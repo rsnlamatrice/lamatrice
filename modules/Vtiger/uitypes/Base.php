@@ -57,13 +57,11 @@ class Vtiger_Base_UIType extends Vtiger_Base_Model {
 		$moduleSpecificUiTypeClassName = $moduleName.'_'.$uiTypeClassSuffix.'_UIType';
 		$uiTypeClassName = 'Vtiger_'.$uiTypeClassSuffix.'_UIType';
 		$fallBackClassName = 'Vtiger_Base_UIType';
-
 		$moduleSpecificFileName = 'modules.'. $moduleName .'.uitypes.'.$uiTypeClassSuffix;
 		$uiTypeClassFileName = 'modules.Vtiger.uitypes.'.$uiTypeClassSuffix;
 
 		$moduleSpecificFilePath = Vtiger_Loader::resolveNameToPath($moduleSpecificFileName);
 		$completeFilePath = Vtiger_Loader::resolveNameToPath($uiTypeClassFileName);
-
 		if(file_exists($moduleSpecificFilePath)) {
 			$instance = new $moduleSpecificUiTypeClassName();
 		}
@@ -72,6 +70,8 @@ class Vtiger_Base_UIType extends Vtiger_Base_Model {
 		} else {
 			$instance = new $fallBackClassName();
 		}
+
+		//var_dump($fieldModel->getName(), get_class($instance), $completeFilePath, file_exists($completeFilePath));
 		$instance->set('field', $fieldModel);
 		return $instance;
 	}

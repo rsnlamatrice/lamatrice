@@ -9,7 +9,6 @@ class RSNContactsPanels_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 
 	
 	public function process(Vtiger_Request $request) {
-
 		return parent::process($request);
 	}
 }

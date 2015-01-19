@@ -27,7 +27,7 @@ Vtiger_Detail_Js("RSNContactsPanels_Detail_Js",{},{
 			// ED150110
 			var relatedModuleName = 'RSNPanelsVariables';
 			var $related = form
-			    .find('.summaryWidgetContainer input.relatedModuleName[value="' + relatedModuleName + '"]');
+			    .find('.summaryWidgetContainer:visible input.relatedModuleName[value="' + relatedModuleName + '"]');
 			if ($related.length === 0) {
 			    //normal en DetailView sans summary
 			    //alert('Impossible de retrouver le $related ' + relatedModuleName);
@@ -46,7 +46,7 @@ Vtiger_Detail_Js("RSNContactsPanels_Detail_Js",{},{
 	registerVariablesInputChangeEvent : function(){
 	    var thisInstance = this;
 	    var detailContentsHolder = this.getContentHolder();
-	    detailContentsHolder.on('change',':input[name]',function(e){
+	    detailContentsHolder.on('change','.summaryWidgetContainer:visible :input[name]',function(e){
 		    var $this = $(this);
 		    var $tr = $this.parents('[data-id]:first');
 		    var $widgetHolder = $this.parents('.summaryWidgetContainer:first');
