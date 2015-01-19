@@ -696,8 +696,6 @@ echo('$rawData'); var_dump($rawData);*/
 	 * @param <array> $presence
 	 * @param <array> $restrictedModulesList
 	 * @return <array> List of module models <Vtiger_Module_Model>
-	 *
-	 * ED141226
 	 */
 	public static function getAll($presence = array(), $restrictedModulesList = array(), $roleid = NULL) {
 		$db = PearDatabase::getInstance();
@@ -716,10 +714,10 @@ echo('$rawData'); var_dump($rawData);*/
 			global $current_user;
 			$is_Admin = $current_user->is_admin;
 			if($roleid === null)
-				//if($is_Admin == 'off') //ED150115 baptiste est aussi admin et veut sa barre perso de compta
+				if($is_Admin == 'off')
 					$roleid=$current_user->roleid;
-				//else
-				//	$roleid = false;
+				else
+					$roleid = false;
 		    $query = 'SELECT vtiger_tab.`tabid`, vtiger_tab.`name`, vtiger_tab.`presence`, vtiger_tab.`tablabel`, vtiger_tab.`modifiedby`, vtiger_tab.`modifiedtime`, vtiger_tab.`customized`, vtiger_tab.`ownedby`, vtiger_tab.`isentitytype`, vtiger_tab.`version`, vtiger_tab.`parent`
 			, ' . ($roleid ? 'IFNULL(vtiger_rsnroletabsequence.`tabsequence`, vtiger_tab.`tabsequence`) AS `tabsequence`' : '`tabsequence`') . '
 			FROM vtiger_tab
@@ -1334,10 +1332,9 @@ echo('$rawData'); var_dump($rawData);*/
 		$result = $focus->$functionName($recordId, $this->getId(), $relatedModule->getId());
 		$query = $result['query'] .' '. $this->getSpecificRelationQuery($relatedModuleName);
 		$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
-
+		
 		//modify query if any module has summary fields, those fields we are displayed in related list of that module
 		$relatedListFields = $relatedModule->getConfigureRelatedListFields();
-		//var_dump( $relatedListFields);
 		if(count($relatedListFields) > 0) {
 			$currentUser = Users_Record_Model::getCurrentUserModel();
 			$queryGenerator = new QueryGenerator($relatedModuleName, $currentUser);

@@ -281,6 +281,9 @@ jQuery.Class("Vtiger_Detail_Js",{
 				//Attach date picker event to date fields
 				app.registerEventForDatePickerFields(contentContainer);
 				
+				//register all select2 Elements
+				app.showSelect2ElementView(contentContainer.find('select.select2'));
+				
 				app.registerEventForTextAreaFields(jQuery(".commentcontent"))
 				contentContainer.trigger(thisInstance.widgetPostLoad,{'widgetName' : relatedModuleName})
 			},
@@ -933,6 +936,8 @@ jQuery.Class("Vtiger_Detail_Js",{
 		app.changeSelectElementView(contentContainer);
 		//Attach date picker event to date fields
 		app.registerEventForDatePickerFields(contentContainer);
+		//register all select2 Elements
+		app.showSelect2ElementView(contentContainer.find('select.select2'));
 		    
 		progressIndicatorElement.progressIndicator({
 		    'mode' : 'hide'

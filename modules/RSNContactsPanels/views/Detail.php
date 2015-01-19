@@ -41,48 +41,12 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 		$params = array();
 		$paramsDetails = array();
 		
-		$sql = $recordModel->getPanelQuery();
-		$queryVariables = $recordModel->getVariablesFromQuery($sql);// array() extrait de la requête
-		
-		//variables connues et déjà liées
-		$relatedVariables = $this->getVariables($request);
-		
-		//variables liées filtrées par (disabled == 0)
-		$variables = array();
-		foreach($relatedVariables as $variable)
-			if(!$variable->get('disabled'))
-				$variables[$variable->get('name')] = $variable;
-		$variablesId = array();
-		// pour chaque variable de la requête
-		foreach($queryVariables as $queryVariable){
-			$variableName = $queryVariable['name'];
-			if(!isset($variables[$variableName])){
-				$params[] = '[[# Variable "' . $variableName . '" inconnue ! #]]';
-				$paramsDetails[] = array(
-					'name'=>$queryVariable['name'],
-					'variable'=> null,
-					'value'=>'[[# Variable "' . $variableName . '" inconnue ! #]]'
-				);
-			}
-			else {
-				$variable = $variables[$variableName];
-				$value = $variable->get('defaultvalue');
-				$params[] = $value;
-				if(!isset($variablesId[$variable->getId()])){
-					$paramsDetails[] = array(
-						'name'=> $queryVariable['name'],
-						'variable'=> $variable,
-						'value'=> $value
-					);
-					$variablesId[$variable->getId()] = 1;
-				}
-			}
-			$sql = preg_replace('/\[\[\s*' . $variableName . '\s*(|[^\]]*)?\]\]/', '?', $sql);
-		}
-		
-		$sql = "SELECT COUNT(*) FROM (" . $sql . ") _execution_query_";
+		$sql = "SELECT COUNT(*) FROM (
+			" . $recordModel->getExecutionSQL($params, $paramsDetails) . "
+		) _panel_";
 		
 		$viewer->assign('QUERY' , $sql);
+		$viewer->assign('QUERY_PARAMS_VALUES' , $params);
 		$viewer->assign('QUERY_PARAMS' , $paramsDetails);
 		
 		$db = PearDatabase::getInstance();
@@ -104,32 +68,15 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 	 * @param Vtiger_Request $request
 	 * @return <type>
 	 */
-	function getVariables(Vtiger_Request $request) {
+	function getVariables(Vtiger_Request $request, &$parentRecordModel = FALSE) {
 		//return parent::showRelatedRecords($request);
 	
-		$parentId = $request->get('record');
-		$pageNumber = $request->get('page');
-		$limit = $request->get('limit');
-		$relatedModuleName = 'RSNPanelsVariables';
-		$moduleName = $request->getModule();
-
-		if(empty($pageNumber)) {
-			$pageNumber = 1;
+		if(!$parentRecordModel){
+			$parentId = $request->get('record');
+			$moduleName = $request->getModule();
+			$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		}
-
-		$pagingModel = new Vtiger_Paging_Model();
-		$pagingModel->set('page', $pageNumber);
-		if(!empty($limit)) {
-			$pagingModel->set('limit', $limit);
-		}
-		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
-		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName);
-		
-		$relationListView->set('orderby', 'sequence');
-		$relationListView->set('sortorder', 'ASC');
-		
-		/* TODO get variables where rsnpanelid plutot que related list */
-		return $relationListView->getEntries($pagingModel);
+		return $parentRecordModel->getRelatedVariables($request);
 	}
 	
 	/**
@@ -137,10 +84,8 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 	 * @param Vtiger_Request $request
 	 * @return <type>
 	 */
-	function showVariables(Vtiger_Request $request) {
+	function showVariables(Vtiger_Request $request, $parentId = FALSE, $paramsPriorValues = FALSE) {
 		//return parent::showRelatedRecords($request);
-	
-		$parentId = $request->get('record');
 		$pageNumber = $request->get('page');
 		$limit = $request->get('limit');
 		$relatedModuleName = $request->get('relatedModule');
@@ -156,7 +101,17 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 			$pagingModel->set('limit', $limit);
 		}
 
-		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
+		if(is_object($parentId))
+			$parentRecordModel = $parentId;
+		else {
+			if(!$parentId)
+				$parentId = $request->get('record');
+			$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
+		}
+		//Contrôle de récursivité infinie
+		if(!RSNContactsPanelsExecutionController::stack($parentRecordModel))
+			return null;
+		
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName);
 		
 		$relationListView->set('orderby', 'sequence');
@@ -164,6 +119,34 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 		
 		/* TODO get variables where rsnpanelid plutot que related list */
 		$models = $relationListView->getEntries($pagingModel);
+		
+		//Affectation des valeurs prioritaires à celle enregistrée dans defaultvalue
+		if($paramsPriorValues){
+			if(!is_array($paramsPriorValues))
+				$paramsPriorValues = RSNContactsPanels_Record_Model::queryParams_decode($paramsPriorValues);
+			//var_dump('$paramsPriorValues', $paramsPriorValues);
+			$followParamsPriorValues = array();
+			foreach($paramsPriorValues as $paramPriorValue)
+			{
+				//var_dump('$paramPriorValue 1', $paramPriorValue, strpos($paramsPriorValue['name'], '/'));
+				if(strpos($paramPriorValue['name'], '/') > 0){
+					$followParamPriorValue = array_merge(array(), $paramPriorValue, array(
+						'parent' => trim(substr($paramPriorValue['name'], 0, strpos($paramPriorValue['name'], '/'))),
+						'name' => trim(substr($paramPriorValue['name'], strpos($paramPriorValue['name'], '/')+1)),
+					));
+					//var_dump($followParamPriorValue);
+					$followParamsPriorValues[] = $followParamPriorValue;
+				}
+				else {
+					//var_dump('$models',$models);
+					foreach($models as $variable){
+						if($variable->get('name') == $paramPriorValue['name']){
+							$variable->set('defaultvalue', $paramPriorValue['value']);
+						}
+					}
+				}
+			}
+		}
 		
 		$header = $relationListView->getHeaders();
 
@@ -179,13 +162,39 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 		$relatedRecordModel = Vtiger_Record_Model::getCleanInstance($relatedModuleName);//TODO Faire mieux que getCleanInstance
 		$viewer->assign('RELATED_RECORD_MODEL', $relatedRecordModel);
 
+		$viewer->assign('REQUEST_OBJECT' , $request);
+		$viewer->assign('VIEW_MODEL' , $this);
+		//var_dump('FOLLOW_PARAMS_PRIOR_VALUES:',$followParamsPriorValues);
+		$viewer->assign('FOLLOW_PARAMS_PRIOR_VALUES' , $followParamsPriorValues);
+		
+		
 		//$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
 			
 		$result = $viewer->view('SummaryWidgets.tpl', $moduleName, 'true');
 		
 		//$db->setDebug(false);
+		RSNContactsPanelsExecutionController::unstack($parentRecordModel);
 		
 		return $result;
+	}
+	
+	public function showSubPanelVariables($request, $variableRecordModel, $followParamsPriorValues = FALSE){
+		$recordModel = RSNContactsPanels_Record_Model::getInstanceByNamePath($variableRecordModel->get('fieldid'));
+		if(!$recordModel){
+			echo '<code># panel "'.$variableRecordModel->get('fieldid').'" introuvable #</code>';
+			return;
+		}
+		$paramsPriorValues = RSNContactsPanels_Record_Model::queryParams_decode($variableRecordModel->get('defaultvalue'));
+		if($followParamsPriorValues){
+			//var_dump('$followParamsPriorValues:',$followParamsPriorValues);
+			$name = $variableRecordModel->get('name');
+			foreach($followParamsPriorValues as $followParamPriorValue)
+				if($followParamPriorValue['parent'] == $name)
+					$paramsPriorValues[] = $followParamPriorValue;
+		}
+		//var_dump($paramsPriorValues, RSNContactsPanels_Record_Model::queryParams_decode($variableRecordModel->get('defaultvalue')));
+		//var_dump($paramsPriorValues);
+		return $this->showVariables($request, $recordModel, $paramsPriorValues);
 	}
 }

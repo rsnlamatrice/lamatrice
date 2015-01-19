@@ -15,9 +15,12 @@
 </div>
 	
 {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
+	{assign var=VARIABLE_TYPE value=trim($RELATED_RECORD->get('rsnvariabletype'))}
+						
 	<div class="contactsContainer relatedRow">
 		<ul class="unstyled">
-			<li title="{$RELATED_RECORD->get('label')}" data-id="{$RELATED_RECORD->getId()}">
+			<li title="{$RELATED_RECORD->get('label')}" data-id="{$RELATED_RECORD->getId()}"
+			class="rsnvariabletype-{strtolower($VARIABLE_TYPE)}">
 				<div class="row-fluid ">
 					<div class="fieldLabel span4 textOverflowEllipsis">
 						<div class="actions pull-right">
@@ -30,17 +33,57 @@
 						{/if}>
 							{$RELATED_RECORD->get('name')}
 						</a>
-					</div>
-					<div class="fieldValue span8 textOverflowEllipsis">
-						{*les combos chosen ne s'affichent pas correctement dans les widgets : modif dans le .css non satisfaisante *}
-						{assign var=FIELD_MODEL value=$RELATED_RECORD->getQueryField()}
-						{if is_object($FIELD_MODEL)}
-							{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-							{include file=vtemplate_path($UITYPEMODEL,$MODULE) RECORD_MODEL=$RELATED_RECORD}
-						{else}
-							<input value="{$RELATED_RECORD->get('defaultvalue')}"/>
+						{if $VARIABLE_TYPE eq '??'}
+							<br/>
+							<span style="max-width: 6em !important;">
+							{assign var=FIELD_MODEL value=$RELATED_RECORD->getField('rsnvariableoperator')}
+							{if is_object($FIELD_MODEL)}
+								{$FIELD_MODEL->set('fieldvalue', $RELATED_RECORD->get('rsnvariableoperator')) eq null}
+								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+								{include file=vtemplate_path($UITYPEMODEL,$MODULE) RECORD_MODEL=$RELATED_RECORD}
+							{else}
+								<select name="rsnvariableoperator"><option>=</option></select>
+							{/if}
+							</span>
 						{/if}
 					</div>
+					{if $VARIABLE_TYPE eq 'PANEL'}
+							
+						<div class="fieldValue span8 textOverflowEllipsis">
+							{*les combos chosen ne s'affichent pas correctement dans les widgets : modif dans le .css non satisfaisante *}
+							{assign var=FIELD_MODEL value=$RELATED_RECORD->getField('defaultvalue')}
+							{if is_object($FIELD_MODEL)}
+								{$FIELD_MODEL->set('fieldvalue', $RELATED_RECORD->get('defaultvalue')) eq null}
+								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+								{include file=vtemplate_path($UITYPEMODEL,$MODULE) RECORD_MODEL=$RELATED_RECORD}
+							{else}
+								<input value="{$RELATED_RECORD->get('defaultvalue')}" name="{$RELATED_RECORD->get('name')}"/>
+							{/if}
+						</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+						<div class="rsnsubpanel">
+							{$VIEW_MODEL->showSubPanelVariables($REQUEST_OBJECT, $RELATED_RECORD, $FOLLOW_PARAMS_PRIOR_VALUES)}
+						</div>
+						<div class="contactsContainer relatedRow">
+							<ul class="unstyled">
+								<li title="{$RELATED_RECORD->get('label')}" data-id="{$RELATED_RECORD->getId()}">
+									<div class="row-fluid ">
+					{else}
+							
+						<div class="fieldValue span8 textOverflowEllipsis">
+							{*les combos chosen ne s'affichent pas correctement dans les widgets : modif dans le .css non satisfaisante *}
+							{assign var=FIELD_MODEL value=$RELATED_RECORD->getQueryField()}
+							{if is_object($FIELD_MODEL)}
+								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+								{include file=vtemplate_path($UITYPEMODEL,$MODULE) RECORD_MODEL=$RELATED_RECORD}
+							{else}
+								<input value="{$RELATED_RECORD->get('defaultvalue')}" name="{$RELATED_RECORD->get('name')}"/>
+							{/if}
+						</div>
+					{/if}
 				</div>
 			</li>
 		</ul>

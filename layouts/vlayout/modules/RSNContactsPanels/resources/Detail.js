@@ -58,14 +58,19 @@ Vtiger_Detail_Js("RSNContactsPanels_Detail_Js",{},{
 		    var params = {
 			    'module' : $widgetHolder.find('.relatedModuleName:first').val(),
 			    'record' : relatedRecordId,
-			    'value' : newValue,
 			    'action' : 'SaveAjax',
 			    'mode' : 'updateVariableValue'
-		    }
+		    };
+		    
+		    if ($this.attr('name') == 'rsnvariableoperator') 
+			params['operator'] = newValue;
+		    else
+			params['value'] = newValue;
+			
 		    AppConnector.request(params).then(
 			    function(responseData){
-				    if(responseData.result[0]){
-					    Vtiger_Helper_Js.showPnotify('Ok, c\'est enregistré');
+				    if(responseData.success){
+					    Vtiger_Helper_Js.showPnotify('Ok, c\'est enregistrÃ©');
 				    }
 				    else {
 					    var params = {

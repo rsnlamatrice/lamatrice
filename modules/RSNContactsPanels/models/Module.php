@@ -27,8 +27,11 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 	public function checkVariables(Vtiger_Record_Model $recordModel) {
 		$query = $recordModel->get('query');
 		$strVariables = array();
-		if(preg_match_all('/\[\[(?<var>(?<!\]\]).*?(?=\]\]))\]\]/', $query, $strVariables)){
-			$variablesData = array();
+		//if(preg_match_all('/\[\[(?<op>\?|\=|IN\s)(?<var>(?<!\]\]).*?(?=\]\]))\]\]/', $query, $strVariables)){
+		$variablesData = $recordModel->getVariablesFromQuery($query, true);
+		//var_dump($variablesData);
+		if($variablesData){
+			/*$variablesData = array();
 			$varIndex = 0;
 			foreach($strVariables['var'] as $strVar){
 				$strParams = explode('|', $strVar);
@@ -36,46 +39,53 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 					$strParams[$paramIndex] = trim($strParams[$paramIndex]);
 				}
 				$variablesData[$strParams[0]] = array(
+					'operation' => $strVariables['op'][$varIndex],
 					'name' => $strParams[0],
 					'field' => $strParams[1],
 					'value' => $strParams[2],
 					'sequence' => $varIndex++,
 				);
-			}
+			}*/
 			
 			//var_dump($variablesData);
 			//var_dump('inputs : ', array_keys($variablesData));
 			
 			//Variables existantes
-			$existingsVariables = $this->getRelatedPanelVariables($recordModel);
-			//var_dump('existings : ', array_keys($existingsVariables));
+			$existingVariables = $this->getRelatedPanelVariables($recordModel);
+			//var_dump('existings : ', array_keys($existingVariables));
 			$newVariables = array();
 			$changedVariables = array();
-			foreach($existingsVariables as $existingsVariable){
-				if(isset($variablesData[$existingsVariable->get('name')])){
-					$strVar = $variablesData[$existingsVariable->get('name')];
-					//var_dump("existe", $existingsVariable->get('name'));
+			//contrôle si la varaible est connue ou si une propriété change
+			foreach($existingVariables as $existingVariable){
+				$name = $existingVariable->get('name');
+				if(isset($variablesData[$name])){
+					$strVar = $variablesData[$name];
+					//var_dump("existe", $name);
 					//existe
 					//corrige disabled
-					if($existingsVariable->get('disabled') == '1'){
-						$existingsVariable->set('disabled', '0');
-						$changedVariables[$existingsVariable->getId()] = $existingsVariable;
+					if($existingVariable->get('disabled') == '1'){
+						$existingVariable->set('disabled', '0');
+						$changedVariables[$existingVariable->getId()] = $existingVariable;
 					}
-					if($existingsVariable->get('sequence') != $strVar['sequence']){
-						$existingsVariable->set('sequence', $strVar['sequence']);
-						$changedVariables[$existingsVariable->getId()] = $existingsVariable;
+					if($existingVariable->get('sequence') != $strVar['sequence']){
+						$existingVariable->set('sequence', $strVar['sequence']);
+						$changedVariables[$existingVariable->getId()] = $existingVariable;
+					}
+					if($existingVariable->get('rsnvariabletype') != $strVar['operation']){
+						$existingVariable->set('rsnvariabletype', $strVar['operation']);
+						$changedVariables[$existingVariable->getId()] = $existingVariable;
 					}
 				}
 				else {
-					//var_dump("n'existe plus", $existingsVariable->get('name'));
+					//var_dump("n'existe plus", $name);
 					//n'existe plus
 					//corrige disabled
-					if($existingsVariable->get('disabled') != '1'){
-						$existingsVariable->set('disabled', '1');
-						$changedVariables[] = $existingsVariable;
+					if($existingVariable->get('disabled') != '1'){
+						$existingVariable->set('disabled', '1');
+						$changedVariables[] = $existingVariable;
 					}
 				}
-				$variablesData[$existingsVariable->get('name')]['_exists_'] = $existingsVariable;
+				$variablesData[$name]['_exists_'] = $existingVariable;
 			}
 			//var_dump(array_keys($changedVariables));
 			// nouvelles variables
@@ -90,6 +100,8 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 					$newVariable->set('disabled', 0);
 					$newVariable->set('fieldid', $strVar['field']);
 					$newVariable->set('sequence', $strVar['sequence']);
+					$newVariable->set('rsnvariableoperator', '=');
+					$newVariable->set('rsnvariabletype', $strVar['operation']);
 					$newVariable->save();
 					
 					//add relation
@@ -100,14 +112,14 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 			//$db = PearDatabase::getInstance();
 			//$db->setDebug(true);
 			// variables modifiées
-			foreach($changedVariables as $existingsVariable){
+			foreach($changedVariables as $existingVariable){
 				
-				//$modelData = $existingsVariable->getData();
+				//$modelData = $existingVariable->getData();
 				//$recordModel->set('id', $recordId);
-				$existingsVariable->set('mode', 'edit');
+				$existingVariable->set('mode', 'edit');
 				
-				//var_dump('save : ', $existingsVariable->get('name'));
-				$existingsVariable->save();
+				//var_dump('save : ', $existingVariable->get('name'));
+				$existingVariable->save();
 				
 			}
 			//$db->setDebug(false);

@@ -159,3 +159,15 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 .summaryWidgetContainer .chzn-container-active {
   position: absolute;
 }
+
+/* RSNContactsPanels */
+.summaryWidgetContainer .rsnvariabletype-panel .fieldLabel a {
+  font-weight: bold;
+  text-decoration: underline;
+}
+.summaryWidgetContainer .rsnsubpanel {
+  border-left: 1px solid #ddba7a;
+}
+.summaryWidgetContainer .rsnsubpanel .fieldLabel  a {
+  padding-left: 1em;
+}

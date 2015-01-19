@@ -26,7 +26,10 @@
 		</div>
 		<br>
 		<div class="visible-on-hover"><i class="icon-play"></i>
-			<pre class="hide">{$QUERY}</pre>
+			<pre class="hide">{$QUERY}
+			
+			<div style="font-family: monospace;">Paramètres : {print_r($QUERY_PARAMS_VALUES, true)}
+			</div></pre>
 		</div>
 	</div>
 	<div class="pull-right alignMiddle">

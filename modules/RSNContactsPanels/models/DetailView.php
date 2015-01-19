@@ -32,7 +32,7 @@ class RSNContactsPanels_DetailView_Model extends Vtiger_DetailView_Model {
 						   '&relatedModule=Execution&mode=showRelatedRecords'
 						   .'&cancel-once=1', // cancel auto widget loading. User needs to use Refresh button.
 				'action'	=> array('Refresh'),
-				'actionlabel'	=> array('Calculer'),
+				'actionlabel'	=> array('Compter'),
 				'actionURL' =>	''
 		);
 

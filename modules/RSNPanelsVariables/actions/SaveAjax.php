@@ -20,9 +20,11 @@ class RSNPanelsVariables_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 			$result = $this->updateVariableValue($request);
 			break;
 		default:
+			
+			//if(is_array($request->get('defaultvalue')))
+			
 			return parent::process($request);
 		}
-		
 
 		$response = new Vtiger_Response();
 		$response->setEmitType(Vtiger_Response::$EMIT_JSON);
@@ -36,8 +38,19 @@ class RSNPanelsVariables_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 	public function updateVariableValue(Vtiger_Request $request) {
 		$recordModel = parent::getRecordModelFromRequest($request);
 
-		$newValue = $request->get('value');
-		$recordModel->set('defaultvalue', $newValue);
+		if($request->get('operator'))
+			$recordModel->set('rsnvariableoperator', $request->get('operator'));
+		else {
+			$value = $request->get('value');
+			if(is_array($value)){
+				if(is_array($value[0]))
+					$value = json_encode($value);
+				else
+					$value = implode(' |##| ', $value);
+			}
+			$recordModel->set('defaultvalue', $value);
+		
+		}
 		
 		return $recordModel->save();
 	}

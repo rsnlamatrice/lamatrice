@@ -321,8 +321,9 @@ var app = {
 
 			// TODO Make it better with jQuery.on
 			app.changeSelectElementView(container);
-            //register all select2 Elements
-            app.showSelect2ElementView(container.find('select.select2'));
+			//register all select2 Elements
+			app.showSelect2ElementView(container.find('select.select2'));
+			
 			//register date fields event to show mini calendar on click of element
 			app.registerEventForDatePickerFields(container);
 			cb(container);
