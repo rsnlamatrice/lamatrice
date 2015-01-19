@@ -167,9 +167,10 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 	public static function getInstance($parentModuleModel, $relatedModuleModel, $label=false) {
 		if(!is_object($parentModuleModel))
 			var_dump("Erreur, parentModuleModel n'est pas un objet : ", $parentModuleModel);
-		if(!is_object($relatedModuleModel))
+		if(!is_object($relatedModuleModel)){
+			echo_callstack();
 			var_dump("Erreur, relatedModuleModel n'est pas un objet : ", $relatedModuleModel);
-				
+		}
 		$db = PearDatabase::getInstance();
 
 		$query = 'SELECT vtiger_relatedlists.*,vtiger_tab.name as modulename FROM vtiger_relatedlists

@@ -45,7 +45,7 @@ class Settings_MenuEditor_Module_Model extends Settings_Vtiger_Module_Model {
 			$insertQuery .= ' ELSE -1 END
 				FROM vtiger_tab';
 			$result = $db->pquery($insertQuery, $params);
-			var_dump($result);
+			//var_dump($result);
 		}
 	}
 }

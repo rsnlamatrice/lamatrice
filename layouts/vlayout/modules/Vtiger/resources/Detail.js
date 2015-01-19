@@ -7,6 +7,8 @@
  * All Rights Reserved.
  *************************************************************************************/
 
+/* ED150110 : add refreshWidget(element)
+ */
 jQuery.Class("Vtiger_Detail_Js",{
 
     detailInstance : false,
@@ -246,6 +248,18 @@ jQuery.Class("Vtiger_Detail_Js",{
 		var contentHeader = jQuery('.widget_header',widgetContainer);
 		var contentContainer = jQuery('.widget_contents',widgetContainer);
 		var urlParams = widgetContainer.data('url');
+		
+		/* ED150110
+		 * url contenant '&cancel-once=1', // cancel auto widget loading. User needs to use Refresh button.
+		*/
+		if (/\&cancel-once/.test(urlParams)) {
+		    // cleans
+		    urlParams = urlParams.replace(/\&cancel-once(=[^\&]*)?/,'');
+		    widgetContainer.data('url', urlParams);
+		    // and exits
+		    return;
+		}
+		
 		var relatedModuleName = contentHeader.find('[name="relatedModule"]').val();
 
 		var params = {
@@ -258,6 +272,15 @@ jQuery.Class("Vtiger_Detail_Js",{
 			function(data){
 				contentContainer.progressIndicator({'mode': 'hide'});
 				contentContainer.html(data);
+				
+				/* ED150110
+				 * register pour inputs
+				 */
+				//Make select box more usability
+				app.changeSelectElementView(contentContainer);
+				//Attach date picker event to date fields
+				app.registerEventForDatePickerFields(contentContainer);
+				
 				app.registerEventForTextAreaFields(jQuery(".commentcontent"))
 				contentContainer.trigger(thisInstance.widgetPostLoad,{'widgetName' : relatedModuleName})
 			},
@@ -766,6 +789,15 @@ jQuery.Class("Vtiger_Detail_Js",{
 			});
 		});
 
+		/* ED150110 */
+		detailContentsHolder.on('click', 'button.refreshWidget', function(e){
+			var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
+			if (widgetHolder.length) {
+			    e.stopImmediatePropagation();
+			    thisInstance.refreshWidget(widgetHolder);
+			}
+		});
+
 		detailContentsHolder.on('click', 'a.relationDelete', function(e){
 			e.stopImmediatePropagation();
 			var element = jQuery(e.currentTarget);
@@ -778,6 +810,9 @@ jQuery.Class("Vtiger_Detail_Js",{
 			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
 				function(e) {
 					var row = element.closest('tr');
+					if (!row.length) {
+					    row = element.closest('li');
+					}
 					var relatedRecordid = row.data('id');
 					var selectedTabElement = thisInstance.getSelectedTab();
 					var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
@@ -868,9 +903,42 @@ jQuery.Class("Vtiger_Detail_Js",{
 
 			var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			relatedController.addRelatedRecord(element);
-		})
+		});
 	},
-
+	
+	/* refresh widget
+	ED150110
+	*/
+	refreshWidget : function(widgetHolder){
+	    if (!widgetHolder.is('.summaryWidgetContainer'))
+		widgetHolder = widgetHolder.parents('.summaryWidgetContainer:first');
+				
+	    var loadingMessage = jQuery('.listViewLoadingMsg').text();
+	    var progressIndicatorElement = jQuery.progressIndicator({
+		    'message' : loadingMessage,
+		    'position' : 'html',
+		    'blockInfo' : {
+			    'enabled' : true
+		    }
+	    });
+	    // extrait l'url du widget
+	    var dataUrl = widgetHolder.children('[data-url]:first').attr('data-url');
+	    $.get('?' + dataUrl, function(data){
+		var contentContainer = widgetHolder.find('.widget_contents');
+		contentContainer.html(data);
+						
+		/* register pour inputs
+		 */
+		//Make select box more usability
+		app.changeSelectElementView(contentContainer);
+		//Attach date picker event to date fields
+		app.registerEventForDatePickerFields(contentContainer);
+		    
+		progressIndicatorElement.progressIndicator({
+		    'mode' : 'hide'
+		});
+	    });
+	},
 
 	/**
 	 * Function to handle the ajax edit for detailview and summary view fields
@@ -1124,12 +1192,12 @@ jQuery.Class("Vtiger_Detail_Js",{
                     detailViewElement.removeClass('hide');
 					currentTarget.show();
                 } else {
-					var activityDiv = currentDiv.closest('.activityEntries');
-					var activityId = activityDiv.find('.activityId').val();
-					var moduleName = activityDiv.find('.activityModule').val();
-					var activityType = activityDiv.find('.activityType').val();
+		    var activityDiv = currentDiv.closest('.activityEntries');
+		    var activityId = activityDiv.find('.activityId').val();
+		    var moduleName = activityDiv.find('.activityModule').val();
+		    var activityType = activityDiv.find('.activityType').val();
 
-					currentDiv.progressIndicator();
+		    currentDiv.progressIndicator();
                     editElement.addClass('hide');
 					var params = {
 						action : 'SaveAjax',
@@ -1613,7 +1681,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 		this.registerEmailFieldClickEvent();
 		this.registerEventForRelatedList();
 		this.registerEventForRelatedListPagination();
-		this.registerEventForAddingRelatedRecord();
+		this.registerEventForAddingRelatedRecord();		
 		this.registerEventForEmailsRelatedRecord();
 		this.registerEventForAddingEmailFromRelatedList();
 		this.registerPostTagCloudWidgetLoad();

@@ -14,10 +14,22 @@
 		{if $ERROR}
 		<code>{$ERROR}</code>
 		{else}
-		Résultat : {$RESULT}
+		Résultat : <b style="font-size: 32px; padding-left: 1em;">{$RESULT}</b>
 		{/if}
+		<br>
+		<br>
+		<div style="font-family: monospace;">
+		{foreach item=QUERY_PARAM from=$QUERY_PARAMS}
+			<div class="row-fluid"><span class="span3">{$QUERY_PARAM['name']}</span>
+			<span class="span9">{$QUERY_PARAM['value']}</span></div>
+		{/foreach}
+		</div>
+		<br>
+		<div class="visible-on-hover"><i class="icon-play"></i>
+			<pre class="hide">{$QUERY}</pre>
+		</div>
 	</div>
-	<div class="pull-right">
+	<div class="pull-right alignMiddle">
 		<a href="">voir les contacts</a>
 	</div>
 {/strip}

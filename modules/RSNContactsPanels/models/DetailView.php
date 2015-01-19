@@ -24,14 +24,15 @@ class RSNContactsPanels_DetailView_Model extends Vtiger_DetailView_Model {
 		$widgets = array();
 
 		$widgets[] = array(
-				'linktype' => 'DETAILVIEWWIDGET',
-				'linklabel' => 'Exécution',
+				'linktype' 	=> 'DETAILVIEWWIDGET',
+				'linklabel'	=> 'Exécution',
 				'linkName'	=> 'execution',
 				'linkField'	=> 'rsncontactspanelsid', 
-				'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
-						'&relatedModule=Execution&mode=showRelatedRecords',
-				'action'	=>	array('Refresh'),
-				'actionlabel'	=>	array('Rafraichir'),
+				'linkurl' 	=> 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+						   '&relatedModule=Execution&mode=showRelatedRecords'
+						   .'&cancel-once=1', // cancel auto widget loading. User needs to use Refresh button.
+				'action'	=> array('Refresh'),
+				'actionlabel'	=> array('Calculer'),
 				'actionURL' =>	''
 		);
 
@@ -44,7 +45,7 @@ class RSNContactsPanels_DetailView_Model extends Vtiger_DetailView_Model {
 				'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 						'&relatedModule=RSNPanelsVariables&mode=showRelatedRecords&page=1&limit=25',
 				'action'	=>	array('Refresh'),
-				'actionlabel'	=>	array('Rafraichir'),
+				'actionlabel'	=>	array(''),
 				'actionURL' =>	''
 		);
 		

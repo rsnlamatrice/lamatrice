@@ -696,6 +696,8 @@ echo('$rawData'); var_dump($rawData);*/
 	 * @param <array> $presence
 	 * @param <array> $restrictedModulesList
 	 * @return <array> List of module models <Vtiger_Module_Model>
+	 *
+	 * ED141226
 	 */
 	public static function getAll($presence = array(), $restrictedModulesList = array(), $roleid = NULL) {
 		$db = PearDatabase::getInstance();
@@ -714,10 +716,10 @@ echo('$rawData'); var_dump($rawData);*/
 			global $current_user;
 			$is_Admin = $current_user->is_admin;
 			if($roleid === null)
-				if($is_Admin == 'off')
+				//if($is_Admin == 'off') //ED150115 baptiste est aussi admin et veut sa barre perso de compta
 					$roleid=$current_user->roleid;
-				else
-					$roleid = false;
+				//else
+				//	$roleid = false;
 		    $query = 'SELECT vtiger_tab.`tabid`, vtiger_tab.`name`, vtiger_tab.`presence`, vtiger_tab.`tablabel`, vtiger_tab.`modifiedby`, vtiger_tab.`modifiedtime`, vtiger_tab.`customized`, vtiger_tab.`ownedby`, vtiger_tab.`isentitytype`, vtiger_tab.`version`, vtiger_tab.`parent`
 			, ' . ($roleid ? 'IFNULL(vtiger_rsnroletabsequence.`tabsequence`, vtiger_tab.`tabsequence`) AS `tabsequence`' : '`tabsequence`') . '
 			FROM vtiger_tab

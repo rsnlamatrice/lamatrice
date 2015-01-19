@@ -22,4 +22,36 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				   , array('<', '>', "'")
 				   , $this->get('query'));
 	}
+	
+	
+	
+	/**
+	 * Traitement des variables imbriques dans la requte
+	 * 	transforme les lments de la forme [[Title | field/type | defaultValue ]]
+	 * 	en RSNPanelsVariables
+	 * @param Vtiger_Record_Model $recordModel
+	 */
+	public function getVariablesFromQuery($query) {
+		$strVariables = array();
+		if(preg_match_all('/\[\[(?<var>(?<!\]\]).*?(?=\]\]))\]\]/', $query, $strVariables)){
+			$variablesData = array();
+			$varIndex = 0;
+			foreach($strVariables['var'] as $strVar){
+				$strParams = explode('|', $strVar);
+				for($paramIndex = 0; $paramIndex < count($strParams); $paramIndex++){
+					$strParams[$paramIndex] = trim($strParams[$paramIndex]);
+				}
+				$variablesData[] = array(
+					'name' => $strParams[0],
+					'field' => $strParams[1],
+					'value' => $strParams[2],
+					'sequence' => $varIndex++,
+				);
+			}
+			
+			return $variablesData;
+		}
+		return array();
+		
+	}
 }

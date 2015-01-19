@@ -53,6 +53,10 @@ label {
     margin-top: 8px;
 }
 
+.visible-on-hover:hover .hide {
+  display: inline-block;
+}
+
 /* par exemple, éditeur de picklist values */
 .selectedListItem {
   background-color: #e9e5c8;
@@ -138,4 +142,20 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 
 .summaryWidgetContainer .btn.pull-right {
   margin-left: 6px;
+}
+
+/*  used in layouts\vlayout\modules\RSNContactsPanels\RSNPanelsVariablesSummaryWidgetContents.tpl */
+.relatedRow:hover .actions .hide {
+  display: inline;
+}
+.line-through {
+  text-decoration: line-through;
+}
+
+/* for layouts\vlayout\modules\RSNContactsPanels\RSNPanelsVariablesSummaryWidgetContents.tpl
+ * les combos chosen ne s'affichent pas correctement dans les widgets.
+ * TODO : mauvais rendu
+ */
+.summaryWidgetContainer .chzn-container-active {
+  position: absolute;
 }

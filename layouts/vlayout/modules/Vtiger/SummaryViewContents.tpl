@@ -23,7 +23,7 @@
 						<span class="value span10" style="word-wrap: break-word;">
 							{if $FIELD_MODEL->get('uitype') eq '15'}{* ED141005 *}
 								{$RECORD->getDisplayValue($FIELD_NAME)}
-							{* ED150105 "rŽfŽrent du compte" masquŽ si par de compte *}
+							{* ED150105 "référent du compte" masqué si par de compte *}
 							{elseif ($MODULE_NAME eq 'Contacts') && ($FIELD_NAME == 'reference') && (!$RECORD->get('account_id'))}
 								<i>pas de compte</i>
 							{else}
@@ -38,9 +38,9 @@
 								{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD}
 								{if $FIELD_MODEL->getFieldDataType() eq 'multipicklist'}
 									<input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}[]' data-prev-value='{$FIELD_MODEL->getDisplayValue($FIELD_MODEL->get('fieldvalue'))}' />
-								 {else}
-									 <input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
-								 {/if}
+								{else}
+									<input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
+								{/if}
 							</span>
 						{/if}
 					</div>

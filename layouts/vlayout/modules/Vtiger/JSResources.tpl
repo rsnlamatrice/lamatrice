@@ -15,8 +15,8 @@
 	<script type="text/javascript" src="libraries/html5shim/html5.js"></script>
 
 	<script type="text/javascript" src="libraries/jquery/jquery.blockUI.js"></script>
-	<script type="text/javascript" src="libraries/jquery/chosen/chosen.jquery.min.js"></script>
-	<script type="text/javascript" src="libraries/jquery/select2/select2.min.js"></script>
+	<script type="text/javascript" src="libraries/jquery/chosen/chosen.jquery.min.js"></script><?php /*.min*/?>
+	<script type="text/javascript" src="libraries/jquery/select2/select2.min.js"></script><?php /*.min*/?>
         <script>/* ED141011 - configuration du jquery/select2
                  * transpose la couleur des options de base dans le plugin
                  */

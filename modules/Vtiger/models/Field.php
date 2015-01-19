@@ -141,27 +141,45 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	public function getFieldDataType() {
 		if(!$this->fieldDataType) {
 			$uiType = $this->get('uitype');
-			if($uiType == '69') {
+			switch($uiType){
+			case '69' :
 				$fieldDataType = 'image';
-			} else if($uiType == '26') {
+				break;
+			case '26' :
 				$fieldDataType = 'documentsFolder';
-			} else if($uiType == '27') {
+				break;
+			case '27' :
 				$fieldDataType = 'fileLocationType';
-			} else if($uiType == '9') {
+				break;
+			case '9' :
 				$fieldDataType = 'percentage';
-			} else if($uiType == '28') {
+				break;
+			case '28' :
 				$fieldDataType = 'documentsFileUpload';
-			} else if($uiType == '83') {
+				break;
+			case '83' :
 				$fieldDataType = 'productTax';
-			} else if($uiType == '117') {
+				break;
+			case '117' :
 				$fieldDataType = 'currencyList';
-			} else if($uiType == '55' && $this->getName() === 'salutationtype') {
-				$fieldDataType = 'picklist';
-			} else if($uiType == '55' && $this->getName() === 'firstname') {
-				$fieldDataType = 'salutation';
-			} else {
+				break;
+			case '55' :
+				switch( $this->getName() ){
+				case 'salutationtype':
+					$fieldDataType = 'picklist';
+					break;
+				case 'firstname' :
+					$fieldDataType = 'salutation';
+					break;
+				default:
+					$webserviceField = $this->getWebserviceFieldObject();
+					$fieldDataType = $webserviceField->getFieldDataType();
+					break;
+				}
+			default:
 				$webserviceField = $this->getWebserviceFieldObject();
 				$fieldDataType = $webserviceField->getFieldDataType();
+				break;
 			}
 			$this->fieldDataType = $fieldDataType;
 		}

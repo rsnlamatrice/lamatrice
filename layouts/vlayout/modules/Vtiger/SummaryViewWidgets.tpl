@@ -39,14 +39,17 @@
 									{assign var=RECORD_ACTION_LABELS value=$DETAIL_VIEW_WIDGET->get('actionlabel')}
 									{assign var=RECORD_ACTION_IDX value=0}
 									{foreach item=RECORD_ACTION from=$RECORD_ACTIONS}
-										{assign var=IS_SELECT_BUTTON value={$RECORD_ACTION eq "Select"}}
+										{assign var=IS_SELECT_BUTTON value=$RECORD_ACTION eq "Select"}
+										{assign var=IS_REFRESH_BUTTON value=$RECORD_ACTION eq "Refresh"}
 										<button type="button" class="btn addButton  pull-right {* ED141210 add pull-right *}
-										{if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
-										{if $IS_SELECT_BUTTON eq true} data-moduleName={$DETAIL_VIEW_WIDGET->get('linkName')} {/if}
+										{if $IS_SELECT_BUTTON eq true} selectRelation
+										{elseif $IS_REFRESH_BUTTON eq true} refreshWidget {/if} "
+										{if $IS_SELECT_BUTTON} data-moduleName={$DETAIL_VIEW_WIDGET->get('linkName')} {/if}
 										data-url="{$DETAIL_VIEW_WIDGET->get('actionURL')}"
-										{if $IS_SELECT_BUTTON neq true}name="addButton"{/if}
+										{if !$IS_SELECT_BUTTON && !$IS_REFRESH_BUTTON} name="addButton"{/if}
 										data-name="{$DETAIL_VIEW_WIDGET->get('linkField')}">
-											{if $IS_SELECT_BUTTON eq false}<i class="icon-plus icon-white"></i>{/if}
+											{if $IS_REFRESH_BUTTON}<i class="icon-refresh icon-white"></i>
+											{elseif $IS_SELECT_BUTTON eq false}<i class="icon-plus icon-white"></i>{/if}
 											{if $RECORD_ACTION_LABELS}{assign var=RECORD_ACTION_LABEL value=$RECORD_ACTION_LABELS[$RECORD_ACTION_IDX]}
 											{else}{assign var=RECORD_ACTION_LABEL value=vtranslate('LBL_'|cat:strtoupper($RECORD_ACTION),$MODULE_NAME)}
 											{/if}
@@ -84,13 +87,16 @@
 									{assign var=RECORD_ACTION_IDX value=0}
 									{foreach item=RECORD_ACTION from=$RECORD_ACTIONS}
 										{assign var=IS_SELECT_BUTTON value={$RECORD_ACTION eq "Select"}}
+										{assign var=IS_REFRESH_BUTTON value={$RECORD_ACTION eq "Refresh"}}
 										<button type="button" class="btn addButton  pull-right {* ED141210 add pull-right *}
-										{if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
+										{if $IS_SELECT_BUTTON eq true} selectRelation
+										{elseif $IS_REFRESH_BUTTON eq true} refreshWidget {/if} "
 										{if $IS_SELECT_BUTTON eq true} data-moduleName={$DETAIL_VIEW_WIDGET->get('linkName')} {/if}
 										data-url="{$DETAIL_VIEW_WIDGET->get('actionURL')}"
 										{if $IS_SELECT_BUTTON neq true}name="addButton"{/if}
 										data-name="{$DETAIL_VIEW_WIDGET->get('linkField')}">
-											{if $IS_SELECT_BUTTON eq false}<i class="icon-plus icon-white"></i>{/if}
+											{if $IS_REFRESH_BUTTON}<i class="icon-refresh icon-white"></i>
+											{elseif $IS_SELECT_BUTTON eq false}<i class="icon-plus icon-white"></i>{/if}
 											{if $RECORD_ACTION_LABELS}{assign var=RECORD_ACTION_LABEL value=$RECORD_ACTION_LABELS[$RECORD_ACTION_IDX]}
 											{else}{assign var=RECORD_ACTION_LABEL value=vtranslate('LBL_'|cat:strtoupper($RECORD_ACTION),$MODULE_NAME)}
 											{/if}

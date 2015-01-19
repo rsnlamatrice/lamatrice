@@ -248,20 +248,24 @@ class Accounts extends CRMEntity {
 			case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
 			FROM vtiger_contactdetails
 			INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
-			LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
 			INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
 			INNER JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid
-			INNER JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid
+			/* ED150116 INNER JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid */
 			INNER JOIN vtiger_contactscf ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
+			LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
+			LEFT JOIN vtiger_crmentityrel
+				ON vtiger_crmentityrel.crmid = ".$id."
+				AND vtiger_crmentityrel.relcrmid = vtiger_crmentity.crmid
 			LEFT JOIN vtiger_groups	ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 			LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
 			WHERE vtiger_crmentity.deleted = 0
 			AND (vtiger_contactdetails.accountid = ".$id."
-			OR vtiger_crmentity.crmid IN (
+			OR vtiger_crmentityrel.crmid = ".$id."
+			/*OR vtiger_crmentity.crmid IN ( très lent
 				SELECT relcrmid
 				FROM vtiger_crmentityrel
 				WHERE crmid = ".$id."
-				)
+				)*/
 			)";
 
 		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);

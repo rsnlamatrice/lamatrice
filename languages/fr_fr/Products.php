@@ -40,7 +40,7 @@ $languageStrings = array(
 	'Qty In Stock'                 => 'Qté en stock'               , 
 	'Product Sheet'                => 'Fiche produit'               , 
 	'Qty In Demand'                => 'Qté demandée'              , 
-	'GL Account'                   => 'Code comptable'              , 
+	'GL Account'                   => 'Compte de vente'              , 
 	'Product Image'                => 'Image produit'               , 
 	'Unit Price'                   => 'Prix unitaire'               , 
 	'Commission Rate'              => 'Commission (%)'              , 
@@ -75,4 +75,5 @@ $languageStrings = array(
 	'Spiral Binder'                => 'Cahier à spiral'            , 
 	'Sq Ft'                        => 'm²'                         , 
 	'LBL_CONVERSION_RATE'          => 'Taux de conversion'             , // TODO: Review
+	'Compte Achat'                   => 'Compte d\'achat'              , 
 );

@@ -19,8 +19,8 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 	}
 	
 	/**
-	 * Traitement des variables imbriquŽes dans la requte
-	 * 	transforme les ŽlŽments de la forme [[Title | field/type | defaultValue ]]
+	 * Traitement des variables imbriquÂŽes dans la requÂte
+	 * 	transforme les ÂŽlÂŽments de la forme [[Title | field/type | defaultValue ]]
 	 * 	en RSNPanelsVariables
 	 * @param Vtiger_Record_Model $recordModel
 	 */
@@ -44,7 +44,7 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 			}
 			
 			//var_dump($variablesData);
-			var_dump('inputs : ', array_keys($variablesData));
+			//var_dump('inputs : ', array_keys($variablesData));
 			
 			//Variables existantes
 			$existingsVariables = $this->getRelatedPanelVariables($recordModel);
@@ -82,7 +82,7 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 			foreach($variablesData as $strVarName => $strVar){
 				if(!isset($strVar['_exists_']))	{
 					//nouvelle variable
-					var_dump("nouvelle variable", $strVarName);
+					//var_dump("nouvelle variable", $strVarName);
 					$newVariable = Vtiger_Record_Model::getCleanInstance('RSNPanelsVariables');
 					$newVariable->set('name', $strVarName);
 					$newVariable->set('rsnpanelid', $recordModel->getId());
@@ -99,7 +99,7 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 			}
 			//$db = PearDatabase::getInstance();
 			//$db->setDebug(true);
-			// variables modifiŽes
+			// variables modifiÂŽÃ©es
 			foreach($changedVariables as $existingsVariable){
 				
 				//$modelData = $existingsVariable->getData();
@@ -107,7 +107,7 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 				$existingsVariable->set('mode', 'edit');
 				
 				//var_dump('save : ', $existingsVariable->get('name'));
-				//var_dump($existingsVariable->save());
+				$existingsVariable->save();
 				
 			}
 			//$db->setDebug(false);
@@ -116,7 +116,7 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 	}
 	
 	/**
-	 * Variables liŽes
+	 * Variables liÂŽes
 	 */
 	public function getRelatedPanelVariables(Vtiger_Record_Model $recordModel){
 		$pagingModel = new Vtiger_Paging_Model();
