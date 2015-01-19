@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnabonnements</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnabonnements` (
+  `rsnabonnementsid` int(11) NOT NULL DEFAULT '0',
+    `dateabonnement` TIMESTAMP NULL DEFAULT NULL,
+    `compte` INT(11) DEFAULT NULL,
+    `montant` DECIMAL(25,8) DEFAULT NULL,
+    `origine` VARCHAR(128) DEFAULT NULL,
+    `origine_detail` VARCHAR(128) DEFAULT NULL,
+    `produit` INT(19) DEFAULT NULL,
+    PRIMARY KEY (`rsnabonnementsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnabonnementscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnabonnementscf` (
+  `rsnabonnementsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnabonnementsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="8fd941fc-1d47-b242-8ff6-e4eab4128073" kpf_version="5" name="lamatrice.soleil.komodoproject">
+<preference-set idref="8fd941fc-1d47-b242-8ff6-e4eab4128073" id="project" preftype="project">
+<preference-set id="languages">
+<preference-set id="languages/PHP">
+  <string id="PHP/newEncoding">utf-8</string>
+</preference-set>
+</preference-set>
+</preference-set>
+</project>

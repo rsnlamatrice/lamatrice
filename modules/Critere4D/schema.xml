@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_critere4d</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_critere4d` (
+  `critere4did` int(11) NOT NULL DEFAULT '0',
+    `nom` VARCHAR(128) DEFAULT NULL,
+    `categorie` VARCHAR(128) DEFAULT NULL,
+    `origine` VARCHAR(5) DEFAULT NULL,
+    `ordredetri` INT(11) DEFAULT NULL,
+    `usage_debut` DATE DEFAULT NULL,
+    `usage_fin` DATE DEFAULT NULL,
+    `commentaire` TEXT DEFAULT NULL,
+    PRIMARY KEY (`critere4did`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_critere4dcf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_critere4dcf` (
+  `critere4did` int(11) NOT NULL,
+  PRIMARY KEY (`critere4did`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

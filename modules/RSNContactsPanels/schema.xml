@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsncontactspanels</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsncontactspanels` (
+  `rsncontactspanelsid` int(11) NOT NULL DEFAULT '0',
+    `name` VARCHAR(128) DEFAULT NULL,
+    `query` TEXT DEFAULT NULL,
+    `rsncontactspanelsdomains` VARCHAR(128) DEFAULT NULL,
+    `pre_script` VARCHAR(128) DEFAULT NULL,
+    `post_script` VARCHAR(128) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    `locked` DATETIME DEFAULT NULL,
+    `rsncontactspanelsstatus` VARCHAR(128) DEFAULT NULL,
+    `duration` INT(11) DEFAULT NULL,
+    PRIMARY KEY (`rsncontactspanelsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsncontactspanelscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsncontactspanelscf` (
+  `rsncontactspanelsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsncontactspanelsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

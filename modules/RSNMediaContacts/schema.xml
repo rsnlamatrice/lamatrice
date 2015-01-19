@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnmediacontacts</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnmediacontacts` (
+  `rsnmediacontactsid` int(11) NOT NULL DEFAULT '0',
+    `contactemail` VARCHAR(128) DEFAULT NULL,
+    `nom` VARCHAR(128) DEFAULT NULL,
+    `contactmediacomment` TEXT DEFAULT NULL,
+    `contactphone` VARCHAR(128) DEFAULT NULL,
+    `derniercontact` TIMESTAMP NULL DEFAULT NULL,
+    `rsntypescontactmedia` VARCHAR(128) DEFAULT NULL,
+    `rsnmediadocuments` VARCHAR(128) DEFAULT NULL,
+    `rsnregion` VARCHAR(128) DEFAULT NULL,
+    `rsnthematiques` VARCHAR(128) DEFAULT NULL,
+    `contactid` INT(11) DEFAULT NULL,
+    `rubrique` VARCHAR(128) DEFAULT NULL,
+    `rsncountry` VARCHAR(128) DEFAULT NULL,
+    `interets` TEXT DEFAULT NULL,
+    `rsnmediaid` INT(19) DEFAULT NULL,
+    PRIMARY KEY (`rsnmediacontactsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnmediacontactscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnmediacontactscf` (
+  `rsnmediacontactsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnmediacontactsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

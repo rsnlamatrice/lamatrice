@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnpanelsvariables</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnpanelsvariables` (
+  `rsnpanelsvariablesid` int(11) NOT NULL DEFAULT '0',
+    `name` VARCHAR(128) DEFAULT NULL,
+    `fieldid` VARCHAR(128) DEFAULT NULL,
+    `label` VARCHAR(128) DEFAULT NULL,
+    `sequence` INT(11) DEFAULT NULL,
+    `defaultvalue` VARCHAR(128) DEFAULT NULL,
+    `disabled` VARCHAR(5) DEFAULT NULL,
+    `rsnpanelid` INT(19) DEFAULT NULL,
+    PRIMARY KEY (`rsnpanelsvariablesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnpanelsvariablescf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnpanelsvariablescf` (
+  `rsnpanelsvariablesid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnpanelsvariablesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnmedias</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnmedias` (
+  `rsnmediasid` int(11) NOT NULL DEFAULT '0',
+    `nom` VARCHAR(128) DEFAULT NULL,
+    `rsntypesmedia` VARCHAR(128) DEFAULT NULL,
+    `rubriquepreferee` VARCHAR(128) DEFAULT NULL,
+    `rsncountry` VARCHAR(128) DEFAULT NULL,
+    `rsnregion` VARCHAR(128) DEFAULT NULL,
+    `mediacomment` TEXT DEFAULT NULL,
+    PRIMARY KEY (`rsnmediasid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnmediascf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnmediascf` (
+  `rsnmediasid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnmediasid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

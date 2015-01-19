@@ -1,0 +1,11 @@
+.detailViewTitle .ed-statistiques {
+    
+    font-size: smaller;
+}
+/* boutons Supprimer sur chaque ligne de la relation */
+.listViewEntries .sub-field > div {
+    height: 20px;
+    margin-bottom: 0;
+    padding: 4px;
+    padding-bottom: 13px;
+}

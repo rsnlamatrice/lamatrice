@@ -1,0 +1,141 @@
+body,
+table td a,
+label {
+  color: #111111;
+}
+.muted {
+  color: #444444;
+}
+.rsn_block_values_summary {
+    display: inline-block;
+    padding-left: 3em;
+    font-size: smaller;
+    font-weight: normal;
+    text-transform: lowercase;
+    
+}
+[class^="icon-rsn-small"],
+[class*=" icon-rsn-small"] {
+  background-image: url("../images/rsn.16.png");
+  background-position: 0px 0px;
+  border: none;
+}
+[class^="icon-rsn-large"],
+[class*=" icon-rsn-large"] {
+  background-image: url("../images/rsn.32.png");
+  background-position: 0px 0px;
+  border: none;
+  width: 32px;
+  height: 32px;
+}
+
+.icon-rsn-small-contact {    background-position: 0 0; }
+.icon-rsn-large-contact {    background-position: 0 0; }
+.icon-rsn-small-collectif {    background-position: -16px 0; }
+.icon-rsn-large-collectif {    background-position: -32px 0; }
+.icon-rsn-small-account {    background-position: -24px 0; }
+.icon-rsn-large-account {    background-position: -64px 0; }
+
+
+.icon-rsn-small-smiley--100 {    background-position: -49px -1px; }
+.icon-rsn-small-smiley--50 {    background-position: -65px -1px; }
+.icon-rsn-small-smiley-0 {    background-position: -81px -1px; }
+.icon-rsn-small-smiley-50 {    background-position: -97px -1px; }
+.icon-rsn-small-smiley-100 {    background-position: -113px -1px; }
+
+.detailViewTitle .rsn-summaryImg {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    text-align: center;
+}
+.detailViewTitle .rsn-summaryImg [class^="icon-rsn-large"] {
+    margin-top: 8px;
+}
+
+/* par exemple, éditeur de picklist values */
+.selectedListItem {
+  background-color: #e9e5c8;
+}
+/* jQuery UI
+layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-buttonset (marron au lieu du bleu du thËme jQuery UI)
+*/
+/* affadit le texte des boutons non sélectionnés */
+.ui-buttonset .ui-button {
+  color: #5a5a5a;
+}
+.row-fluid .ui-icon,
+.quickCreateContent .ui-icon,
+.ui-buttonset .ui-button .ui-icon {
+  display: inline-block;
+}
+.ui-buttonset .ui-button [class^="icon-"] {
+  opacity: 0.7;
+}
+.ui-buttonset .ui-state-active {
+  color: #ffffff;
+}
+.ui-buttonset .ui-state-active [class^="icon-"] {
+  opacity: 1;
+}
+
+/* jQuery UI icons
+ * add color class
+ */
+.ui-icon.black { width: 16px; height: 16px; background-image: url(../images/ui-icons_222222_256x240.png); }/*libraries/jquery/jquery-ui/css/custom-theme*/
+.ui-icon.darkgray { width: 16px; height: 16px; background-image: url(../images/ui-icons_222222_256x240.png); }
+.ui-icon.blue { width: 16px; height: 16px; background-image: url(../images/ui-icons_2e83ff_256x240.png); }
+.ui-icon.gray { width: 16px; height: 16px; background-image: url(../images/ui-icons_454545_256x240.png); }
+.ui-icon.lightgray { width: 16px; height: 16px; background-image: url(../images/ui-icons_888888_256x240.png); }
+.ui-icon.red { width: 16px; height: 16px; background-image: url(../images/ui-icons_cd0a0a_256x240.png); }
+.ui-icon.darkred { width: 16px; height: 16px; background-image: url(../images/ui-icons_820608_256x240.png); }
+.ui-icon.orange { width: 16px; height: 16px; background-image: url(../images/ui-icons_f6cf3b_256x240.png); }
+.ui-icon.green { width: 16px; height: 16px; background-image: url(../images/ui-icons_71c000_256x240.png); }
+.ui-icon.darkgreen { width: 16px; height: 16px; background-image: url(../images/ui-icons_2b7006_256x240.png); }
+
+/* marque le haut d'une ligne pour un nouveau jour
+ * créé pour RSNMediaRelations
+ */
+.listViewEntries.new-day > td {
+  border-top: 1px dashed #8855AA;
+}
+
+#RSNMediaRelations_editView_fieldName_daterelation {
+  width: 6em;
+}
+
+/* pickListValuesTable Picklist settings */
+.pickListValue .picklist-color {
+  display: inline-block;
+  margin-right: 4px;
+  width: 2.5em;
+  height: 1.3em;
+  /*border: 1px solid black;
+  border-radius: 2px;*/
+}
+.pickListValue .colorpicker-holder {
+  height: 16px;
+  background-image: url(../images/colorpicker-picklist-select.png);
+}
+.pickListValue .colorpicker-holder div {
+  height: 14px;
+  background: none;
+}
+.picklistvalue-uicolor {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  margin-bottom: 4px;
+  margin-right: 4px;
+  border-radius: 1px;
+}
+
+/* TODO mieux faire */
+#s2id_RSNMedias_QuickCreateAjax_fieldName_rsntypesmedia {
+  min-width: 22em;
+}
+
+.summaryWidgetContainer .btn.pull-right {
+  margin-left: 6px;
+}

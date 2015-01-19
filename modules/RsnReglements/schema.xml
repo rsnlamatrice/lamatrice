@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnreglements</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnreglements` (
+  `rsnreglementsid` int(11) NOT NULL DEFAULT '0',
+    `account` INT(11) DEFAULT NULL,
+    `numpiece` VARCHAR(128) DEFAULT NULL,
+    `rsnmoderegl` VARCHAR(128) DEFAULT NULL,
+    `dateregl` TIMESTAMP NULL DEFAULT NULL,
+    `rsnbanque` VARCHAR(128) DEFAULT NULL,
+    `amount` DECIMAL(25,8) DEFAULT NULL,
+    `dateoperation` DATE DEFAULT NULL,
+    PRIMARY KEY (`rsnreglementsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnreglementscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnreglementscf` (
+  `rsnreglementsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnreglementsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

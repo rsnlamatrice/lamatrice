@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnmediarelations</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnmediarelations` (
+  `rsnmediarelationsid` int(11) NOT NULL DEFAULT '0',
+    `comment` TEXT DEFAULT NULL,
+    `daterelation` TIMESTAMP NULL DEFAULT NULL,
+    `satisfaction` DECIMAL(25,3) DEFAULT NULL,
+    `sujet` VARCHAR(128) DEFAULT NULL,
+    `rsnmediaid` INT(19) DEFAULT NULL,
+    `byuserid` INT(11) DEFAULT NULL,
+    `mediacontactid` INT(19) DEFAULT NULL,
+    `rsnthematiques` VARCHAR(128) DEFAULT NULL,
+    `campagne` INT(19) DEFAULT NULL,
+    PRIMARY KEY (`rsnmediarelationsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnmediarelationscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnmediarelationscf` (
+  `rsnmediarelationsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnmediarelationsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

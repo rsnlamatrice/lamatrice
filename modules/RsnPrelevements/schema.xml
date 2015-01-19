@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnprelevements</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnprelevements` (
+  `rsnprelevementsid` int(11) NOT NULL DEFAULT '0',
+    `nom` VARCHAR(128) DEFAULT NULL,
+    `accountid` INT(11) DEFAULT NULL,
+    `sepaibanpays` VARCHAR(128) DEFAULT NULL,
+    `sepaibancle` VARCHAR(128) DEFAULT NULL,
+    `numcompte` VARCHAR(32) DEFAULT NULL,
+    `etat` VARCHAR(128) DEFAULT NULL,
+    `sepaibanbban` VARCHAR(128) DEFAULT NULL,
+    `dejapreleve` VARCHAR(5) DEFAULT NULL,
+    `periodicite` VARCHAR(16) DEFAULT NULL,
+    `codebanque` VARCHAR(32) DEFAULT NULL,
+    `codeguichet` VARCHAR(16) DEFAULT NULL,
+    `sepabic` VARCHAR(128) DEFAULT NULL,
+    `origine` VARCHAR(128) DEFAULT NULL,
+    `recufiscal` INT(19) DEFAULT NULL,
+    `clerib` VARCHAR(8) DEFAULT NULL,
+    `sepadatesignature` DATE DEFAULT NULL,
+    `montant` DECIMAL(25,2) DEFAULT NULL,
+    `separum` VARCHAR(128) DEFAULT NULL,
+    PRIMARY KEY (`rsnprelevementsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnprelevementscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnprelevementscf` (
+  `rsnprelevementsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnprelevementsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsntodo</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsntodo` (
+  `rsntodoid` int(11) NOT NULL DEFAULT '0',
+    `sujet` VARCHAR(128) DEFAULT NULL,
+    `datereponse` TIMESTAMP NULL DEFAULT NULL,
+    `rsntodoreponseattendue` VARCHAR(128) DEFAULT NULL,
+    `rsntodoconcerne` VARCHAR(128) DEFAULT NULL,
+    `commentaire` TEXT DEFAULT NULL,
+    `todostatus` VARCHAR(128) DEFAULT NULL,
+    `reponsetext` TEXT DEFAULT NULL,
+    `relatedto` INT(19) DEFAULT NULL,
+    `create_user_id` INT(11) DEFAULT NULL,
+    PRIMARY KEY (`rsntodoid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsntodocf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsntodocf` (
+  `rsntodoid` int(11) NOT NULL,
+  PRIMARY KEY (`rsntodoid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

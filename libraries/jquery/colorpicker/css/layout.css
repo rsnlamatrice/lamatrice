@@ -1,0 +1,24 @@
+
+.colorpicker-holder {
+	position: relative;
+	width: 36px;
+	height: 36px;
+	background: url(../images/select.png) no-repeat;
+	background-color: transparent;
+}
+.colorpicker { /* over dialog */
+	z-index: 99999;
+}
+.q-fields label ~ .colorpicker-holder{
+	background-color: transparent;
+	display: inline-block;
+	vertical-align: middle;
+}
+.colorpicker-holder div {
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 30px;
+	height: 30px;
+	background: url(../images/select.png) center no-repeat;
+}
