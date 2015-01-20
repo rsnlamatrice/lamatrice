@@ -5,5 +5,8 @@
 /logs
 
 *.sh
+.DS_Store
+.*
+
 /test
 
