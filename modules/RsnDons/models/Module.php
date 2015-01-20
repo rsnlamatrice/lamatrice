@@ -157,7 +157,7 @@ class RsnDons_Module_Model extends Vtiger_Module_Model {
 	* Function to get Services of category $this->serviceType ('Don', 'Adhésion', 'Abonnement', ...)
 	*/ 
 	public function getServicesList(){
-		include_once('Modules/Services/Services.php');
+		include_once('modules/Services/Services.php');
 		$servicesEntity = new Services();
 		$query = $servicesEntity->getListQuery('Services'," AND servicecategory = '" . $this->serviceType . "'", TRUE);
 		$query .= " ORDER BY sortindex, label";
