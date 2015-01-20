@@ -44,14 +44,27 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 	*/
 	$columns = $db->getColumnNames($tableName);
 	
-        if($fieldModel->isRoleBased()) {
+        $params = array($id, $newValue);
+	foreach($columns as $column)
+	switch($column){
+	    case 'picklist_valueid':
+		$params[] = $picklist_valueid;
+		break;
+	    case 'sortorderid':
+		$params[] = ++$sequence;
+		break;
+	    case 'presence':
+		$params[] = 1;
+		break;
+	}
+	if($fieldModel->isRoleBased()) {
 	    $columns = implode(', ', array_slice($columns, 0, 5));
             $sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?,?)';
-            $result = $db->pquery($sql, array($id, $newValue, 1, $picklist_valueid,++$sequence));
+            $result = $db->pquery($sql, $params);//array($id, $newValue, 1, $picklist_valueid,++$sequence)
         }else{
             $columns = implode(', ', array_slice($columns, 0, 4));
             $sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?)';
-            $result = $db->pquery($sql, array($id, $newValue, ++$sequence, 1));
+            $result = $db->pquery($sql, $params);//array($id, $newValue, ++$sequence, 1)
         }
 	if(!$result){
 	    echo("<br>ERREUR DANS addPickListValues (" . __FILE__ .")");

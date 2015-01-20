@@ -9,7 +9,7 @@
  *************************************************************************************/
 
 class RsnTODO_Record_Model extends Vtiger_Record_Model {
-	
+
 	/**
 	 * Function to set the entity instance of the record
 	 * @param CRMEntity $entity

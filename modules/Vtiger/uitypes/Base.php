@@ -71,7 +71,6 @@ class Vtiger_Base_UIType extends Vtiger_Base_Model {
 			$instance = new $fallBackClassName();
 		}
 
-		//var_dump($fieldModel->getName(), get_class($instance), $completeFilePath, file_exists($completeFilePath));
 		$instance->set('field', $fieldModel);
 		return $instance;
 	}
