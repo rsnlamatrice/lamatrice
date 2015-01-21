@@ -137,10 +137,10 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 	 * @return <Array> - List of Vtiger_Field_Model instances
 	 */
 	public function getListViewHeaders() {
-		$listViewContoller = $this->get('listview_controller');
+		$listViewController = $this->get('listview_controller');
 		$module = $this->getModule();
 		$headerFieldModels = array();
-		$headerFields = $listViewContoller->getListViewHeaderFields();
+		$headerFields = $listViewController->getListViewHeaderFields();
 		foreach($headerFields as $fieldName => $webserviceField) {
 			if($webserviceField && !in_array($webserviceField->getPresence(), array(0,2))) continue;
 			$headerFieldModels[$fieldName] = Vtiger_Field_Model::getInstance($fieldName,$module);
@@ -335,6 +335,9 @@ var_dump($listResult);*/
 	 * @param <String> $moduleName - Module Name
 	 * @param <Number> $viewId - Custom View Id
 	 * @return Vtiger_ListView_Model instance
+	 *
+	 * ED150121 : au chargement de la page, on a la liste par défaut (all) avec ses colonnes issues de <CRMEntity> -> list_fields_name .
+	 * au rechargement d'une vue, ok.
 	 */
 	public static function getInstance($moduleName, $viewId='0') {
 		$db = PearDatabase::getInstance();
@@ -345,18 +348,21 @@ var_dump($listResult);*/
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$queryGenerator = new QueryGenerator($moduleModel->get('name'), $currentUser);
 		$customView = new CustomView();
+		
+		
 		if (!empty($viewId) && $viewId != "0") {
 			$queryGenerator->initForCustomViewById($viewId);
 
 			//Used to set the viewid into the session which will be used to load the same filter when you refresh the page
 			$viewId = $customView->getViewId($moduleName);
 		} else {
-			$viewId = $customView->getViewId($moduleName);
+			$viewId = $customView->getViewId($moduleName);	
 			if(!empty($viewId) && $viewId != 0) {
 				$queryGenerator->initForDefaultCustomView();
 			} else {
 				$entityInstance = CRMEntity::getInstance($moduleName);
 				$listFields = $entityInstance->list_fields_name;
+				//debug_var_dump($listFields);
 				$listFields[] = 'id';
 				$queryGenerator->setFields($listFields);
 			}

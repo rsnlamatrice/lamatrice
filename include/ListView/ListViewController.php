@@ -153,9 +153,11 @@ class ListViewController {
 	}
 
 	public function getListViewHeaderFields() {
+		
 		$meta = $this->queryGenerator->getMeta($this->queryGenerator->getModule());
 		$moduleFields = $meta->getModuleFields();
 		$fields = $this->queryGenerator->getFields();
+		
 		$headerFields = array();
 		foreach($fields as $fieldName) {
 			if(array_key_exists($fieldName, $moduleFields)) {
