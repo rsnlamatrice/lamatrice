@@ -31,7 +31,7 @@ class Settings_Vtiger_TaxAjax_Action extends Settings_Vtiger_Basic_Action {
 			$taxRecordModel = Settings_Vtiger_TaxRecord_Model::getInstanceById($taxId, $type);
 		}
 		
-		$fields = array('taxlabel','percentage','deleted');
+		$fields = array('taxlabel','percentage','deleted', 'account');
 		foreach($fields as $fieldName) {
 			if($request->has($fieldName)) {
 				$taxRecordModel->set($fieldName,$request->get($fieldName));
