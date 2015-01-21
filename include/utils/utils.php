@@ -1861,6 +1861,15 @@ function echo_callstack($skip = 1, $max = INF){
 		}
 	echo('</pre>');
 }
+function debug_var_dump($params){
+	$params = func_get_args();
+	echo '<br><br><br><br><br>';
+	//$db = PearDatabase::getInstance();
+	//$db->setDebug(true);
+	foreach($params as $param)
+		var_dump($param);
+	echo_callstack(2);
+}
 
 /* ED141016 supprime les accents */
 function remove_accent($str)

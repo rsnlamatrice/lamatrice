@@ -167,6 +167,11 @@ class QueryGenerator {
 	}
 
 	public function initForCustomViewById($viewId) {
+		
+		/* ED150121
+		 * on ne passe jamais ici lors du chargement initial de la page
+		 */
+		
 		$customView = new CustomView($this->module);
 		$this->customViewColumnList = $customView->getColumnsListByCvid($viewId);
 		foreach ($this->customViewColumnList as $customViewColumnInfo) {
@@ -296,6 +301,7 @@ class QueryGenerator {
 	}
 
 	public function getQuery() {
+		
 		if(empty($this->query)) {
 			$conditionedReferenceFields = array();
 			$allFields = array_merge($this->whereFields,$this->fields);
@@ -1239,6 +1245,7 @@ class QueryGenerator {
 	}
 
 	public function initForGlobalSearchByType($type, $value, $operator='s') {
+		
 		$fieldList = $this->meta->getFieldNameListByType($type);
 		if($this->conditionInstanceCount <= 0) {
 			$this->startGroup('');

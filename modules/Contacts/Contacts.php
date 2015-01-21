@@ -105,13 +105,13 @@ class Contacts extends CRMEntity {
 
 
 	var $list_fields_name = Array(
+		'Particulier ou Structure' => 'isgroup',
 		'First Name' => 'firstname',
 		'Last Name' => 'lastname',
-		'Title' => 'title',
-		'Account Name' => 'account_id',
-		'Email' => 'email',
-		'Office Phone' => 'phone',
-		'Assigned To' => 'assigned_user_id',
+		'Compte' => 'accountid',
+		'Type de contact' => 'accounttype',
+		'Ville' => 'mailingcity',
+		'Code postal' => 'mailingzip',
 	);
 
 	var $search_fields = Array(
