@@ -34,6 +34,13 @@ class Settings_Vtiger_TaxRecord_Model extends Vtiger_Base_Model{
 	public function getTax() {
         return $this->get('percentage');
     }
+    
+    /* ED150121
+     * N° de compte
+     */
+    public function getAccount() {
+        return $this->get('account');
+    }
 	
     public function isDeleted() {
         return $this->get('deleted') == 0 ? false : true;
@@ -84,7 +91,7 @@ class Settings_Vtiger_TaxRecord_Model extends Vtiger_Base_Model{
     public function save() {
         $db = PearDatabase::getInstance();
         
-        $tablename = $this->getTableNameFromType();
+        $tablename = $this->getTableNameFromType();//vtiger_inventorytaxinfo
         
         $taxId = $this->getId();
         
@@ -93,8 +100,8 @@ class Settings_Vtiger_TaxRecord_Model extends Vtiger_Base_Model{
             if($this->isDeleted()) {
                 $deleted = 1;
             }
-            $query = 'UPDATE '.$tablename.' SET taxlabel=?,percentage=?,deleted=? WHERE taxid=?';
-            $params = array($this->getName(),$this->get('percentage'),$deleted,$taxId);
+            $query = 'UPDATE '.$tablename.' SET taxlabel=?,percentage=?, account=? ,deleted=? WHERE taxid=?';
+            $params = array($this->getName(),$this->get('percentage'),$this->get('account'),$deleted,$taxId);
             $db->pquery($query,$params);
         }else{
             $taxId = $this->addTax();   
@@ -115,6 +122,7 @@ class Settings_Vtiger_TaxRecord_Model extends Vtiger_Base_Model{
         $taxid = $adb->getUniqueID($tableName);
         $taxLabel = $this->getName();
         $percentage = $this->get('percentage');
+        $account = $this->get('account');
         
         //if the tax is not available then add this tax.
         //Add this tax as a column in related table	
@@ -155,8 +163,8 @@ class Settings_Vtiger_TaxRecord_Model extends Vtiger_Base_Model{
 
         //if the tax is added as a column then we should add this tax in the list of taxes
         if($res) {
-            $query = 'INSERT INTO '.$tableName.' values(?,?,?,?,?)';
-            $params = array($taxid, $taxname, $taxLabel, $percentage, 0);
+            $query = 'INSERT INTO '.$tableName.' values(?,?,?,?,?, ?)';
+            $params = array($taxid, $taxname, $taxLabel, $percentage, 0, $account);
 			$adb->pquery($query, $params);
             return $taxid;
         }

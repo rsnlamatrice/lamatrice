@@ -23,7 +23,7 @@
 			<table class="table table-bordered inventoryTaxTable themeTableColor">
 				<thead>
 					<tr class="blockHeader">
-						<th colspan="3">
+						<th colspan="4">
 							{vtranslate('LBL_PRODUCT_SERVICE_TAXES', $QUALIFIED_MODULE)}
 						</th>
 					</tr>
@@ -32,12 +32,14 @@
 					<tr>
 						<td class="themeTextColor" style="border-left: none;"><strong>{vtranslate('LBL_TAX_NAME', $QUALIFIED_MODULE)}</strong></td>
 						<td class="themeTextColor" style="border-left: none;"><strong>{vtranslate('LBL_TAX_VALUE', $QUALIFIED_MODULE)}</strong></td>
+						<td class="themeTextColor" style="border-left: none;"><strong>N° de compte</strong></td>
 						<td class="themeTextColor" style="border-left: none;"><strong>{vtranslate('LBL_STATUS', $QUALIFIED_MODULE)}</strong></td>
 					</tr>
 					{foreach item=PRODUCT_SERVICE_TAX_MODEL from=$PRODUCT_AND_SERVICES_TAXES}
 						<tr class="opacity" data-taxid="{$PRODUCT_SERVICE_TAX_MODEL->get('taxid')}" data-taxtype="{$PRODUCT_SERVICE_TAX_MODEL->getType()}">
 							<td style="border-left: none;"><label class="taxLabel textOverflowEllipsis">{$PRODUCT_SERVICE_TAX_MODEL->getName()}</label></td>
 							<td style="border-left: none;"><span class="taxPercentage">{$PRODUCT_SERVICE_TAX_MODEL->getTax()}%</span></td>
+							<td style="border-left: none;"><span class="taxAccount">{$PRODUCT_SERVICE_TAX_MODEL->getAccount()}</span></td>
 							<td style="border-left: none;"><input type="checkbox" class="editTaxStatus" {if !$PRODUCT_SERVICE_TAX_MODEL->isDeleted()}checked{/if} />
 								<div class="pull-right actions">
 									<a class="editTax cursorPointer" data-url="{$PRODUCT_SERVICE_TAX_MODEL->getEditTaxUrl()}"><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignBottom"></i></a>&nbsp;
@@ -55,7 +57,7 @@
 			<table class="table table-bordered shippingTaxTable themeTableColor">
 				<thead>
 					<tr class="blockHeader">
-						<th colspan="3">
+						<th colspan="4">
 							{vtranslate('LBL_SHIPPING_HANDLING_TAXES', $QUALIFIED_MODULE)}
 						</th>
 					</tr>
@@ -64,12 +66,14 @@
 					<tr>
 						<td class="themeTextColor" style="border-left: none;"><strong>{vtranslate('LBL_TAX_NAME', $QUALIFIED_MODULE)}</strong></td>
 						<td class="themeTextColor" style="border-left: none;"><strong>{vtranslate('LBL_TAX_VALUE', $QUALIFIED_MODULE)}</strong></td>
+						<td class="themeTextColor" style="border-left: none;"><strong>N° de compte</strong></td>
 						<td class="themeTextColor" style="border-left: none;"><strong>{vtranslate('LBL_STATUS', $QUALIFIED_MODULE)}</strong></td>
 					</tr>
 					{foreach item=SHIPPING_HANDLING_TAX_MODEL from=$SHIPPING_AND_HANDLING_TAXES}
 						<tr class="opacity" data-taxid="{$SHIPPING_HANDLING_TAX_MODEL->get('taxid')}" data-taxtype="{$SHIPPING_HANDLING_TAX_MODEL->getType()}">
 							<td style="border-left: none;"><label class="taxLabel">{$SHIPPING_HANDLING_TAX_MODEL->getName()}</label></td>
 							<td style="border-left: none;"><span class="taxPercentage">{$SHIPPING_HANDLING_TAX_MODEL->getTax()}%</span></td>
+							<td style="border-left: none;"><span class="taxAccount">{$PRODUCT_SERVICE_TAX_MODEL->getAccount()}</span></td>
 							<td style="border-left: none;"><input type="checkbox" class="editTaxStatus" {if !$SHIPPING_HANDLING_TAX_MODEL->isDeleted()}checked{/if} />
 								<div class="pull-right actions">
 									<a class="editTax cursorPointer" data-url="{$SHIPPING_HANDLING_TAX_MODEL->getEditTaxUrl()}"><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>
