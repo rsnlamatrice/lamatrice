@@ -171,3 +171,20 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 .summaryWidgetContainer .rsnsubpanel .fieldLabel  a {
   padding-left: 1em;
 }
+
+/* Contacts EditViewBlocks.tpl */
+.fieldLabel .subFieldLabel {
+  display: block;
+  line-height: 18px;
+  vertical-align: middle;
+  text-align: right;
+  margin: 10px 0;
+}
+
+/* les enfants de cette classe passent en ligne
+  utilisé par layouts/vlayout/modules/Contacts/SummaryViewContents.tpl
+*/
+.inline-children > * {
+  display: inline-block;
+  margin-right: 6px;
+}

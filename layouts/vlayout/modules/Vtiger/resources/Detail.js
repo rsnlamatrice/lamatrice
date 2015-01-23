@@ -948,117 +948,142 @@ jQuery.Class("Vtiger_Detail_Js",{
 	/**
 	 * Function to handle the ajax edit for detailview and summary view fields
 	 * which will expects the currentTdElement
+	 *
+	 * ED150123 : un bloc édité peut contenir plusieurs champs à valider
 	 */
 	ajaxEditHandling : function(currentTdElement) {
-			var thisInstance = this;
-			var detailViewValue = jQuery('.value',currentTdElement);
-			var editElement = jQuery('.edit',currentTdElement);
-			var actionElement = jQuery('.summaryViewEdit', currentTdElement);
+	    var thisInstance = this;
+	    var detailViewValue = jQuery('.value',currentTdElement);
+	    var editElement = jQuery('.edit',currentTdElement);
+	    var actionElement = jQuery('.summaryViewEdit', currentTdElement);
 
-			if(editElement.length <= 0) {
-				return;
+	    if(editElement.length <= 0) {
+		    return;
+	    }
+
+	    if(editElement.is(':visible')){
+		    return;
+	    }
+
+	    detailViewValue.addClass('hide');
+	    editElement.removeClass('hide').show().children().filter('input[type!="hidden"]input[type!="image"],select').filter(':first').focus();
+
+	    var saveTriggred = false;
+	    var preventDefault = false;
+	    var errorExists = false;
+	    var valuesChanged = false;
+	    var saveHandler = function(e) {
+		var element = jQuery(e.target);
+		if((element.closest('td').is(currentTdElement))){
+			return;
+		}
+
+		currentTdElement.removeAttr('tabindex');
+		currentTdElement.progressIndicator();
+
+		// valide séparément chaque input
+		editElement.each(function(){
+		    var editElement = $(this);
+		    var fieldnameElement = jQuery('.fieldname', editElement);
+		    var previousValue = fieldnameElement.data('prevValue');
+		    var fieldName = fieldnameElement.val();
+		    var fieldElement = jQuery('[name="'+ fieldName +'"]', editElement);
+		    var formElement = thisInstance.getForm();
+		    var formData = formElement.serializeFormData();
+		    var ajaxEditNewValue = formData[fieldName];
+		    //value that need to send to the server
+		    var fieldValue = ajaxEditNewValue;
+		    var fieldInfo = Vtiger_Field_Js.getInstance(fieldElement.data('fieldinfo'));
+
+		    // Since checkbox will be sending only on and off and not 1 or 0 as currrent value
+		    if(fieldElement.is('input:checkbox')) {
+			    if(fieldElement.is(':checked')) {
+				    ajaxEditNewValue = '1';
+			    } else {
+				    ajaxEditNewValue = '0';
+			    }
+			    fieldElement = fieldElement.filter('[type="checkbox"]');
+		    }
+		    errorExists = fieldElement.validationEngine('validate');
+		    //If validation fails
+		    if(errorExists) {
+			    return false;
+		    }
+		    var valueChanged = previousValue != ajaxEditNewValue;
+		    
+		    //Before saving ajax edit values we need to check if the value is changed then only we have to save
+		    if(!valueChanged) 
+			return;
+		    //au moins une valeur a changé
+		    valuesChanged = true;
+		    
+		    var preFieldSaveEvent = jQuery.Event(thisInstance.fieldPreSave);
+		    fieldElement.trigger(preFieldSaveEvent, {'fieldValue' : fieldValue,  'recordId' : thisInstance.getRecordId()});
+		    if(preFieldSaveEvent.isDefaultPrevented()) {
+			    //Stop the save
+			    saveTriggred = false;
+			    preventDefault = true;
+			    
+			    errorExists = true;
+			    return false;
+		    }
+		    preventDefault = false;
+
+		    jQuery(document).off('click', '*', saveHandler);
+
+		    if(!saveTriggred && !preventDefault) {
+			    saveTriggred = true;
+		    }else{
+			    errorExists = true;
+			    return;
+		    }
+
+		    //editElement.addClass('hide');
+		    var fieldNameValueMap = {};
+		    if(fieldInfo.getType() == 'multipicklist') {
+			var multiPicklistFieldName = fieldName.split('[]');
+			fieldName = multiPicklistFieldName[0];
+		    }
+		    fieldNameValueMap['value'] = fieldValue;
+		    fieldNameValueMap['field'] = fieldName;
+		    thisInstance.saveFieldValues(fieldNameValueMap).then(function(response) {
+			    var postSaveRecordDetails = response.result;
+			    //currentTdElement.progressIndicator({'mode':'hide'});
+			    //detailViewValue.removeClass('hide');
+			    //actionElement.show();
+			    //TODO compléter la valeur plutôt que l'écraser
+			    detailViewValue.html(postSaveRecordDetails[fieldName].display_value);
+			    fieldElement.trigger(thisInstance.fieldUpdatedEvent,{'old':previousValue,'new':fieldValue});
+			    fieldnameElement.data('prevValue', ajaxEditNewValue);
+			},
+			function(error){
+			    //TODO : Handle error
+			    errorExists = true;
 			}
+		    );
+		});
+		
+		
+		currentTdElement.progressIndicator({'mode':'hide'});
+			    
+		//If validation fails
+		if(errorExists) {
+			return;
+		}
+		
+		//Before saving ajax edit values we need to check if the value is changed then only we have to save
+		if(!valuesChanged) {
+		    editElement.addClass('hide');
+		    detailViewValue.removeClass('hide');
+		    actionElement.show();
+		    jQuery(document).off('click', '*', saveHandler);
+		} else {
+		    detailViewValue.removeClass('hide');
+		    currentTdElement.progressIndicator({'mode':'hide'});
+		}
+	    }
 
-			if(editElement.is(':visible')){
-				return;
-			}
-
-			detailViewValue.addClass('hide');
-			editElement.removeClass('hide').show().children().filter('input[type!="hidden"]input[type!="image"],select').filter(':first').focus();
-
-			var saveTriggred = false;
-			var preventDefault = false;
-
-			var saveHandler = function(e) {
-				var element = jQuery(e.target);
-				if((element.closest('td').is(currentTdElement))){
-					return;
-				}
-
-				currentTdElement.removeAttr('tabindex');
-
-				var fieldnameElement = jQuery('.fieldname', editElement);
-				var previousValue = fieldnameElement.data('prevValue');
-				var fieldName = fieldnameElement.val();
-				var fieldElement = jQuery('[name="'+ fieldName +'"]', editElement);
-				var formElement = thisInstance.getForm();
-				var formData = formElement.serializeFormData();
-				var ajaxEditNewValue = formData[fieldName];
-				//value that need to send to the server
-				var fieldValue = ajaxEditNewValue;
-				var fieldInfo = Vtiger_Field_Js.getInstance(fieldElement.data('fieldinfo'));
-
-				// Since checkbox will be sending only on and off and not 1 or 0 as currrent value
-				if(fieldElement.is('input:checkbox')) {
-					if(fieldElement.is(':checked')) {
-						ajaxEditNewValue = '1';
-					} else {
-						ajaxEditNewValue = '0';
-					}
-					fieldElement = fieldElement.filter('[type="checkbox"]');
-				}
-				var errorExists = fieldElement.validationEngine('validate');
-				//If validation fails
-				if(errorExists) {
-					return;
-				}
-
-
-
-
-
-                //Before saving ajax edit values we need to check if the value is changed then only we have to save
-                if(previousValue == ajaxEditNewValue) {
-                    editElement.addClass('hide');
-                    detailViewValue.removeClass('hide');
-					actionElement.show();
-					jQuery(document).off('click', '*', saveHandler);
-                } else {
-					var preFieldSaveEvent = jQuery.Event(thisInstance.fieldPreSave);
-					fieldElement.trigger(preFieldSaveEvent, {'fieldValue' : fieldValue,  'recordId' : thisInstance.getRecordId()});
-					if(preFieldSaveEvent.isDefaultPrevented()) {
-						//Stop the save
-						saveTriggred = false;
-						preventDefault = true;
-						return
-					}
-					preventDefault = false;
-
-					jQuery(document).off('click', '*', saveHandler);
-
-					if(!saveTriggred && !preventDefault) {
-						saveTriggred = true;
-					}else{
-						return;
-					}
-
-                    currentTdElement.progressIndicator();
-                    editElement.addClass('hide');
-                    var fieldNameValueMap = {};
-                    if(fieldInfo.getType() == 'multipicklist') {
-                        var multiPicklistFieldName = fieldName.split('[]');
-                        fieldName = multiPicklistFieldName[0];
-                    }
-                    fieldNameValueMap['value'] = fieldValue;
-					fieldNameValueMap['field'] = fieldName;
-                    thisInstance.saveFieldValues(fieldNameValueMap).then(function(response) {
-						var postSaveRecordDetails = response.result;
-						currentTdElement.progressIndicator({'mode':'hide'});
-                        detailViewValue.removeClass('hide');
-						actionElement.show();
-                        detailViewValue.html(postSaveRecordDetails[fieldName].display_value);
-						fieldElement.trigger(thisInstance.fieldUpdatedEvent,{'old':previousValue,'new':fieldValue});
-						fieldnameElement.data('prevValue', ajaxEditNewValue);
-					},
-                        function(error){
-                            //TODO : Handle error
-                            currentTdElement.progressIndicator({'mode':'hide'});
-                        }
-                    )
-                }
-			}
-
-			jQuery(document).on('click','*', saveHandler);
+	    jQuery(document).on('click','*', saveHandler);
 	},
 
 

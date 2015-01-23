@@ -232,7 +232,7 @@ class ListViewController {
 		}
 		
 		/* ED141128
-		 * autres tables référencées par un champ
+		 * autres tables rÃˆfÃˆrencÃˆes par un champ
 		 */
 		$referencedEntities = array();
 
@@ -387,7 +387,7 @@ class ListViewController {
 								if($currencyInfo)
 									$currencySymbol = $currencyInfo['currency_symbol'];
 								else
-									$currencySymbol = "€";/*TODO*/
+									$currencySymbol = "Ã„";/*TODO*/
 							}
 							$value = CurrencyField::convertToUserFormat($value, null, true);
 							$row['currencySymbol'] = $currencySymbol;
@@ -505,7 +505,7 @@ class ListViewController {
 						$value = textlength_check($this->nameList[$fieldName][$parentId]);
 						if ($parentMeta->isModuleEntity() && $parentModule != "Users") {
 						
-							/* la table référencée fournit une couleur via un de ses champs */
+							/* la table rÃˆfÃˆrencÃˆe fournit une couleur via un de ses champs */
 							if(isset($this->uicolorList[$fieldName])){
 								/*echo('$this->uicolorList[$fieldName] : ');
 								var_dump($parentId);

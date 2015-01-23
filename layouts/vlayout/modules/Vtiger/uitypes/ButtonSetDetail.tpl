@@ -16,6 +16,7 @@
 {strip}
 {assign var="FIELD_INFO" value=Zend_Json::encode($FIELD_MODEL->getFieldInfo())}
 {assign var=FIELD_NAME value=$FIELD_MODEL->getFieldName()}
+{assign var=FIELD_LABEL value=Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode(vtranslate($FIELD_MODEL->get('label'),$MODULE)))}
 {if $LABELS}
     {assign var=PICKLIST_LABELS value=$LABELS}
 {else}
@@ -44,7 +45,7 @@
 	    {else}
 		{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
 	    {/if}
-	    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
+	    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$FIELD_LABEL}">
 		{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
 		{$PICKLIST_LABEL}</label>
 	    {break}

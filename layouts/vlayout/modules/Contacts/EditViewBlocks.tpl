@@ -91,44 +91,46 @@
 				{/if}
 				<td class="fieldLabel {$WIDTHTYPE}">
 					{if $isReferenceField neq "reference"}<label class="muted pull-right marginRight10px">{/if}
-						{if $FIELD_MODEL->isMandatory() eq true && $isReferenceField neq "reference"} <span class="redColor">*</span> {/if}
-						{if $isReferenceField eq "reference"}
-							{assign var="REFERENCE_LIST" value=$FIELD_MODEL->getReferenceList()}
-							{assign var="REFERENCE_LIST_COUNT" value=count($REFERENCE_LIST)}
-							{if $REFERENCE_LIST_COUNT > 1}
-								{assign var="DISPLAYID" value=$FIELD_MODEL->get('fieldvalue')}
-								{assign var="REFERENCED_MODULE_STRUCT" value=$FIELD_MODEL->getUITypeModel()->getReferenceModule($DISPLAYID)}
-								{if !empty($REFERENCED_MODULE_STRUCT)}
-									{assign var="REFERENCED_MODULE_NAME" value=$REFERENCED_MODULE_STRUCT->get('name')}
-								{/if}
-								<span class="pull-right">
-									{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}
-									<select id="{$MODULE}_editView_fieldName_{$FIELD_MODEL->getName()}_dropDown" class="chzn-select referenceModulesList streched" style="width:140px;">
-										<optgroup>
-											{foreach key=index item=value from=$REFERENCE_LIST}
-												<option value="{$value}" {if $value eq $REFERENCED_MODULE_NAME} selected {/if}>{vtranslate($value, $MODULE)}</option>
-											{/foreach}
-										</optgroup>
-									</select>
-								</span>
-							{else}
-								<label class="muted pull-right marginRight10px">{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</label>
+					{if $FIELD_MODEL->isMandatory() eq true && $isReferenceField neq "reference"} <span class="redColor">*</span> {/if}
+					{if $isReferenceField eq "reference"}
+						{assign var="REFERENCE_LIST" value=$FIELD_MODEL->getReferenceList()}
+						{assign var="REFERENCE_LIST_COUNT" value=count($REFERENCE_LIST)}
+						{if $REFERENCE_LIST_COUNT > 1}
+							{assign var="DISPLAYID" value=$FIELD_MODEL->get('fieldvalue')}
+							{assign var="REFERENCED_MODULE_STRUCT" value=$FIELD_MODEL->getUITypeModel()->getReferenceModule($DISPLAYID)}
+							{if !empty($REFERENCED_MODULE_STRUCT)}
+								{assign var="REFERENCED_MODULE_NAME" value=$REFERENCED_MODULE_STRUCT->get('name')}
 							{/if}
-						{else if $FIELD_MODEL->get('uitype') eq "83"}
-							{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) COUNTER=$COUNTER MODULE=$MODULE}
+							<span class="pull-right">
+								{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}
+								<select id="{$MODULE}_editView_fieldName_{$FIELD_MODEL->getName()}_dropDown" class="chzn-select referenceModulesList streched" style="width:140px;">
+									<optgroup>
+										{foreach key=index item=value from=$REFERENCE_LIST}
+											<option value="{$value}" {if $value eq $REFERENCED_MODULE_NAME} selected {/if}>{vtranslate($value, $MODULE)}</option>
+										{/foreach}
+									</optgroup>
+								</select>
+							</span>
 						{else}
-							{if $FIELD_NAME eq 'othercity'
-							|| $FIELD_NAME eq 'mailingcity'}
-								<br>{vtranslate($FIELD_MODEL->get('label'), $MODULE)}
-								<br><br>Pays
-							{elseif $FIELD_NAME eq 'otherstreet'
-							|| $FIELD_NAME eq 'mailingstreet'}
-								<span style="position: relative; top:-16px; left:58px;">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</span>
-								<span style="position: relative; top:42px;">BP, lieu-dit</span>
-							{else}
-								{vtranslate($FIELD_MODEL->get('label'), $MODULE)}
-							{/if}
+							<label class="muted pull-right marginRight10px">{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</label>
 						{/if}
+					{else if $FIELD_MODEL->get('uitype') eq "83"}
+						{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) COUNTER=$COUNTER MODULE=$MODULE}
+					{else}
+						{if $FIELD_NAME eq 'othercity'
+						|| $FIELD_NAME eq 'mailingcity'}
+							<span class="subFieldLabel">BP, lieu-dit</span>
+							<span class="subFieldLabel">CP, Ville</span>
+							<span class="subFieldLabel">Pays</span>
+						{elseif $FIELD_NAME eq 'otherstreet'
+						|| $FIELD_NAME eq 'mailingstreet'}
+							<span class="subFieldLabel">&nbsp;</span>
+							<span class="subFieldLabel">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</span>
+							<span class="subFieldLabel" style="color: #88bbbb;">&gt;</span>
+						{else}
+							{vtranslate($FIELD_MODEL->get('label'), $MODULE)}
+						{/if}
+					{/if}
 					{if $isReferenceField neq "reference"}</label>{/if}
 				</td>
 				{if $FIELD_MODEL->get('uitype') neq "83"}
@@ -162,9 +164,20 @@
 									<br>
 								{/if}
 								
+								{* BP pobox*}
 								{* zip code *}
 								{if $FIELD_NAME eq 'othercity'
 								|| $FIELD_NAME eq 'mailingcity'}
+									{assign var=TITLE value='Boîte postale, lieu-dit, ...'}
+									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
+									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
+									{assign var=FIELD_NAME value=str_replace('street', 'pobox', $FIELD_NAME)}
+									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-large'}
+									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
+									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
+									<br>
 									{assign var=TITLE value='Code postal. Pour les adresses étrangères, commence par le code du pays. Exple : BE-6350.'}
 									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
@@ -187,24 +200,14 @@
 								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 								{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL TITLE=$TITLE}
 								
-								{* BP pobox*}
 								{if $FIELD_NAME eq 'otherstreet'
 								|| $FIELD_NAME eq 'mailingstreet'}
-									<br>
-									{assign var=TITLE value='Boîte postale, lieu-dit, ...'}
-									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
-									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
-									{assign var=FIELD_NAME value=str_replace('street', 'pobox', $FIELD_NAME)}
-									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-medium'}
-									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
-									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}									
+								
 								{* pays *}
 								{elseif $FIELD_NAME eq 'othercity'
 								|| $FIELD_NAME eq 'mailingcity'}
 									<br>
-									{assign var=TITLE value='Adresse principale, n° et rue, ...'}
+									{assign var=TITLE value='Pays'}
 									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
 									{assign var=FIELD_NAME value=str_replace('city', 'country', $FIELD_NAME)}

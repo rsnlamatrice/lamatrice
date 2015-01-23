@@ -279,13 +279,38 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	public static function getSearchResult($searchKey, $module=false) {
 		$db = PearDatabase::getInstance();
 
-		$query = 'SELECT label, crmid, setype, createdtime FROM vtiger_crmentity WHERE label LIKE ? AND vtiger_crmentity.deleted = 0';
-		$params = array("%$searchKey%");
-
-		if($module !== false) {
-			$query .= ' AND setype = ?';
-			$params[] = $module;
+		/* ED150122
+		 * recherche d'un nombre, sans précision de module ou Contacts : on cherche dans ref 4D
+		 * si le nombre est préfixé de 'C', on cherche dans vtiger_contactdetails.contact_no
+		 */
+		if((!$module || $module == 'Contacts')
+		&& ($searchKey
+		    && (is_numeric($searchKey)
+			|| (($searchKey[0] == 'c' || $searchKey[0] == 'C')
+			    && is_numeric(substr($searchKey,1))))
+		)){
+			$query = 'SELECT vtiger_crmentity.label, vtiger_crmentity.crmid, vtiger_crmentity.setype, vtiger_crmentity.createdtime
+				FROM vtiger_crmentity
+				JOIN vtiger_contactdetails
+					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+				WHERE (vtiger_crmentity.crmid = ?
+					OR vtiger_contactdetails.contact_no = CONCAT(\'C\', ?))
+				AND vtiger_crmentity.deleted = 0';
+			$params = array(trim($searchKey), trim($searchKey));
 		}
+		else {	/* requête générale sur le champ label */
+			$query = 'SELECT label, crmid, setype, createdtime
+				FROM vtiger_crmentity
+				WHERE label LIKE ?
+				AND vtiger_crmentity.deleted = 0';
+			$params = array("%$searchKey%");
+		
+			if($module !== false) {
+				$query .= ' AND setype = ?';
+				$params[] = $module;
+			}
+		}
+		//var_dump($query, $params);
 		//Remove the ordering for now to improve the speed
 		//$query .= ' ORDER BY createdtime DESC';
 

@@ -106,6 +106,7 @@ class Contacts extends CRMEntity {
 
 	var $list_fields_name = Array(
 		'Particulier ou Structure' => 'isgroup',
+		'N° Contact' => 'contact_no',
 		'First Name' => 'firstname',
 		'Last Name' => 'lastname',
 		'Compte' => 'accountid',

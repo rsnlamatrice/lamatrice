@@ -15,6 +15,7 @@
 {strip}
 {assign var="FIELD_INFO" value=Zend_Json::encode($FIELD_MODEL->getFieldInfo())}
 {assign var=FIELD_NAME value=$FIELD_MODEL->getFieldName()}
+{assign var=FIELD_LABEL value=Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode(vtranslate($FIELD_MODEL->get('label'), $MODULE_NAME)))}
 {if $RECORD}{assign var=RECORD_MODEL value=$RECORD}{/if}
 {if !$RECORD_MODEL}RECORD_MODEL manquant{/if}
 {assign var=PICKLIST_LABELS value=$RECORD_MODEL->getPicklistValuesDetails($FIELD_NAME)}
@@ -45,7 +46,7 @@
         {if trim(decode_html($SELECTED_VALUE)) eq trim($PICKLIST_KEY)}
                 checked="checked"
         {/if}
-        /><label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
+        /><label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$FIELD_LABEL}">
             {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
             {$PICKLIST_LABEL}</label>
     {/foreach}

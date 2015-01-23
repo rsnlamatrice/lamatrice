@@ -18,14 +18,11 @@
 		{if $FIELD_MODEL->get('name') neq 'modifiedtime' && $FIELD_MODEL->get('name') neq 'createdtime'}
 			<tr class="summaryViewEntries">
 				<td class="fieldLabel" style="width:30%"><label class="muted">{vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}</label></td>
-				<td class="fieldValue" style="width:70%">
+				<td class="fieldValue" style="width:70%">GLB
 					<div class="row-fluid">
 						<span class="value span10" style="word-wrap: break-word;">
 							{if $FIELD_MODEL->get('uitype') eq '15'}{* ED141005 *}
 								{$RECORD->getDisplayValue($FIELD_NAME)}
-							{* ED150105 "référent du compte" masqué si par de compte *}
-							{elseif ($MODULE_NAME eq 'Contacts') && ($FIELD_NAME == 'reference') && (!$RECORD->get('account_id'))}
-								<i>pas de compte</i>
 							{else}
 								{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 							{/if}
