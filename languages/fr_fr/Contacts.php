@@ -50,12 +50,12 @@ $languageStrings = array(
 	'Dr.'                          => 'Dr'                          , 
 	'Prof.'                        => 'Prof'                        , 
 	'User List'                    => 'Liste des collaborateurs'    , 
-	'Contact Id'                    => 'N° Contact',
-        'Mobile'                        => 'Portable'                   ,
-	'Mailing Street 2'              => 'Complément'                 ,
-	'Mailing Street 3'              => 'Adresse (ligne 4)'          ,
-	'Other Street 2'              => 'Complément (alt.)'            ,
-	'Other Street 3'              => 'Adresse (ligne 4) (alt.)'     ,
+	'Contact Id'                   => 'N° Contact',
+        'Mobile'                       => 'Portable'                   ,
+	'Mailing Street 2'             => 'Structure, n° appt, ...'                 ,
+	'Mailing Street 3'             => 'Bât., rés., ...'          ,
+	'Other Street 2'               => 'Structure, n° appt, ... (alt.)'            ,
+	'Other Street 3'               => 'Bât., rés., ... (alt.)'     ,
         
         //contacttype
         'Analyst'                      => 'Analyste'                    , 

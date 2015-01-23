@@ -114,9 +114,9 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 			$queryGenerator = new QueryGenerator($moduleName, $user);
 			$queryGenerator->setFields(array('id'));
           
-            vimport('~~/modules/CustomView/CustomView.php');
-            $customView = new CustomView($moduleName);
-            $dateSpecificConditions = $customView->getStdFilterConditions();
+			vimport('~~/modules/CustomView/CustomView.php');
+			$customView = new CustomView($moduleName);
+			$dateSpecificConditions = $customView->getStdFilterConditions();
 
 			foreach ($advFilterList as $groupindex=>$groupcolumns) {
 				$filtercolumns = $groupcolumns['columns'];
