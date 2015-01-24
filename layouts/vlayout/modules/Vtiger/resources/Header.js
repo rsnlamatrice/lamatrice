@@ -73,6 +73,37 @@ jQuery.Class("Vtiger_Header_Js", {
         });
         return aDeferred.promise();
     },
+    /* ED150124
+     * Dialog form sur le même modèle que QuickCreate
+     */
+    getDialogForm: function(url, moduleName, params) {
+        var thisInstance = this;
+        var aDeferred = jQuery.Deferred();
+        var requestParams;
+        if (typeof params == 'undefined') {
+            params = {};
+        }
+        /*if ((!params.noCache) || (typeof (params.noCache) == "undefined")) {
+            if (typeof Vtiger_Header_Js.quickCreateModuleCache[moduleName] != 'undefined') {
+                aDeferred.resolve(Vtiger_Header_Js.quickCreateModuleCache[moduleName]);
+                return aDeferred.promise();
+            }
+        }*/
+        requestParams = url;
+        if (typeof params.data != "undefined") {
+            var requestParams = {};
+            requestParams['data'] = params.data;
+            requestParams['url'] = url;
+        }
+        AppConnector.request(requestParams).then(function(data) {
+            /*if ((!params.noCache) || (typeof (params.noCache) == "undefined")) {
+                Vtiger_Header_Js.quickCreateModuleCache[moduleName] = data;
+            }*/
+            aDeferred.resolve(data);
+        });
+        return aDeferred.promise();
+    },
+    
     registerQuickCreateCallBack: function(callBackFunction) {
         if (typeof callBackFunction != 'function') {
             return false;
@@ -194,6 +225,32 @@ jQuery.Class("Vtiger_Header_Js", {
             calendars: 1,
             starts: 1,
             className: 'globalCalendar'
+        });
+    },
+    handleDialogFormData: function(data, params) {
+        if (typeof params == 'undefined') {
+            params = {};
+        }
+        var thisInstance = this;
+        app.showModalWindow(data, function(data) {
+            var quickCreateForm = data.find('form[name="DialogForm"]');
+            var moduleName = quickCreateForm.find('[name="module"]').val();
+            var editViewInstance = Vtiger_Edit_Js.getInstanceByModuleName(moduleName);
+            editViewInstance.registerBasicEvents(quickCreateForm);
+            quickCreateForm.validationEngine(app.validationEngineOptions);
+            if (typeof params.callbackPostShown != "undefined") {
+                params.callbackPostShown(quickCreateForm);
+            }
+            thisInstance.registerQuickCreatePostLoadEvents(quickCreateForm, params);
+            app.registerEventForDatePickerFields(quickCreateForm);
+            var quickCreateContent = quickCreateForm.find('.DialogFormContent');
+            var quickCreateContentHeight = quickCreateContent.height();
+            var contentHeight = parseInt(quickCreateContentHeight);
+            if (contentHeight > 300) {
+                app.showScrollBar(jQuery('.dialogFormContent'), {
+                    'height': '300px'
+                });
+            }
         });
     },
     handleQuickCreateData: function(data, params) {
@@ -428,6 +485,34 @@ jQuery.Class("Vtiger_Header_Js", {
             });
 
         });
+
+        /* ED150124
+         * Dialog form
+         */
+        jQuery('#dialogForms').on("click", ".dialogForm", function(e, params) {
+            if (typeof params == 'undefined') {
+                params = {};
+            }
+
+            if (typeof params.callbackFunction == 'undefined') {
+                params.callbackFunction = function() {
+                };
+            }
+
+            var dialogFormElem = jQuery(e.currentTarget);
+            var dialogFormUrl = dialogFormElem.data('url');
+            var dialogFormName = dialogFormElem.data('name');
+
+            var progress = jQuery.progressIndicator();
+            thisInstance.getDialogForm(dialogFormUrl, dialogFormName, params).then(function(data) {
+                thisInstance.handleQuickCreateData(data, params);
+                progress.progressIndicator({
+                    'mode': 'hide'
+                });
+            });
+
+        });
+        
         jQuery('#basicSearchModulesList_chzn').find('.chzn-results').slimScroll({
             height: '450px',
             railVisible: true,

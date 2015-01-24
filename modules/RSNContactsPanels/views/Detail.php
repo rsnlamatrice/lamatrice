@@ -109,7 +109,7 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 			$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		}
 		//Contrôle de récursivité infinie
-		if(!RSNContactsPanelsExecutionController::stack($parentRecordModel))
+		if(!RSNContactsPanelsExecutionController::stack($parentRecordModel))// attention à bien faire le unstask
 			return null;
 		
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName);

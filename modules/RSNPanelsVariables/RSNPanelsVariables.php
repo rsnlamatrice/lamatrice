@@ -40,8 +40,8 @@ class RSNPanelsVariables extends Vtiger_CRMEntity {
 		'LBL_FIELDID' => array('rsnpanelsvariables', 'fieldid'),
 		'LBL_LABEL' => array('rsnpanelsvariables', 'label'),
 		'LBL_DEFAULTVALUE' => array('rsnpanelsvariables', 'defaultvalue'),
-		'LBL_DISABLED' => array('rsnpanelsvariables', 'disabled'),
 		'LBL_RSNPANELID' => array('rsnpanelsvariables', 'rsnpanelid'),
+		'LBL_DISABLED' => array('rsnpanelsvariables', 'disabled'),
 
 	);
 	var $list_fields_name = Array (
@@ -49,8 +49,8 @@ class RSNPanelsVariables extends Vtiger_CRMEntity {
 		'LBL_FIELDID' => 'fieldid',
 		'LBL_LABEL' => 'label',
 		'LBL_DEFAULTVALUE' => 'defaultvalue',
-		'LBL_DISABLED' => 'disabled',
 		'LBL_RSNPANELID' => 'rsnpanelid',
+		'LBL_DISABLED' => 'disabled',
 
 	);
 

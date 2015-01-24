@@ -94,6 +94,11 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		return $this->isActionSupported('add');
 	}
 
+	/* ED150124 */
+	public function isDeleteActionSupported() {
+		return $this->isActionSupported('add');
+	}
+
 	public function getActions(){
 		$actionString = $this->get('actions');
 
@@ -125,6 +130,9 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		relateEntities($sourceModuleFocus, $sourceModuleName, $sourcerecordId, $destinationModuleName, $destinationRecordId);
 	}
 
+	/* 
+	 * ED150124 : $relatedRecordId == '*' : all relations are deleted
+	 */
 	public function deleteRelation($sourceRecordId, $relatedRecordId){
 		$sourceModule = $this->getParentModuleModel();
 		$sourceModuleName = $sourceModule->get('name');

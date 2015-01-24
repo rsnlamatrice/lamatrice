@@ -48,6 +48,24 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		return $createViewUrl;
 	}
 
+	/* ED150124 */
+	public function getDeleteViewUrl(){
+		$relationModel = $this->getRelationModel();
+		$relatedModel = $relationModel->getRelationModuleModel();
+		$parentRecordModule = $this->getParentRecordModel();
+		$parentModule = $parentRecordModule->getModule();
+
+		$createViewUrl = $relatedModel->getDeleteRelationUrl().'&sourceModule='.$parentModule->get('name').
+								'&sourceRecord='.$parentRecordModule->getId().'&relationOperation=true';
+
+		//To keep the reference fieldname and record value in the url if it is direct relation
+		if($relationModel->isDirectRelation()) {
+			$relationField = $relationModel->getRelationField();
+			$createViewUrl .='&'.$relationField->getName().'='.$parentRecordModule->getId();
+		}
+		return $createViewUrl;
+	}
+
 	public function getCreateEventRecordUrl(){
 		$relationModel = $this->getRelationModel();
 		$relatedModel = $relationModel->getRelationModuleModel();
@@ -63,6 +81,26 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$createViewUrl .='&'.$relationField->getName().'='.$parentRecordModule->getId();
 		}
 		return $createViewUrl;
+	}
+
+	/* ED150124 */
+	public function getDeleteRelationUrl(){
+		$relationModel = $this->getRelationModel();
+		$relatedModule = $relationModel->getRelationModuleModel();
+		$parentRecordModule = $this->getParentRecordModel();
+		$parentModule = $parentRecordModule->getModule();
+
+		$deleteViewUrl = $parentModule->getDeleteRelationUrl().
+							'&relatedModule='.$relatedModule->get('name').
+							'&record='.$parentRecordModule->getId().
+							'&relationOperation=true';
+
+		//To keep the reference fieldname and record value in the url if it is direct relation
+		if($relationModel->isDirectRelation()) {
+			$relationField = $relationModel->getRelationField();
+			$deleteViewUrl .='&'.$relationField->getName().'='.$parentRecordModule->getId();
+		}
+		return $deleteViewUrl;
 	}
 
 	public function getCreateTaskRecordUrl(){
@@ -88,13 +126,18 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		 if($relationModel == null) return null;
 		
 		$actions = $relationModel->getActions();
-
+		
 		$selectLinks = $this->getSelectRelationLinks();
 		foreach($selectLinks as $selectLinkModel) {
 			$selectLinkModel->set('_selectRelation',true)->set('_module',$relationModel->getRelationModuleModel());
 		}
+
+		$deleteLinks = $this->getDeleteRelationLinks();
+		foreach($deleteLinks as $deleteLinksModel) {
+			$deleteLinksModel->set('_deleteRelation',true)->set('_module',$relationModel->getRelationModuleModel());
+		}
 		$addLinks = $this->getAddRelationLinks();
-		$links = array_merge($selectLinks, $addLinks);
+		$links = array_merge($selectLinks, $addLinks, $deleteLinks);
 		$relatedLink = array();
 		$relatedLink['LISTVIEWBASIC'] = $links;
 		return $relatedLink;
@@ -124,6 +167,33 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$selectLinkModel[] = Vtiger_Link_Model::getInstanceFromValues($selectLink);
 		}
 		return $selectLinkModel;
+	}
+
+	/* ED150124 */
+	public function getDeleteRelationLinks() {
+		$relationModel = $this->getRelationModel();
+		$deleteLinkModel = array();
+
+		if(!$relationModel->isDeleteActionSupported()) {
+			return $deleteLinkModel;
+		}
+
+		$relatedModel = $relationModel->getRelationModuleModel();
+
+		$deleteLinkList = array(
+			array(
+				'linktype' => 'LISTVIEWBASIC',
+				'linklabel' => vtranslate('LBL_DELETE')." ".vtranslate($relatedModel->get('label')),
+				'linkurl' => $this->getDeleteRelationUrl(),
+				'linkicon' => '',
+			)
+		);
+
+
+		foreach($deleteLinkList as $deleteLink) {
+			$deleteLinkModel[] = Vtiger_Link_Model::getInstanceFromValues($deleteLink);
+		}
+		return $deleteLinkModel;
 	}
 
 	public function getAddRelationLinks() {

@@ -243,6 +243,24 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	}
 
 	/**
+	 * Function to get the DeleteView Component Name
+	 * @return string
+	 * ED150124
+	 */
+	public function getDeleteViewName(){
+		return 'Delete';
+	}
+
+	/**
+	 * Function to get the DeleteRelationView Component Name
+	 * @return string
+	 * ED150124
+	 */
+	public function getDeleteRelationViewName(){
+		return 'DeleteRelation';
+	}
+
+	/**
 	 * Function to get the DuplicateView Component Name
 	 * @return string
 	 */
@@ -256,6 +274,15 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 */
 	public function getDeleteActionName() {
 		return 'Delete';
+	}
+
+	/**
+	 * Function to get the Delete Action Component Name
+	 * @return string
+	 * ED150124
+	 */
+	public function getDeleteRelationActionName() {
+		return 'DeleteRelation';
 	}
 
 	/**
@@ -288,6 +315,23 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 */
 	public function getCreateRecordUrl() {
 		return 'index.php?module='.$this->get('name').'&view='.$this->getEditViewName();
+	}
+
+	/**
+	 * Function to get the url for the Delete Record view of the module
+	 * @return <String> - url
+	 * ED150124
+	 */
+	public function getDeleteRecordUrl() {
+		return 'index.php?module='.$this->get('name').'&view='.$this->getDeleteViewName();
+	}
+	/**
+	 * Function to get the url for the Delete Record Relation view of the module
+	 * @return <String> - url
+	 * ED150124
+	 */
+	public function getDeleteRelationUrl() {
+		return 'index.php?module='.$this->get('name').'&view='.$this->getDeleteRelationViewName();
 	}
 
 	/**

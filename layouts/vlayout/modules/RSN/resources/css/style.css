@@ -53,8 +53,11 @@ label {
     margin-top: 8px;
 }
 
-.visible-on-hover:hover .hide {
-  display: inline-block;
+.visible-on-hover {
+  min-width: 2em;
+}
+.visible-on-hover:hover .hide, .visible-on-hover .hide:focus {
+  display: inline-block !important;
 }
 
 /* par exemple, éditeur de picklist values */
@@ -167,6 +170,7 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 }
 .summaryWidgetContainer .rsnsubpanel {
   border-left: 1px solid #ddba7a;
+  padding-left: 3px;
 }
 .summaryWidgetContainer .rsnsubpanel .fieldLabel  a {
   padding-left: 1em;

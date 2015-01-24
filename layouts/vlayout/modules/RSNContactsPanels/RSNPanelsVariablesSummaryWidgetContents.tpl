@@ -49,16 +49,16 @@
 					</div>
 					{if $VARIABLE_TYPE eq 'PANEL'}
 							
-						<div class="fieldValue span8 textOverflowEllipsis">
+						<div class="fieldValue span8 textOverflowEllipsis visible-on-hover">
 							{*les combos chosen ne s'affichent pas correctement dans les widgets : modif dans le .css non satisfaisante *}
 							{assign var=FIELD_MODEL value=$RELATED_RECORD->getField('defaultvalue')}
-							{if is_object($FIELD_MODEL)}
+							{if false && is_object($FIELD_MODEL)}
 								{$FIELD_MODEL->set('fieldvalue', $RELATED_RECORD->get('defaultvalue')) eq null}
 								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 								{include file=vtemplate_path($UITYPEMODEL,$MODULE) RECORD_MODEL=$RELATED_RECORD}
 							{else}
-								<input value="{$RELATED_RECORD->get('defaultvalue')}" name="{$RELATED_RECORD->get('name')}"/>
-							{/if}
+								<textarea class="hide" name="{$RELATED_RECORD->get('name')}">{$RELATED_RECORD->get('defaultvalue')}</textarea>
+							{/if}&nbsp;
 						</div>
 									</div>
 								</li>

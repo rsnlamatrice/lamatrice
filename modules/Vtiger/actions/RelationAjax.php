@@ -91,9 +91,10 @@ class Vtiger_RelationAjax_Action extends Vtiger_Action_Controller {
 		$relatedModuleModel = Vtiger_Module_Model::getInstance($relatedModule);
 		$relationModel = Vtiger_Relation_Model::getInstance($sourceModuleModel, $relatedModuleModel);
 		foreach($relatedRecordIdList as $relatedRecordId) {
-			$response = $relationModel->deleteRelation($sourceRecordId,$relatedRecordId);
+			$response = $relationModel->deleteRelation($sourceRecordId, $relatedRecordId);
 		}
-		echo $response;
+		
+		//ED150124, deleted : echo $response;
 	}
 	
 	/**

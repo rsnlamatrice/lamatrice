@@ -100,7 +100,7 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 					$newVariable->set('disabled', 0);
 					$newVariable->set('fieldid', $strVar['field']);
 					$newVariable->set('sequence', $strVar['sequence']);
-					$newVariable->set('rsnvariableoperator', '=');
+					$newVariable->set('rsnvariableoperator', 'égal');
 					$newVariable->set('rsnvariabletype', $strVar['operation']);
 					$newVariable->save();
 					

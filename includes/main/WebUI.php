@@ -199,7 +199,10 @@ class Vtiger_WebUI extends Vtiger_EntryPoint {
 		}
 
 		if ($response) {
-			$response->emit();
+			if(is_object($response)) /*ED150124, added */
+				$response->emit();
+			/* no need else 
+				var_dump($response); */
 		}
 	}
 }

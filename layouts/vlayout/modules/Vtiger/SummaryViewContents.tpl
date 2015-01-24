@@ -18,7 +18,7 @@
 		{if $FIELD_MODEL->get('name') neq 'modifiedtime' && $FIELD_MODEL->get('name') neq 'createdtime'}
 			<tr class="summaryViewEntries">
 				<td class="fieldLabel" style="width:30%"><label class="muted">{vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}</label></td>
-				<td class="fieldValue" style="width:70%">GLB
+				<td class="fieldValue" style="width:70%">
 					<div class="row-fluid">
 						<span class="value span10" style="word-wrap: break-word;">
 							{if $FIELD_MODEL->get('uitype') eq '15'}{* ED141005 *}

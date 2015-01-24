@@ -25,6 +25,7 @@ $languageStrings = array(
 	'LBL_POST_SCRIPT' => 'Script (après)',
 	'COMMENTS' => 'Commentaires',
 	'LBL_DURATION' => 'Durée d\'exécution',
+	'LBL_RESET_ALL_VARIABLES' => 'Réinitialiser toutes les variables',
 
 );
 

@@ -414,6 +414,97 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		return aDeferred.promise();
 	},
 	
+	/**
+	 * Function to delete related record for the module
+	 * ED150124 copie depuis add en récupérant la vue DeleteRelation à la place de QuickCreate
+	 */
+	deleteRelatedRecord : function(element){
+		var aDeferred = jQuery.Deferred();
+		var thisInstance = this;
+		var referenceModuleName = this.relatedModulename;
+		var parentId = this.getParentId();
+		var parentModule = this.parentModuleName;
+		var dialogFormParams = {};
+		var relatedParams = {};
+		var relatedField = element.data('name');
+		var fullFormUrl = element.data('url');
+		relatedParams[relatedField] = parentId;
+		var eliminatedKeys = new Array();//'view', 'module', 'mode', 'action');
+		
+		var preDialogFormSave = function(data){
+
+			var index,queryParam,queryParamComponents;
+			
+			//To handle switch to task tab when click on add task from related list of activities
+			//As this is leading to events tab intially even clicked on add task
+			if(typeof fullFormUrl != 'undefined' && fullFormUrl.indexOf('?')!== -1) {
+				var urlSplit = fullFormUrl.split('?');
+				var queryString = urlSplit[1];
+				var queryParameters = queryString.split('&');
+				for(index=0; index<queryParameters.length; index++) {
+					queryParam = queryParameters[index];
+					queryParamComponents = queryParam.split('=');
+					if(queryParamComponents[0] == 'mode' && queryParamComponents[1] == 'Calendar'){
+						data.find('a[data-tab-name="Task"]').trigger('click');
+					}
+				}
+			}
+			jQuery('<input type="hidden" name="sourceModule" value="'+parentModule+'" />').appendTo(data);
+			jQuery('<input type="hidden" name="sourceRecord" value="'+parentId+'" />').appendTo(data);
+			jQuery('<input type="hidden" name="relationOperation" value="true" />').appendTo(data);
+			
+			if(typeof relatedField != "undefined"){
+				var field = data.find('[name="'+relatedField+'"]');
+				//If their is no element with the relatedField name,we are adding hidden element with
+				//name as relatedField name,for saving of record with relation to parent record
+				if(field.length == 0){
+					jQuery('<input type="hidden" name="'+relatedField+'" value="'+parentId+'" />').appendTo(data);
+				}
+			}
+			for(index=0; index<queryParameters.length; index++) {
+				queryParam = queryParameters[index];
+				queryParamComponents = queryParam.split('=');
+				if(jQuery.inArray(queryParamComponents[0], eliminatedKeys) == '-1' && data.find('[name="'+queryParamComponents[0]+'"]').length == 0) {
+					jQuery('<input type="hidden" name="'+queryParamComponents[0]+'" value="'+queryParamComponents[1]+'" />').appendTo(data);
+				}
+			}
+
+		}
+		var postDialogFormSave  = function(data) {
+			thisInstance.loadRelatedList().then(
+				function(data){
+					aDeferred.resolve(data);
+				})
+		}
+		
+		//If url contains params then seperate them and make them as relatedParams
+		if(typeof fullFormUrl != 'undefined' && fullFormUrl.indexOf('?')!== -1) {
+			var urlSplit = fullFormUrl.split('?');
+			var queryString = urlSplit[1];
+			var queryParameters = queryString.split('&');
+			for(var index=0; index<queryParameters.length; index++) {
+				var queryParam = queryParameters[index];
+				var queryParamComponents = queryParam.split('=');
+				if(jQuery.inArray(queryParamComponents[0], eliminatedKeys) == '-1') {
+					relatedParams[queryParamComponents[0]] = queryParamComponents[1];
+				}
+			}
+		}
+		
+		relatedParams['tab_label'] = this.selectedRelatedTabElement.data('label-key');
+		
+		dialogFormParams['data'] = relatedParams;
+		dialogFormParams['callbackFunction'] = postDialogFormSave;
+		dialogFormParams['callbackPostShown'] = preDialogFormSave;
+		dialogFormParams['noCache'] = true;
+		var dialogFormNode = jQuery('#dialogForm_then_refresh');//.find('[data-name="'+ referenceModuleName +'"]');
+		if(dialogFormNode.length <= 0) {
+			Vtiger_Helper_Js.showPnotify(app.vtranslate('JS_NO_CREATE_OR_NOT_QUICK_CREATE_ENABLED'))
+		}
+		dialogFormNode.trigger('click',dialogFormParams);
+		return aDeferred.promise();
+	},
+	
 	getRelatedPageCount : function(){
 		var params = {};
 		params['action'] = "RelationAjax";

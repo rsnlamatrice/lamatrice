@@ -97,6 +97,13 @@
                                             </div>
                                         </div>
                                     </li>
+				    {* ED150124
+				    * copie du mécanisme des quickCreate pour l'affichage de dialogues modaux
+				    *}
+				    <li id="dialogForms">
+					    <a id="dialogForm_then_refresh" class="dialogForm" data-name="{$MODULE}" href="javascript:void(0)"
+						data-url="index.php"></a>
+				    </li>
                                 </ul>
                             </div>&nbsp;
                         </div>

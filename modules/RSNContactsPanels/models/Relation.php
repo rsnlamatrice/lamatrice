@@ -8,8 +8,7 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-class RSNContactsPanels_Relation_Model extends Vtiger_Relation_Model{
-
+class RSNContactsPanels_Relation_Model extends Vtiger_Relation_Model {
 	
 	public function deleteRelation($sourceRecordId, $relatedRecordId){
 		if(parent::deleteRelation($sourceRecordId, $relatedRecordId))

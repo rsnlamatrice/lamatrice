@@ -12,6 +12,7 @@
  *
  * ED150123 : champs DO NOT inclus avec emailoptout (ne pas envoyer d'email)
  *	champ phone ajouté avec email
+ *	référent du compte
  */
 -->*}
 {strip}
@@ -29,13 +30,18 @@
 		&& $FIELD_NAME neq 'donotappeldoncourrier'
 		&& $FIELD_NAME neq 'donotrelanceabo'
 		&& $FIELD_NAME neq 'donotappeldonweb'
-		&& $FIELD_NAME neq 'phone'}
+		&& $FIELD_NAME neq 'phone'
+		&& ($FIELD_NAME neq 'reference'
+		 || $RECORD->get($FIELD_NAME))
+		}
 			<tr class="summaryViewEntries">
 				<td class="fieldLabel" style="width:30%"><label class="muted">
 				{if $FIELD_NAME == 'emailoptout'}
 					Ne pas...
 				{elseif $FIELD_NAME == 'email'}
 					Email, téléphone
+				{elseif $FIELD_NAME == 'reference'}
+					&nbsp;
 				{else}
 					{vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}
 				{/if}</label></td>
@@ -44,9 +50,6 @@
 						<span class="value span10" style="word-wrap: break-word;">
 							{if $FIELD_MODEL->get('uitype') eq '15'}{* ED141005 *}
 								{$RECORD->getDisplayValue($FIELD_NAME)}
-							{* ED150105 "référent du compte" masqué si par de compte *}
-							{elseif ($FIELD_NAME == 'reference') && (!$RECORD->get('account_id'))}
-								<i>pas de compte</i>
 							{* DO NOT *}
 							{elseif $FIELD_NAME eq 'emailoptout'}
 								{assign var=DONOT_COUNTER value=0}
@@ -115,6 +118,22 @@
 								{/foreach}
 								{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
 							{else}
+								{* code postal *}
+								{if $FIELD_NAME eq 'mailingcity'}
+									{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
+									{assign var=FIELD_NAME_TMP value=$FIELD_NAME}
+									{assign var=FIELD_NAME value='mailingzip'}
+									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+									{if !$FIELD_MODEL}{$FIELD_NAME} n'existe pas !{/if}
+									<span class="hide edit span10" title="Code postal. Préfixez avec le code du pays (exple : B-1531)">{* ED141010 : add RECORD_MODEL=$RECORD*}
+										{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD}
+										<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
+									</span>	
+									{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
+									{assign var=FIELD_NAME value=$FIELD_NAME_TMP}	
+								{/if}
+								
+								{* original *}
 								<span class="hide edit span10">{* ED141010 : add RECORD_MODEL=$RECORD*}
 									{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD}
 									{if $FIELD_MODEL->getFieldDataType() eq 'multipicklist'}
@@ -123,14 +142,9 @@
 										<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
 									{/if}
 								</span>
+								
+								{* pays *}
 								{if $FIELD_NAME eq 'mailingcity'}
-									{assign var=FIELD_NAME value='mailingzip'}
-									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
-									<span class="hide edit span10" title="Code postal. Préfixez avec le code du pays (exple : B-1531)">{* ED141010 : add RECORD_MODEL=$RECORD*}
-										{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD}
-										<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
-									</span>								
-									
 									{assign var=FIELD_NAME value='mailingcountry'}
 									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
 									<span class="hide edit span10" title="Pays">{* ED141010 : add RECORD_MODEL=$RECORD*}

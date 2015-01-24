@@ -1199,8 +1199,25 @@ echo($params);*/
 	function unlinkRelationship($id, $return_module, $return_id) {
 		global $log, $currentModule;
 
-		$query = 'DELETE FROM vtiger_crmentityrel WHERE (crmid=? AND relmodule=? AND relcrmid=?) OR (relcrmid=? AND module=? AND crmid=?)';
-		$params = array($id, $return_module, $return_id, $id, $return_module, $return_id);
+		/* ED150124 : enable deleting all relation */
+		if(is_numeric($id)){
+			if(is_numeric($return_id)){
+				/* original query */
+				$query = 'DELETE FROM vtiger_crmentityrel WHERE (crmid=? AND relmodule=? AND relcrmid=?) OR (relcrmid=? AND module=? AND crmid=?)';
+				$params = array($id, $return_module, $return_id, $id, $return_module, $return_id);
+			}
+			else {
+				$query = 'DELETE FROM vtiger_crmentityrel WHERE (crmid=? AND relmodule=?) OR (relcrmid=? AND module=?)';
+				$params = array($id, $return_module, $id, $return_module);
+			}
+		}
+		elseif(is_numeric($return_id)){
+			$query = 'DELETE FROM vtiger_crmentityrel WHERE (relmodule=? AND relcrmid=?) OR (module=? AND crmid=?)';
+			$params = array($return_module, $return_id, $return_module, $return_id);
+		}
+		else
+			return false;
+		
 		$this->db->pquery($query, $params);
 
 		$fieldRes = $this->db->pquery('SELECT tabid, tablename, columnname FROM vtiger_field WHERE fieldid IN (
@@ -1214,8 +1231,25 @@ echo($params);*/
 			$relatedModule = vtlib_getModuleNameById($tabId);
 			$focusObj = CRMEntity::getInstance($relatedModule);
 
-			$updateQuery = "UPDATE $tableName SET $columnName=? WHERE $columnName=? AND $focusObj->table_index=?";
-			$updateParams = array(null, $return_id, $id);
+			/* ED150124 : enable deleting all relation
+			 * ici on modifie les enregistrements de la table liée en passant à null le champ
+			 * A surveiller avec la nouvelle possibilité de supprimer avec un jocker
+			*/
+			if(is_numeric($id)){
+				if(is_numeric($return_id)){
+					/* original query */
+					$updateQuery = "UPDATE $tableName SET $columnName=? WHERE $columnName=? AND $focusObj->table_index=?";
+					$updateParams = array(null, $return_id, $id);
+				}
+				else {
+					$updateQuery = "UPDATE $tableName SET $columnName=? WHERE $focusObj->table_index=?";
+					$updateParams = array(null, $id);
+				}
+			}
+			elseif(is_numeric($return_id)){
+				$updateQuery = "UPDATE $tableName SET $columnName=? WHERE $columnName=?";
+				$updateParams = array(null, $return_id);
+			}
 			$this->db->pquery($updateQuery, $updateParams);
 		}
 	}

@@ -20,8 +20,11 @@
 		<br>
 		<div style="font-family: monospace;">
 		{foreach item=QUERY_PARAM from=$QUERY_PARAMS}
-			<div class="row-fluid"><span class="span3">{$QUERY_PARAM['name']}</span>
-			<span class="span9">{$QUERY_PARAM['value']}</span></div>
+			<div class="row-fluid visible-on-hover"><span class="span3"
+				style="margin-left: {($QUERY_PARAM['depth']-1)*6}px;
+					{if strtoupper($QUERY_PARAM['operation']) eq 'PANEL'} text-decoration: underline;{/if}">
+				{$QUERY_PARAM['name']}</span>
+			<span class="span8 {if strtoupper($QUERY_PARAM['operation']) eq 'PANEL'} hide{/if}">{$QUERY_PARAM['value']}</span></div>
 		{/foreach}
 		</div>
 		<br>

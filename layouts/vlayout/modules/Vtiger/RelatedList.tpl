@@ -25,18 +25,43 @@
                     {foreach item=RELATED_LINK from=$RELATED_LIST_LINKS['LISTVIEWBASIC']}
                         <div class="btn-group">
                             {assign var=IS_SELECT_BUTTON value={$RELATED_LINK->get('_selectRelation')}}
+                            {assign var=IS_DELETE_BUTTON value={$RELATED_LINK->get('_deleteRelation')}}
                             <button type="button" class="btn addButton
                             {if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
-                        {if $IS_SELECT_BUTTON eq true} data-moduleName={$RELATED_LINK->get('_module')->get('name')} {/if}
-                        {if ($RELATED_LINK->isPageLoadLink())}
-                        {if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
-                        data-url="{$RELATED_LINK->getUrl()}"
-                    {/if}
-            {if $IS_SELECT_BUTTON neq true}name="addButton"{/if}>
-		{if $IS_SELECT_BUTTON eq false}<i class="icon-plus icon-white"></i>{/if}
-		&nbsp;<strong>{$RELATED_LINK->getLabel()}</strong></button>
-    </div>
-{/foreach}
+			    {if $IS_SELECT_BUTTON eq true} data-moduleName={$RELATED_LINK->get('_module')->get('name')} {/if}
+			    {if ($RELATED_LINK->isPageLoadLink())}
+				{if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
+				data-url="{$RELATED_LINK->getUrl()}"
+			    {/if}
+			    {if $IS_DELETE_BUTTON eq true}name="deleteButton"
+			    {elseif $IS_SELECT_BUTTON neq true}name="addButton"
+			    {/if}>
+			    {if $RELATED_LINK->get('linkicon')}
+				<i class="{$RELATED_LINK->get('linkicon')} icon-white"></i>
+			    {elseif $IS_DELETE_BUTTON eq true}
+				<i class="icon-minus icon-white"></i>
+			    {elseif $IS_SELECT_BUTTON eq false}
+				<i class="icon-plus icon-white"></i>
+			    {/if}
+			    &nbsp;<strong>{$RELATED_LINK->getLabel()}</strong></button>
+			</div>
+		    {/foreach}
+		    {* ORGINAL
+		    {foreach item=RELATED_LINK from=$RELATED_LIST_LINKS['LISTVIEWBASIC']}
+                        <div class="btn-group">
+                            {assign var=IS_SELECT_BUTTON value={$RELATED_LINK->get('_selectRelation')}}
+                            <button type="button" class="btn addButton
+                            {if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
+			    {if $IS_SELECT_BUTTON eq true} data-moduleName={$RELATED_LINK->get('_module')->get('name')} {/if}
+			    {if ($RELATED_LINK->isPageLoadLink())}
+				{if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
+				data-url="{$RELATED_LINK->getUrl()}"
+			    {/if}
+			    {if $IS_SELECT_BUTTON neq true}name="addButton"{/if}>
+			    {if $IS_SELECT_BUTTON eq false}<i class="icon-plus icon-white"></i>{/if}
+			    &nbsp;<strong>{$RELATED_LINK->getLabel()}</strong></button>
+			</div>
+		    {/foreach}*}
 &nbsp;
 </div>
 <div class="span4">

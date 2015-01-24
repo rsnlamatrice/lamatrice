@@ -670,6 +670,7 @@ $languageStrings = array(
         'RsnPrelVirement' => 'Ordres de prélèvement',
         'RSNPanelsVariables' => 'Variables de panels',
         'LBL_VARIABLES' => 'Variables de panels',
+        'LBL_DELETE_RELATION_WITH' => 'Suppression de la relation avec',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 
