@@ -64,12 +64,40 @@ class Vtiger_SaveAjax_Action extends Vtiger_Save_Action {
 		$response->emit();
 	}
 
+	/* ED150125
+	 * Classiquement, les appels AJax passent une valeur de field avec un champ $request->get('field') et un champ $request->get('value').
+	 *  un champ $request->get('fields') peut remplacer cela pour fournir plusieurs champs.
+	 *  Les classes héritières préexistantes ne prennent pas en compte 'fields', d'où cette function générale.
+	 * Les valeurs de plusieurs champs sont passés par fields
+	 * Attention, un autre mode (FORM ?) passe tous les champs directement dans la $request, $request->get($fieldName)
+	*/
+	public function getRequestFieldsValues(Vtiger_Request $request) {
+
+		$fieldsValues = $request->get('fields');
+		if($fieldsValues)
+			return $fieldsValues;
+		if($request->get('field'))
+			return array($request->get('field') => $request->get('value'));
+		return array(); //TODO liste des propriétés de $request mais exclure 'record', 'module', 'mode', ...
+	}
+	
 	/**
 	 * Function to get the record model based on the request parameters
 	 * @param Vtiger_Request $request
 	 * @return Vtiger_Record_Model or Module specific Record Model instance
+	 *
+	 * mode d'origine
+	 * 	$request->get('field') et $request->get('value')
+	 * mode multiple
+	 * 	$request->get('fields') === array( <fieldName> => <fieldValue>, <fieldName> => <fieldValue>, ...)
 	 */
 	public function getRecordModelFromRequest(Vtiger_Request $request) {
+
+		/* ED150125
+		 * Les valeurs de plusieurs champs sont passés par fields
+		 */
+		$fieldsValues = $this->getRequestFieldsValues($request);
+		
 		$moduleName = $request->getModule();
 		$recordId = $request->get('record');
 
@@ -80,13 +108,15 @@ class Vtiger_SaveAjax_Action extends Vtiger_Save_Action {
 
 			$fieldModelList = $recordModel->getModule()->getFields();
 			foreach ($fieldModelList as $fieldName => $fieldModel) {
-				$fieldValue = $fieldModel->getUITypeModel()->getUserRequestValue($recordModel->get($fieldName));
+				
+				/* ED150125 */
+				if(isset($fieldsValues[$fieldName]))
+					$fieldValue = $fieldsValues[$fieldName];
+				else
+					$fieldValue = $fieldModel->getUITypeModel()->getUserRequestValue($recordModel->get($fieldName));
 
-				if ($fieldName === $request->get('field')) {
-					$fieldValue = $request->get('value');
-				}
-                $fieldDataType = $fieldModel->getFieldDataType();
-                if ($fieldDataType == 'time') {
+				$fieldDataType = $fieldModel->getFieldDataType();
+				if ($fieldDataType == 'time') {
 					$fieldValue = Vtiger_Time_UIType::getTimeValueWithSeconds($fieldValue);
 				}
 				if ($fieldValue !== null) {

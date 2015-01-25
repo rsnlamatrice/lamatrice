@@ -20,6 +20,7 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 	}
 
 	public function process(Vtiger_Request $request) {
+		
 		$recordModel = $this->saveRecord($request);
 		if($request->get('relationOperation')) {
 			$parentModuleName = $request->get('sourceModule');
@@ -41,6 +42,7 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 	 * @return <RecordModel> - record Model of saved record
 	 */
 	public function saveRecord($request) {
+			
 		$recordModel = $this->getRecordModelFromRequest($request);
 		$recordModel->save();
 		if($request->get('relationOperation')) {
@@ -62,7 +64,7 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 	 * @return Vtiger_Record_Model or Module specific Record Model instance
 	 */
 	protected function getRecordModelFromRequest(Vtiger_Request $request) {
-
+				
 		$moduleName = $request->getModule();
 		$recordId = $request->get('record');
 
@@ -78,19 +80,20 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 			$modelData = $recordModel->getData();
 			$recordModel->set('mode', '');
 		}
-
 		$fieldModelList = $moduleModel->getFields();
 		foreach ($fieldModelList as $fieldName => $fieldModel) {
 			$fieldValue = $request->get($fieldName, null);
-			$fieldDataType = $fieldModel->getFieldDataType();
-			if($fieldDataType == 'time'){
-				$fieldValue = Vtiger_Time_UIType::getTimeValueWithSeconds($fieldValue);
-			}
 			if($fieldValue !== null) {
-				if(!is_array($fieldValue)) {
-					$fieldValue = trim($fieldValue);
+				$fieldDataType = $fieldModel->getFieldDataType();
+				if($fieldDataType == 'time'){
+					$fieldValue = Vtiger_Time_UIType::getTimeValueWithSeconds($fieldValue);
 				}
-				$recordModel->set($fieldName, $fieldValue);
+				if($fieldValue !== null) {
+					if(!is_array($fieldValue)) {
+						$fieldValue = trim($fieldValue);
+					}
+					$recordModel->set($fieldName, $fieldValue);
+				}
 			}
 		}
 		return $recordModel;

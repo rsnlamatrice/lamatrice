@@ -64,10 +64,14 @@ class Users_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 	 */
 	public function getRecordModelFromRequest(Vtiger_Request $request) {
 		$recordModel = parent::getRecordModelFromRequest($request);
-		$fieldName = $request->get('field');
-
-		if ($fieldName === 'is_admin' && !$request->get('value')) {
-			$recordModel->set($fieldName, 'off');
+		
+		/* ED150125
+		 * Les valeurs de plusieurs champs sont passés par fields
+		 */
+		$fieldsValues = $this->getRequestFieldsValues($request);
+		
+		if (isset($fieldsValues['is_admin']) && !$fieldsValues['is_admin']) {
+			$recordModel->set('is_admin', 'off');
 		}
 		return $recordModel;
 	}
