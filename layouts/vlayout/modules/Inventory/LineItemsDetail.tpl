@@ -228,4 +228,27 @@
 		    </span>
 		</td>
 	    </tr>
+	    <tr>
+		<td width="83%">
+		    <span class="pull-right">
+			<b>Reçu</b>
+		    </span>
+		    {* ED150127
+		    * ajout des champs complémentaires du règlement
+		    *}
+		    {if $MODULE eq 'Invoice'}
+			<span class="pull-right" style="margin-right: 12px;">
+			    {$FINAL_DETAILS["receivedcomments"]}
+			</span>
+		    {/if}
+		</td>
+		<td>
+		    <span class="pull-right">
+			{if $MODULE eq 'Invoice'}
+                            {$FINAL_DETAILS["received"]}
+			{else}
+			    {$FINAL_DETAILS["paid"]}
+			{/if}
+		    </span>
+		</td>
 	</table>

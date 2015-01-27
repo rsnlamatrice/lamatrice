@@ -7,8 +7,8 @@
 
 class RsnDons_SaveAjax_Action extends Invoice_SaveAjax_Action {
 
-	var $serviceType = 'Don';
-	var $invoicedate_field = 'datedon';
+	var $serviceType = 'Dons';
+	var $invoicedate_field = 'invoicedate';
 	
 	public function process(Vtiger_Request $request) {
 		//die("EN COURS");

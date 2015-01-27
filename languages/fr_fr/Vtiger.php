@@ -614,12 +614,12 @@ $languageStrings = array(
 	'All Comments' => 'Tous les commentaires',	
 	
 	// Traductions manquantes 
-	'Recycle Bin'				   => 'Corbeille'					,
-	'Email Templates'				   => 'Modèle d\'emails'					,
-	'SMSNotifier'				   => 'Notification SMS'					,
-	'Home'                     => 'Accueil'                     , 
-	'Key Metrics'                     => 'Indicateurs clés'                     , 
-	'Total Amount by Sales stage'     => 'Montant total par phase de vente'                     , 
+	'Recycle Bin'				   => 'Corbeille',
+	'Email Templates'				   => 'Modèle d\'emails',
+	'SMSNotifier'				   => 'Notification SMS',
+	'Home'                     => 'Accueil', 
+	'Key Metrics'                     => 'Indicateurs clés',
+	'Total Amount by Sales stage'     => 'Montant total par phase de vente', 
 	'LBL_TRANSFER_OWNERSHIP' => 'Modifier l\'assignation',
 	'LBL_ASSIGNED_TO' 		=> 'Assigné à',
 	'LBL_VIEW_DETAILS' 		=> 'Afficher les détails',
@@ -632,6 +632,11 @@ $languageStrings = array(
 	'LBL_NOTEPAD_CONTENT' => 'Contenu',
 	'LBL_LAST_SAVED_ON' => 'Dernier enregistrement',
 	'Notebook' => 'Post-it',
+        
+        'RsnDons' => 'Dons',
+        'RsnAdhesions' => 'Adhésions',
+        'RsnAbonnements' => 'Abonnements',
+        
         'RsnReglements' => 'Réglements',
         'LBL_MEDIACONTACTS' => 'Journalistes, ...',
         'LBL_CONTACTS' => 'Contacts',

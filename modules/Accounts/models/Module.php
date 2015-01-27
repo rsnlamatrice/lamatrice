@@ -86,7 +86,8 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 	 * @return <String>
 	 */
 	public function getRelationQuery($recordId, $functionName, $relatedModule) {
-		if ($functionName === 'get_activities') {
+		switch ($functionName) {
+		case 'get_activities':
 			$focus = CRMEntity::getInstance($this->getName());
 			$focus->id = $recordId;
 			$entityIds = $focus->getRelatedContactsIds();
@@ -122,8 +123,16 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 			// There could be more than one contact for an activity.
 			$query .= ' GROUP BY vtiger_activity.activityid';
 			
+			break;
 			
-		} elseif ($functionName === 'get_rsndons') {
+		case 'get_rsndons':
+			$servicecategory = 'Dons';
+		case 'get_rsnadhesions':
+			$servicecategory = 'Adhésion';
+		case 'get_rsnabonnements':
+			$servicecategory = 'Abonnement';
+		case 'get_rsndons ou get_rsnadhesions ou get_rsnabonnements':
+		
 			$focus = CRMEntity::getInstance($this->getName());
 			$focus->id = $recordId;
 			$entityIds = $focus->getRelatedContactsIds();
@@ -150,7 +159,7 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 				FROM `vtiger_inventoryproductrel` lg
 				INNER JOIN `vtiger_service` p
 					ON lg.productid = p.serviceid
-					AND p.servicecategory = \'Don\'
+					AND p.servicecategory = \''.$servicecategory.'\'
 				INNER JOIN `vtiger_invoice` f
 					ON lg.id = f.invoiceid
 				INNER JOIN `vtiger_crmentity`
@@ -178,117 +187,9 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 			}
 			//echo('<pre>'.$query . '</pre>');
 			
-		} elseif ($functionName === 'get_rsnadhesions') {
-			$focus = CRMEntity::getInstance($this->getName());
-			$focus->id = $recordId;
-			$entityIds = $focus->getRelatedContactsIds();
-			$entityIds = implode(',', $entityIds);
-
-			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
-
-			$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
-				, vtiger_crmentity.*, f.invoicedate AS dateadhesion, f.accountid as compte
-				, lg.`listprice` * ( 1 + CASE
-						WHEN NOT tax1 IS NULL THEN tax1 / 100
-						WHEN NOT tax2 IS NULL THEN tax2 / 100
-						WHEN NOT tax3 IS NULL THEN tax3 / 100
-						WHEN NOT tax4 IS NULL THEN tax4 / 100
-						ELSE 0 END
-					) as montant
-				, p.servicename as origine, "" as origine_detail
-				, p.serviceid
-				, f.invoiceid as vtiger_rsnadhesionsid
-				, p.servicecategory
-				, fcf.campaign_no
-				, fcf.notesid
-				, vtiger_crmentity.smownerid AS assigned_user_id
-				FROM `vtiger_inventoryproductrel` lg
-				INNER JOIN `vtiger_service` p
-					ON lg.productid = p.serviceid
-					AND p.servicecategory = \'Adhésion\'
-				INNER JOIN `vtiger_invoice` f
-					ON lg.id = f.invoiceid
-				INNER JOIN `vtiger_crmentity`
-					ON vtiger_crmentity.crmid = f.invoiceid
-				INNER JOIN `vtiger_account` a
-					ON a.accountid = f.accountid   
-				LEFT JOIN `vtiger_invoicecf` fcf
-					ON fcf.invoiceid = f.invoiceid
-				LEFT JOIN vtiger_users
-					ON vtiger_users.id = vtiger_crmentity.smownerid
-				LEFT JOIN vtiger_groups
-					ON vtiger_groups.groupid = vtiger_crmentity.smownerid
-				WHERE vtiger_crmentity.deleted = 0
-				AND ( a.accountid = '.$recordId;
-			if($entityIds) {
-				$query .= " OR f.contactid IN (".$entityIds."))";
-			} else {
-				$query .= ")";
-			}
-			$relatedModuleName = $relatedModule->getName();
-			$query .= $this->getSpecificRelationQuery($relatedModuleName);
-			$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
-			if ($nonAdminQuery) {
-				$query = appendFromClauseToQuery($query, $nonAdminQuery);
-			}
-			//echo('<pre>'.$query . '</pre>');
-		
-		} elseif ($functionName === 'get_rsnabonnements') {
-			$focus = CRMEntity::getInstance($this->getName());
-			$focus->id = $recordId;
-			$entityIds = $focus->getRelatedContactsIds();
-			$entityIds = implode(',', $entityIds);
-
-			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
-
-			$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
-				, vtiger_crmentity.*, f.invoicedate AS dateabonnement, f.accountid as compte
-				, lg.`listprice` * ( 1 + CASE
-						WHEN NOT tax1 IS NULL THEN tax1 / 100
-						WHEN NOT tax2 IS NULL THEN tax2 / 100
-						WHEN NOT tax3 IS NULL THEN tax3 / 100
-						WHEN NOT tax4 IS NULL THEN tax4 / 100
-						ELSE 0 END
-					) as montant
-				, p.servicename as origine, "" as origine_detail
-				, p.serviceid
-				, f.invoiceid as vtiger_rsnabonnementsid
-				, p.servicecategory
-				, fcf.campaign_no
-				, fcf.notesid
-				, vtiger_crmentity.smownerid AS assigned_user_id
-				FROM `vtiger_inventoryproductrel` lg
-				INNER JOIN `vtiger_service` p
-					ON lg.productid = p.serviceid
-					AND p.servicecategory = \'Abonnement\'
-				INNER JOIN `vtiger_invoice` f
-					ON lg.id = f.invoiceid
-				INNER JOIN `vtiger_crmentity`
-					ON vtiger_crmentity.crmid = f.invoiceid
-				INNER JOIN `vtiger_account` a
-					ON a.accountid = f.accountid   
-				LEFT JOIN `vtiger_invoicecf` fcf
-					ON fcf.invoiceid = f.invoiceid
-				LEFT JOIN vtiger_users
-					ON vtiger_users.id = vtiger_crmentity.smownerid
-				LEFT JOIN vtiger_groups
-					ON vtiger_groups.groupid = vtiger_crmentity.smownerid
-				WHERE vtiger_crmentity.deleted = 0
-				AND ( a.accountid = '.$recordId;
-			if($entityIds) {
-				$query .= " OR f.contactid IN (".$entityIds."))";
-			} else {
-				$query .= ")";
-			}
-			$relatedModuleName = $relatedModule->getName();
-			$query .= $this->getSpecificRelationQuery($relatedModuleName);
-			$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
-			if ($nonAdminQuery) {
-				$query = appendFromClauseToQuery($query, $nonAdminQuery);
-			}
-			//echo('<pre>'.$query . '</pre>');
+			break;
 			
-		} elseif ($functionName === 'get_rsnprelevements') {
+		case 'get_rsnprelevements' :
 			
 			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 
@@ -324,8 +225,10 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 			if ($nonAdminQuery) {
 				$query = appendFromClauseToQuery($query, $nonAdminQuery);
 			}
-				
-		} elseif ($functionName === 'get_invoices') {
+			
+			break;
+		
+		case 'get_invoices':
 			
 			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 
@@ -355,15 +258,18 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 				$query = appendFromClauseToQuery($query, $nonAdminQuery);
 			}
 			//echo('<pre>'.$query . '</pre>');
+			break;
 			
-		} elseif ($functionName === 'get_attachments') {
+		case 'get_attachments':
 			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
 			//ED141223 : ajout des champs de la relation
 			$query = preg_replace('/^\s*SELECT\s/', 'SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
 			//echo('<pre>APRES '.$query . '</pre>');
-		} else {
+			break;
+		default:
 			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
-			//echo('<pre>'.$query . '</pre>');
+			
+			break;
 		}
 
 		return $query;

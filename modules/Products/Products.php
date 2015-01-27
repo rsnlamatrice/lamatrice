@@ -41,9 +41,10 @@ class Products extends CRMEntity {
 	var $list_fields_name = Array(
 		'Product Name'=>'productname',
 		'Part Number'=>'productcode',
-		'Commission Rate'=>'commissionrate',
+		'Category'=>'productcategory',
 		'Qty/Unit'=>'qty_per_unit',
-		'Unit Price'=>'unit_price'
+		'Unit Price'=>'unit_price',
+		'Actif' => 'discontinued',
 	);
 
 	var $list_link_field= 'productname';

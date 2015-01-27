@@ -8,6 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 
+ /* ED150127 : ne sert pas à grand chose. Entité de spécialisation des services en facture. */
 include_once 'modules/Vtiger/CRMEntity.php';
 
 class RsnAdhesions extends Vtiger_CRMEntity {
@@ -37,14 +38,14 @@ class RsnAdhesions extends Vtiger_CRMEntity {
 	 */
 	var $list_fields = Array (
 		'LBL_COMPTE' => array('rsnadhesions', 'compte'),
-		'LBL_DATEDON' => array('rsnadhesions', 'datedon'),
+		'LBL_DATEDON' => array('rsnadhesions', 'invoicedate'),
 		'LBL_MONTANT' => array('rsnadhesions', 'montant'),
 		'LBL_ORIGINE' => array('rsnadhesions', 'origine'),
 
 	);
 	var $list_fields_name = Array (
 		'LBL_COMPTE' => 'compte',
-		'LBL_DATEDON' => 'datedon',
+		'LBL_DATEDON' => 'invoicedate',
 		'LBL_MONTANT' => 'montant',
 		'LBL_ORIGINE' => 'origine',
 
@@ -58,7 +59,7 @@ class RsnAdhesions extends Vtiger_CRMEntity {
 		'LBL_ORIGINE' => array('rsnadhesions', 'origine'),
 		'LBL_ORIGINE_DETAIL' => array('rsnadhesions', 'origine_detail'),
 		'LBL_MONTANT' => array('rsnadhesions', 'montant'),
-		'LBL_DATEDON' => array('rsnadhesions', 'datedon'),
+		'LBL_DATEDON' => array('rsnadhesions', 'invoicedate'),
 		'LBL_COMPTE' => array('rsnadhesions', 'compte'),
 
 	);
@@ -66,7 +67,7 @@ class RsnAdhesions extends Vtiger_CRMEntity {
 		'LBL_ORIGINE' => 'origine',
 		'LBL_ORIGINE_DETAIL' => 'origine_detail',
 		'LBL_MONTANT' => 'montant',
-		'LBL_DATEDON' => 'datedon',
+		'LBL_DATEDON' => 'invoicedate',
 		'LBL_COMPTE' => 'compte',
 
 	);
@@ -76,20 +77,20 @@ class RsnAdhesions extends Vtiger_CRMEntity {
 		'LBL_ORIGINE' => 'origine',
 		'LBL_ORIGINE_DETAIL' => 'origine_detail',
 		'LBL_MONTANT' => 'montant',
-		'LBL_DATEDON' => 'datedon',
+		'LBL_DATEDON' => 'invoicedate',
 		'LBL_COMPTE' => 'compte',);
 
 	// For Alphabetical search
 	var $def_basicsearch_col = 'origine';
 
 	// Column value to use on detail view record text display
-	var $def_detailview_recname = 'datedon';
+	var $def_detailview_recname = 'invoicedate';
 
 	// Used when enabling/disabling the mandatory fields for the module.
 	// Refers to vtiger_field.fieldname values.
-	var $mandatory_fields = Array('montant', 'datedon', 'assigned_user_id');
+	var $mandatory_fields = Array('montant', 'invoicedate', 'assigned_user_id');
 
-	var $default_order_by = 'datedon';
+	var $default_order_by = 'invoicedate';
 	var $default_sort_order='DESC';
 
 	/**
@@ -194,23 +195,7 @@ class RsnAdhesions extends Vtiger_CRMEntity {
 			$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module);
 		}
 	}
-/*SELECT vtiger_rsnadhesions.datedon AS vtiger_rsnadhesionsdatedon
-,vtiger_rsnadhesions.compte AS vtiger_rsnadhesionscompte
-,vtiger_rsnadhesions.montant AS vtiger_rsnadhesionsmontant
-,vtiger_rsnadhesions.origine AS vtiger_rsnadhesionsorigine
-,vtiger_rsnadhesions.origine_detail AS vtiger_rsnadhesionsorigine_detail
-,vtiger_rsnadhesions.produit AS vtiger_rsnadhesionsproduit
-,vtiger_crmentity.smownerid AS vtiger_crmentityassigned_user_id
-,vtiger_crmentity.createdtime AS vtiger_crmentitycreatedtime
-,vtiger_crmentity.modifiedtime AS vtiger_crmentitymodifiedtime
-,vtiger_crmentity.deleted
-FROM vtiger_crmentity
-LEFT JOIN vtiger_rsnadhesions
-ON vtiger_rsnadhesions.rsnadhesionsid=vtiger_crmentity.crmid
-LEFT JOIN vtiger_rsnadhesionscf ON vtiger_rsnadhesionscf.rsnadhesionsid=vtiger_crmentity.crmid
-WHERE vtiger_crmentity.crmid=202950
-LIMIT 1*/
-	$sql = 'SELECT f.invoicedate AS vtiger_rsnadhesionsdatedon, f.accountid as vtiger_rsnadhesionscompte, lg.`listprice` as vtiger_rsnadhesionsmontant
+	$sql = 'SELECT f.invoicedate AS vtiger_rsnadhesionsinvoicedate, f.accountid as vtiger_rsnadhesionscompte, lg.`listprice` as vtiger_rsnadhesionsmontant
 	, p.productcode as vtiger_rsnadhesionsorigine, "" as vtiger_rsnadhesionsorigine_detail
 	, p.productid as vtiger_rsnadhesionsproduit
 	, f.accountid as vtiger_rsnadhesionsid
@@ -221,7 +206,7 @@ LIMIT 1*/
 	FROM `vtiger_inventoryproductrel` lg
 	INNER JOIN `vtiger_products` p
 		ON lg.productid = p.productid
-		AND p.productcategory = \'Adhésion\'
+		AND p.productcategory = ?
 	INNER JOIN `vtiger_invoice` f
 		ON lg.id = f.invoiceid
 	INNER JOIN `vtiger_crmentity` e
@@ -233,6 +218,8 @@ LIMIT 1*/
 	var_dump($sql);
 	echo($sql);*/
 	
+	
+	$params[] = 'Adhésion';
 	$params[] = $record;
 	$result = $adb->pquery($sql, $params);
 

@@ -13,7 +13,7 @@
 class RsnDons_Module_Model extends Vtiger_Module_Model {
 	
 	
-	var $serviceType = 'Don';
+	var $serviceType = 'Dons';
 	
 	/**
 	 * Function to check whether the entity has an quick create menu
@@ -154,12 +154,13 @@ class RsnDons_Module_Model extends Vtiger_Module_Model {
 	}
 	
 	/** 
-	* Function to get Services of category $this->serviceType ('Don', 'Adhésion', 'Abonnement', ...)
+	* Function to get Services of category $this->serviceType ('Dons', 'Adhésion', 'Abonnement', ...)
 	*/ 
 	public function getServicesList(){
 		include_once('modules/Services/Services.php');
 		$servicesEntity = new Services();
-		$query = $servicesEntity->getListQuery('Services'," AND servicecategory = '" . $this->serviceType . "'", TRUE);
+		$query = $servicesEntity->getListQuery('Services'," AND servicecategory = '" . $this->serviceType . "'
+						       AND discontinued = 1", TRUE);
 		$query .= " ORDER BY sortindex, label";
 		//echo "<pre>$query</pre>";
 		$params = array();

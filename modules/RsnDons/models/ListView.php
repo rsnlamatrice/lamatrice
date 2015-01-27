@@ -17,12 +17,12 @@
 class RsnDons_ListView_Model extends Vtiger_ListView_Model {
 
 	function getQuery() {
-		$listQuery = 'SELECT f.invoicedate AS datedon, f.accountid as compte, lg.`listprice` as montant
+		$listQuery = 'SELECT f.invoicedate, f.accountid as compte, lg.`listprice` as montant
 		, p.service_no as origine, f.invoiceid as rsndonsid
 		FROM `vtiger_inventoryproductrel` lg
 		INNER JOIN `vtiger_service` p
 			ON lg.productid = p.serviceid
-			AND p.servicecategory = \'Don\'
+			AND p.servicecategory = \'Dons\'
 		INNER JOIN `vtiger_invoice` f
 			ON lg.id = f.invoiceid
 		INNER JOIN `vtiger_crmentity` e
