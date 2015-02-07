@@ -168,6 +168,12 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			)
 		;
 		
+		$list[] = array(
+				'sub' => 'TestsED',
+				'label' => 'Tests ED'
+			)
+		;
+		
 		return $list;
 	}
 	

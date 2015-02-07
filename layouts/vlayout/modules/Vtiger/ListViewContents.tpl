@@ -142,6 +142,9 @@
 					</td><td nowrap class="{$WIDTHTYPE}">
 					<div class="actions pull-right">
 						<span class="actionImages">
+							{if $IS_MODULE_EDITABLE}{*ED150207*}
+							    <a href='{$LISTVIEW_ENTRY->getDuplicateRecordUrl()}'><i title="{vtranslate('LBL_DUPLICATE', $MODULE)}" class="icon-plus alignMiddle"></i></a>
+							{/if}
 							<a href="{$LISTVIEW_ENTRY->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
 							{if $IS_MODULE_EDITABLE}
 								<a href='{$LISTVIEW_ENTRY->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>&nbsp;
