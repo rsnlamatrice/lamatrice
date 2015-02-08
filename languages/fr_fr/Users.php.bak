@@ -11,8 +11,7 @@
  * December 2013 
  ************************************************************************************/
 $languageStrings = array(
-        'SINGLE_Users'               => 'compte utilisateur'                    , 
-	'LBL_ADD_RECORD'               => 'Ajouter un utilisateur'                    , 
+	'LBL_ADD_RECORD'               => 'Ajouter un untilisateur'                    , 
 	'LBL_MY_PREFERENCES'           => 'Mes préférences'           , 
 	'LBL_MORE_INFORMATION'         => 'Informations complémentaires', 
 	'LBL_USERLOGIN_ROLE'           => 'Informations'                , 
@@ -192,8 +191,7 @@ $languageStrings = array(
 	'LBL_TRANSFER_RECORDS_TO_USER' => ' Transférer les enregistrements à l\'utilisateur ',
 	'LBL_USER_TO_BE_DELETED' => 'Utilisateur à supprimer',    
 	
-	// Traductions manquantes
-        'LBL_THERE_IS_NO'  => 'Aucun',
+	// Traductions manquantes 
 	'Starting Day of the week' => 'Jour de début de semaine' ,
 	'Today' => 'Aujourd\'hui',
 	'1 Hour' => '1 heure',

@@ -229,11 +229,11 @@ jQuery.Class("Calendar_CalendarView_Js",{
 
 		//User preferred default view
 		var userDefaultActivityView = jQuery('#activity_view').val();
-		
-	    	if(userDefaultActivityView == 'Today'){
+		if(userDefaultActivityView == 'Today'){
 			userDefaultActivityView ='agendaDay';
 		}else if(userDefaultActivityView == 'This Week'){
 			userDefaultActivityView ='agendaWeek';
+
 		}else if(userDefaultActivityView == 'This Year'){
 			userDefaultActivityView ='year';
 		}else{
@@ -257,6 +257,81 @@ jQuery.Class("Calendar_CalendarView_Js",{
 		var explodedTime = defaultFirstHour.split(':');
 		defaultFirstHour = explodedTime['0'];
 
+		//SG1410
+		var updateInDB = function(event,delta,revertFunc) {				
+			    //TODO gerer format date and time
+			    function toDateString(date) {
+			    if (date) {
+				//code
+			   
+			    var d = date.getDate();
+			    var m = date.getMonth() +1;
+			    var y = date.getFullYear();
+
+			    d = (d <= 9)? ("0"+d) : d;
+			    m = (m <= 9)? ("0"+m) : m;
+			    return y + "-" + m + "-" + d;
+			    }
+			   else return '';
+			    }
+				
+			    function toTimeString(date) {
+				if(date === null || !date)
+					return date;
+			    var h = date.getHours();
+			    
+			    var mn = date.getMinutes();
+			    var s = date.getSeconds();
+			    h = (h <= 9)? ("0"+h) : h;
+			    mn = (mn <= 9)? ("0"+mn) : mn;
+			    s = (s <= 9)? ("0"+s) : s;
+			    return h + ":" + mn + ":" + s;
+				}
+				
+			    var progressIndicatorInstance = jQuery.progressIndicator({
+				});		    
+			    var vttype = (typeof event['vtigertype'] == undefined) ? '' : event.vtigertype;			    
+			    var strttime = toTimeString(event.start);
+			    		    
+			    switch (vttype) {
+				case 'MGTransports' :
+				    //par défaut l'heure est 00:00:00 et avec le changement de fuseau horaire, ça change la date.
+				    strttime = "09:00:00";
+				    event.allDay = true;
+				    break;
+				default :				   
+				    break;
+				
+			    }
+			    
+			    var params = {
+				    module : 'Calendar',
+				    action : 'UpdateFromCalendar',				    
+				    activityid : event.id,
+				    vtigertype : vttype,
+				    startdate : toDateString(event.start),
+				    enddate : toDateString(event.end),
+				    starttime : strttime,
+				    endtime : toTimeString(event.end == null ? event.start : event.end)
+				}
+				
+			    AppConnector.request(params).then(function(data){				
+					progressIndicatorInstance.hide();
+					if (data.result === false) {
+					    alert("Aie ! Problème lors de l'enregistrement " + data.result);
+					    revertFunc(); }
+					else if (data.success === false) {
+					    alert("Aie ! Probl\0x353me lors de l'enregistrement " + (data.error ? data.error.message : ''));
+					    revertFunc(); }
+					else if (data.success) {}
+					},
+				    function(error){
+				    progressIndicatorInstance.hide();
+				    alert("Erreur lors de l'enregistrement : " + error);
+				    }
+			    );		
+			}	
+		
 		var config = {
 			header: {
 				left: 'year,month,agendaWeek,agendaDay',
@@ -310,10 +385,13 @@ jQuery.Class("Calendar_CalendarView_Js",{
 				day: 'dddd d/M',
 				year: 'W\'<br>\'d\'&nbsp;\'MMM'
 			},
-			
 			timeFormat: {
 				agenda: 'H:mm{ - H:mm}'
-			}
+			},
+			//SG1409 
+			editable : true,
+			eventResize : updateInDB,	
+			eventDrop : updateInDB
 		}
 		if(typeof customConfig != 'undefined'){
 			config = jQuery.extend(config,customConfig);

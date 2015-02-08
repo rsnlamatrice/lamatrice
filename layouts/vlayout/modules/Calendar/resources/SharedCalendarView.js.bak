@@ -63,11 +63,7 @@ Calendar_CalendarView_Js("SharedCalendar_SharedCalendarView_Js",{
 		//var type = feedcheckbox.data('calendar-sourcekey');
 		this.calendarfeedDS[feedcheckbox.data('calendar-sourcekey')] = function(start, end, callback) {
 			if(typeof thisInstance.multipleEvents != 'undefined' && thisInstance.multipleEvents != false){
-				
 				var events = thisInstance.multipleEvents[feedcheckbox.data('calendar-userid')];
-				
-				
-				
 				if(events !== false) {
 					callback(events);
 					return;
@@ -78,7 +74,6 @@ Calendar_CalendarView_Js("SharedCalendar_SharedCalendarView_Js",{
 				return;
 			}
 			feedcheckbox.attr('disabled', true);
-			
 			var params = {
 				module: 'Calendar',
 				action: 'Feed',

@@ -306,17 +306,18 @@ function isPermitted($module,$actionname,$record_id='')
 		if($is_admin)
 		{
 			$permission ="yes";
-			$log->debug("Exiting isPermitted method yes ...");
+			$log->debug("Exiting isPermitted method ...");
 			return $permission;
 		}
 
 		//If no actionid, then allow action is vtiger_tab permission is available
 		if($actionid === '')
 		{
-			if($profileTabsPermission[$tabid] ==0){
-				$permission = "yes";
-				$log->debug("Exiting isPermitted method yes ...");
-			}
+			if($profileTabsPermission[$tabid] ==0)
+				{
+						$permission = "yes";
+				$log->debug("Exiting isPermitted method ...");
+				}
 			else
 			{
 				$permission ="no";

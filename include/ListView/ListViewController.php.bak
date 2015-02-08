@@ -173,11 +173,9 @@ class ListViewController {
 		require('user_privileges/user_privileges_'.$this->user->id.'.php');
 		$fields = $this->queryGenerator->getFields();
 		$meta = $this->queryGenerator->getMeta($this->queryGenerator->getModule());
-
-		$moduleFields = $meta->getModuleFields();
-		//var_dump($moduleFields);
 		$accessibleFieldList = array_keys($moduleFields);
 		$listViewFields = array_intersect($fields, $accessibleFieldList);
+		$moduleFields = $meta->getModuleFields();
 		
 		$referenceFieldList = $this->queryGenerator->getReferenceFieldList();
 		foreach ($referenceFieldList as $fieldName) {

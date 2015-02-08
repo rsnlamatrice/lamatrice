@@ -30,7 +30,6 @@ $languageStrings = array(
     'Start Date'=>'Date de début',
     'End Date'=>'Date de fin',
     'Related To' => 'Relatif à',
-    'Related to' => 'Relatif à',
     'administrative' => 'administratif',
     'operative' => 'operationnel',
     'other' => 'autre',

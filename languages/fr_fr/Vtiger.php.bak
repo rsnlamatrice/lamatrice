@@ -23,8 +23,7 @@ $languageStrings = array(
 	'LBL_CANCEL'                   => 'Annuler'                     , 
 	'LBL_BACK'                     => 'Retour'                      , 
 	'LBL_IMPORT'                   => 'Importer'                    , 
-	'LBL_EXPORT'                   => 'Exporter'                    ,
-        'LBL_PRINT'                   => 'Imprimer...'                    ,
+	'LBL_EXPORT'                   => 'Exporter'                    , 
 	'LBL_FIND_DUPLICATES'          => 'Trouver les doublons'        , 
 	'LBL_MORE'                     => 'Plus'                        , 
 	'LBL_ACTIONS'                  => 'Actions'                     , 
@@ -313,7 +312,7 @@ $languageStrings = array(
 	'LBL_PREVIOUS_FQ'              => 'Le trimestre précédent'                   , 
 	'LBL_CURRENT_FQ'               => 'Le trimestre en cours'                  , 
 	'LBL_NEXT_FQ'                  => 'Le trimestre prochain'                    , 
-	'LBL_YESTERDAY'                => 'Hier'                   , 
+	'LBL_YESTERDAY'                => 'H'                   , 
 	'LBL_TODAY'                    => 'Aujourd\'hui'                , 
 	'LBL_TOMORROW'                 => 'Demain'                    , 
 	'LBL_LAST_WEEK'                => 'La semaine dernière'        , 
@@ -572,7 +571,6 @@ $languageStrings = array(
 	'LBL_MAX_UPLOAD_SIZE'          => 'Taille max. du fichier à joindre '      , 
 	'LBL_EXCEEDED'                 => ' dépassée'                    , 
 	
-	
 	//Translations used for Export to Pdf
 	'Valid Date' => 'date de validité',
 	'Phone: ' => 'téléphone: ',
@@ -584,7 +582,7 @@ $languageStrings = array(
 	'Product Code' => 'Code de produit',
 	'Customer Name' => 'Nom du client',
 	'Price' => 'prix',
-	'Tax:' => 'Taxe:',
+	'Tax:' => 'Tax:',
 	'Contact Name' => 'Nom du contact',
 	'Grand Total:' => 'Total:',
 	'Fax: ' => 'Fax: ',
@@ -673,8 +671,6 @@ $languageStrings = array(
         'RSNPanelsVariables' => 'Variables de panels',
         'LBL_VARIABLES' => 'Variables de panels',
         'LBL_DELETE_RELATION_WITH' => 'Suppression de la relation avec',
-        'yes'               => 'oui',
-        'no'               => 'non',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

@@ -63,7 +63,7 @@ $languageStrings = array(
 	'LBL_DAY_OF_THE_MONTH'         => 'jour du mois'            ,
 	'LBL_ON'                       => ' le '                          ,
 	'Daily'                        => ' jour(s)'                      ,
-	'Weekly'                       => ' semaine(s)'                     ,
+	'Weekly'                       => ' semeine(s)'                     ,
 	'Monthly'                      => ' mois'                    ,
 	'Yearly'                       => ' année'                        ,
 	
