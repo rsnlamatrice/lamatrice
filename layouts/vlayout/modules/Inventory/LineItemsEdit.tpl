@@ -339,7 +339,7 @@
 				{/if}
 			    {/foreach}
 			</div>
-		    {/if}    
+		    {/if}
                 </td>
                 <td>
                     {if $MODULE eq 'Invoice'}

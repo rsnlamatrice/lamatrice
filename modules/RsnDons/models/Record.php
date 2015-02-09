@@ -27,7 +27,7 @@ class RsnDons_Record_Model extends Vtiger_Record_Model {
 		FROM `vtiger_inventoryproductrel` lg
 		INNER JOIN `vtiger_services` p
 			ON lg.productid = p.serviceid
-			AND p.servicecategory = \'Don\'
+			AND p.servicecategory = \'Dons\'
 		INNER JOIN `vtiger_invoice` f
 			ON lg.id = f.invoiceid
 		INNER JOIN `vtiger_crmentity` e

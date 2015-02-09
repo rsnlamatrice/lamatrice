@@ -96,7 +96,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 
 	/* ED150124 */
 	public function isDeleteActionSupported() {
-		return $this->isActionSupported('add');
+		return $this->isActionSupported('delete');
 	}
 
 	public function getActions(){

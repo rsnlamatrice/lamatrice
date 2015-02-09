@@ -103,23 +103,23 @@ function getAssociatedProducts($module,$focus,$seid='')
 	if($module == 'Quotes' || $module == 'PurchaseOrder' || $module == 'SalesOrder' || $module == 'Invoice')
 	{
 		$query="SELECT
-					case when vtiger_products.productid != '' then vtiger_products.productname else vtiger_service.servicename end as productname,
- 		            case when vtiger_products.productid != '' then vtiger_products.productcode else vtiger_service.service_no end as productcode,
-					case when vtiger_products.productid != '' then vtiger_products.unit_price else vtiger_service.unit_price end as unit_price,
- 		            case when vtiger_products.productid != '' then vtiger_products.qtyinstock else 'NA' end as qtyinstock,
- 		            case when vtiger_products.productid != '' then 'Products' else 'Services' end as entitytype,
- 		                        vtiger_inventoryproductrel.listprice,
- 		                        vtiger_inventoryproductrel.description AS product_description,
- 		                        vtiger_inventoryproductrel.*,vtiger_crmentity.deleted
- 	                            FROM vtiger_inventoryproductrel
-								LEFT JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_inventoryproductrel.productid
- 		                        LEFT JOIN vtiger_products
- 		                                ON vtiger_products.productid=vtiger_inventoryproductrel.productid
- 		                        LEFT JOIN vtiger_service
- 		                                ON vtiger_service.serviceid=vtiger_inventoryproductrel.productid
- 		                        WHERE id=?
- 		                        ORDER BY sequence_no";
-			$params = array($focus->id);
+				case when vtiger_products.productid != '' then vtiger_products.productname else vtiger_service.servicename end as productname,
+				case when vtiger_products.productid != '' then vtiger_products.productcode else vtiger_service.service_no end as productcode,
+				case when vtiger_products.productid != '' then vtiger_products.unit_price else vtiger_service.unit_price end as unit_price,
+				case when vtiger_products.productid != '' then vtiger_products.qtyinstock else 'NA' end as qtyinstock,
+				case when vtiger_products.productid != '' then 'Products' else 'Services' end as entitytype,
+				vtiger_inventoryproductrel.listprice,
+				vtiger_inventoryproductrel.description AS product_description,
+				vtiger_inventoryproductrel.*,vtiger_crmentity.deleted
+			FROM vtiger_inventoryproductrel
+			LEFT JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_inventoryproductrel.productid
+ 		        LEFT JOIN vtiger_products
+				ON vtiger_products.productid=vtiger_inventoryproductrel.productid
+			LEFT JOIN vtiger_service
+				ON vtiger_service.serviceid=vtiger_inventoryproductrel.productid
+ 		        WHERE id=?
+ 		        ORDER BY sequence_no";
+		$params = array($focus->id);
 	}
 	elseif($module == 'Potentials')
 	{
@@ -173,6 +173,7 @@ function getAssociatedProducts($module,$focus,$seid='')
 			$params = array($seid);
 	}
 
+	
 	$result = $adb->pquery($query, $params);
 	$num_rows=$adb->num_rows($result);
 	for($i=1;$i<=$num_rows;$i++)
@@ -244,7 +245,7 @@ function getAssociatedProducts($module,$focus,$seid='')
 		if($module == 'Potentials' || $module == 'Products' || $module == 'Services') {
 			$product_Detail[$i]['comment'.$i]= $productdescription;
 		}else {
-            $product_Detail[$i]['comment'.$i]= $comment;
+			$product_Detail[$i]['comment'.$i]= $comment;
 		}
 
 		if($module != 'PurchaseOrder' && $focus->object_name != 'Order') {
@@ -354,10 +355,16 @@ function getAssociatedProducts($module,$focus,$seid='')
 	$product_Detail[1]['final_details']['hdnSubTotal'] = $subTotal;
 	$discountPercent = ($focus->column_fields['hdnDiscountPercent'] != '')?$focus->column_fields['hdnDiscountPercent']:'0.00';
 	$discountAmount = ($focus->column_fields['hdnDiscountAmount'] != '')?$focus->column_fields['hdnDiscountAmount']:'0.00';
-    if($discountPercent != '0'){
-        $discountAmount = ($product_Detail[1]['final_details']['hdnSubTotal'] * $discountPercent / 100);
-    }
+	if($discountPercent != '0'){
+	    $discountAmount = ($product_Detail[1]['final_details']['hdnSubTotal'] * $discountPercent / 100);
+	}
 
+	//ED150127
+	$received = ($focus->column_fields['received'] != '')?$focus->column_fields['received']:'0.00';
+	$received = number_format($received, $no_of_decimal_places,'.','');
+	$product_Detail[1]['final_details']['received'] = $received;
+	$product_Detail[1]['final_details']['receivedcomments'] = $focus->column_fields['receivedcomments'];
+	
 	//To avoid NaN javascript error, here we assign 0 initially to' %of price' and 'Direct Price reduction'(For Final Discount)
 	$discount_amount_final = '0.00';
 	$discount_amount_final = number_format($discount_amount_final, $no_of_decimal_places,'.','');

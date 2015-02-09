@@ -47,7 +47,7 @@ class Services extends CRMEntity {
 		// tablename should not have prefix 'vtiger_'
 		'Service No'=>Array('service'=>'service_no'),
 		'Service Name'=>Array('service'=>'servicename'),
-        'Commission Rate'=>Array('service'=>'commissionrate'),
+		'Commission Rate'=>Array('service'=>'commissionrate'),
 		'No of Units'=>Array('service'=>'qty_per_unit'),
 		'Price'=>Array('service'=>'unit_price')
 	);
@@ -55,9 +55,10 @@ class Services extends CRMEntity {
 		/* Format: Field Label => fieldname */
 		'Service No'=>'service_no',
 		'Service Name'=>'servicename',
-		'Commission Rate'=>'commissionrate',
+		'Category'=>'servicecategory',
 		'No of Units'=>'qty_per_unit',
-		'Price'=>'unit_price'
+		'Price'=>'unit_price',
+		'Actif' => 'discontinued',
 	);
 
 	// Make the field link to detail view

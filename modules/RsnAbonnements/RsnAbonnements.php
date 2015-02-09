@@ -7,7 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
-
+/* ED150127 : ne sert pas ˆ grand chose. EntitŽ de spŽcialisation des services en facture. */
 include_once 'modules/Vtiger/CRMEntity.php';
 
 class RsnAbonnements extends Vtiger_CRMEntity {
@@ -37,14 +37,14 @@ class RsnAbonnements extends Vtiger_CRMEntity {
 	 */
 	var $list_fields = Array (
 		'LBL_COMPTE' => array('rsnabonnements', 'compte'),
-		'LBL_DATEDON' => array('rsnabonnements', 'datedon'),
+		'LBL_DATEDON' => array('rsnabonnements', 'invoicedate'),
 		'LBL_MONTANT' => array('rsnabonnements', 'montant'),
 		'LBL_ORIGINE' => array('rsnabonnements', 'origine'),
 
 	);
 	var $list_fields_name = Array (
 		'LBL_COMPTE' => 'compte',
-		'LBL_DATEDON' => 'datedon',
+		'LBL_DATEDON' => 'invoicedate',
 		'LBL_MONTANT' => 'montant',
 		'LBL_ORIGINE' => 'origine',
 
@@ -58,7 +58,7 @@ class RsnAbonnements extends Vtiger_CRMEntity {
 		'LBL_ORIGINE' => array('rsnabonnements', 'origine'),
 		'LBL_ORIGINE_DETAIL' => array('rsnabonnements', 'origine_detail'),
 		'LBL_MONTANT' => array('rsnabonnements', 'montant'),
-		'LBL_DATEDON' => array('rsnabonnements', 'datedon'),
+		'LBL_DATEDON' => array('rsnabonnements', 'invoicedate'),
 		'LBL_COMPTE' => array('rsnabonnements', 'compte'),
 
 	);
@@ -66,7 +66,7 @@ class RsnAbonnements extends Vtiger_CRMEntity {
 		'LBL_ORIGINE' => 'origine',
 		'LBL_ORIGINE_DETAIL' => 'origine_detail',
 		'LBL_MONTANT' => 'montant',
-		'LBL_DATEDON' => 'datedon',
+		'LBL_DATEDON' => 'invoicedate',
 		'LBL_COMPTE' => 'compte',
 
 	);
@@ -76,20 +76,20 @@ class RsnAbonnements extends Vtiger_CRMEntity {
 		'LBL_ORIGINE' => 'origine',
 		'LBL_ORIGINE_DETAIL' => 'origine_detail',
 		'LBL_MONTANT' => 'montant',
-		'LBL_DATEDON' => 'datedon',
+		'LBL_DATEDON' => 'invoicedate',
 		'LBL_COMPTE' => 'compte',);
 
 	// For Alphabetical search
 	var $def_basicsearch_col = 'origine';
 
 	// Column value to use on detail view record text display
-	var $def_detailview_recname = 'datedon';
+	var $def_detailview_recname = 'invoicedate';
 
 	// Used when enabling/disabling the mandatory fields for the module.
 	// Refers to vtiger_field.fieldname values.
-	var $mandatory_fields = Array('montant', 'datedon', 'assigned_user_id');
+	var $mandatory_fields = Array('montant', 'invoicedate', 'assigned_user_id');
 
-	var $default_order_by = 'datedon';
+	var $default_order_by = 'invoicedate';
 	var $default_sort_order='DESC';
 
 	/**
@@ -194,23 +194,7 @@ class RsnAbonnements extends Vtiger_CRMEntity {
 			$cachedModuleFields = VTCacheUtils::lookupFieldInfo_Module($module);
 		}
 	}
-/*SELECT vtiger_rsnabonnements.datedon AS vtiger_rsnabonnementsdatedon
-,vtiger_rsnabonnements.compte AS vtiger_rsnabonnementscompte
-,vtiger_rsnabonnements.montant AS vtiger_rsnabonnementsmontant
-,vtiger_rsnabonnements.origine AS vtiger_rsnabonnementsorigine
-,vtiger_rsnabonnements.origine_detail AS vtiger_rsnabonnementsorigine_detail
-,vtiger_rsnabonnements.produit AS vtiger_rsnabonnementsproduit
-,vtiger_crmentity.smownerid AS vtiger_crmentityassigned_user_id
-,vtiger_crmentity.createdtime AS vtiger_crmentitycreatedtime
-,vtiger_crmentity.modifiedtime AS vtiger_crmentitymodifiedtime
-,vtiger_crmentity.deleted
-FROM vtiger_crmentity
-LEFT JOIN vtiger_rsnabonnements
-ON vtiger_rsnabonnements.rsnabonnementsid=vtiger_crmentity.crmid
-LEFT JOIN vtiger_rsnabonnementscf ON vtiger_rsnabonnementscf.rsnabonnementsid=vtiger_crmentity.crmid
-WHERE vtiger_crmentity.crmid=202950
-LIMIT 1*/
-	$sql = 'SELECT f.invoicedate AS vtiger_rsnabonnementsdatedon, f.accountid as vtiger_rsnabonnementscompte, lg.`listprice` as vtiger_rsnabonnementsmontant
+	$sql = 'SELECT f.invoicedate AS vtiger_rsnabonnementsinvoicedate, f.accountid as vtiger_rsnabonnementscompte, lg.`listprice` as vtiger_rsnabonnementsmontant
 	, p.productcode as vtiger_rsnabonnementsorigine, "" as vtiger_rsnabonnementsorigine_detail
 	, p.productid as vtiger_rsnabonnementsproduit
 	, f.accountid as vtiger_rsnabonnementsid
@@ -221,7 +205,7 @@ LIMIT 1*/
 	FROM `vtiger_inventoryproductrel` lg
 	INNER JOIN `vtiger_products` p
 		ON lg.productid = p.productid
-		AND p.productcategory = \'Abonnement\'
+		AND p.productcategory = ?
 	INNER JOIN `vtiger_invoice` f
 		ON lg.id = f.invoiceid
 	INNER JOIN `vtiger_crmentity` e
@@ -232,7 +216,7 @@ LIMIT 1*/
 	/*var_dump($params);
 	var_dump($sql);
 	echo($sql);*/
-	
+	$params[] = 'Abonnement';
 	$params[] = $record;
 	$result = $adb->pquery($sql, $params);
 
