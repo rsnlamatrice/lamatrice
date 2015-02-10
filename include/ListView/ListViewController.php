@@ -569,7 +569,9 @@ class ListViewController {
 				//buttonSet
 				} elseif($fieldDataType == 'buttonSet'){
 					if($value !== null){
-						$values = $module->getListViewPicklistValues($fieldName);
+						if(!isset($moduleModel))
+							$moduleModel = Vtiger_Module_Model::getInstance($module);
+						$values = $moduleModel->getListViewPicklistValues($fieldName);
 						if(is_array($values) && array_key_exists($value, $values)){
 							$value = '<span class="' . $values[$value]['icon'] . '">' . $values[$value]['label'] . '</span>';
 						}
