@@ -428,8 +428,11 @@ class ListViewController {
 					}
 				} elseif($field->getUIType() == 98) {
 					$value = '<a href="index.php?module=Roles&parent=Settings&view=Edit&record='.$value.'">'.textlength_check(getRoleName($value)).'</a>';
+				
+				//multipicklist
 				} elseif($field->getFieldDataType() == 'multipicklist') {
-					$value = ($value != "") ? str_replace(' |##| ',', ',$value) : "";
+					if($value != '')
+						$value = str_replace(' |##| ', ', ', $value);
 					if(!$is_admin && $value != '') {
 						$valueArray = ($rawValue != "") ? explode(' |##| ',$rawValue) : array();
 						$notaccess = '<font color="red">'.getTranslatedString('LBL_NOT_ACCESSIBLE',
@@ -440,14 +443,16 @@ class ListViewController {
 							if(!$listview_max_textlength
 							|| !(strlen(preg_replace("/(<\/?)(\w+)([^>]*>)/i","",$tmp)) > $listview_max_textlength)) {
 								if (!$is_admin && $this->picklistRoleMap[$fieldName]
-								&& !in_array(trim($val), $this->picklistValueMap[$fieldName])) {
+								&& !in_array(trim($val), $this->picklistValueMap[$fieldName])
+								&& !isset($this->picklistValueDataMap[$fieldName][trim($val)]))//ED150210 teste aussi avec les accents échappés
+								{	//Non accessible ou introuvable dans la picklist officielle
 									$tmpArray[] = $notaccess;
 									$tmp .= ', '.$notaccess;
 								} else {
 									if(isset($this->picklistValueDataMap[$fieldName][$val])
-									   && isset($this->picklistValueDataMap[$fieldName][$val]['uicolor'])){
+									&& isset($this->picklistValueDataMap[$fieldName][$val]['uicolor'])){
 										$uicolor = $this->picklistValueDataMap[$fieldName][$val]['uicolor'];
-										$tmpArray[] = '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>'
+										$tmpArray[] = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
 											. $val;
 									}
 									else
@@ -457,24 +462,34 @@ class ListViewController {
 							} else {
 								$tmpArray[] = '...';
 								$tmp .= '...';
+								break;//ED150210
 							}
 						}
 						$value = implode(', ', $tmpArray);
 						$value = textlength_check($value);
 					}
-					else if($is_admin && $value != '') {
+					else if($value != '') {
 						$valueArray = ($rawValue != "") ? explode(' |##| ',$rawValue) : array();
+						//echo '<br><br><br>';
+						//var_dump($fieldName, $this->picklistValueDataMap[$fieldName], $valueArray);
+						//var_dump($fieldName, $this->picklistValueDataMap[$fieldName], $valueArray);
 						$tmpArray = array();
+						$tmp = '';
 						foreach($valueArray as $index => $val) {
 							if(isset($this->picklistValueDataMap[$fieldName][$val])
 							&& isset($this->picklistValueDataMap[$fieldName][$val]['uicolor'])){
 								$uicolor = $this->picklistValueDataMap[$fieldName][$val]['uicolor'];
-								$tmpArray[] = '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>'
+								$tmpArray[] = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
 									. $val;
 							}
-							else
+							else{
 								$tmpArray[] = $val;
-								$tmp .= ', '.$val;
+							}
+							$tmp .= ', '.$val;
+							if(strlen($tmp) > (int)$listview_max_textlength){
+								$tmpArray[count($tmpArray)-1] = substr($tmpArray[count($tmpArray)-1], 0, strlen($tmp) - $listview_max_textlength) . '...';
+								break;
+							}
 						}
 						$value = implode(', ', $tmpArray);
 					}

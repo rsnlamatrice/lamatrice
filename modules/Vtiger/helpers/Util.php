@@ -301,6 +301,7 @@ class Vtiger_Util_Helper {
 		}
 		//echo_callstack();
 	}
+			
 	$cache->setPicklistValues($fieldName, $values, $picklistvaluesdata);
         return $values;
     }
