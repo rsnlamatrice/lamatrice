@@ -343,13 +343,12 @@ class ListViewController {
 								$module)."</font>";
 					//ED150210 uicolor ?	TODO : les accents foutent le bordel !
 					} elseif($value != ''
-					      && isset($this->picklistValueDataMap[$fieldName][$value])
-					      && isset($this->picklistValueDataMap[$fieldName][$value]['uicolor'])){
-						$uicolor = $this->picklistValueDataMap[$fieldName][$value]['uicolor'];
+					      && isset($this->picklistValueDataMap[$fieldName][htmlentities($value)])
+					      && isset($this->picklistValueDataMap[$fieldName][htmlentities($value)]['uicolor'])){
+						$uicolor = $this->picklistValueDataMap[$fieldName][htmlentities($value)]['uicolor'];
 						$value = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
 							. Vtiger_Language_Handler::getTranslatedString($value, $module);
 					} else {
-						//var_dump($fieldName, $this->picklistValueDataMap[$fieldName], $value);
 						$value = Vtiger_Language_Handler::getTranslatedString($value, $module);
 						$value = textlength_check($value);
 					}
