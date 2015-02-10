@@ -195,7 +195,7 @@ function getAssignedPicklistValues($tableName, $roleid, $adb, $lang=array(), &$p
 	} else {
 	$arr = array();
 	
-	$properties = getPicklistProperties($tableName, $roleId, $cache);
+	$properties = getPicklistProperties($tableName, $roleid, $cache);
 	if($properties){
 		$picklistid = $properties["picklistid"];
 

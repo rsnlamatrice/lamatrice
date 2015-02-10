@@ -57,10 +57,10 @@ class ListViewController {
 		$this->headerSortingEnabled = $enabled;
 	}
 
-	public function setupAccessiblePicklistValueList($name) {
+	public function setupAccessiblePicklistValueList($name, $forceRole = FALSE) {
 		$isRoleBased = vtws_isRoleBasedPicklist($name);
 		$this->picklistRoleMap[$name] = $isRoleBased;
-		if ($this->picklistRoleMap[$name]) {
+		if ($forceRole || $this->picklistRoleMap[$name]) {
 			$picklistvaluesData = array();
 			$this->picklistValueMap[$name] = getAssignedPicklistValues($name,$this->user->roleid, $this->db, array(), $picklistvaluesData);
 			$this->picklistValueDataMap[$name] = $picklistvaluesData;
@@ -218,15 +218,13 @@ class ListViewController {
 				}
 			}
 		}
-
 		foreach ($listViewFields as $fieldName) {
 			$fieldDataType = $moduleFields[$fieldName]->getFieldDataType();
 			/* ED141128 suppr de !$is_admin && */
 			if($fieldDataType == 'picklist'
 			|| $fieldDataType == 'multipicklist' 
 			|| $fieldDataType == 'buttonSet' ) {
-				$this->setupAccessiblePicklistValueList($fieldName);
-				break;
+				$this->setupAccessiblePicklistValueList($fieldName, true);
 			}
 		}
 		
@@ -343,15 +341,16 @@ class ListViewController {
 							&& strtolower($value) != '--none--' && strtolower($value) != 'none' ) {
 						$value = "<font color='red'>". Vtiger_Language_Handler::getTranslatedString('LBL_NOT_ACCESSIBLE',
 								$module)."</font>";
-					//ED150210 uicolor ?	TODO : empty picklistValueDataMap !
-					} elseif(isset($this->picklistValueDataMap[$fieldName][$val])
-					      && isset($this->picklistValueDataMap[$fieldName][$val]['uicolor'])){
+					//ED150210 uicolor ?	TODO : les accents foutent le bordel !
+					} elseif($value != ''
+					      && isset($this->picklistValueDataMap[$fieldName][$value])
+					      && isset($this->picklistValueDataMap[$fieldName][$value]['uicolor'])){
 						$uicolor = $this->picklistValueDataMap[$fieldName][$value]['uicolor'];
 						$value = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
-							. $value;
+							. Vtiger_Language_Handler::getTranslatedString($value, $module);
 					} else {
-						//var_dump($fieldName, $this->picklistValueDataMap[$fieldName], $val);
-						$value = Vtiger_Language_Handler::getTranslatedString($value,$module);
+						//var_dump($fieldName, $this->picklistValueDataMap[$fieldName], $value);
+						$value = Vtiger_Language_Handler::getTranslatedString($value, $module);
 						$value = textlength_check($value);
 					}
 				//date
@@ -570,7 +569,6 @@ class ListViewController {
 				//buttonSet
 				} elseif($fieldDataType == 'buttonSet'){
 					if($value !== null){
-						$module = Vtiger_Module_Model::getInstance($this->queryGenerator->getModule());
 						$values = $module->getListViewPicklistValues($fieldName);
 						if(is_array($values) && array_key_exists($value, $values)){
 							$value = '<span class="' . $values[$value]['icon'] . '">' . $values[$value]['label'] . '</span>';
