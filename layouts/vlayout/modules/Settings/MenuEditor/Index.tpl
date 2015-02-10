@@ -63,7 +63,7 @@
 			
 			{* ED141226 *}
 			<div class="row-fluid paddingTop20">
-				<div class=" span2" style="margin-top: 6px;">Dupliquer depuis le rôle&nbsp;&nbsp;</div>
+				<div class=" span2" style="margin-top: 6px;">Dupliquer <u>depuis</u> le rôle&nbsp;&nbsp;</div>
 				<div class="span8"><select id="duplicateroleselector" name="duplicate-roleid">
 					{if !$DUPLICATE_ROLE}{assign var=DUPLICATE_ROLE value=$CURRENT_ROLE}{/if}
 					{foreach key=ROLEID item=ROLE from=$ALL_ROLES}

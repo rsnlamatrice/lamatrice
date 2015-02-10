@@ -237,8 +237,8 @@
 		    * ajout des champs complémentaires du règlement
 		    *}
 		    {if $MODULE eq 'Invoice'}
-			<span class="pull-right" style="margin-right: 12px;">
-			    {$FINAL_DETAILS["receivedcomments"]}
+			<span class="pull-right" id="invoice-recu">
+			    {str_replace("\n", "<br>", $FINAL_DETAILS["receivedcomments"])}
 			</span>
 		    {/if}
 		</td>
@@ -251,4 +251,17 @@
 			{/if}
 		    </span>
 		</td>
+	    </tr>
+	    <tr>
+		<td width="83%">
+		    <span class="pull-right">
+			<b>Reste à payer</b>
+		    </span>
+		</td>
+		<td>
+		    <span class="pull-right">
+			{$FINAL_DETAILS["balance"]}
+		    </span>
+		</td>
+	    </tr>
 	</table>

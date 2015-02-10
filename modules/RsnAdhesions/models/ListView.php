@@ -18,7 +18,7 @@ class RsnAdhesions_ListView_Model extends Vtiger_ListView_Model {
 
 	function getQuery() {
 		
-		$listQuery = 'SELECT f.invoicedate AS dateadhesion, f.accountid as compte, lg.`listprice` as montant
+		$listQuery = 'SELECT f.invoicedate, f.accountid as compte, lg.`listprice` as montant
 		, p.service_no as origine, f.invoiceid as rsnadhesionsid
 		FROM `vtiger_inventoryproductrel` lg
 		INNER JOIN `vtiger_service` p

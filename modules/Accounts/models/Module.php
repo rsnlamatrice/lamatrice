@@ -67,9 +67,8 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 				$condition = " vtiger_account.accountid != '$record'";
 			}
 
-			$position = stripos($listQuery, 'where');
-			if($position) {
-				$split = spliti('where', $listQuery);
+			$split = preg_split('/\sWHERE\s/i', $listQuery);
+			if($split) {
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $listQuery. ' WHERE ' . $condition;
@@ -127,84 +126,18 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 			
 		case 'get_rsndons':
 			$servicecategory = 'Dons';
+			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
 		case 'get_rsnadhesions':
 			$servicecategory = 'Adhésion';
+			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
 		case 'get_rsnabonnements':
 			$servicecategory = 'Abonnement';
-		case 'get_rsndons ou get_rsnadhesions ou get_rsnabonnements':
-		
-			$focus = CRMEntity::getInstance($this->getName());
-			$focus->id = $recordId;
-			$entityIds = $focus->getRelatedContactsIds();
-			$entityIds = implode(',', $entityIds);
-
-			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
-
-			$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
-				, vtiger_crmentity.*, f.invoicedate AS datedon, f.accountid as compte
-					, lg.`listprice` * ( 1 + CASE
-						WHEN NOT tax1 IS NULL THEN tax1 / 100
-						WHEN NOT tax2 IS NULL THEN tax2 / 100
-						WHEN NOT tax3 IS NULL THEN tax3 / 100
-						WHEN NOT tax4 IS NULL THEN tax4 / 100
-						ELSE 0 END
-					) as montant
-				, p.servicename as origine, "" as origine_detail
-				, p.serviceid
-				, f.invoiceid as vtiger_rsndonsid
-				, p.servicecategory
-				, fcf.campaign_no
-				, fcf.notesid
-				, vtiger_crmentity.smownerid AS assigned_user_id
-				FROM `vtiger_inventoryproductrel` lg
-				INNER JOIN `vtiger_service` p
-					ON lg.productid = p.serviceid
-					AND p.servicecategory = \''.$servicecategory.'\'
-				INNER JOIN `vtiger_invoice` f
-					ON lg.id = f.invoiceid
-				INNER JOIN `vtiger_crmentity`
-					ON vtiger_crmentity.crmid = f.invoiceid
-				INNER JOIN `vtiger_account` a
-					ON a.accountid = f.accountid   
-				LEFT JOIN `vtiger_invoicecf` fcf
-					ON fcf.invoiceid = f.invoiceid
-				LEFT JOIN vtiger_users
-					ON vtiger_users.id = vtiger_crmentity.smownerid
-				LEFT JOIN vtiger_groups
-					ON vtiger_groups.groupid = vtiger_crmentity.smownerid
-				WHERE vtiger_crmentity.deleted = 0
-				AND ( a.accountid = '.$recordId;
-			if($entityIds) {
-				$query .= " OR f.contactid IN (".$entityIds."))";
-			} else {
-				$query .= ")";
-			}
-			$relatedModuleName = $relatedModule->getName();
-			$query .= $this->getSpecificRelationQuery($relatedModuleName);
-			$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
-			if ($nonAdminQuery) {
-				$query = appendFromClauseToQuery($query, $nonAdminQuery);
-			}
-			//echo('<pre>'.$query . '</pre>');
-			
-			break;
+			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
 			
 		case 'get_rsnprelevements' :
 			
 			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 
-			/*$query = "SELECT CASE WHEN (vtiger_users.user_name not like '') THEN $userNameSql ELSE vtiger_groups.groupname END AS user_name,
-						vtiger_crmentity.*, vtiger_activity.activitytype, vtiger_activity.subject, vtiger_activity.date_start, vtiger_activity.time_start,
-						vtiger_activity.recurringtype, vtiger_activity.due_date, vtiger_activity.time_end, vtiger_seactivityrel.crmid AS parent_id,
-						CASE WHEN (vtiger_activity.activitytype = 'Task') THEN (vtiger_activity.status) ELSE (vtiger_activity.eventstatus) END AS status
-						FROM vtiger_activity
-						INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_activity.activityid
-						LEFT JOIN vtiger_seactivityrel ON vtiger_seactivityrel.activityid = vtiger_activity.activityid
-						LEFT JOIN vtiger_cntactivityrel ON vtiger_cntactivityrel.activityid = vtiger_activity.activityid
-						LEFT JOIN vtiger_users ON vtiger_users.id = vtiger_crmentity.smownerid
-						LEFT JOIN vtiger_groups ON vtiger_groups.groupid = vtiger_crmentity.smownerid
-						WHERE vtiger_crmentity.deleted = 0 AND vtiger_activity.activitytype <> 'Emails'
-							AND (vtiger_seactivityrel.crmid = ".$recordId;*/
 			$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
 				, vtiger_crmentity.*, p.*
 				/*, vtiger_crmentity.smownerid AS assigned_user_id*/
@@ -277,6 +210,67 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 
 
 	
+
+	/* 
+	 * Cas particuliers de la fonction ci-dessus pour les modules affichant une seule catégorie de service
+	 * ED150203
+	 */
+	public function getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory) {
+		$focus = CRMEntity::getInstance($this->getName());
+		$focus->id = $recordId;
+		$entityIds = $focus->getRelatedContactsIds();
+		$entityIds = implode(',', $entityIds);
+
+		$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
+
+		$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
+			, vtiger_crmentity.*, f.invoicedate, f.accountid as compte
+				, lg.`listprice` * ( 1 + CASE
+					WHEN NOT tax1 IS NULL THEN tax1 / 100
+					WHEN NOT tax2 IS NULL THEN tax2 / 100
+					WHEN NOT tax3 IS NULL THEN tax3 / 100
+					WHEN NOT tax4 IS NULL THEN tax4 / 100
+					ELSE 0 END
+				) as montant
+			, p.servicename as origine, "" as origine_detail
+			, p.serviceid
+			, f.invoiceid
+			, p.servicecategory
+			, fcf.campaign_no
+			, fcf.notesid
+			, vtiger_crmentity.smownerid AS assigned_user_id
+			FROM `vtiger_inventoryproductrel` lg
+			INNER JOIN `vtiger_service` p
+				ON lg.productid = p.serviceid
+				AND p.servicecategory = \''.$servicecategory.'\'
+			INNER JOIN `vtiger_invoice` f
+				ON lg.id = f.invoiceid
+			INNER JOIN `vtiger_crmentity`
+				ON vtiger_crmentity.crmid = f.invoiceid
+			INNER JOIN `vtiger_account` a
+				ON a.accountid = f.accountid   
+			LEFT JOIN `vtiger_invoicecf` fcf
+				ON fcf.invoiceid = f.invoiceid
+			LEFT JOIN vtiger_users
+				ON vtiger_users.id = vtiger_crmentity.smownerid
+			LEFT JOIN vtiger_groups
+				ON vtiger_groups.groupid = vtiger_crmentity.smownerid
+			WHERE vtiger_crmentity.deleted = 0
+			AND ( a.accountid = '.$recordId;
+		if($entityIds) {
+			$query .= " OR f.contactid IN (".$entityIds."))";
+		} else {
+			$query .= ")";
+		}
+		$relatedModuleName = $relatedModule->getName();
+		$query .= $this->getSpecificRelationQuery($relatedModuleName);
+		$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
+		if ($nonAdminQuery) {
+			$query = appendFromClauseToQuery($query, $nonAdminQuery);
+		}
+		//echo('<pre>'.$query . '</pre>');
+		return $query;
+	}
 	
 
 	/**

@@ -762,8 +762,10 @@ echo('$rawData'); var_dump($rawData);*/
 					$roleid=$current_user->roleid;
 				//else
 				//	$roleid = false;
-		    $query = 'SELECT vtiger_tab.`tabid`, vtiger_tab.`name`, vtiger_tab.`presence`, vtiger_tab.`tablabel`, vtiger_tab.`modifiedby`, vtiger_tab.`modifiedtime`, vtiger_tab.`customized`, vtiger_tab.`ownedby`, vtiger_tab.`isentitytype`, vtiger_tab.`version`, vtiger_tab.`parent`
-			, ' . ($roleid ? 'IFNULL(vtiger_rsnroletabsequence.`tabsequence`, vtiger_tab.`tabsequence`) AS `tabsequence`' : '`tabsequence`') . '
+		    $query = 'SELECT vtiger_tab.`tabid`, vtiger_tab.`name`, vtiger_tab.`presence`, vtiger_tab.`tablabel`
+			, vtiger_tab.`modifiedby`, vtiger_tab.`modifiedtime`, vtiger_tab.`customized`, vtiger_tab.`ownedby`
+			, vtiger_tab.`isentitytype`, vtiger_tab.`version`, vtiger_tab.`parent`
+			, ' . ($roleid ? 'IFNULL(vtiger_rsnroletabsequence.`tabsequence`, vtiger_tab.`tabsequence` * 1)' : '`tabsequence` * 1') . ' AS `tabsequence`
 			FROM vtiger_tab
 			';
 			if($roleid){

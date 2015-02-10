@@ -41,6 +41,8 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 				//Billing Address Fields
 				array('parentField'=>'mailingcity', 'inventoryField'=>'bill_city', 'defaultValue'=>''),
 				array('parentField'=>'mailingstreet', 'inventoryField'=>'bill_street', 'defaultValue'=>''),
+				array('parentField'=>'mailingstreet2', 'inventoryField'=>'bill_street2', 'defaultValue'=>''),
+				array('parentField'=>'mailingstreet3', 'inventoryField'=>'bill_street3', 'defaultValue'=>''),
 				array('parentField'=>'mailingstate', 'inventoryField'=>'bill_state', 'defaultValue'=>''),
 				array('parentField'=>'mailingzip', 'inventoryField'=>'bill_code', 'defaultValue'=>''),
 				array('parentField'=>'mailingcountry', 'inventoryField'=>'bill_country', 'defaultValue'=>''),
@@ -48,6 +50,8 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 
 				//Shipping Address Fields
 				array('parentField'=>'otherstreet', 'inventoryField'=>'ship_street', 'defaultValue'=>''),
+				array('parentField'=>'otherstreet2', 'inventoryField'=>'ship_street2', 'defaultValue'=>''),
+				array('parentField'=>'otherstreet3', 'inventoryField'=>'ship_street3', 'defaultValue'=>''),
 				array('parentField'=>'othercity', 'inventoryField'=>'ship_city', 'defaultValue'=>''),
 				array('parentField'=>'otherstate', 'inventoryField'=>'ship_state', 'defaultValue'=>''),
 				array('parentField'=>'otherzip', 'inventoryField'=>'ship_code', 'defaultValue'=>''),
@@ -225,7 +229,9 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	/**
-	 *
+	 * Retourne le compte du contact.
+	 * Si absent, le génère.
+	 * ED150000
 	 */
 	public function getAccountRecordModel($createIfNone = true){
 		//echo '<pre>'; var_dump($this);echo '</pre>'; 
@@ -233,21 +239,80 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		// creation d'un compte par défaut                                      
 		if(($account_id == null || $account_id == '0') ){
 			if(!$createIfNone) return false;
-			//var_dump("getCleanInstance");
+			
 			$account = Vtiger_Record_Model::getCleanInstance('Accounts');    
-			//var_dump("set('accountname'," .  trim($this->get('lastname') . ' ' . $this->get('firstname')));
-			$account->set('accountname', decode_html(trim($this->get('lastname') . ' ' . $this->get('firstname'))));
 			$account->set('mode', 'create');
+			
+			// Nom en majsucules
+			$account->set('accountname', decode_html(trim($this->get('lastname') . ' ' . $this->get('firstname'))));
+			// Synchro de l'adresse
+			$this->updateAccountAddress($account, false);
+			// Save account
 			$account->save();
+			
+			// Update contact
+			$this->set('mode', 'edit');
+			
 			$account_id = $account->getId();
-			//var_dump($account_id);
 			$this->set('account_id', $account_id);
 			$this->set('reference', 1);// contact referent du compte
-			//var_dump($this->get('account_id'));
-			$this->set('mode', 'edit');
+			
 			$this->save();
 			return $account;
 		}	
 		return Vtiger_Record_Model::getInstanceById($account_id, 'Accounts');
+	}
+	
+	/**
+	 * Recopie l'adresse du contact vers l'adresse du compte et des autres contacts référents du même compte.
+	 * ED150205
+	 */
+	public function synchronizeAddressToOthers(){
+		$this->updateAccountAddress();
+		// update contacts en compte commun
+		$this->updateContactsComptesCommunsAddress();
+	}
+	
+	/**
+	 * Recopie l'adresse du contact dans l'adresse du compte.
+	 * ED150205
+	 */
+	public function updateAccountAddress($account = false, $save = true){
+		//echo '<pre>'; var_dump($this);echo '</pre>'; 
+		$account_id = $this->get('account_id');
+		if(!$account
+		&& !($account_id == null || $account_id == '0') ){
+			$account = $this->getAccountRecordModel(false);
+		}
+		if($account){
+			if($save)
+				$account->set('mode', 'edit');
+			
+			$thisFields = $this->getModule()->getFields();
+			//Parcourt les champs
+			foreach($thisFields as $fieldName => $field){
+				// Champ commençant par "mailing"
+				if(strpos($fieldName, 'mailing') === 0){
+					if($fieldName == 'mailingzip'){
+						$account->set('bill_code', $this->get($fieldName));
+					}
+					else
+						$account->set('bill_' . substr($fieldName, 7), $this->get($fieldName));
+				}
+				//else var_dump($fieldName);
+			
+			}
+			if($save)
+				$account->save();
+		}		
+		return $account;
+	}
+	
+	/**
+	 * Recopie l'adresse des contacts référents du même compte.
+	 * ED150205
+	 */
+	public function updateContactsComptesCommunsAddress($account = false, $save = true){
+		
 	}
 }

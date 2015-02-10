@@ -21,6 +21,8 @@ Vtiger_Edit_Js("Accounts_Edit_Js",{
 	//Address field mapping within module
 	addressFieldsMappingInModule : {
 		'bill_street':'ship_street',
+		'bill_street2':'ship_street2',
+		'bill_street3':'ship_street3',
 		'bill_pobox':'ship_pobox',
 		'bill_city'	:'ship_city',
 		'bill_state':'ship_state',

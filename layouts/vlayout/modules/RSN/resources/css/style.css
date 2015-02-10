@@ -192,3 +192,20 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
   display: inline-block;
   margin-right: 6px;
 }
+
+/* Invoice, Inventory */
+/* reçu */
+#invoice-recu {
+  padding-right: 1em;
+}
+#detailView #invoice-recu {
+  text-align: right;
+}
+/* sous-tables (reçu) */
+#detailView .table table th, #EditView .table table th, #detailView .table table td, #EditView .table table td ,
+form#EditView table table th, .profileDetailView table table th, form#EditView table table td, .profileDetailView table table td {
+    border-bottom: none !important;
+    line-height: normal;
+    padding: 2px;
+    white-space: nowrap;
+}

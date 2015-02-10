@@ -352,11 +352,21 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 */
 	public function isEditable() {
 		if(!$this->isEditEnabled()
-				|| !$this->isViewable() ||
-				((int)$this->get('displaytype')) != 1 ||
-				$this->isReadOnly() == true ||
-				$this->get('uitype') ==  4) {
-
+		|| !$this->isViewable()
+		|| ((int)$this->get('displaytype')) != 1
+		|| $this->isReadOnly() == true
+		|| $this->get('uitype') ==  4) {
+			/*if(!$this->isEditEnabled())
+				echo $this->getName() . ' ! isEditEnabled';
+			elseif(!$this->isViewable())
+				echo $this->getName() . ' ! isViewable';
+			elseif(((int)$this->get('displaytype')) != 1)
+				echo $this->getName() . ' displaytype != 1';
+			elseif($this->isReadOnly() == true)
+				echo $this->getName() . ' isReadOnly';
+			elseif($this->get('uitype') ==  4)
+				echo $this->getName() . ' uitype 4';
+			*/
 			return false;
 		}
 		return true;

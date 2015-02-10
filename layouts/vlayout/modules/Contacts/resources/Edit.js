@@ -12,6 +12,8 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 	addressFieldsMapping : {'Accounts' :
 									{'mailingstreet' : 'bill_street',  
 									'otherstreet' : 'ship_street', 
+									'otherstreet2' : 'ship_street2', 
+									'otherstreet3' : 'ship_street3', 
 									'mailingpobox' : 'bill_pobox',
 									'otherpobox' : 'ship_pobox',
 									'mailingcity' : 'bill_city',
@@ -27,12 +29,14 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 							
 	//Address field mapping within module
 	addressFieldsMappingInModule : {
-										'otherstreet' : 'mailingstreet',
-										'otherpobox' : 'mailingpobox',
-										'othercity' : 'mailingcity',
-										'otherstate' : 'mailingstate',
-										'otherzip' : 'mailingzip',
-										'othercountry' : 'mailingcountry'
+									'otherstreet' : 'mailingstreet',
+									'otherstreet2' : 'mailingstreet2',
+									'otherstreet3' : 'mailingstreet3',
+									'otherpobox' : 'mailingpobox',
+									'othercity' : 'mailingcity',
+									'otherstate' : 'mailingstate',
+									'otherzip' : 'mailingzip',
+									'othercountry' : 'mailingcountry'
 								},
 	
 	

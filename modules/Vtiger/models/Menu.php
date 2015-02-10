@@ -24,7 +24,9 @@ class Vtiger_Menu_Model extends Vtiger_Module_Model {
         $userPrivModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
         $restrictedModulesList = array('Emails', 'ProjectMilestone', 'ProjectTask', 'ModComments', 'Rss', 'Portal',
 					'Integration', 'PBXManager', 'Dashboard', 'Home', 'vtmessages', 'vttwitter');
-
+	/*echo "<br><br><br><br><br>";
+	var_dump($roleid);
+	echo_callstack();*/
 //$db = PearDatabase::getInstance();
 //$db->setDebug(true);
         $allModules = parent::getAll(array('0','2'), array(), $roleid);

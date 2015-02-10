@@ -102,7 +102,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		//get the inventory terms and conditions
 		//$inventoryRecordModel = Inventory_Record_Model::getCleanInstance($moduleName);
 		$termsAndConditions = $recordModel->getInventoryTermsandConditions();
-		
+			
 		
 		foreach($requestFieldList as $fieldName=>$fieldValue) {
 			$fieldModel = $fieldList[$fieldName];

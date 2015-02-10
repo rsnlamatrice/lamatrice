@@ -36,7 +36,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	//Will have the mapping of address fields based on the modules
 	addressFieldsMapping : {'Contacts' :
 								{'bill_street' :  'mailingstreet',
+								'bill_street2' :  'mailingstreet2',
+								'bill_street3' :  'mailingstreet3',
 								'ship_street' : 'otherstreet',
+								'ship_street2' : 'otherstreet2',
+								'ship_street3' : 'otherstreet3',
 								'bill_pobox' : 'mailingpobox',
 								'ship_pobox' : 'otherpobox',
 								'bill_city' : 'mailingcity',
@@ -52,7 +56,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 							'Accounts' :
 								{
 								'bill_street' :  'bill_street',
+								'bill_street2' :  'bill_street2',
+								'bill_street3' :  'bill_street3',
 								'ship_street' : 'ship_street',
+								'ship_street2' : 'ship_street2',
+								'ship_street3' : 'ship_street3',
 								'bill_pobox' : 'bill_pobox',
 								'ship_pobox' : 'ship_pobox',
 								'bill_city' : 'bill_city',
@@ -68,7 +76,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 							'Vendors' :
 								{
 								'bill_street' : 'street',
+								'bill_street2' : 'street2',
+								'bill_street3' : 'street3',
 								'ship_street' : 'street',
+								'ship_street2' : 'street2',
+								'ship_street3' : 'street3',
 								'bill_pobox' : 'pobox',
 								'ship_pobox' : 'pobox',
 								'bill_city' : 'city',
@@ -86,6 +98,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	addressFieldsMappingBetweenModules:{
 								'AccountsBillMap' : {
 									'bill_street' :  'bill_street',
+									'bill_street2' :  'bill_street2',
+									'bill_street3' :  'bill_street3',
 									'bill_pobox' : 'bill_pobox',
 									'bill_city' : 'bill_city',
 									'bill_state' : 'bill_state',
@@ -94,6 +108,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 									},
 								'AccountsShipMap' : {
 									'ship_street' : 'ship_street',
+									'ship_street2' : 'ship_street2',
+									'ship_street3' : 'ship_street3',
 									'ship_pobox' : 'ship_pobox',
 									'ship_city'  : 'ship_city',
 									'ship_state' : 'ship_state',
@@ -102,6 +118,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 									},
 								'ContactsBillMap' : {
 									'bill_street' :  'mailingstreet',
+									'bill_street2' :  'mailingstreet2',
+									'bill_street3' :  'mailingstreet3',
 									'bill_pobox' : 'mailingpobox',
 									'bill_city' : 'mailingcity',
 									'bill_state' : 'mailingstate',
@@ -110,18 +128,22 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 									},
 								'ContactsShipMap' : {
 									'ship_street' : 'otherstreet',
+									'ship_street2' : 'otherstreet2',
+									'ship_street3' : 'otherstreet3',
 									'ship_pobox' : 'otherpobox',
 									'ship_city'  : 'othercity',
 									'ship_state' : 'otherstate',
 									'ship_code' : 'otherzip',
 									'ship_country' : 'othercountry'
-									}
+								}
 		
 	},
 							
 	//Address field mapping within module
 	addressFieldsMappingInModule : {
 										'bill_street':'ship_street',
+										'bill_street2':'ship_street2',
+										'bill_street3':'ship_street3',
 										'bill_pobox':'ship_pobox',
 										'bill_city'	:'ship_city',
 										'bill_state':'ship_state',
@@ -451,8 +473,20 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	getGrandTotal : function() {
 		return parseFloat(jQuery('#grandTotal').text());
 	},
+	
 
-    loadRowSequenceNumber: function() {
+	getReceived : function() {
+		return parseFloat(jQuery('#received').val());
+	},
+	
+	
+	//ED150129 : set balance (solde, reste à payer)
+	setBalance : function(value) {
+		jQuery('#balance').val(value);
+		return this;
+	},
+
+	loadRowSequenceNumber: function() {
 		if(this.rowSequenceHolder == false) {
 			this.rowSequenceHolder = jQuery('.' + this.rowClass, this.getLineItemContentsContainer()).length;
 		}
@@ -885,6 +919,18 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		
 		grandTotal = grandTotal.toFixed(2);
 		this.setGrandTotal(grandTotal);
+		this.calculateBalance(grandTotal);
+	},
+
+	/*ED150129*/
+	calculateBalance : function(grandTotal){
+		if(grandTotal === undefined)
+		    grandTotal = this.getGrandTotal();
+		var received = this.getReceived();
+		var balance = grandTotal - received;
+		
+		balance = balance.toFixed(2);
+		this.setBalance(balance);
 	},
 
 	registerFinalDiscountShowEvent : function(){
@@ -910,7 +956,17 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		jQuery('.finalDiscountSave').on('click',function(e){
 			thisInstance.finalDiscountChangeActions();
 		});
-    },
+	},
+
+	/*ED150126
+	 * event received.changed
+	 */
+	registerFinalReceivedValueChangeEvent : function(){
+		var thisInstance = this;
+		jQuery('#received').on('change',function(e){
+			thisInstance.calculateBalance();
+		});
+	},
 
 	registerLineItemActionSaveEvent : function(){
 		var editForm =  this.getForm();
@@ -997,6 +1053,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.registerFinalDiscountShowEvent();
 		this.registerFinalDiscountValueChangeEvent();
 		this.registerFinalDiscountChangeEvent();
+		//ED150129
+		this.registerFinalReceivedValueChangeEvent();
 
 		this.registerLineItemActionSaveEvent();
 		this.registerLineItemsPopUpCancelClickEvent();

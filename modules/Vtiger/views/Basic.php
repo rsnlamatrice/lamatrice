@@ -26,8 +26,11 @@ abstract class Vtiger_Basic_View extends Vtiger_Footer_View {
 		parent::preProcess($request, false);
 
 		$viewer = $this->getViewer($request);
-
-		$menuModelsList = Vtiger_Menu_Model::getAll(true);
+		
+		global $current_user;
+		$roleid=$current_user->roleid;
+	
+		$menuModelsList = Vtiger_Menu_Model::getAll(true, $roleid);
 		$selectedModule = $request->getModule();
 		$menuStructure = Vtiger_MenuStructure_Model::getInstanceFromMenuList($menuModelsList, $selectedModule);
 
