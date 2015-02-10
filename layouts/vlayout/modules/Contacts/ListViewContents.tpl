@@ -72,10 +72,6 @@
 				{* ED141006 *}
 				{assign var=FIELD_NAME value=$LISTVIEW_HEADER->getFieldName()}
 				{assign var=IS_GROUP_FIELD value=$FIELD_NAME == "isgroup"}
-				{assign var=IS_BUTTONSET value=$LISTVIEW_HEADER->get('uitype') eq '402'}
-				{if $IS_BUTTONSET}
-					{assign var=tmp value=$LISTVIEW_HEADER->set('picklist_values',$RECORD_MODEL->getListViewPicklistValues($FIELD_NAME))}
-				{/if}
 				<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}{if !$IS_GROUP_FIELD} class="{$WIDTHTYPE}"{/if}>
 					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">
 						{if $IS_GROUP_FIELD}
@@ -98,38 +94,8 @@
 			{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
 			{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
 			{assign var=IS_GROUP_FIELD value=$LISTVIEW_HEADERNAME == "isgroup"}
-			{assign var=IS_BUTTONSET value=$LISTVIEW_HEADER->get('uitype') eq '402'}
 			<td class="listViewEntryValue {if !$IS_GROUP_FIELD}{$WIDTHTYPE}{/if}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap>
-				{* ED141010 *}
-				{if $IS_BUTTONSET}
-					{assign var=PICKLIST_VALUES value=$LISTVIEW_HEADER->get('picklist_values')}
-					{assign var=FIELD_VALUE value=$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-					{if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
-					{if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=$LISTVIEW_HEADER->getDefaultFieldValue()}{/if}
-					{if $PICKLIST_VALUES && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES)}
-						{assign var=PICKLIST_ITEM value=$PICKLIST_VALUES[$FIELD_VALUE]}
-					{else}
-						{assign var=PICKLIST_ITEM value=$FIELD_VALUE}
-					{/if}
-					{if is_array($PICKLIST_ITEM)}
-						{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
-						{if isset($PICKLIST_ITEM['class'])}
-						    {assign var=PICKLIST_CLASS value=$PICKLIST_ITEM['class']}
-						{else}
-						    {assign var=PICKLIST_CLASS value=''}
-						{/if}
-						{assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
-					{else}
-						{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
-						{assign var=PICKLIST_ICON value=false}
-						{assign var=PICKLIST_CLASS value=false}
-					{/if}
-					<label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
-					{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>
-					{else}
-					    &nbsp;{$PICKLIST_LABEL}
-					{/if}</label>
-				{else if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
+				{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
 					<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
 				{else if $LISTVIEW_HEADER->get('uitype') eq '72'}
 					{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
@@ -138,8 +104,6 @@
 					{else}
 						{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
 					{/if}
-				{elseif	$LISTVIEW_HEADER->get('uitype') eq '402'}
-				
 				{else}
 					{$LISTVIEW_ENTRY->getDisplayValue($LISTVIEW_HEADERNAME)}{*TODO optimise si on ne laisse que ->get( *}
 				{/if}
