@@ -201,61 +201,13 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			
 		case 'get_rsndons':
 			$servicecategory = 'Dons';
+			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
 		case 'get_rsnadhesions':
 			$servicecategory = 'Adhésion';
+			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
 		case 'get_rsnabonnements':
 			$servicecategory = 'Abonnement';
-		case 'get_rsndons ou get_rsnadhesions ou get_rsnabonnements':
-			
-			$focus = CRMEntity::getInstance($this->getName());
-			$focus->id = $recordId;
-
-			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
-
-			$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
-				, vtiger_crmentity.*, f.invoicedate, f.accountid as compte
-				, lg.`listprice` * ( 1 + CASE
-						WHEN NOT tax1 IS NULL THEN tax1 / 100
-						WHEN NOT tax2 IS NULL THEN tax2 / 100
-						WHEN NOT tax3 IS NULL THEN tax3 / 100
-						WHEN NOT tax4 IS NULL THEN tax4 / 100
-						ELSE 0 END
-					) as montant
-				, p.servicename as origine, "" as origine_detail
-				, p.serviceid
-				, f.invoiceid as vtiger_rsndonsid
-				, p.servicecategory
-				, fcf.campaign_no
-				, fcf.notesid
-				, f.invoiceid as vtiger_rsndonsid
-				, vtiger_crmentity.smownerid AS assigned_user_id
-				FROM `vtiger_inventoryproductrel` lg
-				JOIN `vtiger_service` p
-					ON lg.productid = p.serviceid
-					AND p.servicecategory = \''. $servicecategory .'\'
-				JOIN `vtiger_invoice` f
-					ON lg.id = f.invoiceid
-				JOIN `vtiger_crmentity`
-					ON vtiger_crmentity.crmid = f.invoiceid
-				JOIN vtiger_contactdetails cd
-					ON cd.accountid = f.accountid
-				LEFT JOIN `vtiger_invoicecf` fcf
-					ON fcf.invoiceid = f.invoiceid
-				LEFT JOIN vtiger_users
-					ON vtiger_users.id = vtiger_crmentity.smownerid
-				LEFT JOIN vtiger_groups
-					ON vtiger_groups.groupid = vtiger_crmentity.smownerid
-				WHERE vtiger_crmentity.deleted = 0
-				AND cd.contactid = '.$recordId;
-				
-			$relatedModuleName = $relatedModule->getName();
-			$query .= $this->getSpecificRelationQuery($relatedModuleName);
-			$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
-			if ($nonAdminQuery) {
-				$query = appendFromClauseToQuery($query, $nonAdminQuery);
-			}
-			//echo('<pre>'.$query . '</pre>');
-			break;
+			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
 		
 		case 'get_rsnprelevements':
 			
@@ -327,6 +279,62 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		return $query;
 	}
 
+	/* 
+	 * Cas particuliers de la fonction ci-dessus pour les modules affichant une seule catégorie de service
+	 * ED150203
+	 */
+	public function getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory) {
+		$focus = CRMEntity::getInstance($this->getName());
+		$focus->id = $recordId;
+
+		$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
+
+		$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
+			, vtiger_crmentity.*, f.invoicedate, f.accountid as compte
+			, lg.`listprice` * ( 1 + CASE
+					WHEN NOT tax1 IS NULL THEN tax1 / 100
+					WHEN NOT tax2 IS NULL THEN tax2 / 100
+					WHEN NOT tax3 IS NULL THEN tax3 / 100
+					WHEN NOT tax4 IS NULL THEN tax4 / 100
+					ELSE 0 END
+				) as montant
+			, p.servicename as origine, "" as origine_detail
+			, p.serviceid
+			, f.invoiceid as vtiger_rsndonsid
+			, p.servicecategory
+			, fcf.campaign_no
+			, fcf.notesid
+			, f.invoiceid as vtiger_rsndonsid
+			, vtiger_crmentity.smownerid AS assigned_user_id
+			FROM `vtiger_inventoryproductrel` lg
+			JOIN `vtiger_service` p
+				ON lg.productid = p.serviceid
+				AND p.servicecategory = \''. $servicecategory .'\'
+			JOIN `vtiger_invoice` f
+				ON lg.id = f.invoiceid
+			JOIN `vtiger_crmentity`
+				ON vtiger_crmentity.crmid = f.invoiceid
+			JOIN vtiger_contactdetails cd
+				ON cd.accountid = f.accountid
+			LEFT JOIN `vtiger_invoicecf` fcf
+				ON fcf.invoiceid = f.invoiceid
+			LEFT JOIN vtiger_users
+				ON vtiger_users.id = vtiger_crmentity.smownerid
+			LEFT JOIN vtiger_groups
+				ON vtiger_groups.groupid = vtiger_crmentity.smownerid
+			WHERE vtiger_crmentity.deleted = 0
+			AND cd.contactid = '.$recordId;
+			
+		$relatedModuleName = $relatedModule->getName();
+		$query .= $this->getSpecificRelationQuery($relatedModuleName);
+		$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
+		if ($nonAdminQuery) {
+			$query = appendFromClauseToQuery($query, $nonAdminQuery);
+		}
+		//echo('<pre>'.$query . '</pre>');
+		return $query;
+	}
+	
 	/**
 	 * Function to get list view query for popup window
 	 * @param <String> $sourceModule Parent module
@@ -382,6 +390,9 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	public function saveRecord(Vtiger_Record_Model $recordModel) {
 		// ED141016 : majuscules obligatoires
 		$recordModel->set('lastname', mb_strtoupper(remove_accent($recordModel->get('lastname'))));
+		
+		// ED150205 : synchronisation de l'adresse vers le compte
+		$recordModel->updateAccountAddress(null, true);
 		
 		return parent::saveRecord($recordModel);
 	}

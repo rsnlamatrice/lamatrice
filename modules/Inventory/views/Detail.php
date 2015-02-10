@@ -49,7 +49,7 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 
 		//##Final details convertion started
 		$finalDetails = $relatedProducts[1]['final_details'];
-
+		
 		//Final tax details convertion started
 		$taxtype = $finalDetails['taxtype'];
 		if ($taxtype == 'group') {
@@ -70,10 +70,10 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 		}
 		$finalDetails['sh_taxes'] = $shippingTaxDetails;
 		//Final shipping tax details convertion ended
-
+		
 		$currencyFieldsList = array('adjustment', 'grandTotal', 'hdnSubTotal', 'preTaxTotal', 'tax_totalamount',
 						'shtax_totalamount', 'discountTotal_final', 'discount_amount_final', 'shipping_handling_charge', 'totalAfterDiscount'
-						, 'received' /*ED150127*/
+						, 'received', 'balance' /*ED150127*/
 						);
 		foreach ($currencyFieldsList as $fieldName) {
 			$finalDetails[$fieldName] = Vtiger_Currency_UIType::transformDisplayValue($finalDetails[$fieldName], null, true);

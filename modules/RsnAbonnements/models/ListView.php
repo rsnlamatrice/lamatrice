@@ -18,7 +18,7 @@ class RsnAbonnements_ListView_Model extends Vtiger_ListView_Model {
 
 	function getQuery() {
 		
-		$listQuery = 'SELECT f.invoicedate AS dateabonnement, f.accountid as compte, lg.`listprice` as montant
+		$listQuery = 'SELECT f.invoicedate, f.accountid as compte, lg.`listprice` as montant
 		, p.productcode as origine, f.invoiceid as rsnabonnementsid
 		FROM `vtiger_inventoryproductrel` lg
 		INNER JOIN `vtiger_service` p

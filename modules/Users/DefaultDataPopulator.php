@@ -216,7 +216,11 @@ class DefaultDataPopulator extends CRMEntity {
 		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'modifiedby','vtiger_crmentity',1,'52','modifiedby','Last Modified By',1,0,'',100,23,9,3,'V~O',3,null,'BAS',0)");
 		//Block 11
 		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'bill_street','vtiger_accountbillads',1,'21','bill_street','Billing Address',1,2,'',100,1,11,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'bill_street2','vtiger_accountbillads',1,'21','bill_street2','Billing Address 2',1,2,'',100,1,11,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'bill_street3','vtiger_accountbillads',1,'21','bill_street3','Billing Address 3',1,2,'',100,1,11,1,'V~O',1,null,'BAS',1)");
 		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'ship_street','vtiger_accountshipads',1,'21','ship_street','Shipping Address',1,2,'',100,2,11,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'ship_street2','vtiger_accountshipads',1,'21','ship_street2','Shipping Address 2',1,2,'',100,2,11,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'ship_street3','vtiger_accountshipads',1,'21','ship_street3','Shipping Address 3',1,2,'',100,2,11,1,'V~O',1,null,'BAS',1)");
 
 		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'bill_city','vtiger_accountbillads',1,'1','bill_city','Billing City',1,2,'',100,5,11,1,'V~O',1,null,'BAS',1)");
 		$this->db->query("insert into vtiger_field values (6," . $this->db->getUniqueID("vtiger_field") . ",'ship_city','vtiger_accountshipads',1,'1','ship_city','Shipping City',1,2,'',100,6,11,1,'V~O',1,null,'BAS',1)");
@@ -317,7 +321,11 @@ class DefaultDataPopulator extends CRMEntity {
 		//Block 7 -- Start
 
 		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'mailingstreet','vtiger_contactaddress',1,'21','mailingstreet','Mailing Street',1,2,'',100,1,7,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'mailingstreet2','vtiger_contactaddress',1,'21','mailingstreet2','Mailing Street 2',1,2,'',100,1,7,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'mailingstreet3','vtiger_contactaddress',1,'21','mailingstreet3','Mailing Street 3',1,2,'',100,1,7,1,'V~O',1,null,'BAS',1)");
 		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'otherstreet','vtiger_contactaddress',1,'21','otherstreet','Other Street',1,2,'',100,2,7,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'otherstreet2','vtiger_contactaddress',1,'21','otherstreet2','Other Street 2',1,2,'',100,2,7,1,'V~O',1,null,'BAS',1)");
+		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'otherstreet3','vtiger_contactaddress',1,'21','otherstreet3','Other Street 3',1,2,'',100,2,7,1,'V~O',1,null,'BAS',1)");
 		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'mailingcity','vtiger_contactaddress',1,'1','mailingcity','Mailing City',1,2,'',100,5,7,1,'V~O',1,null,'BAS',1)");
 		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'othercity','vtiger_contactaddress',1,'1','othercity','Other City',1,2,'',100,6,7,1,'V~O',1,null,'BAS',1)");
 		$this->db->query("insert into vtiger_field values (4," . $this->db->getUniqueID("vtiger_field") . ",'mailingstate','vtiger_contactaddress',1,'1','mailingstate','Mailing State',1,2,'',100,7,7,1,'V~O',1,null,'BAS',1)");

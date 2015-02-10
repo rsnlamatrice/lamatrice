@@ -26,7 +26,7 @@ class RsnAbonnements_QuickCreateAjax_View extends Vtiger_QuickCreateAjax_View {
 			}
 		}
 		//ED141022 date du jour par dŽfaut
-		$recordModel->set('dateabonnement', date('Y-m-d'));
+		$recordModel->set('invoicedate', date('Y-m-d'));
 		
 		$servicesList = $moduleModel->getServicesList();
 		//var_dump($servicesList);

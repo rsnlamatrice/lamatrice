@@ -43,6 +43,7 @@ class Vtiger_EditRecordStructure_Model extends Vtiger_RecordStructure_Model {
 						}
 						$values[$blockLabel][$fieldName] = $fieldModel;
 					}
+					//else	var_dump($fieldName);
 				}
 			}
 		}

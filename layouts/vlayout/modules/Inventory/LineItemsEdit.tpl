@@ -319,10 +319,10 @@
                         {/if}
                     </div>
 		    {* ED141226
-		    * ajout des champs complémentaires du règlement
+		    * ajout des champs complÃˆmentaires du rÃ¨glement
 		    *}
 		    {if $MODULE eq 'Invoice'}
-			<div class="pull-right">
+			<div class="pull-right" id="invoice-recu">
                             {foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE}
 				{if $BLOCK_LABEL eq 'LBL_RSNREGLEMENTS'}
 				    <table>

@@ -56,42 +56,42 @@
 			<tr>
 			{assign var=COUNTER value=0}
 			{foreach key=FIELD_NAME item=FIELD_MODEL from=$BLOCK_FIELDS name=blockfields}
-			
-				{if $FIELD_NAME eq 'otherstreet2'
-				|| $FIELD_NAME eq 'mailingstreet2'
-				|| $FIELD_NAME eq 'otherstreet3'
-				|| $FIELD_NAME eq 'mailingstreet3'
-				|| $FIELD_NAME eq 'mailingzip'
-				|| $FIELD_NAME eq 'otherzip'
-				|| $FIELD_NAME eq 'mailingpobox'
-				|| $FIELD_NAME eq 'otherpobox'
-				|| $FIELD_NAME eq 'mailingcountry'
-				|| $FIELD_NAME eq 'othercountry'
-				|| $FIELD_NAME eq 'rsnnpaicomment'}
+
+				{if $FIELD_NAME eq 'ship_street2'
+				|| $FIELD_NAME eq 'bill_street2'
+				|| $FIELD_NAME eq 'ship_street3'
+				|| $FIELD_NAME eq 'bill_street3'
+				|| $FIELD_NAME eq 'bill_code'
+				|| $FIELD_NAME eq 'ship_code'
+				|| $FIELD_NAME eq 'bill_pobox'
+				|| $FIELD_NAME eq 'ship_pobox'
+				|| $FIELD_NAME eq 'bill_country'
+				|| $FIELD_NAME eq 'ship_country'}
 					{continue}
 				{/if}
-				
+					
 				{assign var="isReferenceField" value=$FIELD_MODEL->getFieldDataType()}
-				{if $FIELD_MODEL->get('uitype') eq "20" || $FIELD_MODEL->get('uitype') eq "19"}
+				{if $FIELD_MODEL->get('uitype') eq "20" or $FIELD_MODEL->get('uitype') eq "19"}
 					{if $COUNTER eq '1'}
 						<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td></tr><tr>
 						{assign var=COUNTER value=0}
 					{/if}
 				{/if}
-				
 				{if $COUNTER eq 2}
 					</tr><tr>
 					{assign var=COUNTER value=1}
 				{else}
 					{assign var=COUNTER value=$COUNTER+1}
 				{/if}
+				
 				{if ($COUNTER eq '1')
-				&& ($FIELD_NAME eq 'otherstate'
-				|| $FIELD_NAME eq 'mailingstate')}
+				&& ($FIELD_NAME eq 'ship_state'
+				|| $FIELD_NAME eq 'bill_state')}
 					<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td>
 					{assign var=COUNTER value=$COUNTER+1}
 				{/if}
 				<td class="fieldLabel {$WIDTHTYPE}">
+				
 					{if $isReferenceField neq "reference"}<label class="muted pull-right marginRight10px">{/if}
 					{if $FIELD_MODEL->isMandatory() eq true && $isReferenceField neq "reference"} <span class="redColor">*</span> {/if}
 					{if $isReferenceField eq "reference"}
@@ -119,13 +119,13 @@
 					{else if $FIELD_MODEL->get('uitype') eq "83"}
 						{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) COUNTER=$COUNTER MODULE=$MODULE}
 					{else}
-						{if $FIELD_NAME eq 'othercity'
-						|| $FIELD_NAME eq 'mailingcity'}
+						{if $FIELD_NAME eq 'ship_city'
+						|| $FIELD_NAME eq 'bill_city'}
 							<span class="subFieldLabel">BP, lieu-dit</span>
 							<span class="subFieldLabel">CP, Ville</span>
 							<span class="subFieldLabel">Pays</span>
-						{elseif $FIELD_NAME eq 'otherstreet'
-						|| $FIELD_NAME eq 'mailingstreet'}
+						{elseif $FIELD_NAME eq 'ship_street'
+						|| $FIELD_NAME eq 'bill_street'}
 							<span class="subFieldLabel">&nbsp;</span>
 							<span class="subFieldLabel">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</span>
 							<span class="subFieldLabel" style="color: #88bbbb;">&gt;</span>
@@ -140,16 +140,21 @@
 						<div class="row-fluid">
 							<span class="{if $FIELD_NAME eq 'rsnnpai'}span6{else}span10{/if}">{* ED141005 *}
 								{* street2/3*}
-								{if $FIELD_NAME eq 'otherstreet'
-								|| $FIELD_NAME eq 'mailingstreet'}
+								{if $FIELD_NAME eq 'ship_street'
+								|| $FIELD_NAME eq 'bill_street'}
 									{* street2 *}
 									{assign var=TITLE value='Nom de la structure ou n°appt, n°BAL, escalier, couloir, ...'}
 									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
 									{assign var=FIELD_NAME value=$FIELD_NAME|cat:'2'}
 									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+									
+									{if $FIELD_MODEL == null}
+										{$FIELD_NAME} introuvable
+									{else}
+										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+									{/if}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}									
 								
@@ -160,8 +165,12 @@
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
 									{assign var=FIELD_NAME value=$FIELD_NAME|cat:'3'}
 									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+									{if $FIELD_MODEL == null}
+										{$FIELD_NAME} introuvable
+									{else}
+										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+									{/if}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}									
 								
@@ -170,77 +179,78 @@
 								
 								{* BP pobox*}
 								{* zip code *}
-								{if $FIELD_NAME eq 'othercity'
-								|| $FIELD_NAME eq 'mailingcity'}
+								{if $FIELD_NAME eq 'ship_city'
+								|| $FIELD_NAME eq 'bill_city'}
 									{assign var=TITLE value='Boîte postale, lieu-dit, ...'}
 									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
 									{assign var=FIELD_NAME value=str_replace('city', 'pobox', $FIELD_NAME)}
 									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-large'}
+									{if $FIELD_MODEL == null}
+										{$FIELD_NAME} introuvable
+									{else}
+										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-large'}
+									{/if}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
 									<br>
 									{assign var=TITLE value='Code postal. Pour les adresses étrangères, commence par le code du pays. Exple : BE-6350.'}
 									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
-									{assign var=FIELD_NAME value=str_replace('city', 'zip', $FIELD_NAME)}
+									{assign var=FIELD_NAME value=str_replace('city', 'code', $FIELD_NAME)}
 									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-mini'}
+									{if $FIELD_MODEL == null}
+										{$FIELD_NAME} introuvable
+									{else}
+										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-mini'}
+									{/if}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}	
 								{/if}
 								
 								{* Main : field de la boucle *}
 								{* title (tooltiptext) *}
-								{if $FIELD_NAME eq 'otherstreet'
-								|| $FIELD_NAME eq 'mailingstreet'}
+								{if $FIELD_NAME eq 'ship_street'
+								|| $FIELD_NAME eq 'bill_street'}
 									{assign var=TITLE value='Adresse principale, n° et rue, ...'}
 								{else}
 									{assign var=TITLE value=''}
 								{/if}
+								
 								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 								{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL TITLE=$TITLE}
 								
-								{if $FIELD_NAME eq 'otherstreet'
-								|| $FIELD_NAME eq 'mailingstreet'}
+								{if $FIELD_NAME eq 'ship_street'
+								|| $FIELD_NAME eq 'bill_street'}
 								
 								{* pays *}
-								{elseif $FIELD_NAME eq 'othercity'
-								|| $FIELD_NAME eq 'mailingcity'}
+								{elseif $FIELD_NAME eq 'ship_city'
+								|| $FIELD_NAME eq 'bill_city'}
 									<br>
 									{assign var=TITLE value='Pays'}
 									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
 									{assign var=FIELD_NAME value=str_replace('city', 'country', $FIELD_NAME)}
 									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+									{if $FIELD_MODEL == null}
+										{$FIELD_NAME} introuvable
+									{else}
+										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+									{/if}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
 								
 								{/if}
 								
 							</span>
-							{*rsnnpaicomment*}
-							{if $FIELD_NAME eq 'rsnnpai'}
-								<span class="span5" title="Commentaires sur le NPAI">
-								{assign var=FIELD_NAMETMP value=$FIELD_NAME}
-								{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
-								{assign var=FIELD_NAME value=$FIELD_NAME|cat:'comment'}
-								{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-								{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
-								{assign var=FIELD_NAME value=$FIELD_NAMETMP}
-								{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
-								</span>
-							{/if}
 						</div>
 						
 					</td>
 				{/if}
+				
 				{if $BLOCK_FIELDS|@count eq 1 and $FIELD_MODEL->get('uitype') neq "19" and $FIELD_MODEL->get('uitype') neq "20" and $FIELD_MODEL->get('uitype') neq "30" and $FIELD_MODEL->get('name') neq "recurringtype"}
 					<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td>
 				{/if}

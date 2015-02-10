@@ -68,7 +68,11 @@ class RsnDons_SaveAjax_Action extends Invoice_SaveAjax_Action {
 			$request->setGlobal('copyAddressFromRight', "on");
 			$request->setGlobal('copyAddressFromLeft',"on");
 			$request->setGlobal('bill_street',"-");//TODO
+			$request->setGlobal('bill_street2',"");
+			$request->setGlobal('bill_street3',"");
 			$request->setGlobal('ship_street',"-");
+			$request->setGlobal('ship_street2',"");
+			$request->setGlobal('ship_street3',"");
 			$request->setGlobal('bill_pobox',"");
 			$request->setGlobal('ship_pobox',"");
 			$request->setGlobal('bill_city',"");

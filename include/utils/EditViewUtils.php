@@ -37,7 +37,7 @@ function getConvertSoToInvoice($focus,$so_focus,$soid)
 	global $log,$current_user;
 	$log->debug("Entering getConvertSoToInvoice(".get_class($focus).",".get_class($so_focus).",".$soid.") method ...");
     $log->info("in getConvertSoToInvoice ".$soid);
-    $xyz=array('bill_street','bill_city','bill_code','bill_pobox','bill_country','bill_state','ship_street','ship_city','ship_code','ship_pobox','ship_country','ship_state');
+    $xyz=array('bill_street','bill_street2','bill_street3','bill_city','bill_code','bill_pobox','bill_country','bill_state','ship_street','ship_street2','ship_street3','ship_city','ship_code','ship_pobox','ship_country','ship_state');
 	for($i=0;$i<count($xyz);$i++){
 		if (getFieldVisibilityPermission('SalesOrder', $current_user->id,$xyz[$i]) == '0'){
 			$so_focus->column_fields[$xyz[$i]] = $so_focus->column_fields[$xyz[$i]];
@@ -55,7 +55,11 @@ function getConvertSoToInvoice($focus,$so_focus,$soid)
 	$focus->column_fields['salescommission'] = $so_focus->column_fields['salescommission'];
 	$focus->column_fields['purchaseorder'] = $so_focus->column_fields['purchaseorder'];
 	$focus->column_fields['bill_street'] = $so_focus->column_fields['bill_street'];
+	$focus->column_fields['bill_street2'] = $so_focus->column_fields['bill_street2'];
+	$focus->column_fields['bill_street3'] = $so_focus->column_fields['bill_street3'];
 	$focus->column_fields['ship_street'] = $so_focus->column_fields['ship_street'];
+	$focus->column_fields['ship_street2'] = $so_focus->column_fields['ship_street2'];
+	$focus->column_fields['ship_street3'] = $so_focus->column_fields['ship_street3'];
 	$focus->column_fields['bill_city'] = $so_focus->column_fields['bill_city'];
 	$focus->column_fields['ship_city'] = $so_focus->column_fields['ship_city'];
 	$focus->column_fields['bill_state'] = $so_focus->column_fields['bill_state'];
@@ -363,7 +367,14 @@ function getAssociatedProducts($module,$focus,$seid='')
 	$received = ($focus->column_fields['received'] != '')?$focus->column_fields['received']:'0.00';
 	$received = number_format($received, $no_of_decimal_places,'.','');
 	$product_Detail[1]['final_details']['received'] = $received;
-	$product_Detail[1]['final_details']['receivedcomments'] = $focus->column_fields['receivedcomments'];
+	if($focus->column_fields['receivedreference'])
+		$receivedcomments = $focus->column_fields['receivedmoderegl'] . ' ' . $focus->column_fields['receivedreference'];
+	if($focus->column_fields['receivedcomments']){
+		if($receivedcomments)
+			$receivedcomments .= "<br>";
+		$receivedcomments .= $focus->column_fields['receivedcomments'];
+	}
+	$product_Detail[1]['final_details']['receivedcomments'] = $receivedcomments;
 	
 	//To avoid NaN javascript error, here we assign 0 initially to' %of price' and 'Direct Price reduction'(For Final Discount)
 	$discount_amount_final = '0.00';

@@ -35,7 +35,7 @@ Class Vtiger_Edit_View extends Vtiger_Index_View {
 		$viewer->assign('IS_DUPLICATE_FROM', $record);
 	        $viewer->assign('MODE', '');
 	    }else if(!empty($record)) {
-	        $recordModel = $this->record?$this->record:Vtiger_Record_Model::getInstanceById($record, $moduleName);
+	        $recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record, $moduleName);
 	        $viewer->assign('RECORD_ID', $record);
 	        $viewer->assign('MODE', 'edit');
             } else {
@@ -76,12 +76,13 @@ Class Vtiger_Edit_View extends Vtiger_Index_View {
 	    }
 	    $recordStructureInstance = Vtiger_RecordStructure_Model::getInstanceFromRecordModel($recordModel, Vtiger_RecordStructure_Model::RECORD_STRUCTURE_MODE_EDIT);
 	    $picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($moduleName);
-
+    
 	    /* ED141005 */
 	    $viewer->assign('RECORD_MODEL', $recordModel);
 	    
 	    $viewer->assign('PICKIST_DEPENDENCY_DATASOURCE',Zend_Json::encode($picklistDependencyDatasource));
 	    $viewer->assign('RECORD_STRUCTURE_MODEL', $recordStructureInstance);
+	    
 	    $viewer->assign('RECORD_STRUCTURE', $recordStructureInstance->getStructure());
 	    $viewer->assign('MODULE', $moduleName);
 	    $viewer->assign('CURRENTDATE', date('Y-n-j'));

@@ -13,6 +13,12 @@
  */
 class Inventory_Record_Model extends Vtiger_Record_Model {
 
+	public static function getInstanceById($record, $moduleName){
+		$instance = parent::getInstanceById($record, $moduleName);
+		$instance->calculateBalance();
+		return $instance;
+	}
+
 	function getCurrencyInfo() {
 		$moduleName = $this->getModuleName();
 		$currencyInfo = getInventoryCurrencyInfo($moduleName, $this->getId());
@@ -98,6 +104,10 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 				$relatedProducts[$i]['netPrice'.$i] = $netPrice;
 			}
 		}
+		
+		//ED150129
+		$relatedProducts[1]['final_details']['balance'] = $this->get('balance');
+		
 		return $relatedProducts;
 	}
 
@@ -193,7 +203,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
      *
      */
     public function getPDFFileName() {
-        $moduleName = $this->getModuleName();
+		$moduleName = $this->getModuleName();
 		if ($moduleName == 'Quotes') {
 			vimport("~~/modules/$moduleName/QuotePDFController.php");
 			$controllerClassName = "Vtiger_QuotePDFController";
@@ -222,5 +232,17 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		$instance = parent::getCleanInstance($moduleName);
 		$instance->set('invoicedate', date('Y-m-d'));
 		return $instance;
+	}
+	
+	/* ED150129
+	 * le champ balance n'est gŽrŽ nulle part
+	*/
+	public function calculateBalance(){
+		$moduleName = $this->getModuleName();
+		if ($moduleName == 'Invoice')
+			$this->set('balance', $this->get('hdnGrandTotal') - $this->get('received'));
+		else
+			$this->set('balance', $this->get('hdnGrandTotal') - $this->get('paid'));
+		return $this->get('balance');
 	}
 }
