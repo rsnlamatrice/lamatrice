@@ -35,6 +35,9 @@
 			<input type="hidden" name="sourceRecord" value="{$SOURCE_RECORD}" />
 			<input type="hidden" name="relationOperation" value="{$IS_RELATION_OPERATION}" />
 		{/if}
+		{if $IS_DUPLICATE_FROM}{* ED150207 *}
+			<input type="hidden" name="isDuplicateFrom" value="{$IS_DUPLICATE_FROM}" />
+		{/if}
 		<div class="contentHeader row-fluid">
 		{assign var=SINGLE_MODULE_NAME value='SINGLE_'|cat:$MODULE}
 		{if $RECORD_ID neq ''}

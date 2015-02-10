@@ -42,7 +42,6 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 	 * @return <RecordModel> - record Model of saved record
 	 */
 	public function saveRecord($request) {
-			
 		$recordModel = $this->getRecordModelFromRequest($request);
 		$recordModel->save();
 		if($request->get('relationOperation')) {
@@ -54,6 +53,29 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 
 			$relationModel = Vtiger_Relation_Model::getInstance($parentModuleModel, $relatedModule);
 			$relationModel->addRelation($parentRecordId, $relatedRecordId);
+		}
+		
+		/* ED150207
+		 * modules\Vtiger\views\Edit.php and vlayout\modules\Vtiger\EditViewBlocks.tpl add this <input name="isDuplicateFrom"/>
+		 * Needs <input name="duplicateRelated" value="0|1|Contacts,Invoices,..."/> or override
+		 */
+		// duplicate
+		if( ! $request->get('record') ){
+			if( $request->get('isDuplicateFrom') ) 
+				$duplicateFrom = $request->get('isDuplicateFrom');
+			else
+				$duplicateFrom = preg_replace('/^.*&record=(\d+).*$/','$1',$_SERVER['HTTP_REFERER']);
+			if($duplicateFrom
+			&& (/*true ||*/ $request->get('duplicateRelated'))){
+				$relatedModules = $request->get('duplicateRelated');
+				if(!is_string($relatedModules) || is_numeric($relatedModules[0]) || $relatedModules[0] == 'on' || $relatedModules[0] == 'true')
+					$relatedModules = $relatedModules != '0';
+				else
+					$relatedModules = explode(',',$relatedModules);
+				$moduleName = $request->get('sourceModule');
+				$recordModel->duplicateRelatedRecords($duplicateFrom, $recordModel);
+				//die();
+			}
 		}
 		return $recordModel;
 	}

@@ -45,6 +45,9 @@
 			    {/if}
 			    &nbsp;<strong>{$RELATED_LINK->getLabel()}</strong></button>
 			</div>
+			{if $IS_SELECT_BUTTON neq true && $IS_DELETE_BUTTON neq true}
+			    {assign var=HAS_ADD_BUTTON value=true}
+			{/if}
 		    {/foreach}
 		    {* ORGINAL
 		    {foreach item=RELATED_LINK from=$RELATED_LIST_LINKS['LISTVIEWBASIC']}
@@ -191,6 +194,9 @@
 			    </td><td nowrap class="{$WIDTHTYPE}">
 				<div class="pull-right actions">
 				    <span class="actionImages">
+                                        {if $IS_EDITABLE && $HAS_ADD_BUTTON}{*ED150207*}
+                                            <a href='{$RELATED_RECORD->getDuplicateRecordUrl()}'><i title="{vtranslate('LBL_DUPLICATE', $MODULE)}" class="icon-plus alignMiddle"></i></a>
+                                        {/if}
 					<a href="{$RELATED_RECORD->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
 					{if $IS_EDITABLE}
 					    <a href='{$RELATED_RECORD->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>

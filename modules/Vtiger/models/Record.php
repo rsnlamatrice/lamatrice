@@ -452,4 +452,131 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				return $this->getPicklistValuesDetails($fieldname);
 		}
 	}
+
+	/* ED150207
+	 * Duplication des enregistrements liés sur le modèle d'un autre enregistrement
+	 *
+	 * @param $templateId : template id 
+	 * @param $destRecord : destination record model or id
+	 * @param $relatedModules : array of related module names. TRUE for all.
+	 */
+	public function duplicateRelatedRecords($templateId, $destRecord, $relatedModules = true){
+		if(!$relatedModules) return;
+		if(!is_array($relatedModules)){
+			//related modules 
+			$moduleName = $this->getModuleName();
+			$relatedModules = Vtiger_Relation_Model::getAllRelations($moduleName);
+		}
+		else {
+			//related modules object filtred by name
+			$moduleName = $this->getModuleName();
+			$relationModels = Vtiger_Relation_Model::getAllRelations($moduleName);
+			$relatedModuleNames = array_combine($relatedModules, $relatedModules);
+			$relatedModules = array();
+			foreach($relationModels as $relationModel)
+				if(array_key_exists($relationModel->getRelationModuleName(),$relatedModuleNames))
+					$relatedModules[] = $relationModel;
+		}
+		foreach($relatedModules as $relationModel)
+			$this->duplicateRelatedModuleRecords($templateId, $destRecord, $relationModel);
+	}
+
+	/* ED150207
+	 * Duplication des enregistrements liés sur le modèle d'un autre enregistrement pour un module
+	 * @param $templateId : template id 
+	 * @param $destRecord : destination record model or id
+	 * @param $relationModel : related module name. 
+	 */
+	public function duplicateRelatedModuleRecords($templateId, $destRecord, $relationModel){
+		if(!$relationModel)
+			return;
+		//var_dump($relationModel);
+		
+		if(is_object($destRecord))
+			$destRecord = $destRecord->getId();
+			
+		$sql = array();
+		if(is_object($relationModel)){
+			$relatedModuleName = $relationModel->getRelationModuleName();
+			//var_dump($relationModel);
+		}
+		else
+			$relatedModuleName = $relationModel;
+		
+		switch($relatedModuleName){
+		case "Calendar":
+			return;
+		
+		case "Documents":
+			//vtiger_seattachmentsrel
+			$sql[] = "INSERT INTO vtiger_seattachmentsrel (`crmid`, `attachmentsid`)
+					SELECT $destRecord, `attachmentsid`
+					FROM vtiger_seattachmentsrel src
+					WHERE src.crmid = $templateId
+					ON DUPLICATE KEY UPDATE vtiger_seattachmentsrel.crmid = vtiger_seattachmentsrel.crmid
+			";
+			$sql[] = "INSERT INTO vtiger_senotesrel (`crmid`, `notesid`)
+					SELECT $destRecord, `notesid`
+					FROM vtiger_senotesrel src
+					WHERE src.crmid = $templateId
+					ON DUPLICATE KEY UPDATE vtiger_senotesrel.crmid = vtiger_senotesrel.crmid
+			";
+			break;
+		case "Contacts":
+			switch($this->getModuleName()){
+			case "Campaigns":
+				//vtiger_seattachmentsrel
+				$sql[] = "INSERT INTO vtiger_campaigncontrel (`campaignid`, `contactid`, `campaignrelstatusid`)
+						SELECT $destRecord, `contactid`, `campaignrelstatusid`
+						FROM vtiger_campaigncontrel src
+						WHERE src.campaignid = $templateId
+						ON DUPLICATE KEY UPDATE vtiger_campaigncontrel.campaignid = vtiger_campaigncontrel.campaignid
+				";
+				break;
+			default:
+				break;
+			}
+			break;
+		case "Campaigns":
+			switch($this->getModuleName()){
+			case "Contacts":
+				//vtiger_seattachmentsrel
+				$sql[] = "INSERT INTO vtiger_campaigncontrel (`campaignid`, `contactid`, `campaignrelstatusid`)
+						SELECT $destRecord, `campaignid`, `campaignrelstatusid`
+						FROM vtiger_campaigncontrel src
+						WHERE src.contactid = $templateId
+						ON DUPLICATE KEY UPDATE vtiger_campaigncontrel.contactid = vtiger_campaigncontrel.contactid
+				";
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			//vtiger_crmentityrel
+			$sql[] = "INSERT INTO vtiger_crmentityrel (crmid, module, relcrmid, relmodule)
+					SELECT $destRecord, module, relcrmid, relmodule
+					FROM vtiger_crmentityrel src
+					WHERE src.crmid = $templateId
+					AND src.relmodule = '$relatedModuleName'
+					ON DUPLICATE KEY UPDATE vtiger_crmentityrel.crmid = vtiger_crmentityrel.crmid
+			";
+			$sql[] = "INSERT INTO vtiger_crmentityrel (crmid, module, relcrmid, relmodule)
+					SELECT crmid, module, $destRecord, relmodule
+					FROM vtiger_crmentityrel src
+					WHERE src.relcrmid = $templateId
+					AND src.module = '$relatedModuleName'
+					ON DUPLICATE KEY UPDATE vtiger_crmentityrel.crmid = vtiger_crmentityrel.crmid
+			";
+			break;
+		}
+		
+		$db = PearDatabase::getInstance();
+		//$db->setDebug(true);
+		foreach($sql as $query){
+			//var_dump($query);
+			$db->query($query);
+		}
+		//$db->setDebug(false);
+	}
 }

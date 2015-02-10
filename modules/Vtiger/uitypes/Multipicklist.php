@@ -23,38 +23,38 @@ class Vtiger_Multipicklist_UIType extends Vtiger_Base_UIType {
 	 * @return <Object>
 	 */
 	public function getDisplayValue($value) {
-        $fieldModel = $this->get('field');
-	/* cherche le uicolor */
-	$uiColumns = Vtiger_Util_Helper::getPicklistUIColumns($fieldModel->getName());
-	if(is_array($uiColumns) && isset($uiColumns['uicolor'])){
-		if(!is_array($value)){
-			$value = explode(' |##| ', $value);
-		}
+		$fieldModel = $this->get('field');
+		if(preg_match('/\<.*uicolor/', $value))
+			return $value;
+		/* cherche le uicolor */
+		$uiColumns = Vtiger_Util_Helper::getPicklistUIColumns($fieldModel->getName());
+		if(is_array($uiColumns) && isset($uiColumns['uicolor'])){
+			if(!is_array($value)){
+				$value = explode(' |##| ', $value);
+			}
 			$picklistvaluesdata = array();
-		$picklistValues = Vtiger_Util_Helper::getPickListValues($fieldModel->getName(), $picklistvaluesdata);
-		
-		if(is_array($picklistvaluesdata)){
-			for($i = 0; $i < count($value); $i++){
-				if(isset($picklistvaluesdata[decode_html($value[$i])])){
-					$uicolor = $picklistvaluesdata[decode_html($value[$i])]['uicolor'];
-					if($uicolor)
-					$value[$i] = '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>'
-						. $value[$i];
+			$picklistValues = Vtiger_Util_Helper::getPickListValues($fieldModel->getName(), $picklistvaluesdata);
+			if(is_array($picklistvaluesdata)){
+				for($i = 0; $i < count($value); $i++){
+					if(isset($picklistvaluesdata[decode_html($value[$i])])){
+						$uicolor = $picklistvaluesdata[decode_html($value[$i])]['uicolor'];
+						$value[$i] = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
+							. $value[$i];
+					}
 				}
 			}
 		}
-	}
-	
-        if(is_array($value)){
-            $value = implode(' |##| ', $value);
-        }
+		
+		if(is_array($value)){
+		    $value = implode(' |##| ', $value);
+		}
 		return str_ireplace(' |##| ', ', ', $value);
 	}
     
-    public function getDBInsertValue($value) {
+	public function getDBInsertValue($value) {
 		if(is_array($value)){
-            $value = implode(' |##| ', $value);
-        }
-        return $value;
+			$value = implode(' |##| ', $value);
+		}
+		return $value;
 	}
 }

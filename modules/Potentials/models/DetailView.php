@@ -75,8 +75,9 @@ class Potentials_DetailView_Model extends Vtiger_DetailView_Model {
 					'linkName'	=> $documentsInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 							'&relatedModule=Documents&mode=showRelatedRecords&page=1&limit=5',
-					'action'	=>	($createPermission == true) ? array('Add') : array(),
+					'action'	=>	($createPermission == true) ? array('Add', 'Select') : array(),
 					'actionURL' =>	$documentsInstance->getQuickCreateUrl()
+					'selectURL' =>	$documentsInstance->getListViewUrl(),
 			);
 		}
 
@@ -89,8 +90,9 @@ class Potentials_DetailView_Model extends Vtiger_DetailView_Model {
 					'linkName'	=> $contactsInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 							'&relatedModule=Contacts&mode=showRelatedRecords&page=1&limit=5',
-					'action'	=>	($createPermission == true) ? array('Add') : array(),
-					'actionURL' =>	$contactsInstance->getQuickCreateUrl()
+					'action'	=>	($createPermission == true) ? array('Add', 'Select') : array(),
+					'actionURL' =>	$contactsInstance->getQuickCreateUrl(),
+					'selectURL' =>	$contactsInstance->getListViewUrl(),
 			);
 		}
 
@@ -103,8 +105,8 @@ class Potentials_DetailView_Model extends Vtiger_DetailView_Model {
 					'linkName'	=> $productsInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 							'&relatedModule=Products&mode=showRelatedRecords&page=1&limit=5',
-					'action'	=>	($createPermission == true) ? array('Add') : array(),
-					'actionURL' =>	$productsInstance->getQuickCreateUrl()
+					'action'	=>	($createPermission == true) ? array('Select') : array(),
+					'actionURL' =>	$productsInstance->getListViewUrl()
 			);
 		}
 

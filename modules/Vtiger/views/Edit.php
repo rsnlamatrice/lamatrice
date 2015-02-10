@@ -32,6 +32,7 @@ Class Vtiger_Edit_View extends Vtiger_Index_View {
 	    //var_dump('$record');var_dump($record);
 	    if(!empty($record) && $request->get('isDuplicate') == true) {
 	        $recordModel = $this->record?$this->record:Vtiger_Record_Model::getInstanceById($record, $moduleName);
+		$viewer->assign('IS_DUPLICATE_FROM', $record);
 	        $viewer->assign('MODE', '');
 	    }else if(!empty($record)) {
 	        $recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record, $moduleName);
