@@ -408,6 +408,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 		app.registerEventForTimeFields(detailContentsHolder);
 
 		jQuery('.related', detailContainer).on('click', 'li', function(e, urlAttributes){
+			
 			var tabElement = jQuery(e.currentTarget);
 			var element = jQuery('<div></div>');
 			element.progressIndicator({

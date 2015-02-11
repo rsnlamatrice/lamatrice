@@ -1340,6 +1340,38 @@ jQuery.Class("Vtiger_Detail_Js",{
 		this.registerEventForActivityWidget();
 
 		/**
+		 * Function to handle the summary widget header click
+		 * ED150211
+		 */
+		summaryViewContainer
+		.off('click', '.widget_header h4')
+		.on('click', '.widget_header h4', function(e){
+			e.preventDefault();
+			var currentTarget = jQuery(e.currentTarget);
+			var $module = currentTarget.parents('.summaryWidgetContainer:first').children('[data-module]:first');
+			var moduleName = $module.attr('data-module');
+			
+			if (!moduleName)
+				moduleName = $module.attr('data-name');
+				
+			if (moduleName)
+				if($('.nav li[data-module="' + moduleName + '"]:first').click().length == 0)
+					$('.nav li[data-label-key="' + moduleName + '"]:first').click();
+		});
+		summaryViewContainer.on('hover', '.widget_header h4', function(e){
+			e.preventDefault();
+			var currentTarget = jQuery(e.currentTarget);
+			currentTarget
+				.addClass('selectedListItem')
+				.css('cursor', 'pointer');
+		});
+		summaryViewContainer.on('mouseout', '.widget_header h4', function(e){
+			e.preventDefault();
+			var currentTarget = jQuery(e.currentTarget);
+			currentTarget.removeClass('selectedListItem');
+		});
+		
+		/**
 		 * Function to handle the ajax edit for summary view fields
 		 */
 		summaryViewContainer.on('click', '.summaryViewEdit', function(e){

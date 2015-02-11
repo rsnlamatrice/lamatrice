@@ -272,7 +272,7 @@ class Vtiger_Link_Model extends Vtiger_Link {
 			}
 		}
         
-        if (!is_array($type)) {
+		if (!is_array($type)) {
 			$type = array($type);
 		}
 

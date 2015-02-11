@@ -29,7 +29,8 @@
 			{foreach item=DETAIL_VIEW_WIDGET from=$DETAILVIEW_LINKS['DETAILVIEWWIDGET'] name=count}
 				{if $smarty.foreach.count.index % 2 == $MODULO_LEFT}
 					<div class="summaryWidgetContainer">
-						<div class="widgetContainer_{$smarty.foreach.count.index}" data-url="{$DETAIL_VIEW_WIDGET->getUrl()}" data-name="{$DETAIL_VIEW_WIDGET->getLabel()}">
+						<div class="widgetContainer_{$smarty.foreach.count.index}" data-url="{$DETAIL_VIEW_WIDGET->getUrl()}"
+						     data-name="{$DETAIL_VIEW_WIDGET->getLabel()}" data-module="{$DETAIL_VIEW_WIDGET->get('linkName')}">
 							<div class="widget_header row-fluid">
 								{assign var=RECORD_ACTIONS value=$DETAIL_VIEW_WIDGET->get('action')}
 								<span class="span{if is_array($RECORD_ACTIONS) && (count($RECORD_ACTIONS)>1)}6{else}8{/if} margin0px">
@@ -77,7 +78,8 @@
 			{foreach item=DETAIL_VIEW_WIDGET from=$DETAILVIEW_LINKS['DETAILVIEWWIDGET'] name=count}
 				{if $smarty.foreach.count.index % 2 != $MODULO_LEFT}
 					<div class="summaryWidgetContainer">
-						<div class="widgetContainer_{$smarty.foreach.count.index}" data-url="{$DETAIL_VIEW_WIDGET->getUrl()}" data-name="{$DETAIL_VIEW_WIDGET->getLabel()}">
+						<div class="widgetContainer_{$smarty.foreach.count.index}" data-url="{$DETAIL_VIEW_WIDGET->getUrl()}"
+						     data-name="{$DETAIL_VIEW_WIDGET->getLabel()}" data-module="{$DETAIL_VIEW_WIDGET->get('linkName')}">
 							<div class="widget_header row-fluid">
 								{assign var=RECORD_ACTIONS value=$DETAIL_VIEW_WIDGET->get('action')}
 								<span class="span{if is_array($RECORD_ACTIONS) && (count($RECORD_ACTIONS)>1)}5{else}7{/if} margin0px"><h4>{vtranslate($DETAIL_VIEW_WIDGET->getLabel(),$MODULE_NAME)}</h4></span>
