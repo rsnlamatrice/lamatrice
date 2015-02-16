@@ -61,6 +61,26 @@
 				{/foreach}
 				</optgroup>
 			{/foreach}
+			{* ED150212 - related modules views *}
+			{foreach key=RELATED_NAME item=RELATED_VIEWS from=$RELATED_MODELS_VIEWS}
+				{foreach key=VIEW_IDX item=RELATED_VIEW from=$RELATED_VIEWS}
+					{assign var=RELATED_FIELDS value=$RELATED_VIEW['fields']}
+					{assign var=VIEW_ID value=$RELATED_VIEW['id']}
+					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
+					<optgroup label='[{vtranslate($RELATED_NAME, $SOURCE_MODULE)}] {vtranslate($VIEW_LABEL, $RELATED_NAME)}'>
+					{foreach key=FIELD_NAME item=FIELD_MODEL from=$RELATED_FIELDS}
+						{assign var=COLUMN_NAME value=$RELATED_NAME|cat:"::"|cat:$VIEW_ID|cat:"::"|cat:$VIEW_LABEL|cat:"::"|cat:$FIELD_MODEL->getCustomViewColumnName()}
+						<option value="{$COLUMN_NAME}" data-field-name="{$COLUMN_NAME}"
+							data-view="[{vtranslate($RELATED_NAME, $SOURCE_MODULE)}][{vtranslate($VIEW_LABEL, $RELATED_NAME)}]"
+						{if in_array($COLUMN_NAME, $SELECTED_FIELDS)}
+							selected
+						{/if}
+						>{vtranslate($FIELD_MODEL->get('label'), $RELATED_NAME)}
+						</option>
+					{/foreach}
+					</optgroup>
+				{/foreach}
+			{/foreach}
 		</select>
 	</span>
 	<span class="span3">

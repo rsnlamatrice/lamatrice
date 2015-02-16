@@ -11,6 +11,94 @@
 	 */
 class Contacts_Relation_Model extends Vtiger_Relation_Model {
 
+	
+	/* Returns fields defining relation between modules
+	 *
+	 * ED150212
+	 */
+	public function getRelationFields() {
+		$fields = array();
+		switch($this->getRelationModuleName()){
+		case "Contacts":
+			//$fieldNames = array('dateapplication', 'data');
+			//Added to support data
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'contreltype');
+			$field->set('column', 'vtiger_contactscontrel::contreltype');
+			$field->set('label', 'Désignation');
+			$field->set('typeofdata', 'VARCHAR(255)');
+			$field->set('uitype', 1);
+			array_push($fields, $field);
+			    
+			//Added to support dateapplication
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'dateapplication');
+			$field->set('column', 'vtiger_contactscontrel::dateapplication');
+			$field->set('label', 'Date d\'application');
+			/*ED140906 tests*/
+			$field->set('typeofdata', 'DATETIME');
+			$field->set('uitype', 6);
+			array_push($fields, $field);
+			
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'data');
+			$field->set('column', 'vtiger_contactscontrel::data');
+			$field->set('label', 'Information');
+			$field->set('typeofdata', 'VARCHAR(255)');
+			$field->set('uitype', 21);
+			array_push($fields, $field);
+			break;
+		
+		case "Critere4D":
+			//$fieldNames = array('dateapplication', 'data');
+			//Added to support data
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'data');
+			$field->set('column', 'vtiger_critere4dcontrel::data');
+			$field->set('label', 'Information');
+			$field->set('typeofdata', 'VARCHAR(255)');
+			$field->set('uitype', 21);
+			array_push($fields, $field);
+			    
+			//Added to support dateapplication
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'dateapplication');
+			$field->set('column', 'vtiger_critere4dcontrel::dateapplication');
+			$field->set('label', 'Date d\'application');
+			/*ED140906 tests*/
+			$field->set('typeofdata', 'DATETIME');
+			$field->set('uitype', 6);
+			array_push($fields, $field);
+			break;
+		case "Invoice":
+			    
+			//Added to support dateapplication
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'invoicedate');
+			$field->set('column', 'vtiger_invoice::invoicedate');
+			$field->set('label', 'Date de facture');
+			/*ED140906 tests*/
+			$field->set('typeofdata', 'DATETIME');
+			$field->set('uitype', 6);
+			array_push($fields, $field);
+			    
+			//Added to support dateapplication
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'typedossier');
+			$field->set('column', 'vtiger_invoicecf::typedossier');
+			$field->set('label', 'Type de facture');
+			/*ED140906 tests*/
+			$field->set('typeofdata', 'VARCHAR(128)');
+			$field->set('uitype', 15);
+			array_push($fields, $field);
+			
+			break;
+		default:
+			return parent::getRelationFields();
+		}
+		return $fields;
+	}
+
 	/**
 	 * Function to get Critere4D enabled modules list for detail view of record
 	 * @return <array> List of modules

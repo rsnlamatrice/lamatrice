@@ -146,10 +146,10 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		if($this->get('viewname') == 'All') {
 			return false;
 		}
-        $currentUser = Users_Record_Model::getCurrentUserModel();
-        if($currentUser->isAdminUser()) {
-            return true;
-        }
+		$currentUser = Users_Record_Model::getCurrentUserModel();
+		if($currentUser->isAdminUser()) {
+		    return true;
+		}
         
 		if($this->isMine() || $this->isOthers()) {
 			return true;
@@ -177,7 +177,7 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 		$queryGenerator = $listViewModel->get('query_generator');
 
-        $searchKey = $this->get('search_key');
+		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
 		if(!empty($searchValue)) {

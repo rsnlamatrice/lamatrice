@@ -1346,7 +1346,6 @@ jQuery.Class("Vtiger_Detail_Js",{
 		summaryViewContainer
 		.off('click', '.widget_header h4')
 		.on('click', '.widget_header h4', function(e){
-			e.preventDefault();
 			var currentTarget = jQuery(e.currentTarget);
 			var $module = currentTarget.parents('.summaryWidgetContainer:first').children('[data-module]:first');
 			var moduleName = $module.attr('data-module');
@@ -1358,15 +1357,17 @@ jQuery.Class("Vtiger_Detail_Js",{
 				if($('.nav li[data-module="' + moduleName + '"]:first').click().length == 0)
 					$('.nav li[data-label-key="' + moduleName + '"]:first').click();
 		});
-		summaryViewContainer.on('hover', '.widget_header h4', function(e){
-			e.preventDefault();
+		summaryViewContainer
+		.off('hover', '.widget_header h4')
+		.on('hover', '.widget_header h4', function(e){
 			var currentTarget = jQuery(e.currentTarget);
 			currentTarget
 				.addClass('selectedListItem')
 				.css('cursor', 'pointer');
 		});
-		summaryViewContainer.on('mouseout', '.widget_header h4', function(e){
-			e.preventDefault();
+		summaryViewContainer
+		.off('mouseout', '.widget_header h4')
+		.on('mouseout', '.widget_header h4', function(e){
 			var currentTarget = jQuery(e.currentTarget);
 			currentTarget.removeClass('selectedListItem');
 		});
@@ -1384,7 +1385,9 @@ jQuery.Class("Vtiger_Detail_Js",{
 		/**
 		 * Function to handle actions after ajax save in summary view
 		 */
-		summaryViewContainer.on(thisInstance.fieldUpdatedEvent, '.recordDetails', function(e, params){
+		summaryViewContainer
+		.off(thisInstance.fieldUpdatedEvent, '.recordDetails')
+		.on(thisInstance.fieldUpdatedEvent, '.recordDetails', function(e, params){
 			/* ED150125
 			 * Tente de limiter le nombre de rafraichissement (voir ajaxEditHandling())
 			 *
@@ -1400,7 +1403,9 @@ jQuery.Class("Vtiger_Detail_Js",{
 		/*
 		 * Register the event to edit the status for for related activities
 		 */
-		summaryViewContainer.on('click', '.editStatus', function(e){
+		summaryViewContainer
+		.off('click', '.editStatus')
+		.on('click', '.editStatus', function(e){
 			var currentTarget = jQuery(e.currentTarget);
 			var currentDiv = currentTarget.closest('.activityStatus');
 			var editElement = currentDiv.find('.edit');

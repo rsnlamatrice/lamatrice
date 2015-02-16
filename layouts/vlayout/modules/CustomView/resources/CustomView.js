@@ -201,8 +201,47 @@ var Vtiger_CustomView_Js = {
 		app.changeSelectElementView(selectElement, 'select2', {maximumSelectionSize: 12,dropdownCss : {'z-index' : 0}});
 	},
 
+	/**
+	 * Function which will register the name changed event to show save copy button
+	 * ED150212
+	 */
+	registerNameChangedEvent : function() {
+		if (jQuery("#viewname").val())
+			jQuery("#viewname").change(function(){
+				jQuery("#customViewSubmitCopy").show();
+			});
+	},
+
+	/**
+	 * Function which will register save copy button event : clears record id input value.
+	 * ED150212
+	 */
+	registerSaveAsCopyEvent : function() {
+		if (jQuery("#viewname").val()){
+			//copy button
+			jQuery("#customViewSubmitCopy").click(function(){
+				if ( ! $("#record").attr('original-value'))
+					//backup
+					$("#record").attr('original-value', $("#record").val());
+				//clear
+				$("#record").val('');
+			});
+			//standard button
+			jQuery("#customViewSubmit").click(function(){
+				if ($("#record").attr('original-value'))
+					//restore
+					$("#record").val($("#record").attr('original-value'));
+			});
+		}
+	},
+
 	registerEvents: function(){
 		Vtiger_CustomView_Js.registerSelect2ElementForColumnsSelection();
+		
+		//ED150212
+		Vtiger_CustomView_Js.registerNameChangedEvent();
+		Vtiger_CustomView_Js.registerSaveAsCopyEvent();
+		
 		var contentsContainer = Vtiger_CustomView_Js.getContentsContainer();
 		jQuery('.stndrdFilterDateSelect').datepicker();
 		jQuery('.chzn-select').chosen();
@@ -220,6 +259,13 @@ var Vtiger_CustomView_Js = {
 		Vtiger_CustomView_Js.makeColumnListSortable();
 
 		jQuery("#CustomView").submit(function(e) {
+			
+			//ED150212
+			// save as button
+			var saveAsCopy = e.target.id == "customViewSubmitCopy";
+			if(saveAsCopy)
+				$("#record").val('');
+			
 			var selectElement = Vtiger_CustomView_Js.getColumnSelectElement();
 			var select2Element = app.getSelect2ElementFromSelect(selectElement);
 			var result = Vtiger_MultiSelect_Validator_Js.invokeValidation(selectElement);

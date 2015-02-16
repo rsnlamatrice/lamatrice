@@ -28,7 +28,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	//Hold the condition and their label translations
 	conditonOperatorLabelMapping : false,
 
-    dateConditionInfo : false,
+	dateConditionInfo : false,
 
 	fieldModelInstance : false,
 	//Holds fields type and conditions for which it needs validation
@@ -74,7 +74,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		var filterContainer = this.getFilterContainer();
 		this.fieldTypeConditionMapping = jQuery('input[name="advanceFilterOpsByFieldType"]',filterContainer).data('value');
 		this.conditonOperatorLabelMapping = jQuery('input[name="advanceFilterOptions"]',filterContainer).data('value');
-        this.dateConditionInfo = jQuery('[name="date_filters"]').data('value');;
+		this.dateConditionInfo = jQuery('[name="date_filters"]').data('value');;
 		return this;
 	},
 
@@ -96,9 +96,9 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		return this;
 	},
 
-    getDateSpecificConditionInfo : function () {
-        return this.dateConditionInfo;
-    },
+	getDateSpecificConditionInfo : function () {
+	    return this.dateConditionInfo;
+	},
 
 	/**
 	 * Function which will return set of condition for the given field type
@@ -106,20 +106,20 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	 */
 	getConditionListFromType : function(fieldType){
 		var fieldTypeConditions = this.fieldTypeConditionMapping[fieldType];
-        if(fieldType == 'D' || fieldType == 'DT'){
-            fieldTypeConditions = fieldTypeConditions.concat(this.getDateConditions(fieldType));
-        }
-        return fieldTypeConditions;
+		if(fieldType == 'D' || fieldType == 'DT'){
+		    fieldTypeConditions = fieldTypeConditions.concat(this.getDateConditions(fieldType));
+		}
+		return fieldTypeConditions;
 	},
 
-    getDateConditions : function(fieldType) {
-      if(fieldType != 'D' && fieldType != 'DT') {
-          return new Array();
-      }
-      var filterContainer = this.getFilterContainer();
-      var dateFilters = this.getDateSpecificConditionInfo();
-      return Object.keys(dateFilters);
-    },
+	getDateConditions : function(fieldType) {
+		if(fieldType != 'D' && fieldType != 'DT') {
+		    return new Array();
+		}
+		var filterContainer = this.getFilterContainer();
+		var dateFilters = this.getDateSpecificConditionInfo();
+		return Object.keys(dateFilters);
+	},
 
 	/**
 	 * Function to get the condition label
@@ -130,9 +130,9 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		if(key in this.conditonOperatorLabelMapping){
 			return this.conditonOperatorLabelMapping[key];
 		}
-        if(key in this.getDateSpecificConditionInfo()){
-            return this.getDateSpecificConditionInfo()[key]['label'];
-        }
+		if(key in this.getDateSpecificConditionInfo()){
+		    return this.getDateSpecificConditionInfo()[key]['label'];
+		}
 		return key;
 	},
 
