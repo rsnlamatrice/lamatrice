@@ -103,7 +103,8 @@
 			<button class="btn btn-success" type="submit"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
 			<!--button class="btn" id="goToFullForm" data-edit-view-url="{$EDIT_VIEW_URL}" type="button"><strong>{vtranslate('LBL_GO_TO_FULL_FORM', $MODULE)}</strong></button-->
 	</div>
-	<script>$().ready(function(){
+	<script>{* La sélection d'un coupn permet l'affectation de la campagne correspondante *}
+	$().ready(function(){
 		{* Listes dependantes d'un coupon vers une campagne *}
 		$(document.body)
 		.on('change', '#{$FORMID} select[name="notesid"]', function(){

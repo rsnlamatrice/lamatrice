@@ -30,7 +30,7 @@
 				|| $FIELD_MODEL->get('uitype') eq '4'|| $FIELD_MODEL->isReadOnly()} 
 				readonly 
 		{/if}
-		{if isset($TITLE)} title="{$TITLE}"{/if}
+		{if isset($TITLE)} title="{$TITLE}" placeholder="{$TITLE}"{/if}
 data-fieldinfo='{$FIELD_INFO}' {if !empty($SPECIAL_VALIDATOR)}data-validator={Zend_Json::encode($SPECIAL_VALIDATOR)}{/if} />
 {* TODO - Handler Ticker Symbol field  ($FIELD_MODEL->get('uitype') eq '106' && $MODE eq 'edit') ||*}
 {/strip}
