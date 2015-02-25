@@ -76,7 +76,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 	    $field->set('column', 'contreltype');
 	    $field->set('label', 'Relation');
 	    /*ED140906 tests*/
-	    $field->set('typeofdata', 'VARCHAR(128)');
+	    $field->set('typeofdata', 'V~0');
 	    $field->set('uitype', 402);
 		    
 	    array_push($headerFields, $field);
@@ -87,7 +87,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 	    $field->set('column', strtolower( 'dateapplication' ));
 	    $field->set('label', 'Date d\'application');
 	    /*ED140906 tests*/
-	    $field->set('typeofdata', 'DATETIME');
+	    $field->set('typeofdata', 'D');
 	    $field->set('uitype', 6);
 	    
 	    array_push($headerFields, $field);

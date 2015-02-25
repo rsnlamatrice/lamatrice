@@ -113,7 +113,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	},
 
 	getDateConditions : function(fieldType) {
-		if(fieldType != 'D' && fieldType != 'DT') {
+		if(fieldType != 'D' && fieldType != 'DT'){
 		    return new Array();
 		}
 		var filterContainer = this.getFilterContainer();
@@ -186,10 +186,13 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	
 	getFieldSpecificType : function(fieldSelected) {
 		var fieldInfo = fieldSelected.data('fieldinfo');
-		var type = fieldInfo.type;
-		if(type == 'reference'){
-			return 'V';
+		if (fieldInfo) {//ED150225 adds "if"
+			var type = fieldInfo.type;
+			if(type == 'reference'){
+				return 'V';
+			}
 		}
+		
 		return fieldSelected.data('fieldtype');
 	},
 	
@@ -233,8 +236,9 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	 * @prarms : fieldSelectElement - select element which will represents field list
 	 * @return : jquery object which represents the ui for the field
 	 */
-	getFieldSpecificUi : function(fieldSelectElement) {
-		var selectedOption = fieldSelectElement.find('option:selected');
+	getFieldSpecificUi : function(fieldSelectElement, selectedOption) {
+		if(!selectedOption)
+			selectedOption = fieldSelectElement.find('option:selected');
 		var fieldModel = this.fieldModelInstance;
 		if(fieldModel.getType().toLowerCase() == "boolean") {
 			var conditionRow = fieldSelectElement.closest('.conditionRow');
@@ -260,7 +264,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 
 	/**
 	 * Function which will load the field specific ui for a selected field
-	 * @prarms : fieldSelect - select element which will represents field list
+	 * @params : fieldSelect - select element which will represents field list
 	 * @return : current instance
 	 */
 	loadFieldSpecificUi : function(fieldSelect) {
@@ -269,11 +273,12 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		var fieldUiHolder = row.find('.fieldUiHolder');
 		var conditionSelectElement = row.find('select[name="comparator"]');
 		var fieldInfo = selectedOption.data('fieldinfo');
-
-		var fieldType = 'string';
-		if(typeof fieldInfo != 'undefined') {
-			fieldType = fieldInfo.type;
+		// ED152025 : exit on undefined fieldInfo
+		if(typeof fieldInfo == 'undefined') {
+			console.warn('loadFieldSpecificUi() : fieldinfo is undefined');
+			return this;
 		}
+		var fieldType = fieldInfo.type;
 		var comparatorElementVal = fieldInfo.comparatorElementVal = conditionSelectElement.val();
 		if(fieldType == 'date' || fieldType == 'datetime') {
 			fieldInfo.dateSpecificConditions = this.getDateSpecificConditionInfo();
@@ -281,25 +286,37 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		var moduleName = this.getModuleName()
 		var fieldModel = Vtiger_Field_Js.getInstance(fieldInfo,moduleName);
 		this.fieldModelInstance = fieldModel;
-		var fieldSpecificUi = this.getFieldSpecificUi(fieldSelect);
 
-		//remove validation since we dont need validations for all eleements
-		// Both filter and find is used since we dont know whether the element is enclosed in some conainer like currency
 		var fieldName = fieldModel.getName();
+			
+		//ED150225
+		var $input = $('[data-value="value"]',fieldUiHolder)
+		, sameFieldName = $input && $input.length && (fieldName == $input.attr('name')
+							      || (fieldName+"[]") == $input.attr('name'));
+		if (sameFieldName)
+			fieldModel.setValue($input.val());
+		else
+			fieldModel.setValue('');
+		  
+		var fieldSpecificUi = this.getFieldSpecificUi(fieldSelect, selectedOption);
+		
+		
 		if(fieldModel.getType() == 'multipicklist'){
 			fieldName = fieldName+"[]";
 		}
-		if((fieldModel.getType() == 'picklist' || fieldModel.getType() == 'owner') && fieldSpecificUi.is('select') 
-            && ( comparatorElementVal == 'e' || comparatorElementVal == 'n')) {
+		else if((fieldModel.getType() == 'picklist' || fieldModel.getType() == 'owner') && fieldSpecificUi.is('select')
+		&& ( comparatorElementVal == 'e' || comparatorElementVal == 'n')) {
 			fieldName = fieldName+"[]";
 		}
 		
+		//remove validation since we dont need validations for all eleements
+		// Both filter and find is used since we dont know whether the element is enclosed in some conainer like currency
 		if(fieldSpecificUi.find('.add-on').length > 0){
 			fieldSpecificUi.filter('.input-append').addClass('row-fluid');
 			fieldSpecificUi.find('.input-append').addClass('row-fluid');
 			fieldSpecificUi.filter('.input-prepend').addClass('row-fluid');
 			fieldSpecificUi.find('.input-prepend').addClass('row-fluid');
-            fieldSpecificUi.find('input[type="text"]').css('width','79%');
+			fieldSpecificUi.find('input[type="text"]').css('width','79%');
 		} else {
 			fieldSpecificUi.filter('[name="'+ fieldName +'"]').addClass('row-fluid');
 			fieldSpecificUi.find('[name="'+ fieldName +'"]').addClass('row-fluid');
@@ -310,10 +327,15 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 
 		fieldUiHolder.html(fieldSpecificUi);
 
+		//ED150225
+		//if (currentValue) {
+		//	$('[name="'+ fieldName +'"][data-value="value"]', fieldUiHolder).val(currentValue);
+		//}
+		
 		if(fieldSpecificUi.is('input.select2')){
 			var tagElements = fieldSpecificUi.data('tags');
 			var params = {tags : tagElements,tokenSeparators: [","]}
-			app.showSelect2ElementView(fieldSpecificUi,params)
+			app.showSelect2ElementView(fieldSpecificUi, params)
 		} else if(fieldSpecificUi.is('select')){
 			if(fieldSpecificUi.hasClass('chzn-select')) {
 				app.changeSelectElementView(fieldSpecificUi)
@@ -352,10 +374,15 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		
 		// Is Empty condition does not need any field input value - hide the UI
 		// re-enable if condition element is chosen.
-		if (conditionSelectElement.val() == 'y') {
+		switch(conditionSelectElement.val()){
+		case 'y' :
+		case 'vwi' :
+		case 'vwx' :
 			fieldUiHolder.hide();
-		} else {
+			break;
+		default:
 			fieldUiHolder.show();
+			break;
 		}
 		
 		return this;
@@ -480,7 +507,8 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 							rowValues[field] = jQuery('[name="'+field+'"]', rowElement).val();
 						}
 					}
-				} else if (fieldType == 'picklist' || fieldType == 'multipicklist') {
+				} else if (fieldType == 'picklist' || fieldType == 'multipicklist'
+					|| fieldType == 'buttonset') { //ED150225
 					for(var key in fieldList) {
 						var field = fieldList[key];
 						if(field == 'value' && valueSelectElement.is('input')) {
@@ -567,12 +595,12 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		var filterContainer = this.getFilterContainer();
 		var thisInstance = this;
 		filterContainer.on('change','select[name="columnname"]',function(e,data){
-            var currentElement = jQuery(e.currentTarget);
-            if(typeof data == 'undefined' || data._intialize != true){
-                var row = currentElement.closest('div.conditionRow');
-                var conditionSelectElement = row.find('select[name="comparator"]');
-                conditionSelectElement.empty();
-            }
+			var currentElement = jQuery(e.currentTarget);
+			if(typeof data == 'undefined' || data._intialize != true){
+				var row = currentElement.closest('div.conditionRow');
+				var conditionSelectElement = row.find('select[name="comparator"]');
+				conditionSelectElement.empty();
+			}
 			thisInstance.loadConditions(currentElement);
 			thisInstance.loadFieldSpecificUi(currentElement);
 		});
@@ -588,7 +616,6 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 			var comparatorSelectElement = jQuery(e.currentTarget);
 			var row = comparatorSelectElement.closest('div.conditionRow');
 			var fieldSelectElement = row.find('select[name="columnname"]');
-			var selectedOption = fieldSelectElement.find('option:selected');
 			//To handle the validation depending on condtion
 			thisInstance.loadFieldSpecificUi(fieldSelectElement);
 			thisInstance.addValidationToFieldIfNeeded(fieldSelectElement);
@@ -680,7 +707,19 @@ Vtiger_Multipicklist_Field_Js('AdvanceFilter_Multipicklist_Field_Js',{},{
 
 	getUi : function(){
 		var comparatorSelectedOptionVal = this.get('comparatorElementVal');
-		if(comparatorSelectedOptionVal != 'e' && comparatorSelectedOptionVal !='n' ){
+		switch (comparatorSelectedOptionVal){
+		case 's':
+		case 'ew':
+			var html = '<input type="text" name="'+ this.getName() +'[]"  />';
+			var selectContainer = jQuery(html).val(app.htmlDecode(this.getValue()));
+			this.addValidationToElement(selectContainer);
+			return selectContainer;
+			
+		case 'e':
+		case 'n':
+			return this._super();
+		
+		default:
 			var selectedOption = app.htmlDecode(this.getValue());
 			var pickListValues = this.getPickListValues();
 			var tagsArray = new Array();
@@ -697,8 +736,6 @@ Vtiger_Multipicklist_Field_Js('AdvanceFilter_Multipicklist_Field_Js',{},{
 			selectContainer.data('tags', tagsArray).data('picklistvalues', pickListValuesArrayFlip);
 			this.addValidationToElement(selectContainer);
 			return selectContainer;
-		} else {	
-			return this._super();
 		}
 	}
 });
@@ -755,7 +792,7 @@ Vtiger_Date_Field_Js('AdvanceFilter_Date_Field_Js',{},{
 	 */
 	getUi : function() {
 		var comparatorSelectedOptionVal = this.get('comparatorElementVal');
-        var dateSpecificConditions = this.get('dateSpecificConditions');
+		var dateSpecificConditions = this.get('dateSpecificConditions');
 		if(comparatorSelectedOptionVal == 'bw' || comparatorSelectedOptionVal == 'custom'){
 			var html = '<div class="date"><input class="dateField" data-calendar-type="range" name="'+ this.getName() +'" data-date-format="'+ this.getDateFormat() +'" type="text" ReadOnly="true" value="'+  this.getValue() + '"></div>';
 			var element = jQuery(html);
@@ -780,13 +817,13 @@ Vtiger_Date_Field_Js('AdvanceFilter_Date_Field_Js',{},{
 			}
 			return this.addValidationToElement(element);
 		}
-        else if (comparatorSelectedOptionVal in dateSpecificConditions) {
-            var startValue = dateSpecificConditions[comparatorSelectedOptionVal]['startdate'];
-            var endValue = dateSpecificConditions[comparatorSelectedOptionVal]['enddate'];
-            var html = '<input name="'+ this.getName() +'"  type="text" ReadOnly="true" value="'+  startValue +','+ endValue +'">'
-            return jQuery(html);
-        }
-        else {
+		else if (comparatorSelectedOptionVal in dateSpecificConditions) {
+			var startValue = dateSpecificConditions[comparatorSelectedOptionVal]['startdate'];
+			var endValue = dateSpecificConditions[comparatorSelectedOptionVal]['enddate'];
+			var html = '<input name="'+ this.getName() +'"  type="text" ReadOnly="true" value="'+  startValue +','+ endValue +'">'
+			return jQuery(html);
+		}
+		else {
 			var fieldUi = this._super();
 			var dateTimeFieldValue = fieldUi.find('.dateField').val();
 			var dateValue = dateTimeFieldValue.split(' ');

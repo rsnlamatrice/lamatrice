@@ -21,6 +21,9 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		$sub = $request->get('sub', 'List');
 		$viewer->assign('CURRENT_SUB', $sub);
 		
+		$viewer->assign('VIEW_ID', $request->get('viewid'));
+		$viewer->assign('VIEW_MODULE', $request->get('viewmodule'));
+		
 		$viewer->assign('CURRENT_USER', $currentUserModel);
 		$viewer->view('Outils/' . $sub . '.tpl', $request->getModule());
 	}

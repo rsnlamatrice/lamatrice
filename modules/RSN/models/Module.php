@@ -77,7 +77,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			$quickLinks[] = array(
 				'linktype' => 'SIDEBARLINK',
 				'linklabel' => $sub['label'],
-				'linkurl' => $this->getOutilsViewUrl($sub['sub']),
+				'linkurl' => $this->getOutilsViewUrl($sub['sub'], @$sub['params']),
 				'linkicon' => '',
 			);
 		
@@ -139,7 +139,10 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 	 *  Function returns the url for Outils view
 	 * @return <String>
 	 */
-	public function getOutilsViewUrl($sub = 'List') {
+	public function getOutilsViewUrl($sub = 'List', $params = FALSE) {
+		if(is_array($params))
+			foreach($params as $key=>$value)
+				$sub .= "&$key=$value";
 		return 'index.php?module='.$this->get('name').'&view=Outils&sub=' . $sub;
 	}
 
@@ -165,6 +168,16 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		$list[] = array(
 				'sub' => 'Purge',
 				'label' => 'Grande purge'
+			)
+		;
+		
+		$list[] = array(
+				'sub' => 'EditCustomView',
+				'label' => 'Edition de vue',
+				'params' => array(
+					'viewid' => 100
+					, 'viewmodule' => 'Contacts'
+				)
 			)
 		;
 		

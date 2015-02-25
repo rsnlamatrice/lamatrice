@@ -13,7 +13,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 
 	
 	/* Returns fields defining relation between modules
-	 *
+	 * used in custom view editor
 	 * ED150212
 	 */
 	public function getRelationFields() {
@@ -24,27 +24,27 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			//Added to support data
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'contreltype');
-			$field->set('column', 'vtiger_contactscontrel::contreltype');
+			$field->set('column', 'vtiger_contactscontrel:contreltype');
 			$field->set('label', 'Désignation');
-			$field->set('typeofdata', 'VARCHAR(255)');
+			$field->set('typeofdata', 'V~O');
 			$field->set('uitype', 1);
 			array_push($fields, $field);
 			    
 			//Added to support dateapplication
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'dateapplication');
-			$field->set('column', 'vtiger_contactscontrel::dateapplication');
+			$field->set('column', 'vtiger_contactscontrel:dateapplication');
 			$field->set('label', 'Date d\'application');
 			/*ED140906 tests*/
-			$field->set('typeofdata', 'DATETIME');
+			$field->set('typeofdata', 'D~O');
 			$field->set('uitype', 6);
 			array_push($fields, $field);
 			
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'data');
-			$field->set('column', 'vtiger_contactscontrel::data');
+			$field->set('column', 'vtiger_contactscontrel:data');
 			$field->set('label', 'Information');
-			$field->set('typeofdata', 'VARCHAR(255)');
+			$field->set('typeofdata', 'V~O');
 			$field->set('uitype', 21);
 			array_push($fields, $field);
 			break;
@@ -54,19 +54,19 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			//Added to support data
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'data');
-			$field->set('column', 'vtiger_critere4dcontrel::data');
+			$field->set('column', 'vtiger_critere4dcontrel:data');
 			$field->set('label', 'Information');
-			$field->set('typeofdata', 'VARCHAR(255)');
+			$field->set('typeofdata', 'V~O');
 			$field->set('uitype', 21);
 			array_push($fields, $field);
 			    
 			//Added to support dateapplication
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'dateapplication');
-			$field->set('column', 'vtiger_critere4dcontrel::dateapplication');
+			$field->set('column', 'vtiger_critere4dcontrel:dateapplication');
 			$field->set('label', 'Date d\'application');
 			/*ED140906 tests*/
-			$field->set('typeofdata', 'DATETIME');
+			$field->set('typeofdata', 'D~O');
 			$field->set('uitype', 6);
 			array_push($fields, $field);
 			break;
@@ -75,20 +75,20 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			//Added to support dateapplication
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'invoicedate');
-			$field->set('column', 'vtiger_invoice::invoicedate');
+			$field->set('column', 'vtiger_invoice:invoicedate');
 			$field->set('label', 'Date de facture');
 			/*ED140906 tests*/
-			$field->set('typeofdata', 'DATETIME');
+			$field->set('typeofdata', 'D~O');
 			$field->set('uitype', 6);
 			array_push($fields, $field);
 			    
 			//Added to support dateapplication
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'typedossier');
-			$field->set('column', 'vtiger_invoicecf::typedossier');
+			$field->set('column', 'vtiger_invoicecf:typedossier');
 			$field->set('label', 'Type de facture');
 			/*ED140906 tests*/
-			$field->set('typeofdata', 'VARCHAR(128)');
+			$field->set('typeofdata', 'V~O');
 			$field->set('uitype', 15);
 			array_push($fields, $field);
 			

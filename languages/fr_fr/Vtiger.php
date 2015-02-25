@@ -684,7 +684,10 @@ $languageStrings = array(
         'LBL_DELETE_RELATION_WITH' => 'Suppression de la relation avec',
         'yes'              	 => 'oui',
         'no'              	 => 'non',
-	'LBL_RELATION_TO'	=> 'Relation à'
+	'LBL_RELATION_TO'	=> 'Relation à',
+	'LBL_EXISTS'		=> 'Existe',
+	'LBL_EXCLUDED'		=> 'Exclu',
+	'Left Panel Show/Hide'	=> 'Masque/affiche le panneau gauche'
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

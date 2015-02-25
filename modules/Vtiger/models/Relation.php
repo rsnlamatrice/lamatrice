@@ -303,6 +303,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 	 * ED150212
 	 */
 	public function getRelationViews() {
+		$module = Vtiger_Module_Model::getInstance($this->getRelationModuleName());
 		$views = CustomView_Record_Model::getAll($this->getRelationModuleName());
 		$structures = array();
 		if($views){
@@ -314,13 +315,15 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 							'fields' => $fields
 						);
 			}
+			foreach($fields as $field)
+				$field->setModule($module);
 		}
 		//var_dump($structures);
 		return $structures; 
 		//return Vtiger_RecordStructure_Model::getInstanceForModule($this->getRelationModuleModel())->getStructure();
 	}
 	/* Returns fields defining relation between modules
-	 *
+	 * Should be overrided (e.g. modules/Contacts/models/Relation.php)
 	 * ED150212
 	 */
 	public function getRelationFields() {

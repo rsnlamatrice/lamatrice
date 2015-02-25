@@ -19,3 +19,6 @@
 			{include file="ListViewSidebar.tpl"|vtemplate_path:$MODULE}
 		</div>
 		<div class="contentsDiv {if $LEFTPANELHIDE neq '1'} span10 {/if}marginLeftZero" id="rightPanel">
+			<div id="toggleButton" class="toggleButton" title="{vtranslate("Left Panel Show/Hide")}"> 
+				<i id="tButtonImage" class="{if $LEFTPANELHIDE neq '1'}icon-chevron-left{else}icon-chevron-right{/if}"></i>
+			</div>

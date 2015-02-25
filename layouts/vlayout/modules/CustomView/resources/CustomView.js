@@ -263,8 +263,6 @@ var Vtiger_CustomView_Js = {
 			//ED150212
 			// save as button
 			var saveAsCopy = e.target.id == "customViewSubmitCopy";
-			if(saveAsCopy)
-				$("#record").val('');
 			
 			var selectElement = Vtiger_CustomView_Js.getColumnSelectElement();
 			var select2Element = app.getSelect2ElementFromSelect(selectElement);
@@ -276,6 +274,9 @@ var Vtiger_CustomView_Js = {
 			} else {
 				select2Element.validationEngine('hide');
 			}
+			
+			if(saveAsCopy)
+				$("#record").val('');
 
 			//Mandatory Fields selection validation
 			//Any one Mandatory Field should select while creating custom view.
