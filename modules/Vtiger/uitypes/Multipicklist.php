@@ -26,7 +26,7 @@ class Vtiger_Multipicklist_UIType extends Vtiger_Base_UIType {
 		$fieldModel = $this->get('field');
 		if(preg_match('/\<.*uicolor/', $value))
 			return $value;
-		/* cherche le uicolor */
+		/* search of uicolor */
 		$uiColumns = Vtiger_Util_Helper::getPicklistUIColumns($fieldModel->getName());
 		if(is_array($uiColumns) && isset($uiColumns['uicolor'])){
 			if(!is_array($value)){

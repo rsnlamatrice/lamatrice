@@ -408,6 +408,7 @@ echo('$rawData'); var_dump($rawData);*/
 			}
 			$this->blocks = $blocksList;
 		}
+		
 		return $this->blocks;
 	}
 

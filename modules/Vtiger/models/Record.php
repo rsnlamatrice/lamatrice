@@ -104,6 +104,9 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	 * @return Vtiger_Record_Model instance
 	 */
 	public function setRawData($data) {
+		
+		/*echo "<BR><BR><BR><BR><BR><code>".print_r($data, true)."</code>";
+		echo_callstack();*/
 		$this->rawData = $data;
 		return $this;
 	}

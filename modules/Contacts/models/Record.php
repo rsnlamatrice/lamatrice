@@ -264,6 +264,37 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	/**
+	 * Retourne les contacts référents du même compte que ce contact.
+	 * ED150225
+	 */
+	public function getSameAccountReferentContacts(){
+		//echo '<pre>'; var_dump($this);echo '</pre>'; 
+		$account_id = $this->get('account_id');
+		$this_id = $this->getId();
+		
+		global $adb;
+		if($id ==null)
+		$id = $this->id;
+		$contacts = array();
+		$query = 'SELECT contactid FROM vtiger_contactdetails
+				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+				WHERE vtiger_contactdetails.accountid = ?
+				AND vtiger_contactdetails.contactid <> ?
+				AND vtiger_contactdetails.reference = 1
+				AND vtiger_crmentity.deleted = 0';
+		$accountContacts = $adb->pquery($query, array($id));
+		$numOfContacts = $adb->num_rows($accountContacts);
+		if($accountContacts && $numOfContacts > 0) {
+			for($i=0; $i < $numOfContacts; ++$i) {
+				//TODO : better then multi-query (in fact, may not have more then 1 contact)
+				$contact = Vtiger_Record_Model::getInstanceById($adb->query_result($accountContacts, $i, 'contactid'), 'Contacts');
+				array_push($contacts, $contact);
+			}
+		}
+		return $contacts;
+	}
+	
+	/**
 	 * Recopie l'adresse du contact vers l'adresse du compte et des autres contacts référents du même compte.
 	 * ED150205
 	 */
@@ -312,7 +343,23 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 * Recopie l'adresse des contacts référents du même compte.
 	 * ED150205
 	 */
-	public function updateContactsComptesCommunsAddress($account = false, $save = true){
+	public function updateContactsComptesCommunsAddress(){
 		
+		$contacts = $this->getSameAccountReferentContacts();
+		foreach($contacts as $contact){
+			$contact->set('mode', 'edit');
+			
+			$thisFields = $this->getModule()->getFields();
+			//Parcourt les champs
+			foreach($thisFields as $fieldName => $field){
+				// Champ commençant par "mailing"
+				if(strpos($fieldName, 'mailing') === 0){
+					$contact->set($fieldName, $this->get($fieldName));
+				}
+			
+			}
+			$contact->save();
+		}		
+		return count($contacts);
 	}
 }

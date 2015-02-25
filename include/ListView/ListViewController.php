@@ -450,11 +450,12 @@ class ListViewController {
 						$tmp = '';
 						$tmpArray = array();
 						foreach($valueArray as $index => $val) {
+							$val_decoded = trim(html_entity_decode($val));
 							if(!$listview_max_textlength
-							|| !(strlen(preg_replace("/(<\/?)(\w+)([^>]*>)/i","",$tmp)) > $listview_max_textlength)) {
-								if (!$is_admin && $this->picklistRoleMap[$fieldName]
-								&& !in_array(trim($val), $this->picklistValueMap[$fieldName])
-								&& !isset($this->picklistValueDataMap[$fieldName][trim($val)]))//ED150210 teste aussi avec les accents échappés
+							|| !(strlen($tmp) > $listview_max_textlength)) {
+								if ($this->picklistRoleMap[$fieldName]
+								&& !in_array($val_decoded, $this->picklistValueMap[$fieldName])
+								&& !isset($this->picklistValueDataMap[$fieldName][$val]))//ED150210 teste aussi avec les accents échappés
 								{	//Non accessible ou introuvable dans la picklist officielle
 									$tmpArray[] = $notaccess;
 									$tmp .= ', '.$notaccess;
@@ -467,7 +468,7 @@ class ListViewController {
 									}
 									else
 										$tmpArray[] = $val;
-									$tmp .= ', '.$val;
+									$tmp .= ', '.$val_decoded;
 								}
 							} else {
 								$tmpArray[] = '...';
@@ -476,7 +477,7 @@ class ListViewController {
 							}
 						}
 						$value = implode(', ', $tmpArray);
-						$value = textlength_check($value);
+						//$value = textlength_check($value); ED150224 this func deletes html tags
 					}
 					else if($value != '') {
 						$valueArray = ($rawValue != "") ? explode(' |##| ',$rawValue) : array();

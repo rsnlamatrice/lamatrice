@@ -51,7 +51,10 @@
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
 			<table class="table table-bordered blockContainer showInlineTable">
 			<tr>
-				<th class="blockHeader" colspan="4">{vtranslate($BLOCK_LABEL, $MODULE)}</th>
+				<th class="blockHeader" colspan="4">{vtranslate($BLOCK_LABEL, $MODULE)}
+				{if $BLOCK_LABEL eq 'LBL_ADDRESS_INFORMATION'}
+					&nbsp;<span style="font-size: smaller">(définie par l'adresse du contact référent)</span>
+				{/if}</th>
 			</tr>
 			<tr>
 			{assign var=COUNTER value=0}
