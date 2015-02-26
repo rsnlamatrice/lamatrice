@@ -37,7 +37,8 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 	public function process(Vtiger_Request $request) {
 		
 		$viewer = $this->getViewer($request);
-		/* ED141210 court-circuite les activités */
+		/* ED141210 court-circuite les activités
+		TODO : mettre en paramètre */
 		$viewer->assign('NO_ACTIVITIES_WIDGET', true);
 
 		return parent::process($request);

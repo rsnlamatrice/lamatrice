@@ -22,7 +22,7 @@
                  */
         $.fn.select2.defaults.__formatResult_original = $.fn.select2.defaults.formatResult;
         $.fn.select2.defaults.formatResult = function(result, container, query) {
-            if (result && result.element.length && result.element[0].style.backgroundColor) {
+            if (result && result.element && result.element.length && result.element[0].style.backgroundColor) {
                 container.css('background-color', result.element[0].style.backgroundColor);
             }
             return this.__formatResult_original(result, container, query);

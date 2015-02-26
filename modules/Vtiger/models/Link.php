@@ -148,9 +148,9 @@ class Vtiger_Link_Model extends Vtiger_Link {
 		}
 		//Check if the link is not javascript
 		if(!$this->isPageLoadLink()){
-           //To convert single quotes and double quotes
-           $url = Vtiger_Util_Helper::toSafeHTML($url);
-           return $url;
+			//To convert single quotes and double quotes
+			$url = Vtiger_Util_Helper::toSafeHTML($url);
+			return $url;
 		}
 
 		$module = false;
@@ -212,9 +212,9 @@ class Vtiger_Link_Model extends Vtiger_Link {
 			}
 		}
 
-        $url = implode('&', $parametersParts);
-       //To convert single quotes and double quotes
-        $url = Vtiger_Util_Helper::toSafeHTML($url);
+		$url = implode('&', $parametersParts);
+	       //To convert single quotes and double quotes
+		$url = Vtiger_Util_Helper::toSafeHTML($url);
 		return  $url;
 	}
 
@@ -272,7 +272,7 @@ class Vtiger_Link_Model extends Vtiger_Link {
 			}
 		}
         
-        if (!is_array($type)) {
+		if (!is_array($type)) {
 			$type = array($type);
 		}
 
