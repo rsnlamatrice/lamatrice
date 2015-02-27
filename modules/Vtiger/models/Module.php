@@ -448,9 +448,9 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 * @return <Array of Vtiger_Field_Model> - list of field models
 	 */
 	public function getFieldsByType($type) {
-        if(!is_array($type)) {
-            $type = array($type);
-        }
+		if(!is_array($type)) {
+		    $type = array($type);
+		}
 		$fields = $this->getFields();
 		$fieldList = array();
 		foreach($fields as $field) {

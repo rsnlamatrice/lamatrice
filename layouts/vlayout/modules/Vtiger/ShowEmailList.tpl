@@ -1,38 +1,33 @@
 {*<!--
 /*********************************************************************************
-** ED1502
+** ED150227
 *
  ********************************************************************************/
 -->*}
 
-{assign var="TEXTAREA_DEFAULT_ROWS" value="12"}
+{assign var="TEXTAREA_DEFAULT_ROWS" value="20"}
 
 <div class="commentContainer">
 	<div class="commentTitle row-fluid">
-		<div class="addCommentBlock">
-			<div>
-				{print_r($CONTACTNAME_FIELD, true)}
-				<br>{print_r($EMAIL_FIELDS, true)}
-				<textarea name="emailList" rows="{$TEXTAREA_DEFAULT_ROWS}" class="emaillist" style="width: 100%;">
-					{for $nRecord=0 to count($RECORDS)}
-					{*foreach item=$RECORD from=$RECORDS*}
-						{assign var=RECORD value=$RECORDS[$nRecord]}
-				<br>{print_r($RECORD, true)}
-						{for $nField=0 to count($EMAIL_FIELDS)}
-							{assign var=FIELD value=$EMAIL_FIELDS[$nField]}
-						{*foreach item=$FIELD from=$EMAIL_FIELDS*}
-							{if $RECORD[$FIELD]}
-								{$RECORD[$CONTACTNAME_FIELD]} &lt;{$RECORD[$FIELD]}&gt;;
-							{/if}
-						{/for}
-					{/for}
-					{print_r($RECORDS, true)}
-				</textarea>
-			</div>
-		</div>
+	<div class="addCommentBlock">
+	<div>
+		<textarea id="txtemaillist" name="emailList" rows="{$TEXTAREA_DEFAULT_ROWS}" class="emaillist"
+			style="min-width: 40em;"
+			spellcheck="false"
+			onfocus="$(this).select();"
+			>{foreach item=RECORD from=$RECORDS
+				}{foreach item=FIELD key=FIELD_NAME from=$EMAIL_FIELDS
+					}{if $RECORD[$FIELD]
+						}{$RECORD[$CONTACTNAME_FIELD]} &lt;{$RECORD[$FIELD]}&gt;;
+{/if}{/foreach}{/foreach}</textarea>
 	</div>
-		<div class="hide basicEditCommentBlock" style="min-height: 150px;">
-		<div class="pull-right">
+	</div>
+	</div>
+	<div class="basicEditCommentBlock" style="margin-bottom: 2em;">
+		<div class="pull-right marginRight10px">
+			<a class="cursorPointer marginRight10px" type="reset"
+			   onclick="var $input=$('#txtemaillist'); $input.val($input.val().replace(/(^|;)\s+/g, '$1 '));"
+			   >{vtranslate('LBL_IN_1_ROW', $MODULE_NAME)}</a>
 			<a class="cursorPointer closeCommentBlock cancelLink" type="reset">{vtranslate('LBL_CANCEL', $MODULE_NAME)}</a>
 		</div>
 	</div>

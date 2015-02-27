@@ -387,9 +387,7 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		$cvId = $request->get('viewname');
 		$selectedIds = $request->get('selected_ids');
 		$excludedIds = $request->get('excluded_ids');
-		$step = $request->get('step');
 		$selectedFields = $request->get('selectedFields');
-		$relatedLoad = $request->get('relatedLoad');
 
 		$moduleModel = Vtiger_Module_Model::getInstance($sourceModule);
 		$emailFields = $moduleModel->getFieldsByType('email');
@@ -452,14 +450,7 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 			$num_rows = $db->num_rows($result);
 			for($i=0; $i < $num_rows; $i++)
 				$data[] = $db->fetch_array($result);
-			/*for ($i = 0; $i < $rowCount; $i++) {
-				$id = $this->db->query_result($result, $i, $field->getColumnName());
-				if (!isset($this->ownerNameList[$fieldName][$id])) {
-					$idList[] = $id;
-				}
-			}*/
 		}
-
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE', $moduleName);
 		$viewer->assign('RECORDS', $data);
