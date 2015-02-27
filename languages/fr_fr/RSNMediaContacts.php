@@ -42,7 +42,6 @@ $languageStrings = array(
 	'LBL_EMAILS' => 'Emails',
 	'LBL_HELPDESK' => 'Tickets',
 	'LBL_EVENTS' => 'Evènements',
-        'LBL_SHOW_EMAILS_LIST' => 'Affiche la liste des emails'
 );
 
 ?>

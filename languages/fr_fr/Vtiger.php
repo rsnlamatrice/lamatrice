@@ -703,7 +703,9 @@ $languageStrings = array(
 	'LBL_MERGE_SELECT'                  => 'Sélection de fusion',
 	'LBL_IGNORE_EMPTY_VALUES'           => 'Ignorer les valeurs vides',
         'LBL_ACTION'                        => 'Actions',
-	'LBL_IN_1_ROW'			    => 'En 1 ligne'
+	'LBL_IN_1_ROW'			    => 'En 1 ligne',
+        'LBL_SHOW_EMAILS_LIST' 		    => 'Affiche la liste des emails',
+	'LBL_EMAIL_LIST'		    => 'Liste d\'emails'
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 
