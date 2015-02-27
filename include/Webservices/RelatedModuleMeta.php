@@ -13,6 +13,10 @@
  * Description of RelatedModuleMeta
  * TODO to add and extend a way to track many-many and many-one relationships.
  * @author MAK
+ *
+ *
+ * ED150227
+ * Extension
  */
 class RelatedModuleMeta {
 	private $module;
@@ -21,6 +25,10 @@ class RelatedModuleMeta {
 	private $PRODUCTQUOTESREL = 2;
 	private $PRODUCTINVOICEREL = 3;
 	private $PRODUCTPURCHASEORDERREL = 4;
+	private $INVOICECONTACTREL = 5;
+	private $CONTACTCONTACTSREL = 6;
+	private $CAMPAIGNDOCUMENTSREL = 7;
+	private $CONTACTDOCUMENTSREL = 8;
 	
 	private function  __construct($module, $relatedModule) {
 		$this->module = $module;
@@ -38,10 +46,115 @@ class RelatedModuleMeta {
 	}
 
 	public function getRelationMeta() {
+		switch($this->module){
+		case 'Contacts':
+			switch($this->relatedModule){
+			case 'Contacts':
+				return $this->getRelationMetaInfo($this->CONTACTCONTACTSREL);
+			
+			case 'Campaigns':
+				return $this->getRelationMetaInfo($this->CAMPAIGNCONTACTREL);
+			
+			case 'Invoice':
+				return $this->getRelationMetaInfo($this->INVOICECONTACTREL);
+			
+			case 'Documents':
+				return $this->getRelationMetaInfo($this->CONTACTDOCUMENTSREL);
+			
+			case 'Quotes':
+				break;
+			
+			case 'PurchaseOrder':
+				break;
+			
+			default:
+				break;
+			}
+			break;
+		
+		case 'Campaigns':
+			switch($this->relatedModule){
+			case 'Contacts':
+				return $this->getRelationMetaInfo($this->CAMPAIGNCONTACTREL);
+			
+			case 'Documents':
+				return $this->getRelationMetaInfo($this->CAMPAIGNDOCUMENTSREL);
+			
+			default:
+				break;
+			}
+			break;
+		
+		case 'Documents':
+			switch($this->relatedModule){
+			case 'Contacts':
+				return $this->getRelationMetaInfo($this->CONTACTDOCUMENTSREL);
+			
+			case 'Campaigns':
+				return $this->getRelationMetaInfo($this->CAMPAIGNDOCUMENTSREL);
+			
+			default:
+				break;
+			}
+			break;
+		
+		case 'Products':
+			switch($this->relatedModule){
+			case 'Invoice':
+				return $this->getRelationMetaInfo($this->PRODUCTINVOICEREL);
+			
+			case 'PurchaseOrder':
+				return $this->getRelationMetaInfo($this->PRODUCTPURCHASEORDERREL);
+			
+			case 'Quotes':
+				return $this->getRelationMetaInfo($this->PRODUCTQUOTESREL);
+			
+			default:
+				break;
+			}
+			break;
+		
+		case 'Invoice':
+			switch($this->relatedModule){
+			case 'Contacts':
+				return $this->getRelationMetaInfo($this->INVOICECONTACTREL);
+			
+			case 'Products':
+				return $this->getRelationMetaInfo($this->PRODUCTINVOICEREL);
+			
+			default:
+				break;
+			}
+			break;
+		
+		case 'Quotes':
+			switch($this->relatedModule){
+			case 'Products':
+				return $this->getRelationMetaInfo($this->PRODUCTQUOTESREL);
+			
+			default:
+				break;
+			}
+			break;
+		
+		case 'PurchaseOrder':
+			switch($this->relatedModule){
+			case 'Products':
+				return $this->getRelationMetaInfo($this->PRODUCTPURCHASEORDERREL);
+			
+			default:
+				break;
+			}
+			break;
+		
+		default:
+			break;
+		}
 		$campaignContactRel = array('Campaigns','Contacts');
 		$productInvoiceRel = array('Products','Invoice');
 		$productQuotesRel = array('Products','Quotes');
 		$productPurchaseOrder = array('Products','PurchaseOrder');
+		$invoiceContactRel = array('Invoice','Contacts');
 		if(in_array($this->module, $campaignContactRel) && in_array($this->relatedModule,
 				$campaignContactRel)) {
 			return $this->getRelationMetaInfo($this->CAMPAIGNCONTACTREL);
@@ -62,26 +175,46 @@ class RelatedModuleMeta {
 
 	private function getRelationMetaInfo($relationId) {
 		switch($relationId) {
-			case $this->CAMPAIGNCONTACTREL: return array(
-					'relationTable' => 'vtiger_campaigncontrel',
-					'Campaigns' => 'campaignid',
-					'Contacts' => 'contactid'
-				);
-			case $this->PRODUCTINVOICEREL: return array(
-					'relationTable' => 'vtiger_inventoryproductrel',
-					'Products' => 'productid',
-					'Invoice' => 'id'
-				);
-			case $this->PRODUCTQUOTESREL: return array(
-					'relationTable' => 'vtiger_inventoryproductrel',
-					'Products' => 'productid',
-					'Quotes' => 'id'
-				);
-			case $this->PRODUCTPURCHASEORDERREL: return array(
-					'relationTable' => 'vtiger_inventoryproductrel',
-					'Products' => 'productid',
-					'PurchaseOrder' => 'id'
-				);
+		case $this->CAMPAIGNCONTACTREL: return array(
+				'relationTable' => 'vtiger_campaigncontrel',
+				'Campaigns' => 'campaignid',
+				'Contacts' => 'contactid'
+			);
+		case $this->PRODUCTINVOICEREL: return array(
+				'relationTable' => 'vtiger_inventoryproductrel',
+				'Products' => 'productid',
+				'Invoice' => 'id'
+			);
+		case $this->PRODUCTQUOTESREL: return array(
+				'relationTable' => 'vtiger_inventoryproductrel',
+				'Products' => 'productid',
+				'Quotes' => 'id'
+			);
+		case $this->PRODUCTPURCHASEORDERREL: return array(
+				'relationTable' => 'vtiger_inventoryproductrel',
+				'Products' => 'productid',
+				'PurchaseOrder' => 'id'
+			);
+		case $this->INVOICECONTACTREL: return array(
+				'relationTable' => 'vtiger_invoice',
+				'Contacts' => 'contactid',
+				'Invoice' => 'invoiceid'
+			);
+		case $this->CONTACTCONTACTSREL: return array(
+				'relationTable' => 'vtiger_contactscontrel',
+				'Contacts' => 'contactid',
+				'relatedField' => 'relcontid' //relatedField because same table
+			);
+		case $this->CAMPAIGNDOCUMENTSREL: return array(
+				'relationTable' => 'vtiger_senotesrel',
+				'Documents' => 'notesid',
+				'Campaigns' => 'crmid'
+			);
+		case $this->CONTACTDOCUMENTSREL: return array(
+				'relationTable' => 'vtiger_senotesrel',
+				'Documents' => 'notesid',
+				'Contacts' => 'crmid',
+			);
 		}
 	}
 }

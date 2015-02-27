@@ -208,7 +208,7 @@ var Vtiger_CustomView_Js = {
 	registerNameChangedEvent : function() {
 		if (jQuery("#viewname").val())
 			jQuery("#viewname").change(function(){
-				jQuery("#customViewSubmitCopy").show();
+				jQuery("#customViewSubmitCopy").removeAttr('disabled');
 			});
 	},
 

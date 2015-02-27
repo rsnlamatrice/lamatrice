@@ -322,12 +322,16 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 					/* ED150225
 					 * Related module view
 					 */
-					if($advFilterColumn[0] == '['){
+					if($advFilterColumn[0] == '['){ //[Module:ViewName:ViewId]:field table:column:field:label (TODO check column:field)
 						$pos = strpos($advFilterColumn, ']', 1);
-						$relatedModuleName = substr($advFilterColumn, 1, $pos-1);
+						$viewName = explode(":", substr($advFilterColumn, 1, $pos-1));
+						$relatedModuleName = $viewName[0];
+						$viewId = $viewName[2];
+						$viewName = $viewName[1];
 						$fieldModuleModel = Vtiger_Module_Model::getInstance($relatedModuleName);
-						$viewName = trim(substr($advFilterColumn, $pos + 1));
-						$columnInfo = $viewName[0] == ':' ? substr($viewName, 1) : $viewName;
+						
+						$columnInfo = trim(substr($advFilterColumn, $pos + 1));
+						$columnInfo = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
 						
 						$columnInfo = explode(":", $columnInfo);
 					}

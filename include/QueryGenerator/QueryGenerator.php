@@ -229,15 +229,70 @@ class QueryGenerator {
 	}
 
 	public function parseAdvFilterList($advFilterList, $glue=''){
+		
+		//die('<pre>'.print_r($advFilterList, true).'</pre>');
 		if(!empty($glue)) $this->addConditionGlue($glue);
 
 		$customView = new CustomView($this->module);
+		$moduleModel = Vtiger_Module_Model::getInstance($this->module);
+		$relationModels = Vtiger_Relation_Model::getAllRelations($moduleModel);
 		$dateSpecificConditions = $customView->getStdFilterConditions();
 		foreach ($advFilterList as $groupindex=>$groupcolumns) {
 			$filtercolumns = $groupcolumns['columns'];
 			if(count($filtercolumns) > 0) {
 				$this->startGroup('');
 				foreach ($filtercolumns as $index=>$filter) {
+					/*ED150226
+					 * related module view field
+					 */
+					//die('<pre>'.print_r($filter['columnname'], true).'</pre>');
+					if($filter['columnname'][0] == '['){
+						$pos = strpos($filter['columnname'], ']', 1);
+						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
+						$filter['relatedmodulename'] = $viewName[0];
+						$filter['viewid'] = $viewName[2];
+						$filter['viewname'] = $viewName[1];
+						$filter['relatedmodule'] = Vtiger_Module_Model::getInstance($filter['relatedmodulename']);
+						
+						$columnInfo = trim(substr($filter['columnname'], $pos + 1));
+						$filter['columnname'] = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
+						if(!$filter['columnname']){
+							$relationModel = false;
+							foreach($relationModels as $model)
+								if($model->getRelationModuleName() == $filter['relatedmodulename']){
+									$relationModel = $model;
+									break;
+								}
+							if($relationModel){
+								$relationsInfos = $relationModel->getModulesInfoForDetailView();
+							}
+							if(!$relationModel
+							|| !isset($relationsInfos[$filter['relatedmodulename']]))
+								$relationInfos = array('fieldName' => $this->getSQLColumn('id')
+										       , 'tableName' => ' vtiger_crmentityrel');
+							else
+								$relationInfos = $relationsInfos[$filter['relatedmodulename']];
+							//var_dump($relationInfos);
+							//$relationModel = Vtiger_Relation_Model::getInstance($this->module, $filter['relatedmodulename']);
+							//$value = $relationModel->getQuery();
+							//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $value, 'IN');
+							
+							$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid']);
+							
+							$relatedSql = $listView->getQuery();
+							$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
+							
+							$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
+							$newQuery[0] = $selectColumnSql.' '; /* ED141012 */
+							$relatedSql = implode(' FROM ', $newQuery);
+							//print_r('<pre>$this->getSQLColumn(id) : '.$this->getSQLColumn('id').'</pre>');
+							//print_r('<pre>$relatedSql : '.$relatedSql.'</pre>');
+							$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $relatedSql, 'IN');
+							
+							continue;
+						}
+					}
+					
 					$nameComponents = explode(':',$filter['columnname']);
 					if(empty($nameComponents[2]) && $nameComponents[1] == 'crmid' && $nameComponents[0] == 'vtiger_crmentity') {
 						$name = $this->getSQLColumn('id');
@@ -293,6 +348,10 @@ class QueryGenerator {
 					$this->addConditionGlue($groupConditionGlue);
 			}
 		}
+		if(isset($relatedSql))
+			print_r('<pre>'.$this->getQuery().'</pre>');
+							
+							
 	}
 
 	public function getCustomViewQueryById($viewId) {
@@ -536,11 +595,13 @@ class QueryGenerator {
 		foreach ($this->manyToManyRelatedModuleConditions as $conditionInfo) {
 			$relatedModuleMeta = RelatedModuleMeta::getInstance($this->meta->getTabName(),
 					$conditionInfo['relatedModule']);
+			//var_dump($relatedModuleMeta);
 			$relationInfo = $relatedModuleMeta->getRelationMeta();
 			$relatedModule = $this->meta->getTabName();
-			$sql .= ' INNER JOIN '.$relationInfo['relationTable']." ON ".
-			$relationInfo['relationTable'].".$relationInfo[$relatedModule]=".
-				"$baseTable.$baseTableIndex";
+			$relatedModuleField = isset($relationInfo['relatedField']) ? $relationInfo['relatedField'] : $relationInfo[$relatedModule];
+			//TODO : LEFT JOIN if needed
+			$sql .= ' INNER JOIN '.$relationInfo['relationTable'].
+				' ON '.$relationInfo['relationTable'].".$relatedModuleField = $baseTable.$baseTableIndex";
 		}
 
 		// Adding support for conditions on reference module fields
@@ -680,15 +741,15 @@ class QueryGenerator {
 							$fieldSql .= "$dateFieldColumnName $valueSql";
 						}
 					} else {
-                        if(is_array($value)){
-                            $value = $value[0];
-                        }
+						if(is_array($value)){
+						    $value = $value[0];
+						}
 						$values = explode(' ', $value);
 						if(count($values) == 2) {
 							$fieldSql .= "$fieldGlue CAST(CONCAT($dateFieldColumnName,' ',$timeFieldColumnName) AS DATETIME) $valueSql ";
 						} else {
 							$fieldSql .= "$fieldGlue $dateFieldColumnName $valueSql";
-                        }
+						}
 					}
 				} elseif($field->getFieldDataType() == 'datetime') {
 					$value = $conditionInfo['value'];
@@ -736,9 +797,11 @@ class QueryGenerator {
 					$conditionInfo['relatedModule']);
 			$relationInfo = $relatedModuleMeta->getRelationMeta();
 			$relatedModule = $this->meta->getTabName();
-			$fieldSql = "(".$relationInfo['relationTable'].'.'.
-			$relationInfo[$conditionInfo['column']].$conditionInfo['SQLOperator'].
-			$conditionInfo['value'].")";
+			$fieldSql = "(".
+				$relationInfo['relationTable'].'.'.$relationInfo[$conditionInfo['column']].
+				$conditionInfo['SQLOperator'].
+				$conditionInfo['value'].
+				")";
 			$fieldSqlList[$index] = $fieldSql;
 		}
 
@@ -982,7 +1045,7 @@ class QueryGenerator {
 				$value, $operator);
 	}
 
-	public function addRelatedModuleCondition($relatedModule,$column, $value, $SQLOperator) {
+	public function addRelatedModuleCondition($relatedModule, $column, $value, $SQLOperator) {
 		$conditionNumber = $this->conditionInstanceCount++;
 		$this->groupInfo .= "$conditionNumber ";
 		$this->manyToManyRelatedModuleConditions[$conditionNumber] = array('relatedModule'=>

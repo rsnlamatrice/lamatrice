@@ -64,15 +64,17 @@
 			{* ED150212 - related modules views *}
 			{foreach key=RELATED_NAME item=RELATED_VIEWS from=$RELATED_MODELS_VIEWS}
 				<optgroup label='[{vtranslate($RELATED_NAME, $SOURCE_MODULE)}]'>
+				{* each view of module *}
 				{foreach key=VIEW_IDX item=RELATED_VIEW from=$RELATED_VIEWS}
+					{if $RELATED_VIEW['id'] eq $RECORD_ID}{break}{/if}
 					{assign var=RELATED_FIELDS value=$RELATED_VIEW['fields']}
 					{assign var=VIEW_ID value=$RELATED_VIEW['id']}
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
-					<option value="{$COLUMN_NAME}" data-fieldtype="VW" data-field-name="@RELATION"
-						data-view="[{$RELATED_NAME}][{$VIEW_LABEL}]"
-					{if in_array($COLUMN_NAME, $SELECTED_FIELDS)}
-						selected
-					{/if}
+					{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
+					<option value="{$COLUMN_NAME}" data-fieldtype="VW" data-field-name="(exists)"
+						{if $COLUMN_NAME eq $CONDITION_INFO['columnname']}
+							selected="selected"
+						{/if}
 						data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
 					{assign var=COLUMN_NAME value="["|cat:vtranslate($RELATED_NAME, $SOURCE_MODULE)|cat:"] "|cat:vtranslate($VIEW_LABEL, $RELATED_NAME)}
 					>{$COLUMN_NAME}
@@ -80,21 +82,23 @@
 				{/foreach}
 				{* add relation fields *}
 				{foreach key=VIEW_IDX item=RELATED_VIEW from=$RELATED_VIEWS}
+					{if $RELATED_VIEW['id'] eq $RECORD_ID}{break}{/if}
 					{assign var=RELATED_FIELDS value=$RELATED_VIEW['fields']}
 					{assign var=VIEW_ID value=$RELATED_VIEW['id']}
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
 					{foreach key=FIELD_NAME item=FIELD_MODEL from=$RELATED_FIELDS}
 						{assign var=COLUMN_NAME value=$RELATED_NAME|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()}
+						{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()}
 						{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfo()}
-						<option value="[{$RELATED_NAME}]{$FIELD_MODEL->getCustomViewColumnName()}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$COLUMN_NAME}"
+						<option value="{$COLUMN_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$COLUMN_NAME}"
 							data-view="[{$RELATED_NAME}][{$VIEW_LABEL}]"
-						{if decode_html($FIELD_MODEL->getCustomViewColumnName()) eq $CONDITION_INFO['columnname']}
-							{assign var=FIELD_TYPE value=$FIELD_MODEL->getFieldType()}
-							{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
-							{if $FIELD_MODEL->getFieldDataType() == 'reference'}{$FIELD_TYPE='V'}{/if}
-							{$FIELD_INFO['value'] = decode_html($CONDITION_INFO['value'])}
-							selected="selected"
-						{/if}
+							{if $COLUMN_NAME eq $CONDITION_INFO['columnname']}
+								{assign var=FIELD_TYPE value=$FIELD_MODEL->getFieldType()}
+								{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
+								{if $FIELD_MODEL->getFieldDataType() == 'reference'}{$FIELD_TYPE='V'}{/if}
+								{$FIELD_INFO['value'] = decode_html($CONDITION_INFO['value'])}
+								selected="selected"
+							{/if}
 						
 							data-fieldinfo='{Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))}'
 						>{vtranslate($FIELD_MODEL->get('label'), $RELATED_NAME)}
@@ -111,8 +115,10 @@
 			{* ED150212 - related modules views
 			 * specific fields
 			 *}
+					
 			{foreach key=RELATED_NAME item=RELATED_VIEWS from=$RELATED_MODELS_VIEWS}
 				{foreach key=VIEW_IDX item=RELATED_VIEW from=$RELATED_VIEWS}
+					{if $RELATED_VIEW['id'] eq $RECORD_ID}{break}{/if}
 					{assign var=RELATED_FIELDS value=$RELATED_VIEW['fields']}
 					{assign var=VIEW_ID value=$RELATED_VIEW['id']}
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
@@ -122,7 +128,7 @@
 						<option value="{$COLUMN_NAME}" data-fieldtype="VW" data-field-name="@RELATION"
 							data-view="[{$RELATED_NAME}][{$VIEW_LABEL}]"
 						{if in_array($COLUMN_NAME, $SELECTED_FIELDS)}
-							selected
+							selected="selected"
 						{/if}
 							data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
 						{assign var=COLUMN_NAME value=vtranslate('LBL_RELATION_TO', $RELATED_NAME)|cat:" ["|cat:vtranslate($RELATED_NAME, $SOURCE_MODULE)|cat:"] "|cat:vtranslate($VIEW_LABEL, $RELATED_NAME)}

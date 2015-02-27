@@ -387,9 +387,6 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 * @return Vtiger_Record_Model or Module Specific Record Model instance
 	 */
 	public function getRecordFromArray($valueArray, $rawData=false) {
-/*echo('getRecordFromArray : '); 
-echo('$valueArray'); var_dump($valueArray);
-echo('$rawData'); var_dump($rawData);*/
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', $this->get('name'));
 		$recordInstance = new $modelClassName();
 		return $recordInstance->setData($valueArray)->setModuleFromInstance($this)->setRawData($rawData);
@@ -1387,10 +1384,10 @@ echo('$rawData'); var_dump($rawData);*/
 			$queryGenerator = new QueryGenerator($relatedModuleName, $currentUser);
 			$queryGenerator->setFields($relatedListFields);
 			$selectColumnSql = $queryGenerator->getSelectClauseColumnSQL();
-			$newQuery = spliti('FROM ', $query); /* TODO regex */
+			$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
 			$selectColumnSql = 'SELECT vtiger_crmentity.crmid,'.$selectColumnSql;
 			$newQuery[0] = $selectColumnSql.' '; /* ED141012 */
-			$query = implode('FROM ', $newQuery);
+			$query = implode(' FROM ', $newQuery);
 		}
 		if ($nonAdminQuery) {
 			$query = appendFromClauseToQuery($query, $nonAdminQuery);

@@ -595,7 +595,9 @@ $languageStrings = array(
 	'Fax: ' => 'Fax: ',
 	'Website: ' => 'Site: ',
 	'Tax' => 'Tax',
-    'LBL_ALPHABETS' => 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z',
+        
+        
+        'LBL_ALPHABETS' => 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z',
 	
 	//Realted tab strings
 	'Service Contracts' => 'Contrats de Service',
@@ -687,7 +689,21 @@ $languageStrings = array(
 	'LBL_RELATION_TO'	=> 'Relation à',
 	'LBL_EXISTS'		=> 'Existe',
 	'LBL_EXCLUDED'		=> 'Exclu',
-	'Left Panel Show/Hide'	=> 'Masque/affiche le panneau gauche'
+	'Left Panel Show/Hide'	=> 'Masque/affiche le panneau gauche',
+        
+        'LBL_AVAILABLE_FIELDS'              => 'Champs disponibles', 
+	'LBL_MERGE'                         => 'Fusionner',
+	'LBL_MERGING_CRITERIA_SELECTION'    => 'Critère de sélection de la fusion',
+	'LBL_MERGE_RECORDS_DESCRIPTION'     => 'Le premier enregistrement sera retenu après la fusion. Vous pouvez sélectionner les valeurs à conserver.
+            Les autres enregistrements seront supprimés mais les informations liées seront transférées.',
+	'LBL_MERGE_RECORDS_IN'              => 'Fusionner les enregistrements dans',
+	'LBL_FIELDS'                        => 'Champs',
+	'LBL_RECORD'                        => 'Enregistrement',
+	'LBL_NO_DUPLICATED_FOUND'           => 'Aucune duplication',
+	'LBL_MERGE_SELECT'                  => 'Sélection de fusion',
+	'LBL_IGNORE_EMPTY_VALUES'           => 'Ignorer les valeurs vides',
+        'LBL_ACTION'                        => 'Actions',
+	
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

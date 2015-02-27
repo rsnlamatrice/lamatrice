@@ -175,7 +175,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 				'sub' => 'EditCustomView',
 				'label' => 'Edition de vue',
 				'params' => array(
-					'viewid' => 100
+					'viewid' => 101
 					, 'viewmodule' => 'Contacts'
 				)
 			)

@@ -101,6 +101,47 @@ jQuery.Class("Vtiger_List_Js",{
 		}
 
 	},
+	/*
+	 * function to trigger 'show email list'
+	 * @params: send email url , module name.
+	 *
+	 * ED150227
+	 */
+	triggerShowEmailList : function(massActionUrl, module, params){
+		var listInstance = Vtiger_List_Js.getInstance();
+		var validationResult = listInstance.checkListRecordSelected();
+		if(validationResult != true){
+			var selectedIds = listInstance.readSelectedIds(true);
+			var excludedIds = listInstance.readExcludedIds(true);
+			var cvId = listInstance.getCurrentCvId();
+			var postData = {
+				"viewname" : cvId,
+				"selected_ids":selectedIds,
+				"excluded_ids" : excludedIds
+			};
+
+			var listViewInstance = Vtiger_List_Js.getInstance();
+			var searchValue = listViewInstance.getAlphabetSearchValue();
+
+			if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
+				postData['search_key'] = listViewInstance.getAlphabetSearchField();
+				postData['search_value'] = searchValue;
+				postData['operator'] = "s";
+			}
+			jQuery.extend(postData,params);
+			var actionParams = {
+				"type":"POST",
+				"url":massActionUrl,
+				"dataType":"html",
+				"data" : postData
+			};
+
+			Vtiger_Index_Js.showEmailListPopup(actionParams);
+		} else {
+			listInstance.noRecordSelectedAlert();
+		}
+
+	},
 	
 	triggerTransferOwnership : function(massActionUrl){
 		var thisInstance = this;
