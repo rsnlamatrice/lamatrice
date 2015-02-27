@@ -440,6 +440,11 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	 */
 	public function getPicklistValuesDetails($fieldname){
 		switch($fieldname){
+			case 'emailoptout':
+				return array(
+					'0' => array( 'label' => 'si, on peut', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
+					'1' => array( 'label' => 'Pas d\'email', 'icon' => 'ui-icon ui-icon-locked darkred' )
+				);
 			default:
 				return array();
 		}
