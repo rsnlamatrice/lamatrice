@@ -10,6 +10,7 @@
 
 class Contacts_Record_Model extends Vtiger_Record_Model {
 
+	public static $preventInfiniteSave;
 	
 	/**
 	 * Function returns the url for create event
@@ -273,8 +274,8 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		$this_id = $this->getId();
 		
 		global $adb;
-		if($id ==null)
-		$id = $this->id;
+		if($this_id ==null)
+			$this_id = $this->id;
 		$contacts = array();
 		$query = 'SELECT contactid FROM vtiger_contactdetails
 				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
@@ -282,7 +283,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 				AND vtiger_contactdetails.contactid <> ?
 				AND vtiger_contactdetails.reference = 1
 				AND vtiger_crmentity.deleted = 0';
-		$accountContacts = $adb->pquery($query, array($id));
+		$accountContacts = $adb->pquery($query, array($account_id, $this_id));
 		$numOfContacts = $adb->num_rows($accountContacts);
 		if($accountContacts && $numOfContacts > 0) {
 			for($i=0; $i < $numOfContacts; ++$i) {
@@ -299,6 +300,11 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 * ED150205
 	 */
 	public function synchronizeAddressToOthers(){
+		if(!is_array(self::$preventInfiniteSave))
+			self::$preventInfiniteSave = array();
+		elseif(in_array(self::$preventInfiniteSave, $this->getId()))
+			return;
+		self::$preventInfiniteSave[] = $this->getId();
 		$this->updateAccountAddress();
 		// update contacts en compte commun
 		$this->updateContactsComptesCommunsAddress();
@@ -320,23 +326,28 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 				$account->set('mode', 'edit');
 			
 			$thisFields = $this->getModule()->getFields();
+			$has_changed = false; //prevents recursive update
 			//Parcourt les champs
 			foreach($thisFields as $fieldName => $field){
 				// Champ commençant par "mailing"
 				if(strpos($fieldName, 'mailing') === 0){
-					if($fieldName == 'mailingzip'){
-						$account->set('bill_code', $this->get($fieldName));
-					}
+					if($fieldName == 'mailingzip')
+						$account_field = 'bill_code';
 					else
-						$account->set('bill_' . substr($fieldName, 7), $this->get($fieldName));
+						$account_field = 'bill_' . substr($fieldName, 7);
+					if($account->get($account_field) != $this->get($fieldName)){
+						$account->set($account_field, $this->get($fieldName));
+						$has_changed = true;
+					}
 				}
 				//else var_dump($fieldName);
 			
 			}
-			if($save)
+			if($has_changed && $save)
 				$account->save();
-		}		
-		return $account;
+		}
+		
+		return $has_changed;
 	}
 	
 	/**
@@ -346,20 +357,30 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	public function updateContactsComptesCommunsAddress(){
 		
 		$contacts = $this->getSameAccountReferentContacts();
-		foreach($contacts as $contact){
-			$contact->set('mode', 'edit');
+		$thisFields = $this->getModule()->getFields();
 			
-			$thisFields = $this->getModule()->getFields();
+		foreach($contacts as $contact){
+			if(!is_array(self::$preventInfiniteSave))
+				self::$preventInfiniteSave = array();
+			elseif(in_array(self::$preventInfiniteSave, $this->getId()))
+				continue;
+			self::$preventInfiniteSave[] = $contact->getId();
+			
+			$contact->set('mode', 'edit');
+			$has_changed = false; //prevents recursive update
 			//Parcourt les champs
 			foreach($thisFields as $fieldName => $field){
 				// Champ commençant par "mailing"
 				if(strpos($fieldName, 'mailing') === 0){
-					$contact->set($fieldName, $this->get($fieldName));
+					if(html_entity_decode($contact->get($fieldName)) != html_entity_decode($this->get($fieldName))){
+						$contact->set($fieldName, $this->get($fieldName));
+						$has_changed = true;
+					}
 				}
-			
 			}
-			$contact->save();
+			if($has_changed)
+				$contact->save();
 		}		
-		return count($contacts);
+		return $has_changed;
 	}
 }

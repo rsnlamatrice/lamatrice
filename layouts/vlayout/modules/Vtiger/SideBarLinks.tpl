@@ -24,7 +24,7 @@
 		{assign var="CURRENT_MODULE_NAME" value='module='|cat:$MODULE}
 		{assign var="IS_LINK_MODULE_NAME" value=in_array($CURRENT_MODULE_NAME,$PARSE_URL)}
 		<p onclick="window.location.href='{$SIDEBARLINK->getUrl()}'" id="{$MODULE}_sideBar_link_{Vtiger_Util_Helper::replaceSpaceWithUnderScores($SIDEBARLINK->getLabel())}"
-		   class="{if $LINK_LIST_VIEW and $IS_LINK_MODULE_NAME}selectedQuickLink {else}unSelectedQuickLink{/if}"><a class="quickLinks" href="{$SIDEBARLINK->getUrl()}">
+		   class="{if $LINK_LIST_VIEW and $IS_LINK_MODULE_NAME}selectedQuickLink {else}unSelectedQuickLink{/if}"><a class="quickLinks" {* ED150306 href="{$SIDEBARLINK->getUrl()}" *}>
 				<strong>{vtranslate($SIDEBARLINK->getLabel(), $MODULE)}</strong>
 		</a></p>
 	{/foreach}

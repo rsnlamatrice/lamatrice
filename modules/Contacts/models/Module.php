@@ -391,9 +391,11 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		// ED141016 : majuscules obligatoires
 		$recordModel->set('lastname', mb_strtoupper(remove_accent($recordModel->get('lastname'))));
 		
-		// ED150205 : synchronisation de l'adresse vers le compte
-		$recordModel->updateAccountAddress(null, true);
+		$return = parent::saveRecord($recordModel);
 		
-		return parent::saveRecord($recordModel);
+		// ED150205 : synchronisation de l'adresse vers le compte et les autres contacts en compte commun
+		$recordModel->synchronizeAddressToOthers();
+		
+		return $return;
 	}
 }

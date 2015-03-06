@@ -1054,6 +1054,9 @@ jQuery.Class("Vtiger_Detail_Js",{
 				return false;
 			}
 			
+			//ED150302
+			if(fieldValue === undefined)
+			    fieldValue = '';
 			
 			var fieldNameValueMap = {};
 			if(fieldInfo.getType() == 'multipicklist') {

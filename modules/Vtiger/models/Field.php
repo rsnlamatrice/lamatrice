@@ -262,8 +262,8 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			$fieldPickListValues = array();
 			$module = $this->getModule();
 			$picklistValues = $module->getPicklistValuesDetails($this->getName());
-			foreach($picklistValues as $value) {
-				$fieldPickListValues[$value['label']] = vtranslate($value['label'],$this->getModuleName());
+			foreach($picklistValues as $valueKey=>$value) {
+				$fieldPickListValues[$valueKey] = vtranslate($value['label'],$this->getModuleName());
 			}
 			return $fieldPickListValues;
 		default:

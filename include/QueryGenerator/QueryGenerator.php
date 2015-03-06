@@ -843,10 +843,12 @@ class QueryGenerator {
 
 		$operator = strtolower($operator);
 		$db = PearDatabase::getInstance();
-
-		if(is_string($value) && $this->ignoreComma == false) {
+		$fieldDataType = $field->getFieldDataType();//ED150302
+		if(is_string($value)
+		&& $this->ignoreComma == false) {
+			//ED150302 sic
 			$valueArray = explode(',' , $value);
-			if ($field->getFieldDataType() == 'multipicklist' && in_array($operator, array('e', 'n'))) {
+			if ($fieldDataType == 'multipicklist' && in_array($operator, array('e', 'n'))) {
 				$valueArray = getCombinations($valueArray);
 				foreach ($valueArray as $key => $value) {
 					$valueArray[$key] = ltrim($value, ' |##| ');
@@ -865,7 +867,7 @@ class QueryGenerator {
 				$sql[] = "BETWEEN DATE_FORMAT(".$db->quote($valueArray[0]).", '%m%d') AND ".
 						"DATE_FORMAT(".$db->quote($valueArray[1]).", '%m%d')";
 			} else {
-				if($this->isDateType($field->getFieldDataType())) {
+				if($this->isDateType($fieldDataType)) {
 					$valueArray[0] = getValidDBInsertDateTimeValue($valueArray[0]);
 					$dateTimeStart = explode(' ',$valueArray[0]);
 					if($dateTimeStart[1] == '00:00:00' && $operator != 'between') {
@@ -889,7 +891,7 @@ class QueryGenerator {
 			return $sql;
 		}
 		foreach ($valueArray as $value) {
-			if(!$this->isStringType($field->getFieldDataType())) {
+			if(!$this->isStringType($fieldDataType)) {
 				$value = trim($value);
 			}
 			if ($operator == 'empty' || $operator == 'y') {
@@ -897,7 +899,7 @@ class QueryGenerator {
 				continue;
 			}
 			if((strtolower(trim($value)) == 'null') ||
-					(trim($value) == '' && !$this->isStringType($field->getFieldDataType())) &&
+					(trim($value) == '' && !$this->isStringType($fieldDataType)) &&
 							($operator == 'e' || $operator == 'n')) {
 				if($operator == 'e'){
 					$sql[] = "IS NULL";
@@ -905,14 +907,14 @@ class QueryGenerator {
 				}
 				$sql[] = "IS NOT NULL";
 				continue;
-			} elseif($field->getFieldDataType() == 'boolean') {
+			} elseif($fieldDataType == 'boolean') {
 				$value = strtolower($value);
 				if ($value == 'yes') {
 					$value = 1;
 				} elseif($value == 'no') {
 					$value = 0;
 				}
-			} elseif($this->isDateType($field->getFieldDataType())) {
+			} elseif($this->isDateType($fieldDataType)) {
 				$value = getValidDBInsertDateTimeValue($value);
 				$dateTime = explode(' ', $value);
 				if($dateTime[1] == '00:00:00') {
@@ -928,15 +930,15 @@ class QueryGenerator {
 			}
 
 			if(trim($value) == '' && ($operator == 's' || $operator == 'ew' || $operator == 'c')
-					&& ($this->isStringType($field->getFieldDataType()) ||
-					$field->getFieldDataType() == 'picklist' ||
-					$field->getFieldDataType() == 'multipicklist')) {
+					&& ($this->isStringType($fieldDataType) ||
+					$fieldDataType == 'picklist' ||
+					$fieldDataType == 'multipicklist')) {
 				$sql[] = "LIKE ''";
 				continue;
 			}
 
 			if(trim($value) == '' && ($operator == 'k') &&
-					$this->isStringType($field->getFieldDataType())) {
+					$this->isStringType($fieldDataType)) {
 				$sql[] = "NOT LIKE ''";
 				continue;
 			}
@@ -971,12 +973,12 @@ class QueryGenerator {
 				case 'b': $sqlOperator = "<";
 					break;
 			}
-			if(!$this->isNumericType($field->getFieldDataType()) &&
+			if(!$this->isNumericType($fieldDataType) &&
 					($field->getFieldName() != 'birthday' || ($field->getFieldName() == 'birthday'
 							&& $this->isRelativeSearchOperators($operator)))){
 				$value = "'$value'";
 			}
-			if($this->isNumericType($field->getFieldDataType()) && empty($value)) {
+			if($this->isNumericType($fieldDataType) && empty($value)) {
 				$value = '0';
 			}
 			$sql[] = "$sqlOperator $value";

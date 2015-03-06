@@ -353,8 +353,11 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 							}
 						}
 	
-						$temp_val = explode(",",$advFitlerValue);
-						if(($fieldType == 'date' || ($fieldType == 'time' && $fieldName != 'time_start' && $fieldName != 'time_end') || ($fieldType == 'datetime')) && ($fieldType != '' && $advFitlerValue != '' )) {
+						if(($fieldType == 'date'
+						|| ($fieldType == 'time' && $fieldName != 'time_start' && $fieldName != 'time_end')
+						|| ($fieldType == 'datetime'))
+						&& ($fieldType != '' && $advFitlerValue != '' )) {
+							$temp_val = explode(",",$advFitlerValue);
 							$val = Array();
 							for($x=0;$x<count($temp_val);$x++) {
 								//if date and time given then we have to convert the date and
