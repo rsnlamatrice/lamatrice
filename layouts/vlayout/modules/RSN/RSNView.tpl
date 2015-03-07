@@ -11,7 +11,7 @@
 -->*}
 
 {strip}
-<div class="relatedContainer listViewPageDiv margin0px"><h3>Bo&icirc;te &agrave; outils</h3>
+<div class="relatedContainer listViewPageDiv margin4px"><h3>Bo&icirc;te &agrave; outils</h3>
     &nbsp;
 </div>
 {/strip}

@@ -156,6 +156,34 @@ var Vtiger_Index_Js = {
 	},
 
 	/**
+	 * Function to show email list
+	 * @params : accepts params object
+	 *
+	 * @cb: callback function to recieve the child window reference.
+	 *
+	 * ED150227
+	 */
+
+	showEmailListPopup : function(params, cb){
+		var currentModule = "Emails";
+		var css = jQuery.extend({'text-align' : 'left'}, css); //sic
+		AppConnector.request(params).then(
+			function(data) {
+				var cbargs = [];
+				if(data) {
+					data = jQuery(data);
+					app.showModalWindow(data,function(data){
+					},css);
+				}
+				if (typeof cb == 'function') cb.apply(null, cbargs);
+			},
+			function(error,err){
+
+			}
+		);
+	},
+
+	/**
 	 * Function registers event for Calendar Reminder popups
 	 */
 	registerActivityReminder : function() {

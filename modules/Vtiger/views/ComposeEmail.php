@@ -13,7 +13,7 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
 	function __construct() {
 		parent::__construct();
 		$this->exposeMethod('emailPreview');
-        $this->exposeMethod('previewPrint');
+		$this->exposeMethod('previewPrint');
 		$this->exposeMethod('emailForward');
 		$this->exposeMethod('emailEdit');
 		$this->exposeMethod('composeMailData');
@@ -27,12 +27,12 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
 		}
 	}
 
-    function preProcess(Vtiger_Request $request, $display=true) {
-        if($request->getMode() == 'previewPrint'){
-            return;
-        }
-        return parent::preProcess($request,$display);
-    }
+	function preProcess(Vtiger_Request $request, $display=true) {
+		if($request->getMode() == 'previewPrint'){
+		    return;
+		}
+		return parent::preProcess($request,$display);
+	}
 
 	public function composeMailData($request){
 		$moduleName = 'Emails';

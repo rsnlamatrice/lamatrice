@@ -10,6 +10,7 @@
 
 class Contacts_Record_Model extends Vtiger_Record_Model {
 
+	public static $preventInfiniteSave;
 	
 	/**
 	 * Function returns the url for create event
@@ -264,10 +265,46 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	/**
+	 * Retourne les contacts référents du même compte que ce contact.
+	 * ED150225
+	 */
+	public function getSameAccountReferentContacts(){
+		//echo '<pre>'; var_dump($this);echo '</pre>'; 
+		$account_id = $this->get('account_id');
+		$this_id = $this->getId();
+		
+		global $adb;
+		if($this_id ==null)
+			$this_id = $this->id;
+		$contacts = array();
+		$query = 'SELECT contactid FROM vtiger_contactdetails
+				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+				WHERE vtiger_contactdetails.accountid = ?
+				AND vtiger_contactdetails.contactid <> ?
+				AND vtiger_contactdetails.reference = 1
+				AND vtiger_crmentity.deleted = 0';
+		$accountContacts = $adb->pquery($query, array($account_id, $this_id));
+		$numOfContacts = $adb->num_rows($accountContacts);
+		if($accountContacts && $numOfContacts > 0) {
+			for($i=0; $i < $numOfContacts; ++$i) {
+				//TODO : better then multi-query (in fact, may not have more then 1 contact)
+				$contact = Vtiger_Record_Model::getInstanceById($adb->query_result($accountContacts, $i, 'contactid'), 'Contacts');
+				array_push($contacts, $contact);
+			}
+		}
+		return $contacts;
+	}
+	
+	/**
 	 * Recopie l'adresse du contact vers l'adresse du compte et des autres contacts référents du même compte.
 	 * ED150205
 	 */
 	public function synchronizeAddressToOthers(){
+		if(!is_array(self::$preventInfiniteSave))
+			self::$preventInfiniteSave = array();
+		elseif(in_array(self::$preventInfiniteSave, $this->getId()))
+			return;
+		self::$preventInfiniteSave[] = $this->getId();
 		$this->updateAccountAddress();
 		// update contacts en compte commun
 		$this->updateContactsComptesCommunsAddress();
@@ -289,30 +326,61 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 				$account->set('mode', 'edit');
 			
 			$thisFields = $this->getModule()->getFields();
+			$has_changed = false; //prevents recursive update
 			//Parcourt les champs
 			foreach($thisFields as $fieldName => $field){
 				// Champ commençant par "mailing"
 				if(strpos($fieldName, 'mailing') === 0){
-					if($fieldName == 'mailingzip'){
-						$account->set('bill_code', $this->get($fieldName));
-					}
+					if($fieldName == 'mailingzip')
+						$account_field = 'bill_code';
 					else
-						$account->set('bill_' . substr($fieldName, 7), $this->get($fieldName));
+						$account_field = 'bill_' . substr($fieldName, 7);
+					if($account->get($account_field) != $this->get($fieldName)){
+						$account->set($account_field, $this->get($fieldName));
+						$has_changed = true;
+					}
 				}
 				//else var_dump($fieldName);
 			
 			}
-			if($save)
+			if($has_changed && $save)
 				$account->save();
-		}		
-		return $account;
+		}
+		
+		return $has_changed;
 	}
 	
 	/**
 	 * Recopie l'adresse des contacts référents du même compte.
 	 * ED150205
 	 */
-	public function updateContactsComptesCommunsAddress($account = false, $save = true){
+	public function updateContactsComptesCommunsAddress(){
 		
+		$contacts = $this->getSameAccountReferentContacts();
+		$thisFields = $this->getModule()->getFields();
+			
+		foreach($contacts as $contact){
+			if(!is_array(self::$preventInfiniteSave))
+				self::$preventInfiniteSave = array();
+			elseif(in_array(self::$preventInfiniteSave, $this->getId()))
+				continue;
+			self::$preventInfiniteSave[] = $contact->getId();
+			
+			$contact->set('mode', 'edit');
+			$has_changed = false; //prevents recursive update
+			//Parcourt les champs
+			foreach($thisFields as $fieldName => $field){
+				// Champ commençant par "mailing"
+				if(strpos($fieldName, 'mailing') === 0){
+					if(html_entity_decode($contact->get($fieldName)) != html_entity_decode($this->get($fieldName))){
+						$contact->set($fieldName, $this->get($fieldName));
+						$has_changed = true;
+					}
+				}
+			}
+			if($has_changed)
+				$contact->save();
+		}		
+		return $has_changed;
 	}
 }

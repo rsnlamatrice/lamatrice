@@ -34,7 +34,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 	 * @param <Vtiger_Module_Model> $moduleModel
 	 * @return Vtiger_Relation_Model
 	 */
-	public function setParetModuleModel($moduleModel){
+	public function setParentModuleModel($moduleModel){
 		$this->parentModule = $moduleModel;
 		return $this;
 	}
@@ -57,13 +57,13 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		return $this->relatedModule;
 	}
     
-    public function getRelationModuleName() {
-        $relationModuleName = $this->get('relatedModuleName');
-        if(!empty($relationModuleName)) {
-            return $relationModuleName;
-        }
-        return $this->getRelationModuleModel()->getName();
-    }
+	public function getRelationModuleName() {
+		$relationModuleName = $this->get('relatedModuleName');
+		if(!empty($relationModuleName)) {
+		    return $relationModuleName;
+		}
+		return $this->getRelationModuleModel()->getName();
+	}
 
 	public function getListUrl($parentRecordModel) {
 		return 'module='.$this->getParentModuleModel()->get('name').'&relatedModule='.$this->get('modulename').
@@ -196,7 +196,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 			$row = $db->query_result_rowdata($result, 0);
 			$relationModelClassName = Vtiger_Loader::getComponentClassName('Model', 'Relation', $parentModuleModel->get('name'));
 			$relationModel = new $relationModelClassName();
-			$relationModel->setData($row)->setParetModuleModel($parentModuleModel)->setRelationModuleModel($relatedModuleModel);
+			$relationModel->setData($row)->setParentModuleModel($parentModuleModel)->setRelationModuleModel($relatedModuleModel);
 			return $relationModel;
 		}
 		return false;
@@ -233,7 +233,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 				continue;
 			}
 			$relationModel = new $relationModelClassName();
-			$relationModel->setData($row)->setParetModuleModel($parentModuleModel)->set('relatedModuleName',$row['modulename']);
+			$relationModel->setData($row)->setParentModuleModel($parentModuleModel)->set('relatedModuleName',$row['modulename']);
 			$relationModels[] = $relationModel;
 		}
 		return $relationModels;
@@ -270,31 +270,67 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		return $relationField;
 	}
     
-    public static  function updateRelationSequenceAndPresence($relatedInfoList, $sourceModuleTabId) {
-        $db = PearDatabase::getInstance();
-        $query = 'UPDATE vtiger_relatedlists SET sequence=CASE ';
-        $relation_ids = array();
-        foreach($relatedInfoList as $relatedInfo){
-            $relation_id = $relatedInfo['relation_id'];
-            $relation_ids[] = $relation_id;
-            $sequence = $relatedInfo['sequence'];
-            $presence = $relatedInfo['presence'];
-            $query .= ' WHEN relation_id='.$relation_id.' THEN '.$sequence;
-        }
-        $query.= ' END , ';
-        $query.= ' presence = CASE ';
-        foreach($relatedInfoList as $relatedInfo){
-            $relation_id = $relatedInfo['relation_id'];
-            $relation_ids[] = $relation_id;
-            $sequence = $relatedInfo['sequence'];
-            $presence = $relatedInfo['presence'];
-            $query .= ' WHEN relation_id='.$relation_id.' THEN '.$presence;
-        }
-        $query .= ' END WHERE tabid=? AND relation_id IN ('.  generateQuestionMarks($relation_ids).')';
-        $result = $db->pquery($query, array($sourceModuleTabId,$relation_ids));
-    }
+	public static  function updateRelationSequenceAndPresence($relatedInfoList, $sourceModuleTabId) {
+	    $db = PearDatabase::getInstance();
+	    $query = 'UPDATE vtiger_relatedlists SET sequence=CASE ';
+	    $relation_ids = array();
+	    foreach($relatedInfoList as $relatedInfo){
+		$relation_id = $relatedInfo['relation_id'];
+		$relation_ids[] = $relation_id;
+		$sequence = $relatedInfo['sequence'];
+		$presence = $relatedInfo['presence'];
+		$query .= ' WHEN relation_id='.$relation_id.' THEN '.$sequence;
+	    }
+	    $query.= ' END , ';
+	    $query.= ' presence = CASE ';
+	    foreach($relatedInfoList as $relatedInfo){
+		$relation_id = $relatedInfo['relation_id'];
+		$relation_ids[] = $relation_id;
+		$sequence = $relatedInfo['sequence'];
+		$presence = $relatedInfo['presence'];
+		$query .= ' WHEN relation_id='.$relation_id.' THEN '.$presence;
+	    }
+	    $query .= ' END WHERE tabid=? AND relation_id IN ('.  generateQuestionMarks($relation_ids).')';
+	    $result = $db->pquery($query, array($sourceModuleTabId,$relation_ids));
+	}
 	
 	public function isActive() {
 		return $this->get('presence') == 0 ? true : false;
+	}
+	
+	/* Returns fields structure defining relation between modules
+	 * e.g : date of contact related campaign
+	 * ED150212
+	 */
+	public function getRelationViews() {
+		$module = Vtiger_Module_Model::getInstance($this->getRelationModuleName());
+		$views = CustomView_Record_Model::getAll($this->getRelationModuleName());
+		$structures = array();
+		if($views){
+			$fields = $this->getRelationFields();
+			foreach($views as $viewName => $view){
+				$structures[$view->get('viewname')] = array(
+							'id' => $view->getId(),
+							'name' => $view->get('viewname'),
+							'fields' => $fields
+						);
+			}
+			foreach($fields as $field)
+				$field->setModule($module);
+		}
+		//var_dump($structures);
+		return $structures; 
+		//return Vtiger_RecordStructure_Model::getInstanceForModule($this->getRelationModuleModel())->getStructure();
+	}
+	/* Returns fields defining relation between modules
+	 * Should be overrided (e.g. modules/Contacts/models/Relation.php)
+	 * ED150212
+	 */
+	public function getRelationFields() {
+		$fields = array();
+		$field = $this->getRelationField();
+		if($field)
+			$fields[$field->getName()] = $field;
+		return $fields;
 	}
 }

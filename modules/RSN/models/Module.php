@@ -72,19 +72,42 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		$links = Vtiger_Link_Model::getAllByType($this->getId(), $linkTypes, $linkParams);
 
 		$quickLinks = array();
-		
-		foreach($this->getOutilsList() as $sub)
-			$quickLinks[] = array(
+		foreach($this->getOutilsList() as $sub){
+			$quickLink = array(
 				'linktype' => 'SIDEBARLINK',
 				'linklabel' => $sub['label'],
-				'linkurl' => $this->getOutilsViewUrl($sub['sub']),
+				'linkurl' => $this->getOutilsViewUrl($sub['sub'], @$sub['params']),
 				'linkicon' => '',
 			);
+			if(isset($sub['children'])){
+				$children = array();
+				foreach($sub['children'] as $childQuickLink){
+					$children[] = array(
+						'linktype' => 'SIDEBARLINK',
+						'linklabel' => $childQuickLink['label'],
+						'linkurl' => $this->getOutilsViewUrl($childQuickLink['sub'], @$childQuickLink['params']),
+						'linkicon' => '',
+					);
+				}
+				$quickLink['children'] = $children;
+			}
 		
+			$quickLinks[] = $quickLink;
+		}
+		//var_dump($quickLinks);
 		foreach($quickLinks as $quickLink) {
-			$links['SIDEBARLINK'][] = Vtiger_Link_Model::getInstanceFromValues($quickLink);
+			$link = Vtiger_Link_Model::getInstanceFromValues($quickLink);
+			$links['SIDEBARLINK'][] = $link;
+			if($link->get('children')){
+				$children = array();
+				foreach($link->get('children') as $childLink) {
+					$children[] = Vtiger_Link_Model::getInstanceFromValues($childLink);
+				}
+				$link->set('children', $children);
+			}
 		}
 
+		/* $quickWidgets */
 		$quickWidgets = array();
 
 		/*if ($linkParams['ACTION'] == 'Outils') {
@@ -139,7 +162,10 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 	 *  Function returns the url for Outils view
 	 * @return <String>
 	 */
-	public function getOutilsViewUrl($sub = 'List') {
+	public function getOutilsViewUrl($sub = 'List', $params = FALSE) {
+		if(is_array($params))
+			foreach($params as $key=>$value)
+				$sub .= "&$key=$value";
 		return 'index.php?module='.$this->get('name').'&view=Outils&sub=' . $sub;
 	}
 
@@ -163,8 +189,46 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		;
 		
 		$list[] = array(
+				'sub' => 'ImportCogilog',
+				'label' => 'Importation Cogilog',
+				
+				'children' => array(
+					array(
+						'sub' => 'ImportCogilog/Factures',
+						'label' => 'Factures'
+					),
+					array(
+						'sub' => 'ImportCogilog/Comptes',
+						'label' => 'Comptes'
+					),
+					array(
+						'sub' => 'ImportCogilog/Clients',
+						'label' => 'Clients',
+					),
+					array(
+						'sub' => 'DataRowsTable',
+						'label' => 'Une table',
+						'params' => array(
+							'tablename' => 'gclien00002',
+						)
+					),
+				)
+			)
+		;
+		
+		$list[] = array(
 				'sub' => 'Purge',
 				'label' => 'Grande purge'
+			)
+		;
+		
+		$list[] = array(
+				'sub' => 'EditCustomView',
+				'label' => 'Edition de vue',
+				'params' => array(
+					'viewid' => 101
+					, 'viewmodule' => 'Contacts'
+				)
 			)
 		;
 		

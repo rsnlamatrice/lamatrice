@@ -17,12 +17,21 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	public function process(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
-		
 		$sub = $request->get('sub', 'List');
 		$viewer->assign('CURRENT_SUB', $sub);
 		
+		$viewer->assign('VIEW_ID', $request->get('viewid'));
+		$viewer->assign('VIEW_MODULE', $request->get('viewmodule'));
+		
 		$viewer->assign('CURRENT_USER', $currentUserModel);
-		$viewer->view('Outils/' . $sub . '.tpl', $request->getModule());
+		
+		$this->process_sub($request, $sub, $viewer);
+		
+		if($request->get('template'))
+			$template = $request->get('template');
+		else
+			$template = $sub;
+		$viewer->view('Outils/' . $template . '.tpl', $request->getModule());
 	}
 	
 	public function getHeaderScripts(Vtiger_Request $request) {
@@ -34,5 +43,85 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
 		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
 		return $headerScriptInstances;
+	}
+	
+	
+	private function process_sub($request, $sub, $viewer){
+		switch($sub){
+		case 'ImportCogilog/Factures':
+			
+			$this->process_ImportCogilog_Factures($request, $sub, $viewer);
+			
+			break;
+		
+		case 'ImportCogilog/Clients':
+			$tablename = 'SELECT * FROM gclien00002 ORDER BY tssaisie DESC';
+			$this->process_DataRowsTable($request, $sub, $viewer, $tablename);
+			$request->set('template', 'DataRowsTable');
+			break;
+		
+		case 'DataRowsTable':
+			
+			$this->process_DataRowsTable($request, $sub, $viewer);
+			
+			break;
+		default:
+			$viewer->assign('HTML_DATA', "Inconnu : \"$sub\"");
+			break;
+		}
+
+	}	
+	
+	private function process_ImportCogilog_Factures($request, $sub, $viewer){
+		$this->process_DataRowsTable($request, $sub, $viewer, 'gfactu00002');
+	}
+		
+	private function process_DataRowsTable($request, $sub, $viewer, $table_name = FALSE){
+		if(!$table_name)
+			$table_name = $request->get('tablename');
+			
+		$dbconn = $this->get_db_connect();
+		
+		if(stripos($table_name, 'SELECT ') === 0){
+			$query = $table_name;
+			if(!preg_match('/\sLIMIT\s/i', $query))
+				$query .= ' LIMIT 99';
+		}
+		else
+			$query = 'SELECT * FROM ' . $table_name . ' LIMIT 50';
+		
+		// Exécution de la requête SQL
+		$result = pg_query($query);
+		if(!$result){
+			$viewer->assign('HTMLDATA', '<code>Échec de la requête : ' . pg_last_error() .'</code>'
+					. '<br>'.$query);
+			return;
+		}
+		
+		$rows = array();
+		
+		while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+		    $rows[] = $line;
+		}
+		
+		// Libère le résultat
+		pg_free_result($result);
+		
+		// Ferme la connexion
+		pg_close($dbconn);
+		
+		//$viewer->assign('HTMLDATA', print_r($rows, true));
+		$viewer->assign('DATAROWS', $rows);
+	}
+	
+	private function get_db_connect(){
+		// Connexion, sélection de la base de données
+		include_once('config.cogilog.php');
+		global $cogilog_config;
+		$cxString = 'host='.$cogilog_config['db_server'].' port='.$cogilog_config['db_port'].' dbname='.$cogilog_config['db_name'].' user='.$cogilog_config['db_username'].' password='.$cogilog_config['db_password'];
+		//echo str_repeat('<br>',5);
+		return pg_connect($cxString)
+		    or die('Connexion impossible : ' . pg_last_error());
+			
 	}
 }

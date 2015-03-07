@@ -15,7 +15,7 @@ jQuery.Class("Vtiger_List_Js",{
 
 	massEditPreSave : 'Vtiger.MassEdit.PreSave',
 
-   getInstance: function(){
+	getInstance: function(){
 		if(Vtiger_List_Js.listInstance == false){
 			var module = app.getModuleName();
 			var parentModule = app.getParentModuleName();
@@ -42,7 +42,7 @@ jQuery.Class("Vtiger_List_Js",{
 		}
 		return Vtiger_List_Js.listInstance;
 	},
-		/*
+	/*
 	 * function to trigger send Email
 	 * @params: send email url , module name.
 	 */
@@ -59,14 +59,14 @@ jQuery.Class("Vtiger_List_Js",{
 				"excluded_ids" : excludedIds
 			};
 
-            var listViewInstance = Vtiger_List_Js.getInstance();
-            var searchValue = listViewInstance.getAlphabetSearchValue();
+			  var listViewInstance = Vtiger_List_Js.getInstance();
+			  var searchValue = listViewInstance.getAlphabetSearchValue();
 
 			if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
-                postData['search_key'] = listViewInstance.getAlphabetSearchField();
-                postData['search_value'] = searchValue;
-                postData['operator'] = "s";
-            }
+				postData['search_key'] = listViewInstance.getAlphabetSearchField();
+				postData['search_value'] = searchValue;
+				postData['operator'] = "s";
+			}
 			jQuery.extend(postData,params);
 			var actionParams = {
 				"type":"POST",
@@ -96,6 +96,47 @@ jQuery.Class("Vtiger_List_Js",{
 					alert(app.vtranslate('JS_SMS_SERVER_CONFIGURATION'));
 				}
 			});
+		} else {
+			listInstance.noRecordSelectedAlert();
+		}
+
+	},
+	/*
+	 * function to trigger 'show email list'
+	 * @params: send email url , module name.
+	 *
+	 * ED150227
+	 */
+	triggerShowEmailList : function(massActionUrl, module, params){
+		var listInstance = Vtiger_List_Js.getInstance();
+		var validationResult = listInstance.checkListRecordSelected();
+		if(validationResult != true){
+			var selectedIds = listInstance.readSelectedIds(true);
+			var excludedIds = listInstance.readExcludedIds(true);
+			var cvId = listInstance.getCurrentCvId();
+			var postData = {
+				"viewname" : cvId,
+				"selected_ids":selectedIds,
+				"excluded_ids" : excludedIds
+			};
+
+			var listViewInstance = Vtiger_List_Js.getInstance();
+			var searchValue = listViewInstance.getAlphabetSearchValue();
+
+			if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
+				postData['search_key'] = listViewInstance.getAlphabetSearchField();
+				postData['search_value'] = searchValue;
+				postData['operator'] = "s";
+			}
+			jQuery.extend(postData,params);
+			var actionParams = {
+				"type":"POST",
+				"url":massActionUrl,
+				"dataType":"html",
+				"data" : postData
+			};
+
+			Vtiger_Index_Js.showEmailListPopup(actionParams);
 		} else {
 			listInstance.noRecordSelectedAlert();
 		}

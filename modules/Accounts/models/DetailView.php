@@ -89,10 +89,34 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
 		}
 
-        foreach($CalendarActionLinks as $basicLink) {
+		foreach($CalendarActionLinks as $basicLink) {
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicLink);
 		}
 
+		//ED150211
+		//Moves Comments widget before Modifications
+		$modCommentsLink = false;
+		for($nLink = 0; $nLink < count($linkModelList['DETAILVIEWWIDGET']); $nLink++){
+			$link = $linkModelList['DETAILVIEWWIDGET'][$nLink];
+			switch($link->getLabel()){
+			case "ModComments" :
+				$modCommentsLink = $link;
+				unset($linkModelList['DETAILVIEWWIDGET'][$nLink]);
+				break;
+			case "LBL_UPDATES" :
+				if($modCommentsLink){
+					array_splice( $linkModelList['DETAILVIEWWIDGET'], $nLink, 0, array($modCommentsLink));
+					++$nLink;
+					$modCommentsLink = false;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		if($modCommentsLink){
+			$linkModelList['DETAILVIEWWIDGET'][] = $modCommentsLink;
+		}
 		return $linkModelList;
 	}
 

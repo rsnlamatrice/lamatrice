@@ -229,15 +229,70 @@ class QueryGenerator {
 	}
 
 	public function parseAdvFilterList($advFilterList, $glue=''){
+		
+		//die('<pre>'.print_r($advFilterList, true).'</pre>');
 		if(!empty($glue)) $this->addConditionGlue($glue);
 
 		$customView = new CustomView($this->module);
+		$moduleModel = Vtiger_Module_Model::getInstance($this->module);
+		$relationModels = Vtiger_Relation_Model::getAllRelations($moduleModel);
 		$dateSpecificConditions = $customView->getStdFilterConditions();
 		foreach ($advFilterList as $groupindex=>$groupcolumns) {
 			$filtercolumns = $groupcolumns['columns'];
 			if(count($filtercolumns) > 0) {
 				$this->startGroup('');
 				foreach ($filtercolumns as $index=>$filter) {
+					/*ED150226
+					 * related module view field
+					 */
+					//die('<pre>'.print_r($filter['columnname'], true).'</pre>');
+					if($filter['columnname'][0] == '['){
+						$pos = strpos($filter['columnname'], ']', 1);
+						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
+						$filter['relatedmodulename'] = $viewName[0];
+						$filter['viewid'] = $viewName[2];
+						$filter['viewname'] = $viewName[1];
+						$filter['relatedmodule'] = Vtiger_Module_Model::getInstance($filter['relatedmodulename']);
+						
+						$columnInfo = trim(substr($filter['columnname'], $pos + 1));
+						$filter['columnname'] = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
+						if(!$filter['columnname']){
+							$relationModel = false;
+							foreach($relationModels as $model)
+								if($model->getRelationModuleName() == $filter['relatedmodulename']){
+									$relationModel = $model;
+									break;
+								}
+							if($relationModel){
+								$relationsInfos = $relationModel->getModulesInfoForDetailView();
+							}
+							if(!$relationModel
+							|| !isset($relationsInfos[$filter['relatedmodulename']]))
+								$relationInfos = array('fieldName' => $this->getSQLColumn('id')
+										       , 'tableName' => ' vtiger_crmentityrel');
+							else
+								$relationInfos = $relationsInfos[$filter['relatedmodulename']];
+							//var_dump($relationInfos);
+							//$relationModel = Vtiger_Relation_Model::getInstance($this->module, $filter['relatedmodulename']);
+							//$value = $relationModel->getQuery();
+							//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $value, 'IN');
+							
+							$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid']);
+							
+							$relatedSql = $listView->getQuery();
+							$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
+							
+							$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
+							$newQuery[0] = $selectColumnSql.' '; /* ED141012 */
+							$relatedSql = implode(' FROM ', $newQuery);
+							//print_r('<pre>$this->getSQLColumn(id) : '.$this->getSQLColumn('id').'</pre>');
+							//print_r('<pre>$relatedSql : '.$relatedSql.'</pre>');
+							$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $relatedSql, 'IN');
+							
+							continue;
+						}
+					}
+					
 					$nameComponents = explode(':',$filter['columnname']);
 					if(empty($nameComponents[2]) && $nameComponents[1] == 'crmid' && $nameComponents[0] == 'vtiger_crmentity') {
 						$name = $this->getSQLColumn('id');
@@ -293,6 +348,10 @@ class QueryGenerator {
 					$this->addConditionGlue($groupConditionGlue);
 			}
 		}
+		if(isset($relatedSql))
+			print_r('<pre>'.$this->getQuery().'</pre>');
+							
+							
 	}
 
 	public function getCustomViewQueryById($viewId) {
@@ -536,11 +595,13 @@ class QueryGenerator {
 		foreach ($this->manyToManyRelatedModuleConditions as $conditionInfo) {
 			$relatedModuleMeta = RelatedModuleMeta::getInstance($this->meta->getTabName(),
 					$conditionInfo['relatedModule']);
+			//var_dump($relatedModuleMeta);
 			$relationInfo = $relatedModuleMeta->getRelationMeta();
 			$relatedModule = $this->meta->getTabName();
-			$sql .= ' INNER JOIN '.$relationInfo['relationTable']." ON ".
-			$relationInfo['relationTable'].".$relationInfo[$relatedModule]=".
-				"$baseTable.$baseTableIndex";
+			$relatedModuleField = isset($relationInfo['relatedField']) ? $relationInfo['relatedField'] : $relationInfo[$relatedModule];
+			//TODO : LEFT JOIN if needed
+			$sql .= ' INNER JOIN '.$relationInfo['relationTable'].
+				' ON '.$relationInfo['relationTable'].".$relatedModuleField = $baseTable.$baseTableIndex";
 		}
 
 		// Adding support for conditions on reference module fields
@@ -680,15 +741,15 @@ class QueryGenerator {
 							$fieldSql .= "$dateFieldColumnName $valueSql";
 						}
 					} else {
-                        if(is_array($value)){
-                            $value = $value[0];
-                        }
+						if(is_array($value)){
+						    $value = $value[0];
+						}
 						$values = explode(' ', $value);
 						if(count($values) == 2) {
 							$fieldSql .= "$fieldGlue CAST(CONCAT($dateFieldColumnName,' ',$timeFieldColumnName) AS DATETIME) $valueSql ";
 						} else {
 							$fieldSql .= "$fieldGlue $dateFieldColumnName $valueSql";
-                        }
+						}
 					}
 				} elseif($field->getFieldDataType() == 'datetime') {
 					$value = $conditionInfo['value'];
@@ -736,9 +797,11 @@ class QueryGenerator {
 					$conditionInfo['relatedModule']);
 			$relationInfo = $relatedModuleMeta->getRelationMeta();
 			$relatedModule = $this->meta->getTabName();
-			$fieldSql = "(".$relationInfo['relationTable'].'.'.
-			$relationInfo[$conditionInfo['column']].$conditionInfo['SQLOperator'].
-			$conditionInfo['value'].")";
+			$fieldSql = "(".
+				$relationInfo['relationTable'].'.'.$relationInfo[$conditionInfo['column']].
+				$conditionInfo['SQLOperator'].
+				$conditionInfo['value'].
+				")";
 			$fieldSqlList[$index] = $fieldSql;
 		}
 
@@ -780,10 +843,12 @@ class QueryGenerator {
 
 		$operator = strtolower($operator);
 		$db = PearDatabase::getInstance();
-
-		if(is_string($value) && $this->ignoreComma == false) {
+		$fieldDataType = $field->getFieldDataType();//ED150302
+		if(is_string($value)
+		&& $this->ignoreComma == false) {
+			//ED150302 sic
 			$valueArray = explode(',' , $value);
-			if ($field->getFieldDataType() == 'multipicklist' && in_array($operator, array('e', 'n'))) {
+			if ($fieldDataType == 'multipicklist' && in_array($operator, array('e', 'n'))) {
 				$valueArray = getCombinations($valueArray);
 				foreach ($valueArray as $key => $value) {
 					$valueArray[$key] = ltrim($value, ' |##| ');
@@ -802,7 +867,7 @@ class QueryGenerator {
 				$sql[] = "BETWEEN DATE_FORMAT(".$db->quote($valueArray[0]).", '%m%d') AND ".
 						"DATE_FORMAT(".$db->quote($valueArray[1]).", '%m%d')";
 			} else {
-				if($this->isDateType($field->getFieldDataType())) {
+				if($this->isDateType($fieldDataType)) {
 					$valueArray[0] = getValidDBInsertDateTimeValue($valueArray[0]);
 					$dateTimeStart = explode(' ',$valueArray[0]);
 					if($dateTimeStart[1] == '00:00:00' && $operator != 'between') {
@@ -826,7 +891,7 @@ class QueryGenerator {
 			return $sql;
 		}
 		foreach ($valueArray as $value) {
-			if(!$this->isStringType($field->getFieldDataType())) {
+			if(!$this->isStringType($fieldDataType)) {
 				$value = trim($value);
 			}
 			if ($operator == 'empty' || $operator == 'y') {
@@ -834,7 +899,7 @@ class QueryGenerator {
 				continue;
 			}
 			if((strtolower(trim($value)) == 'null') ||
-					(trim($value) == '' && !$this->isStringType($field->getFieldDataType())) &&
+					(trim($value) == '' && !$this->isStringType($fieldDataType)) &&
 							($operator == 'e' || $operator == 'n')) {
 				if($operator == 'e'){
 					$sql[] = "IS NULL";
@@ -842,14 +907,14 @@ class QueryGenerator {
 				}
 				$sql[] = "IS NOT NULL";
 				continue;
-			} elseif($field->getFieldDataType() == 'boolean') {
+			} elseif($fieldDataType == 'boolean') {
 				$value = strtolower($value);
 				if ($value == 'yes') {
 					$value = 1;
 				} elseif($value == 'no') {
 					$value = 0;
 				}
-			} elseif($this->isDateType($field->getFieldDataType())) {
+			} elseif($this->isDateType($fieldDataType)) {
 				$value = getValidDBInsertDateTimeValue($value);
 				$dateTime = explode(' ', $value);
 				if($dateTime[1] == '00:00:00') {
@@ -865,15 +930,15 @@ class QueryGenerator {
 			}
 
 			if(trim($value) == '' && ($operator == 's' || $operator == 'ew' || $operator == 'c')
-					&& ($this->isStringType($field->getFieldDataType()) ||
-					$field->getFieldDataType() == 'picklist' ||
-					$field->getFieldDataType() == 'multipicklist')) {
+					&& ($this->isStringType($fieldDataType) ||
+					$fieldDataType == 'picklist' ||
+					$fieldDataType == 'multipicklist')) {
 				$sql[] = "LIKE ''";
 				continue;
 			}
 
 			if(trim($value) == '' && ($operator == 'k') &&
-					$this->isStringType($field->getFieldDataType())) {
+					$this->isStringType($fieldDataType)) {
 				$sql[] = "NOT LIKE ''";
 				continue;
 			}
@@ -908,12 +973,12 @@ class QueryGenerator {
 				case 'b': $sqlOperator = "<";
 					break;
 			}
-			if(!$this->isNumericType($field->getFieldDataType()) &&
+			if(!$this->isNumericType($fieldDataType) &&
 					($field->getFieldName() != 'birthday' || ($field->getFieldName() == 'birthday'
 							&& $this->isRelativeSearchOperators($operator)))){
 				$value = "'$value'";
 			}
-			if($this->isNumericType($field->getFieldDataType()) && empty($value)) {
+			if($this->isNumericType($fieldDataType) && empty($value)) {
 				$value = '0';
 			}
 			$sql[] = "$sqlOperator $value";
@@ -982,7 +1047,7 @@ class QueryGenerator {
 				$value, $operator);
 	}
 
-	public function addRelatedModuleCondition($relatedModule,$column, $value, $SQLOperator) {
+	public function addRelatedModuleCondition($relatedModule, $column, $value, $SQLOperator) {
 		$conditionNumber = $this->conditionInstanceCount++;
 		$this->groupInfo .= "$conditionNumber ";
 		$this->manyToManyRelatedModuleConditions[$conditionNumber] = array('relatedModule'=>

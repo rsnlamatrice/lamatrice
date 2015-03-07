@@ -16,6 +16,7 @@
  */
 -->*}
 {strip}
+{* champs Ne pas... *}
 {assign var=DONOT_FIELDS value=array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb')}
 <table class="summary-table">
 	<tbody>

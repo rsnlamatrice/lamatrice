@@ -14,18 +14,18 @@ jQuery.Class("Vtiger_Field_Js",{
 	 * @param moduleName module for which Instance should be created
 	 * @return Instance of field class
 	 */
-    getInstance : function(data,moduleName){
+	getInstance : function(data, moduleName){
 		if(typeof moduleName == 'undefined'){
-			var moduleName = app.getModuleName();
+			moduleName = app.getModuleName();
 		}
-        var moduleField = moduleName+"_Field_Js";
+		var moduleField = moduleName+"_Field_Js";
 		var moduleFieldObj = window[moduleField];
-        if (typeof moduleFieldObj != 'undefined'){
+		if (typeof moduleFieldObj != 'undefined'){
 			 var fieldClass = moduleFieldObj;
 		}else{
-            var fieldClass = Vtiger_Field_Js;
-        }
-        var fieldObj = new fieldClass();
+			var fieldClass = Vtiger_Field_Js;
+		}
+	        var fieldObj = new fieldClass();
 
 		if(typeof data == 'undefined'){
 			data = {};
@@ -41,7 +41,7 @@ jQuery.Class("Vtiger_Field_Js",{
 	 * @return false if field is not mandatory
 	 */
 	isMandatory : function(){
-        return this.get('mandatory');
+		return this.get('mandatory');
 	},
 
 
@@ -50,12 +50,24 @@ jQuery.Class("Vtiger_Field_Js",{
 	 * @return value for the passed key
 	 */
 
-    get : function(key){
-		if(key in this.data){
+	get : function(key){
+		if((typeof this.data === 'object')
+		&& (key in this.data)){
 			return this.data[key];
 		}
-        return '';
-    },
+		return '';
+	},
+
+	/**
+	 * Function to set the value of particular key in object
+	 * @return this
+	 * ED150225
+	 */
+	set : function(key, value){
+		if(typeof this.data === 'object')
+			this.data[key] = value;
+		return this;
+	},
 
 
 	/**
@@ -88,21 +100,31 @@ jQuery.Class("Vtiger_Field_Js",{
 	},
 
 	/**
+	 * Function to set value to the field
+	 * @return this
+	 * ED150225
+	 */
+	setValue : function(value) {
+		this.set('value', value);
+		return this;
+	},
+
+	/**
 	 * Function to get the whole data
 	 * @return <object>
 	 */
 	getData : function() {
-		return this.data;
+		return typeof this.data === 'object' ? this.data : {};
 	},
 
 	/**
 	 * Function to set data attribute of the class
 	 * @return Instance of the class
 	 */
-    setData : function(fieldInfo){
-        this.data = fieldInfo;
+	setData : function(fieldInfo){
+		this.data = fieldInfo;
 		return this;
-    },
+	},
 	
 	getModuleName : function() {
 		return app.getModuleName();
@@ -155,7 +177,8 @@ jQuery.Class("Vtiger_Field_Js",{
 	 * Function to add the validation for the element
 	 */
 	addValidationToElement : function(element) {
-		var element = jQuery(element);
+		if (!element.jquery)
+			element = jQuery(element);
 		var addValidationToElement = element;
 		var elementInStructure = element.find('[name="'+ this.getName() +'"]');
 		if(elementInStructure.length > 0){
@@ -401,6 +424,41 @@ Vtiger_Field_Js('Vtiger_Percentage_Field_Js',{},{
 	}
 });
 Vtiger_Field_Js('Vtiger_Recurrence_Field_Js',{},{
+
+	/**
+	 * Function to get the pick list values
+	 * @return <object> key value pair of options
+	 */
+	getPickListValues : function() {
+		return this.get('picklistvalues');
+	},
+
+	/**
+	 * Function to get the ui
+	 * @return - select element and chosen element
+	 */
+	getUi : function() {
+		var html = '<select class="row-fluid chzn-select" name="'+ this.getName() +'">';
+		var pickListValues = this.getPickListValues();
+		var selectedOption = app.htmlDecode(this.getValue());
+		for(var option in pickListValues) {
+			html += '<option value="'+option+'" ';
+			if(option == selectedOption) {
+				html += ' selected ';
+			}
+			html += '>'+pickListValues[option]+'</option>';
+		}
+		html +='</select>';
+		var selectContainer = jQuery(html);
+		this.addValidationToElement(selectContainer);
+		return selectContainer;
+	}
+});
+
+/* ED150225
+ *
+ */
+Vtiger_Field_Js('Vtiger_Buttonset_Field_Js',{},{
 
 	/**
 	 * Function to get the pick list values

@@ -243,7 +243,10 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		$fieldDataType = $this->getFieldDataType();
 		if($this->getName() == 'hdnTaxType') return null;
 	
-		if($fieldDataType == 'picklist' || $fieldDataType == 'multipicklist') {
+		switch($fieldDataType){
+		case 'picklist':
+		case 'multipicklist':
+			$fieldPickListValues = array();
 			$currentUser = Users_Record_Model::getCurrentUserModel();
 			if($this->isRoleBased() && !$currentUser->isAdminUser()) {
 			    $userModel = Users_Record_Model::getCurrentUserModel();
@@ -255,6 +258,16 @@ class Vtiger_Field_Model extends Vtiger_Field {
 				$fieldPickListValues[$value] = vtranslate($value,$this->getModuleName());
 			}
 			return $fieldPickListValues;
+		case 'buttonSet':
+			$fieldPickListValues = array();
+			$module = $this->getModule();
+			$picklistValues = $module->getPicklistValuesDetails($this->getName());
+			foreach($picklistValues as $valueKey=>$value) {
+				$fieldPickListValues[$valueKey] = vtranslate($value['label'],$this->getModuleName());
+			}
+			return $fieldPickListValues;
+		default:
+			break;
 		}
 		return null;
     }
@@ -492,8 +505,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 */
 	public function getFieldInfo() {
 		$currentUser = Users_Record_Model::getCurrentUserModel();
-        $fieldDataType = $this->getFieldDataType();
-
+		$fieldDataType = $this->getFieldDataType();
 		$this->fieldInfo['mandatory'] = $this->isMandatory();
 		$this->fieldInfo['presence'] = $this->isActiveField();
 		$this->fieldInfo['quickcreate'] = $this->isQuickCreateEnabled();
@@ -504,35 +516,41 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		$this->fieldInfo['label'] = vtranslate($this->get('label'), $this->getModuleName());
 
 
-        if($fieldDataType == 'picklist' || $fieldDataType == 'multipicklist') {
-            $pickListValues = $this->getPicklistValues();
-            if(!empty($pickListValues)) {
-                $this->fieldInfo['picklistvalues'] = $pickListValues;
-            }
-        }
-
-		if($this->getFieldDataType() == 'date' || $this->getFieldDataType() == 'datetime'){
+		switch($fieldDataType){
+		case 'picklist':
+		case 'multipicklist':
+		case 'buttonSet':
+		    $pickListValues = $this->getPicklistValues();
+		    if(!empty($pickListValues)) {
+			$this->fieldInfo['picklistvalues'] = $pickListValues;
+		    }
+		    break;
+		case 'date':
+		case 'datetime':
 			$currentUser = Users_Record_Model::getCurrentUserModel();
 			$this->fieldInfo['date-format'] = $currentUser->get('date_format');
-		}
+			break;
 
-		if($this->getFieldDataType() == 'time') {
+		case 'time':
 			$currentUser = Users_Record_Model::getCurrentUserModel();
 			$this->fieldInfo['time-format'] = $currentUser->get('hour_format');
-		}
+			break;
 
-		if($this->getFieldDataType() == 'currency') {
+		case 'currency':
 			$currentUser = Users_Record_Model::getCurrentUserModel();
 			$this->fieldInfo['currency_symbol'] = $currentUser->get('currency_symbol');
-		}
+			break;
 
-		if($this->getFieldDataType() == 'owner') {
+		case 'owner':
 			$userList = $currentUser->getAccessibleUsers();
 			$groupList = $currentUser->getAccessibleGroups();
 			$pickListValues = array();
 			$pickListValues[vtranslate('LBL_USERS', $this->getModuleName())] = $userList;
 			$pickListValues[vtranslate('LBL_GROUPS', $this->getModuleName())] = $groupList;
 			$this->fieldInfo['picklistvalues'] = $pickListValues;
+			break;
+		default:
+			break;
 		}
 
 		return $this->fieldInfo;
@@ -759,10 +777,12 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			'b' => 'LBL_BEFORE',
 			'a' => 'LBL_AFTER',
 			'bw' => 'LBL_BETWEEN',
-			'y' => 'LBL_IS_EMPTY'
+			'y' => 'LBL_IS_EMPTY',
+			/* ED150225 */
+			'vwi' => 'LBL_EXISTS',
+			'vwx' => 'LBL_EXCLUDED',
 		);
 	}
-
 
 	/**
 	 * Function to get the advanced filter option names by Field type
@@ -778,7 +798,9 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			'D' => array('e','n','bw','b','a','y'),
 			'DT' => array('e','n','bw','b','a','y'),
 			'NN' => array('e','n','l','g','m','h','y'),
-			'E' => array('e','n','s','ew','c','k','y')
+			'E' => array('e','n','s','ew','c','k','y'),
+			/* ED150225 */
+			'VW' => array('vwi','vwx'),
 		);
 	}
 
@@ -1101,7 +1123,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
         return $this;
     }
 
-    /* ED141219 : ça ne veut plusdire grand chose puisque je renomme les champs */
+    /* ED141219 : ça ne veut plus dire grand chose puisque je renomme les champs */
     public function isCustomField() {
         return (substr($this->getName(),0,3) == 'cf_') ? true : false;
     }

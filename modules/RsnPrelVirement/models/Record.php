@@ -16,7 +16,7 @@ class RsnPrelVirement_Record_Model extends Vtiger_Record_Model {
 	public function getDisplayName() {
 		$name = number_format( $this->get('montant'), 2);
 		$name .= ' &euro;';
-		$name .= ' ' . $this->get('rsnprelvirstatus');
+		$name .= ' - ' . $this->get('rsnprelvirstatus');
 		$date  = new DateTime($this->get('dateexport'));
 		$name .= ' - ' . $date->format('d M Y');//date('d M Y', $this->get('dateregl'));
 		return $name;

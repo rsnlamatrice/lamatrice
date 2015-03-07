@@ -525,13 +525,13 @@ class PearDatabase{
 
     /* ADODB newly added. replacement for mysql_fetch_array() */
     function fetch_array(&$result) {
-		if($result->EOF) {
-		    //$this->println("ADODB fetch_array return null");
-		    return NULL;
-		}
-		$arr = $result->FetchRow();
-        if(is_array($arr))
-			$arr = array_map('to_html', $arr);
+	if($result->EOF) {
+	    //$this->println("ADODB fetch_array return null");
+	    return NULL;
+	}
+	$arr = $result->FetchRow();
+	if(is_array($arr))
+		$arr = array_map('to_html', $arr);
         return $this->change_key_case($arr);
     }
 

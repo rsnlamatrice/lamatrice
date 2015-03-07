@@ -59,6 +59,18 @@ Class CustomView_EditAjax_View extends Vtiger_IndexAjax_View {
 		$viewer->assign('CV_PUBLIC_VALUE', CustomView_Record_Model::CV_STATUS_PUBLIC);
 		$viewer->assign('MODULE_MODEL',$moduleModel);
 
+		/* ED150212
+		 * Related record structures
+		 */
+		$relationModels = $moduleModel->getRelations();
+		$relatedViews = array();
+		foreach($relationModels as $relationModel){
+			$relatedViews[$relationModel->getRelationModuleName()] = $relationModel->getRelationViews();
+		}
+		//var_dump($relatedStructures);
+		$viewer->assign('RELATED_MODELS',$relationModels);
+		$viewer->assign('RELATED_MODELS_VIEWS',$relatedViews);
+		
 		echo $viewer->view('EditView.tpl', $module, true);
 	}
 }

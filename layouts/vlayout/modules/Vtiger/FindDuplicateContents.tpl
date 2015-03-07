@@ -75,7 +75,7 @@
 					</td>
 					{if $recordCount eq 0}
 					<td align='center' rowspan="{$groupCount}" style="border-left:1px solid #DDD;border-bottom:1px solid #DDD;vertical-align: middle;text-align: center">
-						<input type="button" value="Merge" name="merge" class="btn btn-success" data-group="{$GROUP_NAME}">
+						<input type="button" value="{vtranslate('LBL_MERGE', $MODULE)}" name="merge" class="btn btn-success" data-group="{$GROUP_NAME}">
 					</td>
 					{/if}
 					{assign var=recordCount value=$recordCount+1}

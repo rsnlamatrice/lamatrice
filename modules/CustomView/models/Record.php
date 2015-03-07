@@ -146,10 +146,10 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		if($this->get('viewname') == 'All') {
 			return false;
 		}
-        $currentUser = Users_Record_Model::getCurrentUserModel();
-        if($currentUser->isAdminUser()) {
-            return true;
-        }
+		$currentUser = Users_Record_Model::getCurrentUserModel();
+		if($currentUser->isAdminUser()) {
+		    return true;
+		}
         
 		if($this->isMine() || $this->isOthers()) {
 			return true;
@@ -177,7 +177,7 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 		$queryGenerator = $listViewModel->get('query_generator');
 
-        $searchKey = $this->get('search_key');
+		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
 		if(!empty($searchValue)) {
@@ -319,40 +319,66 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 					$advFitlerValue = $columnCondition['value'];
 					$advFilterColumnCondition = $columnCondition['column_condition'];
 
-					$columnInfo = explode(":",$advFilterColumn);
-					$fieldName = $columnInfo[2];
-					$fieldModel = $moduleModel->getField($fieldName);
-					$fieldType = $fieldModel->getFieldDataType();
-
-					if($fieldType == 'currency') {
-						if($fieldModel->get('uitype') == '71') {
-							$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue, null, true);
-						} else {
-							$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue);
-						}
+					/* ED150225
+					 * Related module view
+					 */
+					if($advFilterColumn[0] == '['){ //[Module:ViewName:ViewId]:field table:column:field:label (TODO check column:field)
+						$pos = strpos($advFilterColumn, ']', 1);
+						$viewName = explode(":", substr($advFilterColumn, 1, $pos-1));
+						$relatedModuleName = $viewName[0];
+						$viewId = $viewName[2];
+						$viewName = $viewName[1];
+						$fieldModuleModel = Vtiger_Module_Model::getInstance($relatedModuleName);
+						
+						$columnInfo = trim(substr($advFilterColumn, $pos + 1));
+						$columnInfo = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
+						
+						$columnInfo = explode(":", $columnInfo);
 					}
-
-					$temp_val = explode(",",$advFitlerValue);
-					if(($fieldType == 'date' || ($fieldType == 'time' && $fieldName != 'time_start' && $fieldName != 'time_end') || ($fieldType == 'datetime')) && ($fieldType != '' && $advFitlerValue != '' )) {
-						$val = Array();
-						for($x=0;$x<count($temp_val);$x++) {
-							//if date and time given then we have to convert the date and
-							//leave the time as it is, if date only given then temp_time
-							//value will be empty
-							if(trim($temp_val[$x]) != '') {
-								$date = new DateTimeField(trim($temp_val[$x]));
-								if($fieldType == 'date') {
-									$val[$x] = DateTimeField::convertToDBFormat(
-											trim($temp_val[$x]));
-								} elseif($fieldType == 'datetime') {
-									$val[$x] = $date->getDBInsertDateTimeValue();
-								} else {
-									$val[$x] = $date->getDBInsertTimeValue();
-								}
+					else {
+						$columnInfo = explode(":",$advFilterColumn);
+						$fieldModuleModel = $moduleModel;
+					}
+					if(count($columnInfo) > 1){
+						$fieldName = $columnInfo[2];
+						
+						$fieldModel = $fieldModuleModel->getField($fieldName);
+						$fieldType = $fieldModel->getFieldDataType();
+	
+						if($fieldType == 'currency') {
+							if($fieldModel->get('uitype') == '71') {
+								$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue, null, true);
+							} else {
+								$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue);
 							}
 						}
-						$advFitlerValue = implode(",",$val);
+	
+						if(($fieldType == 'date'
+						|| ($fieldType == 'time' && $fieldName != 'time_start' && $fieldName != 'time_end')
+						|| ($fieldType == 'datetime'))
+						&& ($fieldType != '' && $advFitlerValue != '' )) {
+							$temp_val = explode(",",$advFitlerValue);
+							$val = Array();
+							for($x=0;$x<count($temp_val);$x++) {
+								//if date and time given then we have to convert the date and
+								//leave the time as it is, if date only given then temp_time
+								//value will be empty
+								if(trim($temp_val[$x]) != '') {
+									$date = new DateTimeField(trim($temp_val[$x]));
+									if($fieldType == 'date') {
+										$val[$x] = DateTimeField::convertToDBFormat(
+												trim($temp_val[$x]));
+									} elseif($fieldType == 'datetime') {
+										$val[$x] = $date->getDBInsertDateTimeValue();
+									} else {
+										$val[$x] = $date->getDBInsertTimeValue();
+									}
+								}
+							}
+							$advFitlerValue = implode(",",$val);
+						}
 					}
+					
 
 					$advCriteriaSql = 'INSERT INTO vtiger_cvadvfilter(cvid,columnindex,columnname,comparator,value,groupid,column_condition)
 											values (?,?,?,?,?,?,?)';

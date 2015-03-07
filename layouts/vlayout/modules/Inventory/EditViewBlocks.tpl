@@ -12,7 +12,8 @@
 
 {strip}
 <div class='editViewContainer container-fluid'>
-	<form class="form-horizontal recordEditView" id="EditView" name="EditView" method="post" action="index.php" enctype="multipart/form-data">
+	{assign var=FORMID value='EditView'}
+	<form id="{$FORMID}" class="form-horizontal recordEditView" name="EditView" method="post" action="index.php" enctype="multipart/form-data">
 		{assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
 		{if !empty($PICKIST_DEPENDENCY_DATASOURCE)}
 			<input type="hidden" name="picklistDependency" value='{Vtiger_Util_Helper::toSafeHTML($PICKIST_DEPENDENCY_DATASOURCE)}' />
@@ -173,4 +174,52 @@
 			</table>
 			<br>
 		{/foreach}
+	<script>
+	{* On Coupon selection, selects related campaign
+	TODO : Ne fonctionne pas à cause de la sélection de référence qui ne génère pas d'évenement.
+	*}
+	$(document.body).ready(function(){
+		{* Listes dependantes d'un coupon vers une campagne *}
+		$(document.body)
+		.on('change', '#notesid_display', function(){
+			//TODO événement jamais déclenché
+			var notesid = $('#{$FORMID} input[name="notesid"]').val();
+			alert(notesid);
+			if (notesid) {
+				$.ajax({
+					'url' : '?'
+					, 'data' : {
+						'module' : 'Documents'
+						, 'action' : 'get_document_campaign'
+						, 'record' : notesid
+					}
+					, 'async' : false
+					, 'success' : function(data){
+							alert(data);
+						var campaignid = data;
+						if (!campaignid) {
+							alert('Campagne non retournée');
+						}
+						var $dest = $('#{$FORMID} input[name="campaign_no"]');
+						if ($dest.length == 0) {
+							alert('Campagne introuvable');
+						}
+						else {
+							$seloption = $dest.children('option[value="' + campaignid + '"]:first');
+							if ($seloption.length) {
+								$dest.val(campaignid);
+								$seloption.attr('selected', 'selected');
+								$dest.select2("val",campaignid); {* ne fonctionne pas bien *}
+								$dest.next().find('> a > span:first').html($seloption.html());
+							}
+							else {
+								alert('Campagne introuvable');
+							}
+						}
+					}
+				});
+			}
+		})
+		;
+	})</script>
 {/strip}

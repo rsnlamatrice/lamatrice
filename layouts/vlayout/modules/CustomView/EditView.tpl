@@ -71,6 +71,9 @@
 		<div class="filterActions">
 			<a class="cancelLink pull-right padding1per" type="reset" onClick="window.location.reload()">{vtranslate('LBL_CANCEL', $MODULE)}</a>
 			<button class="btn btn-success pull-right" id="customViewSubmit" type="submit"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
+			{if $MODE == 'edit'}
+			<button class="btn btn-success save-copy pull-right marginRight10px" id="customViewSubmitCopy" type="submit" disabled="disabled"><strong>{vtranslate('LBL_SAVE_COPY', $MODULE)}</strong></button>
+			{/if}
 		</div>
 	</form>
 </div>
