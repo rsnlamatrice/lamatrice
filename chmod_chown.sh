@@ -1,3 +1,2 @@
-chmod -R 775 /var/www/lamatrice
-chgrp -R www-data /var/www/lamatrice
-chown -R emmanuel /var/www/lamatrice
+chmod -R 775 . 
+chown -R www-data:www-data .
