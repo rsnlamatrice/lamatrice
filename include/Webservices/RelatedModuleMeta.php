@@ -25,6 +25,7 @@ class RelatedModuleMeta {
 	private $PRODUCTQUOTESREL = 2;
 	private $PRODUCTINVOICEREL = 3;
 	private $PRODUCTPURCHASEORDERREL = 4;
+	//ED150227
 	private $INVOICECONTACTREL = 5;
 	private $CONTACTCONTACTSREL = 6;
 	private $CAMPAIGNDOCUMENTSREL = 7;
@@ -45,6 +46,10 @@ class RelatedModuleMeta {
 		return new RelatedModuleMeta($module, $relatedModule);
 	}
 
+	/*
+	 *
+	 * ED150227 : switch, completed
+	 */
 	public function getRelationMeta() {
 		switch($this->module){
 		case 'Contacts':
@@ -150,29 +155,33 @@ class RelatedModuleMeta {
 		default:
 			break;
 		}
-		$campaignContactRel = array('Campaigns','Contacts');
-		$productInvoiceRel = array('Products','Invoice');
-		$productQuotesRel = array('Products','Quotes');
-		$productPurchaseOrder = array('Products','PurchaseOrder');
-		$invoiceContactRel = array('Invoice','Contacts');
-		if(in_array($this->module, $campaignContactRel) && in_array($this->relatedModule,
-				$campaignContactRel)) {
-			return $this->getRelationMetaInfo($this->CAMPAIGNCONTACTREL);
-		}
-		if(in_array($this->module, $productInvoiceRel) && in_array($this->relatedModule,
-				$productInvoiceRel)) {
-			return $this->getRelationMetaInfo($this->PRODUCTINVOICEREL);
-		}
-		if(in_array($this->module, $productQuotesRel) && in_array($this->relatedModule,
-				$productQuotesRel)) {
-			return $this->getRelationMetaInfo($this->PRODUCTQUOTESREL);
-		}
-		if(in_array($this->module, $productPurchaseOrder) && in_array($this->relatedModule,
-				$productPurchaseOrder)) {
-			return $this->getRelationMetaInfo($this->PRODUCTPURCHASEORDERREL);
-		}
+		//$campaignContactRel = array('Campaigns','Contacts');
+		//$productInvoiceRel = array('Products','Invoice');
+		//$productQuotesRel = array('Products','Quotes');
+		//$productPurchaseOrder = array('Products','PurchaseOrder');
+		//$invoiceContactRel = array('Invoice','Contacts');
+		//if(in_array($this->module, $campaignContactRel) && in_array($this->relatedModule,
+		//		$campaignContactRel)) {
+		//	return $this->getRelationMetaInfo($this->CAMPAIGNCONTACTREL);
+		//}
+		//if(in_array($this->module, $productInvoiceRel) && in_array($this->relatedModule,
+		//		$productInvoiceRel)) {
+		//	return $this->getRelationMetaInfo($this->PRODUCTINVOICEREL);
+		//}
+		//if(in_array($this->module, $productQuotesRel) && in_array($this->relatedModule,
+		//		$productQuotesRel)) {
+		//	return $this->getRelationMetaInfo($this->PRODUCTQUOTESREL);
+		//}
+		//if(in_array($this->module, $productPurchaseOrder) && in_array($this->relatedModule,
+		//		$productPurchaseOrder)) {
+		//	return $this->getRelationMetaInfo($this->PRODUCTPURCHASEORDERREL);
+		//}
 	}
 
+	/*
+	 *
+	 * ED150227 : completed
+	 */
 	private function getRelationMetaInfo($relationId) {
 		switch($relationId) {
 		case $this->CAMPAIGNCONTACTREL: return array(
@@ -203,7 +212,7 @@ class RelatedModuleMeta {
 		case $this->CONTACTCONTACTSREL: return array(
 				'relationTable' => 'vtiger_contactscontrel',
 				'Contacts' => 'contactid',
-				'relatedField' => 'relcontid' //relatedField because same table
+				'relatedField' => 'relcontid' //relatedField because same module
 			);
 		case $this->CAMPAIGNDOCUMENTSREL: return array(
 				'relationTable' => 'vtiger_senotesrel',
