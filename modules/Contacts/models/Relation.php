@@ -108,6 +108,8 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 		return array(
 			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel'),
 			'Contacts' => array('fieldName' => 'relcontid', 'tableName' => 'vtiger_contactscontrel'),
+			'Invoice' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_invoice'
+					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
 		);
 	}
 

@@ -38,6 +38,10 @@ class QueryGenerator {
 	 */
 	private $user;
 	private $advFilterList;
+	
+	//ED150308 : more advanced filters (given by code)
+	private $advFilterListMore;
+	
 	private $fields;
 	private $referenceModuleMetaInfo;
 	private $moduleNameFields;
@@ -126,9 +130,9 @@ class QueryGenerator {
 		return $this->whereFields;
 	}
 
-    public function addWhereField($fieldName) {
-        $this->whereFields[] = $fieldName;
-    }
+	public function addWhereField($fieldName) {
+	    $this->whereFields[] = $fieldName;
+	}
 
 	public function getOwnerFieldList() {
 		return $this->ownerFields;
@@ -215,14 +219,41 @@ class QueryGenerator {
 				$this->addCondition($name, $value, 'BETWEEN');
 			}
 		}
+		/* ED150308*/
+		if($this->getAdvFilterListMore()){
+			//var_dump('OUIOUIOUIOUIOUIOUIOUI $this->getAdvFilterListMore()', $this->getAdvFilterListMore());
+			if(!is_array($this->advFilterList)){
+				$this->advFilterList = array();
+				$key = "1";
+			}
+			else {
+				//last
+				foreach($this->advFilterList as $key=>$item){}
+				if($item){
+					$this->advFilterList[$key]['condition'] = self::$AND;
+					$key = ($key + 1).'';
+				}
+				else
+					$key = "1";
+			}
+			//echo '<pre>';
+			//echo json_encode($this->advFilterList);
+			$this->advFilterList[$key] = array('columns'=>$this->getAdvFilterListMore());
+			//echo '<br><br><br>';
+			//echo json_encode($this->advFilterList);
+			//echo '</pre>';
+			$this->setAdvFilterListMore(false);
+		}
+		
 		if($this->conditionInstanceCount <= 0 && is_array($this->advFilterList) && count($this->advFilterList) > 0) {
 			$this->startGroup('');
 		} elseif($this->conditionInstanceCount > 0 && is_array($this->advFilterList) && count($this->advFilterList) > 0) {
 			$this->addConditionGlue(self::$AND);
-		}
-        if(is_array($this->advFilterList) && count($this->advFilterList) > 0) {
+		}		
+		if(is_array($this->advFilterList) && count($this->advFilterList) > 0) {
 			$this->parseAdvFilterList($this->advFilterList);
 		}
+		
 		if($this->conditionInstanceCount > 0) {
 			$this->endGroup();
 		}
@@ -241,7 +272,13 @@ class QueryGenerator {
 			$filtercolumns = $groupcolumns['columns'];
 			if(count($filtercolumns) > 0) {
 				$this->startGroup('');
+				$skipNextIndex = -1;
 				foreach ($filtercolumns as $index=>$filter) {
+					if($skipNextIndex >= $index){
+						$filter['skip'] = true;
+						continue;
+					}
+					
 					/*ED150226
 					 * related module view field
 					 */
@@ -277,18 +314,59 @@ class QueryGenerator {
 							//$value = $relationModel->getQuery();
 							//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $value, 'IN');
 							
-							$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid']);
+							/*next conditions*/
+							$viewFilters = array();
+							for($iNext = $index+1; $iNext < count($filtercolumns); $iNext++) {
+								$nextFilter = $filtercolumns[$iNext];
+								//same view, memorize and skip
+								if(substr($nextFilter['columnname'], 0, strlen($filter['relatedmodulename']) + 2) == '['.$filter['relatedmodulename'].':'){
+									$nextFilter['columnname'] = preg_replace('/^[^\]]+\]::(.+)$/', '$1', $nextFilter['columnname']);
+									$nextFilter['relatedmodulename'] = $filter['relatedmodulename'];
+									$nextFilter['viewid'] = $filter['viewid'];
+									$nextFilter['viewname'] = $filter['viewname'];
+									$nextFilter['relatedmodule'] = $filter['relatedmodule'];
+									$viewFilters[] = $nextFilter;
+									$skipNextIndex = $iNext;
+								}
+								else
+									break;
+							}
 							
+							//sub view
+							$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
+							//get view query, adding filters
 							$relatedSql = $listView->getQuery();
+							//SELECT `id`  only
 							$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
-							
+							if(strpos($relationInfos['fieldName'], '.') === FALSE)
+								$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. $relationInfos['fieldName'];
 							$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
-							$newQuery[0] = $selectColumnSql.' '; /* ED141012 */
-							$relatedSql = implode(' FROM ', $newQuery);
+							$newQuery[0] = $selectColumnSql.' ';
+							$relatedSql = implode("\nFROM ", $newQuery);
+							
+							$sourceFieldName = isset($relationInfos['sourceFieldName']) ? $relationInfos['sourceFieldName'] : $this->getSQLColumn('id');
+							
 							//print_r('<pre>$this->getSQLColumn(id) : '.$this->getSQLColumn('id').'</pre>');
 							//print_r('<pre>$relatedSql : '.$relatedSql.'</pre>');
-							$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $relatedSql, 'IN');
+							//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $relatedSql, 'IN');
+							//echo str_repeat('<br>',5).__FILE__.'<br>';
+							//var_dump($this->getSQLColumn('id'), "/*BEGIN ".$filter['viewname']."*/\n\t$relatedSql\n\t/*END ".$filter['viewname']."*/", 'IN', 'AND');
+							//TODO $field =	var_dump($this->meta->getFieldByColumnName("contact_id"));
+							$this->startGroup('', $filter['comparator'] . ' ' . $filter['viewname']);
+							$this->addCondition($sourceFieldName
+									    , $relatedSql
+									    , $filter['comparator']);
+							$this->endGroup($filter['viewname']);
 							
+							//column_condition
+							//must use the last filter, even if skipped
+							if(count($viewFilters))
+								$columncondition = $viewFilters[count($viewFilters)-1]['column_condition'];
+							else
+								$columncondition = $filter['column_condition'];
+							if(!empty($columncondition)) {
+								$this->addConditionGlue($columncondition);
+							}
 							continue;
 						}
 					}
@@ -341,17 +419,13 @@ class QueryGenerator {
 					if(!empty($columncondition)) {
 						$this->addConditionGlue($columncondition);
 					}
-				}
+				} //foreach
 				$this->endGroup();
 				$groupConditionGlue = $groupcolumns['condition'];
 				if(!empty($groupConditionGlue))
 					$this->addConditionGlue($groupConditionGlue);
 			}
 		}
-		if(isset($relatedSql))
-			print_r('<pre>'.$this->getQuery().'</pre>');
-							
-							
 	}
 
 	public function getCustomViewQueryById($viewId) {
@@ -383,6 +457,9 @@ class QueryGenerator {
 			$query .= $this->getFromClause();
 			$query .= $this->getWhereClause();
 			$this->query = $query;
+			
+			//print_r('<pre>'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+			
 			return $query;
 		} else {
 			return $this->query;
@@ -621,12 +698,16 @@ class QueryGenerator {
 
 				$tableName = $fieldObject->getTableName();
 				if(!in_array($tableName, $referenceFieldTableList)) {
-					if($referenceFieldObject->getFieldName() == 'parent_id' && ($this->getModule() == 'Calendar' || $this->getModule() == 'Events')) {
-						$sql .= ' LEFT JOIN vtiger_seactivityrel ON vtiger_seactivityrel.activityid = vtiger_activity.activityid ';
-					}
-					//TODO : this will create duplicates, need to find a better way
-					if($referenceFieldObject->getFieldName() == 'contact_id' && ($this->getModule() == 'Calendar' || $this->getModule() == 'Events')) {
-						$sql .= ' LEFT JOIN vtiger_cntactivityrel ON vtiger_cntactivityrel.activityid = vtiger_activity.activityid ';
+					if($this->getModule() == 'Calendar' || $this->getModule() == 'Events'){
+						switch($referenceFieldObject->getFieldName()){
+						case 'parent_id':
+							$sql .= ' LEFT JOIN vtiger_seactivityrel ON vtiger_seactivityrel.activityid = vtiger_activity.activityid ';
+							break;
+						//TODO : this will create duplicates, need to find a better way
+						case 'contact_id':
+							$sql .= ' LEFT JOIN vtiger_cntactivityrel ON vtiger_cntactivityrel.activityid = vtiger_activity.activityid ';
+							break;
+						}
 					}
 					$sql .= " LEFT JOIN ".$tableName.' AS '.$tableName.$conditionInfo['referenceField'].' ON
 							'.$tableName.$conditionInfo['referenceField'].'.'.$tableList[$tableName].'='.
@@ -667,6 +748,23 @@ class QueryGenerator {
 			$fieldName = $conditionInfo['name'];
 			$field = $moduleFieldList[$fieldName];
 			if(empty($field) || $conditionInfo['operator'] == 'None') {
+				/* ED150307 IN, NOT IN
+				 * sub view
+				 */
+				if($this->isViewOperators($conditionInfo['operator'])) {
+					$valueSql = $conditionInfo['value'];
+					if($valueSql[0] != '(')
+						$valueSql = "($valueSql)";
+					switch($conditionInfo['operator']) {
+					case 'vwi':
+						$sqlOperator = " IN ";
+						break;
+					case 'vwx':
+						$sqlOperator = " NOT IN ";
+						break;
+					}
+					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
+				}
 				continue;
 			}
 			$fieldSql = '(';
@@ -777,10 +875,10 @@ class QueryGenerator {
 					if($fieldName == 'birthday' && !$this->isRelativeSearchOperators(
 							$conditionInfo['operator'])) {
 						$fieldSql .= "$fieldGlue DATE_FORMAT(".$field->getTableName().'.'.
-						$field->getColumnName().",'%m%d') ".$valueSql;
+							$field->getColumnName().",'%m%d') ".$valueSql;
 					} else {
 						$fieldSql .= "$fieldGlue ".$field->getTableName().'.'.
-						$field->getColumnName().' '.$valueSql;
+							$field->getColumnName().' '.$valueSql;
 					}
 				}
 				if($conditionInfo['operator'] == 'n' && ($field->getFieldDataType() == 'owner' || $field->getFieldDataType() == 'picklist') ) {
@@ -792,6 +890,7 @@ class QueryGenerator {
 			$fieldSql .= ')';
 			$fieldSqlList[$index] = $fieldSql;
 		}
+		
 		foreach ($this->manyToManyRelatedModuleConditions as $index=>$conditionInfo) {
 			$relatedModuleMeta = RelatedModuleMeta::getInstance($this->meta->getTabName(),
 					$conditionInfo['relatedModule']);
@@ -820,10 +919,17 @@ class QueryGenerator {
 				$fieldSqlList[$index] = $fieldSql;
 			}
 		}
+		
+		//echo('<br>$fieldSqlList');
+		//var_dump($fieldSqlList);
 		// This is needed as there can be condition in different order and there is an assumption in makeGroupSqlReplacements API
 		// that it expects the array in an order and then replaces the sql with its the corresponding place
 		ksort($fieldSqlList);
+		//echo('<br>$groupSql');
+		//var_dump($groupSql);
 		$groupSql = $this->makeGroupSqlReplacements($fieldSqlList, $groupSql);
+		//echo('<br>$groupSql');
+		//var_dump($groupSql);
 		if($this->conditionInstanceCount > 0) {
 			$this->conditionalWhere = $groupSql;
 			$sql .= $groupSql;
@@ -840,7 +946,6 @@ class QueryGenerator {
 	 * @param WebserviceField $field
 	 */
 	private function getConditionValue($value, $operator, $field) {
-
 		$operator = strtolower($operator);
 		$db = PearDatabase::getInstance();
 		$fieldDataType = $field->getFieldDataType();//ED150302
@@ -972,10 +1077,16 @@ class QueryGenerator {
 					break;
 				case 'b': $sqlOperator = "<";
 					break;
+				/*ED150307*/
+				case 'vwi': $sqlOperator = " IN ";
+					break;
+				case 'vwx': $sqlOperator = " NOT IN ";
+					break;
 			}
-			if(!$this->isNumericType($fieldDataType) &&
-					($field->getFieldName() != 'birthday' || ($field->getFieldName() == 'birthday'
-							&& $this->isRelativeSearchOperators($operator)))){
+			if(!$this->isNumericType($fieldDataType)
+				&& !$this->isViewOperators($operator) //ED150307
+				&& ($field->getFieldName() != 'birthday'
+				   || ($field->getFieldName() == 'birthday' && $this->isRelativeSearchOperators($operator)))){
 				$value = "'$value'";
 			}
 			if($this->isNumericType($fieldDataType) && empty($value)) {
@@ -1004,6 +1115,11 @@ class QueryGenerator {
 	private function isRelativeSearchOperators($operator) {
 		$nonDaySearchOperators = array('l','g','m','h');
 		return in_array($operator, $nonDaySearchOperators);
+	}
+	/* ED150307*/
+	private function isViewOperators($operator) {
+		$viewOperators = array('vwi','vwx');
+		return in_array($operator, $viewOperators);
 	}
 	private function isNumericType($type) {
 		return ($type == 'integer' || $type == 'double' || $type == 'currency');
@@ -1073,12 +1189,15 @@ class QueryGenerator {
 		return array('name'=>$fieldname,'value'=>$value,'operator'=>$operator);
 	}
 
-	public function startGroup($groupType) {
-		$this->groupInfo .= " $groupType (";
+	private $groupCounter = 0;
+	public function startGroup($groupType, $debug = '') {
+		$this->groupCounter++;
+		$this->groupInfo .= " $groupType /*startGroup $debug*/(";
 	}
 
-	public function endGroup() {
-		$this->groupInfo .= ')';
+	public function endGroup($debug = '') {
+		$this->groupInfo .= ")/*endGroup $debug*/";
+		$this->groupCounter--;
 	}
 
 	public function addConditionGlue($glue) {
@@ -1335,6 +1454,13 @@ class QueryGenerator {
 				$this->fields[] = 'id';
 		}
 	}
-
+	
+	//ED150308 : more advanced filters (given by code)
+	public function setAdvFilterListMore($list){
+		$this->advFilterListMore = $list;
+	}
+	public function getAdvFilterListMore(){
+		return $this->advFilterListMore;
+	}
 }
 ?>

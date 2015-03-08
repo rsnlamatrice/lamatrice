@@ -1,2 +1,2 @@
 chmod -R 775 . 
-chown -R www-data:www-data .
+chown -R ed:www-data .

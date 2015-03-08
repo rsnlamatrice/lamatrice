@@ -13,7 +13,12 @@
  */
 class Vtiger_ListView_Model extends Vtiger_Base_Model {
 
-
+	/* ED150308
+	 * 
+	 */
+	public static function getInstanceWithFilters($filters){
+		
+	}
 
 	/**
 	 * Function to get the Module Model
@@ -336,10 +341,10 @@ var_dump($listResult);*/
 	 * @param <Number> $viewId - Custom View Id
 	 * @return Vtiger_ListView_Model instance
 	 *
-	 * ED150121 : au chargement de la page, on a la liste par défaut (all) avec ses colonnes issues de <CRMEntity> -> list_fields_name .
+	 * ED150121 : au chargement de la page, on a la liste par d≈Ωfaut (all) avec ses colonnes issues de <CRMEntity> -> list_fields_name .
 	 * au rechargement d'une vue, ok.
 	 */
-	public static function getInstance($moduleName, $viewId='0') {
+	public static function getInstance($moduleName, $viewId='0', $moreFilters = FALSE) {
 		$db = PearDatabase::getInstance();
 		$currentUser = vglobal('current_user');
 
@@ -349,6 +354,8 @@ var_dump($listResult);*/
 		$queryGenerator = new QueryGenerator($moduleModel->get('name'), $currentUser);
 		$customView = new CustomView();
 		
+		if($moreFilters)
+			$queryGenerator->setAdvFilterListMore($moreFilters);
 		
 		if (!empty($viewId) && $viewId != "0") {
 			$queryGenerator->initForCustomViewById($viewId);
