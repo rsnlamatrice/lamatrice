@@ -381,7 +381,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * used by Contacts_Save_Action::process
 	 */
-	public function createContactAddressesRecord(){
+	public function createContactAddressesRecord($fieldPrefixe = 'mailing', $save = true){
 		
 		$addressModule = Vtiger_Module_Model::getInstance('ContactAddresses');
 		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactAddresses');
@@ -392,14 +392,14 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			'modifiedtime' => 'createdtime',
 			'rsnnpai' => 'rsnnpai',
 			'rsnnpaicomment' => 'rsnnpaicomment',
-			'mailingstreet' => 'mailingstreet',
-			'mailingstreet2' =>'mailingstreet2',
-			'mailingstreet3' => 'mailingstreet3',
-			'mailingpobox' => 'mailingpobox',
-			'mailingcity' => 'mailingcity',
-			'mailingstate' => 'mailingstate',
-			'mailingzip' => 'mailingzip',
-			'mailingcountry' => 'mailingcountry'
+			$fieldPrefixe.'street' => 'mailingstreet',
+			$fieldPrefixe.'street2' =>'mailingstreet2',
+			$fieldPrefixe.'street3' => 'mailingstreet3',
+			$fieldPrefixe.'pobox' => 'mailingpobox',
+			$fieldPrefixe.'city' => 'mailingcity',
+			$fieldPrefixe.'state' => 'mailingstate',
+			$fieldPrefixe.'zip' => 'mailingzip',
+			$fieldPrefixe.'country' => 'mailingcountry'
 		);
 		//echo '<pre>';
 		foreach($mapping as $sourceField => $destField){
@@ -408,9 +408,10 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		}
 		//echo '</pre>';
 		//die();
-		$addressRecord->save();
-		$addressRecord->set('mode', '');
-		
+		if($save){
+			$addressRecord->save();
+			$addressRecord->set('mode', '');
+		}
 		return $addressRecord;
 	}
 }

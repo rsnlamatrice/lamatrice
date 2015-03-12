@@ -1036,17 +1036,19 @@ class Contacts extends CRMEntity {
 						SELECT vtiger_contactaddresses.contactaddressesid,
 							vtiger_contactaddresses.contactid,
 							vtiger_contactaddresses.addresstype, vtiger_contactaddresses.comments,
-							`rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`
+							`rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`,
+							0 AS _is_current_
 						FROM vtiger_contactaddresses
 						WHERE vtiger_contactaddresses.contactid=".$id."
 						UNION "/* add current address from contactaddress */."
 						SELECT vtiger_contactaddress.contactaddressid,
 							vtiger_contactaddress.contactaddressid,
 							'LBL_CURRENT_ADDRESS', NULL,
-							`rsnnpai`, `rsnnpaicomment`, `mailingcity`, `mailingstreet`, `mailingstreet2`, `mailingstreet3`, `mailingcountry`, `mailingstate`, `mailingpobox`, `mailingzip`
+							`rsnnpai`, `rsnnpaicomment`, `mailingcity`, `mailingstreet`, `mailingstreet2`, `mailingstreet3`, `mailingcountry`, `mailingstate`, `mailingpobox`, `mailingzip`,
+							1 AS _is_current_
 						FROM vtiger_contactaddress
 						WHERE vtiger_contactaddress.contactaddressid=".$id."
-						ORDER BY contactaddressesid ASC
+						ORDER BY _is_current_ DESC, contactaddressesid DESC
 					) vtiger_contactaddresses
 					INNER JOIN vtiger_crmentity on vtiger_crmentity.crmid = vtiger_contactaddresses.contactaddressesid
 					LEFT JOIN vtiger_groups on vtiger_groups.groupid=vtiger_crmentity.smownerid

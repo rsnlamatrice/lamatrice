@@ -31,15 +31,26 @@ Class Vtiger_Edit_View extends Vtiger_Index_View {
 	    $record = $request->get('record');
 	    //var_dump('$record');var_dump($record);
 	    if(!empty($record) && $request->get('isDuplicate') == true) {
-	        $recordModel = $this->record?$this->record:Vtiger_Record_Model::getInstanceById($record, $moduleName);
-		$viewer->assign('IS_DUPLICATE_FROM', $record);
-	        $viewer->assign('MODE', '');
+		
+		/*ED150312*/
+		//TODO Devrait être dans W:\www\users\lamatrice\modules\ContactAddresses\views\Edit.php mais ça bugge
+		if($moduleName == 'ContactAddresses'
+		&& $request->get('source_module') == 'Contacts') {
+		    $sourceModule = Vtiger_Module_Model::getInstance('Contacts');
+		    $sourceRecord = Vtiger_Record_Model::getInstanceById($record, $sourceModule);
+		    $recordModel = $sourceRecord->createContactAddressesRecord('mailing', false);
+		    $request->set('isDuplicate', false);
+		}
+		else {
+		    $recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record, $moduleName);
+		    $viewer->assign('IS_DUPLICATE_FROM', $record);
+		}
+		$viewer->assign('MODE', '');
 	    }else if(!empty($record)) {
 	        $recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record, $moduleName);
 	        $viewer->assign('RECORD_ID', $record);
 	        $viewer->assign('MODE', 'edit');
             } else {
-		
 		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
                 $viewer->assign('MODE', '');
             }
