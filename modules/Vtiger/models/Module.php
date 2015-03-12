@@ -1380,19 +1380,26 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		//modify query if any module has summary fields, those fields we are displayed in related list of that module
 		$relatedListFields = $relatedModule->getConfigureRelatedListFields();
 		if(count($relatedListFields) > 0) {
-			$currentUser = Users_Record_Model::getCurrentUserModel();
-			$queryGenerator = new QueryGenerator($relatedModuleName, $currentUser);
-			$queryGenerator->setFields($relatedListFields);
-			$selectColumnSql = $queryGenerator->getSelectClauseColumnSQL();
-			$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
-			$selectColumnSql = 'SELECT vtiger_crmentity.crmid,'.$selectColumnSql;
-			$newQuery[0] = $selectColumnSql.' '; /* ED141012 */
-			$query = implode(' FROM ', $newQuery);
+			
+			//Replace fields in query
+			//ED150312
+			//TODO bug UNION makes ORDER BY error
+			//Solution : see modules/Contacts/Contacts.php->get_ContactAdresses()
+			//if(!preg_match('/\sUNION\s+SELECT\s/i', $query)){//TODO UNION for root query
+				$currentUser = Users_Record_Model::getCurrentUserModel();
+				$queryGenerator = new QueryGenerator($relatedModuleName, $currentUser);
+				$queryGenerator->setFields($relatedListFields);
+				$selectColumnSql = $queryGenerator->getSelectClauseColumnSQL();
+				//TODO BUG : UNION is broken
+				$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
+				$selectColumnSql = 'SELECT vtiger_crmentity.crmid,'.$selectColumnSql;
+				$newQuery[0] = $selectColumnSql.' '; /* ED141012 */
+				$query = implode(' FROM ', $newQuery);
+			//}
 		}
 		if ($nonAdminQuery) {
 			$query = appendFromClauseToQuery($query, $nonAdminQuery);
 		}
-
 		return $query;
 	}
 

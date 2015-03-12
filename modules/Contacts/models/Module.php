@@ -269,7 +269,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			//echo('<pre>APRES '.$query . '</pre>');
 			break;
 		default:
-			//echo('<pre>'.$functionName . '</pre>');
+			//echo('<pre>'.__FILE__.' '.$functionName . '</pre>');
 			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
 			//echo('<pre>'.$query . '</pre>');
 			

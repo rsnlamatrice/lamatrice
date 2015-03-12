@@ -37,12 +37,16 @@ $languageStrings = array(
 	'Mailing Zip'                  => 'Code postal'                 , 
 	'Mailing Country'              => 'Pays'                        , 
 	'Mailing Po Box'               => 'Boite postale'            , 
+	'Mailing Street 2'             => 'Structure, n° appt, ...'     ,
+	'Mailing Street 3'             => 'Bât., rés., ...'          ,
 	'Other Street'                 => 'Adresse (alt.)'              , 
 	'Other City'                   => 'Ville (alt.)'                , 
 	'Other State'                  => 'Région (alt.)'         , 
 	'Other Zip'                    => 'Code postal (alt.)'          , 
 	'Other Country'                => 'Pays (alt.)'                 , 
-	'Other Po Box'                 => 'Boite postale (alt.)'              , 
+	'Other Po Box'                 => 'Boite postale (alt.)'        ,
+	'Other Street 2'               => 'Structure, n° appt, ... (alt.)',
+	'Other Street 3'               => 'Bât., rés., ... (alt.)'     ,
 	'Contact Image'                => 'Photo'                       , 
 	'Mr.'                          => 'M'                           , 
 	'Ms.'                          => 'Mme'                         , 
@@ -52,10 +56,6 @@ $languageStrings = array(
 	'User List'                    => 'Liste des collaborateurs'    , 
 	'Contact Id'                   => 'N° Contact',
         'Mobile'                       => 'Portable'                   ,
-	'Mailing Street 2'             => 'Structure, n° appt, ...'     ,
-	'Mailing Street 3'             => 'Bât., rés., ...'          ,
-	'Other Street 2'               => 'Structure, n° appt, ... (alt.)'            ,
-	'Other Street 3'               => 'Bât., rés., ... (alt.)'     ,
         
         //contacttype
         'Analyst'                      => 'Analyste'                    , 
@@ -67,6 +67,7 @@ $languageStrings = array(
 	'Prospect'                     => 'Prospect'                    , 
 	'Reseller'                     => 'Revendeur'                   , 
 	
+	/*ED140000*/
         'LBL_BLOCK_DO_NOT'              => 'Ne pas'                     ,
 );
 $jsLanguageStrings = array(

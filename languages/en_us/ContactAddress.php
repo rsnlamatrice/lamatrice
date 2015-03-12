@@ -9,13 +9,12 @@
  ************************************************************************************/
 
 $languageStrings = array(
-	'ContactAddresses' => 'Adresses des contacts',
-	'SINGLE_ContactAddresses' => 'Adresse de contact',
-	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
-	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations du système',
+	'ContactAddress' => 'Contacts adresses',
+	'SINGLE_ContactAddress' => 'Contact adress',
+	'LBL_BLOCK_GENERAL_INFORMATION' => 'General informations',
+	'LBL_BLOCK_SYSTEM_INFORMATION' => 'System informations',
 	'LBL_ADDRESSTYPE' => 'Type',
 	'LBL_CONTACTID' => 'Contact',
-	'LBL_COMMENTS' => 'Commentaires',
 
 );
 

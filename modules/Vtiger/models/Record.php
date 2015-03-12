@@ -283,8 +283,8 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		$db = PearDatabase::getInstance();
 
 		/* ED150122
-		 * recherche d'un nombre, sans prŽcision de module ou Contacts : on cherche dans ref 4D
-		 * si le nombre est prŽfixŽ de 'C', on cherche dans vtiger_contactdetails.contact_no
+		 * recherche d'un nombre, sans prÂŽcision de module ou Contacts : on cherche dans ref 4D
+		 * si le nombre est prÂŽfixÂŽ de 'C', on cherche dans vtiger_contactdetails.contact_no
 		 */
 		if((!$module || $module == 'Contacts')
 		&& ($searchKey
@@ -301,7 +301,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				AND vtiger_crmentity.deleted = 0';
 			$params = array(trim($searchKey), trim($searchKey));
 		}
-		else {	/* requte gŽnŽrale sur le champ label */
+		else {	/* requÂte gÂŽnÂŽrale sur le champ label */
 			$query = 'SELECT label, crmid, setype, createdtime
 				FROM vtiger_crmentity
 				WHERE label LIKE ?
@@ -445,6 +445,13 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 					'0' => array( 'label' => 'si, on peut', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
 					'1' => array( 'label' => 'Pas d\'email', 'icon' => 'ui-icon ui-icon-locked darkred' )
 				);
+			case 'rsnnpai':
+				return array(
+					'0' => array( 'label' => 'Ok', 'icon' => 'ui-icon ui-icon-check green' ),
+					'1' => array( 'label' => 'SupposÃ©e', 'icon' => 'ui-icon ui-icon-check darkgreen' ),
+					'2' => array( 'label' => 'A confirmer', 'icon' => 'ui-icon ui-icon-close orange' ),
+					'3' => array( 'label' => 'DÃ©finitive', 'icon' => 'ui-icon ui-icon-close darkred' ),
+				);
 			default:
 				return array();
 		}
@@ -455,14 +462,11 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	 * getListViewPicklistValues
 	 */
 	public function getListViewPicklistValues($fieldname){
-		switch($fieldname){
-			default:
-				return $this->getPicklistValuesDetails($fieldname);
-		}
+		return $this->getPicklistValuesDetails($fieldname);
 	}
 
 	/* ED150207
-	 * Duplication des enregistrements liés sur le modèle d'un autre enregistrement
+	 * Duplication des enregistrements liÃ©s sur le modÃ¨le d'un autre enregistrement
 	 *
 	 * @param $templateId : template id 
 	 * @param $destRecord : destination record model or id
@@ -490,7 +494,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	}
 
 	/* ED150207
-	 * Duplication des enregistrements liés sur le modèle d'un autre enregistrement pour un module
+	 * Duplication des enregistrements liÃ©s sur le modÃ¨le d'un autre enregistrement pour un module
 	 * @param $templateId : template id 
 	 * @param $destRecord : destination record model or id
 	 * @param $relationModel : related module name. 

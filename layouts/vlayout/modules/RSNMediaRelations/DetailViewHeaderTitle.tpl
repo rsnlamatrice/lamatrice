@@ -10,7 +10,7 @@
 	</span>
 	<span class="span8 margin0px">
 		<span class="row-fluid">
-			<span class="recordLabel font-x-x-large textOverflowEllipsis span pushDown" title="{$RECORD->getName()}">{$RECORD->getName()}</span>
+			<span class="recordLabel font-x-x-large textOverflowEllipsis span pushDown">{$RECORD->getName()}</span>
 			<br><span>{$RECORD->getDisplayValue('mediacontactid')}&nbsp;-&nbsp;{$RECORD->getDisplayValue('rsnmediaid')}</span>
 			{if $RECORD->get('rsnthematiques')}
 			&nbsp;<span title="{$RECORD->getDisplayValue('rsnthematiques')}">{$RECORD->getDisplayValue('rsnthematiques')}</span>

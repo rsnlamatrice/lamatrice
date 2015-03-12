@@ -190,21 +190,13 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 					'MBR' => array( 'label' => 'Membre', 'icon' => '' ),
 					'FOYER' => array( 'label' => 'Membre', 'icon' => '' )
 				);
-			case 'rsnnpai':
-				return array(
-					'0' => array( 'label' => 'Ok', 'icon' => 'ui-icon ui-icon-check green' ),
-					'1' => array( 'label' => 'Supposée', 'icon' => 'ui-icon ui-icon-check darkgreen' ),
-					'2' => array( 'label' => 'A confirmer', 'icon' => 'ui-icon ui-icon-close orange' ),
-					'3' => array( 'label' => 'Définitive', 'icon' => 'ui-icon ui-icon-close darkred' ),
-				);
 			case '(all the same)':
 				return array(
 					'0' => array( 'label' => 'si, on peut tout faire', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
 					'1' => array( 'label' => 'ne rien faire', 'icon' => 'ui-icon ui-icon-locked darkred' )
 				);
 			default:
-				//die($fieldname);
-				return array();
+				return parent::getPicklistValuesDetails($fieldname);
 		}
 	}
 	
@@ -225,7 +217,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 					'1' => array( 'label' => 'Ne pas appeler', 'icon' => 'ui-icon ui-icon-locked darkred' )
 				);
 			default:
-				return $this->getPicklistValuesDetails($fieldname);
+				return parent::getListViewPicklistValues($fieldname);
 		}
 	}
 	
