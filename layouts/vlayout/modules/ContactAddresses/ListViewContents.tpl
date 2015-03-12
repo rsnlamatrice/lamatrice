@@ -74,12 +74,14 @@
 		</thead>
 		{foreach item=LISTVIEW_ENTRY from=$LISTVIEW_ENTRIES name=listview}
 			{assign var=UICOLOR value=$LISTVIEW_ENTRY->get('uicolor')}
+			{assign var=IS_MAIN_ADDRESS value=$LISTVIEW_ENTRY->get('setype') eq 'Contacts'}
+			{if $IS_MAIN_ADDRESS}{assign var=UICOLOR value='red'}{/if}
 			<tr class="listViewEntries" data-id='{$LISTVIEW_ENTRY->getId()}'
 				data-recordUrl='{$LISTVIEW_ENTRY->getDetailViewUrl()}'
 				id="{$MODULE}_listView_row_{$smarty.foreach.listview.index+1}"
 			>
 				<td  width="5%" class="{$WIDTHTYPE}"
-					{*if $UICOLOR neq null} style="background-color: {$UICOLOR} !important;"{/if*}>
+					{if $UICOLOR neq null} style="background-color: {$UICOLOR} !important;"{/if}>
 					<input type="checkbox" value="{$LISTVIEW_ENTRY->getId()}" class="listViewEntriesCheckBox"/>
 				</td>
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}

@@ -158,6 +158,10 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 							
 				$fieldRels = self::get_related_contacts_fields();
 				break;
+			
+			  case "Invoice":
+				return $relatedRecordModelsList;
+			
 			  default:
 				die(__FILE__ . ' getEntries : ' . $relatedModuleName . ' inconnu');
 			}

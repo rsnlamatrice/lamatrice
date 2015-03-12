@@ -74,12 +74,13 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$viewer->assign('RECORD_MODEL', $recordModel);
 		
 		$viewer->view('ListViewContents.tpl', $moduleName);
+		
 	}
-
+	
 	function postProcess(Vtiger_Request $request) {
 		$viewer = $this->getViewer ($request);
 		$moduleName = $request->getModule();
-
+			
 		$viewer->view('ListViewPostProcess.tpl', $moduleName);
 		parent::postProcess($request);
 	}
@@ -188,6 +189,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 			if(!$this->listViewCount){
 				$this->listViewCount = $listViewModel->getListViewCount();
 			}
+			
 			$totalCount = $this->listViewCount;
 			$pageLimit = $pagingModel->getPageLimit();
 			$pageCount = ceil((int) $totalCount / (int) $pageLimit);

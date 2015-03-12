@@ -110,6 +110,9 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			  case "Contacts" :
 				$tpl = "RelatedListContacts.tpl";
 				break;
+			  case "ContactAddresses" :
+				$tpl = "RelatedListContactAddresses.tpl";
+				break;
 			  case "Services" :
 				$tpl = "RelatedListServices.tpl";
 				break;

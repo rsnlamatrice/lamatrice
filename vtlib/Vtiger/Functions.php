@@ -368,7 +368,7 @@ class Vtiger_Functions {
 				
 				/* ED140921 */
 				if($result === FALSE){
-					echo("Erreur dans __FILE__\r\nContrôlez le nom des champs dans la table vtiger_entityname.");
+					echo("Erreur dans ".__FILE__."\r\nContrôlez le nom des champs dans la table vtiger_entityname.");
 					print_r($result);
 					die($sql);
 				}
