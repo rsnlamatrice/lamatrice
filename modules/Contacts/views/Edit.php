@@ -12,17 +12,18 @@
 class Contacts_Edit_View extends Vtiger_Edit_View {
 
 	public function process(Vtiger_Request $request) {
+		
 		$moduleName = $request->getModule();
 		$recordId = $request->get('record');
-        $recordModel = $this->record;
-        if(!$recordModel){
-           if (!empty($recordId)) {
-               $recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
-           } else {
-               $recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
-           }
-            $this->record = $recordModel;
-        }
+		$recordModel = $this->record;
+		if(!$recordModel){
+		   if (!empty($recordId)) {
+		       $recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+		   } else {
+		       $recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
+		   }
+		    $this->record = $recordModel;
+		}
 
 		$viewer = $this->getViewer($request);
 		$viewer->assign('IMAGE_DETAILS', $recordModel->getImageDetails());
