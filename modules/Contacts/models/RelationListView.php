@@ -183,6 +183,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				  
 				  $value = $db->query_result($result, $i, strtolower( $fieldRel ));
 				    switch($fieldRelType){
+				    case "D":
 				    case "DATETIME":
 					if($value)
 						$value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
