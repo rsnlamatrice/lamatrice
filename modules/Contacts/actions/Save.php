@@ -15,11 +15,21 @@ class Contacts_Save_Action extends Vtiger_Save_Action {
 		$result = Vtiger_Util_Helper::transformUploadedFiles($_FILES, true);
 		$_FILES = $result['imagename'];
 
-		//To stop saveing the value of salutation as '--None--'
+		//To stop saving the value of salutation as '--None--'
 		$salutationType = $request->get('salutationtype');
 		if ($salutationType === '--None--') {
 			$request->set('salutationtype', '');
 		}
+		
+		//ED150312
+		//duplicate address data to a new ContactAddresses record
+		if($request->get('_archive_address')){
+			$contactModule = Vtiger_Module_Model::getInstance('Contacts');
+			//"old" means "before saved"
+			$contactOldRecord = Vtiger_Record_Model::getInstanceById($request->get('record'), $contactModule);
+			$contactOldRecord->createContactAddressesRecord();
+		}
+		
 		parent::process($request);
 	}
 }

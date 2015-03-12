@@ -293,4 +293,5 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		}
 		echo $response;
 	}
+	
 }

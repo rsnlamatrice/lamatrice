@@ -178,7 +178,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 					thisInstance.registerEventToEditRelatedStatus();
 				}
 				/* ED14122
-				 * ré-enregistre les événements des éléments de la liste (sélection de date, saisie du champ de données)
+				 * r≈Ω-enregistre les ≈Ωv≈Ωnements des ≈Ωl≈Ωments de la liste (s≈Ωlection de date, saisie du champ de donn≈Ωes)
 				 */
 				switch (relatedModuleName ){
 				case "Critere4D":
@@ -230,6 +230,38 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			);
 		});
 
+		/* ED50312
+		 * Contact -> ContactAddresses related list -> Delete (see layouts\vlayout\modules\Contacts\RelatedListContactAddresses.tpl)
+		*/
+		detailContentsHolder.on('click', 'a.relatedRecordDelete', function(e){
+			e.stopImmediatePropagation();
+			
+			var element = jQuery(e.currentTarget);
+			var row = element.closest('tr');
+			var relatedRecordid = row.data('id');
+			var relatedModuleName = thisInstance.getRelatedModuleName();
+			var deleteRecordActionUrl = "index.php?module="+relatedModuleName+"&action=Delete&record="+relatedRecordid;
+			
+			var message = app.vtranslate('LBL_DELETE_CONFIRMATION');
+			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(function(data) {
+					AppConnector.request(deleteRecordActionUrl+'&ajaxDelete=true').then(
+					function(data){
+						if(data.success == true){
+							var selectedTabElement = thisInstance.getSelectedTab();
+							var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+							relatedController.deleteRelation([relatedRecordid]).then(function(response){
+								relatedController.loadRelatedList();
+							});
+						}else{
+							Vtiger_Helper_Js.showPnotify(data.error.message);
+						}
+					});
+				},
+				function(error, err){
+				}
+			);
+		});
+
 		// ED141008
 		var relatedModuleName = this.getRelatedModuleName(detailContentsHolder);
 		switch (relatedModuleName ){
@@ -258,7 +290,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			
 			var selectedTabElement = this.getSelectedTab();
 			var relatedController = new Contacts_RelatedList_Js(this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
-			//TODO relatedController n'est pas initialisÈ comme d'autres objects, il manque les propriÈtÈs, en particulier relatedModulename et parentRecordId
+			//TODO relatedController n'est pas initialis√© comme d'autres objects, il manque les propri√©t√©s, en particulier relatedModulename et parentRecordId
 			if(!relatedController.relatedModulename)
 				Vtiger_RelatedList_Js.prototype.init.call(relatedController, this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			relatedController.registerEventsCritere4D();
@@ -286,7 +318,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			
 			var selectedTabElement = this.getSelectedTab();
 			var relatedController = new Contacts_RelatedList_Js(this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
-			//TODO relatedController n'est pas initialisÈ comme d'autres objects, il manque les propriÈtÈs, en particulier relatedModulename et parentRecordId
+			//TODO relatedController n'est pas initialis√© comme d'autres objects, il manque les propri√©t√©s, en particulier relatedModulename et parentRecordId
 			if(!relatedController.relatedModulename)
 				Vtiger_RelatedList_Js.prototype.init.call(relatedController, this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			relatedController.registerEventsContacts();
@@ -396,8 +428,8 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 	
 	
 	
-	/* Enregistre les événements
-	 * en particulier le click sur un onglet de table liée
+	/* Enregistre les ≈Ωv≈Ωnements
+	 * en particulier le click sur un onglet de table li≈Ωe
 	 */
 	registerEventForRelatedTabClick : function(){
 		var thisInstance = this;
