@@ -112,15 +112,14 @@
 	    </thead>
             {/if}
 	    {if $DATE_FORMAT eq ''}{assign var=DATE_FORMAT value='dd-mm-yyyy'}{/if}
-            {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
+           {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
                 <tr class="listViewEntries" data-id='{$RELATED_RECORD->getId()}' data-recordUrl='{$RELATED_RECORD->getDetailViewUrl()}'>
                     {foreach item=HEADER_FIELD from=$RELATED_HEADERS}
                         {assign var=RELATED_HEADERNAME value=$HEADER_FIELD->get('name')}
 			{assign var=IS_GROUP_FIELD value=$RELATED_HEADERNAME == "isgroup"}
 			{assign var=IS_BUTTONSET value=$HEADER_FIELD->get('uitype') eq '402'}
 			    <td class="{$WIDTHTYPE}" data-field-type="{$HEADER_FIELD->getFieldDataType()}" nowrap>
-                            
-			    {if $HEADER_FIELD->isNameField() eq true or $HEADER_FIELD->get('uitype') eq '4'}
+                            {if $HEADER_FIELD->isNameField() eq true or $HEADER_FIELD->get('uitype') eq '4'}
                                 <a href="{$RELATED_RECORD->getDetailViewUrl()}">{$RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME)}</a>
                             {elseif $RELATED_HEADERNAME eq 'access_count'}
                                 {$RELATED_RECORD->getAccessCountValue($PARENT_RECORD->getId())}
@@ -138,15 +137,15 @@
 				    {assign var=DATE_IDS value=$RELATED_RECORD->get($FIELD_NAME)}
 				    {foreach item=DATE_ID from=$DATE_IDS}
 					<div class="row-fluid date">
-						{if $WIDGET_INSIDE && $DATE_ID}
+						{if $WIDGET_INSIDE && is_object($DATE_ID)}
 						    {$DATE_ID->format('d/m/Y')}
 						{else}
 						<input id="{$MODULE}_editView_fieldName_{$FIELD_NAME}_{$I}" type="text"
 						    class="span5 dateField"
 						    name="{$HEADER_FIELD->getFieldName()}" data-date-format="{$DATE_FORMAT}" 
-						    {if $DATE_ID}
-						    value="{$DATE_ID->format('d/m/Y')}"
-						    dateapplication="{$DATE_ID->format('Y-m-d H:i:s')}"
+						    {if is_object($DATE_ID)}
+						      value="{$DATE_ID->format('d/m/Y')}"
+						      dateapplication="{$DATE_ID->format('Y-m-d H:i:s')}"
 						    {/if}
 						    data-validation-engine="validate[required,funcCall[Vtiger_Base_Validator_Js.invokeValidation]]" 
 						/>
