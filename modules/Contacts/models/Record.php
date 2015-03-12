@@ -375,4 +375,42 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		}		
 		return $has_changed;
 	}
+	
+	/*ED150312
+	 * Copy current address to a new ContactAdresses record
+	 *
+	 * used by Contacts_Save_Action::process
+	 */
+	public function createContactAddressesRecord(){
+		
+		$addressModule = Vtiger_Module_Model::getInstance('ContactAddresses');
+		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactAddresses');
+		$addressRecord->set('mode', 'create');
+		$addressRecord->set('addresstype', 'LBL_OLD_ADDRESS');
+		$mapping = array(
+			'id' => 'contactid',
+			'modifiedtime' => 'createdtime',
+			'rsnnpai' => 'rsnnpai',
+			'rsnnpaicomment' => 'rsnnpaicomment',
+			'mailingstreet' => 'mailingstreet',
+			'mailingstreet2' =>'mailingstreet2',
+			'mailingstreet3' => 'mailingstreet3',
+			'mailingpobox' => 'mailingpobox',
+			'mailingcity' => 'mailingcity',
+			'mailingstate' => 'mailingstate',
+			'mailingzip' => 'mailingzip',
+			'mailingcountry' => 'mailingcountry'
+		);
+		//echo '<pre>';
+		foreach($mapping as $sourceField => $destField){
+			$addressRecord->set($destField, $this->get($sourceField));
+			//var_dump($sourceField, $destField, $contactOldRecord->get($sourceField), $addressRecord->get($destField));
+		}
+		//echo '</pre>';
+		//die();
+		$addressRecord->save();
+		$addressRecord->set('mode', '');
+		
+		return $addressRecord;
+	}
 }

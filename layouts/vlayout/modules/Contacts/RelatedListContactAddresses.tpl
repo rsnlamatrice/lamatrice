@@ -216,7 +216,7 @@
 					     <a href='{$VIEW_URL}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>
 					{/if}
 					{if $IS_DELETABLE && !$IS_MAIN_ADDRESS}
-					    <a class="relationDelete"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
+					    <a class="relatedRecordDelete"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
 					{/if}
 				    </span>
 				</div>

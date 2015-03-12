@@ -39,6 +39,19 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 									'othercountry' : 'mailingcountry'
 								},
 	
+	//ED150312
+	//Address field mapping with contactAdresses
+	addressFieldsMappingInContactAddresses : {
+									'mailingstreet' : 'street',
+									'mailingstreet2' : 'street2',
+									'mailingstreet3' : 'street3',
+									'mailingpobox' : 'pobox',
+									'mailingcity' : 'city',
+									'mailingstate' : 'state',
+									'mailingzip' : 'zip',
+									'mailingcountry' : 'country'
+								},
+	
 	
 	/**
 	 * Function which will register event for Reference Fields Selection
@@ -181,6 +194,27 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 			thisInstance.copyAddress(swapMode, container);
 		})
 	},
+	
+	
+	/** ED150312
+	 * Function to register event on address changing between two fileds
+	 */
+	registerEventOnAddressChanging : function(container){
+		var thisInstance = this;
+		jQuery('table.blockContainer.current-address :input').on('change',function(e){
+			var element = jQuery(e.currentTarget);
+			var $chkArchive = element.parents('table.blockContainer').find(':input[name="_archive_address"]');
+			if($chkArchive.length == 0){
+				$chkArchive = $('<input type="checkbox" checked="checked" name="_archive_address"/>')
+					.appendTo(
+						$('<label>archiver l\'adresse avant modification&nbsp;</label>')
+							.css('float', 'right')
+							.appendTo(element.parents('table.blockContainer').find('th.blockHeader'))
+					)
+				;
+			}
+		});
+	},
 
     /**
 	 * Function to check for Portal User
@@ -225,5 +259,7 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		this.registerReferenceSelectionEvent(container);
 		this.registerEventForCopyingAddress(container);
 		this.registerRecordPreSaveEvent(container);
+		//ED150312
+		this.registerEventOnAddressChanging(container);
 	}
 })
