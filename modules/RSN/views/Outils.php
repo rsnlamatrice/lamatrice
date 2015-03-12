@@ -73,10 +73,27 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	}	
 	
 	private function process_ImportCogilog_Factures($request, $sub, $viewer){
-		$this->process_DataRowsTable($request, $sub, $viewer, 'gfactu00002');
+		$query = 'SELECT cl.code AS CodeClient, cl.nom2 AS NomClient, f.*
+FROM gfactu00002 f
+JOIN gclien00002 cl
+ON f.id_gclien = cl.id
+WHERE annee = 2015
+';
+		$this->process_DataRowsTable($request, $sub, $viewer, $query);
 	}
 		
 	private function process_DataRowsTable($request, $sub, $viewer, $table_name = FALSE){
+		$rows = $this->getDataRows($table_name);
+		if(!is_array($rows)){
+			$viewer->assign('HTMLDATA', $rows);
+			return;
+		}
+			
+		//$viewer->assign('HTMLDATA', print_r($rows, true));
+		$viewer->assign('DATAROWS', $rows);
+	}
+		
+	private function getDataRows($table_name = FALSE){
 		if(!$table_name)
 			$table_name = $request->get('tablename');
 			
@@ -93,9 +110,8 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		// Exécution de la requête SQL
 		$result = pg_query($query);
 		if(!$result){
-			$viewer->assign('HTMLDATA', '<code>Échec de la requête : ' . pg_last_error() .'</code>'
-					. '<br>'.$query);
-			return;
+			return '<code>Échec de la requête : ' . pg_last_error() .'</code>'
+					. '<br>'.$query;
 		}
 		
 		$rows = array();
@@ -110,8 +126,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		// Ferme la connexion
 		pg_close($dbconn);
 		
-		//$viewer->assign('HTMLDATA', print_r($rows, true));
-		$viewer->assign('DATAROWS', $rows);
+		return $rows;
 	}
 	
 	private function get_db_connect(){

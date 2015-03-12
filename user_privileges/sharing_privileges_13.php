@@ -178,4 +178,8 @@ $RSNPanelsVariables_share_read_permission=array('ROLE'=>array(),'GROUP'=>array()
 
 $RSNPanelsVariables_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$ContactAddresses_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$ContactAddresses_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 ?>
