@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_contactaddresses</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_contactaddresses` (
+  `contactaddressesid` int(11) NOT NULL DEFAULT '0',
+    `addresstype` VARCHAR(128) DEFAULT NULL,
+    `contactid` INT(11) DEFAULT NULL,
+    `comments` VARCHAR(512) DEFAULT NULL,
+    PRIMARY KEY (`contactaddressesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_contactaddressescf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_contactaddressescf` (
+  `contactaddressesid` int(11) NOT NULL,
+  PRIMARY KEY (`contactaddressesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
