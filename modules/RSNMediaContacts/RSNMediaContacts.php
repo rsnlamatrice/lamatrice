@@ -269,6 +269,8 @@ $db->setDebug(true);*/
 		return $return_value;
 	}
 	
+	
+	
 	function get_attachments($id, $cur_tab_id, $rel_tab_id, $actions = false) {
 		global $currentModule, $app_strings, $singlepane_view;
 		$this_module = $currentModule;

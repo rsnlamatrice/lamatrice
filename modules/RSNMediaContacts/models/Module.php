@@ -8,7 +8,7 @@
  * All Rights Reserved.
  * ************************************************************************************/
 
-class RSNMedias_Module_Model extends Vtiger_Module_Model {
+class RSNMediaContacts_Module_Model extends Vtiger_Module_Model {
 	
 
 	/**
@@ -19,26 +19,23 @@ class RSNMedias_Module_Model extends Vtiger_Module_Model {
 	 * @return <String>
 	 */
 	public function getRelationQuery($recordId, $functionName, $relatedModule) {
-		if ($functionName === 'get_rsnmediacontacts') {
+		if ($functionName === 'get_rsnmedias') {
 			//$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
-			$query = "SELECT vtiger_crmentity.crmid, vtiger_rsnmediacontacts.nom
-			, vtiger_rsnmediacontacts.rsntypescontactmedia
-			, vtiger_rsnmediacontacts.rsnthematiques
-			, vtiger_rsnmediacontacts.rsnmediaid
+			$query = "SELECT vtiger_crmentity.crmid
+			, vtiger_rsnmedias.*
 			, vtiger_crmentity.createdtime
-			FROM vtiger_rsnmediacontacts
+			FROM vtiger_rsnmedias
 			INNER JOIN vtiger_crmentity
-				on vtiger_crmentity.crmid = vtiger_rsnmediacontacts.rsnmediacontactsid
-			INNER JOIN vtiger_rsnmediacontactscf
-				ON vtiger_rsnmediacontacts.rsnmediacontactsid = vtiger_rsnmediacontactscf.rsnmediacontactsid
+				on vtiger_crmentity.crmid = vtiger_rsnmedias.rsnmediasid
+			INNER JOIN vtiger_rsnmediascf
+				ON vtiger_rsnmedias.rsnmediasid = vtiger_rsnmediascf.rsnmediasid
 			LEFT JOIN vtiger_groups
 				ON vtiger_groups.groupid=vtiger_crmentity.smownerid
 			LEFT JOIN vtiger_users on vtiger_users.id = vtiger_crmentity.smownerid
-			WHERE (vtiger_rsnmediacontacts.rsnmediaid=" . $recordId . "
-				OR vtiger_crmentity.crmid IN (
-					SELECT vtiger_rsnmediarelations.mediacontactid
-					FROM vtiger_rsnmediarelations
-					WHERE vtiger_rsnmediarelations.rsnmediaid=" . $recordId . "
+			WHERE (vtiger_crmentity.crmid IN (
+					SELECT vtiger_rsnmediacontacts.rsnmediaid
+					FROM vtiger_rsnmediacontacts
+					WHERE vtiger_rsnmediacontacts.rsnmediacontactsid=" . $recordId . "
 				)
 				OR vtiger_crmentity.crmid IN (
 					SELECT vtiger_crmentityrel.relcrmid
