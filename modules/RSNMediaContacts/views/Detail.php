@@ -33,9 +33,20 @@ class RSNMediaContacts_Detail_View extends Vtiger_Detail_View {
 		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName);
 		
-		$relationListView->set('orderby', 'daterelation');
-		$relationListView->set('sortorder', 'DESC');
-		
+		switch($relatedModuleName){
+		case 'RSNMediaRelations':
+			$relationListView->set('orderby', 'daterelation');
+			$relationListView->set('sortorder', 'DESC');
+			break;
+		case 'RSNMedias':
+			$relationListView->set('orderby', 'nom');
+			$relationListView->set('sortorder', 'ASC');
+			break;
+		default:
+			$relationListView->set('orderby', 'createdtime');
+			$relationListView->set('sortorder', 'ASC');
+			break;
+		}
 		$models = $relationListView->getEntries($pagingModel);
 		$header = $relationListView->getHeaders();
 

@@ -414,4 +414,34 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		}
 		return $addressRecord;
 	}
+	
+	/*ED150318
+	 * Copy current email address to a new ContactEmails record
+	 *
+	 * used by Contacts_Save_Action::process
+	 */
+	public function createContactEmailsRecord($save = true){
+		
+		$addressModule = Vtiger_Module_Model::getInstance('ContactEmails');
+		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactEmails');
+		$addressRecord->set('mode', 'create');
+		$mapping = array(
+			'id' => 'contactid',
+			'email' => 'email',
+			'emailoptout' => 'emailoptout',
+			'modifiedtime' => 'createdtime',
+		);
+		//echo '<pre>';
+		foreach($mapping as $sourceField => $destField){
+			$addressRecord->set($destField, $this->get($sourceField));
+			//var_dump($sourceField, $destField, $addressRecord->get($destField));
+		}
+		//echo '</pre>';
+		//die();
+		if($save){
+			$addressRecord->save();
+			$addressRecord->set('mode', '');
+		}
+		return $addressRecord;
+	}
 }

@@ -13,7 +13,8 @@
 <div class="relatedContainer">
     <input type="hidden" name="relatedModuleName" class="relatedModuleName" value="{$RELATED_MODULE}" />
 </div>
-	{assign var=PICKLIST_VALUES value=$RELATED_RECORD_MODEL->getListViewPicklistValues('satisfaction')}
+	{assign var=PICKLIST_VALUES_SATISFACTION value=$RELATED_RECORD_MODEL->getListViewPicklistValues('satisfaction')}
+	{assign var=PICKLIST_VALUES_INITIATEUR value=$RELATED_RECORD_MODEL->getListViewPicklistValues('initiateur')}
 	
 	{foreach item=RELATED_RECORD from=$RELATED_RECORDS}
 		<div class="contactsContainer">
@@ -32,16 +33,49 @@
 							</a>
 						</div>
 						<div class="span3 textOverflowEllipsis">
-							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('lastname')}">
-								{$RELATED_RECORD->getDisplayValue('byuserid')}
+							{*$RELATED_RECORD->getDisplayValue('initiateur')*}
+							{assign var=FIELD_VALUE value=$RELATED_RECORD->get('initiateur')}
+							{if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
+							{if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=0}{/if}
+							{if $PICKLIST_VALUES_INITIATEUR && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES_INITIATEUR)}
+								{assign var=PICKLIST_ITEM value=$PICKLIST_VALUES_INITIATEUR[$FIELD_VALUE]}
+							{else}
+								{assign var=PICKLIST_ITEM value=$FIELD_VALUE}
+							{/if}
+							{if is_array($PICKLIST_ITEM)}
+								{assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
+								{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
+								
+							{else}
+								{assign var=PICKLIST_ICON value=''}
+								{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
+							{/if}
+							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}"
+							   title="{$RELATED_RECORD->getDisplayValue('byuserid')} - initiateur : {$PICKLIST_LABEL}">
+								{if PICKLIST_ICON}
+									{if $FIELD_VALUE eq 'WE'}
+									    {$RELATED_RECORD->getDisplayValue('byuserid')}
+									    <span class="{$PICKLIST_ICON}"></span>
+									{elseif $FIELD_VALUE eq 'CONT'}
+									    {$RELATED_RECORD->getDisplayValue('byuserid')}
+									    <span class="{$PICKLIST_ICON}"></span>{$PICKLIST_LABEL}
+									{else}
+									    <span class="{$PICKLIST_ICON}"></span>
+									    {$RELATED_RECORD->getDisplayValue('byuserid')}
+									{/if}
+									
+								{else}
+								    {$RELATED_RECORD->getDisplayValue('byuserid')}
+								{/if}
+								
 							</a>
 						</div>
 						<div class="span1">
 								{assign var=FIELD_VALUE value=$RELATED_RECORD->get('satisfaction')}
 								{if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
 								{if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=0}{/if}
-								{if $PICKLIST_VALUES && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES)}
-									{assign var=PICKLIST_ITEM value=$PICKLIST_VALUES[$FIELD_VALUE]}
+								{if $PICKLIST_VALUES_SATISFACTION && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES_SATISFACTION)}
+									{assign var=PICKLIST_ITEM value=$PICKLIST_VALUES_SATISFACTION[$FIELD_VALUE]}
 								{else}
 									{assign var=PICKLIST_ITEM value=$FIELD_VALUE}
 								{/if}

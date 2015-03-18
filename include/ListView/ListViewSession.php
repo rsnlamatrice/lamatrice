@@ -138,11 +138,17 @@ class ListViewSession {
 			}
 
 			$resultAllCRMIDlist_query=$adb->pquery($list_query,array());
+			
+			/*ED150318*/
+			if(!$resultAllCRMIDlist_query){
+				echo( "<pre>$list_query</pre>");
+				throw new Exception('Erreur dans la requ&ecirc;te');
+			}
+			
 			$navigationRecordList = array();
 			while($forAllCRMID = $adb->fetch_array($resultAllCRMIDlist_query)) {
 				$navigationRecordList[] = $forAllCRMID[$instance->table_index];
 			}
-
 			$pageCount = 0;
 			$current = $start;
 			if($start ==1){

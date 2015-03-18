@@ -15,7 +15,6 @@ require_once 'modules/Emails/mail.php';
 require_once 'modules/Vtiger/helpers/ShortURL.php';
 global $adb;
 $adb = PearDatabase::getInstance();
-
 if (isset($_REQUEST['user_name']) && isset($_REQUEST['emailId'])) {
     $username = vtlib_purify($_REQUEST['user_name']);
     $result = $adb->pquery('select email1 from vtiger_users where user_name= ? ', array($username));

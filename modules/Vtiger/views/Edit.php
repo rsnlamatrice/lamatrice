@@ -51,7 +51,7 @@ Class Vtiger_Edit_View extends Vtiger_Index_View {
 	        $viewer->assign('RECORD_ID', $record);
 	        $viewer->assign('MODE', 'edit');
             } else {
-		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
+		$recordModel = $this->record ? $this->record : Vtiger_Record_Model::getCleanInstance($moduleName);
                 $viewer->assign('MODE', '');
             }
             if(!$this->record){

@@ -571,9 +571,9 @@ class ListViewController {
 					if($value !== null){
 						if(!isset($moduleModel))
 							$moduleModel = Vtiger_Module_Model::getInstance($module);
-						$values = $moduleModel->getListViewPicklistValues($fieldName);
+						$values = $moduleModel->getPicklistValuesDetails($fieldName);
 						if(is_array($values) && array_key_exists($value, $values)){
-							$value = '<span class="' . $values[$value]['icon'] . '">' . $values[$value]['label'] . '</span>';
+							$value = '<span class="' . $values[$value]['icon'] . '" title="'.$values[$value]['label'].'" data-value="'.$value.'">' . $values[$value]['label'] . '</span>';
 						}
 					}
 				} else {

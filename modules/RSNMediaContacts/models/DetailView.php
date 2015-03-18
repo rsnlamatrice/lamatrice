@@ -15,13 +15,26 @@ class RSNMediaContacts_DetailView_Model extends Vtiger_DetailView_Model {
 	 * @return <Array> - List of widgets , where each widget is an Vtiger_Link_Model
 	 *
 	 * Ajout des blocks Widgets
-	 * La table _Links ne semble pas tre utilisŽe pour initialiser le tableau
-	 * nŽcessite l'existence des fichiers Vtiger/%RelatedModule%SummaryWidgetContents.tpl (tout attachŽ)
+	 * La table _Links ne semble pas Âtre utilisÂŽe pour initialiser le tableau
+	 * nÂŽcessite l'existence des fichiers Vtiger/%RelatedModule%SummaryWidgetContents.tpl (tout attachÂŽ)
 	 */
 	public function getWidgets() {
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$widgetLinks = parent::getWidgets();
 		$widgets = array();
+
+		$relatedInstance = Vtiger_Module_Model::getInstance('RSNMedias');
+		$widgets[] = array(
+				'linktype' => 'DETAILVIEWWIDGET',
+				'linklabel' => 'MÃ©dias liÃ©s',
+				'linkName'	=> $relatedInstance->getName(),
+				'linkField'	=> 'mediacontactid', /*ED141126*/
+				'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+						'&relatedModule='.$relatedInstance->getName().'&mode=showRelatedRecords&page=1&limit=15',
+				'action'	=>	array('Select'),
+				'actionlabel'	=>	array('SÃ©lectionner'),
+				'actionURL' =>	$relatedInstance->getListViewUrl()
+		);
 
 		$relatedInstance = Vtiger_Module_Model::getInstance('RSNMediaRelations');
 		$widgets[] = array(
@@ -30,7 +43,7 @@ class RSNMediaContacts_DetailView_Model extends Vtiger_DetailView_Model {
 				'linkName'	=> $relatedInstance->getName(),
 				'linkField'	=> 'mediacontactid', /*ED141126*/
 				'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
-						'&relatedModule=RSNMediaRelations&mode=showRelatedRecords&page=1&limit=15',
+						'&relatedModule='.$relatedInstance->getName().'&mode=showRelatedRecords&page=1&limit=15',
 				'action'	=>	array('Add'),
 				'actionlabel'	=>	array('Nouvelle relation'),
 				'actionURL' =>	$relatedInstance->getListViewUrl()

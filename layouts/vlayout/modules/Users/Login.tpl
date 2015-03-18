@@ -164,13 +164,13 @@
 												<div class="control-group">
 													<label class="control-label" for="username"><b>Utilisateur</b></label>
 													<div class="controls">
-														<input type="text" id="username" name="username" placeholder="Utilisateur">
+														<input type="text" id="username" name="user_name" placeholder="Utilisateur">
 													</div>
 												</div>
 												<div class="control-group">
 													<label class="control-label" for="email"><b>Email</b></label>
 													<div class="controls">
-														<input type="text" id="email" name="email"  placeholder="Email">
+														<input type="text" id="email" name="emailId"  placeholder="Email">
 													</div>
 												</div>
 												<div class="control-group signin-button">

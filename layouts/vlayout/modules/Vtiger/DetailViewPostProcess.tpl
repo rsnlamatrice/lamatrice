@@ -28,6 +28,7 @@
 							data-module="{preg_replace('/.*relatedModule=(\w+).*/', '$1', $RELATED_LINK->getUrl())}">
 							{* Assuming most of the related link label would be module name - we perform dual translation *}
 							{assign var="DETAILVIEWRELATEDLINKLBL" value= vtranslate($RELATED_LINK->getLabel(), $RELATED_LINK->getLabel())}
+							
 							<a href="javascript:void(0);" class="textOverflowEllipsis" style="width:auto" title="{vtranslate($RELATED_LINK->getLabel(),{$MODULE_NAME})}"><strong>{$DETAILVIEWRELATEDLINKLBL}</strong></a>
 						</li>
 						{/foreach}
