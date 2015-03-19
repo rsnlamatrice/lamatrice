@@ -25,7 +25,7 @@
 		<span class="row-fluid">
 			<h4 class="recordLabel pushDown" title="{$RECORD->getDisplayValue('salutationtype')}&nbsp;{$RECORD->getName()}"> &nbsp;
 				{if $RECORD->getDisplayValue('salutationtype')}
-                    <span class="salutation">{$RECORD->getDisplayValue('salutationtype')}</span> 
+                    <span class="salutation">{vtranslate($RECORD->getDisplayValue('salutationtype'), $MODULE_NAME)}&nbsp;</span> 
                 {/if}
                 {assign var=COUNTER value=0}
                 {foreach item=NAME_FIELD from=$MODULE_MODEL->getNameFields()}
@@ -39,7 +39,7 @@
 		</span>
 		<span class="row-fluid">
 			<span class="title_label">&nbsp;{$RECORD->getDisplayValue('title')}</span>
-            {if $RECORD->getDisplayValue('account_id') && $RECORD->getDisplayValue('title') }
+			{if $RECORD->getDisplayValue('account_id') && $RECORD->getDisplayValue('title') }
 				&nbsp;{vtranslate('LBL_AT')}&nbsp;
 			{/if}
 			{$RECORD->getDisplayValue('account_id')}
