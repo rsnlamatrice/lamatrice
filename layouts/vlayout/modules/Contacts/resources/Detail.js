@@ -428,8 +428,8 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 	
 	
 	
-	/* Enregistre les ŽvŽnements
-	 * en particulier le click sur un onglet de table liŽe
+	/* Enregistre les événements
+	 * en particulier le click sur un onglet de table liée
 	 */
 	registerEventForRelatedTabClick : function(){
 		var thisInstance = this;

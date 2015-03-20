@@ -1015,7 +1015,7 @@ class Contacts extends CRMEntity {
 
 		$button = '';
 
-		$button .= '<input type="hidden" name="email_directing_module"><input type="hidden" name="record">';
+		$button .= '<input type="hidden" name="record">';
 
 		if($actions) {
 			if(is_string($actions)) $actions = explode(',', strtoupper($actions));

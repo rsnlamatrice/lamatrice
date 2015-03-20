@@ -137,6 +137,57 @@ Vtiger_Detail_Js("Accounts_Detail_Js",{
 			}
 		)
 		return aDeferred.promise();
+	},
+	
+	
+	/**
+	 * Function to register Event for Sorting
+	 */
+	registerEventForRelatedList : function(){
+		var thisInstance = this;
+		var detailContentsHolder = this.getContentHolder();
+	
+		/* ED50312
+		 * Contact -> ContactAddresses related list -> Delete (see layouts\vlayout\modules\Contacts\RelatedListContactAddresses.tpl)
+		*/
+		detailContentsHolder.on('click', 'a.relatedRecordDelete', function(e){
+			e.stopImmediatePropagation();
+			
+			var element = jQuery(e.currentTarget);
+			var row = element.closest('tr');
+			var relatedRecordid = row.data('id');
+			var relatedModuleName = thisInstance.getRelatedModuleName();
+			var deleteRecordActionUrl = "index.php?module="+relatedModuleName+"&action=Delete&record="+relatedRecordid;
+			
+			var message = app.vtranslate('LBL_RELATED_RECORD_DELETE_CONFIRMATION');
+			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(function(data) {
+					AppConnector.request(deleteRecordActionUrl+'&ajaxDelete=true').then(
+					function(data){
+						if(data.success == true){
+							var selectedTabElement = thisInstance.getSelectedTab();
+							var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+							relatedController.deleteRelation([relatedRecordid]).then(function(response){
+								relatedController.loadRelatedList();
+							});
+						}else{
+							Vtiger_Helper_Js.showPnotify(data.error.message);
+						}
+					});
+				},
+				function(error, err){
+				}
+			);
+		});
+	}
+	
+	,
+	
+	/**
+	 * Function which will register all the events
+	 */
+	registerEvents : function() {
+		this.registerEventForRelatedList();
+		this._super();
 	}
 
 });

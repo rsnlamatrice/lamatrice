@@ -1753,6 +1753,89 @@ class Accounts extends CRMEntity {
 		}
 		return $entityIds;
 	}
+	
+	
+
+
+	/* ED150315
+	 * Historique des adresses
+	 */
+	function get_contactaddresses($id, $cur_tab_id, $rel_tab_id, $actions=false) {
+		global $log, $singlepane_view,$currentModule,$current_user;
+		$log->debug("Entering get_contactaddresses(".$id.") method ...");
+		$this_module = $currentModule;
+
+		$related_module = vtlib_getModuleNameById($rel_tab_id);
+		require_once("modules/$related_module/$related_module.php");
+		$other = new $related_module();
+		vtlib_setup_modulevars($related_module, $other);
+		$singular_modname = vtlib_toSingular($related_module);
+
+		$parenttab = getParentTab();
+
+		if($singlepane_view == 'true')
+			$returnset = '&return_module='.$this_module.'&return_action=DetailView&return_id='.$id;
+		else
+			$returnset = '&return_module='.$this_module.'&return_action=CallRelatedList&return_id='.$id;
+
+		$button = '';
+
+		$button .= '<input type="hidden" name="record">';
+
+		if($actions) {
+			if(is_string($actions)) $actions = explode(',', strtoupper($actions));
+			if(in_array('SELECT', $actions) && isPermitted($related_module,4, '') == 'yes') {
+				$button .= "<input title='".getTranslatedString('LBL_SELECT')." ". getTranslatedString($related_module). "' class='crmbutton small edit' type='button' onclick=\"return window.open('index.php?module=$related_module&return_module=$currentModule&action=Popup&popuptype=detailview&select=enable&form=EditView&form_submit=false&recordid=$id&parenttab=$parenttab','test','width=640,height=602,resizable=0,scrollbars=0');\" value='". getTranslatedString('LBL_SELECT'). " " . getTranslatedString($related_module) ."'>&nbsp;";
+			}
+			if(in_array('ADD', $actions) && isPermitted($related_module,1, '') == 'yes') {
+				$button .= "<input title='". getTranslatedString('LBL_ADD_NEW')." ". getTranslatedString($singular_modname)."' accessyKey='F' class='crmbutton small create' onclick='fnvshobj(this,\"sendmail_cont\");sendmail(\"$this_module\",$id);' type='button' name='button' value='". getTranslatedString('LBL_ADD_NEW')." ". getTranslatedString($singular_modname)."'></td>";
+			}
+		}
+
+		$userNameSql = getSqlForNameInDisplayFormat(array('first_name'=>
+							'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
+		$query = "
+			SELECT CASE WHEN (vtiger_users.user_name not like '') THEN $userNameSql ELSE vtiger_groups.groupname END   AS user_name,
+					vtiger_contactaddresses.*,
+					vtiger_crmentity.crmid, vtiger_crmentity.smownerid,
+					vtiger_crmentity.modifiedtime,
+					vtiger_crmentity.setype
+					FROM (
+						SELECT vtiger_contactaddresses.contactaddressesid,
+							vtiger_contactaddresses.contactid,
+							vtiger_contactaddresses.addresstype, vtiger_contactaddresses.comments,
+							`rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`,
+							0 AS is_current_address
+						FROM vtiger_contactaddresses
+						JOIN vtiger_contactdetails
+							ON vtiger_contactaddresses.contactid = vtiger_contactdetails.contactid
+						WHERE vtiger_contactdetails.accountid=".$id."
+						UNION "/* add current address from contactaddress */."
+						SELECT vtiger_contactaddress.contactaddressid,
+							vtiger_contactaddress.contactaddressid,
+							'LBL_CURRENT_ADDRESS', NULL,
+							`rsnnpai`, `rsnnpaicomment`, `mailingcity`, `mailingstreet`, `mailingstreet2`, `mailingstreet3`
+							, `mailingcountry`, `mailingstate`, `mailingpobox`, `mailingzip`,
+							1 AS is_current_address
+						FROM vtiger_contactaddress
+						JOIN vtiger_contactdetails
+							ON vtiger_contactaddress.contactaddressid = vtiger_contactdetails.contactid
+						WHERE vtiger_contactdetails.accountid=".$id."
+						ORDER BY is_current_address DESC, contactaddressesid DESC
+					) vtiger_contactaddresses
+					INNER JOIN vtiger_crmentity on vtiger_crmentity.crmid = vtiger_contactaddresses.contactaddressesid
+					LEFT JOIN vtiger_groups on vtiger_groups.groupid=vtiger_crmentity.smownerid
+					LEFT JOIN vtiger_users on vtiger_users.id = vtiger_crmentity.smownerid
+					WHERE vtiger_crmentity.deleted=0
+			";
+		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
+		if($return_value == null) $return_value = Array();
+		$return_value['CUSTOM_BUTTON'] = $button;
+
+		$log->debug("Exiting get_contactaddresses method ...");
+		return $return_value;
+	}
+
 }
 
 ?>
