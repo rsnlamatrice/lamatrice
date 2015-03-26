@@ -376,7 +376,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		// ED141018
 		// ED141129 TODO utiliser $crmentity->uicolor_field
 		if(strpos($query,'vtiger_attachmentsfolder'))
-			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/gi', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
+			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
 		//var_dump($query);
 		return $query;
 	}
