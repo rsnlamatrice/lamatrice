@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnaborevues</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnaborevues` (
+  `rsnaborevuesid` int(11) NOT NULL DEFAULT '0',
+    `isabonne` VARCHAR(5) DEFAULT NULL,
+    `debutabo` DATE DEFAULT NULL,
+    `finabo` DATE DEFAULT NULL,
+    `rsnabotype` VARCHAR(128) DEFAULT NULL,
+    `accountid` INT(11) DEFAULT NULL,
+    `nbexemplaires` INT(11) DEFAULT NULL,
+    PRIMARY KEY (`rsnaborevuesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnaborevuescf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnaborevuescf` (
+  `rsnaborevuesid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnaborevuesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
