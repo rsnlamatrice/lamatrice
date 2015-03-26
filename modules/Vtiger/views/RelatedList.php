@@ -125,6 +125,17 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			}
 			break;
 		
+		case "Accounts" :
+			switch($relatedModuleName){
+			  case "ContactAddresses" :
+				$tpl = "RelatedListContactAddresses.tpl";
+				break;
+			  case "ContactEmails" :
+				$tpl = "RelatedListContactEmails.tpl";
+				break;
+			}
+			break;
+		
 		case "RSNMediaContacts" :
 		case "RSNMedias" :
 			switch($relatedModuleName){
