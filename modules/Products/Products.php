@@ -876,10 +876,12 @@ class Products extends CRMEntity {
 			FROM vtiger_invoice
 			INNER JOIN vtiger_crmentity
 				ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
-			LEFT OUTER JOIN vtiger_account
-				ON vtiger_account.accountid = vtiger_invoice.accountid
+			INNER JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			INNER JOIN vtiger_inventoryproductrel
 				ON vtiger_inventoryproductrel.id = vtiger_invoice.invoiceid
+			LEFT OUTER JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_invoice.accountid
 			LEFT JOIN vtiger_groups
 				ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 			LEFT JOIN vtiger_users
@@ -888,7 +890,8 @@ class Products extends CRMEntity {
 			AND vtiger_inventoryproductrel.productid = ".$id;
 
 		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
-
+		//echo("<pre>".$return_value['query']."</pre>");
+		//echo_callstack();
 		if($return_value == null) $return_value = Array();
 		$return_value['CUSTOM_BUTTON'] = $button;
 

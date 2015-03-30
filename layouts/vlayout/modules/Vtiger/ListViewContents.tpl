@@ -69,6 +69,10 @@
 						<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
 							&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white">{/if}</a>
 					</th>
+					{assign var=IS_BUTTONSET value=$LISTVIEW_HEADER->get('uitype') eq '402'}
+					{if $IS_BUTTONSET}
+					    {assign var=tmp value=$LISTVIEW_HEADER->set('picklist_values',$MODULE_MODEL->getListViewPicklistValues($LISTVIEW_HEADER->getName()))}
+					{/if}
 				{/foreach}
 			</tr>
 		</thead>
@@ -98,6 +102,37 @@
 							{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
 						{/if}
 					{elseif	$UITYPE eq '401'}
+					
+					{* ED15 *}
+					{elseif $IS_BUTTONSET}
+					    {assign var=PICKLIST_VALUES value=$LISTVIEW_HEADER->get('picklist_values')}
+					    {assign var=FIELD_VALUE value=$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+					    {if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
+					    {if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=$LISTVIEW_HEADER->getDefaultFieldValue()}{/if}
+					    {if $PICKLIST_VALUES && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES)}
+						    {assign var=PICKLIST_ITEM value=$PICKLIST_VALUES[$FIELD_VALUE]}
+					    {else}
+						    {assign var=PICKLIST_ITEM value=$FIELD_VALUE}
+					    {/if}
+					    {if is_array($PICKLIST_ITEM)}
+						    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
+						    {if isset($PICKLIST_ITEM['class'])}
+							{assign var=PICKLIST_CLASS value=$PICKLIST_ITEM['class']}
+						    {else}
+							{assign var=PICKLIST_CLASS value=''}
+						    {/if}
+						    {assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
+					    {else}
+						    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
+						    {assign var=PICKLIST_ICON value=false}
+						    {assign var=PICKLIST_CLASS value=false}
+					    {/if}
+					    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
+					    {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>
+					    {else}
+						&nbsp;{$PICKLIST_LABEL}
+					    {/if}</label>
+					    
 					
 					{else} 
 						{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}

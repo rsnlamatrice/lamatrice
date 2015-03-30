@@ -265,8 +265,9 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		case 'get_attachments':
 			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
 			//ED141223 : ajout des champs de la relation
-			$query = preg_replace('/^\s*SELECT\s/', 'SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
+			$query = preg_replace('/(^\s*|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
 			//echo('<pre>APRES '.$query . '</pre>');
+			//echo_callstack();
 			break;
 		default:
 			//echo('<pre>'.__FILE__.' '.$functionName . '</pre>');
@@ -397,5 +398,18 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		$recordModel->synchronizeAddressToOthers();
 		
 		return $return;
+	}
+	
+	
+	/* ED150323
+	 * Provides the ability for Document / Related contacts to show dateapplication data
+	 * see /modules/Vtiger/models/RelationListView.php, function getEntries($pagingModel)
+	*/
+	public function getConfigureRelatedListFields(){
+		$ListFields = parent::getConfigureRelatedListFields();
+		// Documents
+		$ListFields['dateapplication'] = 'dateapplication';
+		$ListFields['data'] = 'data';
+		return $ListFields;
 	}
 }

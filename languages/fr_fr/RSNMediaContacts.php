@@ -16,7 +16,7 @@ $languageStrings = array(
 	'LBL_BLOCK_COMMENTS' => 'Commentaires',
 	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations du système',
 	'LBL_RSNMEDIAID' => 'Média',
-	'LBL_CONTACTID' => 'La Matrice',
+	'LBL_CONTACTID' => 'Contact La Matrice',
 	'LBL_CONTACTEMAIL' => 'Email',
 	'LBL_CONTACTMEDIACOMMENT' => 'Commentaire sur le contact',
 	'LBL_DERNIERCONTACT' => 'Dernier contact',
@@ -42,6 +42,7 @@ $languageStrings = array(
 	'LBL_EMAILS' => 'Emails',
 	'LBL_HELPDESK' => 'Tickets',
 	'LBL_EVENTS' => 'Evènements',
+	'LBL_SATISFACTION' => 'Satisfaction',
 );
 
 ?>

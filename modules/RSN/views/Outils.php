@@ -4,7 +4,7 @@
  * La liste est affichée dans le bandeau vertical de gauche,
  * 	initialisée dans Module.php::getSideBarLinks()
  *************************************************************************************/
-
+require_once('modules/RSN/models/ImportCogilogFactures.php');
 class RSN_Outils_View extends Vtiger_Index_View {
 	
 	public function preProcess(Vtiger_Request $request, $display = true) {
@@ -56,13 +56,13 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		
 		case 'ImportCogilog/Clients':
 			$tablename = 'SELECT * FROM gclien00002 ORDER BY tssaisie DESC';
-			$this->process_DataRowsTable($request, $sub, $viewer, $tablename);
+			$this->process_PG_DataRowsTable($request, $sub, $viewer, $tablename);
 			$request->set('template', 'DataRowsTable');
 			break;
 		
 		case 'DataRowsTable':
 			
-			$this->process_DataRowsTable($request, $sub, $viewer);
+			$this->process_PG_DataRowsTable($request, $sub, $viewer);
 			
 			break;
 		default:
@@ -70,20 +70,21 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			break;
 		}
 
-	}	
+	}
 	
 	private function process_ImportCogilog_Factures($request, $sub, $viewer){
-		$query = 'SELECT cl.code AS CodeClient, cl.nom2 AS NomClient, f.*
-FROM gfactu00002 f
-JOIN gclien00002 cl
-ON f.id_gclien = cl.id
-WHERE annee = 2015
-';
-		$this->process_DataRowsTable($request, $sub, $viewer, $query);
-	}
 		
-	private function process_DataRowsTable($request, $sub, $viewer, $table_name = FALSE){
-		$rows = $this->getDataRows($table_name);
+		$doneRows = RSN_CogilogFacturesRSN_Import::importNexts();
+		
+		//$this->process_PG_DataRowsTable($request, $sub, $viewer, $query);
+		
+		$viewer->assign('DATAROWS', $doneRows);
+	}
+	
+	private function process_PG_DataRowsTable($request, $sub, $viewer, $table_name = FALSE){
+		if(!$table_name)
+			$table_name = $request->get('tablename');
+		$rows = $this->getPGDataRows($table_name);
 		if(!is_array($rows)){
 			$viewer->assign('HTMLDATA', $rows);
 			return;
@@ -93,9 +94,7 @@ WHERE annee = 2015
 		$viewer->assign('DATAROWS', $rows);
 	}
 		
-	private function getDataRows($table_name = FALSE){
-		if(!$table_name)
-			$table_name = $request->get('tablename');
+	private function getPGDataRows($table_name){
 			
 		$dbconn = $this->get_db_connect();
 		

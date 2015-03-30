@@ -288,7 +288,8 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			}
 		}
 		$limitQuery = $query .' LIMIT '.$startIndex.','.($pageLimit+1); /* ED140907 + 1 instead of two db query */
-		//echo $query;
+		//echo "<pre>".__FILE__." : $query</pre>";
+		//echo_callstack();
 		$result = $db->pquery($limitQuery, array());
 		$relatedRecordList = array();
 		
@@ -353,6 +354,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 				$headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
 			}
 		}
+		
 		switch($relatedModuleModel->name){
 		case "Documents":
 			$headerFields = array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
@@ -360,6 +362,17 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			break;
 	
 		default:
+			$parentRecordModule = $this->getParentRecordModel();
+			$parentModule = $parentRecordModule->getModule();
+			switch($parentModule->getName()){
+			case "Documents":
+				$headerFields = array_merge($headerFields, $parentModule->getRelationHeaders());
+				
+				break;
+		
+			default:
+				break;
+			}
 			break;
 		}
 		return $headerFields;
@@ -375,9 +388,10 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		$query = $relationModel->getQuery($recordModel);
 		// ED141018
 		// ED141129 TODO utiliser $crmentity->uicolor_field
-		if(strpos($query,'vtiger_attachmentsfolder'))
-			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/gi', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
-		//var_dump($query);
+		if(strpos($query,'vtiger_attachmentsfolder')){
+			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
+		}
+		
 		return $query;
 	}
 

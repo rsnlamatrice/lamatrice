@@ -141,7 +141,13 @@
                 </tr>
             </thead>
             {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
-		<tr class="listViewEntries" data-id='{$RELATED_RECORD->getId()}' data-recordUrl='{$RELATED_RECORD->getDetailViewUrl()}'>
+		{assign var=IS_MAIN_ADDRESS value=$RELATED_RECORD->get('addresstype') eq 'LBL_CURRENT_ADDRESS'}
+		
+		{assign var=VIEW_URL value=$RELATED_RECORD->getDetailViewUrl()}
+		{if $IS_MAIN_ADDRESS}{assign var=VIEW_URL value=str_replace('ContactAddresses', 'Contacts', $VIEW_URL)}{/if}
+		<tr class="listViewEntries" data-id='{$RELATED_RECORD->getId()}' data-recordUrl='{$VIEW_URL}'
+		    {if $IS_MAIN_ADDRESS} style="background-color: rgb(185, 236, 185);" title="{vtranslate('LBL_CONTACT_CURRENT_ADDRESS', $MODULE)}"{/if}
+		>
                     {foreach item=HEADER_FIELD from=$RELATED_HEADERS}
                         {assign var=RELATED_HEADERNAME value=$HEADER_FIELD->get('name')}
 			{assign var=IS_BUTTONSET value=$HEADER_FIELD->get('uitype') eq '402'}
@@ -184,7 +190,9 @@
 			    {else}
 				&nbsp;{$PICKLIST_LABEL}
 			    {/if}</label>
-			    
+				
+			{elseif empty($UNKNOWN_FIELD_RETURNS_VALUE)}{*ED140907*}
+			    {$RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME)}
 			{else}{*ED140907*}
 			    {$RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME, false, $UNKNOWN_FIELD_RETURNS_VALUE)}
 			{/if}
@@ -193,14 +201,22 @@
 				<div class="pull-right actions">
 				    <span class="actionImages">
                                         {if $IS_EDITABLE && $HAS_ADD_BUTTON}{*ED150207*}
-                                            <a href='{$RELATED_RECORD->getDuplicateRecordUrl()}'><i title="{vtranslate('LBL_DUPLICATE', $MODULE)}" class="icon-plus alignMiddle"></i></a>
+                                            {assign var=VIEW_URL value=$RELATED_RECORD->getDuplicateRecordUrl()}
+					    {if $IS_MAIN_ADDRESS}{assign var=VIEW_URL value=$VIEW_URL|cat:'&source_module=Contacts'}{/if}
+					    {if $IS_MAIN_ADDRESS}{assign var=VIEW_TITLE value='LBL_CREATE_ARCHIVE'}
+					    {else}{assign var=VIEW_TITLE value='LBL_DUPLICATE'}{/if}
+					    <a href='{$VIEW_URL}'><i title="{vtranslate($VIEW_TITLE, $MODULE)}" class="icon-plus alignMiddle"></i></a>
                                         {/if}
-					<a href="{$RELATED_RECORD->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
+					{assign var=VIEW_URL value=$RELATED_RECORD->getFullDetailViewUrl()}
+					{if $IS_MAIN_ADDRESS}{assign var=VIEW_URL value=str_replace('ContactAddresses', 'Contacts', $VIEW_URL)}{/if}
+					<a href="{$VIEW_URL}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
 					{if $IS_EDITABLE}
-					    <a href='{$RELATED_RECORD->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>
+					   {assign var=VIEW_URL value=$RELATED_RECORD->getEditViewUrl()}
+					    {if $IS_MAIN_ADDRESS}{assign var=VIEW_URL value=str_replace('ContactAddresses', 'Contacts', $VIEW_URL)}{/if}
+					     <a href='{$VIEW_URL}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>
 					{/if}
-					{if $IS_DELETABLE}
-					    <a class="relationDelete"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
+					{if $IS_DELETABLE && !$IS_MAIN_ADDRESS}
+					    <a class="relatedRecordDelete"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
 					{/if}
 				    </span>
 				</div>

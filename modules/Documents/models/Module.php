@@ -122,7 +122,6 @@ class Documents_Module_Model extends Vtiger_Module_Model {
      */
 	public function getRelatedListFields() {
 		$relatedListFields = parent::getRelatedListFields();
-		
 		//Adding filestatus, filelocationtype in the related list to be used for file download
 		$relatedListFields['filestatus'] = 'filestatus';
 		$relatedListFields['filelocationtype'] = 'filelocationtype';
@@ -130,36 +129,36 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		return $relatedListFields;
 	}
     
-    public function getSettingLinks() {
-        vimport('~~modules/com_vtiger_workflow/VTWorkflowUtils.php');
+	public function getSettingLinks() {
+		vimport('~~modules/com_vtiger_workflow/VTWorkflowUtils.php');
         
         
 		$layoutEditorImagePath = Vtiger_Theme::getImagePath('LayoutEditor.gif');
 		$settingsLinks = array();
 
 		$settingsLinks[] = array(
-					'linktype' => 'LISTVIEWSETTING',
-					'linklabel' => 'LBL_EDIT_FIELDS',
-						'linkurl' => 'index.php?parent=Settings&module=LayoutEditor&sourceModule='.$this->getName(),
-					'linkicon' => $layoutEditorImagePath
+			'linktype' => 'LISTVIEWSETTING',
+			'linklabel' => 'LBL_EDIT_FIELDS',
+			'linkurl' => 'index.php?parent=Settings&module=LayoutEditor&sourceModule='.$this->getName(),
+			'linkicon' => $layoutEditorImagePath
 		);
 		
 		$settingsLinks[] = array(
-					'linktype' => 'LISTVIEWSETTING',
-					'linklabel' => 'LBL_EDIT_PICKLIST_VALUES',
-				'linkurl' => 'index.php?parent=Settings&module=Picklist&source_module='.$this->getName(),
-				'linkicon' => ''
+			'linktype' => 'LISTVIEWSETTING',
+			'linklabel' => 'LBL_EDIT_PICKLIST_VALUES',
+			'linkurl' => 'index.php?parent=Settings&module=Picklist&source_module='.$this->getName(),
+			'linkicon' => ''
 		);
         
-        if($this->hasSequenceNumberField()) {
-		$settingsLinks[] = array(
+		if($this->hasSequenceNumberField()) {
+			$settingsLinks[] = array(
 				'linktype' => 'LISTVIEWSETTING',
 				'linklabel' => 'LBL_MODULE_SEQUENCE_NUMBERING',
 				'linkurl' => 'index.php?parent=Settings&module=Vtiger&view=CustomRecordNumbering&sourceModule='.$this->getName(),
-					'linkicon' => ''
+				'linkicon' => ''
 			);
 		}
-
+	
 		return $settingsLinks;
     }
     
@@ -177,7 +176,6 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	*/
 	public function getRelationHeaders(){
 		$headerFields = array();
-		
 		//Added to support dateapplication
 		$field = new Vtiger_Field_Model();
 		$field->set('name', 'dateapplication');
@@ -188,6 +186,23 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		
 		$headerFields[$field->get('name')] = $field;
 		return $headerFields;
+	}
+	
+	/**
+	 * Function to get relation query for particular module with function name
+	 * @param <record> $recordId
+	 * @param <String> $functionName
+	 * @param Vtiger_Module_Model $relatedModule
+	 * @return <String>
+	 */
+	public function getRelationQuery($recordId, $functionName, $relatedModule) {
+		$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
+		//ED150323 : ajout des champs de la relation
+		if(strpos($query, 'senotesrel') !== FALSE)
+			$query = preg_replace('/^\s*SELECT\s/', 'SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
+		//echo('<pre>APRES '.$query . '</pre>');
+		
+		return $query;
 	}
 }
 ?>

@@ -249,7 +249,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		}
 
 
-	//var_dump("<br><br><br>333333333333333333 getListViewEntries $listQuery ");
+	//echo("<br><br><br>333333333333333333 getListViewEntries <pre>$listQuery</pre> ");
 	
 		$viewid = ListViewSession::getCurrentView($moduleName);
 		ListViewSession::setSessionQuery($moduleName, $listQuery, $viewid);
@@ -259,9 +259,10 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		$listResult = $db->pquery($listQuery, array());
 		
 		$listViewRecordModels = array();
-		$listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult);// ICI LE PBLM DE CHAMPS QUI DISPARAISSENT
+		// ICI LE PBLM DE CHAMPS QUI DISPARAISSENT RATTRAPPABLE PLUS BAS dans $moduleModel->getRecordFromArray($record, $rawData);
+		$listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult); 
 		$pagingModel->calculatePageRange($listViewEntries);
-
+//var_dump($listViewEntries);
 		if($db->num_rows($listResult) > $pageLimit){
 			array_pop($listViewEntries);
 			$pagingModel->set('nextPageExists', true);
@@ -278,7 +279,6 @@ var_dump($listResult);*/
 			$rawData = $db->query_result_rowdata($listResult, $index++);
 			$record['id'] = $recordId;
 			$listViewRecordModels[$recordId] = $moduleModel->getRecordFromArray($record, $rawData);
-			
 		}
 		return $listViewRecordModels;
 	}

@@ -51,4 +51,40 @@ class RSNMediaContacts_ListView_Model extends Vtiger_ListView_Model {
 		
 		return $massActionLinks;
 	}
+	
+	
+
+	/**
+	 * Function to get the list view header
+	 * @return <Array> - List of Vtiger_Field_Model instances
+	 *
+	 * ED150325 adds 'satisfaction' field
+	 */
+	public function getListViewHeaders() {
+		$headerFieldModels = parent::getListViewHeaders();
+		
+		$relationsModel = Vtiger_Module_Model::getInstance('RSNMediaRelations');
+		//array_unshift( $headerFieldModels, $relationsModel->getField('satisfaction'));
+		array_push( $headerFieldModels, $relationsModel->getField('satisfaction'));
+		
+		return $headerFieldModels;
+	}
+	
+	/**
+	 * Function to get the list view query
+	 * @return <Array> - SQL query
+	 *
+	 * ED150325 adds 'satisfaction' column
+	 */
+	public function getQuery(){
+		$listQuery = parent::getQuery();
+		$listQuery = preg_replace('/^\s*SELECT\s/i'
+					, 'SELECT IFNULL((SELECT ROUND(AVG(vtiger_rsnmediarelations.satisfaction)/50) * 50
+					  FROM vtiger_rsnmediarelations
+					  WHERE vtiger_rsnmediarelations.mediacontactid = vtiger_rsnmediacontacts.rsnmediacontactsid
+					  AND vtiger_rsnmediarelations.daterelation > CURRENT_DATE - 365 * 2
+					), \'-\') AS satisfaction, '
+					, $listQuery);
+		return $listQuery;
+	}
 }

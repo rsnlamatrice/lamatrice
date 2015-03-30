@@ -55,5 +55,19 @@ class RSNMediaContacts_Module_Model extends Vtiger_Module_Model {
 
 		return $query;
 	}
-
+	
+	/**
+	 * Function to get a Vtiger Record Model instance from an array of key-value mapping
+	 * @param <Array> $valueArray
+	 * @return Vtiger_Record_Model or Module Specific Record Model instance
+	 *
+	 * ED150325 adds column 'satisfaction' calculated at 
+	 */
+	public function getRecordFromArray($valueArray, $rawData=false) {
+		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', $this->get('name'));
+		$recordInstance = new $modelClassName();
+		if(isset($rawData['satisfaction']))
+			$valueArray['satisfaction'] = $rawData['satisfaction'];
+		return $recordInstance->setData($valueArray)->setModuleFromInstance($this)->setRawData($rawData);
+	}
 }

@@ -46,6 +46,7 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		}
 
 		$models = $relationListView->getEntries($pagingModel);
+		
 		$links = $relationListView->getLinks();
 		$header = $relationListView->getHeaders();
 		$noOfEntries = count($models);
@@ -133,6 +134,10 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			  case "ContactEmails" :
 				$tpl = "RelatedListContactEmails.tpl";
 				break;
+		
+			 default:
+				$tpl = 'RelatedList.tpl';
+				break;
 			}
 			break;
 		
@@ -152,7 +157,7 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			$tpl = 'RelatedList.tpl';
 			break;
 		}
-			
+		
 		return $viewer->view($tpl, $moduleName, 'true');
 	}
 }
