@@ -19,12 +19,13 @@ class RSNMediaRelations_Record_Model extends Vtiger_Record_Model {
 					'0' => array( 'label' => '', 'icon' => 'icon-rsn-small-smiley-0' ),
 					'-50' => array( 'label' => '', 'icon' => 'icon-rsn-small-smiley--50' ),
 					'-100' => array( 'label' => '', 'icon' => 'icon-rsn-small-smiley--100' ),
+					'(null)' => array( 'label' => '', 'icon' => 'icon-rsn-small-smiley-query' ),
 					
 				);
 			case 'initiateur':
 				return array(
-					'CONT' => array( 'label' => 'Elle/lui', 'icon' => 'ui-icon ui-icon-arrowthick-1-w' ),
-					'WE' => array( 'label' => 'Nous', 'icon' => 'ui-icon ui-icon-arrowthick-1-e' ),
+					'CONT' => array( 'label' => 'ille', 'icon' => 'ui-icon ui-icon-arrowthick-1-w' ),
+					'WE' => array( 'label' => 'nous', 'icon' => 'ui-icon ui-icon-arrowthick-1-e' ),
 					'AR' => array( 'label' => 'A/R', 'icon' => 'ui-icon ui-icon-transferthick-e-w' ),
 					' ' => array( 'label' => '', 'icon' => 'ui-icon ui-icon-help' ),
 					

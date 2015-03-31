@@ -49,6 +49,28 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			array_push($fields, $field);
 			break;
 		
+		case "Campaigns":
+			//$fieldNames = array('dateapplication', 'data');
+			    
+			//Added to support dateapplication
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'dateapplication');
+			$field->set('column', 'vtiger_campaigncontrel:dateapplication');
+			$field->set('label', 'Date d\'application');
+			/*ED140906 tests*/
+			$field->set('typeofdata', 'D~O');
+			$field->set('uitype', 6);
+			array_push($fields, $field);
+			
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'data');
+			$field->set('column', 'vtiger_campaigncontrel:data');
+			$field->set('label', 'Information');
+			$field->set('typeofdata', 'V~O');
+			$field->set('uitype', 21);
+			array_push($fields, $field);
+			break;
+		
 		case "Critere4D":
 			//$fieldNames = array('dateapplication', 'data');
 			//Added to support data
@@ -108,6 +130,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 		return array(
 			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel'),
 			'Contacts' => array('fieldName' => 'relcontid', 'tableName' => 'vtiger_contactscontrel'),
+			//'Campaigns' => array('fieldName' => 'contactid', 'tableName' => 'vtiger_campaigncontrel'),
 			'Invoice' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_invoice'
 					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
 		);

@@ -79,7 +79,7 @@ class RSNMediaContacts_ListView_Model extends Vtiger_ListView_Model {
 	public function getQuery(){
 		$listQuery = parent::getQuery();
 		$listQuery = preg_replace('/^\s*SELECT\s/i'
-					, 'SELECT IFNULL((SELECT ROUND(AVG(vtiger_rsnmediarelations.satisfaction)/50) * 50
+					, 'SELECT IFNULL((SELECT ROUND(SUM(vtiger_rsnmediarelations.satisfaction)/50) * 50
 					  FROM vtiger_rsnmediarelations
 					  WHERE vtiger_rsnmediarelations.mediacontactid = vtiger_rsnmediacontacts.rsnmediacontactsid
 					  AND vtiger_rsnmediarelations.daterelation > CURRENT_DATE - 365 * 2

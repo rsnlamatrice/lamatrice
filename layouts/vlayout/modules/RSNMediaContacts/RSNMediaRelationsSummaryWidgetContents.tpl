@@ -71,9 +71,9 @@
 							</a>
 						</div>
 						<div class="span1">
-								{assign var=FIELD_VALUE value=$RELATED_RECORD->get('satisfaction')}
-								{if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
-								{if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=0}{/if}
+							{assign var=FIELD_VALUE value=$RELATED_RECORD->get('satisfaction')}
+							{if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
+							{if $FIELD_VALUE neq null}{*assign var=FIELD_VALUE value=0}{/if*}
 								{if $PICKLIST_VALUES_SATISFACTION && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES_SATISFACTION)}
 									{assign var=PICKLIST_ITEM value=$PICKLIST_VALUES_SATISFACTION[$FIELD_VALUE]}
 								{else}
@@ -97,6 +97,7 @@
 								{else}
 								    &nbsp;{$PICKLIST_LABEL}
 								{/if}</label>
+							{/if}
 						</div>
 						
 					</div>

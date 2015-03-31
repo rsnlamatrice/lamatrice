@@ -23,16 +23,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 		switch($relatedModuleModel->name){
 		  case "Critere4D":
 		    
-			$headerFields = array();
-		
-		      $headerFieldNames = $relatedModuleModel->getRelatedListFields();
-
-		      foreach($headerFieldNames as $fieldName) {
-			  $headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
-		      }
-		      
 		      /* Champs issus de critere4dcontrel */
-		      $headerFields = Critere4D_RelationListView_Model::get_related_fields($headerFields);
+		      $headerFields = Critere4D_RelationListView_Model::get_related_fields(parent::getHeaders());
 		      
 		    break;
 		
@@ -62,7 +54,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 		return $headerFields;
 	}
 	
-	/* Retourne les en-tÍtes des colonnes des contacts
+	/* Retourne les en-têtes des colonnes des contacts
 	 * Ajoute les champs de la relation
 	 * ED141012
 	 * */
@@ -92,6 +84,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 	    
 	    return $headerFields;
 	}
+	
 	
 	
 	/**
@@ -130,6 +123,15 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					AND contactid = ?";
 			
 				$fieldRels = Critere4D_RelationListView_Model::get_related_fields();
+				break;
+			  case "Campaigns":
+				$query = "SELECT dateapplication,
+					data AS rel_data, $fieldName
+					FROM $tableName
+					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
+					AND contactid = ?";
+			
+				$fieldRels = Campaigns_RelationListView_Model::get_related_fields();
 				break;
 			  case "Contacts":
 				$query = "SELECT dateapplication,
@@ -176,28 +178,28 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				&& $recordId == $contactId) 
 					$recordId = $db->query_result($result, $i, "contactid");
 				foreach($fieldRels as $fieldRel){
-				  $relatedRecordModel = $relatedRecordModelsList[$recordId];
-				  
-				  $fieldRelType = $fieldRel->get('typeofdata');
-				  $fieldRel = $fieldRel->get('name');
-				  
-				  $value = $db->query_result($result, $i, strtolower( $fieldRel ));
-				    switch($fieldRelType){
-				    case "D":
-				    case "DATETIME":
-					if($value)
-						$value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
-				      break;
-				    default:
-				      $value = preg_replace('/\\r\\n?/', '<br/>', $value);
-				      break;
-				  }
-				  $values = $relatedRecordModel->get($fieldRel);//valeur prÈcÈdemment affectÈe
-				  if($values === null)
-				    $values = array($value);
-				  else
-				    $values[] = $value;
-				  $relatedRecordModel->set($fieldRel, $values);
+					$relatedRecordModel = $relatedRecordModelsList[$recordId];
+					
+					$fieldRelType = $fieldRel->get('typeofdata');
+					$fieldRel = $fieldRel->get('name');
+					
+					$value = $db->query_result($result, $i, strtolower( $fieldRel ));
+					switch($fieldRelType){
+					  case "D":
+					  case "DATETIME":
+					      if($value)
+						      $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
+					    break;
+					  default:
+					    $value = preg_replace('/\\r\\n?/', '<br/>', $value);
+					    break;
+					}
+					$values = $relatedRecordModel->get($fieldRel);//valeur prÈcÈdemment affectÈe
+					if($values === null)
+						$values = array($value);
+					else
+						$values[] = $value;
+					$relatedRecordModel->set($fieldRel, $values);
 				}		
 				$relatedRecordModelsList[$recordId] = $relatedRecordModel;
 			}

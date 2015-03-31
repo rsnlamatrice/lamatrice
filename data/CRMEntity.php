@@ -81,11 +81,11 @@ class CRMEntity {
 		foreach ($this->tab_name as $table_name) {
 /*
 echo "\r\nsaveentity<pre>";
-var_dump($table_name);	
-var_dump($fileid);	
+var_dump($table_name);
+var_dump($fileid);
 echo "</pre>//saveentity\r\n";
 */
-		if ($table_name == "vtiger_crmentity") {
+			if ($table_name == "vtiger_crmentity") {
 				$this->insertIntoCrmEntity($module, $fileid);
 			} else {
 				$this->insertIntoEntityTable($table_name, $module, $fileid);
@@ -433,6 +433,7 @@ echo "</pre>//saveentity\r\n";
 				$this->column_fields[$fieldname] = $fldvalue;
 			}
 			if (isset($this->column_fields[$fieldname])) {
+				
 				if ($uitype == 56) {
 					if ($this->column_fields[$fieldname] == 'on' || $this->column_fields[$fieldname] == 1) {
 						$fldvalue = '1';
@@ -513,17 +514,27 @@ echo "</pre>//saveentity\r\n";
 					$fldvalue = CurrencyField::convertToDBFormat($this->column_fields[$fieldname]);
 				} else {
 					$fldvalue = $this->column_fields[$fieldname];
+				
 				}
-				if ($uitype != 33 && $uitype != 8)
+				if ($uitype != 33 && $uitype != 8){
 					$fldvalue = from_html($fldvalue, ($insertion_mode == 'edit') ? true : false);
+				}
 			}
 			else {
 				$fldvalue = '';
 			}
-			if ($fldvalue == '') {
-				$fldvalue = $this->get_column_value($columname, $fldvalue, $fieldname, $uitype, $datatype);
-			}
-
+			
+			/*ED150331*/
+			if($fldvalue == '(null)')
+				$fldvalue = null;
+			elseif ($fldvalue == '')
+				if ($uitype == 402) {
+					$fldvalue = null;
+				}
+				else {
+					$fldvalue = $this->get_column_value($columname, $fldvalue, $fieldname, $uitype, $datatype);
+				}
+				
 			if ($insertion_mode == 'edit') {
 				if ($table_name != 'vtiger_ticketcomments' && $uitype != 4) {
 					array_push($update, $columname . "=?");

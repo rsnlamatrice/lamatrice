@@ -251,6 +251,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		}
 		
 		$query = $this->getRelationQuery();
+		//echo "<pre>".__FILE__." getRelationQuery : $query</pre>";
 		if ($this->get('whereCondition')) {
 			$query = $this->updateQueryWithWhereCondition($query);
 		}
@@ -361,6 +362,11 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		    	
 			break;
 	
+		case "Campaigns":
+			$headerFields = array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
+		    	
+			break;
+	
 		default:
 			$parentRecordModule = $this->getParentRecordModel();
 			$parentModule = $parentRecordModule->getModule();
@@ -388,10 +394,10 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		$query = $relationModel->getQuery($recordModel);
 		// ED141018
 		// ED141129 TODO utiliser $crmentity->uicolor_field
-		if(strpos($query,'vtiger_attachmentsfolder')){
-			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
-		}
 		
+		if(strpos($query,'vtiger_attachmentsfolder'))
+			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
+		//var_dump(get_class($relationModel), $query);
 		return $query;
 	}
 

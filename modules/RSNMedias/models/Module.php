@@ -21,10 +21,7 @@ class RSNMedias_Module_Model extends Vtiger_Module_Model {
 	public function getRelationQuery($recordId, $functionName, $relatedModule) {
 		if ($functionName === 'get_rsnmediacontacts') {
 			//$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
-			$query = "SELECT vtiger_crmentity.crmid, vtiger_rsnmediacontacts.nom
-			, vtiger_rsnmediacontacts.rsntypescontactmedia
-			, vtiger_rsnmediacontacts.rsnthematiques
-			, vtiger_rsnmediacontacts.rsnmediaid
+			$query = "SELECT vtiger_crmentity.crmid, vtiger_rsnmediacontacts.*
 			, vtiger_crmentity.createdtime
 			FROM vtiger_rsnmediacontacts
 			INNER JOIN vtiger_crmentity

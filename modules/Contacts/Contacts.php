@@ -973,8 +973,10 @@ class Contacts extends CRMEntity {
 							'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 		$query = "SELECT case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name,
 					vtiger_campaign.campaignid, vtiger_campaign.campaignname, vtiger_campaign.campaigntype, vtiger_campaign.campaignstatus,
-					vtiger_campaign.expectedrevenue, vtiger_campaign.closingdate, vtiger_crmentity.crmid, vtiger_crmentity.smownerid,
-					vtiger_crmentity.modifiedtime from vtiger_campaign
+					vtiger_campaign.expectedrevenue, vtiger_campaign.closingdate,
+					vtiger_crmentity.crmid, vtiger_crmentity.smownerid,
+					vtiger_crmentity.modifiedtime
+					FROM vtiger_campaign
 					inner join vtiger_campaigncontrel on vtiger_campaigncontrel.campaignid=vtiger_campaign.campaignid
 					inner join vtiger_crmentity on vtiger_crmentity.crmid = vtiger_campaign.campaignid
 					inner join vtiger_campaignscf ON vtiger_campaignscf.campaignid = vtiger_campaign.campaignid

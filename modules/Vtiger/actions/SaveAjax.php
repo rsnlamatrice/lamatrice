@@ -13,6 +13,7 @@ class Vtiger_SaveAjax_Action extends Vtiger_Save_Action {
 	/*
 	 */
 	public function process(Vtiger_Request $request) {
+		//save
 		$recordModel = $this->saveRecord($request);
 
 		$fieldModelList = $recordModel->getModule()->getFields();
@@ -33,17 +34,37 @@ class Vtiger_SaveAjax_Action extends Vtiger_Save_Action {
 			}
 			else
 				$fieldValue = $displayValue = Vtiger_Util_Helper::toSafeHTML($recordFieldValue);
-			if ($fieldModel->getFieldDataType() !== 'currency' && $fieldModel->getFieldDataType() !== 'datetime' && $fieldModel->getFieldDataType() !== 'date') { 
+			switch ($fieldModel->getFieldDataType()){
+			 case 'currency':
+			 case 'datetime':
+			 case 'date':
+				break;
+			 case 'uicolor':
+				$displayValue = sprintf('<div class="" style="background-color:%s">&nsbp;</div>',
+							$fieldModel->getDisplayValue($fieldValue, $recordModel->getId()));
+				break;
+			 case 'buttonSet':
+				$values = $recordModel->getPicklistValuesDetails($fieldName);
+				$displayValue = isset($values[$fieldValue])
+					? sprintf('<div class="buttonset  ui-buttonset">'.
+						  '<label class="ui-button ui-widget ui-state-default ui-corner-left ui-corner-right ui-state-active" aria-pressed="true" role="button" aria-disabled="false">'.
+						  '<span class="ui-button-text"><span class="%s"></span>&nbsp;%s</span></label></div>',
+						      $values[$fieldValue]['icon'],
+						      $values[$fieldValue]['label']
+					)
+					: $fieldValue;
+				break;
+			 default:
 				/* ED141005
-				 * les types 56, 15, 16 et 33 ont une chance de voir leur valeur d'affichage adaptée par le Record_Model
+				 * les types 56, 15, 16, 33 et 402 ont une chance de voir leur valeur d'affichage adaptée par le Record_Model
 				 */
-				if(in_array( $fieldModel->get('uitype'), array(56,15,16,33)))
+				if(in_array( $fieldModel->get('uitype'), array(56,15,16,33,402))){
 					$displayValue = $recordModel->getDisplayValue($fieldName, $recordModel->getId());
+				}
 				else
-					$displayValue = $fieldModel->getDisplayValue($fieldValue, $recordModel->getId()); 
-				
+					$displayValue = $fieldModel->getDisplayValue($fieldValue, $recordModel->getId());
+				break;
 			}
-			
 			$result[$fieldName] = array('value' => $fieldValue, 'display_value' => $displayValue);
 		}
 

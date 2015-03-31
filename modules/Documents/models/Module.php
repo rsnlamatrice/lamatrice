@@ -188,21 +188,21 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		return $headerFields;
 	}
 	
-	/**
-	 * Function to get relation query for particular module with function name
-	 * @param <record> $recordId
-	 * @param <String> $functionName
-	 * @param Vtiger_Module_Model $relatedModule
-	 * @return <String>
-	 */
-	public function getRelationQuery($recordId, $functionName, $relatedModule) {
-		$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
-		//ED150323 : ajout des champs de la relation
-		if(strpos($query, 'senotesrel') !== FALSE)
-			$query = preg_replace('/^\s*SELECT\s/', 'SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
-		//echo('<pre>APRES '.$query . '</pre>');
-		
-		return $query;
-	}
+	///**
+	// * Function to get relation query for particular module with function name
+	// * @param <record> $recordId
+	// * @param <String> $functionName
+	// * @param Vtiger_Module_Model $relatedModule
+	// * @return <String>
+	// */
+	//public function getRelationQuery($recordId, $functionName, $relatedModule) {
+	//	$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
+	//	//ED150323 : ajout des champs de la relation
+	//	if(strpos($query, 'senotesrel') !== FALSE)
+	//		$query = preg_replace('/^\s*SELECT\s/', 'SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
+	//	//echo('<pre>APRES '.$query . '</pre>');
+	//	
+	//	return $query;
+	//}
 }
 ?>

@@ -24,22 +24,22 @@
 	<span class="span8 margin0px">
 		<span class="row-fluid">
 			<h4 class="recordLabel pushDown" title="{$RECORD->getDisplayValue('salutationtype')}&nbsp;{$RECORD->getName()}"> &nbsp;
-				{if $RECORD->getDisplayValue('salutationtype')}
-                    <span class="salutation">{$RECORD->getDisplayValue('salutationtype')}</span> 
-                {/if}
-                {assign var=COUNTER value=0}
-                {foreach item=NAME_FIELD from=$MODULE_MODEL->getNameFields()}
-                    {assign var=FIELD_MODEL value=$MODULE_MODEL->getField($NAME_FIELD)}
-                    {if $FIELD_MODEL->getPermissions()}
-                        <span class="{$NAME_FIELD}">{$RECORD->get($NAME_FIELD)}</span>
-                    {if $COUNTER eq 0 && ($RECORD->get($NAME_FIELD))}&nbsp;{assign var=COUNTER value=$COUNTER+1}{/if}
-                {/if}
-            {/foreach}
+			{if $RECORD->getDisplayValue('salutationtype')}
+				<span class="salutation">{vtranslate($RECORD->getDisplayValue('salutationtype'), $MODULE_NAME)}&nbsp;</span> 
+			{/if}
+			{assign var=COUNTER value=0}
+			{foreach item=NAME_FIELD from=$MODULE_MODEL->getNameFields()}
+				{assign var=FIELD_MODEL value=$MODULE_MODEL->getField($NAME_FIELD)}
+				{if $FIELD_MODEL->getPermissions()}
+					<span class="{$NAME_FIELD}">{$RECORD->get($NAME_FIELD)}</span>
+					{if $COUNTER eq 0 && ($RECORD->get($NAME_FIELD))}&nbsp;{assign var=COUNTER value=$COUNTER+1}{/if}
+				{/if}
+			{/foreach}
 			</h4>
 		</span>
 		<span class="row-fluid">
 			<span class="title_label">&nbsp;{$RECORD->getDisplayValue('title')}</span>
-            {if $RECORD->getDisplayValue('account_id') && $RECORD->getDisplayValue('title') }
+			{if $RECORD->getDisplayValue('account_id') && $RECORD->getDisplayValue('title') }
 				&nbsp;{vtranslate('LBL_AT')}&nbsp;
 			{/if}
 			{$RECORD->getDisplayValue('account_id')}

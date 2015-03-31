@@ -269,6 +269,13 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			//echo('<pre>APRES '.$query . '</pre>');
 			//echo_callstack();
 			break;
+		case 'get_campaigns':
+			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
+			//ED141223 : ajout des champs de la relation
+			$query = preg_replace('/(^\s*|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_campaigncontrel.dateapplication, vtiger_campaigncontrel.data, ', $query);
+			//echo('<pre>APRES '.$query . '</pre>');
+			//echo_callstack();
+			break;
 		default:
 			//echo('<pre>'.__FILE__.' '.$functionName . '</pre>');
 			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
@@ -364,6 +371,8 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 				$condition = " vtiger_contactdetails.contactid != '$record'";
 			} elseif ($sourceModule === 'Critere4D') { /* ED140907 les contacts peuvent avoir plusieurs fois le même critère */
 				$condition = false; 
+			} elseif ($sourceModule === 'Campaigns') { /* ED150331 les contacts peuvent avoir plusieurs fois la mêmes campagnes */
+				$condition = false; 
 			} else {
 				$condition = " vtiger_contactdetails.contactid NOT IN (SELECT $fieldName FROM $tableName WHERE $relatedFieldName = '$record')";
 			}
@@ -402,7 +411,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	
 	
 	/* ED150323
-	 * Provides the ability for Document / Related contacts to show dateapplication data
+	 * Provides the ability for Document / Related contacts / Campaigns to show dateapplication data
 	 * see /modules/Vtiger/models/RelationListView.php, function getEntries($pagingModel)
 	*/
 	public function getConfigureRelatedListFields(){

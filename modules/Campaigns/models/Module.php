@@ -102,4 +102,34 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 			return $overRideQuery;
 		}
 	}
+	
+	
+	/* ED150323
+	 * Provides the ability for Document / Related contacts / Campaigns to show dateapplication data
+	 * see /modules/Vtiger/models/RelationListView.php, function getEntries($pagingModel)
+	*/
+	public function getConfigureRelatedListFields(){
+		$ListFields = parent::getConfigureRelatedListFields();
+		// Documents
+		$ListFields['dateapplication'] = 'dateapplication';
+		$ListFields['data'] = 'data';
+		return $ListFields;
+	}
+    
+	/* ED141223
+	 * fields de la table vtiger_campaigncontrel
+	*/
+	public function getRelationHeaders(){
+		$headerFields = array();
+		//Added to support dateapplication
+		$field = new Vtiger_Field_Model();
+		$field->set('name', 'dateapplication');
+		$field->set('column', strtolower( 'dateapplication' ));
+		$field->set('label', 'Date d\'application');
+		$field->set('typeofdata', 'DATETIME');
+		$field->set('uitype', 6);
+		
+		$headerFields[$field->get('name')] = $field;
+		return $headerFields;
+	}
 }

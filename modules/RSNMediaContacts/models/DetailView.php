@@ -23,19 +23,6 @@ class RSNMediaContacts_DetailView_Model extends Vtiger_DetailView_Model {
 		$widgetLinks = parent::getWidgets();
 		$widgets = array();
 
-		$relatedInstance = Vtiger_Module_Model::getInstance('RSNMedias');
-		$widgets[] = array(
-				'linktype' => 'DETAILVIEWWIDGET',
-				'linklabel' => 'Médias liés',
-				'linkName'	=> $relatedInstance->getName(),
-				'linkField'	=> 'mediacontactid', /*ED141126*/
-				'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
-						'&relatedModule='.$relatedInstance->getName().'&mode=showRelatedRecords&page=1&limit=15',
-				'action'	=>	array('Select'),
-				'actionlabel'	=>	array('Sélectionner'),
-				'actionURL' =>	$relatedInstance->getListViewUrl()
-		);
-
 		$relatedInstance = Vtiger_Module_Model::getInstance('RSNMediaRelations');
 		$widgets[] = array(
 				'linktype' => 'DETAILVIEWWIDGET',
@@ -46,6 +33,19 @@ class RSNMediaContacts_DetailView_Model extends Vtiger_DetailView_Model {
 						'&relatedModule='.$relatedInstance->getName().'&mode=showRelatedRecords&page=1&limit=15',
 				'action'	=>	array('Add'),
 				'actionlabel'	=>	array('Nouvelle relation'),
+				'actionURL' =>	$relatedInstance->getListViewUrl()
+		);
+
+		$relatedInstance = Vtiger_Module_Model::getInstance('RSNMedias');
+		$widgets[] = array(
+				'linktype' => 'DETAILVIEWWIDGET',
+				'linklabel' => 'Médias liés',
+				'linkName'	=> $relatedInstance->getName(),
+				'linkField'	=> 'mediacontactid', /*ED141126*/
+				'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+						'&relatedModule='.$relatedInstance->getName().'&mode=showRelatedRecords&page=1&limit=15',
+				'action'	=>	array('Select'),
+				'actionlabel'	=>	array('Sélectionner'),
 				'actionURL' =>	$relatedInstance->getListViewUrl()
 		);
 		
