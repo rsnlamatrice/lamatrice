@@ -43,6 +43,11 @@ class RSNMediaContacts_Module_Model extends Vtiger_Module_Model {
 					WHERE vtiger_crmentityrel.crmid=" . $recordId . "
 					OR vtiger_crmentityrel.relcrmid=" . $recordId . "
 				)
+				OR vtiger_crmentity.crmid IN (
+					SELECT vtiger_rsnmediarelations.rsnmediaid
+					FROM vtiger_rsnmediarelations
+					WHERE vtiger_rsnmediarelations.mediacontactid=" . $recordId . "
+				)
 			)
 			AND vtiger_crmentity.deleted=0";
 			//$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
