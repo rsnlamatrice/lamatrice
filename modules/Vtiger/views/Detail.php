@@ -154,16 +154,16 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$selectedTabLabel = $request->get('tab_label');
 
 		if(empty($selectedTabLabel)) {
-            if($currentUserModel->get('default_record_view') === 'Detail') {
-                $selectedTabLabel = vtranslate('SINGLE_'.$moduleName, $moduleName).' '. vtranslate('LBL_DETAILS', $moduleName);
-            } else{
-                if($moduleModel->isSummaryViewSupported()) {
-                    $selectedTabLabel = vtranslate('SINGLE_'.$moduleName, $moduleName).' '. vtranslate('LBL_SUMMARY', $moduleName);
-                } else {
-                    $selectedTabLabel = vtranslate('SINGLE_'.$moduleName, $moduleName).' '. vtranslate('LBL_DETAILS', $moduleName);
-                }
-            } 
-        }
+			if($currentUserModel->get('default_record_view') === 'Detail') {
+			    $selectedTabLabel = vtranslate('SINGLE_'.$moduleName, $moduleName).' '. vtranslate('LBL_DETAILS', $moduleName);
+			} else{
+			    if($moduleModel->isSummaryViewSupported()) {
+				$selectedTabLabel = vtranslate('SINGLE_'.$moduleName, $moduleName).' '. vtranslate('LBL_SUMMARY', $moduleName);
+			    } else {
+				$selectedTabLabel = vtranslate('SINGLE_'.$moduleName, $moduleName).' '. vtranslate('LBL_DETAILS', $moduleName);
+			    }
+			} 
+		}
 
 		$viewer = $this->getViewer($request);
 
@@ -293,10 +293,10 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$recordStrucure = Vtiger_RecordStructure_Model::getInstanceFromRecordModel($recordModel, Vtiger_RecordStructure_Model::RECORD_STRUCTURE_MODE_DETAIL);
 		$structuredValues = $recordStrucure->getStructure();
 
-        $moduleModel = $recordModel->getModule();
+		$moduleModel = $recordModel->getModule();
 
 		$viewer->assign('RECORD_STRUCTURE', $structuredValues);
-        $viewer->assign('BLOCK_LIST', $moduleModel->getBlocks());
+		$viewer->assign('BLOCK_LIST', $moduleModel->getBlocks());
 
 		echo $viewer->view('DetailViewSummaryContents.tpl', $moduleName, true);
 	}

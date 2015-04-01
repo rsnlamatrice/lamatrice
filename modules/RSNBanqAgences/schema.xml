@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnbanqagences</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnbanqagences` (
+  `rsnbanqagencesid` int(11) NOT NULL DEFAULT '0',
+    `codeagence` VARCHAR(16) DEFAULT NULL,
+    `rsnbanquesid` INT(19) DEFAULT NULL,
+    `bic` VARCHAR(128) DEFAULT NULL,
+    `street` VARCHAR(128) DEFAULT NULL,
+    `street2` VARCHAR(128) DEFAULT NULL,
+    `zipcode` VARCHAR(128) DEFAULT NULL,
+    `city` VARCHAR(128) DEFAULT NULL,
+    PRIMARY KEY (`rsnbanqagencesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnbanqagencescf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnbanqagencescf` (
+  `rsnbanqagencesid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnbanqagencesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
