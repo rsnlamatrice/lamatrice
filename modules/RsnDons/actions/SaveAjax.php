@@ -2,7 +2,7 @@
 /*+***********************************************************************************
  * ED141022
  *
- * Attention hŽritage de Save_Action et non SaveAjax_Action
+ * Attention hÅ½ritage de Save_Action et non SaveAjax_Action
  *************************************************************************************/
 
 class RsnDons_SaveAjax_Action extends Invoice_SaveAjax_Action {
@@ -27,11 +27,11 @@ class RsnDons_SaveAjax_Action extends Invoice_SaveAjax_Action {
 			}
 			
 			/* Le montant fournit est TTC */			
-			/* sŽparateur de dŽcimales */			
+			/* separateur de decimales */			
 			if(is_string($request->get('montant')))
 				$request->set('montant', str_replace( ',', '.', $request->get('montant') ));
 			
-			/* get taxe associŽe au service */
+			/* get taxe associee au service */
 			$totalTTC = $request->get('montant');
 			if($totalTTC != 0){
 				$taxes = getTaxDetailsForProduct($request->get('serviceid'));

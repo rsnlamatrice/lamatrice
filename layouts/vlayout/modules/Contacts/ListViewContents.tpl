@@ -87,7 +87,7 @@
 		</thead>
 		{foreach item=LISTVIEW_ENTRY from=$LISTVIEW_ENTRIES name=listview}
 		<tr class="listViewEntries" data-id='{$LISTVIEW_ENTRY->getId()}' data-recordUrl='{$LISTVIEW_ENTRY->getDetailViewUrl()}' id="{$MODULE}_listView_row_{$smarty.foreach.listview.index+1}">
-			{assign var=IS_GROUP value=$LISTVIEW_ENTRY->get('isgroup') eq '1'}{* TODO boolean *}
+			{assign var=IS_GROUP value=($LISTVIEW_ENTRY->get('isgroup') eq '1') || strpos($LISTVIEW_ENTRY->get('isgroup'), 'data-value="1"')}{* TODO boolean *}
 			<td  width="3%" class="{$WIDTHTYPE}">
 				<input type="checkbox" value="{$LISTVIEW_ENTRY->getId()}" class="listViewEntriesCheckBox"/>
 			</td>
@@ -104,8 +104,14 @@
 					{else}
 						{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
 					{/if}
+				{else if $IS_GROUP_FIELD}
+					{if $IS_GROUP}
+						<span class="icon-rsn-small-collectif"></span>
+					{else}
+						<span class="icon-rsn-small-contact"></span>
+					{/if}
 				{else}
-					{$LISTVIEW_ENTRY->getDisplayValue($LISTVIEW_HEADERNAME)}{*TODO optimise si on ne laisse que ->get( *}
+					{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{*TODO optimise si on ne laisse que ->get( *}
 				{/if}
 					
 				{if $LISTVIEW_HEADER@last}
