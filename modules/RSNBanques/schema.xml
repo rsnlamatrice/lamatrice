@@ -5,9 +5,9 @@
 			<name>vtiger_rsnbanques</name>
 			<sql><![CDATA[CREATE TABLE `vtiger_rsnbanques` (
   `rsnbanquesid` int(11) NOT NULL DEFAULT '0',
-    `codebanque` VARCHAR(32) DEFAULT NULL,
+    `codebanque` VARCHAR(128) DEFAULT NULL,
     `name` VARCHAR(128) DEFAULT NULL,
-    `shortname` VARCHAR(32) DEFAULT NULL,
+    `shortname` VARCHAR(128) DEFAULT NULL,
     `disabled` VARCHAR(5) DEFAULT NULL,
     PRIMARY KEY (`rsnbanquesid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>

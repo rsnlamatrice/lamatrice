@@ -35,40 +35,40 @@ class RSNBanques extends Vtiger_CRMEntity {
 	/**
 	 * Mandatory for Listing (Related listview)
 	 */
-	var $list_fields = Array (
+	var $list_fields = array (
 		'LBL_CODEBANQUE' => array('rsnbanques', 'codebanque'),
 		'LBL_NAME' => array('rsnbanques', 'name'),
 		'LBL_SHORTNAME' => array('rsnbanques', 'shortname'),
 
-	);
-	var $list_fields_name = Array (
+);
+	var $list_fields_name = array (
 		'LBL_CODEBANQUE' => 'codebanque',
 		'LBL_NAME' => 'name',
 		'LBL_SHORTNAME' => 'shortname',
 
-	);
+);
 
 	// Make the field link to detail view
 	var $list_link_field = '';
 
 	// For Popup listview and UI type support
-	var $search_fields = Array(
+	var $search_fields = array (
 		'LBL_SHORTNAME' => array('rsnbanques', 'shortname'),
 		'LBL_DISABLED' => array('rsnbanques', 'disabled'),
 		'LBL_NAME' => array('rsnbanques', 'name'),
 		'LBL_CODEBANQUE' => array('rsnbanques', 'codebanque'),
 
-	);
-	var $search_fields_name = Array (
+);
+	var $search_fields_name = array (
 		'LBL_SHORTNAME' => 'shortname',
 		'LBL_DISABLED' => 'disabled',
 		'LBL_NAME' => 'name',
 		'LBL_CODEBANQUE' => 'codebanque',
 
-	);
+);
 
 	// For Popup window record selection
-	var $popup_fields = Array ('');
+	var $popup_fields = array('');
 
 	// For Alphabetical search
 	var $def_basicsearch_col = '';
@@ -78,7 +78,7 @@ class RSNBanques extends Vtiger_CRMEntity {
 
 	// Used when enabling/disabling the mandatory fields for the module.
 	// Refers to vtiger_field.fieldname values.
-	var $mandatory_fields = Array('','assigned_user_id');
+	var $mandatory_fields = array('createdtime', 'modifiedtime', '');
 
 	var $default_order_by = '';
 	var $default_sort_order='ASC';

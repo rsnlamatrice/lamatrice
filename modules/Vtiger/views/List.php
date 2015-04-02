@@ -72,7 +72,6 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		
                 $recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 		$viewer->assign('RECORD_MODEL', $recordModel);
-		
 		$viewer->view('ListViewContents.tpl', $moduleName);
 		
 	}

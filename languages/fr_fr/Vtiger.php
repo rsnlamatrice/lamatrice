@@ -714,6 +714,9 @@ $languageStrings = array(
 	'LBL_BEFORE_RNVP'		=> 'Avant RNVP',
 	'LBL_CREATE_ARCHIVE'		=> 'Archiver',
 	'ContactEmails'		        => 'Adresses emails',
+        
+	'LBL_RSNBANQUES' => 'Banques',
+	'LBL_RSNBANQAGENCES' => 'Agences',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

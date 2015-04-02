@@ -205,7 +205,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		    }
 		}
 		$listQuery = $this->getQuery();
-	//var_dump("<br><br><br><br><br>ICICICI getListViewEntries $listQuery ");
+	//var_dump("<br><br><br><br><br><pre>ICICICI getListViewEntries $listQuery </pre>");
 	
 		$sourceModule = $this->get('src_module');
 		if(!empty($sourceModule)) {
@@ -280,6 +280,7 @@ var_dump($listResult);*/
 			$record['id'] = $recordId;
 			$listViewRecordModels[$recordId] = $moduleModel->getRecordFromArray($record, $rawData);
 		}
+		//var_dump($listViewRecordModels);
 		return $listViewRecordModels;
 	}
 

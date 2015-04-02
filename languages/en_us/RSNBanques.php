@@ -14,9 +14,10 @@ $languageStrings = array(
 	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
 	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations Système',
 	'LBL_CODEBANQUE' => 'Code',
-	'LBL_NAME' => 'Nom',
 	'LBL_DISABLED' => 'Désactivé',
+	'LBL_NAME' => 'Nom',
 	'LBL_SHORTNAME' => 'Abréviation',
+	'LBL_RSNBANQAGENCES' => 'Agences',
 
 );
 
