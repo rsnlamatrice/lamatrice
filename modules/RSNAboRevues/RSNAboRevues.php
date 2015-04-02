@@ -72,7 +72,6 @@ class RSNAboRevues extends Vtiger_CRMEntity {
 		'LBL_FINABO' => 'finabo',
 		'LBL_ISABONNE' => 'isabonne',
 		'LBL_DEBUTABO' => 'debutabo',
-
 	);
 
 	// For Popup window record selection

@@ -91,7 +91,7 @@ echo "</pre>//saveentity\r\n";
 				$this->insertIntoEntityTable($table_name, $module, $fileid);
 			}
 		}
-
+		
 		//Calling the Module specific save code
 		$this->save_module($module);
 
@@ -804,7 +804,6 @@ echo($params);*/
 			$em->triggerEvent("vtiger.entity.aftersave.final", $entityData);
 			//Event triggering code ends
 		}
-
 	}
 
 	function process_list_query($query, $row_offset, $limit = -1, $max_per_page = -1) {

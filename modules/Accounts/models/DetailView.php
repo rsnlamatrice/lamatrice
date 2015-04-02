@@ -190,6 +190,20 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 					'actionlabel'	=> array('Sélectionner'),
 					'actionURL' =>	$documentsInstance->getListViewUrl()
 			);
+			
+			$rsnAboRevuesInstance = Vtiger_Module_Model::getInstance('RSNAboRevues');
+			$relatedField = $this->getModuleName() == 'Contacts' ? 'contact_id' : 'account_id';
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'LBL_RSNABOREVUES',
+					'linkName'	=> $rsnAboRevuesInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule=RSNAboRevues&mode=showRelatedRecords&page=1&limit=15',
+					'action'	=> array('Add'),
+					'actionlabel'	=> array('Créer'),
+					'actionURL' =>	$rsnAboRevuesInstance->getCreateRecordUrl() . '&sourceModule='.$this->getModuleName().'&sourceRecord='.$this->getRecord()->getId()
+						. '&relationOperation=true&' . $relatedField .'='.$this->getRecord()->getId(),
+			);
 		}
 
 		foreach ($widgets as $widgetDetails) {
