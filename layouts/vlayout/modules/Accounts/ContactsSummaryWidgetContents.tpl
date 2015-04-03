@@ -18,7 +18,7 @@
 			<ul class="unstyled">
 				<li>
 					<div class="row-fluid">
-						<div class="span4 textOverflowEllipsis">
+						<div class="span6 textOverflowEllipsis">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('lastname')}">
 								{if $RELATED_RECORD->get('isgroup')}
 								    <span class="icon-rsn-small-collectif"></span>
@@ -28,7 +28,7 @@
 								{$RELATED_RECORD->getName()}
 							</a>
 						</div>
-						<div class="span3 textOverflowEllipsis">
+						<div class="span4 textOverflowEllipsis">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getName()}">
 							    {if ($RELATED_RECORD->get('account_id') eq $ACCOUNT_ID) && ($RELATED_RECORD->get('reference') eq 1)}Référent du compte{/if}
 							</a>

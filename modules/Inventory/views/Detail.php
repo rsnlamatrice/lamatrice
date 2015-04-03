@@ -44,7 +44,7 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 		$record = $request->get('record');
 		$moduleName = $request->getModule();
 
-		$recordModel = Inventory_Record_Model::getInstanceById($record);
+		$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
 		$relatedProducts = $recordModel->getProducts();
 
 		//##Final details convertion started

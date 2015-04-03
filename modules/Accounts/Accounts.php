@@ -1121,6 +1121,8 @@ class Accounts extends CRMEntity {
 			"Documents" => array("vtiger_senotesrel"=>array("crmid","notesid"),"vtiger_account"=>"accountid"),
 			"Campaigns" => array("vtiger_campaignaccountrel"=>array("accountid","campaignid"),"vtiger_account"=>"accountid"),
 			"Emails" => array("vtiger_seactivityrel"=>array("crmid","activityid"),"vtiger_account"=>"accountid"),
+			/* ED150402 */
+			"RSNAboRevues" => array("vtiger_rsnaborevues"=>array("crmid","accountid"),"vtiger_account"=>"accountid"),
 		);
 		return $rel_tables[$secmodule];
 	}
@@ -1591,8 +1593,11 @@ class Accounts extends CRMEntity {
 		else
 			$returnset = "&return_module=$currentModule&return_action=CallRelatedList&return_id=$id";
 
+		/*ED150402 : add 73*/
+		$reference_fields_uitype = "10,73";
+			
 		$return_value = null;
-		$dependentFieldSql = $this->db->pquery("SELECT tabid, fieldname, columnname FROM vtiger_field WHERE uitype='10' AND" .
+		$dependentFieldSql = $this->db->pquery("SELECT tabid, fieldname, columnname FROM vtiger_field WHERE uitype IN ($reference_fields_uitype) AND" .
 				" fieldid IN (SELECT fieldid FROM vtiger_fieldmodulerel WHERE relmodule=? AND module=?)", array($currentModule, $related_module));
 		$numOfFields = $this->db->num_rows($dependentFieldSql);
 
@@ -1621,6 +1626,7 @@ class Accounts extends CRMEntity {
 
 			$query = "SELECT vtiger_crmentity.*, $other->table_name.*";
 			$query .= ", CASE WHEN (vtiger_users.user_name NOT LIKE '') THEN $userNameSql ELSE vtiger_groups.groupname END AS user_name";
+
 
 			$more_relation = '';
 			if (!empty($other->related_tables)) {

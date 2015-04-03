@@ -11,15 +11,14 @@
 $languageStrings = array(
 	'RSNAboRevues' => 'Abonnements Revue',
 	'SINGLE_RSNAboRevues' => 'Abonnement Revue',
-	'LBL_BLOCK_GENERAL_INFORMATION' => '',
-	'LBL_BLOCK_SYSTEM_INFORMATION' => '',
+	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
+	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations système',
 	'LBL_DEBUTABO' => 'Début',
 	'LBL_ISABONNE' => 'Est abonné(e)',
 	'LBL_ACCOUNTID' => 'Compte du contact',
 	'LBL_NBEXEMPLAIRES' => 'Nbre d\'exemplaires',
 	'LBL_FINABO' => 'Fin',
 	'LBL_RSNABOTYPE' => 'Type',
-
 );
 
 ?>

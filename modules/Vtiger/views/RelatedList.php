@@ -134,8 +134,7 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			  case "ContactEmails" :
 				$tpl = "RelatedListContactEmails.tpl";
 				break;
-		
-			 default:
+			  default:
 				$tpl = 'RelatedList.tpl';
 				break;
 			}

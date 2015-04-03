@@ -182,7 +182,6 @@ class Vtiger_Functions {
 		$name = NULL;
 		if (is_numeric($mixed)) $name = self::getModuleName ($mixed);
 		else $name = $mixed;
-
 		if ($name && !isset(self::$moduleEntityCache[$name])) {
 			global $adb;
 			$result = $adb->pquery('SELECT fieldname,modulename,tablename,entityidfield,entityidcolumn from vtiger_entityname', array());
@@ -353,7 +352,8 @@ class Vtiger_Functions {
 
 				$table = $metainfo['tablename'];
 				if(!$table)/* ED140921 */
-					throw new Exception("La table est inconnue en retour de getEntityModuleInfo().\r\nContrôlez l'existence de l'enregistrement dans la table vtiger_entityname.");
+					die("[computeCRMRecordLabels()] Module '$module' : La table est inconnue en retour de getEntityModuleInfo().\r\nContrôlez l'existence de l'enregistrement dans la table vtiger_entityname.");
+					//throw new Exception("La table est inconnue en retour de getEntityModuleInfo().\r\nContrôlez l'existence de l'enregistrement dans la table vtiger_entityname.");
 				
 				$idcolumn = $metainfo['entityidfield'];
 				$columns  = explode(',', $metainfo['fieldname']);
