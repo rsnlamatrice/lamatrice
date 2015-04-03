@@ -219,19 +219,23 @@ function getEntityName($module, $ids_list, $compute=false) {
 
 /* ED141128 */
 function getEntityFieldValue($module, $fieldName, $ids_list, $compute=false) {
-	if(is_object($fieldName))
+	if(is_object($fieldName)){
+		$fieldTableName = $fieldName->get('table');
 		$fieldModel = $fieldName;
-	else
+	}
+	else 
 		$fieldModel = Vtiger_Field_Model::getInstance( $fieldName, $module);
+	
 	if(is_string($module))
 		$module = Vtiger_Module_Model::getInstance($module);
 	
 	$moduleName = $module->get('name');
 	$focus = CRMEntity::getInstance($moduleName);
 	$idField = $focus->table_index;
-		
+	if(!isset($fieldTableName))
+		$fieldTableName = $focus->table_name;
 	$sql = "SELECT " . $idField . ", " . $fieldModel->get('column') . "
-		FROM " . $focus->table_name . "
+		FROM " . $fieldTableName . "
 		WHERE " . $idField . " IN (" . implode(',', $ids_list) . ")";
 	global $adb;
 	$values = array();
