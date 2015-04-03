@@ -199,6 +199,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 			$relationModel->setData($row)->setParentModuleModel($parentModuleModel)->setRelationModuleModel($relatedModuleModel);
 			return $relationModel;
 		}
+		
 		return false;
 	}
 

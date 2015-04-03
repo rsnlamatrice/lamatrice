@@ -289,23 +289,23 @@ class Contacts extends CRMEntity {
 			
 		       INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
 		       LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
-		       INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
-		       INNER JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid
-		       INNER JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid
-		       INNER JOIN vtiger_contactscf ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
+		       LEFT  JOIN vtiger_contactscf ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
+		       LEFT JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid
+		       LEFT JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
+		       LEFT JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid
 		       LEFT JOIN vtiger_groups ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 		       LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
 		       WHERE vtiger_crmentity.deleted = 0"
 		;
-		//print_r($query);
-	       $return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
+		   $return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
 	
 	       if($return_value == null) $return_value = Array();
 	       $return_value['CUSTOM_BUTTON'] = $button;
 	
 	       $log->debug("Exiting get_contacts_related_list method ...");
 	       
-	       /*print_r($query);
+	      /* echo("<pre>$query</pre>");
+	    
 		$db = PearDatabase::getInstance();	$db->setDebug(true);
 		echo_callstack();*/
 	

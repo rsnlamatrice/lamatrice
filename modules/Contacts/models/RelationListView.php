@@ -134,13 +134,17 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$fieldRels = Campaigns_RelationListView_Model::get_related_fields();
 				break;
 			  case "Contacts":
-				$query = "SELECT dateapplication,
-					contreltype, $fieldName, contactid
+				$query = "SELECT $tableName.dateapplication,
+					$tableName.contreltype, $tableName.$fieldName, $tableName.contactid
 					FROM $tableName
-					WHERE ($fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
-					  AND contactid = ?)
-					OR (contactid IN (". generateQuestionMarks($relatedRecordIdsList).")
-					  AND $fieldName = ?)
+					JOIN vtiger_crmentity
+						ON $tableName.contactid = vtiger_crmentity.crmid
+					WHERE (($tableName.$fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
+					  AND $tableName.contactid = ?)
+					OR ($tableName.contactid IN (". generateQuestionMarks($relatedRecordIdsList).")
+					  AND $tableName.$fieldName = ?)
+					)
+					AND vtiger_crmentity.deleted = 0
 					  
 					UNION
 					/* compte commun */
@@ -153,6 +157,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 						ON vtiger_contactdetails.accountid = account.crmid
 					WHERE c1.contactid = ".$contactId."
 					AND  vtiger_contactdetails.contactid <> ".$contactId."
+					AND account.deleted = 0
 					";
 					  
 				array_push($relatedRecordIdsList, $contactId);
@@ -169,7 +174,6 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			}
 			array_push($relatedRecordIdsList, $contactId);
 			$result = $db->pquery($query, $relatedRecordIdsList);
-
 			$numOfrows = $db->num_rows($result);
 			
 			for($i=0; $i<$numOfrows; $i++) {
@@ -177,12 +181,12 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				if($relatedModuleName == "Contacts"
 				&& $recordId == $contactId) 
 					$recordId = $db->query_result($result, $i, "contactid");
+				$relatedRecordModel = $relatedRecordModelsList[$recordId];
+				if($relatedRecordModel)
 				foreach($fieldRels as $fieldRel){
-					$relatedRecordModel = $relatedRecordModelsList[$recordId];
 					
 					$fieldRelType = $fieldRel->get('typeofdata');
 					$fieldRel = $fieldRel->get('name');
-					
 					$value = $db->query_result($result, $i, strtolower( $fieldRel ));
 					switch($fieldRelType){
 					  case "D":
@@ -194,7 +198,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					    $value = preg_replace('/\\r\\n?/', '<br/>', $value);
 					    break;
 					}
-					$values = $relatedRecordModel->get($fieldRel);//valeur prÈcÈdemment affectÈe
+					$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
 					if($values === null)
 						$values = array($value);
 					else
