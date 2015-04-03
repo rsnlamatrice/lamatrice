@@ -358,6 +358,13 @@ class Vtiger_Functions {
 				$idcolumn = $metainfo['entityidfield'];
 				$columns  = explode(',', $metainfo['fieldname']);
 
+				/* ED150403
+				 * if multiple columns, CONCAT() returns NULL if one of the values is null.
+				 */
+				if(count($columns) > 1)
+					for($i=0;$i<count($columns); $i++)
+						$columns[$i] = "IFNULL($columns[$i],'')"; 
+				
 				// NOTE: Ignore field-permission check for non-admin (to compute record label).
 				$columnString = count($columns) < 2? $columns[0] :
 					sprintf("concat(%s)", implode(",' ',", $columns));
@@ -365,7 +372,8 @@ class Vtiger_Functions {
 				$sql = sprintf('SELECT %s AS label, %s AS id FROM %s WHERE %s IN (%s)',
 						$columnString, $idcolumn, $table, $idcolumn, generateQuestionMarks($ids));
 				$result = $adb->pquery($sql, $ids);
-				
+				//print_r($result);
+					
 				/* ED140921 */
 				if($result === FALSE){
 					echo("Erreur dans ".__FILE__."\r\nContrôlez le nom des champs dans la table vtiger_entityname.");

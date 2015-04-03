@@ -41,6 +41,7 @@ class RSNAboRevues extends Vtiger_CRMEntity {
 		'LBL_NBEXEMPLAIRES' => array('rsnaborevues', 'nbexemplaires'),
 		'LBL_FINABO' => array('rsnaborevues', 'finabo'),
 		'LBL_RSNABOTYPE' => array('rsnaborevues', 'rsnabotype'),
+		'LBL_ACCOUNTID' => array('rsnaborevues', 'account_id'),
 
 	);
 	var $list_fields_name = Array (
@@ -49,6 +50,7 @@ class RSNAboRevues extends Vtiger_CRMEntity {
 		'LBL_NBEXEMPLAIRES' => 'nbexemplaires',
 		'LBL_FINABO' => 'finabo',
 		'LBL_RSNABOTYPE' => 'rsnabotype',
+		'LBL_ACCOUNTID' => 'account_id',
 
 	);
 
