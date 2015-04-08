@@ -43,6 +43,7 @@ $languageStrings = array(
 	'LBL_HELPDESK' => 'Tickets',
 	'LBL_EVENTS' => 'Evènements',
 	'LBL_SATISFACTION' => 'Satisfaction',
+	'LBL_NIVEAUMAITRISE' => 'Maîtrise',
 );
 
 ?>

@@ -28,6 +28,7 @@ $languageStrings = array(
 	'LBL_CONTACTEMAIL' => 'Email',
 	'LBL_RSNMEDIADOCUMENTS' => 'Reçoit déjà',
 	'LBL_CONTACTPHONE' => 'Téléphone',
+	'LBL_CONTACTREFERENT' => 'Contact de référence',
 
 );
 

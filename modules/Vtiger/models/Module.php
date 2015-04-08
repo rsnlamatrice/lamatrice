@@ -805,24 +805,23 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				}
 		    }
 		}
-
 		return $moduleModels;
 	}
 
 	public static function getEntityModules() {
 		self::preModuleInitialize2();
 		$moduleModels = Vtiger_Cache::get('vtiger','EntityModules');
-        if(!$moduleModels){
-            $presence = array(0, 2);
-            $moduleModels = self::getAll($presence);
-            $restrictedModules = array('Webmails', 'Emails', 'Integration', 'Dashboard');
-            foreach($moduleModels as $key => $moduleModel){
-                if(in_array($moduleModel->getName(),$restrictedModules) || $moduleModel->get('isentitytype') != 1){
-                    unset($moduleModels[$key]);
-                }
-            }
-            Vtiger_Cache::set('vtiger','EntityModules',$moduleModels);
-        }
+		if(!$moduleModels){
+		    $presence = array(0, 2);
+		    $moduleModels = self::getAll($presence);
+		    $restrictedModules = array('Webmails', 'Emails', 'Integration', 'Dashboard');
+		    foreach($moduleModels as $key => $moduleModel){
+			if(in_array($moduleModel->getName(),$restrictedModules) || $moduleModel->get('isentitytype') != 1){
+			    unset($moduleModels[$key]); 
+			}
+		    }
+		    Vtiger_Cache::set('vtiger','EntityModules',$moduleModels);
+		}
 		return $moduleModels;
 	}
 

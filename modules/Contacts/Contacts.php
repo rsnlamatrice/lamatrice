@@ -1983,10 +1983,11 @@ class Contacts extends CRMEntity {
 		if(!is_array($with_crmids)) $with_crmids = Array($with_crmids);
 		foreach($with_crmids as $with_crmid) {
 			if($with_module == 'Products') {
-				$adb->pquery("insert into vtiger_seproductsrel values (?,?,?)", array($crmid, $with_crmid, 'Contacts'));
+				$adb->pquery("INSERT INTO vtiger_seproductsrel values (?,?,?)", array($crmid, $with_crmid, 'Contacts'));
 
 			} elseif($with_module == 'Campaigns') {
-				$adb->pquery("insert into vtiger_campaigncontrel values(?,?,1)", array($with_crmid, $crmid));
+				$adb->pquery("INSERT INTO vtiger_campaigncontrel (`campaignid`, `contactid`, `campaignrelstatusid`, `dateapplication`, `data`)
+					     VALUES(?,?,1, NOW(), NULL)", array($with_crmid, $crmid));
 
 			} elseif($with_module == 'Critere4D') {
 				$adb->pquery("INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication)
