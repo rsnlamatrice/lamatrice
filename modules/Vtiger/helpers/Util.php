@@ -256,12 +256,15 @@ class Vtiger_Util_Helper {
 	 * TODO : autres modules que Contacts ?
 	 */
 	switch($fieldName){
-		case 'mailingstate': //module Contacts
-		case 'otherstate': //module Contacts
-			$fieldName = 'rsnregion';
-			break;
-		default:
-			break;
+	 case 'mailingstate': //module Contacts
+	 case 'otherstate': //module Contacts
+		$fieldName = 'rsnregion';
+		break;
+	 case 'mailingcountry':
+		$fieldName = 'rsncountry';
+		break;
+	 default:
+		break;
 	}
 	/* */
 	

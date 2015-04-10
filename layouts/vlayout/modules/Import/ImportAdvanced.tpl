@@ -22,7 +22,8 @@
 		<input type="hidden" name="merge_type" value='{$USER_INPUT->get('merge_type')}' />
 		<input type="hidden" name="merge_fields" value='{$MERGE_FIELDS}' />
 
-		<input type="hidden" id="mandatory_fields" name="mandatory_fields" value='{$ENCODED_MANDATORY_FIELDS}' />
+		{* ED150408 adds htmlspecialchars because of translated name containing ' *}
+		<input type="hidden" id="mandatory_fields" name="mandatory_fields" value="{htmlspecialchars($ENCODED_MANDATORY_FIELDS)}" />
 
 		<table style="width:100%;margin-left:auto;margin-right:auto;" cellpadding="2" cellspacing="12" class="searchUIBasic">
 			<tr>
