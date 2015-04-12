@@ -38,7 +38,7 @@ class RSNMediaContacts_Module_Model extends Vtiger_Module_Model {
 					WHERE vtiger_rsnmediacontacts.rsnmediacontactsid=" . $recordId . "
 				)
 				OR vtiger_crmentity.crmid IN (
-					SELECT vtiger_crmentityrel.relcrmid
+					SELECT IF(vtiger_crmentityrel.crmid=" . $recordId . ", vtiger_crmentityrel.relcrmid, vtiger_crmentityrel.crmid)
 					FROM vtiger_crmentityrel
 					WHERE vtiger_crmentityrel.crmid=" . $recordId . "
 					OR vtiger_crmentityrel.relcrmid=" . $recordId . "
