@@ -65,6 +65,12 @@
 					<input type="checkbox" id="listViewEntriesMainCheckBox" />
 				</th>
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
+					{* ED150412 *}
+					{if $LISTVIEW_HEADER->getName() == 'createdtime'}
+						{assign var=SKIP_MODIFIEDTIME value=true}
+					{else if $LISTVIEW_HEADER->getName() == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
 					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} class="{$WIDTHTYPE}">
 						<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
 							&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white">{/if}</a>
@@ -87,74 +93,85 @@
 					<input type="checkbox" value="{$LISTVIEW_ENTRY->getId()}" class="listViewEntriesCheckBox"/>
 				</td>
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
-				{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
-				{assign var=UITYPE value=$LISTVIEW_HEADER->get('uitype')}
-				{assign var=IS_BUTTONSET value=$UITYPE eq '402'}
-				<td class="listViewEntryValue {$WIDTHTYPE}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}"
-				    {if $UICOLOR neq null && $UITYPE eq '401'} style="background-color: {$UICOLOR} !important; min-width:3em;"{/if} nowrap>
-					{if $LISTVIEW_HEADER->isNameField() eq true or $UITYPE eq '4'}
-						<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
-					{else if $UITYPE eq '72'}
-						{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
-						{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
-							{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
-						{else}
-							{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-						{/if}
-					{elseif	$UITYPE eq '401'}
-					
-					{* ED15 *}
-					{elseif $IS_BUTTONSET}
-					    {assign var=PICKLIST_VALUES value=$LISTVIEW_HEADER->get('picklist_values')}
-					    {assign var=FIELD_VALUE value=$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-					    {if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
-					    {if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=$LISTVIEW_HEADER->getDefaultFieldValue()}{/if}
-					    {if $PICKLIST_VALUES && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES)}
-						    {assign var=PICKLIST_ITEM value=$PICKLIST_VALUES[$FIELD_VALUE]}
-					    {else}
-						    {assign var=PICKLIST_ITEM value=$FIELD_VALUE}
-					    {/if}
-					    {if is_array($PICKLIST_ITEM)}
-						    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
-						    {if isset($PICKLIST_ITEM['class'])}
-							{assign var=PICKLIST_CLASS value=$PICKLIST_ITEM['class']}
+					{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
+					{if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
+					{assign var=UITYPE value=$LISTVIEW_HEADER->get('uitype')}
+					{assign var=IS_BUTTONSET value=$UITYPE eq '402'}
+					<td class="listViewEntryValue {$WIDTHTYPE}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}"
+					    {if $UICOLOR neq null && $UITYPE eq '401'} style="background-color: {$UICOLOR} !important; min-width:3em;"{/if} nowrap>
+						{if $LISTVIEW_HEADER->isNameField() eq true or $UITYPE eq '4'}
+							<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
+						{else if $UITYPE eq '72'}
+							{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
+							{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
+								{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
+							{else}
+								{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+							{/if}
+						{elseif	$UITYPE eq '401'}
+						
+						{* ED150000 *}
+						{elseif $IS_BUTTONSET}
+						    {assign var=PICKLIST_VALUES value=$LISTVIEW_HEADER->get('picklist_values')}
+						    {assign var=FIELD_VALUE value=$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						    {if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
+						    {if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=$LISTVIEW_HEADER->getDefaultFieldValue()}{/if}
+						    {if $PICKLIST_VALUES && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES)}
+							    {assign var=PICKLIST_ITEM value=$PICKLIST_VALUES[$FIELD_VALUE]}
 						    {else}
-							{assign var=PICKLIST_CLASS value=''}
+							    {assign var=PICKLIST_ITEM value=$FIELD_VALUE}
 						    {/if}
-						    {assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
-					    {else}
-						    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
-						    {assign var=PICKLIST_ICON value=false}
-						    {assign var=PICKLIST_CLASS value=false}
-					    {/if}
-					    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
-					    {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>
-					    {else}
-						&nbsp;{$PICKLIST_LABEL}
-					    {/if}</label>
-					    
-					
-					{else} 
-						{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-					{/if}
-					{if $LISTVIEW_HEADER@last}
-						</td><td nowrap class="{$WIDTHTYPE}">
-						<div class="actions pull-right">
-							<span class="actionImages">
-								{if $IS_MODULE_EDITABLE}{*ED150207*}
-								    <a href='{$LISTVIEW_ENTRY->getDuplicateRecordUrl()}'><i title="{vtranslate('LBL_DUPLICATE', $MODULE)}" class="icon-plus alignMiddle"></i></a>
-								{/if}
-								<a href="{$LISTVIEW_ENTRY->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
-								{if $IS_MODULE_EDITABLE}
-									<a href='{$LISTVIEW_ENTRY->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>&nbsp;
-								{/if}
-								{if $IS_MODULE_DELETABLE}
-									<a class="deleteRecordButton"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
-								{/if}
-							</span>
-						</div></td>
-					{/if}
-				</td>
+						    {if is_array($PICKLIST_ITEM)}
+							    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
+							    {if isset($PICKLIST_ITEM['class'])}
+								{assign var=PICKLIST_CLASS value=$PICKLIST_ITEM['class']}
+							    {else}
+								{assign var=PICKLIST_CLASS value=''}
+							    {/if}
+							    {assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
+						    {else}
+							    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
+							    {assign var=PICKLIST_ICON value=false}
+							    {assign var=PICKLIST_CLASS value=false}
+						    {/if}
+						    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
+						    {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>
+						    {else}
+							&nbsp;{$PICKLIST_LABEL}
+						    {/if}</label>
+						    
+						{* ED150412 *}
+						{else if $LISTVIEW_HEADERNAME == 'createdtime'}
+							{substr($LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME),0,10)}
+							{if $LISTVIEW_ENTRY->get('modifiedtime')
+							&& substr($LISTVIEW_ENTRY->get('createdtime'),0,10) neq substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+								<br>{substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+							{/if}
+						{else if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME}
+							
+						{else} 
+							{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						{/if}
+						{if $LISTVIEW_HEADER@last}
+							</td><td nowrap class="{$WIDTHTYPE}">
+							<div class="actions pull-right">
+								<span class="actionImages">
+									{if $IS_MODULE_EDITABLE}{*ED150207*}
+									    <a href='{$LISTVIEW_ENTRY->getDuplicateRecordUrl()}'><i title="{vtranslate('LBL_DUPLICATE', $MODULE)}" class="icon-plus alignMiddle"></i></a>
+									{/if}
+									<a href="{$LISTVIEW_ENTRY->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
+									{if $IS_MODULE_EDITABLE}
+										<a href='{$LISTVIEW_ENTRY->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>&nbsp;
+									{/if}
+									{if $IS_MODULE_DELETABLE}
+										<a class="deleteRecordButton"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
+									{/if}
+								</span>
+							</div></td>
+						{/if}
+					</td>
 				{/foreach}
 			</tr>
 		{/foreach}

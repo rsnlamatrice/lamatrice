@@ -65,10 +65,16 @@
 					<input type="checkbox" id="listViewEntriesMainCheckBox" />
 				</th>
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
-				<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} class="{$WIDTHTYPE}">
-					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
-						&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white">{/if}</a>
-				</th>
+					{* ED150412 *}
+					{if $LISTVIEW_HEADER->get('column') == 'createdtime'}
+						{assign var=SKIP_MODIFIEDTIME value=true}
+					{else if $LISTVIEW_HEADER->get('column') == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} class="{$WIDTHTYPE}">
+						<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
+							&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white">{/if}</a>
+					</th>
 				{/foreach}
 			</tr>
 		</thead>
@@ -81,40 +87,52 @@
 				<input type="checkbox" value="{$LISTVIEW_ENTRY->getId()}" class="listViewEntriesCheckBox"/>
 			</td>
 			{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
-			{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
-			<td class="listViewEntryValue {$WIDTHTYPE}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}"
-			    data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap="nowrap">
-				{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
-					<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
-				{else if $LISTVIEW_HEADER->get('uitype') eq '72'}
-					{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
-					{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
-						{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
+				{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
+				{if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+					{continue}
+				{/if}
+				<td class="listViewEntryValue {$WIDTHTYPE}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}"
+				    data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap="nowrap">
+					{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
+						<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
+					{else if $LISTVIEW_HEADER->get('uitype') eq '72'}
+						{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
+						{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
+							{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
+						{else}
+							{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						{/if}
+					{elseif	$LISTVIEW_HEADER->get('uitype') eq '402'}
+					{* ED150412 *}
+					{else if $LISTVIEW_HEADERNAME == 'createdtime'}
+						{substr($LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME),0,10)}
+						{if $LISTVIEW_ENTRY->get('modifiedtime')
+						&& substr($LISTVIEW_ENTRY->get('createdtime'),0,10) neq substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+							<br>{substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+						{/if}
+					{else if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME}
+								
 					{else}
-						{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-					{/if}
-				{elseif	$LISTVIEW_HEADER->get('uitype') eq '402'}
-				{else}
-					{if ($LISTVIEW_HEADERNAME eq 'folderid')}
-						<div style="background-color:{$LISTVIEW_ENTRY->get('uicolor')}; margin-left:0;" class="picklistvalue-uicolor">&nbsp;</div>
-					{/if}
-					{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-				{/if}
-				{if $LISTVIEW_HEADER@last}
-				</td><td nowrap class="{$WIDTHTYPE}">
-				<div class="actions pull-right">
-					<span class="actionImages">
-						<a href="{$LISTVIEW_ENTRY->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
-						{if $IS_MODULE_EDITABLE}
-							<a href='{$LISTVIEW_ENTRY->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>&nbsp;
+						{if ($LISTVIEW_HEADERNAME eq 'folderid')}
+							<div style="background-color:{$LISTVIEW_ENTRY->get('uicolor')}; margin-left:0;" class="picklistvalue-uicolor">&nbsp;</div>
 						{/if}
-						{if $IS_MODULE_DELETABLE}
-							<a class="deleteRecordButton"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
-						{/if}
-					</span>
-				</div></td>
-				{/if}
-			</td>
+						{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+					{/if}
+					{if $LISTVIEW_HEADER@last}
+					</td><td nowrap class="{$WIDTHTYPE}">
+					<div class="actions pull-right">
+						<span class="actionImages">
+							<a href="{$LISTVIEW_ENTRY->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
+							{if $IS_MODULE_EDITABLE}
+								<a href='{$LISTVIEW_ENTRY->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>&nbsp;
+							{/if}
+							{if $IS_MODULE_DELETABLE}
+								<a class="deleteRecordButton"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
+							{/if}
+						</span>
+					</div></td>
+					{/if}
+				</td>
 			{/foreach}
 		</tr>
 		{/foreach}

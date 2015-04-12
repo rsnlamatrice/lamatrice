@@ -71,6 +71,12 @@
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
 				{* ED141006 *}
 				{assign var=FIELD_NAME value=$LISTVIEW_HEADER->getFieldName()}
+				{* ED150412 *}
+				{if $FIELD_NAME == 'createdtime'}
+					{assign var=SKIP_MODIFIEDTIME value=true}
+				{else if $FIELD_NAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+					{continue}
+				{/if}
 				{assign var=IS_GROUP_FIELD value=$FIELD_NAME == "isgroup"}
 				<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}{if !$IS_GROUP_FIELD} class="{$WIDTHTYPE}"{/if}>
 					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">
@@ -93,6 +99,9 @@
 			</td>
 			{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
 			{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
+			{if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+				{continue}
+			{/if}
 			{assign var=IS_GROUP_FIELD value=$LISTVIEW_HEADERNAME == "isgroup"}
 			<td class="listViewEntryValue {if !$IS_GROUP_FIELD}{$WIDTHTYPE}{/if}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap>
 				{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
@@ -110,6 +119,15 @@
 					{else}
 						<span class="icon-rsn-small-contact"></span>
 					{/if}
+				{* ED150412 *}
+				{else if $LISTVIEW_HEADERNAME == 'createdtime'}
+					{substr($LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME),0,10)}
+					{if $LISTVIEW_ENTRY->get('modifiedtime')
+					&& substr($LISTVIEW_ENTRY->get('createdtime'),0,10) neq substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+						<br>{substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+					{/if}
+				{else if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME}
+					
 				{else}
 					{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{*TODO optimise si on ne laisse que ->get( *}
 				{/if}
