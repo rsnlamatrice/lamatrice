@@ -164,5 +164,4 @@ class Vtiger_Paging_Model extends Vtiger_Base_Model {
 		//	return ($page * $limit + 1) . ' ou +';
 		//return $range['end'];
 	}
-
 }

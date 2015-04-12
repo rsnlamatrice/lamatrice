@@ -16,6 +16,7 @@
 <input type="hidden" id="previousPageExist" value="{$PAGING_MODEL->isPrevPageExists()}" />
 <input type="hidden" id="nextPageExist" value="{$PAGING_MODEL->isNextPageExists()}" />
 <input type="hidden" id="alphabetSearchKey" value= "{$MODULE_MODEL->getAlphabetSearchField()}" />
+<input type="hidden" id="requestSearchKey" value= "{$MODULE_MODEL->getRequestSearchField()}" />{* ED150412 *}
 <input type="hidden" id="Operator" value="{$OPERATOR}" />
 <input type="hidden" id="alphabetValue" value="{$ALPHABET_VALUE}" />
 <input type="hidden" id="totalCount" value="{$LISTVIEW_COUNT}" />
@@ -79,6 +80,18 @@
 					{if $IS_BUTTONSET}
 					    {assign var=tmp value=$LISTVIEW_HEADER->set('picklist_values',$MODULE_MODEL->getListViewPicklistValues($LISTVIEW_HEADER->getName()))}
 					{/if}
+				{/foreach}
+			</tr>
+			<tr class="listViewHeaders filters">
+				<th width="5%"></th>
+				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
+					{* ED150412 *}
+					{if $LISTVIEW_HEADER->getName() == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}  data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}">
+						<input style=""/>
+					</th>
 				{/foreach}
 			</tr>
 		</thead>
