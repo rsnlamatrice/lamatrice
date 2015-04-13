@@ -828,4 +828,5 @@ $jsLanguageStrings = array(
 	'JS_PAGE_NOT_EXIST' => 'La Page n\'existe pas',
 	'JS_YOU_ARE_IN_PAGE_NUMBER' => 'Vous êtes à la page n°',
 	'to' => 'à',
+	'JS_NO_RESULTS_FOUND' => 'Aucun resultat trouvé',
 );
