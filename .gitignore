@@ -10,4 +10,4 @@
 
 /test
 
-*.php.bak
+**/*.php.bak

@@ -1943,7 +1943,7 @@ jQuery.Class("Vtiger_List_Js",{
 			, searchValue = $target.val()//TODO Checkbox : On click event + e.currentTarget.checked
 			, searchType = $th.attr('data-field-type')
 			, searchKey = $th.attr('data-field-name')
-			, operator = /^([\=\>\<]+)\s*(.*)$/.exec(searchValue);
+			, operator = /^([\=\>\<]+|N?IN)\s*(.*)$/i.exec(searchValue);
 			if (operator != null) {
 				searchValue = operator[2];
 				switch(operator[1]){
@@ -1966,6 +1966,12 @@ jQuery.Class("Vtiger_List_Js",{
 				case '<=' :
 					operator = 'm';
 					break;
+				case 'IN' :
+					operator = 'vwi';
+					break;
+				case 'NIN' :
+					operator = 'vwx';
+					break;
 				}
 			}
 			else
@@ -1979,6 +1985,9 @@ jQuery.Class("Vtiger_List_Js",{
 				case 'currency':
 				case 'double':
 					operator = 'h';
+					break;
+				case 'multipicklist' :
+					operator = 'c';
 					break;
 				default:
 					break;

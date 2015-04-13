@@ -216,7 +216,18 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		});
 	},
 
-    /**
+	/** ED150312
+	 * Function to register event on address changing between two fileds
+	 */
+	registerEventOnZipChanging : function(container){
+		var thisInstance = this;
+		jQuery('[name="mailingzip"],[name="otherzip"]').on('change',function(e){
+			var element = jQuery(e.currentTarget);
+			
+		});
+	},
+
+	/**
 	 * Function to check for Portal User
 	 */
 	checkForPortalUser : function(form){
