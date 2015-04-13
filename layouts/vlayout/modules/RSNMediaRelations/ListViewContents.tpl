@@ -67,6 +67,14 @@
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
 					
 					{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('column')}
+					{* ED141006 *}
+					{assign var=FIELD_NAME value=$LISTVIEW_HEADER->getFieldName()}
+					{* ED150412 *}
+					{if $FIELD_NAME == 'createdtime'}
+						{assign var=SKIP_MODIFIEDTIME value=true}
+					{else if $FIELD_NAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
 					{if $LISTVIEW_HEADERNAME neq 'initiateur'}
 					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} class="{$WIDTHTYPE}">
 						<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADERNAME}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADERNAME}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
@@ -78,16 +86,13 @@
 			<tr class="listViewHeaders filters">
 				<th width="5%"></th>
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
+					{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('column')}
 					{* ED150412 *}
-					{if $LISTVIEW_HEADER->getName() == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+					{if ($LISTVIEW_HEADERNAME eq 'initiateur')
+					|| ($LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last)}
 						{continue}
 					{/if}
 					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}>
-						{if $LISTVIEW_HEADER->getName() == 'isgroup'}
-							{assign var=INPUT_CLASS value='input-mini'}
-						{else}
-							{assign var=INPUT_CLASS value='input-small'}
-						{/if}
 						{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getHeaderFilterTemplateName(),$MODULE)}
 					</th>
 				{/foreach}
