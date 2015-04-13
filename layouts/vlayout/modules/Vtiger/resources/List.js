@@ -1943,7 +1943,7 @@ jQuery.Class("Vtiger_List_Js",{
 			, searchValue = $target.val()//TODO Checkbox : On click event + e.currentTarget.checked
 			, searchType = $th.attr('data-field-type')
 			, searchKey = $th.attr('data-field-name')
-			, operator = /^([\=\>\<]+|N?IN)\s*(.*)$/i.exec(searchValue);
+			, operator = /^\s*([\=\>\<\!]+|[\!N]?IN\s|[\!N]?PARMIS\s)\s*(.*)$/i.exec(searchValue);
 			if (operator != null) {
 				searchValue = operator[2];
 				switch(operator[1]){
@@ -1966,10 +1966,13 @@ jQuery.Class("Vtiger_List_Js",{
 				case '<=' :
 					operator = 'm';
 					break;
-				case 'IN' :
+				case 'IN ' :
+				case 'PARMIS ' :
 					operator = 'vwi';
 					break;
-				case 'NIN' :
+				case 'NIN ' :
+				case 'NPARMIS ' :
+				case '!PARMIS ' :
 					operator = 'vwx';
 					break;
 				}
