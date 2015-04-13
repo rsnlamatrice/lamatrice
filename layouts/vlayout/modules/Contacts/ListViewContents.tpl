@@ -98,8 +98,13 @@
 					{if $LISTVIEW_HEADER->getName() == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
 						{continue}
 					{/if}
-					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}  data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}">
-						<input style=""/>
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}>
+						{if $LISTVIEW_HEADER->getName() == 'isgroup'}
+							{assign var=INPUT_CLASS value='input-mini'}
+						{else}
+							{assign var=INPUT_CLASS value='input-small'}
+						{/if}
+						{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getHeaderFilterTemplateName(),$MODULE)}
 					</th>
 				{/foreach}
 			</tr>

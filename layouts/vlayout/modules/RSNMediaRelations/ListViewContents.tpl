@@ -75,6 +75,23 @@
 					{/if}
 				{/foreach}
 			</tr>
+			<tr class="listViewHeaders filters">
+				<th width="5%"></th>
+				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
+					{* ED150412 *}
+					{if $LISTVIEW_HEADER->getName() == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}>
+						{if $LISTVIEW_HEADER->getName() == 'isgroup'}
+							{assign var=INPUT_CLASS value='input-mini'}
+						{else}
+							{assign var=INPUT_CLASS value='input-small'}
+						{/if}
+						{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getHeaderFilterTemplateName(),$MODULE)}
+					</th>
+				{/foreach}
+			</tr>
 		</thead>
 		
 		{assign var=PREVIOUS_DATE value=''}

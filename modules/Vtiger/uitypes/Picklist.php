@@ -17,6 +17,14 @@ class Vtiger_Picklist_UIType extends Vtiger_Base_UIType {
 	public function getTemplateName() {
 		return 'uitypes/Picklist.tpl';
 	}
+	
+	/** ED150413
+	 * Function to get the header filter input template name for the current UI Type Object
+	 * @return <String> - Template Name
+	 */
+	public function getHeaderFilterTemplateName() {
+		return 'uitypes/MultiPicklistHeaderFilter.tpl';
+	}
 
 	/**
 	 * Function to get the Display Value, for the current field type with given DB Insert Value

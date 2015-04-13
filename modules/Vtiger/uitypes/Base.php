@@ -84,7 +84,7 @@ class Vtiger_Base_UIType extends Vtiger_Base_Model {
 		return $value;
 	}
 
-    /**
+	/**
 	 * Function to get the Detailview template name for the current UI Type Object
 	 * @return <String> - Template Name
 	 */
@@ -99,5 +99,13 @@ class Vtiger_Base_UIType extends Vtiger_Base_Model {
 	 */
 	public function getRelatedListDisplayValue($value) {
 		return $this->getDisplayValue($value);
+	}
+
+	/** ED150413
+	 * Function to get the header filter input template name for the current UI Type Object
+	 * @return <String> - Template Name
+	 */
+	public function getHeaderFilterTemplateName() {
+		return 'uitypes/StringHeaderFilter.tpl';
 	}
 }

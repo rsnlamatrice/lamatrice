@@ -1922,7 +1922,8 @@ jQuery.Class("Vtiger_List_Js",{
 					.append($('<a href class="icon-refresh"></a>')
 						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
 						.click(function(){
-							$(this).parents('tr:first').find(':input:visible:first').change();
+							//TODO do not use url parameters that contains search_key and search_value
+							$(this).parents('tr:first').find(':input:visible:first').change();//TODO function
 							return false;
 						})
 					)
@@ -1938,15 +1939,23 @@ jQuery.Class("Vtiger_List_Js",{
 			}
 		});
 		listViewPageDiv.on('change','.listViewHeaders.filters :input',function(e) {
-			var $target = jQuery(e.currentTarget)
-			, $th = $target.parents('th:first')
-			, searchValue = $target.val()//TODO Checkbox : On click event + e.currentTarget.checked
-			, searchType = $th.attr('data-field-type')
-			, searchKey = $th.attr('data-field-name')
+			var $input = jQuery(e.currentTarget)
+			//, $th = $input.parents('th:first')
+			, searchValue = $input.val()//TODO Checkbox : On click event + e.currentTarget.checked
+			, searchType = $input.attr('data-field-type')
+			, searchKey = $input.attr('data-field-name')
 			, operator = /^\s*([\=\>\<\!]+|[\!N]?IN\s|[\!N]?PARMIS\s)\s*(.*)$/i.exec(searchValue);
-			if (operator != null) {
+			if (operator === null) {
+				operator = $input.attr('data-operator');
+			}
+			else {
 				searchValue = operator[2];
-				switch(operator[1]){
+				if (operator != null)
+					operator = operator[1].trim();
+			}
+			if (operator != null) {
+				//see include\QueryGenerator\QueryGenerator.php : line 1051
+				switch(operator){
 				case '=' :
 					operator = 'e';
 					break;
@@ -1966,13 +1975,16 @@ jQuery.Class("Vtiger_List_Js",{
 				case '<=' :
 					operator = 'm';
 					break;
-				case 'IN ' :
-				case 'PARMIS ' :
+				case '%' : // like % %
+					operator = 'c';
+					break;
+				case 'IN' :
+				case 'PARMIS' :
 					operator = 'vwi';
 					break;
-				case 'NIN ' :
-				case 'NPARMIS ' :
-				case '!PARMIS ' :
+				case 'NIN' :
+				case 'NPARMIS' :
+				case '!PARMIS' :
 					operator = 'vwx';
 					break;
 				}
@@ -2009,14 +2021,13 @@ jQuery.Class("Vtiger_List_Js",{
 			jQuery('#pageToJump').val('1');
 			jQuery('#totalPageCount').text("");
 			thisInstance.getListViewRecords(urlParams).then(
-					function(data){
-						thisInstance.updatePagination();
-                        //To unmark the all the selected ids
-                        jQuery('#deSelectAllMsg').trigger('click');
-					},
+				function(data){
+					thisInstance.updatePagination();
+					//To unmark the all the selected ids
+					jQuery('#deSelectAllMsg').trigger('click');
+				},
 
-					function(textStatus, errorThrown){
-					}
+				function(textStatus, errorThrown){}
 			);
 		});
 	},
