@@ -224,4 +224,9 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
   max-width: 10em;
   height: 20px;
 }
-.listViewHeaders th { padding-top: 0px !important; padding-bottom: 0px !important; }
+.listViewEntriesTable .listViewHeaders th + th {
+  padding: 3px 5px !important;
+}
+.listViewEntriesTable .listViewHeaders.filters th + th {
+  padding: 0px 5px 5px 5px !important;
+}
