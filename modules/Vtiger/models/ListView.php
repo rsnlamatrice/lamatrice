@@ -150,7 +150,34 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 			if($webserviceField && !in_array($webserviceField->getPresence(), array(0,2))) continue;
 			$headerFieldModels[$fieldName] = Vtiger_Field_Model::getInstance($fieldName,$module);
 		}
-		return $headerFieldModels;
+		return $this->initListViewHeadersFilters($headerFieldModels);
+	}
+
+	/** ED150414
+	 * Function to init fields as list view header filters
+	 * @return <Array> - List of Vtiger_Field_Model instances
+	 */
+	private function initListViewHeadersFilters($listViewHeaders) {
+		
+		$search_fields = $this->get('search_key');
+		$search_texts = $this->get('search_value');
+		$operators = $this->get('operator');
+		//ED150414 may be array of fields, then values and operators are also arrays
+		if(!is_array($search_fields))
+			$search_fields = array($search_fields);
+		if(!is_array($search_texts))
+			$search_texts = array($search_texts);
+		if(!is_array($operators))
+			$operators = array($operators);
+		for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++){
+			$fieldName = $search_fields[$i];
+			if(isset($listViewHeaders[$fieldName])
+			&&  !($search_texts[$i] == '' && $operators[$i] == 'e')){
+				$listViewHeaders[$fieldName]->set('fieldvalue', $search_texts[$i]);
+				$listViewHeaders[$fieldName]->set('filterOperator', $operators[$i]);
+			}
+		}
+		return $listViewHeaders;
 	}
 
 	/**

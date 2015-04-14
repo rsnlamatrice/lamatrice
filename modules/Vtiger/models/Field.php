@@ -16,13 +16,13 @@ class Vtiger_Field_Model extends Vtiger_Field {
 
 	var $webserviceField = false;
 
-    const REFERENCE_TYPE = 'reference';
+	const REFERENCE_TYPE = 'reference';
 	const OWNER_TYPE = 'owner';
-
-    const QUICKCREATE_MANDATORY = 0;
-    const QUICKCREATE_NOT_ENABLED = 1;
-    const QUICKCREATE_ENABLED = 2;
-    const QUICKCREATE_NOT_PERMITTED = 3;
+	
+	const QUICKCREATE_MANDATORY = 0;
+	const QUICKCREATE_NOT_ENABLED = 1;
+	const QUICKCREATE_ENABLED = 2;
+	const QUICKCREATE_NOT_PERMITTED = 3;
 
 	/**
 	 * Function to get the value of a given property
@@ -1176,4 +1176,31 @@ class Vtiger_Field_Model extends Vtiger_Field {
         return $fieldModelList;
     }
 
+	/* ED150414
+	 * for Header Filter
+	*/
+	var $filterOperator = null;
+	/* ED150414
+	 * Returns UI operator
+	 */
+	public function getFilterOperatorDisplayValue(){
+		//see include\QueryGenerator\QueryGenerator.php, line 1054
+		switch($this->filterOperator){
+			case 'e': return '=';
+			case 'n': return '<>';
+			case 's': return '';
+			case 'ew': return '%-';
+			case 'c': return '%';
+			case 'k': return '<>%'; //"NOT LIKE %$value%"
+			case 'l': return '<';
+			case 'g': return '>';
+			case 'm': return '<=';
+			case 'h': return '>=';
+			case 'a': return '>';
+			case 'b': return '<';
+			/*ED150307*/
+			case 'vwi': return "IN ";
+			case 'vwx': return " NOT IN ";
+		}
+	}
 }

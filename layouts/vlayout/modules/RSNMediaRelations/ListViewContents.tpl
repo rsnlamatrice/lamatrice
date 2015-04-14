@@ -116,6 +116,9 @@
 			</td>
 			{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
 				{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
+				{if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+					{continue}
+				{/if}
 				{if $LISTVIEW_HEADERNAME eq 'initiateur'}{continue}{/if}
 				{assign var=UITYPE value=$LISTVIEW_HEADER->get('uitype')}
 				<td class="listViewEntryValue {$WIDTHTYPE}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}"

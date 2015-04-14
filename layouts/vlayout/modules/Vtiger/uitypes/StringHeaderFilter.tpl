@@ -18,7 +18,7 @@
 		class="{$INPUT_CLASS}" 
 		data-field-type="{$FIELD_MODEL->getFieldDataType()}"
 		data-field-name="{$FIELD_MODEL->getFieldName()}"
-		value="{$FIELD_MODEL->get('fieldvalue')}"
+		value="{$FIELD_MODEL->getFilterOperatorDisplayValue()}{$FIELD_MODEL->get('fieldvalue')}"
 		{if isset($TITLE)} title="{$TITLE}" placeholder="{$TITLE}"{/if}
 />
 {/strip}

@@ -77,6 +77,19 @@
 					</th>
 				{/foreach}
 			</tr>
+			<tr class="listViewHeaders filters">
+				<th width="5%"></th>
+				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
+					{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('column')}
+					{* ED150412 *}
+					{if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}>
+						{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getHeaderFilterTemplateName(),$MODULE)}
+					</th>
+				{/foreach}
+			</tr>
 		</thead>
 		{foreach item=LISTVIEW_ENTRY from=$LISTVIEW_ENTRIES name=listview}
 		<tr class="listViewEntries" data-id='{$LISTVIEW_ENTRY->getId()}'

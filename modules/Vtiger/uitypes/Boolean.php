@@ -17,6 +17,14 @@ class Vtiger_Boolean_UIType extends Vtiger_Base_UIType {
 	public function getTemplateName() {
 		return 'uitypes/Boolean.tpl';
 	}
+	
+	/** ED150414
+	 * Function to get the header filter input template name for the current UI Type Object
+	 * @return <String> - Template Name
+	 */
+	public function getHeaderFilterTemplateName() {
+		return 'uitypes/BooleanHeaderFilter.tpl';
+	}
 
 	/**
 	 * Function to get the Display Value, for the current field type with given DB Insert Value

@@ -746,6 +746,8 @@ class QueryGenerator {
 		$fieldSqlList = array();
 		
 		foreach ($this->conditionals as $index=>$conditionInfo) {
+			//echo '<br><br><br><br><br>'; var_dump($index, $conditionInfo);
+			
 			$fieldName = $conditionInfo['name'];
 			$field = $moduleFieldList[$fieldName];
 			if(empty($field) || $conditionInfo['operator'] == 'None') {
@@ -1284,57 +1286,79 @@ class QueryGenerator {
 			}
 			$this->endGroup();
 		} else {
+			
 			if(isset($input['search_field']) && $input['search_field'] !="") {
-				$fieldName=vtlib_purify($input['search_field']);
-			} else {
-				return ;
-			}
-			if($this->conditionInstanceCount > 0) {
-				$this->startGroup(self::$AND);
-			} else {
-				$this->startGroup('');
-			}
-			$moduleFields = $this->meta->getModuleFields();
-			$field = $moduleFields[$fieldName];
-			$type = $field->getFieldDataType();
-			if(isset($input['search_text']) && $input['search_text']!="") {
-				// search other characters like "|, ?, ?" by jagi
-				$value = $input['search_text'];
-				$stringConvert = function_exists(iconv) ? @iconv("UTF-8",$default_charset,$value)
-						: $value;
-				if(!$this->isStringType($type)) {
-					$value=trim($stringConvert);
+				$search_fields = $input['search_field'];
+				$search_texts = $input['search_text'];
+				$operators = $input['operator'];
+				//ED150414 may be array of fields, then values and operators are also arrays
+				if(is_array($search_fields)){
+					if(!is_array($search_texts))
+						$search_texts = array($search_texts);
+					if(!is_array($operators))
+						$operators = array($operators);
+					for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++)
+						if(!($search_texts[$i] == '' && $operators[$i] == 'e'))
+							$this->addUserSearchConditionUnique($search_fields[$i], $search_texts[$i], $operators[$i]);
 				}
+				else	//original
+					$this->addUserSearchConditionUnique($search_fields, $search_texts, $operators);
+			}
+		}
+	}
+	
+	/* ED150414
+	 * Add a group
+	 * (extracted from above)
+	 **/
+	private function addUserSearchConditionUnique($search_field, $search_text, $operator){
+		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator);
+		$fieldName=vtlib_purify($search_field);
+		if($this->conditionInstanceCount > 0) {
+			$this->startGroup(self::$AND);
+		} else {
+			$this->startGroup('');
+		}
+		$moduleFields = $this->meta->getModuleFields();
+		$field = $moduleFields[$fieldName];
+		$type = $field->getFieldDataType();
+		if(isset($search_text) && $search_text!="") {
+			// search other characters like "|, ?, ?" by jagi
+			$value = $search_text;
+			$stringConvert = function_exists(iconv) ? @iconv("UTF-8",$default_charset,$value)
+					: $value;
+			if(!$this->isStringType($type)) {
+				$value=trim($stringConvert);
+			}
 
-				if($type == 'picklist') {
-					global $mod_strings;
-					// Get all the keys for the for the Picklist value
-					$mod_keys = array_keys($mod_strings, $value);
-					if(sizeof($mod_keys) >= 1) {
-						// Iterate on the keys, to get the first key which doesn't start with LBL_      (assuming it is not used in PickList)
-						foreach($mod_keys as $mod_idx=>$mod_key) {
-							$stridx = strpos($mod_key, 'LBL_');
-							// Use strict type comparision, refer strpos for more details
-							if ($stridx !== 0) {
-								$value = $mod_key;
-								break;
-							}
+			if($type == 'picklist') {
+				global $mod_strings;
+				// Get all the keys for the for the Picklist value
+				$mod_keys = array_keys($mod_strings, $value);
+				if(sizeof($mod_keys) >= 1) {
+					// Iterate on the keys, to get the first key which doesn't start with LBL_      (assuming it is not used in PickList)
+					foreach($mod_keys as $mod_idx=>$mod_key) {
+						$stridx = strpos($mod_key, 'LBL_');
+						// Use strict type comparision, refer strpos for more details
+						if ($stridx !== 0) {
+							$value = $mod_key;
+							break;
 						}
 					}
 				}
-				if($type == 'currency') {
-					// Some of the currency fields like Unit Price, Total, Sub-total etc of Inventory modules, do not need currency conversion
-					if($field->getUIType() == '72') {
-						$value = CurrencyField::convertToDBFormat($value, null, true);
-					} else {
-						$currencyField = new CurrencyField($value);
-						$value = $currencyField->getDBInsertedValue();
-					}
+			}
+			if($type == 'currency') {
+				// Some of the currency fields like Unit Price, Total, Sub-total etc of Inventory modules, do not need currency conversion
+				if($field->getUIType() == '72') {
+					$value = CurrencyField::convertToDBFormat($value, null, true);
+				} else {
+					$currencyField = new CurrencyField($value);
+					$value = $currencyField->getDBInsertedValue();
 				}
 			}
-			if(!empty($input['operator'])) {
-				$operator = $input['operator'];
-			} elseif(trim(strtolower($value)) == 'null'){
+		}
+		if(empty($operator)) {
+			if(trim(strtolower($value)) == 'null'){
 				$operator = 'e';
 			} else {
 				if(!$this->isNumericType($type) && !$this->isDateType($type)) {
@@ -1343,9 +1367,9 @@ class QueryGenerator {
 					$operator = 'h';
 				}
 			}
-			$this->addCondition($fieldName, $value, $operator);
-			$this->endGroup();
 		}
+		$this->addCondition($fieldName, $value, $operator);
+		$this->endGroup();
 	}
 
 	public function getDashBoardConditionList() {

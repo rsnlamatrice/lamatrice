@@ -1939,82 +1939,15 @@ jQuery.Class("Vtiger_List_Js",{
 			}
 		});
 		listViewPageDiv.on('change','.listViewHeaders.filters :input',function(e) {
-			var $input = jQuery(e.currentTarget)
-			//, $th = $input.parents('th:first')
-			, searchValue = $input.val()//TODO Checkbox : On click event + e.currentTarget.checked
-			, searchType = $input.attr('data-field-type')
-			, searchKey = $input.attr('data-field-name')
-			, operator = /^\s*([\=\>\<\!]+|[\!N]?IN\s|[\!N]?PARMIS\s)\s*(.*)$/i.exec(searchValue);
-			if (operator === null) {
-				operator = $input.attr('data-operator');
-			}
-			else {
-				searchValue = operator[2];
-				if (operator != null)
-					operator = operator[1].trim();
-			}
-			if (operator != null) {
-				//see include\QueryGenerator\QueryGenerator.php : line 1051
-				switch(operator){
-				case '=' :
-					operator = 'e';
-					break;
-				case '!' :
-				case '<>' :
-					operator = searchValue.substr('%') < 0 ? 'n' : 'k';
-					break;
-				case '>' :
-					operator = 'g';
-					break;
-				case '>=' :
-					operator = 'h';
-					break;
-				case '<' :
-					operator = 'l';
-					break;
-				case '<=' :
-					operator = 'm';
-					break;
-				case '%' : // like % %
-					operator = 'c';
-					break;
-				case 'IN' :
-				case 'PARMIS' :
-					operator = 'vwi';
-					break;
-				case 'NIN' :
-				case 'NPARMIS' :
-				case '!PARMIS' :
-					operator = 'vwx';
-					break;
-				}
-			}
-			else
-				operator = 's';
-			if (operator == 's') 
-				switch (searchType) {
-				case 'date':
-					operator = 'e';
-					break;
-				case 'integer':
-				case 'currency':
-				case 'double':
-					operator = 'h';
-					break;
-				case 'multipicklist' :
-					operator = 'c';
-					break;
-				default:
-					break;
-				}
+			
 			var cvId = thisInstance.getCurrentCvId();
-			var urlParams = {
+			var urlParams = thisInstance.getHeadersFiltersUrlParams(e, {
 				"viewname" : cvId,
-				"search_key" : searchKey,
-				"search_value" : searchValue,
-				"operator" : operator,
+				"search_key" : [],
+				"search_value" : [],
+				"operator" : [],
 				"page"	:	1
-			}
+			});
 			jQuery('#recordsCount').val('');
 			//To Set the page number as first page
 			jQuery('#pageNumber').val('1');
@@ -2031,4 +1964,95 @@ jQuery.Class("Vtiger_List_Js",{
 			);
 		});
 	},
+	
+	/* ED150412
+	 * Function to register change in header filter inputs
+	 */
+	getHeadersFiltersUrlParams : function(e, urlParams) {
+		
+		jQuery(e.currentTarget).parents('.listViewHeaders.filters:first').find(':input[data-field-name]').each(function(){
+			var $input = jQuery(this)
+			//, $th = $input.parents('th:first')
+			, searchValue = $input.val()//TODO Checkbox : On click event + e.currentTarget.checked
+			if (searchValue == ''
+			|| ($input[0].tagName == 'SELECT') && searchValue == ' ')
+				return;
+			var searchType = $input.attr('data-field-type')
+			, searchKey = $input.attr('data-field-name')
+			, operator = /^\s*([\=\>\<\!\%]+|\%\-|[\!N]?IN\s|[\!N]?PARMIS\s)\s*(.*)$/i.exec(searchValue);
+			if (operator === null) {
+				operator = $input.attr('data-operator');
+			}
+			else {
+				searchValue = operator[2];
+				if (operator != null)
+					operator = operator[1].trim().toUpperCase();
+			}
+			if (operator != null) {
+				//see include\QueryGenerator\QueryGenerator.php : line 1051
+				switch(operator){
+				 case '=' :
+					operator = 'e';
+					break;
+				 case '!' :
+				 case '<>' :
+					operator = searchValue.substr('%') < 0 ? 'n' : 'k';
+					break;
+				 case '!%' :
+				 case '<>%' :
+					operator = 'k';
+					break;
+				 case '>' :
+					operator = 'g';
+					break;
+				 case '>=' :
+					operator = 'h';
+					break;
+				 case '<' :
+					operator = 'l';
+					break;
+				 case '<=' :
+					operator = 'm';
+					break;
+				 case '%' : // like % %
+					operator = 'c';
+					break;
+				 case '%-' : // ends with
+					operator = 'ew';
+					break;
+				 case 'IN' :
+				 case 'PARMIS' :
+					operator = 'vwi';
+					break;
+				 case 'NIN' :
+				 case 'NPARMIS' :
+				 case '!PARMIS' :
+					operator = 'vwx';
+					break;
+				}
+			}
+			else
+				operator = 's';
+			if (operator == 's') 
+				switch (searchType) {
+				 case 'date':
+					operator = 'e';
+					break;
+				 case 'integer':
+				 case 'currency':
+				 case 'double':
+					operator = 'h';
+					break;
+				 case 'multipicklist' :
+					operator = 'c';
+					break;
+				 default:
+					break;
+				}
+			urlParams.search_key.push(searchKey);
+			urlParams.search_value.push(searchValue);
+			urlParams.operator.push(operator);
+		});
+		return urlParams;
+	}
 });
