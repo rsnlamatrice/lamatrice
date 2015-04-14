@@ -744,6 +744,7 @@ class QueryGenerator {
 		$baseTableIndex = $moduleTableIndexList[$baseTable];
 		$groupSql = $this->groupInfo;
 		$fieldSqlList = array();
+		
 		foreach ($this->conditionals as $index=>$conditionInfo) {
 			$fieldName = $conditionInfo['name'];
 			$field = $moduleFieldList[$fieldName];
@@ -1205,6 +1206,7 @@ class QueryGenerator {
 	}
 
 	public function addUserSearchConditions($input) {
+		
 		global $log,$default_charset;
 		if($input['searchtype']=='advance') {
 
@@ -1229,6 +1231,7 @@ class QueryGenerator {
 			} else {
 				$this->startGroup('');
 			}
+			
 			foreach ($advfilterlist as $groupindex=>$groupcolumns) {
 				$filtercolumns = $groupcolumns['columns'];
 				if(count($filtercolumns) > 0) {
