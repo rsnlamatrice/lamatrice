@@ -123,10 +123,17 @@ class RSN_CogilogFacturesRSN_Import {
 			, ( "ligne_fact"."quantite" ) AS "quantite", CASE WHEN ( "produit"."codetva" = 0 ) THEN "produit"."achat" ELSE "produit"."achat" * ( 1 + ( "codetauxtva"."taux" / 100 ) ) END AS "prixachatttc"
 			, "famille"."nom" AS "produit_famille"
 			, "ligne_fact".position AS "position_ligne"
-			, "produit"."id" AS "id_produit", "produit"."nom" AS "nom_produit", "produit"."code" AS "code_produit", "produit"."gererstock" AS "gererstock"
-			, "produit"."prix" AS "prixvente_produit", "produit"."stockqte" AS "stock_produit"
-			, "produit"."compte" AS "compte_produit", "produit"."section" AS "section_produit"
+			, "produit"."id" AS "id_produit"
+			, "produit"."nom" AS "nom_produit"
+			, "produit"."code" AS "code_produit"
+			, "produit"."gererstock" AS "gererstock"
+			, "produit"."stockdivers" AS "stockdivers"
+			, "produit"."prix" AS "prixvente_produit"
+			, "produit"."stockqte" AS "stock_produit"
+			, "produit"."compte" AS "compte_produit"
+			, "produit"."section" AS "section_produit"
 			, "produit"."codetva" AS "tva_produit"
+			, "produit"."indisponible" AS "indisponible"
 			FROM gfactu00002 facture
 			JOIN gclien00002 cl
 				ON facture.id_gclien = cl.id
@@ -170,7 +177,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		echo("<pre>Nbre de lignes de factures à importer : ".$rows[0]['nbrerestantes']."</pre>");
 		
 		$query .= ' ORDER BY facture.id, position_ligne ASC
-                    LIMIT 1000 ';
+                    LIMIT 200 ';
 		//var_dump($query);
 		return self::getPGDataRows($query);
     }
@@ -193,6 +200,8 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		foreach($facture['lignes'] as $ligne_facture){
 			$product = self::importLigneFacture($ligne_facture, $invoice, $contact, $sequence++);
 		}
+		//Update totals
+		
 		return $invoice;
 	}
 	
@@ -296,8 +305,8 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$record->set('duedate', $srcRow['echeance']);
 			$record->set('contact_id', $contact->getId());
 			$record->set('account_id', $account->getId());
-			$record->set('received', $srcRow['netht']+$srcRow['nettva']);
-			$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
+			$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
+			//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 			$record->set('typedossier', 'Facture'); //TODO
 			$record->set('invoicestatus', 'Paid');//TODO
                     
@@ -309,15 +318,16 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
                         }
 			$record->set('MODE', '');
 			//This field is not manage by save()
-            $cogId = str_pad ($srcRow['id'], 6, '0', STR_PAD_LEFT);
+			$cogId = str_pad ($srcRow['id'], 6, '0', STR_PAD_LEFT);
 			$record->set('invoice_no','COG'.$cogId);
 			//set invoice_no
 			$query = "UPDATE vtiger_invoice
 				SET invoice_no = CONCAT('COG', ?)
+				, total = ?
 				WHERE invoiceid = ?
 				LIMIT 1
 			";
-			$result = $db->pquery($query, array($cogId, $record->getId()));
+			$result = $db->pquery($query, array($cogId, $srcRow['netht']+$srcRow['nettva'], $record->getId()));
 		}
 		
 		return $record;		
@@ -340,7 +350,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		$discount_amount = $srcRow['total_ligne_ht'] - $qty * $listprice;
 		
 		$db = PearDatabase::getInstance();
-		$query ="insert into vtiger_inventoryproductrel(id, productid, sequence_no, quantity, listprice, discount_amount) values(?,?,?,?,?,?)";
+		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount) VALUES(?,?,?,?,?,?)";
 		$qparams = array($invoice->getId(), $product->getId(), $sequence, $qty, $listprice, $discount_amount);
 		//$db->setDebug(true);
 		$db->pquery($query, $qparams);
@@ -352,7 +362,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		if(!$product)
 			$product = self::findService($srcRow);
 		if(!$product)
-			if($srcRow['gererstock'])
+			if($srcRow['gererstock'] == 't' || $srcRow['stockdivers'] != 0)
 				$product = self::importProduct($srcRow);
 			else
 				$product = self::importService($srcRow);
@@ -382,7 +392,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		$query = "SELECT serviceid
 			FROM vtiger_service
                         JOIN vtiger_crmentity
-                            ON vtiger_service.productid = vtiger_crmentity.crmid
+                            ON vtiger_service.serviceid = vtiger_crmentity.crmid
 			WHERE productcode = ?
 			ORDER BY vtiger_crmentity.deleted ASC
 		";
@@ -395,7 +405,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 	}
 	
 	private static function importProduct($srcRow){
-		
+		echo ("<pre>Création du produit ".$srcRow['nom_produit']." (".$srcRow['code_produit'].") : ".$srcRow['prixvente_produit']." &euro;</pre>");
 		$record = Vtiger_Record_Model::getCleanInstance('Products');
 		$record->set('MODE', 'create');
 		$record->set('productname', $srcRow['nom_produit']);
@@ -403,8 +413,9 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		$record->set('glacct', $srcRow['compte_produit']);
 		$record->set('rsnsectionanal', $srcRow['section_produit']);
 		$record->set('qtyinstock', $srcRow['stock_produit']);
-		$record->set('unit_price', $srcRow['prixvente_produit']);
+		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
 		$record->set('taxclass', $srcRow['tva_produit']);
+		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
 	    
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
@@ -418,16 +429,18 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		return $record;
 	}
 	private static function importService($srcRow){
+		echo ("<pre>Création du service ".$srcRow['nom_produit']." (".$srcRow['code_produit'].") : ".$srcRow['prixvente_produit']." &euro;</pre>");
 		
 		$record = Vtiger_Record_Model::getCleanInstance('Services');
 		$record->set('MODE', 'create');
-		$record->set('productname', $srcRow['nom_produit']);
+		$record->set('servicename', $srcRow['nom_produit']);
 		$record->set('productcode', $srcRow['code_produit']);
 		$record->set('glacct', $srcRow['compte_produit']);
 		$record->set('rsnsectionanal', $srcRow['section_produit']);
 		$record->set('qtyinstock', $srcRow['stock_produit']);
-		$record->set('unit_price', $srcRow['prixvente_produit']);
+		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
 		$record->set('taxclass', $srcRow['tva_produit']);
+		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
 	    
 		//$db->setDebug(true);
 		$record->save();

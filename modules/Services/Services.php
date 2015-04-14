@@ -695,10 +695,12 @@ class Services extends CRMEntity {
 			FROM vtiger_invoice
 			INNER JOIN vtiger_crmentity
 				ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
-			LEFT OUTER JOIN vtiger_account
-				ON vtiger_account.accountid = vtiger_invoice.accountid
 			INNER JOIN vtiger_inventoryproductrel
 				ON vtiger_inventoryproductrel.id = vtiger_invoice.invoiceid
+			LEFT OUTER JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid
+			LEFT OUTER JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_invoice.accountid
 			LEFT JOIN vtiger_groups
 				ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 			LEFT JOIN vtiger_users

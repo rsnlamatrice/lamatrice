@@ -145,15 +145,18 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
 		$operator = $request->get('operator');
+			
 		if(!empty($operator)) {
 			$listViewModel->set('operator', $operator);
 			$viewer->assign('OPERATOR',$operator);
 			$viewer->assign('ALPHABET_VALUE',$searchValue);
 		}
-		if(!empty($searchKey) && !empty($searchValue)) {
+		//ED150414 $searchValue == 0 is acceptable
+		if(!empty($searchKey) && (!empty($searchValue) || ($searchValue == '0'))) {
 			$listViewModel->set('search_key', $searchKey);
 			$listViewModel->set('search_value', $searchValue);
 		}
+		
 		if(!$this->listViewHeaders){
 			$this->listViewHeaders = $listViewModel->getListViewHeaders();
 		}

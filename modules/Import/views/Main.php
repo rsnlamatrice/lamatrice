@@ -188,7 +188,7 @@ class Import_Main_View extends Vtiger_View_Controller{
 
 	public function queueDataImport() {
 		$configReader = new Import_Config_Model();
-		$immediateImportRecordLimit = 500000; //$configReader->get('immediateImportLimit');
+		$immediateImportRecordLimit = $configReader->get('immediateImportLimit');
 
 		$numberOfRecordsToImport = $this->numberOfRecords;
 		if($numberOfRecordsToImport > $immediateImportRecordLimit) {
