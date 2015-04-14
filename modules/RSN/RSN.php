@@ -92,35 +92,4 @@ class RSN {
 		if(isset($blockInstance))
 			$blockInstance->addField($fieldInstance);
 	}
-	
-	
-	/* importation de la liste des valeurs utilisées comme orgine (leadsource dans vtiger)
-	 * depuis rsn_4d.adresse.origine vers vtiger_leadsource
-	
-	 * à la table vtiger_leadsource, j'ai ajouté un champ is4D pour signifier l'origine de l'origine.
-	 */
-	static function import4D_origines_contacts(){
-		//non testé par $db->execute()
-		return "
-			SET @num_row = 0;
-			SET @valueid = 0;
-			SET @picklistvalueid = 0;
-			SELECT @valueid := MAX(leadsourceid) FROM vtiger_leadsource; 
-			SELECT @picklistvalueid := vtiger_picklistvalues_seq.id + 1 FROM vtiger_picklistvalues_seq; 
-			INSERT INTO `vtiger_leadsource`(`leadsource`, `presence`, `picklist_valueid`, `sortorderid`, is4D) 
-				SELECT o.origine, 1, @picklistvalueid + (@num_row := @num_row + 1), IFNULL(c.ordredetri, @valueid + @num_row ), 1
-				FROM (SELECT DISTINCT origine
-					FROM rsn_4d.adresse
-					WHERE origine <> '') o
-				LEFT JOIN rsn_4d.critere c
-					ON o.origine = c.nom
-				WHERE o.origine NOT IN (SELECT leadsource FROM `vtiger_leadsource`)
-			;
-			
-			UPDATE `vtiger_leadsource_seq` SET `id`=@valueid + @num_row + 1
-			;
-			UPDATE `vtiger_picklistvalues_seq` SET `id`=@picklistvalueid + @num_row + 1
-			;
-		";
-	}
 }
