@@ -5,6 +5,8 @@
  *
  */
 
+ define('ASSIGNEDTO_ALL', '7');
+ 
 class RSN_CogilogFacturesRSN_Import {
 
 	/* get postgresql data rows */
@@ -177,7 +179,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		echo("<pre>Nbre de lignes de factures à importer : ".$rows[0]['nbrerestantes']."</pre>");
 		
 		$query .= ' ORDER BY facture.id, position_ligne ASC
-                    LIMIT 200 ';
+                    LIMIT 20 ';
 		//var_dump($query);
 		return self::getPGDataRows($query);
     }
@@ -250,10 +252,11 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			//set contact_no
 			$query = "UPDATE vtiger_contactdetails
 				SET contact_no = CONCAT('C', ?)
+				, smownerid = ?
 				WHERE contactid = ?
 				LIMIT 1
 			";
-			$result = $db->pquery($query, array($codeClient, $contact->getId()));
+			$result = $db->pquery($query, array($codeClient, ASSIGNEDTO_ALL, $contact->getId()));
 		}
 		
 		return $contact;
@@ -324,10 +327,11 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$query = "UPDATE vtiger_invoice
 				SET invoice_no = CONCAT('COG', ?)
 				, total = ?
+				, smownerid = ?
 				WHERE invoiceid = ?
 				LIMIT 1
 			";
-			$result = $db->pquery($query, array($cogId, $srcRow['netht']+$srcRow['nettva'], $record->getId()));
+			$result = $db->pquery($query, array($cogId, $srcRow['netht']+$srcRow['nettva'], ASSIGNEDTO_ALL, $record->getId()));
 		}
 		
 		return $record;		
