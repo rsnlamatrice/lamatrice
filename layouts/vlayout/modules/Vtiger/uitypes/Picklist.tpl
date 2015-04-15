@@ -20,7 +20,8 @@ ED141024
 {assign var=PICKLIST_VALUES value=$FIELD_MODEL->getPicklistValues($PICKLIST_DATA)}
 {/if}
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
-<select class="chzn-select {if $OCCUPY_COMPLETE_WIDTH} row-fluid {/if}" name="{$FIELD_MODEL->getFieldName()}" data-validation-engine="validate[{if $FIELD_MODEL->isMandatory() eq true} required,{/if}funcCall[Vtiger_Base_Validator_Js.invokeValidation]]"
+{* AV150415 : add uiclass *}
+<select class="chzn-select {if $OCCUPY_COMPLETE_WIDTH} row-fluid {/if} {$FIELD_MODEL->get('uiclass')}" name="{$FIELD_MODEL->getFieldName()}" data-validation-engine="validate[{if $FIELD_MODEL->isMandatory() eq true} required,{/if}funcCall[Vtiger_Base_Validator_Js.invokeValidation]]"
 	data-fieldinfo='{$FIELD_INFO|escape}' {if !empty($SPECIAL_VALIDATOR)}data-validator='{Zend_Json::encode($SPECIAL_VALIDATOR)}'{/if} data-selected-value='{$FIELD_MODEL->get('fieldvalue')}'
 	>
 		{if $FIELD_MODEL->isEmptyPicklistOptionAllowed()}<option value="">{vtranslate('LBL_SELECT_OPTION','Vtiger')}</option>{/if}

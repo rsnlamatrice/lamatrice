@@ -21,8 +21,9 @@
 {if !isset($INPUT_CLASS)}
 		{assign var="INPUT_CLASS" value='input-large'}
 {/if}
+{* AV150415 : add uiclass *}
 <input id="{$MODULE}_editView_fieldName_{$FIELD_NAME}" type="text" 
-	   class="{$INPUT_CLASS} {if $FIELD_MODEL->isNameField()}nameField{/if}" 
+	   class="{$INPUT_CLASS} {if $FIELD_MODEL->isNameField()}nameField{/if} {$FIELD_MODEL->get('uiclass')}" 
 	   data-validation-engine="validate[{if $FIELD_MODEL->isMandatory() eq true}required,{/if}funcCall[Vtiger_Base_Validator_Js.invokeValidation]]" 
 	   name="{$FIELD_MODEL->getFieldName()}" 
 	   value="{$FIELD_MODEL->get('fieldvalue')}"

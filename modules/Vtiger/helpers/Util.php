@@ -243,6 +243,37 @@ class Vtiger_Util_Helper {
 		return $formatedDate;
 	}
 
+	/**
+	 * AV150415
+	 * @param $fieldname : the current field name.
+	 * @return the new field name.
+	 */
+	public static function getRelatedFieldName($fieldName) {
+    	/* ED150102
+		 * redirection exceptionnel de champ vers une table commune
+		 * TODO : extraire cette config
+		 * TODO : autres modules que Contacts ?
+		 */
+		switch($fieldName){
+		 case 'mailingstate': //module Contacts
+		 case 'otherstate': //module Contacts
+			$fieldName = 'rsnregion';
+			break;
+		 case 'bill_country':
+		 case 'ship_country':
+		 case 'country':
+		 case 'mailingcountry':
+		 case 'othercountry':
+		 case 'address_country':
+			$fieldName = 'rsncountry';
+			break;
+		 default:
+			break;
+		}
+		/* */
+		return $fieldName;
+    }
+
     /**
      * Function which will give the picklist values for a field
      * @param type $fieldName -- string
@@ -250,64 +281,94 @@ class Vtiger_Util_Helper {
      * @return type -- array of values
      */
     public static function getPickListValues($fieldName, &$picklistvaluesdata = FALSE) {
-	/* ED150102
-	 * redirection exceptionnel de champ vers une table commune
-	 * TODO : extraire cette config
-	 * TODO : autres modules que Contacts ?
-	 */
-	switch($fieldName){
-	 case 'mailingstate': //module Contacts
-	 case 'otherstate': //module Contacts
-		$fieldName = 'rsnregion';
-		break;
-	 case 'mailingcountry':
-		$fieldName = 'rsncountry';
-		break;
-	 default:
-		break;
-	}
-	/* */
-	
-	$cache = Vtiger_Cache::getInstance();
-        if($cache->getPicklistValues($fieldName, $picklistvaluesdata)) {
-            return $cache->getPicklistValues($fieldName);
-        }
-        $db = PearDatabase::getInstance();
+		$fieldName = self::getRelatedFieldName($fieldName); // AV150415
 
-	$uiColumns = false;
-	if(is_array($picklistvaluesdata))
-		$uiColumns = self::getPicklistUIColumns($fieldName);
-	$uicolor = TRUE;
-        $query = 'SELECT '.$fieldName;
-	if(is_array($uiColumns))
-		if(count($uiColumns) == 0)
-			$uiColumns = FALSE;
-		else
-			foreach($uiColumns as $column => $enabled)
-				if($enabled)
-					$query .= ', `' . $column . '`';
-	$query .= ' FROM vtiger_'.$fieldName.' order by sortorderid';
-	$result = $db->pquery($query, array());
-        $values = array();
-        $num_rows = $db->num_rows($result);
-        for($i=0; $i<$num_rows; $i++) {
-			//Need to decode the picklist values twice which are saved from old ui
-            $values[] = decode_html(decode_html($db->query_result($result,$i,$fieldName)));
-        }
-	if(is_array($uiColumns)){
-		for($i=0; $i<$num_rows; $i++) {
-			$data = array();
-			foreach($uiColumns as $column => $enabled)
-				if($enabled)
-					$data[$column] = $db->query_result($result, $i, $column);
-			$picklistvaluesdata[$values[$i]] = $data;
+		$cache = Vtiger_Cache::getInstance();
+	        if($cache->getPicklistValues($fieldName, $picklistvaluesdata)) {
+	            return $cache->getPicklistValues($fieldName);
+	        }
+	        $db = PearDatabase::getInstance();
+
+		$uiColumns = false;
+		if(is_array($picklistvaluesdata))
+			$uiColumns = self::getPicklistUIColumns($fieldName);
+		$uicolor = TRUE;
+	        $query = 'SELECT '.$fieldName;
+		if(is_array($uiColumns))
+			if(count($uiColumns) == 0)
+				$uiColumns = FALSE;
+			else
+				foreach($uiColumns as $column => $enabled)
+					if($enabled)
+						$query .= ', `' . $column . '`';
+		$query .= ' FROM vtiger_'.$fieldName.' order by sortorderid';
+		$result = $db->pquery($query, array());
+	        $values = array();
+	        $num_rows = $db->num_rows($result);
+	        for($i=0; $i<$num_rows; $i++) {
+				//Need to decode the picklist values twice which are saved from old ui
+	            $values[] = decode_html(decode_html($db->query_result($result,$i,$fieldName)));
+	        }
+		if(is_array($uiColumns)){
+			for($i=0; $i<$num_rows; $i++) {
+				$data = array();
+				foreach($uiColumns as $column => $enabled)
+					if($enabled)
+						$data[$column] = $db->query_result($result, $i, $column);
+				$picklistvaluesdata[$values[$i]] = $data;
+			}
+			//echo_callstack();
 		}
-		//echo_callstack();
-	}
-			
-	$cache->setPicklistValues($fieldName, $values, $picklistvaluesdata);
+				
+		$cache->setPicklistValues($fieldName, $values, $picklistvaluesdata);
         return $values;
     }
+
+    /**
+     * Function which will give the picklist values for a field
+     * @param type $fieldName -- string
+     * @param searchValue string: each data return must begin by the search value;
+     * &$picklistvaluesdata : more data (uicolor) ED141127
+     * @return type -- array of values
+     */
+    public static function getPickListValuesAsync($fieldName, $searchValue = "", &$picklistvaluesdata = FALSE) {
+		$fieldName = self::getRelatedFieldName($fieldName); // AV150415
+
+	    $db = PearDatabase::getInstance();
+
+		$uiColumns = false;
+		if(is_array($picklistvaluesdata))
+			$uiColumns = self::getPicklistUIColumns($fieldName);
+		$uicolor = TRUE;
+	        $query = 'SELECT '.$fieldName;
+		if(is_array($uiColumns))
+			if(count($uiColumns) == 0)
+				$uiColumns = FALSE;
+			else
+				foreach($uiColumns as $column => $enabled)
+					if($enabled)
+						$query .= ', `' . $column . '`';
+		$query .= ' FROM vtiger_'.$fieldName;
+		$query .= ' WHERE '.$fieldName.' LIKE "'.$searchValue.'%" order by sortorderid';
+		$result = $db->pquery($query, array());
+	        $values = array();
+	        $num_rows = $db->num_rows($result);
+	        for($i=0; $i<$num_rows; $i++) {
+				//Need to decode the picklist values twice which are saved from old ui
+	            $values[] = decode_html(decode_html($db->query_result($result,$i,$fieldName)));
+	        }
+		if(is_array($uiColumns)){
+			for($i=0; $i<$num_rows; $i++) {
+				$data = array();
+				foreach($uiColumns as $column => $enabled)
+					if($enabled)
+						$data[$column] = $db->query_result($result, $i, $column);
+				$picklistvaluesdata[$values[$i]] = $data;
+			}
+		}
+        return $values;
+    }
+
     /** ED141127
      * Function which will give the picklist uicolumns for a field
      * @param type $fieldName -- string

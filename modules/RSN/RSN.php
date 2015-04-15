@@ -19,14 +19,18 @@ class RSN {
  		if($eventType == 'module.postinstall') {
 			// TODO Handle actions after this module is installed.
 			$this->_registerLinks($moduleName);
+			$this->add_uiclass_field();
 		} else if ($eventType == 'module.enabled') {
 			$this->_registerLinks($moduleName);
 			$this->setTablesDefaultOwner();
+			$this->add_uiclass_field();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
+			$this->remove_uiclass_field();
 		} else if($eventType == 'module.preuninstall') {
 			// TODO Handle actions when this module is about to be deleted.
+			$this->remove_uiclass_field();
 		} else if($eventType == 'module.preupdate') {
 			// TODO Handle actions before this module is updated.
 		} else if($eventType == 'module.postupdate') {
@@ -63,6 +67,8 @@ class RSN {
 		$thisModuleInstance = Vtiger_Module::getInstance($moduleName);
 		if ($thisModuleInstance) {
 			$thisModuleInstance->addLink("HEADERCSS", "rsn.css", "layouts/vlayout/modules/RSN/resources/css/style.css");
+			$thisModuleInstance->addLink("HEADERSCRIPT", "ui-async.js", "layouts/vlayout/modules/RSN/resources/js/ui-async.js");
+
 		}
 	}
 
@@ -70,26 +76,25 @@ class RSN {
 		$thisModuleInstance = Vtiger_Module::getInstance($moduleName);
 		if ($thisModuleInstance) {
 			$thisModuleInstance->deleteLink("HEADERCSS", "rsn.css", "layouts/vlayout/modules/RSN/resources/css/style.css");
+			$thisModuleInstance->deleteLink("HEADERSCRIPT", "ui-async.js", "layouts/vlayout/modules/RSN/resources/js/ui-async.js");
 		}
 	}
-	
-	/* ajoute le champ accountboss pour identifier le référent du compte
-	 * ANNULE : utilisation du champ existant "reference"
+
+	/* AV150415
+	 * Add the 'uiclass' field in the field table.
 	 */ 
-	static function contact_addField_accountboss(){
-		
-		$sql = "ALTER TABLE `vtiger_contactdetails` ADD `accountboss` BOOLEAN NULL AFTER `accountid`";
-		
-		// ça n'a pas l'air de fonctionner...
-		$fieldInstance = new Vtiger_Field();
-		$fieldInstance->name = 'Référent du compte';
-		$fieldInstance->table = 'vtiger_contactdetails';
-		$fieldInstance->column = 'accountboss';
-		$fieldInstance->columntype = 'TINYINT(1)';
-		$fieldInstance->uitype = 56;
-		$fieldInstance->typeofdata = 'V~M';
-		
-		if(isset($blockInstance))
-			$blockInstance->addField($fieldInstance);
+	static function add_uiclass_field(){
+		$sql = "ALTER TABLE  `vtiger_field` ADD  `uiclass` VARCHAR( 64 ) NOT NULL";
+		$db = PearDatabase::getInstance();
+		$db->pquery($sql);
+	}
+
+	/* AV150415
+	 * remove the 'uiclass' field in the field table.
+	 */ 
+	static function remove_uiclass_field(){
+		$sql = "ALTER TABLE  `vtiger_field` DROP  `uiclass`";
+		$db = PearDatabase::getInstance();
+		$db->pquery($sql);
 	}
 }

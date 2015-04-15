@@ -240,35 +240,39 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 * ED141128 : $picklistvaluesdata  returns uicolor, uiicon, ...
 	 */
 	public function getPicklistValues(&$picklistvaluesdata = FALSE) {
-		$fieldDataType = $this->getFieldDataType();
-		if($this->getName() == 'hdnTaxType') return null;
-	
-		switch($fieldDataType){
-		case 'picklist':
-		case 'multipicklist':
-			$fieldPickListValues = array();
-			$currentUser = Users_Record_Model::getCurrentUserModel();
-			if($this->isRoleBased() && !$currentUser->isAdminUser()) {
-			    $userModel = Users_Record_Model::getCurrentUserModel();
-			    $picklistValues = Vtiger_Util_Helper::getRoleBasedPicklistValues($this->getName(), $userModel->get('roleid'), $picklistvaluesdata);
-			}else{
-			    $picklistValues = Vtiger_Util_Helper::getPickListValues($this->getName(), $picklistvaluesdata);
+		// AV150415: Do not return data if field is asynchronous.
+		if(strpos($this->uiclass, 'ui-async') === false) {
+			$fieldDataType = $this->getFieldDataType();
+			if($this->getName() == 'hdnTaxType') return null;
+		
+			switch($fieldDataType){
+			case 'picklist':
+			case 'multipicklist':
+				$fieldPickListValues = array();
+				$currentUser = Users_Record_Model::getCurrentUserModel();
+				if($this->isRoleBased() && !$currentUser->isAdminUser()) {
+				    $userModel = Users_Record_Model::getCurrentUserModel();
+				    $picklistValues = Vtiger_Util_Helper::getRoleBasedPicklistValues($this->getName(), $userModel->get('roleid'), $picklistvaluesdata);
+				}else{
+				    $picklistValues = Vtiger_Util_Helper::getPickListValues($this->getName(), $picklistvaluesdata);
+				}
+				foreach($picklistValues as $value) {
+					$fieldPickListValues[$value] = vtranslate($value,$this->getModuleName());
+				}
+				return $fieldPickListValues;
+			case 'buttonSet':
+				$fieldPickListValues = array();
+				$module = $this->getModule();
+				$picklistValues = $module->getPicklistValuesDetails($this->getName());
+				foreach($picklistValues as $valueKey=>$value) {
+					$fieldPickListValues[$valueKey] = vtranslate($value['label'],$this->getModuleName());
+				}
+				return $fieldPickListValues;
+			default:
+				break;
 			}
-			foreach($picklistValues as $value) {
-				$fieldPickListValues[$value] = vtranslate($value,$this->getModuleName());
-			}
-			return $fieldPickListValues;
-		case 'buttonSet':
-			$fieldPickListValues = array();
-			$module = $this->getModule();
-			$picklistValues = $module->getPicklistValuesDetails($this->getName());
-			foreach($picklistValues as $valueKey=>$value) {
-				$fieldPickListValues[$valueKey] = vtranslate($value['label'],$this->getModuleName());
-			}
-			return $fieldPickListValues;
-		default:
-			break;
 		}
+
 		return null;
     }
 
