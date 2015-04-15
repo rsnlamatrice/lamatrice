@@ -64,7 +64,6 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$this->viewName = $request->get('viewname');
-		
 		$this->initializeListViewContents($request, $viewer);
 		$viewer->assign('VIEW', $request->get('view'));
 		$viewer->assign('MODULE_MODEL', $moduleModel);
@@ -148,8 +147,8 @@ class Vtiger_List_View extends Vtiger_Index_View {
 			
 		if(!empty($operator)) {
 			$listViewModel->set('operator', $operator);
-			$viewer->assign('OPERATOR',$operator);
-			$viewer->assign('ALPHABET_VALUE',$searchValue);
+			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
+			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
 		}
 		//ED150414 $searchValue == 0 is acceptable
 		if(!empty($searchKey) && (!empty($searchValue) || ($searchValue == '0'))) {
@@ -213,6 +212,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 	 * @param Vtiger_Request $request
 	 */
 	function getRecordsCount(Vtiger_Request $request) {
+		
 		$moduleName = $request->getModule();
 		$cvId = $request->get('viewname');
 		$count = $this->getListViewCount($request);

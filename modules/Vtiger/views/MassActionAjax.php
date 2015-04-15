@@ -66,9 +66,9 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		$searchValue = $request->get('search_value');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
-			$viewer->assign('OPERATOR',$operator);
-			$viewer->assign('ALPHABET_VALUE',$searchValue);
-			$viewer->assign('SEARCH_KEY',$searchKey);
+			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
+			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
+			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
 		}
 	
 		echo $viewer->view('MassEditForm.tpl',$moduleName,true);
@@ -97,9 +97,9 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		$searchValue = $request->get('search_value');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
-			$viewer->assign('OPERATOR',$operator);
+			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
 			$viewer->assign('ALPHABET_VALUE',$searchValue);
-			$viewer->assign('SEARCH_KEY',$searchKey);
+			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
 		}
 
 		echo $viewer->view('AddCommentForm.tpl',$moduleName,true);
@@ -217,9 +217,9 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		$searchValue = $request->get('search_value');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
-			$viewer->assign('OPERATOR',$operator);
-			$viewer->assign('ALPHABET_VALUE',$searchValue);
-			$viewer->assign('SEARCH_KEY',$searchKey);
+			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
+			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
+			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
 		}
 		$parentModule = $request->get('sourceModule');
 		$parentRecord = $request->get('sourceRecord');
@@ -273,9 +273,9 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		$searchValue = $request->get('search_value');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
-			$viewer->assign('OPERATOR',$operator);
-			$viewer->assign('ALPHABET_VALUE',$searchValue);
-			$viewer->assign('SEARCH_KEY',$searchKey);
+			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
+			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
+			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
 		}
 
 		echo $viewer->view('SendSMSForm.tpl', $moduleName, true);

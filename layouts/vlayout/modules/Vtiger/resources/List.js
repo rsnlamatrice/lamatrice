@@ -244,14 +244,14 @@ jQuery.Class("Vtiger_List_Js",{
 				function(e) {
 
 					var deleteURL = url+'&viewname='+cvId+'&selected_ids='+selectedIds+'&excluded_ids='+excludedIds;
-                    var listViewInstance = Vtiger_List_Js.getInstance();
-                    var searchValue = listViewInstance.getAlphabetSearchValue();
-
-                   	if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
-                        deleteURL += '&search_key='+listViewInstance.getRequestSearchField();
-                        deleteURL += '&search_value='+searchValue;
-                        deleteURL += '&operator='+listViewInstance.getSearchOperator();
-                    }
+					var listViewInstance = Vtiger_List_Js.getInstance();
+					var searchValue = listViewInstance.getAlphabetSearchValue();
+		
+					if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
+						deleteURL += '&search_key='+listViewInstance.getRequestSearchField('string')
+							+ '&search_value='+(typeof searchValue == 'object' ? JSON.stringify(searchValue) : searchValue)
+							+ '&operator='+listViewInstance.getSearchOperator('string');
+					}
 					var deleteMessage = app.vtranslate('JS_RECORDS_ARE_GETTING_DELETED');
 					var progressIndicatorElement = jQuery.progressIndicator({
 						'message' : deleteMessage,
@@ -445,7 +445,9 @@ jQuery.Class("Vtiger_List_Js",{
 		var searchValue = listViewInstance.getAlphabetSearchValue();
 
 		if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
-			exportActionUrl += '&search_key='+listViewInstance.getRequestSearchField()+'&search_value='+searchValue+'&operator='+listViewInstance.getSearchOperator();
+			exportActionUrl += '&search_key='+listViewInstance.getRequestSearchField('string')
+				+'&search_value='+(typeof searchValue == 'object' ? JSON.stringify(searchValue) : searchValue)
+				+'&operator='+listViewInstance.getSearchOperator('string');
 		    }
 		    window.location.href = exportActionUrl;
 	},
@@ -906,10 +908,20 @@ jQuery.Class("Vtiger_List_Js",{
 
 	/* ED150412 added #requestSearchKey
 	 */
-	getRequestSearchField : function() {
+	getRequestSearchField : function(format_type) {
 		var value = jQuery("#requestSearchKey").val();
-		if (value)
+		if (value){
+			/*ED150414
+			 * tests if it is a json value (eg ["fieldname1", "fieldname2"] )
+			*/
+			if (typeof value === 'string'
+			&& /^\[(\".*\",?)*\]$/.test(value))
+				if (format_type == 'string') 
+					return this.unescapeHtml(value);
+				else
+					try { return eval(value); } catch(ex) {}
 			return value;
+		}
 		return jQuery("#alphabetSearchKey").val();
 	},
 
@@ -919,20 +931,44 @@ jQuery.Class("Vtiger_List_Js",{
 		return jQuery("#alphabetSearchKey").val();
 	},
 
-	getAlphabetSearchValue : function() {
-		return jQuery("#alphabetValue").val();
+	getAlphabetSearchValue : function(format_type) {
+		var value = jQuery("#alphabetValue").val();
+		/*ED150414
+		 * tests if it is a json value (eg [">10", 1] )
+		 * TODO : isn't it dangerous ?
+		*/
+		if (typeof value === 'string'
+		&& /^\[[\s\S]*\]$/.test(value))
+			if (format_type == 'string') 
+				return this.unescapeHtml(value);
+			else
+				try { return eval(this.unescapeHtml(value)); } catch(ex) {}
+		return value;
 	},
 
 	/* ED150412 
 	 */
-	getSearchOperator : function() {
+	getSearchOperator : function(format_type) {
 		var value = jQuery("#Operator").val();
 		if (!value)
 			return 's';
+		if (typeof value === 'string'
+		&& /^\[[\s\S]*\]$/.test(value))
+			if (format_type == 'string') 
+				return this.unescapeHtml(value);
+			else
+				try { return eval(value); } catch(ex) {}
 		return value;
 	},
 
-
+	unescapeHtml : function(safe) {
+		return safe.replace(/&amp;/g, '&')
+		    .replace(/&lt;/g, '<')
+		    .replace(/&gt;/g, '>')
+		    .replace(/&quot;/g, '"')
+		    .replace(/&#039;/g, "'");
+	 },
+	 
 	/*
 	 * Function to check whether atleast one record is checked
 	 */
