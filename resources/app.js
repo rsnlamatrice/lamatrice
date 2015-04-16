@@ -825,7 +825,6 @@ var app = {
 			var chosenContainer = $(field).parents('div.chzn-container:first');
 			var selectElement = this.getSelectElementFromChosen(chosenContainer);
 			this.getFieldData(selectElement.attr('name'), value, function(fieldData) {// tmp name
-				console.log("totototot");
 				$(selectElement).empty();
 				for (var i=0; i < fieldData.length; ++i) {
 					var newOption = $('<option value="' + fieldData[i] + '">' + fieldData[i] + '</option>');
