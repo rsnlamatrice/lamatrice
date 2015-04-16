@@ -467,6 +467,7 @@ var app = {
 		 * */
 		this.registerEventForColorPickerFields(parentElement,registerForAddon,customParams);
 		this.registerEventForButtonSetFields(parentElement,registerForAddon,customParams);
+		this.registerEventForAsyncFields(parentElement,registerForAddon,customParams);
 		
 		if(typeof parentElement == 'undefined') {
 			parentElement = jQuery('body');
@@ -708,6 +709,105 @@ var app = {
 			return;
 		}
 		element.buttonset();
+	},
+
+	/**
+	 * Function to register async fields
+	 * AV150416
+	 */
+	registerEventForAsyncFields : function(parentElement,registerForAddon, customParams) {
+		var self = this;
+		var elements;
+
+		if(typeof parentElement == 'undefined') {
+			parentElement = jQuery('body');
+		}
+
+		parentElement = jQuery(parentElement);
+
+		if(parentElement.is('.ui-async')){
+			elements = parentElement; // fonction with the each fonction ??
+		}else{
+			elements = jQuery('.ui-async', parentElement);
+		}
+		if(elements.length == 0){
+			return;
+		}
+
+		elements.each(function( index ) {
+			//TOTO: generalized auto-complete for all field tag, not only for <input type="text">
+			$( this ).autocomplete({
+				source: []
+			});
+			$( this ).on('input', function(e) {
+				self.updateList($( this) );
+			});
+		});
+	},
+
+	/**
+	 * Function to get asynchronous field data using ajax and a cache.
+	 * AV150416
+	 */
+	getFieldData: function() {
+		var cache = [];
+		return function(searchField, searchValue, callback) {
+			searchValue = searchValue.toLowerCase();
+			if (cache[searchField] !== undefined) {
+				for (var i = 1; i <= searchValue.length; ++i) {
+					var cacheValue = searchValue.substr(0, i);
+					if (cache[searchField][cacheValue] !== undefined) {
+						callback(cache[searchField][cacheValue]);
+						return;
+					}
+				}
+			}
+
+			$.post('index.php',
+		    {
+		        module: app.getModuleName(),
+		        action: 'GetFieldData',
+		        search_field: searchField,
+		        search_value: searchValue
+		    },
+		    function(data, status){
+		    	cache[searchField] = (cache[searchField] === undefined) ? [] : cache[searchField];
+		    	cache[searchField][searchValue] = data.result;
+		    	callback(data.result);
+		    });
+		};
+	}(),
+
+	/**
+	 * Function to get the minimum length of a ui-async field before auto-completion
+	 * AV150416
+	 */
+	getMinAutoCompleteLength : function (field) {
+		var regExp = /ui-async-(\d+)/;
+		var matches = regExp.exec(field.attr('class'));
+
+		return (matches) ? parseInt(matches[1]) : 1;
+	},
+
+	/**
+	 * Function to update the auto-completion list a ui-async field.
+	 * This function is call when a modification event is triggered.
+	 * AV150416
+	 */
+	updateList: function(field, fieldTag) {
+		if (field.val().length >= this.getMinAutoCompleteLength(field)) {
+			fieldTag = (fieldTag === undefined) ? 'input' : fieldTag;
+			switch (fieldTag) {
+			case 'input':
+				this.getFieldData(field.attr('name'), field.val(), function(fieldData) {
+					field.autocomplete({
+		                source: fieldData
+		            });
+				});
+				break;
+			default:
+			}
+		}
 	},
 	
 	/**
