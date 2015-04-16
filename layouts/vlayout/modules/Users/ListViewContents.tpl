@@ -19,6 +19,7 @@
 <input type="hidden" id="pageLimitValue" value= "{$PAGING_MODEL->getPageLimit()}" />
 <input type="hidden" id="numberOfEntries" value= "{$LISTVIEW_ENTIRES_COUNT}" />
 <input type="hidden" id="alphabetSearchKey" value= "{$MODULE_MODEL->getAlphabetSearchField()}" />
+<input type="hidden" id="requestSearchKey" value= "{$PAGING_MODEL->getRequestSearchField()}" />{* ED150412 *}
 <input type="hidden" id="Operator" value="{$OPERATOR}" />
 <input type="hidden" id="alphabetValue" value="{$ALPHABET_VALUE}" />
 <input type="hidden" id="totalCount" value="{$LISTVIEW_COUNT}" />

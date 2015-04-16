@@ -67,8 +67,8 @@ class Documents_List_View extends Vtiger_List_View {
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
 			$listViewModel->set('operator', $operator);
-			$viewer->assign('OPERATOR',$operator);
-			$viewer->assign('ALPHABET_VALUE',$searchValue);
+			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
+			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(htmlspecialchars(json_encode($searchValue))) : $searchValue);
 		}
 		if(!empty($searchKey) && !empty($searchValue)) {
 			$listViewModel->set('search_key', $searchKey);

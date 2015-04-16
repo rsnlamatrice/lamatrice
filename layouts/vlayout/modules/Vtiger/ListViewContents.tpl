@@ -16,7 +16,7 @@
 <input type="hidden" id="previousPageExist" value="{$PAGING_MODEL->isPrevPageExists()}" />
 <input type="hidden" id="nextPageExist" value="{$PAGING_MODEL->isNextPageExists()}" />
 <input type="hidden" id="alphabetSearchKey" value= "{$MODULE_MODEL->getAlphabetSearchField()}" />
-<input type="hidden" id="requestSearchKey" value= "{$MODULE_MODEL->getRequestSearchField()}" />{* ED150412 *}
+<input type="hidden" id="requestSearchKey" value= "{$PAGING_MODEL->getRequestSearchField()}" />{* ED150412 *}
 <input type="hidden" id="Operator" value="{$OPERATOR}" />
 <input type="hidden" id="alphabetValue" value="{$ALPHABET_VALUE}" />
 <input type="hidden" id="totalCount" value="{$LISTVIEW_COUNT}" />

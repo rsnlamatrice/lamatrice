@@ -1424,13 +1424,6 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		return $focus->def_basicsearch_col;
 	}
 
-	/* ED150412
-	 * 
-	 */
-	public function getRequestSearchField(){
-		return array_key_exists( 'search_key', $_GET) ? $_GET['search_key'] : '';
-	}
-
 	/**
 	 * Function which will give complusory mandatory fields
 	 * @return type

@@ -67,8 +67,6 @@ class RSN {
 		$thisModuleInstance = Vtiger_Module::getInstance($moduleName);
 		if ($thisModuleInstance) {
 			$thisModuleInstance->addLink("HEADERCSS", "rsn.css", "layouts/vlayout/modules/RSN/resources/css/style.css");
-			$thisModuleInstance->addLink("HEADERSCRIPT", "ui-async.js", "layouts/vlayout/modules/RSN/resources/js/ui-async.js");
-
 		}
 	}
 
@@ -76,7 +74,6 @@ class RSN {
 		$thisModuleInstance = Vtiger_Module::getInstance($moduleName);
 		if ($thisModuleInstance) {
 			$thisModuleInstance->deleteLink("HEADERCSS", "rsn.css", "layouts/vlayout/modules/RSN/resources/css/style.css");
-			$thisModuleInstance->deleteLink("HEADERSCRIPT", "ui-async.js", "layouts/vlayout/modules/RSN/resources/js/ui-async.js");
 		}
 	}
 
