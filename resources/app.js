@@ -459,7 +459,7 @@ var app = {
 		}
 		element.autosize();
 	},
-
+	
 	registerEventForDatePickerFields : function(parentElement,registerForAddon,customParams){
 		
 		/* ED141010
