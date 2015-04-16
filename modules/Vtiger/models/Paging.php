@@ -164,4 +164,15 @@ class Vtiger_Paging_Model extends Vtiger_Base_Model {
 		//	return ($page * $limit + 1) . ' ou +';
 		//return $range['end'];
 	}
+	
+	/* ED150412
+	 * 
+	 */
+	public function getRequestSearchField($json_array = true){
+		return array_key_exists( 'search_key', $_REQUEST)
+			? ($json_array && is_array($_REQUEST['search_key'])
+				? htmlspecialchars(json_encode($_REQUEST['search_key']))
+				: $_REQUEST['search_key'])
+			: '';
+	}
 }
