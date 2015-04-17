@@ -179,7 +179,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		echo("<pre>Nbre de lignes de factures à importer : ".$rows[0]['nbrerestantes']."</pre>");
 		
 		$query .= ' ORDER BY facture.id, position_ligne ASC
-                    LIMIT 20 ';
+                    LIMIT 100 ';
 		//var_dump($query);
 		return self::getPGDataRows($query);
     }
@@ -251,10 +251,11 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$contact->set('contact_no','C'.$codeClient);
 			//set contact_no
 			$query = "UPDATE vtiger_contactdetails
+				JOIN vtiger_crmentity
+					ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
 				SET contact_no = CONCAT('C', ?)
 				, smownerid = ?
 				WHERE contactid = ?
-				LIMIT 1
 			";
 			$result = $db->pquery($query, array($codeClient, ASSIGNEDTO_ALL, $contact->getId()));
 		}
@@ -325,13 +326,17 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$record->set('invoice_no','COG'.$cogId);
 			//set invoice_no
 			$query = "UPDATE vtiger_invoice
+				JOIN vtiger_crmentity
+					ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
 				SET invoice_no = CONCAT('COG', ?)
 				, total = ?
 				, smownerid = ?
 				WHERE invoiceid = ?
-				LIMIT 1
 			";
 			$result = $db->pquery($query, array($cogId, $srcRow['netht']+$srcRow['nettva'], ASSIGNEDTO_ALL, $record->getId()));
+			
+			if( ! $result)
+				$db->echoError();;
 		}
 		
 		return $record;		
