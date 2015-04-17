@@ -95,7 +95,7 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 		$listQuery = parent::getQuery();
 		if(strpos($listQuery, 'vtiger_inventoryproductrel') !== FALSE){
 			$listQuery = preg_replace('/(RIGHT|FULL|INNER|(?<!LEFT))\sJOIN vtiger_inventoryproductrel/i', ' LEFT JOIN vtiger_inventoryproductrel ', $listQuery);
-			$listQuery = str_replace(' WHERE ', ' WHERE IFNULL(vtiger_inventoryproductrel.sequence_no, 1) = 1 AND ', $listQuery);
+			$listQuery = str_replace(' WHERE ', ' WHERE (vtiger_inventoryproductrel.sequence_no IS NULL OR vtiger_inventoryproductrel.sequence_no = 1) AND ', $listQuery);
 		}
 		return $listQuery;
 	}
