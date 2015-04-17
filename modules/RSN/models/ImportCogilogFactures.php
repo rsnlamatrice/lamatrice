@@ -5,8 +5,11 @@
  *
  */
 
- define('ASSIGNEDTO_ALL', '7');
- 
+define('ASSIGNEDTO_ALL', '7');
+define('COUPON_FOLDERID', '9');
+define('MAX_QUERY_ROWS', 1000); //DEBUG
+
+
 class RSN_CogilogFacturesRSN_Import {
 
 	/* get postgresql data rows */
@@ -179,7 +182,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		echo("<pre>Nbre de lignes de factures à importer : ".$rows[0]['nbrerestantes']."</pre>");
 		
 		$query .= ' ORDER BY facture.id, position_ligne ASC
-                    LIMIT 100 ';
+                    LIMIT ' . MAX_QUERY_ROWS;
 		//var_dump($query);
 		return self::getPGDataRows($query);
     }
@@ -314,6 +317,14 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$record->set('typedossier', 'Facture'); //TODO
 			$record->set('invoicestatus', 'Paid');//TODO
                     
+		    
+			$coupon = self::findCoupon($srcRow);
+			if($coupon)
+				$record->set('notesid', $coupon->getId());
+			$campagne = self::findCampagne($srcRow, $coupon);
+			if($campagne)
+				$record->set('campaign_no', $campagne->getId());
+			
 			//$db->setDebug(true);
 			$record->save();
 			if(!$record->getId()){
@@ -386,6 +397,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
                             ON vtiger_products.productid = vtiger_crmentity.crmid
 			WHERE productcode = ?
 			ORDER BY vtiger_crmentity.deleted ASC
+			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, array($codeProduct));
@@ -404,6 +416,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
                             ON vtiger_service.serviceid = vtiger_crmentity.crmid
 			WHERE productcode = ?
 			ORDER BY vtiger_crmentity.deleted ASC
+			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, array($codeProduct));
@@ -460,5 +473,64 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		}
 		$record->set('MODE', '');
 		return $record;
+	}
+	
+	
+	/* coupon d'après code affaire d'un document de type Coupon
+	 */
+	private static function findCoupon($srcRow){
+		
+		$codeAffaire=$srcRow['affaire_code'];
+		$query = "SELECT vtiger_crmentity.crmid
+			FROM vtiger_notes
+			JOIN vtiger_notescf
+                            ON vtiger_notescf.notesid = vtiger_notes.notesid
+                        JOIN vtiger_crmentity
+                            ON vtiger_notes.notesid = vtiger_crmentity.crmid
+			WHERE codeaffaire = ?
+			AND folderid  =?
+			AND vtiger_crmentity.deleted = 0
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
+		if(!$result)
+			$db->echoError();
+		if($db->num_rows($result)){
+			$row = $db->fetch_row($result, 0);
+			return Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
+		}
+	}
+	
+	
+	/* campagne d'après code affaire / Coupon
+	 */
+	private static function findCampagne($srcRow, $coupon){
+		
+		if(!is_object($coupon)){
+			
+			$codeAffaire=$srcRow['affaire_code'];
+			$query = "SELECT vtiger_crmentity.crmid
+				FROM vtiger_campaignscf
+				JOIN vtiger_crmentity
+				    ON vtiger_campaignscf.campaignid = vtiger_crmentity.crmid
+				WHERE codeaffaire = ?
+				AND vtiger_crmentity.deleted = 0
+				LIMIT 1
+			";
+			$db = PearDatabase::getInstance();
+			$result = $db->pquery($query, array($codeAffaire));
+			if(!$result)
+				$db->echoError();
+			if($db->num_rows($result)){
+				$row = $db->fetch_row($result, 0);
+				return Vtiger_Record_Model::getInstanceById($row['crmid'], 'Campaigns');
+			}
+			return;
+		}
+		$campaigns = $coupon->getRelatedCampaigns();
+		if(count($campaigns) == 1)
+			foreach($campaigns as $campaign)
+				return $campaign;
 	}
 }
