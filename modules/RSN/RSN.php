@@ -27,10 +27,8 @@ class RSN {
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
-			$this->remove_uiclass_field();
 		} else if($eventType == 'module.preuninstall') {
 			// TODO Handle actions when this module is about to be deleted.
-			$this->remove_uiclass_field();
 		} else if($eventType == 'module.preupdate') {
 			// TODO Handle actions before this module is updated.
 		} else if($eventType == 'module.postupdate') {

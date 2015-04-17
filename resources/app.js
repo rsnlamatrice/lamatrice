@@ -736,12 +736,22 @@ var app = {
 
 		elements.each(function( index ) {
 			//TOTO: generalized auto-complete for all field tag, not only for <input type="text">
-			$( this ).autocomplete({
-				source: []
-			});
-			$( this ).on('input', function(e) {
-				self.updateList($( this) );
-			});
+			var tagName = $( this )[0].tagName.toLowerCase();
+			switch (tagName) {
+			case 'input':
+				$( this ).autocomplete({
+					source: []
+				});
+				$( this ).on('input', function(e) {
+					self.updateListForInput($( this ));
+				});
+				break;
+			case 'select':
+				self.getChosenElementFromSelect($( this )).find('input').on('input', function(e) {
+					self.updateListForChosen($( this ));
+				});
+				break;
+			}
 		});
 	},
 
@@ -794,19 +804,35 @@ var app = {
 	 * This function is call when a modification event is triggered.
 	 * AV150416
 	 */
-	updateList: function(field, fieldTag) {
+	updateListForInput: function(field) {
 		if (field.val().length >= this.getMinAutoCompleteLength(field)) {
-			fieldTag = (fieldTag === undefined) ? 'input' : fieldTag;
-			switch (fieldTag) {
-			case 'input':
-				this.getFieldData(field.attr('name'), field.val(), function(fieldData) {
-					field.autocomplete({
-		                source: fieldData
-		            });
-				});
-				break;
-			default:
-			}
+			this.getFieldData(field.attr('name'), field.val(), function(fieldData) {
+				field.autocomplete({
+	                source: fieldData
+	            });
+			});
+		}
+	},
+
+	/**
+	 * Function to update the auto-completion list a ui-async field.
+	 * This function is call when a modification event is triggered.
+	 * AV150416
+	 */
+	updateListForChosen: function(field) {
+		var value = field.val();
+		if (value.length >= this.getMinAutoCompleteLength(field)) {
+			var chosenContainer = $(field).parents('div.chzn-container:first');
+			var selectElement = this.getSelectElementFromChosen(chosenContainer);
+			this.getFieldData(selectElement.attr('name'), value, function(fieldData) {// tmp name
+				$(selectElement).empty();
+				for (var i=0; i < fieldData.length; ++i) {
+					var newOption = $('<option value="' + fieldData[i] + '">' + fieldData[i] + '</option>');
+		        	$(selectElement).append(newOption);
+		        }
+		        $(selectElement).trigger("liszt:updated");
+		        field.val(value);
+			});
 		}
 	},
 	
