@@ -196,6 +196,9 @@ class WebserviceField{
 			$tableFields = WebserviceField::$tableMeta[$this->getTableName()];
 		}else{
 			$dbMetaColumns = $this->pearDB->database->MetaColumns($this->getTableName());
+			//ED150417
+			if(!is_array($dbMetaColumns))
+				return;
 			$tableFields = array();
 			foreach ($dbMetaColumns as $key => $dbField) {
 				$tableFields[$dbField->name] = $dbField;
@@ -285,6 +288,9 @@ class WebserviceField{
 	
 	private function getFieldTypeFromTable(){
 		$tableFields = $this->getTableFields();
+		//ED150417
+		if(!is_array($tableFields))
+			return;
 		foreach ($tableFields as $fieldName => $dbField) {
 			if(strcmp($fieldName,$this->getColumnName())===0){
 				return $dbField->type;

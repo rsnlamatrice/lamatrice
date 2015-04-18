@@ -300,15 +300,19 @@ class QueryGenerator {
 									$relationModel = $model;
 									break;
 								}
+							//echo '<br><br><br><br>'.__FILE__;
 							if($relationModel){
 								$relationsInfos = $relationModel->getModulesInfoForDetailView();
+								//var_dump($relationsInfos);
 							}
 							if(!$relationModel
-							|| !isset($relationsInfos[$filter['relatedmodulename']]))
+							|| !isset($relationsInfos[$filter['relatedmodulename']])){
 								$relationInfos = array('fieldName' => $this->getSQLColumn('id')
 										       , 'tableName' => ' vtiger_crmentityrel');
+							}
 							else
 								$relationInfos = $relationsInfos[$filter['relatedmodulename']];
+							
 							//var_dump($relationInfos);
 							//$relationModel = Vtiger_Relation_Model::getInstance($this->module, $filter['relatedmodulename']);
 							//$value = $relationModel->getQuery();
@@ -340,6 +344,8 @@ class QueryGenerator {
 							$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
 							if(strpos($relationInfos['fieldName'], '.') === FALSE)
 								$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. $relationInfos['fieldName'];
+							else
+								$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. substr($relationInfos['fieldName'], strpos($relationInfos['fieldName'], '.')+1);
 							$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
 							$newQuery[0] = $selectColumnSql.' ';
 							$relatedSql = implode("\nFROM ", $newQuery);

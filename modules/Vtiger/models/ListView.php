@@ -232,7 +232,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		    }
 		}
 		$listQuery = $this->getQuery();
-	//var_dump("<br><br><br><br><br><pre>ICICICI getListViewEntries $listQuery </pre>");
+	//echo("<p style=\"margin-top:6em\"> ICICICI getListViewEntries $listQuery </p>");
 	
 		$sourceModule = $this->get('src_module');
 		if(!empty($sourceModule)) {

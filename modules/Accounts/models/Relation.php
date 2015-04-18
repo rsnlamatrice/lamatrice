@@ -19,6 +19,7 @@ class Accounts_Relation_Model extends Vtiger_Relation_Model {
 	public function getModulesInfoForDetailView() {
 		return array(
 			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel')
+			, 'Contacts' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_contactdetails')
 		);
 	}
 }
