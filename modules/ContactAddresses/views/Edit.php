@@ -15,9 +15,10 @@ class ContactAddresses_Edit_View extends Vtiger_Edit_View {
 			/*ED150312*/
 			if(!empty($recordId) && $request->get('isDuplicate') == true
 			   && $request->get('source_module') == 'Contacts') {
-				$sourceModule = Vtiger_Module_Model::getInstance('Contacts');
+				$sourceModule = Vtiger_Module_Model::getInstance($request->get('source_module'));
 				$sourceRecord = Vtiger_Record_Model::getInstanceById($recordId, $sourceModule);
 				$recordModel = $sourceRecord->createContactAddressesRecord('mailing', false);
+				//var_dump($recordModel);
 				$request->set('isDuplicate', false);
 			}
 			elseif (!empty($recordId)) {

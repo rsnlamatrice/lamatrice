@@ -386,7 +386,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		$addressModule = Vtiger_Module_Model::getInstance('ContactAddresses');
 		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactAddresses');
 		$addressRecord->set('mode', 'create');
-		$addressRecord->set('addresstype', 'LBL_OLD_ADDRESS');
+		$addressRecord->set('addresstype', 'Ancienne adresse');
 		$mapping = array(
 			'id' => 'contactid',
 			'modifiedtime' => 'createdtime',
@@ -404,7 +404,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		//echo '<pre>';
 		foreach($mapping as $sourceField => $destField){
 			$addressRecord->set($destField, $this->get($sourceField));
-			//var_dump($sourceField, $destField, $contactOldRecord->get($sourceField), $addressRecord->get($destField));
+			//var_dump($sourceField, $destField, $this->get($sourceField), $addressRecord->get($destField));
 		}
 		//echo '</pre>';
 		//die();

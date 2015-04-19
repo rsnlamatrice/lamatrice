@@ -21,7 +21,11 @@ class Vtiger_QuickCreateAjax_View extends Vtiger_IndexAjax_View {
 	public function process(Vtiger_Request $request) {
 		$moduleName = $request->getModule();
 
-		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
+		//ED150419 (ContactAddresses_QuickCreateAjax_View initializes $this->record )
+		if(isset($this->record))
+			$recordModel = $this->record;
+		else
+			$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 		$moduleModel = $recordModel->getModule();
 		
 		$fieldList = $moduleModel->getFields();
