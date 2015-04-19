@@ -22,11 +22,15 @@ class RSN {
 			$this->add_uiclass_field();
 		} else if ($eventType == 'module.enabled') {
 			$this->_registerLinks($moduleName);
-			$this->setTablesDefaultOwner();
+			$this->setTablesDefaultOwner($moduleName);
 			$this->add_uiclass_field();
+			$this->add_invoice_handler();
+			$this->registerEvents();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
+			$this->remove_invoice_handler();
+			$this->unregisterEvents();
 		} else if($eventType == 'module.preuninstall') {
 			// TODO Handle actions when this module is about to be deleted.
 		} else if($eventType == 'module.preupdate') {
@@ -91,5 +95,68 @@ class RSN {
 		$sql = "ALTER TABLE  `vtiger_field` DROP  `uiclass`";
 		$db = PearDatabase::getInstance();
 		$db->pquery($sql);
+	}
+
+	/* TODO Choose the best way between Method+Task vs Handler (called every time)
+	
+	/* ED150418
+	 * Add the 'InvoiceHandler' workflow.
+	 */ 
+	static function add_invoice_handler(){
+		$adb = PearDatabase::getInstance();
+		
+		//registerEntityMethods
+		vimport("~~modules/com_vtiger_workflow/include.inc");
+		vimport("~~modules/com_vtiger_workflow/tasks/VTEntityMethodTask.inc");
+		vimport("~~modules/com_vtiger_workflow/VTEntityMethodManager.inc");
+		$emm = new VTEntityMethodManager($adb);
+
+		// Registering method for Updating Inventory Stock
+		$emm->addEntityMethod("Invoice","RSNInvoiceSaved","modules/Invoice/InvoiceHandler.php","handleRSNInvoiceSaved");//Adding EntityMethod for Updating Products data after creating Invoice
+
+	}
+
+	/* ED150418
+	 * Remove the 'InvoiceHandler' workflow.
+	 */ 
+	static function remove_invoice_handler(){
+		$adb = PearDatabase::getInstance();
+		
+		//registerEntityMethods
+		vimport("~~modules/com_vtiger_workflow/include.inc");
+		vimport("~~modules/com_vtiger_workflow/tasks/VTEntityMethodTask.inc");
+		vimport("~~modules/com_vtiger_workflow/VTEntityMethodManager.inc");
+		$emm = new VTEntityMethodManager($adb);
+
+		// 
+		$emm->removeEntityMethod("Invoice","RSNInvoiceSaved");
+	
+	}
+	
+	
+	/**
+	 * Function registers all the event handlers
+	 */
+	function registerEvents() {
+		$adb = PearDatabase::getInstance();
+		vimport('~~include/events/include.inc');
+		$em = new VTEventsManager($adb);
+
+		// Registering event for Recurring Invoices
+		$em->registerHandler('vtiger.entity.aftersave', 'modules/Invoice/InvoiceHandler.php', 'RSNInvoiceHandler');
+		$em->setModuleForHandler('Invoice', 'RSNInvoiceHandler');
+	}
+	
+	
+	/**
+	 * Function registers all the event handlers
+	 */
+	function unregisterEvents() {
+		$adb = PearDatabase::getInstance();
+		vimport('~~include/events/include.inc');
+		$em = new VTEventsManager($adb);
+
+		// Registering event for Recurring Invoices
+		$em->unregisterHandler('RSNInvoiceHandler');
 	}
 }

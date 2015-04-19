@@ -107,6 +107,7 @@
 			$this->adb = $adb;
 		}
 
+		/* ED150418 TODO Should filter with ModuleName (IN vtiger_eventhandler_module WHERE module_name=?) */
 		function trigger($data){
 			$adb = $this->adb;
 			$eventInfos = self::lookupCache($this->name);

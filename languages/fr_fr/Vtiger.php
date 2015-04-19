@@ -36,6 +36,7 @@ $languageStrings = array(
 	'LBL_ADD_COMMENT'              => 'Ajouter Commentaire'                 , 
 	'LBL_EDIT_FIELDS'              => 'Gestionnaire d\'agencement'               , 
 	'LBL_EDIT_WORKFLOWS'           => 'Editer les flux'              , 
+	'LBL_EDITING_WORKFLOWS'           => 'Edition de flux'              , /*ED150418*/
 	'LBL_EDIT_PICKLIST_VALUES'     => 'Editer les valeurs de listes déroulantes'        , 
 	'LBL_EDIT_MAILSCANNER'         => 'Convertir Emails'              , 
 	'LBL_RECORD_DELETE'            => 'L\'enregistrement que vous tentez de visualiser a été supprimé.', 
