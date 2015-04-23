@@ -20,10 +20,12 @@ class RSN {
 			// TODO Handle actions after this module is installed.
 			$this->_registerLinks($moduleName);
 			$this->add_uiclass_field();
+			$this->add_fielduirelation_table();
 		} else if ($eventType == 'module.enabled') {
 			$this->_registerLinks($moduleName);
 			$this->setTablesDefaultOwner();
 			$this->add_uiclass_field();
+			$this->add_fielduirelation_table();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -89,6 +91,23 @@ class RSN {
 	 */ 
 	static function remove_uiclass_field(){
 		$sql = "ALTER TABLE  `vtiger_field` DROP  `uiclass`";
+		$db = PearDatabase::getInstance();
+		$db->pquery($sql);
+	}
+
+	static function add_fielduirelation_table() {
+		$sql = "CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
+	  		`id` int(11) NOT NULL AUTO_INCREMENT,
+	  		`field` int(11) NOT NULL,
+	  		`related_field` int(11) DEFAULT NULL,
+	  		`relation` varchar(200) NOT NULL,
+	  		PRIMARY KEY (`id`))";
+		$db = PearDatabase::getInstance();
+		$db->pquery($sql);
+	}
+
+	static function remove_fielduirelation_table() {
+		$sql = "DROP TABLE `vtiger_fielduirelation`";
 		$db = PearDatabase::getInstance();
 		$db->pquery($sql);
 	}

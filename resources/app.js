@@ -726,7 +726,7 @@ var app = {
 		parentElement = jQuery(parentElement);
 
 		if(parentElement.is('.ui-async')){
-			elements = parentElement; // fonction with the each fonction ??
+			elements = parentElement;
 		}else{
 			elements = jQuery('.ui-async', parentElement);
 		}
@@ -735,18 +735,21 @@ var app = {
 		}
 
 		elements.each(function( index ) {
-			//TOTO: generalized auto-complete for all field tag, not only for <input type="text">
+			//TOTO: generalized auto-complete for Chosen type.
 			var tagName = $( this )[0].tagName.toLowerCase();
 			switch (tagName) {
 			case 'input':
 				$( this ).autocomplete({
-					source: []
+					source: [],
+					change: function() {
+				        self.onInputValueChange($( this ));
+				    }
 				});
 				$( this ).on('input', function(e) {
 					self.updateListForInput($( this ));
 				});
 				break;
-			case 'select':
+			case 'select'://tmp on change !!
 				self.getChosenElementFromSelect($( this )).find('input').on('input', function(e) {
 					self.updateListForChosen($( this ));
 				});
@@ -756,34 +759,150 @@ var app = {
 	},
 
 	/**
+	 * AV150421
+	 */
+	parseAutoFillValues: function(valueString) {
+		var regExp = /\[([^\]]+)\]/g,
+			results = [],
+			match;
+
+		while ((match = regExp.exec(valueString))) {
+    		results.push(match[1]);
+    	}
+
+		return results;
+	},
+
+	/**
+	 * AV150421
+	 */
+	getRealValue: function(valueString) {
+		var regExp = /\[([^\]]+)\]/g;
+		var realValue = valueString.replace(regExp, '').trim();
+
+		return realValue;
+	},
+
+	/**
+	 * AV150421
+	 */
+	onInputValueChange: function(field) {
+		var autoFillFields = this.getAutoFillFields(field);
+		var values = this.parseAutoFillValues(field.val());
+
+		for (var i=0; i < autoFillFields.length; ++i) {
+			if (values[i]){
+				$('input[name="' + autoFillFields[i] +  '"]').val(values[i]);
+			}
+			//tmp chosen !!!
+		}
+
+		field.val(this.getRealValue(field.val()));
+	},
+
+	/**
+	 * Function to check if a particular result is filter.
+	 * AV150421
+	 */
+	resultIsFiltered: function(result, filters) {
+		for (var filterName in filters) {
+			if (filters[filterName] && result[filterName] && result[filterName].toLowerCase().indexOf(filters[filterName].toLowerCase()) != 0) {
+				return true;
+			}
+		}
+
+		return false;
+	},
+
+	/**
+	 * Function to filter the result using filed filter.
+	 * AV150421
+	 */
+	filterResults: function(fieldData, filters) {
+		var filteredFieldData = [];
+
+		for (var i=0; i < fieldData.length; ++i) {
+			if (!this.resultIsFiltered(fieldData[i], filters)) {
+				filteredFieldData.push(fieldData[i]);
+			}
+		}
+
+		return filteredFieldData;
+	},
+
+	/**
 	 * Function to get asynchronous field data using ajax and a cache.
 	 * AV150416
 	 */
 	getFieldData: function() {
 		var cache = [];
-		return function(searchField, searchValue, callback) {
+		return function(searchField, searchValue, searchFieldId, filters, fill_fields, callback) {
+			var self = this;
 			searchValue = searchValue.toLowerCase();
+			var filterString = '';
+			for (var filter in filters) {
+    			filterString += '%%' + filters[filter];
+    		}
+
 			if (cache[searchField] !== undefined) {
 				for (var i = 1; i <= searchValue.length; ++i) {
 					var cacheValue = searchValue.substr(0, i);
 					if (cache[searchField][cacheValue] !== undefined) {
-						callback(cache[searchField][cacheValue]);
+						callback(this.filterResults(cache[searchField][cacheValue], filters));
+						return;
+					} else if (cache[searchField][cacheValue + filterString] !== undefined) {
+						callback(this.filterResults(cache[searchField][cacheValue + filterString], filters));
 						return;
 					}
 				}
 			}
 
-			$.post('index.php',
-		    {
-		        module: app.getModuleName(),
+			var nedeedFields = '';
+			var first = true;
+			for (var key in fill_fields) {
+				if (!first) {
+					nedeedFields += ':';
+				}
+				nedeedFields += fill_fields[key];
+				first = false;
+			}
+			for (var key in filters) {
+				if (nedeedFields.indexOf(key) == -1) {
+					if (!first) {
+						nedeedFields += ':';
+					}
+					nedeedFields += key;
+					first = false;
+				}
+			}
+
+			var data = {
+				module: app.getModuleName(),
 		        action: 'GetFieldData',
 		        search_field: searchField,
-		        search_value: searchValue
-		    },
-		    function(data, status){
+		        search_value: searchValue,
+		        search_field_id: searchFieldId,
+		        needed_fields: nedeedFields
+			}
+
+			var filterNumber = 0;
+
+			for (var key in filters) {
+				if (filters[key]) {
+					data[key] = filters[key];
+					++filterNumber;
+				}
+			}
+
+			$.post('index.php', data,
+		    function(data, status) {
+		    	var cacheString = searchValue;
+		    	if (filterNumber > 0) {
+		    		cacheString += filterString;
+		    	}
 		    	cache[searchField] = (cache[searchField] === undefined) ? [] : cache[searchField];
-		    	cache[searchField][searchValue] = data.result;
-		    	callback(data.result);
+		    	cache[searchField][cacheString] = data.result;
+		    	callback(self.filterResults(data.result, filters));
 		    });
 		};
 	}(),
@@ -794,9 +913,85 @@ var app = {
 	 */
 	getMinAutoCompleteLength : function (field) {
 		var regExp = /ui-async-(\d+)/;
-		var matches = regExp.exec(field.attr('class'));
+		var match = regExp.exec(field.attr('class'));
 
-		return (matches) ? parseInt(matches[1]) : 1;
+		return (match) ? parseInt(match[1]) : 1;
+	},
+
+	/**
+	 * Function to get related filter fields names
+	 * AV150417
+	 */
+	getRelatedFilterFields : function (field) {
+		var regExp = /auto-filter-by-([a-zA-Z0-9\-_]+)/g,
+			str = field.attr('class'),
+			results = [],
+			match;
+
+		while ((match = regExp.exec(str))) {
+    		results.push(match[1]);
+    	}
+
+		return results;
+	},
+
+	/**
+	 * Function to get related filter fields names
+	 * AV150420
+	 */
+	getAutoFillFields : function (field) {
+		var regExp = /auto-fill-([a-zA-Z0-9\-_]+)/g,
+			str = field.attr('class'),
+			results = [],
+			match;
+
+		while ((match = regExp.exec(str))) {
+    		results.push(match[1]);
+    	}
+
+		return results;
+	},
+
+	/**
+	 * Function to get field id
+	 * @param : the field
+	 * @return : the field id
+	 * AV150420
+	 */
+	getFieldId: function(field) {
+		var regExp = /ui-fieldid-(\d+)/;
+		var match = regExp.exec(field.attr('class'));
+
+		return (match) ? parseInt(match[1]) : 0;
+	},
+
+	/**
+	 * Function to cast the fieldData returned by the serveur to a arrays of string.
+	 * AV150421
+	 */
+	getFieldDataArray: function(fieldData) {
+		var fieldDataArray = [];
+		for(var i=0; i<fieldData.length; ++i) {
+			var value = '',
+				first = true;
+
+			for (var fieldname in fieldData[i]) {
+				if (!first) {
+					value += ' [';
+				}
+
+				value += fieldData[i][fieldname];
+
+				if (!first) {
+					value += ']';
+				} else {
+					first = false;
+				}
+			}
+			fieldDataArray.push(value);
+		}
+
+		return fieldDataArray;
 	},
 
 	/**
@@ -805,10 +1000,12 @@ var app = {
 	 * AV150416
 	 */
 	updateListForInput: function(field) {
+		var self = this;
+		this.getFilters(field);
 		if (field.val().length >= this.getMinAutoCompleteLength(field)) {
-			this.getFieldData(field.attr('name'), field.val(), function(fieldData) {
+			this.getFieldData(field.attr('name'), field.val(), this.getFieldId(field), this.getFilters(field), this.getAutoFillFields(field),function(fieldData) {
 				field.autocomplete({
-	                source: fieldData
+	                source: self.getFieldDataArray(fieldData)
 	            });
 			});
 		}
@@ -820,14 +1017,16 @@ var app = {
 	 * AV150416
 	 */
 	updateListForChosen: function(field) {
+		var self = this;
 		var value = field.val();
 		if (value.length >= this.getMinAutoCompleteLength(field)) {
 			var chosenContainer = $(field).parents('div.chzn-container:first');
 			var selectElement = this.getSelectElementFromChosen(chosenContainer);
-			this.getFieldData(selectElement.attr('name'), value, function(fieldData) {// tmp name
+			this.getFieldData(selectElement.attr('name'), value, this.getFieldId(selectElement), this.getFilters(selectElement), this.getAutoFillFields(selectElement), function(fieldData) {
 				$(selectElement).empty();
+				var fieldDataArray = self.getFieldDataArray(fieldData);
 				for (var i=0; i < fieldData.length; ++i) {
-					var newOption = $('<option value="' + fieldData[i] + '">' + fieldData[i] + '</option>');
+					var newOption = $('<option value="' + fieldData[i][selectElement.attr('name')] + '">' + fieldDataArray[i] + '</option>');
 		        	$(selectElement).append(newOption);
 		        }
 		        $(selectElement).trigger("liszt:updated");
@@ -835,7 +1034,29 @@ var app = {
 			});
 		}
 	},
-	
+
+	/**
+	 * Function to get filters for a specific field
+	 * @param : the field
+	 * @return : an array containing filters
+	 * AV150417
+	 */
+	getFilters: function(field) {
+		var relatedFilterFields = this.getRelatedFilterFields(field);
+		var filters = {};
+
+		for (var i=0; i < relatedFilterFields.length; ++i) {
+			//tmp it may be many field name like that !!??
+			var relatedField = $('input[name="' + relatedFilterFields[i] + '"]')[0];
+
+			if (relatedField !== undefined) {
+				filters[relatedFilterFields[i]] = $( relatedField ).val();
+			}
+		}
+
+		return filters;
+	},
+
 	/**
 	 * Function to get the chosen element from the raw select element
 	 * @params: select element

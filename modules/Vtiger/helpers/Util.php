@@ -267,6 +267,16 @@ class Vtiger_Util_Helper {
 		 case 'address_country':
 			$fieldName = 'rsncountry';
 			break;
+		 case 'bill_city':
+		 case 'ship_city':
+		 case 'city':
+		 case 'mailingcity':
+		 case 'othercity':
+		 case 'address_city':
+		 	$fieldName = 'rsncity';
+		 	break;
+		 case 'mailingzip':
+		 	$fieldName = 'rsnzipcode';
 		 default:
 			break;
 		}
