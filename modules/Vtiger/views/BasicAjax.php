@@ -50,10 +50,10 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 		}
         
 		$saveFilterPermitted = true;
-        $saveFilterexcludedModules =  array('ModComments','RSS','Portal','Integration','PBXManager','DashBoard');
-        if(in_array($moduleName, $saveFilterexcludedModules)){
-            $saveFilterPermitted = false;
-        }
+		$saveFilterexcludedModules =  array('ModComments','RSS','Portal','Integration','PBXManager','DashBoard');
+		if(in_array($moduleName, $saveFilterexcludedModules)){
+		    $saveFilterPermitted = false;
+		}
         
 		//See if it is an excluded module, If so search in home module
 		if(in_array($moduleName, $excludedModuleForSearch)) {
@@ -62,7 +62,7 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 		$module = $request->getModule();
 
 		$customViewModel = new CustomView_Record_Model();
-        $customViewModel->setModule($moduleName);
+		$customViewModel->setModule($moduleName);
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$recordStructureInstance = Vtiger_RecordStructure_Model::getInstanceForModule($moduleModel);
 
@@ -76,20 +76,20 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 		}
 		$viewer->assign('ADVANCED_FILTER_OPTIONS', Vtiger_Field_Model::getAdvancedFilterOptions());
 		$viewer->assign('ADVANCED_FILTER_OPTIONS_BY_TYPE', $advanceFilterOpsByFieldType);
-        $dateFilters = Vtiger_Field_Model::getDateFilterTypes();
-        foreach($dateFilters as $comparatorKey => $comparatorInfo) {
-            $comparatorInfo['startdate'] = DateTimeField::convertToUserFormat($comparatorInfo['startdate']);
-            $comparatorInfo['enddate'] = DateTimeField::convertToUserFormat($comparatorInfo['enddate']);
-            $comparatorInfo['label'] = vtranslate($comparatorInfo['label'],$module);
-            $dateFilters[$comparatorKey] = $comparatorInfo;
-        }
-        $viewer->assign('DATE_FILTERS', $dateFilters);
+		$dateFilters = Vtiger_Field_Model::getDateFilterTypes();
+		foreach($dateFilters as $comparatorKey => $comparatorInfo) {
+		    $comparatorInfo['startdate'] = DateTimeField::convertToUserFormat($comparatorInfo['startdate']);
+		    $comparatorInfo['enddate'] = DateTimeField::convertToUserFormat($comparatorInfo['enddate']);
+		    $comparatorInfo['label'] = vtranslate($comparatorInfo['label'],$module);
+		    $dateFilters[$comparatorKey] = $comparatorInfo;
+		}
+		$viewer->assign('DATE_FILTERS', $dateFilters);
 		$viewer->assign('RECORD_STRUCTURE', $recordStructureInstance->getStructure());
 		$viewer->assign('SOURCE_MODULE',$moduleName);
-        $viewer->assign('SOURCE_MODULE_MODEL', $moduleModel);
+		$viewer->assign('SOURCE_MODULE_MODEL', $moduleModel);
 		$viewer->assign('MODULE', $module);
         
-        $viewer->assign('SAVE_FILTER_PERMITTED', $saveFilterPermitted);
+		$viewer->assign('SAVE_FILTER_PERMITTED', $saveFilterPermitted);
 
 		echo $viewer->view('AdvanceSearch.tpl',$moduleName, true);
 	}
@@ -129,20 +129,20 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 						} else {
 							$name = $nameComponents[2];
 						}
-                        if(($nameComponents[4] == 'D' || $nameComponents[4] == 'DT') && in_array($filter['comparator'], $dateSpecificConditions)) {
-                            $filter['stdfilter'] = $filter['comparator'];
-                            $valueComponents = explode(',',$filter['value']);
-                            if($filter['comparator'] == 'custom') {
-                                $filter['startdate'] = DateTimeField::convertToDBFormat($valueComponents[0]);
-                                $filter['enddate'] = DateTimeField::convertToDBFormat($valueComponents[1]);
-                            }
-                            $dateFilterResolvedList = $customView->resolveDateFilterValue($filter);
-                            $value[] = $queryGenerator->fixDateTimeValue($name, $dateFilterResolvedList['startdate']);
-                            $value[] = $queryGenerator->fixDateTimeValue($name, $dateFilterResolvedList['enddate'], false);
-                            $queryGenerator->addCondition($name, $value, 'BETWEEN');
-                        }else{
-                            $queryGenerator->addCondition($name, $filter['value'], $filter['comparator']);
-                        }
+						if(($nameComponents[4] == 'D' || $nameComponents[4] == 'DT') && in_array($filter['comparator'], $dateSpecificConditions)) {
+						    $filter['stdfilter'] = $filter['comparator'];
+						    $valueComponents = explode(',',$filter['value']);
+						    if($filter['comparator'] == 'custom') {
+							$filter['startdate'] = DateTimeField::convertToDBFormat($valueComponents[0]);
+							$filter['enddate'] = DateTimeField::convertToDBFormat($valueComponents[1]);
+						    }
+						    $dateFilterResolvedList = $customView->resolveDateFilterValue($filter);
+						    $value[] = $queryGenerator->fixDateTimeValue($name, $dateFilterResolvedList['startdate']);
+						    $value[] = $queryGenerator->fixDateTimeValue($name, $dateFilterResolvedList['enddate'], false);
+						    $queryGenerator->addCondition($name, $value, 'BETWEEN');
+						}else{
+						    $queryGenerator->addCondition($name, $filter['value'], $filter['comparator']);
+						}
 						$columncondition = $filter['column_condition'];
 						if(!empty($columncondition)) {
 							$queryGenerator->addConditionGlue($columncondition);

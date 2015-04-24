@@ -21,11 +21,14 @@ class RSN {
 			$this->_registerLinks($moduleName);
 			$this->add_uiclass_field();
 			$this->add_fielduirelation_table();
+			$this->add_rsncity_table();
 		} else if ($eventType == 'module.enabled') {
 			$this->_registerLinks($moduleName);
 			$this->setTablesDefaultOwner();
 			$this->add_uiclass_field();
 			$this->add_fielduirelation_table();
+			$this->add_rsncity_table();
+			
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -81,7 +84,7 @@ class RSN {
 	 * Add the 'uiclass' field in the field table.
 	 */ 
 	static function add_uiclass_field(){
-		$sql = "ALTER TABLE  `vtiger_field` ADD  `uiclass` VARCHAR( 64 ) NOT NULL";
+		$sql = "ALTER TABLE  `vtiger_field` ADD  `uiclass` VARCHAR( 255 ) NOT NULL";
 		$db = PearDatabase::getInstance();
 		$db->pquery($sql);
 	}
@@ -108,6 +111,24 @@ class RSN {
 
 	static function remove_fielduirelation_table() {
 		$sql = "DROP TABLE `vtiger_fielduirelation`";
+		$db = PearDatabase::getInstance();
+		$db->pquery($sql);
+	}
+	
+	
+
+	static function add_rsncity_table() {
+		$sql = "CREATE TABLE IF NOT EXISTS `vtiger_rsncity` (
+  `rsncityid` int(11) NOT NULL AUTO_INCREMENT,
+  `rsncity` varchar(200) NOT NULL,
+  `sortorderid` int(11) NOT NULL,
+  `presence` int(11) NOT NULL DEFAULT '1',
+  `uicolor` varchar(128) DEFAULT NULL,
+  `rsnzipcode` varchar(30) NOT NULL,
+  `countryalpha2` char(2) NOT NULL,
+  PRIMARY KEY (`rsncityid`),
+  KEY `countryalpha2` (`countryalpha2`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8";
 		$db = PearDatabase::getInstance();
 		$db->pquery($sql);
 	}

@@ -106,6 +106,18 @@ class Products_Record_Model extends Vtiger_Record_Model {
 				"&sourceModule=".$this->getModuleName()."&sourceRecord=".$this->getId()."&relationOperation=true";
 	}
 
+	/* ED150424
+	 * Function to get Url to Convert this record to an other module (Product to Service, Service to Product )
+	 * @return <String> Url to Convert this record
+	 */
+	function getConvertAsModuleUrl($destModuleModel){
+		if(is_string($destModuleModel))
+			$destModuleModel = Vtiger_Module_Model::getInstance($otherModuleModel);
+
+		return "index.php?module=".$this->getModuleName()."&view=ConvertToModule".
+				"&destModule=".$destModuleModel->getName()."&record=".$this->getId();
+	}
+	
 	/**
 	 * Function get details of taxes for this record
 	 * Function calls from Edit/Create view of Inventory Records
@@ -364,5 +376,73 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		$result = $db->pquery('SELECT discontinued FROM vtiger_products WHERE productid = ?',array($recordId));
 		$activeStatus = $db->query_result($result, 'discontinued');
 		return $activeStatus;
+	}
+	
+	
+	/* ED150424
+	 * Converts a product to a service (or reverse)
+	 */
+	public function convertAsModule($destModuleModel){
+		if(is_string($destModuleModel))
+			$destModuleModel = Vtiger_Module_Model::getInstance($destModuleModel);
+		
+		$destRecordModel = Vtiger_Record_Model::getCleanInstance($destModuleModel->getName());
+		
+		$srcFields = $this->getModule()->getFields();
+		$destFields = $destModuleModel->getFields();
+		
+		if($this->getModuleName() == 'Products'
+		&& $destModuleModel->getName() == 'Services'){
+			$mapping = array(
+				'productid' => 'serviceid',
+				'product_no' => 'service_no',
+				'productname' => 'servicename',
+				'productcode' => 'servicecode',
+				'productcategory' => 'servicecategory',
+			);
+		}
+		elseif($this->getModuleName() == 'Services'
+		&& $destModuleModel->getName() == 'Products'){
+			$mapping = array(
+				'serviceid' => 'productid',
+				'service_no' => 'product_no',
+				'servicename' => 'productname',
+				'servicecode' => 'productcode',
+				'servicecategory' => 'productcategory',
+			);
+		}
+		else 
+			return false;
+		
+		
+		foreach($srcFields as $fieldName => $field){
+			$fieldValue = $this->get($fieldName);
+			switch($field->getFieldDataType()){
+			case 'currency':
+				$fieldValue = Vtiger_Currency_UIType::convertToDBFormat($fieldValue);
+				break;
+			case 'date':
+				$fieldValue = DateTimeField::convertToDBFormat($fieldValue);
+				break;
+			}
+			if(array_key_exists($fieldName, $mapping))
+				$destRecordModel->set($mapping[$fieldName], $fieldValue);
+			else
+				$destRecordModel->set($fieldName, $fieldValue);
+		}
+		$destRecordModel->set('id', $this->getId());
+		
+		$sql = "UPDATE vtiger_crmentity
+			SET setype = ?
+			WHERE crmid = ?";
+		$db = PearDatabase::getInstance();
+		$db->setDebug(true);
+		$db->pquery($sql, array($destModuleModel->getName(), $this->getId()));
+		
+		$destRecordModel->set('MODE', 'edit');
+		$destRecordModel->save();
+		$db->setDebug(false);
+	
+		return $destRecordModel;
 	}
 }

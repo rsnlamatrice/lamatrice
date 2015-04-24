@@ -66,6 +66,19 @@ class Products_DetailView_Model extends Vtiger_DetailView_Model {
 				);
 				$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
 			}
+
+			//ED150424
+			$otherModule = $this->getModuleName() == 'Products' ? 'Services' : 'Products';
+			$otherModuleModel = Vtiger_Module_Model::getInstance($otherModule);
+			if($currentUserModel->hasModuleActionPermission($otherModuleModel->getId(), 'EditView')) {
+				$basicActionLink = array(
+						'linktype' => 'DETAILVIEW',
+						'linklabel' =>  vtranslate('LBL_CONVERT_AS').' '.vtranslate($otherModuleModel->getSingularLabelKey(), $otherModule),
+						'linkurl' => $recordModel->getConvertAsModuleUrl($otherModuleModel),
+						'linkicon' => ''
+				);
+				$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
+			}
 		}
 
 		return $linkModelList;

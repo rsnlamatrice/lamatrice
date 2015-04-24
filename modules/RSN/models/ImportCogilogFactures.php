@@ -7,7 +7,7 @@
 
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
-define('MAX_QUERY_ROWS', 1000); //DEBUG
+define('MAX_QUERY_ROWS', 50); //DEBUG
 
 
 class RSN_CogilogFacturesRSN_Import {
@@ -238,6 +238,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$contact = Vtiger_Record_Model::getCleanInstance('Contacts');
 			$contact->set('MODE', 'create');
 			$contact->set('lastname',$nomClient);
+			$contact->set('isgroup',0);
 			$contact->set('mailingstreet', $srcRow['num']. ' ' .$srcRow['voie']);
 			$contact->set('mailingstreet2', $srcRow['nom1']);
 			$contact->set('mailingstreet3', $srcRow['compad1']);
@@ -247,7 +248,9 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$contact->set('mailingcountry', $srcRow['pays']);
 			$contact->set('email', $srcRow['email']);
 			$contact->set('rsnnpai', 1);
+			//$db->setDebug(true);
 			$contact->save();
+			//$db->setDebug(false);
 			
 			$contact->set('MODE', '');
 			//This field is not manage by save()
@@ -261,6 +264,8 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 				WHERE contactid = ?
 			";
 			$result = $db->pquery($query, array($codeClient, ASSIGNEDTO_ALL, $contact->getId()));
+			
+			//var_dump("Contact C$codeClient créé, id=".$contact->getId() . ", nom=".$contact->getName());
 		}
 		
 		return $contact;

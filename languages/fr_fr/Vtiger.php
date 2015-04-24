@@ -718,6 +718,9 @@ $languageStrings = array(
 	'LBL_RSNBANQAGENCES' => 'Agences',
 	'LBL_RSNABOREVUES'		=> 'Abonnements à la revue',
 	'RSNAboRevues'			=> 'Abonnements à la revue',
+        
+        'LBL_CONVERT_AS'                   => 'Convertir en',
+	'LBL_ERROR'                     => 'Erreur'                       , 
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 
