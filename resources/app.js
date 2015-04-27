@@ -389,23 +389,13 @@ var app = {
 	 * Function to push down the error message size when validation is invoked
 	 * @params : form Element
 	 */
-
 	formAlignmentAfterValidation : function(form){
 		// to avoid hiding of error message under the fixed nav bar
-		var destination = form.find(".formError:not('.greenPopup'):first").offset().top;
-		var resizedDestnation = destination-105;
-		jQuery('html').animate({
-			scrollTop:resizedDestnation
-		}, 'slow');
-	},
-
-	/**
-	 * Function to push down the error message size when validation is invoked
-	 * @params : form Element
-	 */
-	formAlignmentAfterValidation : function(form){
-		// to avoid hiding of error message under the fixed nav bar
-		var destination = form.find(".formError:not('.greenPopup'):first").offset().top;
+		var offset = form.find(".formError:not('.greenPopup'):first").offset();
+		//ED150427
+		if (offset == null)
+			return;
+		var destination = offset.top;
 		var resizedDestnation = destination-105;
 		jQuery('html').animate({
 			scrollTop:resizedDestnation
@@ -420,6 +410,7 @@ var app = {
 		} else if (dateFormat == 'dd-mm-yyyy') {
 			return 'd-m-Y';
 		}
+		return dateFormat;
 	},
 
 	convertTojQueryDatePickerFormat: function(dateFormat){

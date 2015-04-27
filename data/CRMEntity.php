@@ -223,7 +223,7 @@ echo "</pre>//saveentity\r\n";
 		global $adb;
 		global $current_user;
 		global $log;
-
+		
 		if ($fileid != '') {
 			$this->id = $fileid;
 			$this->mode = 'edit';

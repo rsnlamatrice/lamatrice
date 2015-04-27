@@ -389,8 +389,8 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		$destRecordModel = Vtiger_Record_Model::getCleanInstance($destModuleModel->getName());
 		
 		$srcFields = $this->getModule()->getFields();
-		$destFields = $destModuleModel->getFields();
-		
+		$destFields = $destModuleModel->getFields();		
+				
 		if($this->getModuleName() == 'Products'
 		&& $destModuleModel->getName() == 'Services'){
 			$mapping = array(
@@ -419,10 +419,10 @@ class Products_Record_Model extends Vtiger_Record_Model {
 			$fieldValue = $this->get($fieldName);
 			switch($field->getFieldDataType()){
 			case 'currency':
-				$fieldValue = Vtiger_Currency_UIType::convertToDBFormat($fieldValue);
+				$fieldValue = CurrencyField::convertToUserFormat($fieldValue);
 				break;
 			case 'date':
-				$fieldValue = DateTimeField::convertToDBFormat($fieldValue);
+				$fieldValue = DateTimeField::convertToUserFormat($fieldValue);
 				break;
 			}
 			if(array_key_exists($fieldName, $mapping))
@@ -439,9 +439,52 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		$db->setDebug(true);
 		$db->pquery($sql, array($destModuleModel->getName(), $this->getId()));
 		
-		$destRecordModel->set('MODE', 'edit');
+		$destRecordModel->set('mode', 'edit');
 		$destRecordModel->save();
 		$db->setDebug(false);
+	
+	
+		//Controle avant purge
+		$newRecordModel = Vtiger_Record_Model::getInstanceById($this->getId(), $destModuleModel->getName());
+		if($newRecordModel){
+			//controle les valeurs des champs
+			$fieldValueErrors = false;
+			foreach($srcFields as $fieldName => $field){
+				$fieldValue = $this->get($fieldName);
+				$newFieldName = array_key_exists($fieldName, $mapping) ? $mapping[$fieldName] : $fieldName;
+				$newFieldValue = $newRecordModel->get($newFieldName);
+				if($newFieldValue != $fieldValue
+				&& ($newFieldValue && $fieldValue)
+				&& $fieldName != 'unit_price' //arrondis
+				&& $fieldName != 'modifiedtime'
+				&& !preg_match('/_no$/', $fieldName) //champs service_no, product_no spécifiques à leur module
+				){
+					var_dump("La valeur du champ $fieldName " . (array_key_exists($fieldName, $mapping) ? "-> " . $newFieldName : "") . " n'a pas été transposée à l'identique :", $fieldValue, $newFieldValue);
+				}
+			}
+			if(!$fieldValueErrors){
+				
+				$focus = CRMEntity::getInstance($this->getModuleName());
+				
+				foreach ($focus->tab_name as $table_name) {
+					if ($table_name != "vtiger_crmentity") {
+						$tablekey = $focus->tab_name_index[$table_name];
+						$sql = "DELETE FROM $table_name
+							WHERE $tablekey = ?";
+						$db = PearDatabase::getInstance();
+						$result = $db->pquery($sql, array($this->getId()));
+						if(!$result){
+							var_dump("Erreur de suppression de l'enregistrement original : ", $sql);
+						}
+						else {
+							var_dump("Ok, suppression de l'enregistrement original $table_name WHERE $tablekey = " . $this->getId());
+						}
+					}
+				}
+				
+			}
+			
+		}
 	
 		return $destRecordModel;
 	}
