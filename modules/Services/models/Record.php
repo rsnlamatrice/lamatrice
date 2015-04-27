@@ -38,4 +38,21 @@ class Services_Record_Model extends Products_Record_Model {
 				"&sourceModule=".$this->getModuleName()."&sourceRecord=".$this->getId()."&relationOperation=true";
 	}
 	
+	
+	
+	/**
+	 * Function to get acive status of record
+	 */
+	public function getActiveStatusOfRecord(){
+		$activeStatus = $this->get('discontinued');
+		if($activeStatus){
+			return $activeStatus;
+		}
+		$recordId = $this->getId();
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery('SELECT discontinued FROM vtiger_service WHERE serviceid = ?',array($recordId));
+		$activeStatus = $db->query_result($result, 'discontinued');
+		return $activeStatus;
+	}
+	
 }

@@ -202,6 +202,10 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 						'label' => 'Affaires vers coupons'
 					),
 					array(
+						'sub' => 'ImportCogilog/ProduitsEtServices',
+						'label' => 'Produits et services'
+					),
+					array(
 						'sub' => 'ImportCogilog/Comptes',
 						'label' => 'Comptes'
 					),

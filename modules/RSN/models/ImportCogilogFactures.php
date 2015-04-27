@@ -7,8 +7,10 @@
 
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
-define('MAX_QUERY_ROWS', 50); //DEBUG
+define('MAX_QUERY_ROWS', 500); //DEBUG
 
+
+require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
 
 class RSN_CogilogFacturesRSN_Import {
 
@@ -220,11 +222,12 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		}
 		$nomClient = preg_replace('/^0*'.$codeClient.'\s(.+)\/\d+\*.*$/','$1', $srcRow['nomclient']);
 			
-		$query = "SELECT contactid, deleted
+		$query = "SELECT contactid
 			FROM vtiger_contactdetails
                         JOIN vtiger_crmentity
                             ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 			WHERE contact_no = CONCAT('C', ?)
+			AND vtiger_crmentity.deleted = 0
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
@@ -236,7 +239,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		}
 		else {
 			$contact = Vtiger_Record_Model::getCleanInstance('Contacts');
-			$contact->set('MODE', 'create');
+			$contact->set('mode','create');
 			$contact->set('lastname',$nomClient);
 			$contact->set('isgroup',0);
 			$contact->set('mailingstreet', $srcRow['num']. ' ' .$srcRow['voie']);
@@ -252,7 +255,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 			$contact->save();
 			//$db->setDebug(false);
 			
-			$contact->set('MODE', '');
+			$contact->set('mode','');
 			//This field is not manage by save()
 			$contact->set('contact_no','C'.$codeClient);
 			//set contact_no
@@ -302,7 +305,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		}
 		else {
 			$record = Vtiger_Record_Model::getCleanInstance('Invoice');
-			$record->set('MODE', 'create');
+			$record->set('mode','create');
 			$record->set('bill_street', $srcRow['num']. ' ' .$srcRow['voie']);
 			$record->set('bill_street2', $srcRow['nom1']);
 			$record->set('bill_street3', $srcRow['compad1']);
@@ -336,7 +339,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
                             echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
                             return false;
                         }
-			$record->set('MODE', '');
+			$record->set('mode','');
 			//This field is not manage by save()
 			$cogId = str_pad ($srcRow['id'], 6, '0', STR_PAD_LEFT);
 			$record->set('invoice_no','COG'.$cogId);
@@ -366,7 +369,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 	 * cf include/utils/InventoryUtils.php, saveInventoryProductDetails()
 	 */
 	private static function importLigneFacture($srcRow, $invoice, $contact, $sequence){
-		$product = self::getProductOrService($srcRow);
+		$product = RSN_CogilogProduitsEtServices_Import::getProductOrService($srcRow);
 		if(!$product)
 			return false;
 		//adds invoice/product relation
@@ -382,103 +385,7 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		//$db->setDebug(false);
 	}
 	
-	private static function getProductOrService($srcRow){
-		$product = self::findProduct($srcRow);
-		if(!$product)
-			$product = self::findService($srcRow);
-		if(!$product)
-			if($srcRow['gererstock'] == 't' || $srcRow['stockdivers'] != 0)
-				$product = self::importProduct($srcRow);
-			else
-				$product = self::importService($srcRow);
-		return $product;
-	}
 	
-	private static function findProduct($srcRow){
-		$codeProduct=$srcRow['code_produit'];
-		$query = "SELECT productid
-			FROM vtiger_products
-                        JOIN vtiger_crmentity
-                            ON vtiger_products.productid = vtiger_crmentity.crmid
-			WHERE productcode = ?
-			ORDER BY vtiger_crmentity.deleted ASC
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($codeProduct));
-		if($db->num_rows($result)){
-			$row = $db->fetch_row($result, 0);
-			return Vtiger_Record_Model::getInstanceById($row['productid'], 'Products');
-		}
-	}
-	
-	private static function findService($srcRow){
-		
-		$codeProduct=$srcRow['code_produit'];
-		$query = "SELECT serviceid
-			FROM vtiger_service
-                        JOIN vtiger_crmentity
-                            ON vtiger_service.serviceid = vtiger_crmentity.crmid
-			WHERE productcode = ?
-			ORDER BY vtiger_crmentity.deleted ASC
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($codeProduct));
-		if($db->num_rows($result)){
-			$row = $db->fetch_row($result, 0);
-			return Vtiger_Record_Model::getInstanceById($row['serviceid'], 'Services');
-		}
-	}
-	
-	private static function importProduct($srcRow){
-		echo ("<pre>Création du produit ".$srcRow['nom_produit']." (".$srcRow['code_produit'].") : ".$srcRow['prixvente_produit']." &euro;</pre>");
-		$record = Vtiger_Record_Model::getCleanInstance('Products');
-		$record->set('MODE', 'create');
-		$record->set('productname', $srcRow['nom_produit']);
-		$record->set('productcode', $srcRow['code_produit']);
-		$record->set('glacct', $srcRow['compte_produit']);
-		$record->set('rsnsectionanal', $srcRow['section_produit']);
-		$record->set('qtyinstock', $srcRow['stock_produit']);
-		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
-		$record->set('taxclass', $srcRow['tva_produit']);
-		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
-	    
-		$db = PearDatabase::getInstance();
-		//$db->setDebug(true);
-		$record->save();
-		//$db->setDebug(false);
-		if(!$record->getId()){
-		    echo "<pre><code>Impossible d'enregistrer le nouveau produit</code></pre>";
-		    return false;
-		}
-		$record->set('MODE', '');
-		return $record;
-	}
-	private static function importService($srcRow){
-		echo ("<pre>Création du service ".$srcRow['nom_produit']." (".$srcRow['code_produit'].") : ".$srcRow['prixvente_produit']." &euro;</pre>");
-		
-		$record = Vtiger_Record_Model::getCleanInstance('Services');
-		$record->set('MODE', 'create');
-		$record->set('servicename', $srcRow['nom_produit']);
-		$record->set('productcode', $srcRow['code_produit']);
-		$record->set('glacct', $srcRow['compte_produit']);
-		$record->set('rsnsectionanal', $srcRow['section_produit']);
-		$record->set('qtyinstock', $srcRow['stock_produit']);
-		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
-		$record->set('taxclass', $srcRow['tva_produit']);
-		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
-	    
-		//$db->setDebug(true);
-		$record->save();
-		//$db->setDebug(false);
-		if(!$record->getId()){
-		    echo "<pre><code>Impossible d'enregistrer le nouveau service</code></pre>";
-		    return false;
-		}
-		$record->set('MODE', '');
-		return $record;
-	}
 	
 	
 	/* coupon d'après code affaire d'un document de type Coupon

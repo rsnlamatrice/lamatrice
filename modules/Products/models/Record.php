@@ -110,7 +110,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 	 * Function to get Url to Convert this record to an other module (Product to Service, Service to Product )
 	 * @return <String> Url to Convert this record
 	 */
-	function getConvertAsModuleUrl($destModuleModel){
+	function getConvertToModuleUrl($destModuleModel){
 		if(is_string($destModuleModel))
 			$destModuleModel = Vtiger_Module_Model::getInstance($otherModuleModel);
 
@@ -436,12 +436,12 @@ class Products_Record_Model extends Vtiger_Record_Model {
 			SET setype = ?
 			WHERE crmid = ?";
 		$db = PearDatabase::getInstance();
-		$db->setDebug(true);
+		//$db->setDebug(true);
 		$db->pquery($sql, array($destModuleModel->getName(), $this->getId()));
 		
 		$destRecordModel->set('mode', 'edit');
 		$destRecordModel->save();
-		$db->setDebug(false);
+		//$db->setDebug(false);
 	
 	
 		//Controle avant purge
@@ -477,7 +477,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 							var_dump("Erreur de suppression de l'enregistrement original : ", $sql);
 						}
 						else {
-							var_dump("Ok, suppression de l'enregistrement original $table_name WHERE $tablekey = " . $this->getId());
+							//var_dump("Ok, suppression de l'enregistrement original $table_name WHERE $tablekey = " . $this->getId());
 						}
 					}
 				}

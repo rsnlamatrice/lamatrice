@@ -8,7 +8,7 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-class Products_ConvertToModule_View extends Vtiger_Edit_View {
+class Products_ConvertToModule_View extends Vtiger_Save_Action {
 
 	public function process(Vtiger_Request $request) {
 		
