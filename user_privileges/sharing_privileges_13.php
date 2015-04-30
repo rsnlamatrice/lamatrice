@@ -194,4 +194,8 @@ $RSNBanqAgences_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNBanqAgences_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$RSNAboRevues_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNAboRevues_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 ?>

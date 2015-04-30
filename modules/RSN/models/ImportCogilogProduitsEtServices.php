@@ -90,6 +90,7 @@ class RSN_CogilogProduitsEtServices_Import {
 			, "produit"."compte" AS "compte_produit"
 			, "produit"."section" AS "section_produit"
 			, "produit"."codetva" AS "tva_produit"
+			, "codetauxtva"."taux" AS "tva_taux"
 			, "produit"."indisponible" AS "indisponible"
 			, "famille"."nom" AS "produit_famille"
 			, "produit"."tssaisie" AS "createdtime"
@@ -123,7 +124,7 @@ class RSN_CogilogProduitsEtServices_Import {
 	private static function importRow($row){
 		
 		//Imports Document
-		$record = self::getProductOrService($row);
+		$record = self::getProductOrService($row, true);
 		if(!$record) return false;
 		
 		return $record;
@@ -132,7 +133,7 @@ class RSN_CogilogProduitsEtServices_Import {
 	
 	
 	
-	public static function getProductOrService($srcRow){
+	public static function getProductOrService($srcRow, $doUpdate = false){
 		$product = self::findProduct($srcRow);
 		if(!$product)
 			$product = self::findService($srcRow);
@@ -142,7 +143,7 @@ class RSN_CogilogProduitsEtServices_Import {
 			else
 				$product = self::importService($srcRow);
 		}
-		else
+		elseif($doUpdate)
 			self::updateProduct($product, $srcRow);
 		return $product;
 	}
@@ -206,6 +207,31 @@ class RSN_CogilogProduitsEtServices_Import {
 		    return false;
 		}
 		$record->set('mode','');
+		self::updateProductDates($record, $srcRow);
+		return $record;
+	}
+	private static function importService($srcRow){
+		echo ("<pre>Création du service ".$srcRow['nom_produit']." (".$srcRow['code_produit'].") : ".$srcRow['prixvente_produit']." &euro;</pre>");
+		
+		$record = Vtiger_Record_Model::getCleanInstance('Services');
+		$record->set('mode','create');
+		$record->set('servicename', $srcRow['nom_produit']);
+		$record->set('productcode', $srcRow['code_produit']);
+		$record->set('glacct', $srcRow['compte_produit']);
+		$record->set('rsnsectionanal', $srcRow['section_produit']);
+		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
+		$record->set('taxclass', $srcRow['tva_produit']);
+		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
+	    
+		//$db->setDebug(true);
+		$record->save();
+		//$db->setDebug(false);
+		if(!$record->getId()){
+		    echo "<pre><code>Impossible d'enregistrer le nouveau service</code></pre>";
+		    return false;
+		}
+		$record->set('mode','');
+		self::updateProductDates($record, $srcRow);
 		return $record;
 	}
 	
@@ -234,7 +260,12 @@ class RSN_CogilogProduitsEtServices_Import {
 		    return false;
 		}
 		$record->set('mode','');
-		
+		self::updateProductDates($record, $srcRow);
+		self::updateProductTaxRel($record, $srcRow);
+		return $record;
+	}
+	
+	private static function updateProductDates($record, $srcRow){
 		$query = "UPDATE vtiger_crmentity
 			SET createdtime = ?, modifiedtime = ?
 			WHERE vtiger_crmentity.crmid = ?
@@ -244,27 +275,31 @@ class RSN_CogilogProduitsEtServices_Import {
 		$result = $db->pquery($query, array(substr( $srcRow['createdtime'], 0, 19), substr($srcRow['modifiedtime'], 0, 19), $record->getId()));
 		return $record;
 	}
-	private static function importService($srcRow){
-		echo ("<pre>Création du service ".$srcRow['nom_produit']." (".$srcRow['code_produit'].") : ".$srcRow['prixvente_produit']." &euro;</pre>");
+	
+	static $allTaxes;
+	
+	private static function findTaxId($srcRow){
+		if(!$srcRow['tva_taux'])
+			return false;
+		if(!self::$allTaxes)
+			self::$allTaxes = getAllTaxes();
+		foreach(self::$allTaxes as $tax)
+			if(!$tax['deleted'] && $tax['percentage'] == $srcRow['tva_taux'])
+				return $tax['taxid'];
+		echo 'Taux de TVA introuvable : ' . $srcRow['tva_taux'];
+		return false;
+	}
+	
+	private static function updateProductTaxRel($record, $srcRow){
+		$taxId = self::findTaxId($srcRow);
 		
-		$record = Vtiger_Record_Model::getCleanInstance('Services');
-		$record->set('mode','create');
-		$record->set('servicename', $srcRow['nom_produit']);
-		$record->set('productcode', $srcRow['code_produit']);
-		$record->set('glacct', $srcRow['compte_produit']);
-		$record->set('rsnsectionanal', $srcRow['section_produit']);
-		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
-		$record->set('taxclass', $srcRow['tva_produit']);
-		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
-	    
-		//$db->setDebug(true);
-		$record->save();
-		//$db->setDebug(false);
-		if(!$record->getId()){
-		    echo "<pre><code>Impossible d'enregistrer le nouveau service</code></pre>";
-		    return false;
+		global $adb, $log;
+		$sql = "delete from vtiger_producttaxrel where productid=?";
+		$adb->pquery($sql, array($record->getId()));
+		
+		if($taxId){
+			$query = "insert into vtiger_producttaxrel (`productid`, `taxid`, `taxpercentage`) values(?,?,?)";
+			$adb->pquery($query, array($record->getId(), $taxId, $srcRow['tva_taux']));
 		}
-		$record->set('mode','');
-		return $record;
 	}
 }

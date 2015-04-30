@@ -31,7 +31,7 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		if(!empty($searchKey)) {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
-        $orderBy = $this->getForSql('orderby');
+		$orderBy = $this->getForSql('orderby');
 		$sortOrder = $this->getForSql('sortorder');
 
 		//List view will be displayed on recently created/modified records
@@ -40,18 +40,20 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 			$sortOrder = 'DESC';
 		}
 
-        if(!empty($orderBy)){
-            $columnFieldMapping = $moduleModel->getColumnFieldMapping();
-            $orderByFieldName = $columnFieldMapping[$orderBy];
-            $orderByFieldModel = $moduleModel->getField($orderByFieldName);
-            if($orderByFieldModel && $orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::REFERENCE_TYPE){
-                //IF it is reference add it in the where fields so that from clause will be having join of the table
-                $queryGenerator = $this->get('query_generator');
-                $queryGenerator->addWhereField($orderByFieldName);
-            }
-        }
+		if(!empty($orderBy)){
+		    $columnFieldMapping = $moduleModel->getColumnFieldMapping();
+		    $orderByFieldName = $columnFieldMapping[$orderBy];
+		    $orderByFieldModel = $moduleModel->getField($orderByFieldName);
+		    if($orderByFieldModel && $orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::REFERENCE_TYPE){
+			//IF it is reference add it in the where fields so that from clause will be having join of the table
+			$queryGenerator = $this->get('query_generator');
+			$queryGenerator->addWhereField($orderByFieldName);
+		    }
+		}
 
 		$listQuery = $this->getQuery();
+
+		$listQuery = $this->replacePriceWithTaxQuery($listQuery, $moduleName);
 
 		if($this->get('subProductsPopup')){
 			$listQuery = $this->addSubProductsQuery($listQuery);
@@ -103,6 +105,7 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		if($sourceModule !== 'PriceBooks' && $sourceField !== 'priceBookRelatedList') {
 			$listQuery .= " LIMIT $startIndex,".($pageLimit+1);
 		}
+		//echo "<pre style='margin-top:6em;'>$listQuery</pre>";
 
 		$listResult = $db->pquery($listQuery, array());
 
@@ -147,6 +150,23 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 			}
 		}
 		return $flag;
+	}
+
+	/* ED150430
+	 * add relation with tax to show TTC price
+	 */
+	public function replacePriceWithTaxQuery($listQuery, $moduleName){
+		$tableName = $moduleName == 'Services' ? 'vtiger_service' : 'vtiger_products';
+		$query = ' LEFT JOIN vtiger_producttaxrel ON vtiger_crmentity.crmid = vtiger_producttaxrel.productid';
+		$listQuery = preg_replace('/\sWHERE\s/i', $query . ' WHERE ', $listQuery, 1);
+		
+		$query = $tableName . '.unit_price * (1 + IFNULL(vtiger_producttaxrel.taxpercentage, 0)/100)';
+		//occurence du SELECT
+		$listQuery = preg_replace('/' . $tableName . '\.unit_price/', $query . ' as unit_price', $listQuery, 1);
+		//occurences suivantes (WHERE ...)
+		$listQuery = preg_replace('/(^.*' . $tableName . '\.unit_price.*)' . $tableName . '\.unit_price/', '$1'. $query, $listQuery);
+		
+		return $listQuery;
 	}
 
 	/**

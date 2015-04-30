@@ -875,8 +875,7 @@ class QueryGenerator {
 						}
 					}
 				} else {
-					if($fieldName == 'birthday' && !$this->isRelativeSearchOperators(
-							$conditionInfo['operator'])) {
+					if($fieldName == 'birthday' && !$this->isRelativeSearchOperators($conditionInfo['operator'])) {
 						$fieldSql .= "$fieldGlue DATE_FORMAT(".$field->getTableName().'.'.
 							$field->getColumnName().",'%m%d') ".$valueSql;
 					} else {
@@ -1023,10 +1022,22 @@ class QueryGenerator {
 					$value = 0;
 				}
 			} elseif($this->isDateType($fieldDataType)) {
-				$value = getValidDBInsertDateTimeValue($value);
-				$dateTime = explode(' ', $value);
-				if($dateTime[1] == '00:00:00') {
-					$value = $dateTime[0];
+				
+				//ED150429 :
+				// Date "<2015" === "< 2015-01-01"
+				// Date ">2015" === "> 2015-12-31"
+				// Date ">=2015" === ">= 2015-01-01"
+				if(is_numeric($value) && $value > 2000){
+					//$fieldName = "YEAR($fieldName)";
+					//TODO non satisfaisant, il faudrait le traiter dans le getWhereClause
+					$value = $value . '-01-01';
+				}
+				else {
+					$value = getValidDBInsertDateTimeValue($value);
+					$dateTime = explode(' ', $value);
+					if($dateTime[1] == '00:00:00') {
+						$value = $dateTime[0];
+					}
 				}
 			}
 
@@ -1355,7 +1366,7 @@ class QueryGenerator {
 					$currencyField = new CurrencyField($value);
 					$value = $currencyField->getDBInsertedValue();
 				}
-			}
+			}			
 		}
 		if(empty($operator)) {
 			if(trim(strtolower($value)) == 'null'){

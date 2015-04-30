@@ -7,7 +7,7 @@
 
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
-define('MAX_QUERY_ROWS', 500); //DEBUG
+define('MAX_QUERY_ROWS', 5000); //DEBUG
 
 
 require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
@@ -155,26 +155,6 @@ class RSN_CogilogFacturesRSN_Import {
 			LEFT JOIN "gtvacg00002" AS "codetauxtva"
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
-		/*
-		SELECT ROUND( CAST( ( "ligne_fact"."quantite" * "ligne_fact"."prixttc" * ( 100 - "ligne_fact"."remise" ) / 100 ) AS NUMERIC ), 2 ) AS "montant_facture"
-, ROUND( CAST( ( "ligne_fact"."quantite" * ( CASE WHEN ( "produit"."codetva" = 0 ) THEN "produit"."achat" ELSE "produit"."achat" * ( 1 + ( "codetauxtva"."taux" / 100 ) ) END ) ) AS NUMERIC ), 2 ) AS "montant_achat"
-, ( "ligne_fact"."quantite" ) AS "quantite", CASE WHEN ( "produit"."codetva" = 0 ) THEN "produit"."achat" ELSE "produit"."achat" * ( 1 + ( "codetauxtva"."taux" / 100 ) ) END AS "prixachatttc"
-, "affaire"."nom" AS "NomAffaire"
-, "produit"."nom" AS "nomProduit"
-, "famille"."nom" AS "NomFamille"
-, CAST( date_trunc( 'month', "datepiece" ) AS DATE ) "dateMois"
-, CASE WHEN ( EXTRACT( MONTH FROM "datepiece" ) < 9 ) THEN CAST( EXTRACT( YEAR FROM "datepiece" ) - 1 AS "text" ) || '-' || CAST( EXTRACT( YEAR FROM "datepiece" ) AS "text" )
-    ELSE CAST( EXTRACT( YEAR FROM "datepiece" ) AS "text" ) || '-' || CAST( EXTRACT( YEAR FROM "datepiece" ) + 1 AS "text" ) END AS "Exercice"
-, "compteclient"
-, ROUND( CAST( ( "ligne_fact"."quantite" * ( CASE WHEN ( "produit"."codetva" = 0 ) THEN "produit"."prix"
-    ELSE "produit"."prix" * ( 1 + ( "codetauxtva"."taux" / 100 ) ) END ) ) AS NUMERIC ), 2 ) "prixProduit"
-FROM "gfactu00002" AS "facture"
-INNER JOIN "glfact00002" AS "ligne_fact" ON "ligne_fact"."id_piece" = "facture"."id"
-INNER JOIN "gprodu00002" AS "produit" ON "ligne_fact"."id_gprodu" = "produit"."id"
-INNER JOIN "gaffai00002" AS "affaire" ON "affaire"."id" = "facture"."id_gaffai"
-INNER JOIN "gtprod00002" AS "famille" ON "famille"."id" = "produit"."id_gtprod"
-LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva"."code"*/
-
 		if($factMin)
 			$query .= ' WHERE NOT facture.id BETWEEN '.$factMin.' AND '.$factMax.'
 		';
@@ -196,7 +176,6 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 		//Checks Contact
 		$contact = self::importContact($facture['row']);
 		if(!$contact) return false;
-		
 		//Imports invoice
 		$invoice = self::importFacture($facture['row'], $contact);
 		if(!$invoice) return false;
@@ -217,10 +196,11 @@ LEFT JOIN "gtvacg00002" AS "codetauxtva" ON "produit"."codetva" = "codetauxtva".
 	 */
 	private static function importContact($srcRow){
 		$codeClient = preg_replace('/^0+/', '', $srcRow['codeclient']);
-		if(!preg_match('/^0*'.$codeClient.'\s(.+)\/\d+\*.*$/',$srcRow['nomclient'])){
+		$regexp = '/^0*'.$codeClient.'\s(.+)\/(\w+-)?\d+\*.*$/';
+		if(!preg_match($regexp,$srcRow['nomclient'])){
 			return false;
 		}
-		$nomClient = preg_replace('/^0*'.$codeClient.'\s(.+)\/\d+\*.*$/','$1', $srcRow['nomclient']);
+		$nomClient = preg_replace($regexp,'$1', $srcRow['nomclient']);
 			
 		$query = "SELECT contactid
 			FROM vtiger_contactdetails
