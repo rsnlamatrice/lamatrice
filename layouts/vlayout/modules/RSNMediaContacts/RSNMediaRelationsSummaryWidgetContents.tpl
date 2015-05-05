@@ -23,7 +23,8 @@
 					<div class="row-fluid">
 						<div class="span2 textOverflowEllipsis">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('lastname')}">
-								{$RELATED_RECORD->getDisplayValue('daterelation')}
+								{*les petits écrans masquent l'année*}
+								{preg_replace('/^(\d{2})-(\d{2})-(\d{2})(\d{2})$/', '$1-$2-$4', $RELATED_RECORD->getDisplayValue('daterelation'))}
 							</a>
 						</div>
 						<div class="span5 textOverflowEllipsis">
