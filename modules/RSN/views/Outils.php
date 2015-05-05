@@ -6,6 +6,7 @@
  *************************************************************************************/
 require_once('modules/RSN/models/ImportCogilogFactures.php');
 require_once('modules/RSN/models/ImportCogilogAffaires.php');
+require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
 class RSN_Outils_View extends Vtiger_Index_View {
 	
 	public function preProcess(Vtiger_Request $request, $display = true) {
@@ -61,6 +62,12 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			
 			break;
 		
+		case 'ImportCogilog/ProduitsEtServices':
+			
+			$this->process_ImportCogilog_ProduitsEtServices($request, $sub, $viewer);
+			
+			break;
+		
 		case 'ImportCogilog/Clients':
 			$tablename = 'SELECT * FROM gclien00002 ORDER BY tssaisie DESC';
 			$this->process_PG_DataRowsTable($request, $sub, $viewer, $tablename);
@@ -91,6 +98,15 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	private function process_ImportCogilog_Affaires($request, $sub, $viewer){
 		
 		$doneRows = RSN_CogilogAffairesRSN_Import::importNexts();
+		
+		//$this->process_PG_DataRowsTable($request, $sub, $viewer, $query);
+		
+		$viewer->assign('DATAROWS', $doneRows);
+	}
+	
+	private function process_ImportCogilog_ProduitsEtServices($request, $sub, $viewer){
+		
+		$doneRows = RSN_CogilogProduitsEtServices_Import::importNexts();
 		
 		//$this->process_PG_DataRowsTable($request, $sub, $viewer, $query);
 		

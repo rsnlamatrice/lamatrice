@@ -5,7 +5,6 @@
  *
  */
 
- define('COUPON_FOLDERID', '9');
  
 class RSN_CogilogAffairesRSN_Import {
 

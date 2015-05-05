@@ -176,6 +176,10 @@ class PearDatabase{
 		}
 		return false;
     }
+	//ED150417
+	function echoError($msg='') {
+		echo("<pre>ADODB error ".$msg."->[".$this->database->ErrorNo()."]".$this->database->ErrorMsg()."</pre>");
+    }
 
     function change_key_case($arr) {
 		return is_array($arr)?array_change_key_case($arr):$arr;

@@ -23,7 +23,7 @@
 {/if}
 {* AV150415 : add uiclass *}
 <input id="{$MODULE}_editView_fieldName_{$FIELD_NAME}" type="text" 
-	   class="{$INPUT_CLASS} {if $FIELD_MODEL->isNameField()}nameField{/if} {$FIELD_MODEL->get('uiclass')}" 
+	   class="{$INPUT_CLASS} {if $FIELD_MODEL->isNameField()}nameField{/if} {$FIELD_MODEL->get('uiclass')} ui-fieldid-{$FIELD_MODEL->get('id')}" 
 	   data-validation-engine="validate[{if $FIELD_MODEL->isMandatory() eq true}required,{/if}funcCall[Vtiger_Base_Validator_Js.invokeValidation]]" 
 	   name="{$FIELD_MODEL->getFieldName()}" 
 	   value="{$FIELD_MODEL->get('fieldvalue')}"

@@ -73,4 +73,39 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		}
 		return $links;
 	}
+	
+	
+
+	/** 
+	 * Function to get the list view entries
+	 * @param Vtiger_Paging_Model $pagingModel
+	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
+	 *
+	 * ED150424 : add module prefix char ('C') when searching on 'contact_no' field
+	 */
+	public function getListViewEntries($pagingModel) {
+		$searchKey = $this->get('search_key');
+		$searchValue = $this->get('search_value');
+		
+		
+		if(is_array($searchKey)){
+			for($i = 0; $i < count($searchKey); $i++){
+				if($searchKey[$i] == 'contact_no' && $searchValue[$i] && is_numeric($searchValue[$i][0]))
+				$searchValue[$i] = $this->getModuleCustomNumberingPrefix() . $searchValue[$i];
+				$this->set('search_value', $searchValue);
+				break;
+			}
+		}
+		elseif($searchKey == 'contact_no' && $searchValue && is_numeric($searchValue[0])){
+			$this->set('search_value', $this->getModuleCustomNumberingPrefix() . $searchValue);
+		}
+		return parent::getListViewEntries($pagingModel);
+	}
+	
+	/* ED150424 */
+	private function getModuleCustomNumberingPrefix(){
+		$model = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($this->getModule()->getName());
+		$data = $model->getModuleCustomNumberingData();
+		return $data['prefix'];
+	}
 }

@@ -28,14 +28,14 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 
 		$customViewModel = CustomView_Record_Model::getInstanceById($cvId);
 		if($customViewModel) {
-            $searchKey = $request->get('search_key');
-            $searchValue = $request->get('search_value');
-            $operator = $request->get('operator');
-            if(!empty($operator)) {
-                $customViewModel->set('operator', $operator);
-                $customViewModel->set('search_key', $searchKey);
-                $customViewModel->set('search_value', $searchValue);
-            }
+			$searchKey = $request->get('search_key');
+			$searchValue = $request->get('search_value');
+			$operator = $request->get('operator');
+			if(!empty($operator)) {
+			    $customViewModel->set('operator', $operator);
+			    $customViewModel->set('search_key', $searchKey);
+			    $customViewModel->set('search_value', $searchValue);
+			}
 			return $customViewModel->getRecordIds($excludedIds,$module);
 		}
 	}

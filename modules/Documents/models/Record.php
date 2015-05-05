@@ -123,4 +123,14 @@ class Documents_Record_Model extends Vtiger_Record_Model {
 		return $value;
 	}
 
+
+	function getRelatedCampaigns(){
+		$pagingModel = new Vtiger_Paging_Model();
+		$pagingModel->set('page', 1);
+		
+		$relatedModuleName = 'Campaigns';
+		$relationListView = Vtiger_RelationListView_Model::getInstance($this, $relatedModuleName, '');
+		return $relationListView->getEntries($pagingModel);
+	}
+
 }

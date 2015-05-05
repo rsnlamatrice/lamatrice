@@ -192,6 +192,14 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		if($skipRecords && !empty($skipRecords) && is_array($skipRecords) && count($skipRecords) > 0) {
 			$listQuery .= ' AND '.$baseTableName.'.'.$baseTableId.' NOT IN ('. implode(',', $skipRecords) .')';
 		}
+		
+		//ED150428
+		//query may contains a join to related table, making multiple instance of same record id
+		$listQuery = "SELECT DISTINCT $baseTableId
+			FROM ($listQuery) a
+		";
+		
+		//echo("<pre>$listQuery</pre>");
 		$result = $db->query($listQuery);
 		$noOfRecords = $db->num_rows($result);
 		$recordIds = array();

@@ -718,6 +718,9 @@ $languageStrings = array(
 	'LBL_RSNBANQAGENCES' => 'Agences',
 	'LBL_RSNABOREVUES'		=> 'Abonnements à la revue',
 	'RSNAboRevues'			=> 'Abonnements à la revue',
+        
+        'LBL_CONVERT_AS'                   => 'Convertir en',
+	'LBL_ERROR'                     => 'Erreur'                       , 
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 
@@ -828,5 +831,9 @@ $jsLanguageStrings = array(
 	'JS_PAGE_NOT_EXIST' => 'La Page n\'existe pas',
 	'JS_YOU_ARE_IN_PAGE_NUMBER' => 'Vous êtes à la page n°',
 	'to' => 'à',
+        
+	//Delete Records message
+	'JS_RECORDS_ARE_GETTING_DELETED' => 'Enregistrements en cours de suppression',
+	'JS_RECORD_GETTING_DELETED' => 'Enregistrement en cours de suppression',
 	'JS_NO_RESULTS_FOUND' => 'Aucun resultat trouvé',
 );
