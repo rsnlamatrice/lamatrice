@@ -106,9 +106,13 @@ function getAssociatedProducts($module,$focus,$seid='')
 
 	if($module == 'Quotes' || $module == 'PurchaseOrder' || $module == 'SalesOrder' || $module == 'Invoice')
 	{
+		/* ED150507 replace service_no with productcode
+		 * add productcategory
+		*/
 		$query="SELECT
 				case when vtiger_products.productid != '' then vtiger_products.productname else vtiger_service.servicename end as productname,
-				case when vtiger_products.productid != '' then vtiger_products.productcode else vtiger_service.service_no end as productcode,
+				case when vtiger_products.productid != '' then vtiger_products.productcode else vtiger_service.productcode end as productcode,
+				case when vtiger_products.productid != '' then vtiger_products.productcategory else vtiger_service.servicecategory end as productcategory,
 				case when vtiger_products.productid != '' then vtiger_products.unit_price else vtiger_service.unit_price end as unit_price,
 				case when vtiger_products.productid != '' then vtiger_products.qtyinstock else 'NA' end as qtyinstock,
 				case when vtiger_products.productid != '' then 'Products' else 'Services' end as entitytype,
@@ -130,6 +134,7 @@ function getAssociatedProducts($module,$focus,$seid='')
 		$query="SELECT
  		                        vtiger_products.productname,
  		                        vtiger_products.productcode,
+ 		                        vtiger_products.productcategory, /*ED150507*/
  		                        vtiger_products.unit_price,
  		                        vtiger_products.qtyinstock,
  		                        vtiger_seproductsrel.*,vtiger_crmentity.deleted,
@@ -147,6 +152,7 @@ function getAssociatedProducts($module,$focus,$seid='')
 		$query="SELECT
  		                        vtiger_products.productid,
  		                        vtiger_products.productcode,
+ 		                        vtiger_products.productcategory, /*ED150507*/
  		                        vtiger_products.productname,
  		                        vtiger_products.unit_price,
  		                        vtiger_products.qtyinstock,vtiger_crmentity.deleted,
@@ -163,7 +169,8 @@ function getAssociatedProducts($module,$focus,$seid='')
 	{
 		$query="SELECT
  		                        vtiger_service.serviceid AS productid,
- 		                        'NA' AS productcode,
+ 		                        vtiger_service.productcode AS productcode, /*ED150507*/
+ 		                        vtiger_service.servicecategory AS productcategory, /*ED150507*/
  		                        vtiger_service.servicename AS productname,
  		                        vtiger_service.unit_price AS unit_price,
  		                        'NA' AS qtyinstock,vtiger_crmentity.deleted,
@@ -185,6 +192,7 @@ function getAssociatedProducts($module,$focus,$seid='')
 		$deleted = $adb->query_result($result,$i-1,'deleted');
 		$hdnProductId = $adb->query_result($result,$i-1,'productid');
 		$hdnProductcode = $adb->query_result($result,$i-1,'productcode');
+		$hdnProductCategory = $adb->query_result($result,$i-1,'productcategory');/*ED150507*/
 		$productname=$adb->query_result($result,$i-1,'productname');
 		$productdescription=$adb->query_result($result,$i-1,'product_description');
 		$comment=$adb->query_result($result,$i-1,'comment');
@@ -244,7 +252,8 @@ function getAssociatedProducts($module,$focus,$seid='')
 		/* Added to fix the issue Product Pop-up name display*/
 		if($_REQUEST['action'] == 'CreateSOPDF' || $_REQUEST['action'] == 'CreatePDF' || $_REQUEST['action'] == 'SendPDFMail')
 			$product_Detail[$i]['productName'.$i]= htmlspecialchars($product_Detail[$i]['productName'.$i]);
-		$product_Detail[$i]['hdnProductcode'.$i] = $hdnProductcode;
+		$product_Detail[$i]['hdnProductcode'.$i] = $hdnProductcode;/*ED150507*/
+		$product_Detail[$i]['hdnProductCategory'.$i] = $hdnProductCategory;
 		$product_Detail[$i]['productDescription'.$i]= from_html($productdescription);
 		if($module == 'Potentials' || $module == 'Products' || $module == 'Services') {
 			$product_Detail[$i]['comment'.$i]= $productdescription;

@@ -57,5 +57,14 @@ $languageStrings = array(
         'RsnReglements' => 'Règlements',
         'individual' => 'Ligne à ligne',
         'group' => 'Commune',
-	'LBL_RSNREGLEMENTS' => 'Règlements'
+	'LBL_RSNREGLEMENTS' => 'Règlements',
+	
+	//Translation for product not found
+	'LBL_THIS' => 'Ce',
+	'LBL_IS_DELETED_FROM_THE_SYSTEM_PLEASE_REMOVE_OR_REPLACE_THIS_ITEM' => 'est supprimé du système. Veuillez supprimer ou remplacer cet article.',
+	'LBL_THIS_LINE_ITEM_IS_DELETED_FROM_THE_SYSTEM_PLEASE_REMOVE_THIS_LINE_ITEM' => 'Cette ligne est supprimée du système. Veuillez supprimer ou remplacer cet article.',
+);
+
+$jsLanguageStrings = array(
+	'JS_PLEASE_REMOVE_LINE_ITEM_THAT_IS_DELETED' => 'Veuillez retirer cette ligne dont le produit a été supprimé.',
 );

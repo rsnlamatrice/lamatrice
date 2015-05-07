@@ -1368,7 +1368,6 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 */
 	public function getRelationQuery($recordId, $functionName, $relatedModule) {
 		$relatedModuleName = $relatedModule->getName();
-
 		$focus = CRMEntity::getInstance($this->getName());
 		$focus->id = $recordId;
 

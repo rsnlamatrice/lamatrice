@@ -83,19 +83,38 @@ class RSN {
 	 * Add the 'uiclass' field in the field table.
 	 */ 
 	static function add_uiclass_field(){
-		$sql = "ALTER TABLE  `vtiger_field` ADD  `uiclass` VARCHAR( 64 ) NOT NULL";
 		$db = PearDatabase::getInstance();
+		
+		$sql = "ALTER TABLE  `vtiger_field` ADD  `uiclass` VARCHAR( 64 ) NOT NULL";
+		$db->pquery($sql);
+		
+		
+		$sql = "
+CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `field` int(11) NOT NULL,
+  `related_field` int(11) DEFAULT NULL,
+  `relation` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_FIELDID_FIELDUIRELATION` (`field`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 
+";
+		$db->pquery($sql);
+		
+		$sql = "ALTER TABLE `vtiger_fielduirelation`
+  ADD CONSTRAINT `FK_FIELDID_FIELDUIRELATION` FOREIGN KEY (`field`) REFERENCES `vtiger_field` (`fieldid`) ON DELETE CASCADE ON UPDATE CASCADE";
 		$db->pquery($sql);
 	}
 
 	/* AV150415
 	 * remove the 'uiclass' field in the field table.
+	 * ED150507 : commented because dangerous
 	 */ 
-	static function remove_uiclass_field(){
-		$sql = "ALTER TABLE  `vtiger_field` DROP  `uiclass`";
-		$db = PearDatabase::getInstance();
-		$db->pquery($sql);
-	}
+	//static function remove_uiclass_field(){
+	//	$sql = "ALTER TABLE  `vtiger_field` DROP  `uiclass`";
+	//	$db = PearDatabase::getInstance();
+	//	$db->pquery($sql);
+	//}
 
 	/* TODO Choose the best way between Method+Task vs Handler (called every time)
 	
@@ -112,8 +131,8 @@ class RSN {
 		$emm = new VTEntityMethodManager($adb);
 
 		// Registering method for Updating Inventory Stock
-		$emm->addEntityMethod("Invoice","RSNInvoiceSaved","modules/Invoice/InvoiceHandler.php","handleRSNInvoiceSaved");//Adding EntityMethod for Updating Products data after creating Invoice
-
+		//Adding EntityMethod for Updating Products data after creating Invoice
+		$emm->addEntityMethod("Invoice","RSNInvoiceSaved","modules/Invoice/InvoiceHandler.php","handleRSNInvoiceSaved");
 	}
 
 	/* ED150418

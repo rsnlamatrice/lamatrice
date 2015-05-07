@@ -340,20 +340,24 @@ var_dump($listResult);*/
 				}
 			}
 		}
-		$position = stripos($listQuery, ' from ');
-		if ($position) {
-			$split = spliti(' from ', $listQuery);
-			$splitCount = count($split);
-			$listQuery = 'SELECT count(*) AS count ';
-			for ($i=1; $i<$splitCount; $i++) {
-				$listQuery = $listQuery. ' FROM ' .$split[$i];
-			}
-		}
+		//ED150507 : ' from ' is not correct if FROM is preceded with \t
+		//$position = stripos($listQuery, ' from ');
+		//if ($position) {
+		//	$split = spliti(' from ', $listQuery);
+		//	$splitCount = count($split);
+		//	$listQuery = 'SELECT count(*) AS count ';
+		//	for ($i=1; $i<$splitCount; $i++) {
+		//		$listQuery = $listQuery. ' FROM ' .$split[$i];
+		//	}
+		//}
 
 		if($this->getModule()->get('name') == 'Calendar'){
 			$listQuery .= ' AND activitytype <> "Emails"';
 		}
 
+		//ED150507 : cou
+		$listQuery = 'SELECT count(*) AS count FROM (' . $listQuery . ') q';
+		
 		$listResult = $db->pquery($listQuery, array());
 		return $db->query_result($listResult, 0, 'count');
 	}

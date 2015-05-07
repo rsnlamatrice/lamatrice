@@ -17,16 +17,22 @@
 class RsnDons_ListView_Model extends Vtiger_ListView_Model {
 
 	function getQuery() {
+		$module = $this->getModule();
+		$moduleName = strtolower( $module->getName() );
 		$listQuery = 'SELECT f.invoicedate, f.accountid as compte, lg.`listprice` as montant
-		, p.service_no as origine, f.invoiceid as rsndonsid
+		, p.productcode as origine, f.invoiceid as '.$moduleName.'id
+		, e.*
 		FROM `vtiger_inventoryproductrel` lg
 		INNER JOIN `vtiger_service` p
 			ON lg.productid = p.serviceid
-			AND p.servicecategory = \'Dons\'
+			AND p.servicecategory = \''. $module->serviceType . '\'
+		INNER JOIN `vtiger_crmentity` ep
+			ON ep.crmid = p.serviceid
 		INNER JOIN `vtiger_invoice` f
 			ON lg.id = f.invoiceid
 		INNER JOIN `vtiger_crmentity` e
 			ON e.crmid = f.invoiceid
+		WHERE e.deleted = 0 AND ep.deleted = 0
 		';
 		//var_dump($listQuery);
 		return $listQuery;

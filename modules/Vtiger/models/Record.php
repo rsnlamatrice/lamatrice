@@ -284,7 +284,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 
 		/* ED150122
 		 * recherche d'un nombre, sans prcision de module ou Contacts : on cherche dans ref 4D
-		 * si le nombre est prfix de 'C', on cherche dans vtiger_contactdetails.contact_no
+		 * si le nombre est préfixé de 'C', on cherche dans vtiger_contactdetails.contact_no
 		 */
 		if((!$module || $module == 'Contacts')
 		&& ($searchKey
@@ -299,6 +299,8 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				WHERE (vtiger_crmentity.crmid = ?
 					OR vtiger_contactdetails.contact_no = CONCAT(\'C\', ?))
 				AND vtiger_crmentity.deleted = 0';
+			if(!is_numeric($searchKey))
+				$searchKey = substr($searchKey,1);
 			$params = array(trim($searchKey), trim($searchKey));
 		}
 		else {	/* requte gnrale sur le champ label */

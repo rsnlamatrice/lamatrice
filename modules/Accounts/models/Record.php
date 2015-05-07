@@ -100,4 +100,41 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 				array('parentField'=>'ship_pobox', 'inventoryField'=>'ship_pobox', 'defaultValue'=>'')
 		);
 	}
+	
+	
+	
+	/** ED150507
+	 * Function to get RSNAboRevues array for this account
+	 */
+	public function getRSNAboRevues($isabonneOnly = false){
+		
+		$moduleName = $this->getModuleName();
+		$relatedModuleName = 'RSNAboRevues';
+		$parentId = $this->getId();
+		$pagingModel = new Vtiger_Paging_Model();
+		$pagingModel->set('page',1);
+		$pagingModel->set('limit', $isabonneOnly ? 8 : 99); //TODO 99?!
+			
+		$parentRecordModel = $this;
+		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName, null);
+
+		$orderBy = 'debutabo';
+		$sortOrder = 'DESC';
+			
+		$relationListView->set('orderby', $orderBy);
+		$relationListView->set('sortorder',$sortOrder);
+
+//$db = PearDatabase::getInstance();
+//$db->setDebug(true);
+		$allEntries = $relationListView->getEntries($pagingModel);
+		if(!$isabonneOnly)
+			return $allEntries;
+		$entries = array();
+		foreach($allEntries as $id=>$entry)
+			if($entry->get('isabonne'))
+				$entries[$id] = $entry;
+			else
+				break;
+		return $entries;
+	}
 }
