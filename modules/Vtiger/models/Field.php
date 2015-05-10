@@ -805,6 +805,8 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			'E' => array('e','n','s','ew','c','k','y'),
 			/* ED150225 */
 			'VW' => array('vwi','vwx'),
+			/* ED150507 */
+			'PANEL' => array('vwi','vwx'),
 		);
 	}
 

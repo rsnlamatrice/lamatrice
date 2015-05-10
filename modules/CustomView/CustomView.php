@@ -91,6 +91,7 @@ class CustomView extends CRMEntity {
 		global $adb, $current_user;
 		$now_action = vtlib_purify($_REQUEST['action']);
 		if (empty($_REQUEST['viewname'])) {
+			//ED150507 : Attention, bad record occured
 			if (isset($_SESSION['lvs'][$module]["viewname"]) && $_SESSION['lvs'][$module]["viewname"] != '') {
 				$viewid = $_SESSION['lvs'][$module]["viewname"];
 			} elseif ($this->setdefaultviewid != "") {

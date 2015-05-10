@@ -358,6 +358,28 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		return $sql;
 	}
 	
+	
+	
+	/** ED150507
+	 * Function returns query execution result widget
+	 * Replaces question mark with param value
+	 * @return <string>
+	 */
+	function getExecutionSQLWithIntegratedParams(){
+		$params = array();
+		$paramsDetails = array();
+		$sql = $this->getExecutionSQL($params, $paramsDetails);
+		if(!$sql)
+			return $sql;
+		for($i = 0; $i < count($params); $i++){
+			// replace /*[[operator xxx]]*/ ? with /*[[operator xxx]]*/ 'value'
+			$sql = preg_replace('/(\/\*\[\[.*'.$paramsDetails[$i]['name'] . '.*\]\]\*\/\s)\?/'
+					    , '$1\'' . str_replace('\'', '\\\'', $params[$i]) . '\''
+					    , $sql);
+		}
+		return $sql;
+	}
+	
 	/**
 	 * Fonction qui retourne une instance de record d'après son chemin.
 	 * Un chemin est la combinaison du domaine et du nom
@@ -419,5 +441,33 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		$relationListView->set('sortorder', 'ASC');
 		/* TODO get variables where rsnpanelid plutot que related list */
 		return $relationListView->getEntries($pagingModel);
+	}
+	
+	
+
+	/**
+	 * Function to get List of RSNContactsPanels records
+	 * @return <Array> List of record models <RSNContactsPanels>
+	 */
+	public static function getAllForCustomViewEditor() {
+		$db = PearDatabase::getInstance();
+		$moduleModel = Vtiger_Module_Model::getInstance('RSNContactsPanels');
+
+		//TODO get only the ones visible for current user
+		
+		$result = $db->pquery('SELECT vtiger_crmentity.crmid as id, vtiger_crmentity.*, vtiger_rsncontactspanels.*
+				      FROM vtiger_rsncontactspanels
+				      JOIN vtiger_crmentity
+					ON vtiger_rsncontactspanels.rsncontactspanelsid = vtiger_crmentity.crmid
+				      WHERE vtiger_crmentity.deleted = 0', array());
+		$numOfRows = $db->num_rows($result);
+
+		$recordModelsList = array();
+		for ($i=0; $i<$numOfRows; $i++) {
+			$rowData = $db->query_result_rowdata($result, $i);
+			$recordModel = new self();
+			$recordModelsList[$rowData['crmid']] = $recordModel->setData($rowData)->setModule($moduleModel);
+		}
+		return $recordModelsList;
 	}
 }

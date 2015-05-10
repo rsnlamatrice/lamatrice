@@ -58,7 +58,11 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	 * @return Vtiger_Record_Model or Module Specific Record Model instance
 	 */
 	public function setModule($moduleName) {
-		$this->module = Vtiger_Module_Model::getInstance($moduleName);
+		//ED150507
+		if($moduleName instanceof Vtiger_Module_Model)
+			$this->module = $moduleName;
+		else
+			$this->module = Vtiger_Module_Model::getInstance($moduleName);
 		return $this;
 	}
 

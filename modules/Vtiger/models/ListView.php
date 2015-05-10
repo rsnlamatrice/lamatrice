@@ -284,6 +284,9 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		$listQuery .= " LIMIT $startIndex,".($pageLimit+1);
 
 		$listResult = $db->pquery($listQuery, array());
+		if(!$listResult){
+			echo $db->echoError() . '<pre>' . $listQuery . '</pre>';
+		}
 		
 		$listViewRecordModels = array();
 		// ICI LE PBLM DE CHAMPS QUI DISPARAISSENT RATTRAPPABLE PLUS BAS dans $moduleModel->getRecordFromArray($record, $rawData);
