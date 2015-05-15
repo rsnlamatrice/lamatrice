@@ -19,6 +19,8 @@ class Contacts_Edit_View extends Vtiger_Edit_View {
 		if(!$recordModel){
 		   if (!empty($recordId)) {
 		       $recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+			if($request->get('isDuplicate') == true)
+				$recordModel->set('reference', '0');
 		   } else {
 		       $recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 		   }

@@ -9,7 +9,7 @@
  * All Rights Reserved.
  * *********************************************************************************** */
 /* ED140921
- * note : hérité par Contacts
+ * note : hÃ©ritÃ© par Contacts
  */
 class Accounts_Detail_View extends Vtiger_Detail_View {
 
@@ -58,15 +58,15 @@ class Accounts_Detail_View extends Vtiger_Detail_View {
 	
 	/**
 	 * ED141210
-	 * en ajoutant NO_ACTIVITIES_WIDGET on dsactive le chargement des Events
-	 * en fait, a permet, dans le SummaryView d'inverser les widgets de gauche ˆ droite 
+	 * en ajoutant NO_ACTIVITIES_WIDGET on dÂÃ©sactive le chargement des Events
+	 * en fait, ÂÃ§a permet, dans le SummaryView d'inverser les widgets de gauche Ã Âˆ droite 
 	 */
 	public function process(Vtiger_Request $request) {
 		
 		$viewer = $this->getViewer($request);
-		/* ED141210 court-circuite les activits */
+		/* ED141210 court-circuite les activitÂs */
 		$viewer->assign('NO_ACTIVITIES_WIDGET', true);
-		/* ED150102 compte de référence */
+		/* ED150102 compte de rÃ©fÃ©rence */
 		$viewer->assign('ACCOUNT_ID', $request->get('record'));
 
 		return parent::process($request);
