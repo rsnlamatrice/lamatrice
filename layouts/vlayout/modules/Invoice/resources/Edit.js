@@ -48,17 +48,29 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 					'enabled' : true
 				}
 			});
+			
+			//set subject if empty (see inventory)
+			var $subject = container.find('input[name="subject"]');
+			if (!$subject.val() || $subject.is('.auto-filled')) {
+				var $typeDossier = container.find(':input[name="typedossier"]')
+				, typeDossier = $typeDossier.length ? $typeDossier.val() : ''
+				, subject = (typeDossier && typeDossier != 'Facture' ? typeDossier + ' / ' : '') + selectedName
+				;
+				$subject
+					.addClass('auto-filled')
+					.val(subject);
+			}
 			thisInstance.getRecordDetails(params).then(
 				function(data){
 					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
 					
 					var $dest = container.find('input[name="campaign_no"]');
 					if ($dest.length == 0) {
-						alert('Campagne introuvable');
+						alert('Zone de saisie de la Campagne introuvable');
 						return;
 					}
-					if ($dest.val() && !$dest.attr('data-replacable')) {
-						console.log('Campagne déjà sélectionnée')
+					if ($dest.val() && !$dest.attr('auto-filled')) {
+						//console.log('Campagne déjà sélectionnée');
 						return;
 					}
 					var response = data['result']
@@ -74,12 +86,12 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 						break;
 					}
 					if (!campaign) {
-						alert('Campagne non retournée');
+						//alert('Coupon sans Campagne');
 						return;
 					}
 					$dest
 						.val(campaign.id)
-						.attr('data-replacable', 1);
+						.attr('auto-filled', 1);
 					$dest.nextAll('.input-prepend:first').children('input:first')
 						.val(campaign.campaignname);
 				},

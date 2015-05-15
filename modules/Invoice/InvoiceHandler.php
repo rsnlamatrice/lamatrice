@@ -65,7 +65,6 @@ class RSNInvoiceHandler extends VTEventHandler {
 		if($invoiceData){
 			$this->handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems);
 		}
-		die();
 	}
 	/* ED150507 Règles de gestion lors de la validation d'une facture, article d'abonnement */
 	public function handleAfterSaveInvoiceAbonnementsEvent($invoice, $categoryItems){
