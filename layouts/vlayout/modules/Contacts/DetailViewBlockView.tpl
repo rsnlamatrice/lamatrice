@@ -7,7 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
 *
-affichage du détail d'un contact
+affichage du d≈Ωtail d'un contact
  ********************************************************************************/
  
  ED141010 : add RECORD_MODEL=$RECORD
@@ -21,6 +21,8 @@ affichage du détail d'un contact
 	{assign var=BLOCK_DO_NOT value=$BLOCK_LABEL_KEY == 'LBL_BLOCK_DO_NOT'}{* ED140926 force checkbox instead of yes/no text *}
 	
 	<input type=hidden name="timeFormatOptions" data-value='{$DAY_STARTS}' />
+	{* ED150515 : account_id needed for 'reference' changing confirmation *}
+	<input type=hidden name="account_id" data-value='{$RECORD->get('account_id')}' />
 	<table class="table table-bordered equalSplit detailview-table">
 		<thead>
 		<tr>
@@ -70,7 +72,7 @@ affichage du détail d'un contact
 				</td>
 				{assign var=COUNTER value=$COUNTER+1}
 			{else}
-				{if $FIELD_MODEL->get('uitype') eq "20" or (($FIELD_MODEL->get('uitype') eq "19") && ($FIELD_NAME neq "rsnnpaicomment"))}{* ED150122 : commentaire sur NPAI affiché plus petit *}
+				{if $FIELD_MODEL->get('uitype') eq "20" or (($FIELD_MODEL->get('uitype') eq "19") && ($FIELD_NAME neq "rsnnpaicomment"))}{* ED150122 : commentaire sur NPAI affich≈Ω plus petit *}
 					{if $COUNTER eq '1'}
 						<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td></tr><tr>
 						{assign var=COUNTER value=0}
@@ -96,7 +98,7 @@ affichage du détail d'un contact
 			{include file=vtemplate_path('uitypes/Boolean.tpl',$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 						{elseif $FIELD_MODEL->get('uitype') eq '15'}{* ED141005 *}
 							{$RECORD->getDisplayValue($FIELD_NAME)}
-						{* ED150105 "référent du compte" masqué si pas de compte *}
+						{* ED150105 "referent du compte" masque si pas de compte *}
 						{elseif ($MODULE_NAME eq 'Contacts') && ($FIELD_NAME == 'reference') && (!$RECORD->get('account_id'))}
 							<i>pas de compte</i>
 						{else}

@@ -41,6 +41,8 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 	 * Function to load record
 	 * @param <Number> $recordId
 	 * @return <Vtiger_Record_Model>
+	 *
+	 * ED150515 : Attention, fields of type 'file' must not be shown in tooltipview (e.g., Document->filename)
 	 */
 	protected function loadRecord($recordId) {
 		$moduleName = $this->module->getName();
@@ -77,6 +79,7 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 			
 		} catch(WebServiceException $wex) {
 			// Error retrieving information !
+			echo $wex;
 		}
 		return $this;
 	}

@@ -18,6 +18,9 @@
 {strip}
 {* champs Ne pas... *}
 {assign var=DONOT_FIELDS value=array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb')}
+{* ED150515 : account_id needed for 'reference' changing confirmation *}
+<input type=hidden name="account_id" data-value='{$RECORD->get('account_id')}' />
+	
 <table class="summary-table">
 	<tbody>
 	{foreach item=FIELD_MODEL key=FIELD_NAME from=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS']}
@@ -32,8 +35,7 @@
 		&& $FIELD_NAME neq 'donotrelanceabo'
 		&& $FIELD_NAME neq 'donotappeldonweb'
 		&& $FIELD_NAME neq 'phone'
-		&& ($FIELD_NAME neq 'reference'
-		 || $RECORD->get($FIELD_NAME))
+		&& ($FIELD_NAME neq 'reference' || $RECORD->get($FIELD_NAME))
 		}
 			<tr class="summaryViewEntries">
 				<td class="fieldLabel" style="width:30%"><label class="muted">

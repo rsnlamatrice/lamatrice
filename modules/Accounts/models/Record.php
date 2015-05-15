@@ -31,6 +31,33 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		}
 		return $hierarchy;
 	}
+	/** ED150515
+	 * Function returns the account main contact
+	 * @return <Array>
+	 */
+	function getAccountMainContact() {
+		
+		$moduleName = $this->getModuleName();
+		$relatedModuleName = 'Contacts';
+		$parentId = $this->getId();
+		
+		$query = "SELECT vtiger_crmentity.crmid, vtiger_crmentity.label, vtiger_contactdetails.*
+			FROM vtiger_contactdetails
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_contactdetails.accountid = ?
+			AND vtiger_contactdetails.reference = 1
+		";
+		global $adb;
+		$entries = array();
+		$result = $adb->pquery($query, array($this->getId()));
+		while(!$result->EOF){
+			$row = $adb->fetchByAssoc($result);
+			$entries[$row['crmid']] = $row;
+		}
+		return $entries;
+	}
 
 	/**
 	 * Function returns the url for create event

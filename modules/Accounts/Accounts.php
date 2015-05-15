@@ -202,7 +202,7 @@ class Accounts extends CRMEntity {
 	 * 
 	 * ED141010 contactdetails.accountid
 	 */
-	function get_contacts($id, $cur_tab_id, $rel_tab_id, $actions=false) {
+	function get_contacts($id, $cur_tab_id, $rel_tab_id, $actions=false, $mainContactOnly = false) {
 		global $log, $singlepane_view,$currentModule,$current_user;
 		$log->debug("Entering get_contacts(".$id.") method ...");
 		$this_module = $currentModule;
@@ -268,7 +268,10 @@ class Accounts extends CRMEntity {
 				WHERE crmid = ".$id."
 				)*/
 			)";
-
+		if($mainContactOnly){
+			$query .= " AND (vtiger_contactdetails.referent = 1
+			 AND vtiger_contactdetails.accountid = ".$id.")";
+		}
 		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
 
 		if($return_value == null) $return_value = Array();

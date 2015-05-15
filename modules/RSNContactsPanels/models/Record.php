@@ -373,7 +373,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			return $sql;
 		for($i = 0; $i < count($params); $i++){
 			// replace /*[[operator xxx]]*/ ? with /*[[operator xxx]]*/ 'value'
-			$sql = preg_replace('/(\/\*\[\[.*'.$paramsDetails[$i]['name'] . '.*\]\]\*\/\s)\?/'
+			$sql = preg_replace('/(\/\*\[\[.*'.preg_quote($paramsDetails[$i]['name']) . '.*\]\]\*\/\s)\?/'
 					    , '$1\'' . str_replace('\'', '\\\'', $params[$i]) . '\''
 					    , $sql);
 		}

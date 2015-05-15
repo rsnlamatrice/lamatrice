@@ -82,6 +82,9 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			foreach($relatedRecordModelsList as $relatedId => $relatedRecord)
 				if($relatedRecord->get('account_id') != $accountId)
 					$relatedRecord->set('reference', 0);
+			//relation 1->n
+			if (array_key_exists($relatedModuleName, $relatedModulesInfo))
+				unset($relatedModulesInfo[$relatedModuleName]);
 		}
 		
 		if (array_key_exists($relatedModuleName, $relatedModulesInfo) && $relatedRecordModelsList) {

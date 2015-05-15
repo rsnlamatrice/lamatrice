@@ -60,7 +60,6 @@
 		if(!$meta->hasReadAccess()){
 			throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,"Permission to read is denied");
 		}
-		
 		$result = $handler->query($q);
 		VTWS_PreserveGlobal::flush();
 		return $result;
