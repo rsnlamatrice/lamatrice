@@ -71,4 +71,23 @@ class Accounts_Detail_View extends Vtiger_Detail_View {
 
 		return parent::process($request);
 	}
+
+
+	/**
+	 * Function returns related records based on related moduleName
+	 * @param Vtiger_Request $request
+	 * @return <type>
+	 */
+	function showRelatedRecords(Vtiger_Request $request) {
+		//default order
+		if(!$request->get('orderby')){
+			switch($request->get('relatedModule')){
+			 case 'RSNAboRevues':
+				$request->set('orderby', 'debutabo');
+				$request->set('sortorder', 'DESC');
+				break;
+			}
+		}
+		return parent::showRelatedRecords($request);
+	}
 }

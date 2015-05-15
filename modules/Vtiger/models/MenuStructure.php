@@ -13,7 +13,7 @@
  */
 class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 
-	protected $limit = 7; // Max. limit of persistent top-menu items to display.
+	protected $limit = 8; // Max. limit of persistent top-menu items to display.
 	protected $enableResponsiveMode = true; // Should the top-menu items be responsive (width) on UI?
 
 	const TOP_MENU_INDEX = 'top';
@@ -32,11 +32,11 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 	 * @return <array> - Associate array of Parent name mapped to Vtiger_Menu_Model instances
 	 */
 	public function getMore() {
-		$moreTabs = $this->get(self::MORE_MENU_INDEX); 
+		$moreTabs = $this->get(self::MORE_MENU_INDEX);
 		foreach($moreTabs as $key=>$value){ 
 			if(!$value){ 
 				unset($moreTabs[$key]); 
-			} 
+			}
 		} 
 		return $moreTabs;
 	}

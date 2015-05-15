@@ -60,7 +60,7 @@ class RSNAboRevues extends Vtiger_CRMEntity {
 	// For Popup listview and UI type support
 	var $search_fields = Array(
 		'LBL_RSNABOTYPE' => array('rsnaborevues', 'rsnabotype'),
-		'LBL_ACCOUNTID' => array('rsnaborevues', 'accountid'),
+		'LBL_ACCOUNTID' => array('rsnaborevues', 'account_id'),
 		'LBL_NBEXEMPLAIRES' => array('rsnaborevues', 'nbexemplaires'),
 		'LBL_FINABO' => array('rsnaborevues', 'finabo'),
 		'LBL_ISABONNE' => array('rsnaborevues', 'isabonne'),
@@ -69,7 +69,7 @@ class RSNAboRevues extends Vtiger_CRMEntity {
 	);
 	var $search_fields_name = Array (
 		'LBL_RSNABOTYPE' => 'rsnabotype',
-		'LBL_ACCOUNTID' => 'accountid',
+		'LBL_ACCOUNTID' => 'account_id',
 		'LBL_NBEXEMPLAIRES' => 'nbexemplaires',
 		'LBL_FINABO' => 'finabo',
 		'LBL_ISABONNE' => 'isabonne',
@@ -77,7 +77,14 @@ class RSNAboRevues extends Vtiger_CRMEntity {
 	);
 
 	// For Popup window record selection
-	var $popup_fields = Array ('');
+	var $popup_fields = Array (
+		'LBL_RSNABOTYPE' => 'rsnabotype',
+		'LBL_ACCOUNTID' => 'account_id',
+		'LBL_NBEXEMPLAIRES' => 'nbexemplaires',
+		'LBL_FINABO' => 'finabo',
+		'LBL_ISABONNE' => 'isabonne',
+		'LBL_DEBUTABO' => 'debutabo',
+	);
 
 	// For Alphabetical search
 	var $def_basicsearch_col = '';

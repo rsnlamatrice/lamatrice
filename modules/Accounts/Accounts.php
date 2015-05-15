@@ -251,7 +251,8 @@ class Accounts extends CRMEntity {
 			INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
 			INNER JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid
 			/* ED150116 INNER JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid */
-			INNER JOIN vtiger_contactscf ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
+			/* ED150418 LEFT */
+			LEFT JOIN vtiger_contactscf ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
 			LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
 			LEFT JOIN vtiger_crmentityrel
 				ON vtiger_crmentityrel.crmid = ".$id."
@@ -1572,10 +1573,15 @@ class Accounts extends CRMEntity {
 	 */
 	function get_dependents_list($id, $cur_tab_id, $rel_tab_id, $actions = false) {
 
-		global $currentModule, $app_strings, $singlepane_view, $current_user;
+		//ED150507 $currentModule is not Accounts
+		//global $currentModule;
+		global $app_strings, $singlepane_view, $current_user;
 
 		$parenttab = getParentTab();
 
+		//ED150507 $currentModule is not Accounts
+		$currentModule = vtlib_getModuleNameById($cur_tab_id);
+		
 		$related_module = vtlib_getModuleNameById($rel_tab_id);
 		$other = CRMEntity::getInstance($related_module);
 
@@ -1597,8 +1603,13 @@ class Accounts extends CRMEntity {
 		$reference_fields_uitype = "10,73";
 			
 		$return_value = null;
-		$dependentFieldSql = $this->db->pquery("SELECT tabid, fieldname, columnname FROM vtiger_field WHERE uitype IN ($reference_fields_uitype) AND" .
-				" fieldid IN (SELECT fieldid FROM vtiger_fieldmodulerel WHERE relmodule=? AND module=?)", array($currentModule, $related_module));
+		$dependentFieldSql = $this->db->pquery("SELECT tabid, fieldname, columnname
+						       , IF(uitype = 73, 0, 1) AS sortindex
+						       FROM vtiger_field
+						       WHERE uitype IN ($reference_fields_uitype)
+						       AND fieldid IN (SELECT fieldid FROM vtiger_fieldmodulerel WHERE relmodule=? AND module=?)
+						       ORDER BY sortindex
+						       LIMIT 1", array($currentModule, $related_module));
 		$numOfFields = $this->db->num_rows($dependentFieldSql);
 
 		if ($numOfFields > 0) {

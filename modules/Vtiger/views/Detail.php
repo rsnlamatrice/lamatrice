@@ -485,6 +485,10 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 
 		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName);
+		/*ED150507*/
+		$relationListView->set('orderby', $request->get('orderby'));
+		$relationListView->set('sortorder',$request->get('sortorder'));
+		
 		$models = $relationListView->getEntries($pagingModel);
 		$header = $relationListView->getHeaders();
 
@@ -496,7 +500,11 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$viewer->assign('PAGING_MODEL', $pagingModel);
 		
 		/* ED150102*/
-		$relatedRecordModel = Vtiger_Record_Model::getCleanInstance($relatedModuleName);//TODO Faire mieux que getCleanInstance
+		if($models)
+			foreach($models as $relatedRecordModel)
+				break;
+		else
+			$relatedRecordModel = Vtiger_Record_Model::getCleanInstance($relatedModuleName);
 		$viewer->assign('RELATED_RECORD_MODEL', $relatedRecordModel);
 
 		return $viewer->view('SummaryWidgets.tpl', $moduleName, 'true');

@@ -12,24 +12,8 @@
  * RsnAdhesions ListView Model Class
  *
  * La table vtiger_rsnadhesions n'est pas utilisée.
- * Les dons sont des lignes de facture (table vtiger_inventoryproductrel)
+ * Les adhésions sont des lignes de facture (table vtiger_inventoryproductrel)
  */
-class RsnAdhesions_ListView_Model extends Vtiger_ListView_Model {
+class RsnAdhesions_ListView_Model extends RsnDons_ListView_Model {
 
-	function getQuery() {
-		
-		$listQuery = 'SELECT f.invoicedate, f.accountid as compte, lg.`listprice` as montant
-		, p.service_no as origine, f.invoiceid as rsnadhesionsid
-		FROM `vtiger_inventoryproductrel` lg
-		INNER JOIN `vtiger_service` p
-			ON lg.productid = p.serviceid
-			AND p.servicecategory = \'Adhésion\'
-		INNER JOIN `vtiger_invoice` f
-			ON lg.id = f.invoiceid
-		INNER JOIN `vtiger_crmentity` e
-			ON e.crmid = f.invoiceid
-		';
-		//var_dump($listQuery);
-		return $listQuery;
-	}
 }

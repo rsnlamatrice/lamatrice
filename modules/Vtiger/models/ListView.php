@@ -232,7 +232,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		    }
 		}
 		$listQuery = $this->getQuery();
-	//var_dump("<br><br><br><br><br><pre>ICICICI getListViewEntries $listQuery </pre>");
+	//echo("<p style=\"margin-top:6em\"> ICICICI getListViewEntries $listQuery </p>");
 	
 		$sourceModule = $this->get('src_module');
 		if(!empty($sourceModule)) {
@@ -284,6 +284,9 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		$listQuery .= " LIMIT $startIndex,".($pageLimit+1);
 
 		$listResult = $db->pquery($listQuery, array());
+		if(!$listResult){
+			echo $db->echoError() . '<pre>' . $listQuery . '</pre>';
+		}
 		
 		$listViewRecordModels = array();
 		// ICI LE PBLM DE CHAMPS QUI DISPARAISSENT RATTRAPPABLE PLUS BAS dans $moduleModel->getRecordFromArray($record, $rawData);
@@ -340,20 +343,24 @@ var_dump($listResult);*/
 				}
 			}
 		}
-		$position = stripos($listQuery, ' from ');
-		if ($position) {
-			$split = spliti(' from ', $listQuery);
-			$splitCount = count($split);
-			$listQuery = 'SELECT count(*) AS count ';
-			for ($i=1; $i<$splitCount; $i++) {
-				$listQuery = $listQuery. ' FROM ' .$split[$i];
-			}
-		}
+		//ED150507 : ' from ' is not correct if FROM is preceded with \t
+		//$position = stripos($listQuery, ' from ');
+		//if ($position) {
+		//	$split = spliti(' from ', $listQuery);
+		//	$splitCount = count($split);
+		//	$listQuery = 'SELECT count(*) AS count ';
+		//	for ($i=1; $i<$splitCount; $i++) {
+		//		$listQuery = $listQuery. ' FROM ' .$split[$i];
+		//	}
+		//}
 
 		if($this->getModule()->get('name') == 'Calendar'){
 			$listQuery .= ' AND activitytype <> "Emails"';
 		}
 
+		//ED150507 : cou
+		$listQuery = 'SELECT count(*) AS count FROM (' . $listQuery . ') q';
+		
 		$listResult = $db->pquery($listQuery, array());
 		return $db->query_result($listResult, 0, 'count');
 	}

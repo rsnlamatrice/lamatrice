@@ -220,15 +220,17 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			OR ($fieldName = ?
 			AND contactid = ?)
 			)"
-			//. ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?")
+			
 		;
+		if($relatedRecordDateApplicationList !== FALSE )
+			$deleteQuery .= ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?");
 		$params[] = $sourceRecordId;
 		$params[] = $relatedRecordId;
 		$params[] = $relatedRecordId;
 		$params[] = $sourceRecordId;
-		/*if($relatedRecordDateApplicationList !== FALSE )
+		if($relatedRecordDateApplicationList !== FALSE )
 			$params[] = $relatedRecordDateApplicationList;
-		*/
+		
 		if($db->pquery($deleteQuery, $params) === FALSE)
 			return false;
 		return true;
@@ -272,13 +274,17 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					$params = array();
 					$updateQuery = "UPDATE $tableName
 						SET $fieldToUpdate = ?
-						WHERE ($fieldName = ?
+						WHERE (($fieldName = ?
 						AND contactid = ?)"
-						//AND dateapplication = ?
+						//
 					;
 					if($relatedModuleName == "Contacts")
 						$updateQuery .= " OR ($fieldName = ?
-								AND contactid = ?)";
+								AND contactid = ?))
+								AND dateapplication = ?";
+					else
+						$updateQuery .= ')';
+						
 					$params[] = $datum['value'];
 					$params[] = $relatedRecordId;
 					$params[] = $sourceRecordId;
@@ -288,6 +294,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					if($relatedModuleName == "Contacts"){
 						$params[] = $sourceRecordId;
 						$params[] = $relatedRecordId;
+						$params[] = $datum['dateapplication'];
 					}
 					//var_dump($updateQuery, $params);
 					if($db->pquery($updateQuery, $params) === FALSE)

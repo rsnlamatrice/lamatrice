@@ -449,7 +449,7 @@ class Reports extends CRMEntity{
 		if ($paramsList) {
 			$startIndex = $paramsList['startIndex'];
 			$pageLimit = $paramsList['pageLimit'];
-			$orderBy = $paramsList['orderBy'];
+			$orderBy = $paramsList['orderBy']; //ED150507 attention orderBy or orderby ?
 			$sortBy = $paramsList['sortBy'];
 			if ($orderBy) {
 				$sql .= " ORDER BY $orderBy $sortBy";

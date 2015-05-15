@@ -36,6 +36,7 @@ $languageStrings = array(
 	'LBL_ADD_COMMENT'              => 'Ajouter Commentaire'                 , 
 	'LBL_EDIT_FIELDS'              => 'Gestionnaire d\'agencement'               , 
 	'LBL_EDIT_WORKFLOWS'           => 'Editer les flux'              , 
+	'LBL_EDITING_WORKFLOWS'           => 'Edition de flux'              , /*ED150418*/
 	'LBL_EDIT_PICKLIST_VALUES'     => 'Editer les valeurs de listes déroulantes'        , 
 	'LBL_EDIT_MAILSCANNER'         => 'Convertir Emails'              , 
 	'LBL_RECORD_DELETE'            => 'L\'enregistrement que vous tentez de visualiser a été supprimé.', 
@@ -710,8 +711,6 @@ $languageStrings = array(
 	'LBL_CURRENT_ADDRESS'		=> 'Adresse actuelle',
 	'LBL_CONTACT_CURRENT_ADDRESS'	=> 'Adresse actuelle du contact',
 	'ContactAddresses'		=> 'Adresses postales',
-	'LBL_OLD_ADDRESS'		=> 'Ancienne adresse',
-	'LBL_BEFORE_RNVP'		=> 'Avant RNVP',
 	'LBL_CREATE_ARCHIVE'		=> 'Archiver',
 	'ContactEmails'		        => 'Adresses emails',
 	'LBL_RSNBANQUES' => 'Banques',
@@ -720,7 +719,14 @@ $languageStrings = array(
 	'RSNAboRevues'			=> 'Abonnements à la revue',
         
         'LBL_CONVERT_AS'                   => 'Convertir en',
-	'LBL_ERROR'                     => 'Erreur'                       , 
+	'LBL_ERROR'                     => 'Erreur',
+        
+        //Rapports (notez l'espace en fin de mot)
+        'A_faire_LBL_COMMENTAIRE ' => 'Commentaire',
+        'A_faire_LBL_RSNTODOREPONSEATTENDUE ' => 'Délai attendu',
+        'A_faire_LBL_RSNTODOCONCERNE ' => 'Concerne',
+        'A_faire_LBL_SUJET ' => 'Sujet',
+        'A_faire_Estimation_durée ' => 'Durée estimée',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

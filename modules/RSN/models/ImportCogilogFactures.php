@@ -62,8 +62,8 @@ class RSN_CogilogFacturesRSN_Import {
         
 	// Importe les factures qui n'ont pas encore été importées
 	public static function importNexts(){
-            
-		$srcRows = self::getEntries();
+		$nbRows = MAX_QUERY_ROWS;
+		$srcRows = self::getEntries($nbRows);
 		$doneRows = array();
 		$factures = array();
 		$current_facture = false;
@@ -81,8 +81,11 @@ class RSN_CogilogFacturesRSN_Import {
 			$factures[count($factures)-1]['lignes'][] = $srcRow;
 			//break;//debug
 		}
-		//Supprime la dernière car il n'y a peut être pas toutes les lignes d'articles
-		array_pop($factures);
+		
+		if(count($factures) == $nbRows ){
+			//Supprime la dernière car il n'y a peut être pas toutes les lignes d'articles
+			array_pop($factures);
+		}
 		
 		foreach($factures as $facture){
 			if(self::importRow($facture))
@@ -100,7 +103,7 @@ class RSN_CogilogFacturesRSN_Import {
 	/*
 	 * Les entrées contiennent autant de lignes que de lignes de factures
 	 */
-	private static function getEntries(){
+	private static function getEntries($nbRows = MAX_QUERY_ROWS){
             
 		/* factures déjà importés */
 		$query = "SELECT MIN(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_min, MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
@@ -155,8 +158,11 @@ class RSN_CogilogFacturesRSN_Import {
 			LEFT JOIN "gtvacg00002" AS "codetauxtva"
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
+		/* Attention à ne pas importer une facture en cours de saisie */
+		$query .= ' WHERE facture.datepiece < CURRENT_DATE 
+		';
 		if($factMin)
-			$query .= ' WHERE NOT facture.id BETWEEN '.$factMin.' AND '.$factMax.'
+			$query .= ' AND NOT facture.id BETWEEN '.$factMin.' AND '.$factMax.'
 		';
 			
 		//var_dump($query);
@@ -164,7 +170,7 @@ class RSN_CogilogFacturesRSN_Import {
 		echo("<pre>Nbre de lignes de factures à importer : ".$rows[0]['nbrerestantes']."</pre>");
 		
 		$query .= ' ORDER BY facture.id, position_ligne ASC
-                    LIMIT ' . MAX_QUERY_ROWS;
+                    LIMIT ' . $nbRows;
 		//var_dump($query);
 		return self::getPGDataRows($query);
     }
@@ -248,7 +254,7 @@ class RSN_CogilogFacturesRSN_Import {
 			";
 			$result = $db->pquery($query, array($codeClient, ASSIGNEDTO_ALL, $contact->getId()));
 			
-			//var_dump("Contact C$codeClient créé, id=".$contact->getId() . ", nom=".$contact->getName());
+			var_dump("Contact C$codeClient créé, id=".$contact->getId() . ", nom=".$contact->getName());
 		}
 		
 		return $contact;
@@ -262,7 +268,10 @@ class RSN_CogilogFacturesRSN_Import {
 	private static function importFacture($srcRow, $contact){
 			
 		$account = $contact->getAccountRecordModel();
-                
+                if(!$account->getId()){
+			var_dump('Le compte n\'est pas défini', $account);
+			return;
+                }
 		$query = "SELECT invoiceid, vtiger_crmentity.deleted
 			FROM vtiger_invoice
                         JOIN vtiger_crmentity

@@ -79,6 +79,11 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->process_PG_DataRowsTable($request, $sub, $viewer);
 			
 			break;
+		
+		case 'DefineMissingLabels' :
+			$this->defineMissingLabels();
+			break;
+		
 		default:
 			$viewer->assign('HTML_DATA', "Inconnu : \"$sub\"");
 			break;
@@ -169,5 +174,36 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		return pg_connect($cxString)
 		    or die('Connexion impossible : ' . pg_last_error());
 			
+	}
+	
+	
+	private function defineMissingLabels(){
+		$db = PearDatabase::getInstance();
+		
+		$query = 'SELECT vtiger_crmentity.crmid, vtiger_crmentity.setype
+			FROM vtiger_crmentity
+			JOIN vtiger_entityname
+				ON vtiger_entityname.modulename = vtiger_crmentity.setype
+			WHERE label IS NULL
+			AND deleted = 0';
+
+		$result = $db->pquery($query);
+		$noOfRows = $db->num_rows($result);
+		$updated = array();
+		for($i=0; $i<$noOfRows; ++$i) {
+			$row = $db->query_result_rowdata($result, $i);
+			
+			$labelInfo = getEntityName($row['setype'], $row['crmid'], true);
+			if ($labelInfo) {
+				$label = decode_html($labelInfo[$row['crmid']]);
+				$db->pquery('UPDATE vtiger_crmentity SET label=? WHERE crmid=?', array($label, $row['crmid']));
+			
+				$updated[$row['crmid']] = $label;
+			}
+			else {
+				//par exemple, le crmentity existe mais pas le contactdetails...
+			}
+		}
+		var_dump($updated);
 	}
 }

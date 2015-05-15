@@ -107,6 +107,9 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				case "Critere4D":
 					$fieldRels = Critere4D_RelationListView_Model::get_related_fields();
 					break;
+				case "Contacts":
+					$fieldRels = Contacts_RelationListView_Model::get_related_contacts_fields();
+					break;
 				default:
 					$fieldRels = Vtiger_RelationListView_Model::get_related_fields();
 					break;

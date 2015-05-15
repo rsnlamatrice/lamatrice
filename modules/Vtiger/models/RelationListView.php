@@ -239,8 +239,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 
 	public function getEntries($pagingModel) {
 		$db = PearDatabase::getInstance();
-		//echo __FILE__;
-		//$db->setDebug(true);
+		//echo __FILE__; $db->setDebug(true);
 		
 		$parentModule = $this->getParentRecordModel()->getModule();
 		$relationModule = $this->getRelationModel()->getRelationModuleModel();

@@ -1,7 +1,8 @@
 <?php
 /*+***********************************************************************************
- * ED150424
+ * ED150417
  *************************************************************************************/
 
-class Services_ConvertToModule_View extends Products_ConvertToModule_View {
+class Invoice_Relation_Model extends Inventory_Relation_Model {
+
 }

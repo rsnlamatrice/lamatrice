@@ -352,8 +352,8 @@ class Vtiger_Functions {
 
 				$table = $metainfo['tablename'];
 				if(!$table)/* ED140921 */
-					die("[computeCRMRecordLabels()] Module '$module' : La table est inconnue en retour de getEntityModuleInfo().\r\nContrôlez l'existence de l'enregistrement dans la table vtiger_entityname.");
-					//throw new Exception("La table est inconnue en retour de getEntityModuleInfo().\r\nContrôlez l'existence de l'enregistrement dans la table vtiger_entityname.");
+					die("[computeCRMRecordLabels()] Module '$module' : La table est inconnue en retour de getEntityModuleInfo().\r\nContrÃ´lez l'existence de l'enregistrement dans la table vtiger_entityname.");
+					//throw new Exception("La table est inconnue en retour de getEntityModuleInfo().\r\nContrÃ´lez l'existence de l'enregistrement dans la table vtiger_entityname.");
 				
 				$idcolumn = $metainfo['entityidfield'];
 				$columns  = explode(',', $metainfo['fieldname']);
@@ -369,14 +369,15 @@ class Vtiger_Functions {
 				$columnString = count($columns) < 2? $columns[0] :
 					sprintf("concat(%s)", implode(",' ',", $columns));
 
-				$sql = sprintf('SELECT %s AS label, %s AS id FROM %s WHERE %s IN (%s)',
+				//ED150512 adds TRIM()
+				$sql = sprintf('SELECT TRIM(%s) AS label, %s AS id FROM %s WHERE %s IN (%s)',
 						$columnString, $idcolumn, $table, $idcolumn, generateQuestionMarks($ids));
 				$result = $adb->pquery($sql, $ids);
 				//print_r($result);
 					
 				/* ED140921 */
 				if($result === FALSE){
-					echo("Erreur dans ".__FILE__."\r\nContrôlez le nom des champs dans la table vtiger_entityname.");
+					echo("Erreur dans ".__FILE__."\r\nContrÃ´lez le nom des champs dans la table vtiger_entityname.");
 					print_r($result);
 					die($sql);
 				}

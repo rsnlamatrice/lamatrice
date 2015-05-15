@@ -14,22 +14,6 @@
  * La table vtiger_rsnabonnements n'est pas utilisée.
  * Les dons sont des lignes de facture (table vtiger_inventoryproductrel)
  */
-class RsnAbonnements_ListView_Model extends Vtiger_ListView_Model {
+class RsnAbonnements_ListView_Model extends RsnDons_ListView_Model {
 
-	function getQuery() {
-		
-		$listQuery = 'SELECT f.invoicedate, f.accountid as compte, lg.`listprice` as montant
-		, p.productcode as origine, f.invoiceid as rsnabonnementsid
-		FROM `vtiger_inventoryproductrel` lg
-		INNER JOIN `vtiger_service` p
-			ON lg.productid = p.serviceid
-			AND p.servicecategory = \'Abonnement\'
-		INNER JOIN `vtiger_invoice` f
-			ON lg.id = f.invoiceid
-		INNER JOIN `vtiger_crmentity` e
-			ON e.crmid = f.invoiceid
-		';
-		//var_dump($listQuery);
-		return $listQuery;
-	}
 }
