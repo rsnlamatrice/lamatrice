@@ -19,6 +19,75 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 		jQuery('input[name="account_id"]', container).on(Vtiger_Edit_Js.referenceSelectionEvent, function(e, data){
 			thisInstance.referenceSelectionEventHandler(data, container);
 		});
+		
+		jQuery('input[name="notesid"]', container).on(Vtiger_Edit_Js.referenceSelectionEvent, function(e, data){
+			thisInstance.couponSelectionEventHandler(data, container);
+		});
+	},
+	
+	/* ED150515
+	 * Sélection d'un coupon : affectation de la campagne
+	 */
+	couponSelectionEventHandler : function(data, container){
+		
+		var thisInstance = this
+		, $note = container.find('input[name="notesid"]:first')
+		, notesid = $note.val();
+		if (notesid) {
+			var params = {
+				'record' : notesid
+				, 'source_module' : 'Documents'
+				, 'related_data' : 'Campaigns'
+			};
+			var selectedName = data['selectedName'];
+			
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : selectedName + '...',
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			thisInstance.getRecordDetails(params).then(
+				function(data){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+					
+					var $dest = container.find('input[name="campaign_no"]');
+					if ($dest.length == 0) {
+						alert('Campagne introuvable');
+						return;
+					}
+					if ($dest.val() && !$dest.attr('data-replacable')) {
+						console.log('Campagne déjà sélectionnée')
+						return;
+					}
+					var response = data['result']
+					, campaigns = response['related_data']['Campaigns']
+					, campaign = false
+					//, campaigndate = ''
+					;
+					if (!campaigns)
+						return;
+					for(var i in campaigns) {
+						//if(campaigndate < campaigns[i]['date']
+						campaign = campaigns[i];
+						break;
+					}
+					if (!campaign) {
+						alert('Campagne non retournée');
+						return;
+					}
+					$dest
+						.val(campaign.id)
+						.attr('data-replacable', 1);
+					$dest.nextAll('.input-prepend:first').children('input:first')
+						.val(campaign.campaignname);
+				},
+				function(error, err){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+				}
+			);
+		}
 	},
 
 	/**
@@ -26,7 +95,7 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 	 */
 	getPopUpParams : function(container) {
 		var params = this._super(container);
-        var sourceFieldElement = jQuery('input[class="sourceField"]',container);
+		var sourceFieldElement = jQuery('input[class="sourceField"]',container);
 
 		if(sourceFieldElement.attr('name') == 'contact_id') {
 			var form = this.getForm();

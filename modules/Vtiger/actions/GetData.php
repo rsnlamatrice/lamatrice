@@ -10,10 +10,7 @@
 
 class Vtiger_GetData_Action extends Vtiger_IndexAjax_View {
 
-	/* ED150515
-	 * @relatedData : data to return in more
-	 */
-	public function process(Vtiger_Request $request, $relatedData = false) {
+	public function process(Vtiger_Request $request) {
 		$record = $request->get('record');
 		$sourceModule = $request->get('source_module');
 		$response = new Vtiger_Response();
@@ -24,8 +21,9 @@ class Vtiger_GetData_Action extends Vtiger_IndexAjax_View {
 			$data = $recordModel->getData();
 			$result = array('success'=>true, 'data'=>array_map('decode_html',$data));
 			//ED50515
-			if($relatedData)
-				$result['relatedData'] = $relatedData;
+			if($request->get('related_data')){
+				$result['related_data'] = $recordModel->getRelatedData($request->get('related_data'));
+			}
 			$response->setResult($result);
 		} else {
 			$response->setResult(array('success'=>false, 'message'=>vtranslate('LBL_PERMISSION_DENIED')));

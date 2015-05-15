@@ -235,7 +235,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	/* ED150129
-	 * le champ balance n'est gŽrŽ nulle part
+	 * le champ balance n'est gÅ½rÅ½ nulle part
 	*/
 	public function calculateBalance(){
 		$moduleName = $this->getModuleName();

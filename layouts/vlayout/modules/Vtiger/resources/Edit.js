@@ -321,7 +321,11 @@ jQuery.Class("Vtiger_Edit_Js",{
 	 */
 	getRecordDetails : function(params) {
 		var aDeferred = jQuery.Deferred();
-		var url = "index.php?module="+app.getModuleName()+"&action=GetData&record="+params['record']+"&source_module="+params['source_module'];
+		var url = "index.php?module="+app.getModuleName()
+			+ "&action=GetData&record="+params['record']
+			+ "&source_module="+params['source_module']
+			+ (params['related_data'] ? "&related_data="+params['related_data'] : '')
+			;
 		AppConnector.request(url).then(
 			function(data){
 				if(data['success']) {
@@ -464,14 +468,14 @@ jQuery.Class("Vtiger_Edit_Js",{
 				if(editViewForm.validationEngine('validate')) {
 					//Once the form is submiting add data attribute to that form element
 					editViewForm.data('submit', 'true');
-						//on submit form trigger the recordPreSave event
-						var recordPreSaveEvent = jQuery.Event(Vtiger_Edit_Js.recordPreSave);
-						editViewForm.trigger(recordPreSaveEvent, {'value' : 'edit'});
-						if(recordPreSaveEvent.isDefaultPrevented()) {
-							//If duplicate record validation fails, form should submit again
-							editViewForm.removeData('submit');
-							e.preventDefault();
-						}
+					//on submit form trigger the recordPreSave event
+					var recordPreSaveEvent = jQuery.Event(Vtiger_Edit_Js.recordPreSave);
+					editViewForm.trigger(recordPreSaveEvent, {'value' : 'edit'});
+					if(recordPreSaveEvent.isDefaultPrevented()) {
+						//If duplicate record validation fails, form should submit again
+						editViewForm.removeData('submit');
+						e.preventDefault();
+					}
 				} else {
 					//If validation fails, form should submit again
 					editViewForm.removeData('submit');

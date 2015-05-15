@@ -74,24 +74,27 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 	referenceSelectionEventHandler :  function(data, container) {
 		var thisInstance = this;
 		var sourceModule = data['source_module'];
-		var selectedName = data['selectedName'];
-		var progressIndicatorElement = jQuery.progressIndicator({
-			'message' : '',
-			'position' : 'html',
-			'blockInfo' : {
-				'enabled' : true
-			}
-		});
-		thisInstance.getRecordDetails(data).then(
-			function(recordDetails){
-				progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
-				thisInstance.copyAddressDetails(data, container, true, recordDetails);
-				thisInstance.checkAccountReferent(data, container, recordDetails);
-			},
-			function(error, err){
-				progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
-			}
-		);
+		if (sourceModule == 'Accounts') {
+			var selectedName = data['selectedName'];
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : selectedName + '...',
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			data['related_data'] = 'MainContacts';
+			thisInstance.getRecordDetails(data).then(
+				function(recordDetails){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+					thisInstance.copyAddressDetails(data, container, true, recordDetails);
+					thisInstance.checkAccountReferent(data, container, recordDetails);
+				},
+				function(error, err){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+				}
+			);
+		}
 	},
 	
 	/** ED150515
@@ -104,7 +107,7 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		, getRecordDetailsCallBack = function(data){
 	
 			var response = data['result']
-			, mainContacts = response['relatedData']['MainContacts'];
+			, mainContacts = response['related_data']['MainContacts'];
 			if (!mainContacts) 
 				return;
 			var message = ''
@@ -134,15 +137,19 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		};
 		if (recordDetails)
 			getRecordDetailsCallBack.call(this, recordDetails)
-		else
+		else {
+			data['related_data'] = 'MainContacts';
 			thisInstance.getRecordDetails(data).then(
 				getRecordDetailsCallBack
 				, function(error, err){}
 			);
+		}
 	},
 	
 	/**
 	 * Function which will copy the address details - without Confirmation
+	 *
+	 * ED150515 : adds recordDetails is already requested
 	 */
 	copyAddressDetails : function(data, container, askUser, recordDetails) {
 		var thisInstance = this
@@ -162,7 +169,8 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 					function(e) {
 						thisInstance.mapAddressDetails(addressDetails, response['data'], container);
 					},
-					function(error, err){});
+					function(error, err){}
+				);
 			}
 			else
 				thisInstance.mapAddressDetails(addressDetails, response['data'], container);
@@ -301,6 +309,7 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 			var params = {
 				'record' : accountId
 				, 'source_module' : 'Accounts'
+				, 'related_data' : 'MainContacts'
 			};
 			var progressIndicatorElement = jQuery.progressIndicator({
 				'message' : 'Contrôle en cours...',
@@ -314,7 +323,7 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
 			
 					var response = data['result']
-					, mainContacts = response['relatedData']['MainContacts'];
+					, mainContacts = response['related_data']['MainContacts'];
 					if (!mainContacts) 
 						return;
 					var message = ''

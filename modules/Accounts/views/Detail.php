@@ -53,8 +53,6 @@ class Accounts_Detail_View extends Vtiger_Detail_View {
 			return $viewer->view('RelatedActivities.tpl', $moduleName, true);
 		}
 	}
-
-
 	
 	/**
 	 * ED141210

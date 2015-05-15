@@ -325,9 +325,10 @@ var Vtiger_Index_Js = {
 
 		function hideAllTooltipViews() {
 			// Hide all previous popover
-			var lastPopover = null;
-			while (lastPopover = lastPopovers.pop()) {
+			var lastPopover = lastPopovers.pop();
+			while (lastPopover) {
 				lastPopover.popover('hide');
+				lastPopover = lastPopovers.pop();
 			}
 		}
 

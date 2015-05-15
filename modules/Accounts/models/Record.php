@@ -35,7 +35,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	 * Function returns the account main contact
 	 * @return <Array>
 	 */
-	function getAccountMainContact() {
+	function getRelatedMainContacts() {
 		
 		$moduleName = $this->getModuleName();
 		$relatedModuleName = 'Contacts';

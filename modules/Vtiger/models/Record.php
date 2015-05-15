@@ -597,4 +597,47 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		}
 		//$db->setDebug(false);
 	}
+	
+	/* ED150515
+	 * Returns related data to this record
+	 * @param $dataNames : array or string width ',' separator
+	 * 	module name or suffix of function name (getRelated<dataName>)
+	 * @returns an associative array of entries
+	 *
+	 * Used from modules\Vtiger\actions\GetData.php, responding to vlayout\modules\Vtiger\resources\Edit.js, getRecordDetails({related_data : dataNames})
+	 */
+	public function getRelatedData($dataNames){
+		if(is_string($dataNames))
+			$dataNames = explode(',', $dataNames);
+		$data = array();
+		foreach($dataNames as $dataName){
+			//Method 1 : specific getRelatedXXXXX function exists
+			$functionName = "getRelated$dataName";
+			if(method_exists($this, $functionName)){
+				$data[$dataName] = $this->$functionName();
+				continue;
+			}
+			//Method 2 : $dataName is a ModuleName
+			$pagingModel = new Vtiger_Paging_Model();
+			$pagingModel->set('page', 1);
+			
+			$relatedModuleName = $dataName;
+			$relationListView = Vtiger_RelationListView_Model::getInstance($this, $relatedModuleName, '');
+			$data[$dataName] = $relationListView->getEntries($pagingModel);
+		}
+		// converts record models as raw data
+		foreach($data as $dataName => $entries){
+			$rawData = false;
+			foreach($entries as $id => $entry){
+				if(!(is_a($entry, Vtiger_Record_Model )))
+					break;
+				if(!$rawData)
+					$rawData = array();
+				$rawData[$id] = $entry->getData();
+			}
+			if($rawData)
+				$data[$dataName] = $rawData;
+		}
+		return $data;
+	}
 }

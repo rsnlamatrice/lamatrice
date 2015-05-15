@@ -17,7 +17,7 @@ class Invoice_Save_Action extends Inventory_Save_Action {
 			// This is a dependency on the older code, where in Invoice save_module we decide wheather to update or not.
 			$_REQUEST['action'] = 'InvoiceAjax';
 		}
-
+		
 		$recordModel = parent::saveRecord($request);
 
 		//Reverting the action value to $_REQUEST
