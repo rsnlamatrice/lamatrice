@@ -114,12 +114,15 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 
 /* pickListValuesTable Picklist settings */
 .pickListValue .picklist-color {
-  display: inline-block;
+  display: none;
   margin-right: 4px;
   width: 2.5em;
   height: 1.3em;
   /*border: 1px solid black;
   border-radius: 2px;*/
+}
+.properties-uicolor .pickListValue .picklist-color {
+  display: inline-block;
 }
 .pickListValue .colorpicker-holder {
   height: 16px;

@@ -56,6 +56,10 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 	    case 'presence':
 		$params[] = 1;
 		break;
+	    case 'uicolor':
+	    case 'uiicon':
+		$params[] = null;
+		break;
 	}
 	if($fieldModel->isRoleBased()) {
 	    $columns = implode(', ', array_slice($columns, 0, 5));
