@@ -272,11 +272,11 @@ jQuery.Class("Vtiger_Header_Js", {
             var quickCreateContent = quickCreateForm.find('.quickCreateContent');
             var quickCreateContentHeight = quickCreateContent.height();
             var contentHeight = parseInt(quickCreateContentHeight);
-            if (contentHeight > 300) {
+            /*if (contentHeight > 300) {
                 app.showScrollBar(jQuery('.quickCreateContent'), {
                     'height': '300px'
                 });
-            }
+            }*/
         });
     },
     registerQuickCreatePostLoadEvents: function(form, params) {
