@@ -79,7 +79,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			$result = $db->pquery($sql, array($recordId));
 
 			/* ED40927 */
-			if(true && $db->getRowCount($result) == 0){
+			if($db->getRowCount($result) == 0){
 				$imageId = null;
 				$imagePath = null;
 				if($this->get('isgroup')){
@@ -260,7 +260,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 * Retourne les contacts référents du même compte que ce contact.
 	 * ED150225
 	 */
-	public function getSameAccountReferentContacts(){
+	public function getCompteCommunContacts(){
 		//echo '<pre>'; var_dump($this);echo '</pre>'; 
 		$account_id = $this->get('account_id');
 		$this_id = $this->getId();
@@ -299,7 +299,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		self::$preventInfiniteSave[] = $this->getId();
 		$this->updateAccountAddress();
 		// update contacts en compte commun
-		$this->updateContactsComptesCommunsAddress();
+		$this->updateCompteCommunContactsAddress();
 	}
 	
 	/**
@@ -346,15 +346,15 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 * Recopie l'adresse des contacts référents du même compte.
 	 * ED150205
 	 */
-	public function updateContactsComptesCommunsAddress(){
+	public function updateCompteCommunContactsAddress(){
 		
-		$contacts = $this->getSameAccountReferentContacts();
+		$contacts = $this->getCompteCommunContacts();
 		$thisFields = $this->getModule()->getFields();
 			
 		foreach($contacts as $contact){
 			if(!is_array(self::$preventInfiniteSave))
 				self::$preventInfiniteSave = array();
-			elseif(in_array(self::$preventInfiniteSave, $this->getId()))
+			elseif(in_array(self::$preventInfiniteSave, array($this->getId())))
 				continue;
 			self::$preventInfiniteSave[] = $contact->getId();
 			
@@ -386,7 +386,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		$addressModule = Vtiger_Module_Model::getInstance('ContactAddresses');
 		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactAddresses');
 		$addressRecord->set('mode', 'create');
-		$addressRecord->set('addresstype', 'LBL_OLD_ADDRESS');
+		$addressRecord->set('addresstype', 'Ancienne adresse');
 		$mapping = array(
 			'id' => 'contactid',
 			'modifiedtime' => 'createdtime',
@@ -404,7 +404,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		//echo '<pre>';
 		foreach($mapping as $sourceField => $destField){
 			$addressRecord->set($destField, $this->get($sourceField));
-			//var_dump($sourceField, $destField, $contactOldRecord->get($sourceField), $addressRecord->get($destField));
+			//var_dump($sourceField, $destField, $this->get($sourceField), $addressRecord->get($destField));
 		}
 		//echo '</pre>';
 		//die();
@@ -443,5 +443,22 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			$addressRecord->set('mode', '');
 		}
 		return $addressRecord;
+	}
+	
+	
+	/* ED15015 : un seul contact peut être référent du compte
+	 */
+	public function ensureAccountHasOnlyOneMainContact(){
+		if($this->get('account_id') && $this->get('reference')){
+			$query = "UPDATE vtiger_contactdetails
+			SET reference = 0
+			WHERE contactid <> ?
+			AND accountid = ?
+			AND reference = 1";
+		
+			global $adb;
+			$adb->pquery($query, array( $this->getId(), $this->get('account_id') ));
+		}
+		return $this;
 	}
 }

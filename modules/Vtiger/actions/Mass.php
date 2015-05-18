@@ -15,7 +15,12 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 		$module = $request->get('module');
 		if(!empty($cvId) && $cvId=="undefined"){
 			$sourceModule = $request->get('sourceModule');
-			$cvId = CustomView_Record_Model::getAllFilterByModule($sourceModule)->getId();
+			$cvRecord = CustomView_Record_Model::getAllFilterByModule($sourceModule);
+			if(!$cvRecord){
+				var_dump("Impossible de trouver la vue par défaut, nommé 'All' pour le module $sourceModule.");
+				return;
+			}
+			$cvId = $cvRecord->getId();
 		}
 		$selectedIds = $request->get('selected_ids');
 		$excludedIds = $request->get('excluded_ids');

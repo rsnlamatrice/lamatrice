@@ -168,6 +168,7 @@
 				{assign var=PICKLIST_VALUES value=$HEADER_FIELD->get('picklist_values')}
 				
                                 {assign var=I value=0}
+				{assign var=DATE_IDS value=$RELATED_RECORD->get('dateapplication')}
 				{foreach item=DATA from=$RELATED_RECORD->get($FIELD_NAME)}
 				    {if $DATA eq null}{assign var=DATA value=$HEADER_FIELD->getDefaultFieldValue()}{/if}
 				    {assign var=PICKLIST_ITEM_KNOWN value=$PICKLIST_VALUES && array_key_exists($DATA, $PICKLIST_VALUES)}
@@ -201,7 +202,7 @@
 					    <input id="{$MODULE}_editView_fieldName_{$FIELD_NAME}_{$I}"
 					    class="span3 contreltype select2"
 					    value="{$DATA}"
-					    {if $DATE_IDS[$I]}dateapplication="{$DATE_IDS[$I]->format('Y-m-d H:i:s')}"{/if}>
+					    dateapplication="{if $DATE_IDS[$I]}{$DATE_IDS[$I]->format('Y-m-d H:i:s')}{/if}">
 					      
 					    </select>
 					{/if}

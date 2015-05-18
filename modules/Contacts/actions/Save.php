@@ -23,7 +23,7 @@ class Contacts_Save_Action extends Vtiger_Save_Action {
 		
 		//ED150312
 		//duplicate address data to a new ContactAddresses record
-		if($request->get('_archive_address')){
+		if($request->get('_archive_address') && $request->get('record')){
 			$contactModule = Vtiger_Module_Model::getInstance('Contacts');
 			//"old" means "before saved"
 			$contactOldRecord = Vtiger_Record_Model::getInstanceById($request->get('record'), $contactModule);

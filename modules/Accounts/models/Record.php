@@ -31,6 +31,33 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		}
 		return $hierarchy;
 	}
+	/** ED150515
+	 * Function returns the account main contact
+	 * @return <Array>
+	 */
+	function getRelatedMainContacts() {
+		
+		$moduleName = $this->getModuleName();
+		$relatedModuleName = 'Contacts';
+		$parentId = $this->getId();
+		
+		$query = "SELECT vtiger_crmentity.crmid, vtiger_crmentity.label, vtiger_contactdetails.*
+			FROM vtiger_contactdetails
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_contactdetails.accountid = ?
+			AND vtiger_contactdetails.reference = 1
+		";
+		global $adb;
+		$entries = array();
+		$result = $adb->pquery($query, array($this->getId()));
+		while(!$result->EOF){
+			$row = $adb->fetchByAssoc($result);
+			$entries[$row['crmid']] = $row;
+		}
+		return $entries;
+	}
 
 	/**
 	 * Function returns the url for create event
@@ -99,5 +126,42 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 				array('parentField'=>'ship_country', 'inventoryField'=>'ship_country', 'defaultValue'=>''),
 				array('parentField'=>'ship_pobox', 'inventoryField'=>'ship_pobox', 'defaultValue'=>'')
 		);
+	}
+	
+	
+	
+	/** ED150507
+	 * Function to get RSNAboRevues array for this account
+	 */
+	public function getRSNAboRevues($isabonneOnly = false){
+		
+		$moduleName = $this->getModuleName();
+		$relatedModuleName = 'RSNAboRevues';
+		$parentId = $this->getId();
+		$pagingModel = new Vtiger_Paging_Model();
+		$pagingModel->set('page',1);
+		$pagingModel->set('limit', $isabonneOnly ? 8 : 99); //TODO 99?!
+			
+		$parentRecordModel = $this;
+		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName, null);
+
+		$orderBy = 'debutabo';
+		$sortOrder = 'DESC';
+			
+		$relationListView->set('orderby', $orderBy);
+		$relationListView->set('sortorder',$sortOrder);
+
+//$db = PearDatabase::getInstance();
+//$db->setDebug(true);
+		$allEntries = $relationListView->getEntries($pagingModel);
+		if(!$isabonneOnly)
+			return $allEntries;
+		$entries = array();
+		foreach($allEntries as $id=>$entry)
+			if($entry->get('isabonne'))
+				$entries[$id] = $entry;
+			else
+				break;
+		return $entries;
 	}
 }

@@ -190,7 +190,7 @@
 									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-mini'}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
-									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}	
+									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
 								{/if}
 								
 								{* Main : field de la boucle *}
@@ -198,6 +198,9 @@
 								{if $FIELD_NAME eq 'otherstreet'
 								|| $FIELD_NAME eq 'mailingstreet'}
 									{assign var=TITLE value='Adresse principale, n° et rue, ...'}
+								{elseif $FIELD_NAME eq 'othercity'
+								|| $FIELD_NAME eq 'mailingcity'}
+									{assign var=TITLE value='Ville'}
 								{else}
 									{assign var=TITLE value=''}
 								{/if}

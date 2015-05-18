@@ -260,8 +260,6 @@ class QueryGenerator {
 	}
 
 	public function parseAdvFilterList($advFilterList, $glue=''){
-		
-		//die('<pre>'.print_r($advFilterList, true).'</pre>');
 		if(!empty($glue)) $this->addConditionGlue($glue);
 
 		$customView = new CustomView($this->module);
@@ -294,57 +292,74 @@ class QueryGenerator {
 						$columnInfo = trim(substr($filter['columnname'], $pos + 1));
 						$filter['columnname'] = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
 						if(!$filter['columnname']){
+							//echo '<br><br><br><br>'.__FILE__;
 							$relationModel = false;
-							foreach($relationModels as $model)
-								if($model->getRelationModuleName() == $filter['relatedmodulename']){
-									$relationModel = $model;
-									break;
-								}
-							if($relationModel){
-								$relationsInfos = $relationModel->getModulesInfoForDetailView();
+							//RSNContactsPanels
+							if($filter['relatedmodulename'] == 'RSNContactsPanels'){
+								$sourceFieldName = $this->getSQLColumn('id');
+								$viewFilters = false; //TODO sure ?
+								$panelRecord = Vtiger_Record_Model::getInstanceById($filter['viewid'], $filter['relatedmodulename']);
+								$relatedSql =  $panelRecord->getExecutionSQLWithIntegratedParams();
+		
 							}
-							if(!$relationModel
-							|| !isset($relationsInfos[$filter['relatedmodulename']]))
-								$relationInfos = array('fieldName' => $this->getSQLColumn('id')
-										       , 'tableName' => ' vtiger_crmentityrel');
-							else
-								$relationInfos = $relationsInfos[$filter['relatedmodulename']];
-							//var_dump($relationInfos);
-							//$relationModel = Vtiger_Relation_Model::getInstance($this->module, $filter['relatedmodulename']);
-							//$value = $relationModel->getQuery();
-							//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $value, 'IN');
-							
-							/*next conditions*/
-							$viewFilters = array();
-							for($iNext = $index+1; $iNext < count($filtercolumns); $iNext++) {
-								$nextFilter = $filtercolumns[$iNext];
-								//same view, memorize and skip
-								if(substr($nextFilter['columnname'], 0, strlen($filter['relatedmodulename']) + 2) == '['.$filter['relatedmodulename'].':'){
-									$nextFilter['columnname'] = preg_replace('/^[^\]]+\]::(.+)$/', '$1', $nextFilter['columnname']);
-									$nextFilter['relatedmodulename'] = $filter['relatedmodulename'];
-									$nextFilter['viewid'] = $filter['viewid'];
-									$nextFilter['viewname'] = $filter['viewname'];
-									$nextFilter['relatedmodule'] = $filter['relatedmodule'];
-									$viewFilters[] = $nextFilter;
-									$skipNextIndex = $iNext;
+							else { //"normal" relation
+								foreach($relationModels as $model)
+									if($model->getRelationModuleName() == $filter['relatedmodulename']){
+										$relationModel = $model;
+										break;
+									}
+								if($relationModel){
+									$relationsInfos = $relationModel->getModulesInfoForDetailView();
+									//var_dump($relationsInfos);
+								}
+								if(!$relationModel
+								|| !isset($relationsInfos[$filter['relatedmodulename']])){
+									$relationInfos = array('fieldName' => $this->getSQLColumn('id')
+											       , 'tableName' => ' vtiger_crmentityrel');
 								}
 								else
-									break;
+									$relationInfos = $relationsInfos[$filter['relatedmodulename']];
+								
+								//var_dump($relationInfos);
+								//$relationModel = Vtiger_Relation_Model::getInstance($this->module, $filter['relatedmodulename']);
+								//$value = $relationModel->getQuery();
+								//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $value, 'IN');
+								
+								/*next conditions*/
+								$viewFilters = array();
+								for($iNext = $index+1; $iNext < count($filtercolumns); $iNext++) {
+									$nextFilter = $filtercolumns[$iNext];
+									//same view, memorize and skip
+									if(substr($nextFilter['columnname'], 0, strlen($filter['relatedmodulename']) + 2) == '['.$filter['relatedmodulename'].':'){
+										$nextFilter['columnname'] = preg_replace('/^[^\]]+\]::(.+)$/', '$1', $nextFilter['columnname']);
+										$nextFilter['relatedmodulename'] = $filter['relatedmodulename'];
+										$nextFilter['viewid'] = $filter['viewid'];
+										$nextFilter['viewname'] = $filter['viewname'];
+										$nextFilter['relatedmodule'] = $filter['relatedmodule'];
+										$viewFilters[] = $nextFilter;
+										$skipNextIndex = $iNext;
+									}
+									else
+										break;
+								}
+								
+								//sub view
+								$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
+								//get view query, adding filters
+								$relatedSql = $listView->getQuery();
+							
+								//SELECT `id`  only
+								$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
+								if(strpos($relationInfos['fieldName'], '.') === FALSE)
+									$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. $relationInfos['fieldName'];
+								else
+									$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. substr($relationInfos['fieldName'], strpos($relationInfos['fieldName'], '.')+1);
+								$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
+								$newQuery[0] = $selectColumnSql.' ';
+								$relatedSql = implode("\nFROM ", $newQuery);
+								
+								$sourceFieldName = isset($relationInfos['sourceFieldName']) ? $relationInfos['sourceFieldName'] : $this->getSQLColumn('id');
 							}
-							
-							//sub view
-							$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
-							//get view query, adding filters
-							$relatedSql = $listView->getQuery();
-							//SELECT `id`  only
-							$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
-							if(strpos($relationInfos['fieldName'], '.') === FALSE)
-								$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. $relationInfos['fieldName'];
-							$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
-							$newQuery[0] = $selectColumnSql.' ';
-							$relatedSql = implode("\nFROM ", $newQuery);
-							
-							$sourceFieldName = isset($relationInfos['sourceFieldName']) ? $relationInfos['sourceFieldName'] : $this->getSQLColumn('id');
 							
 							//print_r('<pre>$this->getSQLColumn(id) : '.$this->getSQLColumn('id').'</pre>');
 							//print_r('<pre>$relatedSql : '.$relatedSql.'</pre>');

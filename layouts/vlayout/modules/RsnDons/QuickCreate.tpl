@@ -108,7 +108,7 @@
 		{* Listes dependantes d'un coupon vers une campagne *}
 		$(document.body)
 		.on('change', '#{$FORMID} select[name="notesid"]', function(){
-			var campaignid = ($(this).children('[selected]').attr('campaignid'));
+			var campaignid = ($(this).children('[selected][campaignid]').attr('campaignid'));
 			if (campaignid) {
 				var $dest = $(this).parents('form:first').find('select[name="campaign_no"]');
 				if ($dest.length == 0) {

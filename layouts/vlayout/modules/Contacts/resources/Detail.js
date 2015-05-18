@@ -370,23 +370,6 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	/**
 	 * Function to register Event for Contacts
 	 */
@@ -492,6 +475,8 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 		var form = this.getForm();
 		this._super();
 		this.registerRecordPreSaveEvent(form);
+		//ED150515
+		Vtiger_Edit_Js.getInstance().registerEventOnAccountReferenceStatusChanging(form);
 	}
 	
 	

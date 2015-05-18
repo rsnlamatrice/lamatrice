@@ -171,8 +171,8 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		}
 		$focus->mode = $recordModel->get('mode');
 		$focus->id = $recordModel->getId();
-		
 		$focus->save($moduleName);
+
 		return $recordModel->setId($focus->id);
 	}
 
@@ -1368,7 +1368,6 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 */
 	public function getRelationQuery($recordId, $functionName, $relatedModule) {
 		$relatedModuleName = $relatedModule->getName();
-
 		$focus = CRMEntity::getInstance($this->getName());
 		$focus->id = $recordId;
 

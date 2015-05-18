@@ -108,6 +108,30 @@
 				{/foreach}
 				</optgroup>
 			{/foreach}
+			
+			{* ED150507 - Contacts panels *}
+			{if isset($CONTACTS_PANELS)}
+				{assign var=RELATED_NAME value='RSNContactsPanels'}
+				<optgroup label='* {vtranslate($RELATED_NAME)} *'>
+				{* each panel *}
+				{foreach key=VIEW_IDX item=RECORD_MODEL from=$CONTACTS_PANELS}
+					{if $RECORD_MODEL->getId() eq $RECORD_ID}{break}{/if}
+					{*assign var=RELATED_FIELDS value=$RECORD_MODEL->getFields()*}
+					{assign var=VIEW_ID value=$RECORD_MODEL->getId()}
+					{assign var=VIEW_LABEL value=$RECORD_MODEL->getName()}
+					{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
+					<option value="{$COLUMN_NAME}" data-fieldtype="PANEL" data-field-name="(exists)"
+						{if $COLUMN_NAME eq $CONDITION_INFO['columnname']}
+							selected="selected"
+						{/if}
+						data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
+					>
+					{assign var=COLUMN_NAME value=vtranslate($VIEW_LABEL, $RELATED_NAME)}
+					{$COLUMN_NAME}
+					</option>
+				{/foreach}
+				</optgroup>
+			{/if}
 		</select>
 	</span>
 	<span class="hide">
@@ -156,6 +180,30 @@
 					</optgroup>
 				{/foreach}
 			{/foreach}
+			{* ED150507 - Contacts panels *}
+			{if isset($CONTACTS_PANELS)}
+				{assign var=RELATED_NAME value='RSNContactsPanels'}
+				<optgroup label='* {vtranslate($RELATED_NAME)} *'>
+				{* each panel *}
+				{foreach key=VIEW_IDX item=RECORD_MODEL from=$CONTACTS_PANELS}
+					{if $RECORD_MODEL->getId() eq $RECORD_ID}{break}{/if}
+					{assign var=VIEW_ID value=$RECORD_MODEL->getId()}
+					{assign var=VIEW_LABEL value=$RECORD_MODEL->getName()}
+					<optgroup label='[{vtranslate($RELATED_NAME, $SOURCE_MODULE)}] {vtranslate($VIEW_LABEL, $RELATED_NAME)}'>
+						{* relation : exists | excluded *}
+						{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
+						<option value="{$COLUMN_NAME}" data-fieldtype="PANEL" data-field-name="@RELATION"
+							data-view="[{$RELATED_NAME}][{$VIEW_LABEL}]"
+						{if in_array($COLUMN_NAME, $SELECTED_FIELDS)}
+							selected="selected"
+						{/if}
+							data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
+						{assign var=COLUMN_NAME value=vtranslate('LBL_RELATION_TO', $RELATED_NAME)|cat:" ["|cat:vtranslate($RELATED_NAME, $SOURCE_MODULE)|cat:"] "|cat:vtranslate($VIEW_LABEL, $RELATED_NAME)}
+						>{$COLUMN_NAME}
+						</option>
+					</optgroup>
+				{/foreach}
+			{/if}
 		</select>
 	</span>
 	<span class="span3">

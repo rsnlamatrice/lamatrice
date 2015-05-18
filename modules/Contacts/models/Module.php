@@ -391,8 +391,6 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		}
 	}
 	
-	
-
 	/**
 	 * Function to save a given record model of the current module
 	 * @param Vtiger_Record_Model $recordModel
@@ -405,6 +403,9 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		
 		// ED150205 : synchronisation de l'adresse vers le compte et les autres contacts en compte commun
 		$recordModel->synchronizeAddressToOthers();
+		
+		// ED15015 : un seul contact peut être référent du compte
+		$recordModel->ensureAccountHasOnlyOneMainContact();
 		
 		return $return;
 	}
@@ -420,5 +421,29 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		$ListFields['dateapplication'] = 'dateapplication';
 		$ListFields['data'] = 'data';
 		return $ListFields;
+	}
+	
+	/**
+	 * Function to get list of field for summary view
+	 * @return <Array> list of field models <Vtiger_Field_Model>
+	 *
+	 * ED150515 : overrided to set 'reference' field after 'account_id'
+	 */
+	public function getSummaryViewFieldsList() {
+		if (!$this->summaryFields) {
+			$summaryFields = array();
+			$fields = parent::getSummaryViewFieldsList();
+			$fieldReference = $fields['reference'];
+			if($fieldReference){
+				unset($fields['reference']);
+				foreach ($fields as $fieldName => $fieldModel) {
+					$summaryFields[$fieldName] = $fieldModel;
+					if($fieldName == 'account_id')
+						$summaryFields[$fieldReference->getName()] = $fieldReference;
+				}
+			}
+			$this->summaryFields = $summaryFields;
+		}
+		return $this->summaryFields;
 	}
 }

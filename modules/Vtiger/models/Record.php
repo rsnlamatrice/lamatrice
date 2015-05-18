@@ -58,7 +58,11 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	 * @return Vtiger_Record_Model or Module Specific Record Model instance
 	 */
 	public function setModule($moduleName) {
-		$this->module = Vtiger_Module_Model::getInstance($moduleName);
+		//ED150507
+		if($moduleName instanceof Vtiger_Module_Model)
+			$this->module = $moduleName;
+		else
+			$this->module = Vtiger_Module_Model::getInstance($moduleName);
 		return $this;
 	}
 
@@ -284,7 +288,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 
 		/* ED150122
 		 * recherche d'un nombre, sans prcision de module ou Contacts : on cherche dans ref 4D
-		 * si le nombre est prfix de 'C', on cherche dans vtiger_contactdetails.contact_no
+		 * si le nombre est préfixé de 'C', on cherche dans vtiger_contactdetails.contact_no
 		 */
 		if((!$module || $module == 'Contacts')
 		&& ($searchKey
@@ -299,6 +303,8 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				WHERE (vtiger_crmentity.crmid = ?
 					OR vtiger_contactdetails.contact_no = CONCAT(\'C\', ?))
 				AND vtiger_crmentity.deleted = 0';
+			if(!is_numeric($searchKey))
+				$searchKey = substr($searchKey,1);
 			$params = array(trim($searchKey), trim($searchKey));
 		}
 		else {	/* requte gnrale sur le champ label */
@@ -590,5 +596,48 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 			$db->query($query);
 		}
 		//$db->setDebug(false);
+	}
+	
+	/* ED150515
+	 * Returns related data to this record
+	 * @param $dataNames : array or string width ',' separator
+	 * 	module name or suffix of function name (getRelated<dataName>)
+	 * @returns an associative array of entries
+	 *
+	 * Used from modules\Vtiger\actions\GetData.php, responding to vlayout\modules\Vtiger\resources\Edit.js, getRecordDetails({related_data : dataNames})
+	 */
+	public function getRelatedData($dataNames){
+		if(is_string($dataNames))
+			$dataNames = explode(',', $dataNames);
+		$data = array();
+		foreach($dataNames as $dataName){
+			//Method 1 : specific getRelatedXXXXX function exists
+			$functionName = "getRelated$dataName";
+			if(method_exists($this, $functionName)){
+				$data[$dataName] = $this->$functionName();
+				continue;
+			}
+			//Method 2 : $dataName is a ModuleName
+			$pagingModel = new Vtiger_Paging_Model();
+			$pagingModel->set('page', 1);
+			
+			$relatedModuleName = $dataName;
+			$relationListView = Vtiger_RelationListView_Model::getInstance($this, $relatedModuleName, '');
+			$data[$dataName] = $relationListView->getEntries($pagingModel);
+		}
+		// converts record models as raw data
+		foreach($data as $dataName => $entries){
+			$rawData = false;
+			foreach($entries as $id => $entry){
+				if(!(is_a($entry, Vtiger_Record_Model )))
+					break;
+				if(!$rawData)
+					$rawData = array();
+				$rawData[$id] = $entry->getData();
+			}
+			if($rawData)
+				$data[$dataName] = $rawData;
+		}
+		return $data;
 	}
 }

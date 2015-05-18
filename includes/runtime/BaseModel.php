@@ -21,16 +21,7 @@ class Vtiger_Base_Model {
 	function  __construct($values=array()) {
 		$this->valueMap = $values;
 	}
-
-	/**
-	 * Constructor
-	 * @param Array $values
-	 */
-	function  sssss__construct($values=array()) {
-		var_dump('Vtiger_Base_Model->__construct');
-		var_dump($values);
-		parent::__construct($values);
-	}
+	
 	/**
 	 * Function to get the value for a given key
 	 * @param $key

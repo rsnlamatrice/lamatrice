@@ -94,4 +94,29 @@ class Products_Module_Model extends Vtiger_Module_Model {
 
 		return $matchingRecords;
 	}
+	
+	/** ED150507
+	 * Function searches the record of the next Revue SdN that will be sent
+	 * vtiger_products.sales_start_date defines the next product
+	 */
+	public function getProchaineRevue(){
+		
+		$db = PearDatabase::getInstance();
+
+		$query = 'SELECT crmid, vtiger_products.sales_start_date
+		FROM vtiger_products
+		INNER JOIN vtiger_crmentity
+			ON vtiger_crmentity.crmid = vtiger_products.productid
+		WHERE vtiger_crmentity.deleted = 0
+		AND vtiger_products.productcategory = \'Revue\'
+		AND vtiger_products.sales_start_date > NOW()
+		ORDER BY vtiger_products.sales_start_date
+		LIMIT 1
+		';
+		
+		$dbResult = $db->pquery($query);
+		$crmId = $db->query_result($dbResult, 0, 'crmid');
+		
+		return Vtiger_Record_Model::getInstanceById($crmId, 'Products');
+	}
 }

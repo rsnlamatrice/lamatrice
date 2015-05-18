@@ -10,47 +10,47 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 	
 	//Will have the mapping of address fields based on the modules
 	addressFieldsMapping : {'Accounts' :
-									{'mailingstreet' : 'bill_street',  
-									'otherstreet' : 'ship_street', 
-									'otherstreet2' : 'ship_street2', 
-									'otherstreet3' : 'ship_street3', 
-									'mailingpobox' : 'bill_pobox',
-									'otherpobox' : 'ship_pobox',
-									'mailingcity' : 'bill_city',
-									'othercity' : 'ship_city',
-									'mailingstate' : 'bill_state',
-									'otherstate' : 'ship_state',
-									'mailingzip' : 'bill_code',
-									'otherzip' : 'ship_code',
-									'mailingcountry' : 'bill_country',
-									'othercountry' : 'ship_country'
-									}
-							},
+			{'mailingstreet' : 'bill_street',  
+			'otherstreet' : 'ship_street', 
+			'otherstreet2' : 'ship_street2', 
+			'otherstreet3' : 'ship_street3', 
+			'mailingpobox' : 'bill_pobox',
+			'otherpobox' : 'ship_pobox',
+			'mailingcity' : 'bill_city',
+			'othercity' : 'ship_city',
+			'mailingstate' : 'bill_state',
+			'otherstate' : 'ship_state',
+			'mailingzip' : 'bill_code',
+			'otherzip' : 'ship_code',
+			'mailingcountry' : 'bill_country',
+			'othercountry' : 'ship_country'
+			}
+	},
 							
 	//Address field mapping within module
 	addressFieldsMappingInModule : {
-									'otherstreet' : 'mailingstreet',
-									'otherstreet2' : 'mailingstreet2',
-									'otherstreet3' : 'mailingstreet3',
-									'otherpobox' : 'mailingpobox',
-									'othercity' : 'mailingcity',
-									'otherstate' : 'mailingstate',
-									'otherzip' : 'mailingzip',
-									'othercountry' : 'mailingcountry'
-								},
+		'otherstreet' : 'mailingstreet',
+		'otherstreet2' : 'mailingstreet2',
+		'otherstreet3' : 'mailingstreet3',
+		'otherpobox' : 'mailingpobox',
+		'othercity' : 'mailingcity',
+		'otherstate' : 'mailingstate',
+		'otherzip' : 'mailingzip',
+		'othercountry' : 'mailingcountry'
+	},
 	
 	//ED150312
 	//Address field mapping with contactAdresses
 	addressFieldsMappingInContactAddresses : {
-									'mailingstreet' : 'street',
-									'mailingstreet2' : 'street2',
-									'mailingstreet3' : 'street3',
-									'mailingpobox' : 'pobox',
-									'mailingcity' : 'city',
-									'mailingstate' : 'state',
-									'mailingzip' : 'zip',
-									'mailingcountry' : 'country'
-								},
+		'mailingstreet' : 'street',
+		'mailingstreet2' : 'street2',
+		'mailingstreet3' : 'street3',
+		'mailingpobox' : 'pobox',
+		'mailingcity' : 'city',
+		'mailingstate' : 'state',
+		'mailingzip' : 'zip',
+		'mailingcountry' : 'country'
+	},
 	
 	
 	/**
@@ -68,51 +68,120 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 	 * Reference Fields Selection Event Handler
 	 * On Confirmation It will copy the address details
 	 *
-	 * ED141016 : transposition de la question a l'utilisateur apr�s test de l'existence d'une adresse � dupliquer 
+	 * ED141016 : transposition de la question à l'utilisateur aprés test de l'existence d'une adresse à dupliquer 
 	 * 
 	 */
 	referenceSelectionEventHandler :  function(data, container) {
 		var thisInstance = this;
-		
-		//var message = app.vtranslate('OVERWRITE_EXISTING_MSG1')+app.vtranslate('SINGLE_'+data['source_module'])+' ('+data['selectedName']+') '+app.vtranslate('OVERWRITE_EXISTING_MSG2');
-		//Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
-		//	function(e) {
-				thisInstance.copyAddressDetails(data, container, askUser);
-		//	},
-		//	function(error, err){
-		//	});
+		var sourceModule = data['source_module'];
+		if (sourceModule == 'Accounts') {
+			var selectedName = data['selectedName'];
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : selectedName + '...',
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			data['related_data'] = 'MainContacts';
+			thisInstance.getRecordDetails(data).then(
+				function(recordDetails){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+					thisInstance.copyAddressDetails(data, container, true, recordDetails);
+					thisInstance.checkAccountReferent(data, container, recordDetails);
+				},
+				function(error, err){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+				}
+			);
+		}
+	},
+	
+	/** ED150515
+	 * Function which will set account reference value
+	 */
+	checkAccountReferent : function(data, container, recordDetails) {
+		var thisInstance = this
+		, sourceModule = data['source_module']
+		, selectedName = data['selectedName']
+		, getRecordDetailsCallBack = function(data){
+	
+			var response = data['result']
+			, mainContacts = response['related_data']['MainContacts'];
+			if (!mainContacts) 
+				return;
+			var message = ''
+			, thisContactWasMain = false
+			, otherContactWasMain = false
+			, thisContactId = container.find('input[name="record"]').val() //TODO Achtung if duplicating
+			, accountId = container.find(':input[name="account_id"]').val();
+			if (!thisContactId) //DetailView or may be empty if new
+				thisContactId = $('#recordId').val();
+			if (!accountId) //DetailView
+				accountId = container.find(':input[name="account_id"]').attr('data-value');
+			if (!accountId)
+				return;
+			for (var contactId in mainContacts) {
+				if (thisContactId == contactId) 
+					thisContactWasMain = true;
+				else
+					otherContactWasMain = true;
+			}
+			$inputs = container.find(':input[name="reference"]');
+			if(otherContactWasMain)
+				$inputs.filter('[value="0"]')[0].checked = true;
+			else 
+				$inputs.filter('[value="1"]')[0].checked = true;
+			$inputs.first().parents('.ui-buttonset:first')
+				.buttonset('refresh');
+		};
+		if (recordDetails)
+			getRecordDetailsCallBack.call(this, recordDetails)
+		else {
+			data['related_data'] = 'MainContacts';
+			thisInstance.getRecordDetails(data).then(
+				getRecordDetailsCallBack
+				, function(error, err){}
+			);
+		}
 	},
 	
 	/**
 	 * Function which will copy the address details - without Confirmation
+	 *
+	 * ED150515 : adds recordDetails is already requested
 	 */
-	copyAddressDetails : function(data, container, askUser) {
-		var thisInstance = this;
-		var sourceModule = data['source_module'];
-		var selectedName = data['selectedName'];
-		thisInstance.getRecordDetails(data).then(
-			function(data){
-				var response = data['result'];
-				
-				addressDetails=thisInstance.addressFieldsMapping[sourceModule];
-				
-				if (askUser && !thisInstance.hasAddressDetails(addressDetails, response['data'])) 
-					return;
-				if (askUser) {
-					var message = app.vtranslate('OVERWRITE_EXISTING_MSG1')+app.vtranslate('SINGLE_'+sourceModule)+' ('+selectedName+') '+app.vtranslate('OVERWRITE_EXISTING_MSG2');
-					Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
-						function(e) {
-							thisInstance.mapAddressDetails(addressDetails, response['data'], container);
-						},
-						function(error, err){
-						});
-				}
-				else
-					thisInstance.mapAddressDetails(addressDetails, response['data'], container);
-			},
-			function(error, err){
-
-			});
+	copyAddressDetails : function(data, container, askUser, recordDetails) {
+		var thisInstance = this
+		, sourceModule = data['source_module']
+		, selectedName = data['selectedName']
+		, getRecordDetailsCallBack = function(data){
+			var response = data['result'];
+			
+			addressDetails=thisInstance.addressFieldsMapping[sourceModule];
+			
+			if (askUser && !thisInstance.hasAddressDetails(addressDetails, response['data'])) 
+				return;
+			if (askUser) {
+				var message = app.vtranslate('OVERWRITE_EXISTING_MSG1')+ ' (' + app.vtranslate('SINGLE_'+sourceModule)+' ' + selectedName+') '
+					+ app.vtranslate('OVERWRITE_EXISTING_MSG2');
+				Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
+					function(e) {
+						thisInstance.mapAddressDetails(addressDetails, response['data'], container);
+					},
+					function(error, err){}
+				);
+			}
+			else
+				thisInstance.mapAddressDetails(addressDetails, response['data'], container);
+		};
+		if (recordDetails)
+			getRecordDetailsCallBack.call(this, recordDetails)
+		else
+			thisInstance.getRecordDetails(data).then(
+				getRecordDetailsCallBack
+				, function(error, err){}
+			);
 	},
 	
 	/**
@@ -197,11 +266,11 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 	
 	
 	/** ED150312
-	 * Function to register event on address changing between two fileds
+	 * Function to register event on address changing between two fields
 	 */
 	registerEventOnAddressChanging : function(container){
 		var thisInstance = this;
-		jQuery('table.blockContainer.current-address :input').on('change',function(e){
+		$('table.blockContainer.current-address :input').on('change', function(e){
 			var element = jQuery(e.currentTarget);
 			var $chkArchive = element.parents('table.blockContainer').find(':input[name="_archive_address"]');
 			if($chkArchive.length == 0){
@@ -216,17 +285,93 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		});
 	},
 
-	/** ED150312
-	 * Function to register event on address changing between two fileds
+	/** ED150515
+	 * Function to register event on account reference status changing
+	 * Also used from Detail.js
 	 */
-	registerEventOnZipChanging : function(container){
+	registerEventOnAccountReferenceStatusChanging : function(container){
 		var thisInstance = this;
-		jQuery('[name="mailingzip"],[name="otherzip"]').on('change',function(e){
-			var element = jQuery(e.currentTarget);
+		jQuery(document.body).on('change', ':input[name="reference"]',function(e){
+			var element = jQuery(e.currentTarget)
+			, isSetToTrue = element.attr('value') == '1'
+			, thisContactId = container.find('input[name="record"]').val() //TODO Achtung if duplicating
+			, accountId = container.find(':input[name="account_id"]').val();
 			
+			if (!thisContactId){ //DetailView
+				thisContactId = $('#recordId').val();
+				//may be empty on new
+			}
+			if (!accountId){ //DetailView
+				accountId = container.find(':input[name="account_id"]').attr('data-value');
+			}
+			if (!accountId)
+				return;
+			var params = {
+				'record' : accountId
+				, 'source_module' : 'Accounts'
+				, 'related_data' : 'MainContacts'
+			};
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : 'Contrôle en cours...',
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			thisInstance.getRecordDetails(params).then(
+				function(data){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+			
+					var response = data['result']
+					, mainContacts = response['related_data']['MainContacts'];
+					if (!mainContacts) 
+						return;
+					var message = ''
+					, thisContactWasMain = false
+					, otherContactWasMain = false;
+					for (var contactId in mainContacts) {
+						if (thisContactId == contactId) {
+							if (isSetToTrue) 
+								continue;
+							thisContactWasMain = true;
+						}
+						else if (isSetToTrue){
+							var contact_html = '<a class="contact" recordid="' + contactId + '">'
+								+ (mainContacts[contactId]['firstname'] + ' ' + mainContacts[contactId]['lastname']).trim()
+								+ ' (' + mainContacts[contactId]['contact_no'] + ')</a>';
+							if (message) message += '<br>';
+							message += 'Actuellement, le contact ' + contact_html
+								+ ' est défini comme référent du compte.'
+								+ '<br>-> Ce contact ' + contact_html + ' va perdre son statut de référent.';
+						}
+						else
+							otherContactWasMain = true;
+					}
+					if(!message && thisContactWasMain && !otherContactWasMain)
+						message += 'Actuellement, ce contact est défini comme référent du compte.<br>Attention, le compte n\'aura plus de référent !';
+					if (message) {
+						Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
+							function(e) {
+								
+							},
+							function(error, err){
+								//user canceled
+								if(isSetToTrue)
+									container.find(':input[name="reference"][value="0"]')[0].checked = true;
+								else 
+									container.find(':input[name="reference"][value="1"]')[0].checked = true;
+								element.parents('.ui-buttonset:first')
+									.buttonset('refresh');
+							});
+					}
+				},
+				function(error, err){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+				}
+			);
 		});
 	},
-
+	
 	/**
 	 * Function to check for Portal User
 	 */
@@ -272,5 +417,6 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		this.registerRecordPreSaveEvent(container);
 		//ED150312
 		this.registerEventOnAddressChanging(container);
+		this.registerEventOnAccountReferenceStatusChanging(container);
 	}
 })

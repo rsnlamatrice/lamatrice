@@ -479,10 +479,32 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return parseFloat(jQuery('#received').val());
 	},
 	
-	
 	//ED150129 : set balance (solde, reste à payer)
 	setBalance : function(value) {
 		jQuery('#balance').val(value);
+		
+		this.setAutoInvoiceStatus(value);
+		return this;
+	},
+	
+	//ED150515 : set balance (solde, reste à payer)
+	setAutoInvoiceStatus : function(balance) {
+		var $status = $('select[name="invoicestatus"]');
+		//Si le statut n'est pas défini et qu'il y a un total à payer
+		//ou que le status a été défini automatiquement
+		if ((!$status.val() && this.getGrandTotal())
+		|| ($status.val() && $status.is('.auto-filled'))) {
+			var status = balance == 0 ? 'Paid' : '';
+			$status
+				.addClass('auto-filled')
+				.val(status);
+			var $seloption = $status.children('option[value="' + status + '"]:first');
+			if ($seloption.length) {
+				$seloption.attr('selected', 'selected');
+				$status.select2("val",status); /* ne fonctionne pas bien */
+				$status.next().find('> a > span:first').html($seloption.html());
+			}
+		}
 		return this;
 	},
 
@@ -517,7 +539,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return newRow.removeClass('hide lineItemCloneCopy');
 	},
 
-    registerAddingNewProductsAndServices: function(){
+	registerAddingNewProductsAndServices: function(){
 		var thisInstance = this;
 		var lineItemTable = this.getLineItemContentsContainer();
 		jQuery('#addProduct').on('click',function(){
@@ -1038,7 +1060,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	},
 
-
 	registerLineItemsPopUpCancelClickEvent : function(){
 		var editForm = this.getForm();
 		editForm.on('click','.cancelLink',function(){
@@ -1046,7 +1067,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		})
 	},
 
-    lineItemResultActions: function(){
+	lineItemResultActions: function(){
 		var thisInstance = this;
 		var lineItemResultTab = this.getLineItemResultContainer();
 
@@ -1937,8 +1958,14 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var $subject = jQuery('input[name="subject"]', container);
 			//si vide ou ayant la classe auto-filled
 			if (!$subject.val() || $subject.is('.auto-filled')) {
-				$subject.addClass('auto-filled');
-				$subject.val(this.value);
+				var $coupon = $('#notesid_display')
+				, coupon = $coupon.val()
+				, typeDossier = this.value
+				, subject = (typeDossier && typeDossier != 'Facture' ? typeDossier + (coupon ? ' / ' : '') : '') + coupon
+				;
+				$subject
+					.addClass('auto-filled')
+					.val(subject);
 			}
 		});
 			
@@ -1946,6 +1973,17 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				//lors de la saisie manuelle, on purge la classe auto-filled
 			jQuery(this).removeClass('auto-filled');
 		});
+	},
+
+	/*ED150515
+	 * auto-filled management of invoicestatus field
+	 * invoicestatus is changed when balance changed, but if '.auto-filled:not()'
+	 */
+	registerInvoiceStatusEvent : function(){
+		var editForm = this.getForm();
+		editForm.on('change','select.auto-filled[name="invoicestatus"]',function(){
+			$(this).removeClass('auto-filled')
+		})
 	},
 	
 	/**
@@ -1976,6 +2014,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
     registerBasicEvents : function(container) {
 		this._super(container);
 		this.registerTypeSelectionEvent(container); /*ED141219*/
+		this.registerInvoiceStatusEvent(container);
 		this.registerSaveEvent(container); /*ED141219*/
 		this.registerReferenceSelectionEvent(container);
 	},

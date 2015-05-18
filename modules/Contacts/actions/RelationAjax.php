@@ -21,6 +21,28 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		$this->exposeMethod('deleteRelationContacts');
 		$this->exposeMethod('addRelationContacts');
 	}
+	
+	/*
+	 * Function to add relation for specified source record id and related record id list
+	 * @param <array> $request
+	 *		keys					Content
+	 *		src_module				source module name
+	 *		src_record				source record id
+	 *		related_module			related module name
+	 *		related_record_list		json encoded of list of related record ids
+	 */
+	function addRelation($request) {
+		switch( $request->get('related_module') ){
+		 case 'Contacts' :
+			return $this->addRelationContacts($request);
+			break;
+		 case 'Critere4D' :
+			return $this->addRelationCritere4D($request);
+			break;
+		 default :
+			return parent::addRelation($request);
+		}
+	}
 
 	/**
 	 * Function to update Relation DateApplication
@@ -257,7 +279,7 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		
 		$i = 0;
 		foreach($relatedRecordIdList as $relatedRecordId) {
-			$response = $relationModel->deleteRelationContacts($sourceRecordId,$relatedRecordId, $relatedRecordDateApplicationList[$i]); //ED140917 3eme argument
+			$response = $relationModel->deleteRelationContacts($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList[$i]); //ED140917 3eme argument
 			$i++;
 		}
 		echo $response;

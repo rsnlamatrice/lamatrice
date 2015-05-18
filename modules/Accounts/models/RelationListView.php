@@ -82,6 +82,9 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			foreach($relatedRecordModelsList as $relatedId => $relatedRecord)
 				if($relatedRecord->get('account_id') != $accountId)
 					$relatedRecord->set('reference', 0);
+			//relation 1->n
+			if (array_key_exists($relatedModuleName, $relatedModulesInfo))
+				unset($relatedModulesInfo[$relatedModuleName]);
 		}
 		
 		if (array_key_exists($relatedModuleName, $relatedModulesInfo) && $relatedRecordModelsList) {
@@ -106,6 +109,9 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			switch($relatedModuleName){
 				case "Critere4D":
 					$fieldRels = Critere4D_RelationListView_Model::get_related_fields();
+					break;
+				case "Contacts":
+					$fieldRels = Contacts_RelationListView_Model::get_related_contacts_fields();
 					break;
 				default:
 					$fieldRels = Vtiger_RelationListView_Model::get_related_fields();

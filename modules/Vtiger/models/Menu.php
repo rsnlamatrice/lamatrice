@@ -24,19 +24,23 @@ class Vtiger_Menu_Model extends Vtiger_Module_Model {
         $userPrivModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
         $restrictedModulesList = array('Emails', 'ProjectMilestone', 'ProjectTask', 'ModComments', 'Rss', 'Portal',
 					'Integration', 'PBXManager', 'Dashboard', 'Home', 'vtmessages', 'vttwitter');
-	/*echo "<br><br><br><br><br>";
+	/*echo __FILE__."<br><br><br><br><br>";
 	var_dump($roleid);
-	echo_callstack();*/
-//$db = PearDatabase::getInstance();
-//$db->setDebug(true);
+	echo_callstack();
+$db = PearDatabase::getInstance();
+$db->setDebug(true);*/
         $allModules = parent::getAll(array('0','2'), array(), $roleid);
 //$db->setDebug(false);
 	$menuModels = array();
         $moduleSeqs = Array();
         $moduleNonSeqs = Array();
+	//Attention, doublon sur tabSequence qui fait disparaitre des modules
         foreach($allModules as $module){
             if($module->get('tabsequence') != -1){
-                $moduleSeqs[$module->get('tabsequence')] = $module;
+		$tabsequence = $module->get('tabsequence');
+		while(isset($moduleSeqs[$tabsequence]))
+		    $tabsequence += count($allModules);
+                $moduleSeqs[$tabsequence] = $module;
             } else {
                 $moduleNonSeqs[] = $module;
             }
@@ -47,12 +51,11 @@ class Vtiger_Menu_Model extends Vtiger_Module_Model {
 	foreach($modules as $module) {
             if (($userPrivModel->isAdminUser() ||
                     $userPrivModel->hasGlobalReadPermission() ||
-                    $userPrivModel->hasModulePermission($module->getId()))& !in_array($module->getName(), $restrictedModulesList) && $module->get('parent') != '') {
+                    $userPrivModel->hasModulePermission($module->getId()))
+		&& !in_array($module->getName(), $restrictedModulesList) && $module->get('parent') != '') {
                     $menuModels[$module->getName()] = $module;
-
             }
         }
-//var_dump(array_keys($menuModels));
         return $menuModels;
     }
 

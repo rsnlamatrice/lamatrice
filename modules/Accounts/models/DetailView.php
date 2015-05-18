@@ -133,7 +133,7 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$widgetLinks = parent::getWidgets();
 		
-		/* Retire RecentsActivities pour le mettre en dernier */
+		/* ED150000 Retire RecentsActivities pour le mettre en dernier */
 		$last_widgets = array();
 		for ($i = 0; $i < count($widgetLinks); $i++) {
 			$widget = $widgetLinks[$i];

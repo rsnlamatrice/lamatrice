@@ -1105,10 +1105,11 @@ jQuery.Class("Vtiger_Detail_Js",{
 				    $(changedElements).each(function(){
 					    var editElement = $(this);
 					    var fieldnameElement = jQuery('.fieldname', editElement);
-					    var fieldName = fieldnameElement.val();
+					    var inputName = fieldnameElement.val()
+					    , fieldName = inputName.replace('[]', '');
 					    if (changedFields[fieldName] === undefined) 
 						return;
-					    var fieldElement = jQuery('[name="'+ fieldName +'"]', editElement);
+					    var fieldElement = jQuery('[name="'+ inputName +'"]', editElement);
 					    display_value += '&nbsp;' + postSaveRecordDetails[fieldName].display_value;
 					    fieldElement.trigger(thisInstance.fieldUpdatedEvent,{
 								    'old':fieldnameElement.data('prevValue')
