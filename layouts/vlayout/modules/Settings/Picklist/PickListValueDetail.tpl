@@ -14,7 +14,7 @@
 	<li class="active"><a href="#allValuesLayout" data-toggle="tab"><strong>{vtranslate('LBL_ALL_VALUES',$QUALIFIED_MODULE)}</strong></a></li>
 	{if $SELECTED_PICKLIST_FIELDMODEL->isRoleBased()}<li id="assignedToRoleTab"><a href="#AssignedToRoleLayout" data-toggle="tab"><strong>{vtranslate('LBL_VALUES_ASSIGNED_TO_A_ROLE',$QUALIFIED_MODULE)}</strong></a></li>{/if}
 </ul>
-<div class="tab-content layoutContent padding20 themeTableColor overflowVisible">
+<div class="tab-content layoutContent padding20 themeTableColor overflowVisible {if $PROPERTIES_UICOLOR} properties-uicolor{/if}{if $PROPERTIES_UIICON} properties-uiicon{/if}">
 	<div class="tab-pane active" id="allValuesLayout">	
 		<div class="row-fluid">
 			<div class="span5 marginLeftZero textOverflowEllipsis">

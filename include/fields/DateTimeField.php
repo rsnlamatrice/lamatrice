@@ -227,9 +227,9 @@ class DateTimeField {
 			// convert this to target timezone using the DateTimeZone object
 			$targetTimeZone = new DateTimeZone($targetTimeZoneName);
 			$myDateTime->setTimeZone($targetTimeZone);
-			self::$cache[$time][$targetTimeZoneName] = $myDateTime;
+		//	self::$cache[$time][$targetTimeZoneName] = $myDateTime;
 		//}
-		$myDateTime = self::$cache[$time][$targetTimeZoneName];
+		//$myDateTime = self::$cache[$time][$targetTimeZoneName];
 		return $myDateTime;
 	}
 

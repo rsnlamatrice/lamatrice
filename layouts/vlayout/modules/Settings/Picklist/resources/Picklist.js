@@ -620,10 +620,18 @@ var Settings_Picklist_Js = {
 		
 		var element = jQuery('#picklistproperties-uicolor, #picklistproperties-uiicon');
 		
-		if(element.length == 0){
+		if(element.length == 0)
 			return;
-		}
+		
 		element.change(function(){
+			//change layout class name properties-uicolor 
+			var className = this.id.replace('picklist', '')
+			, $layout = $(this).parents('.layoutContent:first');
+			if (this.checked)
+				$layout.addClass(className);
+			else
+				$layout.removeClass(className);
+			//show save button
 			jQuery('#saveSequence').removeAttr('disabled');
 		});
 	},

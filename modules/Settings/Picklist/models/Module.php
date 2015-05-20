@@ -56,19 +56,24 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 	    case 'presence':
 		$params[] = 1;
 		break;
+	    case 'uicolor':
+	    case 'uiicon':
+		$params[] = null;
+		break;
 	}
 	if($fieldModel->isRoleBased()) {
 	    $columns = implode(', ', array_slice($columns, 0, 5));
             $sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?,?)';
-            $result = $db->pquery($sql, $params);//array($id, $newValue, 1, $picklist_valueid,++$sequence)
+            $result = $db->pquery($sql, array_slice($params, 0, 5));//array($id, $newValue, 1, $picklist_valueid,++$sequence)
         }else{
             $columns = implode(', ', array_slice($columns, 0, 4));
             $sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?)';
-            $result = $db->pquery($sql, $params);//array($id, $newValue, ++$sequence, 1)
+            $result = $db->pquery($sql, array_slice($params, 0, 4));//array($id, $newValue, ++$sequence, 1)
         }
 	if(!$result){
 	    echo("<br>ERREUR DANS addPickListValues (" . __FILE__ .")");
-	    var_dump( array($id, $newValue, $picklist_valueid, $sequence, 1), $result);
+	    $db->echoError();
+	    var_dump(array($id, $newValue, $picklist_valueid, $sequence, 1), $result);
 	    die($sql);
 	}
         if($fieldModel->isRoleBased() && !empty($rolesSelected)) {
