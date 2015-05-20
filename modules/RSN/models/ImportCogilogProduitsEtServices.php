@@ -130,9 +130,6 @@ class RSN_CogilogProduitsEtServices_Import {
 		return $record;
 	}
 	
-	
-	
-	
 	public static function getProductOrService($srcRow, $doUpdate = false){
 		$product = self::findProduct($srcRow);
 		if(!$product)
