@@ -119,4 +119,20 @@ class Products_Module_Model extends Vtiger_Module_Model {
 		
 		return Vtiger_Record_Model::getInstanceById($crmId, 'Products');
 	}
+	
+	
+
+	/**
+	 * Function to get the module is permitted to specific action
+	 * @param <String> $actionName
+	 * @return <boolean>
+	 */
+	public function isPermitted($actionName) {
+		if($actionName == 'Duplicate'){
+			global $RSN_PRODUCT_ALLOW_DUPLICATE;
+			return (!isset($RSN_PRODUCT_ALLOW_DUPLICATE) || $RSN_PRODUCT_ALLOW_DUPLICATE == 'true')
+				&& parent::isPermitted($actionName);
+		}
+		return parent::isPermitted($actionName);
+	}
 }

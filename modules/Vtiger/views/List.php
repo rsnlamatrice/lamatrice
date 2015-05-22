@@ -203,6 +203,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 			$viewer->assign('LISTVIEW_COUNT', $totalCount);
 		}
 
+		$viewer->assign('IS_MODULE_DUPLICATABLE', $listViewModel->getModule()->isPermitted('Duplicate'));
 		$viewer->assign('IS_MODULE_EDITABLE', $listViewModel->getModule()->isPermitted('EditView'));
 		$viewer->assign('IS_MODULE_DELETABLE', $listViewModel->getModule()->isPermitted('Delete'));
 	}
