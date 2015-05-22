@@ -7,7 +7,7 @@
 
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
-define('MAX_QUERY_ROWS', 2000); //DEBUG
+define('MAX_QUERY_ROWS', 100); //DEBUG
 
 
 require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
@@ -106,7 +106,7 @@ class RSN_CogilogFacturesRSN_Import {
 	private static function getEntries($nbRows = MAX_QUERY_ROWS){
             
 		/* factures déjà importés */
-		$query = "SELECT MIN(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_min, MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
+		$query = "SELECT MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
 			FROM vtiger_invoice
                         JOIN vtiger_crmentity
                             ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
@@ -118,9 +118,7 @@ class RSN_CogilogFacturesRSN_Import {
 		$result = $db->pquery($query, array());
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
-			$factMin = intval(substr($row['codefacture_min'], 2));
 			$factMax = intval(substr($row['codefacture_max'], 2));
-			$anneeMin = intval(substr($row['codefacture_min'], 0, strlen($row['codefacture_min']) - 5)) + 2000;
 			$anneeMax = intval(substr($row['codefacture_max'], 0, strlen($row['codefacture_max']) - 5)) + 2000;
 			var_dump('Dernière facture existante : ', $anneeMax, $factMax	);
 		}
@@ -167,7 +165,7 @@ class RSN_CogilogFacturesRSN_Import {
 		$query .= ' WHERE facture.datepiece < CURRENT_DATE 
 		';
 		if($factMax)
-			$query .= ' AND ((facture.numero > '.$factMax.' AND facture.annee > '.$anneeMax.')
+			$query .= ' AND ((facture.numero > '.$factMax.' AND facture.annee = '.$anneeMax.')
 			OR facture.annee > '.$anneeMax.')';
 		//$query .= ' AND cl.code = \'999999\'';
 		//print_r("<pre>$query</pre>");
