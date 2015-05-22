@@ -19,7 +19,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 	 * RSN rule : "il est interdit de dupliquer un produit. Trop de conséquence si paramètre non modifié erroné."
 	 */
 	public function isDuplicatable() {
-		return false;
+		return !isset($RSN_PRODUCT_ALLOW_DUPLICATE) || $RSN_PRODUCT_ALLOW_DUPLICATE == 'true';
 	}
 
 	/**
