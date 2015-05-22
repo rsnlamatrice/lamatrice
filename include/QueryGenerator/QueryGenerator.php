@@ -367,7 +367,7 @@ class QueryGenerator {
 							//echo str_repeat('<br>',5).__FILE__.'<br>';
 							//var_dump($this->getSQLColumn('id'), "/*BEGIN ".$filter['viewname']."*/\n\t$relatedSql\n\t/*END ".$filter['viewname']."*/", 'IN', 'AND');
 							//TODO $field =	var_dump($this->meta->getFieldByColumnName("contact_id"));
-							$this->startGroup('', $filter['comparator'] . ' ' . $filter['viewname']);
+							$this->startGroup('', $filter['comparator'] . ' [' . $filter['viewname'] . ']');
 							$this->addCondition($sourceFieldName
 									    , $relatedSql
 									    , $filter['comparator']);
@@ -937,16 +937,13 @@ class QueryGenerator {
 			}
 		}
 		
-		//echo('<br>$fieldSqlList');
-		//var_dump($fieldSqlList);
+		//echo('<br>$fieldSqlList'); var_dump($fieldSqlList);
 		// This is needed as there can be condition in different order and there is an assumption in makeGroupSqlReplacements API
 		// that it expects the array in an order and then replaces the sql with its the corresponding place
 		ksort($fieldSqlList);
-		//echo('<br>$groupSql');
-		//var_dump($groupSql);
+		//echo('<br>$groupSql'); var_dump($groupSql);
 		$groupSql = $this->makeGroupSqlReplacements($fieldSqlList, $groupSql);
-		//echo('<br>$groupSql');
-		//var_dump($groupSql);
+		//echo('<br>$groupSql'); var_dump($groupSql);
 		if($this->conditionInstanceCount > 0) {
 			$this->conditionalWhere = $groupSql;
 			$sql .= $groupSql;
@@ -1130,10 +1127,13 @@ class QueryGenerator {
 		$pos = 0;
 		$nextOffset = 0;
 		foreach ($fieldSqlList as $index => $fieldSql) {
-			$pos = strpos($groupSql, $index.'', $nextOffset);
+			
+			//ED150522 builded with $this->groupInfo .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/
+			$key = " /*VAR*/$index/*/VAR*/ ";
+			$pos = strpos($groupSql, $key, $nextOffset);
 			if($pos !== false) {
 				$beforeStr = substr($groupSql,0,$pos);
-				$afterStr = substr($groupSql, $pos + strlen($index));
+				$afterStr = substr($groupSql, $pos + strlen($key));
 				$nextOffset = strlen($beforeStr.$fieldSql);
 				$groupSql = $beforeStr.$fieldSql.$afterStr;
 			}
@@ -1184,7 +1184,7 @@ class QueryGenerator {
 		if($glue != null && $conditionNumber > 0)
 			$this->addConditionGlue ($glue);
 
-		$this->groupInfo .= "$conditionNumber ";
+		$this->groupInfo .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/
 		$this->whereFields[] = $fieldname;
 		$this->ignoreComma = $ignoreComma;
 		$this->reset();
@@ -1194,7 +1194,7 @@ class QueryGenerator {
 
 	public function addRelatedModuleCondition($relatedModule, $column, $value, $SQLOperator) {
 		$conditionNumber = $this->conditionInstanceCount++;
-		$this->groupInfo .= "$conditionNumber ";
+		$this->groupInfo .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/
 		$this->manyToManyRelatedModuleConditions[$conditionNumber] = array('relatedModule'=>
 			$relatedModule,'column'=>$column,'value'=>$value,'SQLOperator'=>$SQLOperator);
 	}
@@ -1204,7 +1204,7 @@ class QueryGenerator {
 		if($glue != null && $conditionNumber > 0)
 			$this->addConditionGlue($glue);
 
-		$this->groupInfo .= "$conditionNumber ";
+		$this->groupInfo .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/
 		$this->referenceModuleField[$conditionNumber] = array('relatedModule'=> $relatedModule,'referenceField'=> $referenceField,'fieldName'=>$fieldName,'value'=>$value,
 			'SQLOperator'=>$SQLOperator);
 	}
