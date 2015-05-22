@@ -106,6 +106,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 
 		$viewer->assign('IS_EDITABLE', $this->record->getRecord()->isEditable($moduleName));
 		$viewer->assign('IS_DELETABLE', $this->record->getRecord()->isDeletable($moduleName));
+		$viewer->assign('IS_DUPLICATABLE', $this->record->getRecord()->isDuplicatable($moduleName));
 
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'));
 		$linkModels = $this->record->getSideBarLinks($linkParams);

@@ -65,7 +65,7 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 
 		$detailViewLink = array();
 
-		if(Users_Privileges_Model::isPermitted($moduleName, 'EditView', $recordId)) {
+		if($recordModel->isEditable()) {//ED150521
 			$detailViewLinks[] = array(
 					'linktype' => 'DETAILVIEWBASIC',
 					'linklabel' => 'LBL_EDIT',
@@ -84,7 +84,7 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 		$detailViewBasiclinks = $linkModelListDetails['DETAILVIEWBASIC'];
 		unset($linkModelListDetails['DETAILVIEWBASIC']);
 
-		if(Users_Privileges_Model::isPermitted($moduleName, 'Delete', $recordId)) {
+		if($recordModel->isDeletable()) {//ED150521
 			$deletelinkModel = array(
 					'linktype' => 'DETAILVIEW',
 					'linklabel' => sprintf("%s %s", getTranslatedString('LBL_DELETE', $moduleName), vtranslate('SINGLE_'. $moduleName, $moduleName)),
@@ -94,7 +94,7 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($deletelinkModel);
 		}
 
-		if(Users_Privileges_Model::isPermitted($moduleName, 'EditView', $recordId)) {
+		if($recordModel->isDuplicatable()) {//ED150521
 			$duplicateLinkModel = array(
 						'linktype' => 'DETAILVIEWBASIC',
 						'linklabel' => 'LBL_DUPLICATE',
