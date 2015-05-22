@@ -10,6 +10,19 @@
 
 class Products_Record_Model extends Vtiger_Record_Model {
 
+
+
+	/** ED150521
+	 * Function to get details for user have the permissions to do duplicate
+	 * @return <Boolean> - true/false
+	 *
+	 * RSN rule : "il est interdit de dupliquer un produit. Trop de conséquence si paramètre non modifié erroné."
+	 */
+	public function isDuplicatable() {
+		global $RSN_PRODUCT_ALLOW_DUPLICATE;
+		return !isset($RSN_PRODUCT_ALLOW_DUPLICATE) || $RSN_PRODUCT_ALLOW_DUPLICATE == 'true';
+	}
+
 	/**
 	 * Function to get Taxes Url
 	 * @return <String> Url

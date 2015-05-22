@@ -7,7 +7,11 @@
 
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
+<<<<<<< HEAD
 define('MAX_QUERY_ROWS', 1000); //DEBUG
+=======
+define('MAX_QUERY_ROWS', 100); //DEBUG
+>>>>>>> e75fe93f7e9174cafae3b4e3ef5295bbbc2bdee8
 
 
 require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
@@ -62,6 +66,9 @@ class RSN_CogilogFacturesRSN_Import {
         
 	// Importe les factures qui n'ont pas encore été importées
 	public static function importNexts(){
+		
+		$focus = CRMEntity::getInstance('Invoice');
+		
 		$nbRows = MAX_QUERY_ROWS;
 		$srcRows = self::getEntries($nbRows);
 		$doneRows = array();
@@ -97,6 +104,7 @@ class RSN_CogilogFacturesRSN_Import {
 			
 			//break;//debug
 		}
+		
                 return $doneRows;
 	}
         
@@ -106,7 +114,7 @@ class RSN_CogilogFacturesRSN_Import {
 	private static function getEntries($nbRows = MAX_QUERY_ROWS){
             
 		/* factures déjà importés */
-		$query = "SELECT MIN(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_min, MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
+		$query = "SELECT MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
 			FROM vtiger_invoice
                         JOIN vtiger_crmentity
                             ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
@@ -118,11 +126,9 @@ class RSN_CogilogFacturesRSN_Import {
 		$result = $db->pquery($query, array());
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
-			$factMin = intval(substr($row['codefacture_min'], 2));
 			$factMax = intval(substr($row['codefacture_max'], 2));
-			$anneeMin = intval(substr($row['codefacture_min'], 0, strlen($row['codefacture_min']) - 5)) + 2000;
 			$anneeMax = intval(substr($row['codefacture_max'], 0, strlen($row['codefacture_max']) - 5)) + 2000;
-			var_dump('Dernière facture existante : ', $anneeMax, $factMax	);
+			echo('Dernière facture existante : ' . $anneeMax . ', n° '. $factMax);
 		}
 		else
 			$factMax = false;
@@ -227,7 +233,7 @@ class RSN_CogilogFacturesRSN_Import {
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
 			$contact = Vtiger_Record_Model::getInstanceById($row['contactid'], 'Contacts');
-			//var_dump("$codeClient existe id=".$row['contactid']);
+			//var_dump("$codeClient existe id=".$contact->getId());
 		}
 		else {
 			$contact = Vtiger_Record_Model::getCleanInstance('Contacts');
@@ -339,6 +345,7 @@ class RSN_CogilogFacturesRSN_Import {
                             echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
                             return false;
                         }
+			
 			$record->set('mode','');
 			//This field is not manage by save()
 			$record->set('invoice_no','COG'.$cogId);

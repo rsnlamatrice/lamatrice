@@ -9,7 +9,18 @@
  *************************************************************************************/
 
 class Services_Record_Model extends Products_Record_Model {
+	/** ED150521
+	 * Function to get details for user have the permissions to do duplicate
+	 * @return <Boolean> - true/false
+	 *
+	 * RSN rule : "il est interdit de dupliquer un produit. Trop de conséquences si paramètre non modifié erroné."
+	 */
+	/* inherited from Products
+	public function isDuplicatable() {
+		return false;
+	}*/
 
+	
 	function getCreateQuoteUrl() {
 		$quotesModuleModel = Vtiger_Module_Model::getInstance('Quotes');
 

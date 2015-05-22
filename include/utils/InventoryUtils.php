@@ -563,7 +563,7 @@ function saveInventoryProductDetails(&$focus, $module, $update_prod_stock='false
 		if($_REQUEST["deleted".$i] == 1)
 			continue;
 
-	    $prod_id = $_REQUEST['hdnProductId'.$i];
+		$prod_id = $_REQUEST['hdnProductId'.$i];
 		if(isset($_REQUEST['productDescription'.$i]))
 			$description = $_REQUEST['productDescription'.$i];
 		/*else{
@@ -571,8 +571,8 @@ function saveInventoryProductDetails(&$focus, $module, $update_prod_stock='false
 			$desc_res = $adb->pquery($desc_duery,array($prod_id));
 			$description = $adb->query_result($desc_res,0,"product_description");
 		}	*/
-        $qty = $_REQUEST['qty'.$i];
-        $listprice = $_REQUEST['listPrice'.$i];
+		$qty = $_REQUEST['qty'.$i];
+		$listprice = $_REQUEST['listPrice'.$i];
 		$comment = $_REQUEST['comment'.$i];
 
 		//we have to update the Product stock for PurchaseOrder if $update_prod_stock is true

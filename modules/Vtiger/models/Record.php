@@ -372,6 +372,15 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		return Users_Privileges_Model::isPermitted($this->getModuleName(), 'Delete', $this->getId());
 	}
 
+	/** ED150521
+	 * Function to get details for user have the permissions to do duplicate
+	 * @return <Boolean> - true/false
+	 */
+	public function isDuplicatable() {
+		//TODO specific action 'Duplicate'
+		return Users_Privileges_Model::isPermitted($this->getModuleName(), 'EditView', $this->getId());
+	}
+
 	/**
 	 * Funtion to get Duplicate Record Url
 	 * @return <String>

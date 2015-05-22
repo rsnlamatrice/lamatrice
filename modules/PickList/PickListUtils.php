@@ -237,7 +237,7 @@ function getAssignedPicklistValues($tableName, $roleid, $adb, $lang=array(), &$p
 						$data['uicolor'] = $resultrow['uicolor'];
 					if($uiicon)
 						$data['uiicon'] = $resultrow['uiicon'];
-					$picklistValuesData[$resultrow[$tableName]] = $data; //Avé les accents
+					$picklistValuesData[$pick_val] = $data; //Avé les accents
 				}
 
 			}

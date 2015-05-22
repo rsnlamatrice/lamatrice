@@ -13,7 +13,7 @@
 	<div class="contents">
 		<form id="ConfigEditorForm" class="form-horizontal" data-detail-url="{$MODEL->getDetailViewUrl()}">
 			<div class="widget_header row-fluid">
-				<div class="span8"><h3>{vtranslate('LBL_CONFIG_EDITOR', $QUALIFIED_MODULE)}</h3>&nbsp;{vtranslate('LBL_CONFIG_DESCRIPTION', $QUALIFIED_MODULE)}</div>
+				<div class="span8"><h3>{vtranslate('LBL_CONFIG'|cat:$CONFIG_DOMAIN|cat:'_EDITOR', $QUALIFIED_MODULE)}</h3>&nbsp;{vtranslate('LBL_CONFIG'|cat:$CONFIG_DOMAIN|cat:'_DESCRIPTION', $QUALIFIED_MODULE)}</div>
 				<div class="span4 btn-toolbar">
 					<div class="pull-right">
 						<button class="btn btn-success saveButton" type="submit" title="{vtranslate('LBL_SAVE', $QUALIFIED_MODULE)}"><strong>{vtranslate('LBL_SAVE', $QUALIFIED_MODULE)}</strong></button>
@@ -29,7 +29,7 @@
 												'list_max_entries_per_page' => ['name' => 'NumberRange100']]}
 			<table class="table table-bordered table-condensed themeTableColor">
 				<thead>
-					<tr class="blockHeader"><th colspan="2">{vtranslate('LBL_CONFIG_FILE', $QUALIFIED_MODULE)}</th></tr>
+					<tr class="blockHeader"><th colspan="2">{vtranslate('LBL_CONFIG'|cat:$CONFIG_DOMAIN|cat:'_FILE', $QUALIFIED_MODULE)}</th></tr>
 				</thead>
 				<tbody>
 					{assign var=FIELD_DATA value=$MODEL->getViewableData()}

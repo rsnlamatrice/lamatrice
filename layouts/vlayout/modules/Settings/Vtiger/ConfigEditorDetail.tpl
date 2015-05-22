@@ -11,7 +11,7 @@
 {strip}
 <div class="container-fluid" id="ConfigEditorDetails">
 	<div class="widget_header row-fluid">
-		<div class="span8"><h3>{vtranslate('LBL_CONFIG_EDITOR', $QUALIFIED_MODULE)}</h3></div>
+		<div class="span8"><h3>{vtranslate('LBL_CONFIG'|cat:$CONFIG_DOMAIN|cat:'_EDITOR', $QUALIFIED_MODULE)}</h3></div>
 		<div class="span4">
 			<div class="pull-right">
 				<button class="btn editButton" data-url='{$MODEL->getEditViewUrl()}' type="button" title="{vtranslate('LBL_EDIT', $QUALIFIED_MODULE)}"><strong>{vtranslate('LBL_EDIT', $QUALIFIED_MODULE)}</strong></button>
@@ -24,7 +24,7 @@
 			<thead>
 				<tr class="blockHeader">
 					<th colspan="2">
-						<span class="alignMiddle">{vtranslate('LBL_CONFIG_FILE', $QUALIFIED_MODULE)}</span>
+						<span class="alignMiddle">{vtranslate('LBL_CONFIG'|cat:$CONFIG_DOMAIN|cat:'_FILE', $QUALIFIED_MODULE)}</span>
 					</th>
 				</tr>
 			</thead>

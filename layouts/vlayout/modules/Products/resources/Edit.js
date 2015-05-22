@@ -65,17 +65,33 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 	registerEventForTaxes : function(){
 		var thisInstance = this;
 		var formElem = this.getForm();
+		//checkboxes
 		jQuery('.taxes').on('change',function(e){
 			var elem = thisInstance.getCurrentElem(e);
 			var taxBox  = elem.data('taxName');
 			if(elem.is(':checked')) {
+				//ED150521 : rule "Only one tax allowed"
+				if (!thisInstance.getUseMultipleTaxes()) {
+					jQuery('.taxes:not([data-tax-name="'+taxBox+'"]').removeAttr('checked');
+					elem.parents('table:first').find('input[type="text"][name^="tax"]:not([name="'+taxBox+'"]').addClass('hide');
+				}
+				
 				jQuery('input[name='+taxBox+']',formElem).removeClass('hide').show();
 			}else{
 				jQuery('input[name='+taxBox+']',formElem).addClass('hide');
 			}
-
 		});
 		return this;
+	},
+	
+	/** ED150522
+	 * may product use multiple taxes
+	 */
+	getUseMultipleTaxes : function(){
+		var $useMultipleTaxes = $('#products-use-multiple-taxes')
+		, useMultipleTaxes = $useMultipleTaxes.length == 0 || $useMultipleTaxes.val() != 'false'
+		;
+		return useMultipleTaxes;
 	},
 	
 	/**

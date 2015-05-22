@@ -791,7 +791,9 @@ echo($params);*/
 		//Event triggering code
 		require_once("include/events/include.inc");
 		global $adb;
-
+		
+		$log->debug("self::isBulkSaveMode() returns " . self::isBulkSaveMode());
+		
 		//In Bulk mode stop triggering events
 		if(!self::isBulkSaveMode()) {
 			$em = new VTEventsManager($adb);
