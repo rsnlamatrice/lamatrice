@@ -49,6 +49,10 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		}
 		$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($moduleName);
 
+		/*ED150522*/
+		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
+		$viewer->assign('RECORD_MODEL',$recordModel); 
+
 		$viewer->assign('PICKIST_DEPENDENCY_DATASOURCE',Zend_Json::encode($picklistDependencyDatasource));
 		$viewer->assign('CURRENTDATE', date('Y-n-j'));
 		$viewer->assign('MODE', 'massedit');
