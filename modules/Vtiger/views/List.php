@@ -129,7 +129,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 
 
 		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
-
+		
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'), 'CVID'=>$cvId);
 		$linkModels = $listViewModel->getListViewMassActions($linkParams);
 
