@@ -328,10 +328,11 @@ class ListViewController {
 						$value = ' --';
 					}
 				}elseif ($fieldDataType == 'picklist') {
+					$val_decoded = trim(html_entity_decode($value));
 					//not check for permissions for non admin users for status and activity type field
 					//TODO uicolor come plus bas multipicklist
 					if($module == 'Calendar' && ($fieldName == 'taskstatus' || $fieldName == 'eventstatus' || $fieldName == 'activitytype')) {
-					    $value = Vtiger_Language_Handler::getTranslatedString($value,$module);
+						$value = Vtiger_Language_Handler::getTranslatedString($value,$module);
 						$value = textlength_check($value);
 					}
 					else if ($value != '' && !$is_admin && $this->picklistRoleMap[$fieldName] &&
@@ -342,12 +343,13 @@ class ListViewController {
 								$module)."</font>";
 					//ED150210 uicolor ?	TODO : les accents foutent le bordel !
 					} elseif($value != ''
-					      && isset($this->picklistValueDataMap[$fieldName][htmlentities($value)])
-					      && isset($this->picklistValueDataMap[$fieldName][htmlentities($value)]['uicolor'])){
-						$uicolor = $this->picklistValueDataMap[$fieldName][htmlentities($value)]['uicolor'];
+					      && isset($this->picklistValueDataMap[$fieldName][$val_decoded])
+					      && isset($this->picklistValueDataMap[$fieldName][$val_decoded]['uicolor'])){
+						$uicolor = $this->picklistValueDataMap[$fieldName][$val_decoded]['uicolor'];
 						$value = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
 							. Vtiger_Language_Handler::getTranslatedString($value, $module);
 					} else {
+						//var_dump($this->picklistValueDataMap[$fieldName], $value, htmlentities($value), decode_html($value));
 						$value = Vtiger_Language_Handler::getTranslatedString($value, $module);
 						$value = textlength_check($value);
 					}
@@ -459,10 +461,11 @@ class ListViewController {
 									$tmpArray[] = $notaccess;
 									$tmp .= ', '.$notaccess;
 								} else {
-									if(isset($this->picklistValueDataMap[$fieldName][$val])
-									&& isset($this->picklistValueDataMap[$fieldName][$val]['uicolor'])){
-										$uicolor = $this->picklistValueDataMap[$fieldName][$val]['uicolor'];
-										$tmpArray[] = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
+									if(isset($this->picklistValueDataMap[$fieldName][$val_decoded])
+									&& isset($this->picklistValueDataMap[$fieldName][$val_decoded]['uicolor'])){
+										$uicolor = $this->picklistValueDataMap[$fieldName][$val_decoded]['uicolor'];
+										$tmpArray[] = ($uicolor
+											       ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
 											. $val;
 									}
 									else
@@ -486,9 +489,10 @@ class ListViewController {
 						$tmpArray = array();
 						$tmp = '';
 						foreach($valueArray as $index => $val) {
-							if(isset($this->picklistValueDataMap[$fieldName][$val])
-							&& isset($this->picklistValueDataMap[$fieldName][$val]['uicolor'])){
-								$uicolor = $this->picklistValueDataMap[$fieldName][$val]['uicolor'];
+							$val_decoded = trim(html_entity_decode($val));
+							if(isset($this->picklistValueDataMap[$fieldName][$val_decoded])
+							&& isset($this->picklistValueDataMap[$fieldName][$val_decoded]['uicolor'])){
+								$uicolor = $this->picklistValueDataMap[$fieldName][$val_decoded]['uicolor'];
 								$tmpArray[] = ($uicolor ? '<div class="picklistvalue-uicolor" style="background-color:'. $uicolor . '">&nbsp;</div>' : '')
 									. $val;
 							}

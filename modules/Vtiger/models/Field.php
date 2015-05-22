@@ -523,7 +523,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		switch($fieldDataType){
 		case 'picklist':
 		case 'multipicklist':
-		case 'buttonSet':
+		case 'buttonSet'://ED140000
 		    $pickListValues = $this->getPicklistValues();
 		    if(!empty($pickListValues)) {
 			$this->fieldInfo['picklistvalues'] = $pickListValues;
