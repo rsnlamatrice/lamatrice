@@ -62,6 +62,9 @@ class RSN_CogilogFacturesRSN_Import {
         
 	// Importe les factures qui n'ont pas encore été importées
 	public static function importNexts(){
+		
+		$focus = CRMEntity::getInstance('Invoice');
+		
 		$nbRows = MAX_QUERY_ROWS;
 		$srcRows = self::getEntries($nbRows);
 		$doneRows = array();
@@ -97,6 +100,7 @@ class RSN_CogilogFacturesRSN_Import {
 			
 			//break;//debug
 		}
+		
                 return $doneRows;
 	}
         
@@ -120,7 +124,7 @@ class RSN_CogilogFacturesRSN_Import {
 			$row = $db->fetch_row($result, 0);
 			$factMax = intval(substr($row['codefacture_max'], 2));
 			$anneeMax = intval(substr($row['codefacture_max'], 0, strlen($row['codefacture_max']) - 5)) + 2000;
-			var_dump('Dernière facture existante : ', $anneeMax, $factMax	);
+			echo('Dernière facture existante : ' . $anneeMax . ', n° '. $factMax);
 		}
 		else
 			$factMax = false;
@@ -225,7 +229,7 @@ class RSN_CogilogFacturesRSN_Import {
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
 			$contact = Vtiger_Record_Model::getInstanceById($row['contactid'], 'Contacts');
-			//var_dump("$codeClient existe id=".$row['contactid']);
+			//var_dump("$codeClient existe id=".$contact->getId());
 		}
 		else {
 			$contact = Vtiger_Record_Model::getCleanInstance('Contacts');
@@ -337,6 +341,7 @@ class RSN_CogilogFacturesRSN_Import {
                             echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
                             return false;
                         }
+			
 			$record->set('mode','');
 			//This field is not manage by save()
 			$record->set('invoice_no','COG'.$cogId);
