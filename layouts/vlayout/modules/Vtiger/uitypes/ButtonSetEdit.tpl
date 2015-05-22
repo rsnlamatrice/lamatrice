@@ -17,7 +17,7 @@
 {assign var=FIELD_NAME value=$FIELD_MODEL->getFieldName()}
 {assign var=FIELD_LABEL value=Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode(vtranslate($FIELD_MODEL->get('label'), $MODULE_NAME)))}
 {if $RECORD}{assign var=RECORD_MODEL value=$RECORD}{/if}
-{if !$RECORD_MODEL}RECORD_MODEL manquant{/if}
+{if !$RECORD_MODEL}RECORD_MODEL manquant {*echo_callstack()*}{/if}
 {assign var=PICKLIST_LABELS value=$RECORD_MODEL->getPicklistValuesDetails($FIELD_NAME)}
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
 {assign var=SELECTED_VALUE value=$FIELD_MODEL->get('fieldvalue')}
