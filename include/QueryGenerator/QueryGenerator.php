@@ -265,6 +265,7 @@ class QueryGenerator {
 		$customView = new CustomView($this->module);
 		$moduleModel = Vtiger_Module_Model::getInstance($this->module);
 		$relationModels = Vtiger_Relation_Model::getAllRelations($moduleModel);
+		//var_dump($relationModels);
 		$dateSpecificConditions = $customView->getStdFilterConditions();
 		foreach ($advFilterList as $groupindex=>$groupcolumns) {
 			$filtercolumns = $groupcolumns['columns'];
@@ -1338,6 +1339,11 @@ class QueryGenerator {
 	 * (extracted from above)
 	 **/
 	private function addUserSearchConditionUnique($search_field, $search_text, $operator){
+		if(is_array($search_field)){
+			//Array means OR conditions
+			//$this->startGroup(self::$OR);
+			return;
+		}
 		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator);
 		$fieldName=vtlib_purify($search_field);
 		if($this->conditionInstanceCount > 0) {

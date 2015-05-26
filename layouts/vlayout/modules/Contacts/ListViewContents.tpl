@@ -70,25 +70,25 @@
 					<input type="checkbox" id="listViewEntriesMainCheckBox" />
 				</th>
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
-				{* ED141006 *}
-				{assign var=FIELD_NAME value=$LISTVIEW_HEADER->getFieldName()}
-				{* ED150412 *}
-				{if $FIELD_NAME == 'createdtime'}
-					{assign var=SKIP_MODIFIEDTIME value=true}
-				{else if $FIELD_NAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
-					{continue}
-				{/if}
-				{assign var=IS_GROUP_FIELD value=$FIELD_NAME == "isgroup"}
-				<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}{if !$IS_GROUP_FIELD} class="{$WIDTHTYPE}"{/if}>
-					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">
-						{if $IS_GROUP_FIELD}
-							&nbsp;
-						{else}
-							{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
-						{/if}
-						&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white"/>{/if}
-					</a>
-				</th>
+					{* ED141006 *}
+					{assign var=FIELD_NAME value=$LISTVIEW_HEADER->getFieldName()}
+					{* ED150412 *}
+					{if $FIELD_NAME == 'createdtime'}
+						{assign var=SKIP_MODIFIEDTIME value=true}
+					{else if $FIELD_NAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+						{continue}
+					{/if}
+					{assign var=IS_GROUP_FIELD value=$FIELD_NAME == "isgroup"}
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}{if !$IS_GROUP_FIELD} class="{$WIDTHTYPE}"{/if}>
+						<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">
+							{if $IS_GROUP_FIELD}
+								&nbsp;
+							{else}
+								{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
+							{/if}
+							&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white"/>{/if}
+						</a>
+					</th>
 				{/foreach}
 			</tr>
 			<tr class="listViewHeaders filters">
@@ -111,7 +111,7 @@
 		</thead>
 		{foreach item=LISTVIEW_ENTRY from=$LISTVIEW_ENTRIES name=listview}
 		<tr class="listViewEntries" data-id='{$LISTVIEW_ENTRY->getId()}' data-recordUrl='{$LISTVIEW_ENTRY->getDetailViewUrl()}' id="{$MODULE}_listView_row_{$smarty.foreach.listview.index+1}">
-			{assign var=IS_GROUP value=($LISTVIEW_ENTRY->get('isgroup') eq '1') || strpos($LISTVIEW_ENTRY->get('isgroup'), 'data-value="1"')}{* TODO boolean *}
+			{assign var=IS_GROUP value=($LISTVIEW_ENTRY->getRawDataFieldValue('isgroup') eq '1') || strpos($LISTVIEW_ENTRY->getRawDataFieldValue('isgroup'), 'data-value="1"')}{* TODO boolean *}
 			<td  width="3%" class="{$WIDTHTYPE}">
 				<input type="checkbox" value="{$LISTVIEW_ENTRY->getId()}" class="listViewEntriesCheckBox"/>
 			</td>
@@ -123,7 +123,11 @@
 			{assign var=IS_GROUP_FIELD value=$LISTVIEW_HEADERNAME == "isgroup"}
 			<td class="listViewEntryValue {if !$IS_GROUP_FIELD}{$WIDTHTYPE}{/if}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap>
 				{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
-					<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
+					<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+					{*ED150526*}
+					{if $LISTVIEW_HEADERNAME == 'lastname' && $IS_GROUP && $LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+						&nbsp;-&nbsp;{$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+					{/if}</a>
 				{else if $LISTVIEW_HEADER->get('uitype') eq '72'}
 					{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
 					{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
@@ -145,9 +149,9 @@
 						<br>{substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
 					{/if}
 				{else if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME}
-					
+				
 				{else}
-					{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{*TODO optimise si on ne laisse que ->get( *}
+					{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
 				{/if}
 					
 				{if $LISTVIEW_HEADER@last}

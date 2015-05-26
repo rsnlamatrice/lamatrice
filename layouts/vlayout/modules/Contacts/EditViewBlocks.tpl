@@ -143,7 +143,7 @@
 								{if $FIELD_NAME eq 'otherstreet'
 								|| $FIELD_NAME eq 'mailingstreet'}
 									{* street2 *}
-									{assign var=TITLE value='Nom de la structure ou n°appt, n°BAL, escalier, couloir, ...'}
+									{assign var=TITLE value='Structure ou chez, n°appt, n°BAL, escalier, couloir, ...'}
 									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
 									{assign var=FIELD_NAME value=$FIELD_NAME|cat:'2'}
@@ -239,6 +239,23 @@
 								{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 								{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
 								</span>
+							{/if}
+							
+							{*isgroup : add duplicate mailingstreet2 *}
+							{if $FIELD_NAME eq 'isgroup'}
+								<div class="isgroup_mailingstreet2-holder {if !$RECORD_MODEL->get('isgroup')}hide{/if}"
+								 title="Nom apparaissant en 2ème ligne d'adresse">
+								{* isgroup_mailingstreet2 *}
+								{assign var=TITLE value='Structure ou chez'}
+								{assign var=FIELD_NAMETMP value=$FIELD_NAME}
+								{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
+								{assign var=FIELD_NAME value='mailingstreet2'}
+								{assign var=FIELD_MODEL value=$RECORD_STRUCTURE_MODEL->getField($FIELD_NAME)}
+								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+								{include file=vtemplate_path($UITYPEMODEL,$MODULE) FORCE_FIELD_NAME='isgroup_mailingstreet2' BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+								{assign var=FIELD_NAME value=$FIELD_NAMETMP}
+								{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
+								</div>
 							{/if}
 						</div>
 						

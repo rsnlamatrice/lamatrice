@@ -148,10 +148,10 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 
 	public function getRelationType(){
 		if(empty($this->relationType)){
-			$this->relationType = self::RELATION_INDIRECT;
-			if ($this->getRelationField()) {
+			if ($this->getRelationField()) 
 				$this->relationType = self::RELATION_DIRECT;
-			}
+			else
+				$this->relationType = self::RELATION_INDIRECT;
 		}
 		return $this->relationType;
 	}

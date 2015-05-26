@@ -372,6 +372,28 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		});
 	},
 	
+	
+	/** ED150526
+	 * Function to register event for synchronising group name and mailingstreet2
+	 */
+	registerEventForSynchronizeGroupNameMailingStreet2 : function(container){
+		var thisInstance = this;
+		//syncrhonise les deux zones de saisie
+		jQuery('#Contacts_editView_fieldName_isgroup_mailingstreet2, #Contacts_editView_fieldName_mailingstreet2').on('change',function(e){
+			var other = this.id.indexOf('_fieldName_isgroup_') > 0
+				? this.id.replace('_fieldName_isgroup_', '_fieldName_')
+				: this.id.replace('_fieldName_', '_fieldName_isgroup_');
+			jQuery('#'+other).val(this.value);
+		});
+		//affiche/masque la saisie sous "isgroup"
+		jQuery('input[name="isgroup"]').on('change',function(e){
+			if(this.checked && this.value == 1)
+				$('.isgroup_mailingstreet2-holder').show();
+			else
+				$('.isgroup_mailingstreet2-holder').hide();
+		});
+	},
+	
 	/**
 	 * Function to check for Portal User
 	 */
@@ -418,5 +440,6 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		//ED150312
 		this.registerEventOnAddressChanging(container);
 		this.registerEventOnAccountReferenceStatusChanging(container);
+		this.registerEventForSynchronizeGroupNameMailingStreet2(container);
 	}
 })

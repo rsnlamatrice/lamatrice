@@ -137,6 +137,10 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			$relatedRecordIdsList = array_keys($relatedRecordModelsList);
 			
 			switch($relatedModuleName){
+			  case "Invoice":
+			  case "RSNAboRevues":
+				return $relatedRecordModelsList;
+			
 			  case "Critere4D":
 				$query = "SELECT dateapplication,
 					data AS rel_data, $fieldName
@@ -188,46 +192,45 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$fieldRels = self::get_related_contacts_fields();
 				break;
 			
-			  case "Invoice":
-				return $relatedRecordModelsList;
-			
 			  default:
 				die(__FILE__ . ' getEntries : ' . $relatedModuleName . ' inconnu');
 			}
-			array_push($relatedRecordIdsList, $contactId);
-			$result = $db->pquery($query, $relatedRecordIdsList);
-			$numOfrows = $db->num_rows($result);
-			
-			for($i=0; $i<$numOfrows; $i++) {
-				$recordId = $db->query_result($result, $i, $fieldName);
-				if($relatedModuleName == "Contacts"
-				&& $recordId == $contactId) 
-					$recordId = $db->query_result($result, $i, "contactid");
-				$relatedRecordModel = $relatedRecordModelsList[$recordId];
-				if($relatedRecordModel)
-				foreach($fieldRels as $fieldRel){
-					
-					$fieldRelType = $fieldRel->get('typeofdata');
-					$fieldRel = $fieldRel->get('name');
-					$value = $db->query_result($result, $i, strtolower( $fieldRel ));
-					switch($fieldRelType){
-					  case "D":
-					  case "DATETIME":
-					      if($value)
-						      $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
-					    break;
-					  default:
-					    $value = preg_replace('/\\r\\n?/', '<br/>', $value);
-					    break;
-					}
-					$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
-					if($values === null)
-						$values = array($value);
-					else
-						$values[] = $value;
-					$relatedRecordModel->set($fieldRel, $values);
-				}		
-				$relatedRecordModelsList[$recordId] = $relatedRecordModel;
+			if($query){
+				array_push($relatedRecordIdsList, $contactId);
+				$result = $db->pquery($query, $relatedRecordIdsList);
+				$numOfrows = $db->num_rows($result);
+				
+				for($i=0; $i<$numOfrows; $i++) {
+					$recordId = $db->query_result($result, $i, $fieldName);
+					if($relatedModuleName == "Contacts"
+					&& $recordId == $contactId) 
+						$recordId = $db->query_result($result, $i, "contactid");
+					$relatedRecordModel = $relatedRecordModelsList[$recordId];
+					if($relatedRecordModel)
+					foreach($fieldRels as $fieldRel){
+						
+						$fieldRelType = $fieldRel->get('typeofdata');
+						$fieldRel = $fieldRel->get('name');
+						$value = $db->query_result($result, $i, strtolower( $fieldRel ));
+						switch($fieldRelType){
+						  case "D":
+						  case "DATETIME":
+						      if($value)
+							      $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
+						    break;
+						  default:
+						    $value = preg_replace('/\\r\\n?/', '<br/>', $value);
+						    break;
+						}
+						$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
+						if($values === null)
+							$values = array($value);
+						else
+							$values[] = $value;
+						$relatedRecordModel->set($fieldRel, $values);
+					}		
+					$relatedRecordModelsList[$recordId] = $relatedRecordModel;
+				}
 			}
 		}
 		return $relatedRecordModelsList;
