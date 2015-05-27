@@ -152,6 +152,10 @@
 				
 				{else}
 					{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+					{*ED150527 refreshing listview does not set isNameField to lastname field *}
+					{if $LISTVIEW_HEADERNAME == 'lastname' && $IS_GROUP && $LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+						&nbsp;-&nbsp;{$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+					{/if}
 				{/if}
 					
 				{if $LISTVIEW_HEADER@last}

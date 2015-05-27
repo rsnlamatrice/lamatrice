@@ -85,7 +85,6 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		foreach(array('vtiger_contactaddress.mailingstreet2', 'vtiger_contactdetails.isgroup') as $fieldName)
 			if(!preg_match('/SELECT.+'.preg_quote($fieldName).'.+FROM\s/i', $listQuery))
 				$listQuery = preg_replace('/^\s*SELECT\s/i', 'SELECT '.$fieldName.',', $listQuery);
-			
 		return $listQuery;
 	}
 
@@ -97,10 +96,13 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 	 * ED150424 : add module prefix char ('C') when searching on 'contact_no' field
 	 */
 	public function getListViewEntries($pagingModel) {
+		//TODO add mailingstreet2
+		
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		
 		if(is_array($searchKey)){
+			$operators = $this->get('operator');
 			for($i = 0; $i < count($searchKey); $i++){
 				//add module prefix char ('C') when searching on 'contact_no' field
 				if($searchKey[$i] == 'contact_no' && $searchValue[$i] && is_numeric($searchValue[$i][0])){
@@ -110,12 +112,14 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 				//une recherche sur le nom s'effectue aussi sur le mailingstreet2 si c'est un groupe
 				// name LIKE % OR (mailingstreet2 LIKE % OR isgroup == 0 )
 				else if($searchKey[$i] == 'lastname' && $searchValue[$i]){
-					/* TODO A traiter dans le querygenerator
-					$searchKey[$i] = array('lastname', array('mailingstreet2', 'isgroup'));
-					$searchValue[$i] = array( $searchValue[$i], array($searchValue[$i], 0));
+					/* un sous-tableau
+					*/
+					$searchKey[$i] = array('lastname', null, array('mailingstreet2', null, 'isgroup'));
+					$searchValue[$i] = array( $searchValue[$i], null, array($searchValue[$i], null, '1'));
+					$operators[$i] = array( $operators[$i], 'OR', array($operators[$i], 'AND', 'e'));
 					$this->set('search_key', $searchKey);
 					$this->set('search_value', $searchValue);
-					*/
+					$this->set('operator', $operators);
 				}
 			}
 		}

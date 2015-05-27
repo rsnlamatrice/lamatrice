@@ -1337,16 +1337,40 @@ class QueryGenerator {
 	/* ED150414
 	 * Add a group
 	 * (extracted from above)
+	 *
+	 * ED150527 : $search_field, $search_text, $operator may be arrays for sub conditions
+	 * see modules/Contacts/models/ListView.php, function getListViewEntries()
 	 **/
-	private function addUserSearchConditionUnique($search_field, $search_text, $operator){
+	private function addUserSearchConditionUnique($search_field, $search_text, $operator, $startingGroup = null){
+		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator);
 		if(is_array($search_field)){
 			//Array means OR conditions
-			//$this->startGroup(self::$OR);
+			if(!$startingGroup && $this->conditionInstanceCount > 0) {
+				$this->startGroup(self::$AND);
+			} else {
+				$this->startGroup('');
+			}
+			$previousIsLogicalOperator = false;
+			for($i = 0; $i < count($search_field); $i++){
+				if(!$search_field[$i]){ //ONLY for logicial operator 
+					$this->addConditionGlue($operator[$i]);
+					$previousIsLogicalOperator = true;
+					continue;
+				}
+				elseif (!$previousIsLogicalOperator && $i > 0){
+					$this->addConditionGlue(self::$AND);
+					$previousIsLogicalOperator = false;
+				}
+				
+				$this->addUserSearchConditionUnique($search_field[$i], $search_text[$i], $operator[$i], true);
+			}
+			
+			$this->endGroup();
 			return;
 		}
 		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator);
 		$fieldName=vtlib_purify($search_field);
-		if($this->conditionInstanceCount > 0) {
+		if(!$startingGroup && $this->conditionInstanceCount > 0) {
 			$this->startGroup(self::$AND);
 		} else {
 			$this->startGroup('');
@@ -1363,7 +1387,8 @@ class QueryGenerator {
 				$value=trim($stringConvert);
 			}
 
-			if($type == 'picklist') {
+			switch($type){
+			case 'picklist':
 				global $mod_strings;
 				// Get all the keys for the for the Picklist value
 				$mod_keys = array_keys($mod_strings, $value);
@@ -1378,8 +1403,8 @@ class QueryGenerator {
 						}
 					}
 				}
-			}
-			if($type == 'currency') {
+				break;
+			case 'currency' :
 				// Some of the currency fields like Unit Price, Total, Sub-total etc of Inventory modules, do not need currency conversion
 				if($field->getUIType() == '72') {
 					$value = CurrencyField::convertToDBFormat($value, null, true);
@@ -1387,6 +1412,7 @@ class QueryGenerator {
 					$currencyField = new CurrencyField($value);
 					$value = $currencyField->getDBInsertedValue();
 				}
+				break;
 			}			
 		}
 		if(empty($operator)) {

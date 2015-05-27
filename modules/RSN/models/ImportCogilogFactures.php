@@ -7,7 +7,7 @@
 
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
-define('MAX_QUERY_ROWS', 100); //DEBUG
+define('MAX_QUERY_ROWS', 1000); //DEBUG
 
 
 require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
