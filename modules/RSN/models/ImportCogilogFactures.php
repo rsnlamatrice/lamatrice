@@ -1,13 +1,13 @@
 <?php
 /*
- * Les factures imporées depuis Cogilog ont un code de facture (invoice_no) commençant par COG et suivi de l'id Cogilog
+ * Les factures imporées depuis Cogilog ont un code de facture (invoice_no) commençant par COG et suivi du n° de facture Cogilog
  *
  *
  */
 
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
-define('MAX_QUERY_ROWS', 2000); //DEBUG
+define('MAX_QUERY_ROWS', 1000); //DEBUG
 
 
 require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
@@ -62,6 +62,9 @@ class RSN_CogilogFacturesRSN_Import {
         
 	// Importe les factures qui n'ont pas encore été importées
 	public static function importNexts(){
+		
+		$focus = CRMEntity::getInstance('Invoice');
+		
 		$nbRows = MAX_QUERY_ROWS;
 		$srcRows = self::getEntries($nbRows);
 		$doneRows = array();
@@ -97,6 +100,7 @@ class RSN_CogilogFacturesRSN_Import {
 			
 			//break;//debug
 		}
+		
                 return $doneRows;
 	}
         
@@ -106,21 +110,24 @@ class RSN_CogilogFacturesRSN_Import {
 	private static function getEntries($nbRows = MAX_QUERY_ROWS){
             
 		/* factures déjà importés */
-		$query = "SELECT MIN(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_min, MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
+		$query = "SELECT MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
 			FROM vtiger_invoice
+                        JOIN vtiger_crmentity
+                            ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
 			WHERE invoice_no LIKE 'COG%'
+			AND vtiger_crmentity.deleted = 0
 		";
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
 		$result = $db->pquery($query, array());
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
-			$factMin = $row['codefacture_min'];
-			$factMax = $row['codefacture_max'];
-			//var_dump($factMin,$factMax);
+			$factMax = intval(substr($row['codefacture_max'], 2));
+			$anneeMax = intval(substr($row['codefacture_max'], 0, strlen($row['codefacture_max']) - 5)) + 2000;
+			echo('Dernière facture existante : ' . $anneeMax . ', n° '. $factMax);
 		}
 		else
-			$factMin  = false;
+			$factMax = false;
 		
 		$query = 'SELECT cl.code AS CodeClient, cl.nom2 AS NomClient,
 			facture.*,
@@ -161,15 +168,15 @@ class RSN_CogilogFacturesRSN_Import {
 		/* Attention à ne pas importer une facture en cours de saisie */
 		$query .= ' WHERE facture.datepiece < CURRENT_DATE 
 		';
-		if($factMin)
-			$query .= ' AND NOT facture.id BETWEEN '.$factMin.' AND '.$factMax.'
-		';
-			
-		//var_dump($query);
+		if($factMax)
+			$query .= ' AND ((facture.numero > '.$factMax.' AND facture.annee = '.$anneeMax.')
+			OR facture.annee > '.$anneeMax.')';
+		//$query .= ' AND cl.code = \'999999\'';
+		//print_r("<pre>$query</pre>");
 		$rows = self::getPGDataRows("SELECT COUNT(*) AS nbrerestantes FROM ($query) a");
 		echo("<pre>Nbre de lignes de factures à importer : ".$rows[0]['nbrerestantes']."</pre>");
 		
-		$query .= ' ORDER BY facture.id, position_ligne ASC
+		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
                     LIMIT ' . $nbRows;
 		//var_dump($query);
 		return self::getPGDataRows($query);
@@ -203,10 +210,11 @@ class RSN_CogilogFacturesRSN_Import {
 	private static function importContact($srcRow){
 		$codeClient = preg_replace('/^0+/', '', $srcRow['codeclient']);
 		$regexp = '/^0*'.$codeClient.'\s(.+)\/(\w+-)?\d+\*.*$/';
-		if(!preg_match($regexp,$srcRow['nomclient'])){
-			return false;
+		if(preg_match($regexp,$srcRow['nomclient'])){
+			$nomClient = preg_replace($regexp,'$1', $srcRow['nomclient']);
 		}
-		$nomClient = preg_replace($regexp,'$1', $srcRow['nomclient']);
+		else
+			$nomClient = $srcRow['nomclient'];
 			
 		$query = "SELECT contactid
 			FROM vtiger_contactdetails
@@ -221,7 +229,7 @@ class RSN_CogilogFacturesRSN_Import {
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
 			$contact = Vtiger_Record_Model::getInstanceById($row['contactid'], 'Contacts');
-			//var_dump("$codeClient existe id=".$row['contactid']);
+			//var_dump("$codeClient existe id=".$contact->getId());
 		}
 		else {
 			$contact = Vtiger_Record_Model::getCleanInstance('Contacts');
@@ -267,29 +275,34 @@ class RSN_CogilogFacturesRSN_Import {
 	 */
 	private static function importFacture($srcRow, $contact){
 			
+		$cogId = substr($srcRow['annee'], 2,2) . str_pad ($srcRow['numero'], 5, '0', STR_PAD_LEFT);
+		/*var_dump($cogId);
+		return;*/
+	
 		$account = $contact->getAccountRecordModel();
                 if(!$account->getId()){
 			var_dump('Le compte n\'est pas défini', $account);
 			return;
                 }
-		$query = "SELECT invoiceid, vtiger_crmentity.deleted
+		$query = "SELECT invoiceid /*, vtiger_crmentity.deleted*/
 			FROM vtiger_invoice
                         JOIN vtiger_crmentity
                             ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
 			WHERE invoice_no = CONCAT('COG', ?)
+			AND vtiger_crmentity.deleted = 0
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($srcRow['id']));
+		$result = $db->pquery($query, array($cogId));
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
-                        if($row['deleted'] == 1){
+                        /*if($row['deleted'] == 1){
                             //restore from bin
                             
                             $recordIds = array($srcRow['id']);
                             $recycleBinModule = new RecycleBin_Module_Model();
                             $recycleBinModule->deleteRecords($recordIds);
-                        }
+                        }*/
 			$record = Vtiger_Record_Model::getInstanceById($row['invoiceid'], 'Invoice');
 		}
 		else {
@@ -328,9 +341,9 @@ class RSN_CogilogFacturesRSN_Import {
                             echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
                             return false;
                         }
+			
 			$record->set('mode','');
 			//This field is not manage by save()
-			$cogId = str_pad ($srcRow['id'], 6, '0', STR_PAD_LEFT);
 			$record->set('invoice_no','COG'.$cogId);
 			//set invoice_no
 			$query = "UPDATE vtiger_invoice
@@ -339,9 +352,14 @@ class RSN_CogilogFacturesRSN_Import {
 				SET invoice_no = CONCAT('COG', ?)
 				, total = ?
 				, smownerid = ?
+				, createdtime = ?
+				, modifiedtime = ?
 				WHERE invoiceid = ?
 			";
-			$result = $db->pquery($query, array($cogId, $srcRow['netht']+$srcRow['nettva'], ASSIGNEDTO_ALL, $record->getId()));
+			$result = $db->pquery($query, array($cogId, $srcRow['netht']+$srcRow['nettva'], ASSIGNEDTO_ALL
+							    , substr($srcRow['tssaisie'], 0, 20)
+							    , substr($srcRow['tsmod'], 0, 20)
+							    , $record->getId()));
 			
 			if( ! $result)
 				$db->echoError();;

@@ -31,7 +31,10 @@ Class Products_Edit_View extends Vtiger_Edit_View {
 		$viewer->assign('BASE_CURRENCY_SYMBOL', $baseCurrenctDetails['symbol']);
 		$viewer->assign('TAXCLASS_DETAILS', $recordModel->getTaxClassDetails());
 		$viewer->assign('IMAGE_DETAILS', $recordModel->getImageDetails());
-
+		//ED150522
+		global $RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES;
+		$viewer->assign('RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES', $RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES);
+		
 		parent::process($request);
 	}
 	

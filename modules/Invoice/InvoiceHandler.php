@@ -35,11 +35,12 @@ class RSNInvoiceHandler extends VTEventHandler {
 			break;
 		}
 	}
-	
-	
-    
-	/* ED150507 Règles de gestion lors de la validation d'une facture */
+	    
+	/* ED150507 Règles de gestion lors de la validation d'une facture
+	*/
 	public function handleAfterSaveInvoiceEvent($entity, $moduleName){
+		global $log;
+		$log->debug("IN handleAfterSaveInvoiceEvent");
 		$invoiceId = $entity->getId();
 		$data = $entity->getData();
 		$invoice = Vtiger_Record_Model::getInstanceById($invoiceId, $moduleName);
@@ -65,17 +66,25 @@ class RSNInvoiceHandler extends VTEventHandler {
 		if($invoiceData){
 			$this->handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems);
 		}
+		$log->debug("OUT handleAfterSaveInvoiceEvent");
 	}
-	/* ED150507 Règles de gestion lors de la validation d'une facture, article d'abonnement */
+	
+	/* ED150507 Règles de gestion lors de la validation d'une facture, article d'abonnement
+	*/
 	public function handleAfterSaveInvoiceAbonnementsEvent($invoice, $categoryItems){
+		global $log;
+		$log->debug("IN handleAfterSaveInvoiceAbonnementsEvent");
+		
 		$productModel = Vtiger_Module_Model::getInstance('Products');
 		$prochaineRevue = $productModel->getProchaineRevue();
 		if(!$prochaineRevue){
+			$log->debug("handleAfterSaveInvoiceAbonnementsEvent, pas de prochaineRevue définie");
 			//TODO Alert
 			return;
 		}
 		$account = Vtiger_Record_Model::getInstanceById($invoice->get('account_id'), 'Accounts');
 		if(!$account){
+			$log->debug("handleAfterSaveInvoiceAbonnementsEvent, pas de compte défini");
 			//TODO Alert
 			return;
 		}
@@ -104,6 +113,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 					else {
 						$rsnAboRevueCourant = $rsnAboRevue;
 						$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
+						$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " .($startDateOfNextAbo));
 						var_dump('$startDateOfNextAbo', $startDateOfNextAbo);
 						break;
 					}
@@ -114,6 +124,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 			}
 		}
 		var_dump('$rsnAboRevueCourant', $rsnAboRevueCourant ? 'oui' : 'non');
+		$log->debug("handleAfterSaveInvoiceAbonnementsEvent rsnAboRevueCourant = " .($rsnAboRevueCourant ? 'oui' : 'non'));
 		foreach($categoryItems as $nLine => $lineItem){
 			$productCode = $lineItem['hdnProductcode'.$nLine];
 			$addMonths = 0;
@@ -184,10 +195,12 @@ class RSNInvoiceHandler extends VTEventHandler {
 				
 				$aboRevue->save();
 				$aboRevue->set('mode', '');
+				$log->debug("handleAfterSaveInvoiceAbonnementsEvent 'nouveau $aboRevue'");
 				var_dump('$aboRevue', 'nouveau $aboRevue');
 				break;
 			}
 		}
+		$log->debug("OUT handleAfterSaveInvoiceAbonnementsEvent");
 		return $aboRevue;
 	}
 	

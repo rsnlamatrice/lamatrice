@@ -49,6 +49,13 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	
 	
 	private function process_sub($request, $sub, $viewer){
+		
+		global $VTIGER_BULK_SAVE_MODE;
+		
+		$previousBulkSaveMode = $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = false;
+		
+		
 		switch($sub){
 		case 'ImportCogilog/Factures':
 			
@@ -88,7 +95,8 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$viewer->assign('HTML_DATA', "Inconnu : \"$sub\"");
 			break;
 		}
-
+		
+		$VTIGER_BULK_SAVE_MODE = $previousBulkSaveMode;
 	}
 	
 	private function process_ImportCogilog_Factures($request, $sub, $viewer){

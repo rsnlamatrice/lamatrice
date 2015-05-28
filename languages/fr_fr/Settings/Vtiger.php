@@ -199,6 +199,13 @@ $languageStrings = array(
 	/* ED141226 */
 	'LBL_FOLDER' => 'Dossier',
 	'LBL_FOLDERS' => 'Dossiers',
+        
+	'LBL_CONFIGRSN_EDITOR'          => 'Règles de gestion du Rézo',
+	'LBL_CONFIGRSN_FILE'            => 'config.RSN.inc.php',  
+	'LBL_CONFIGRSN_DESCRIPTION'     => 'Modifie les règles de gestion du Rézo',  
+        
+        'RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES' => 'Plusieurs taxes utilisables par produit et service',
+        'RSN_PRODUCT_ALLOW_DUPLICATE' => 'Les produits et services peuvent être dupliqués',
 );
 $jsLanguageStrings = array(
 	'JS_PLEASE_SELECT_ATLEAST_ONE_MEMBER_FOR_A_GROUP' => 'Veuillez choisir au moins un collaborateur pour le groupe', 

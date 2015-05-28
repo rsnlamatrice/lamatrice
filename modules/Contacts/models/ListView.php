@@ -75,6 +75,18 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 	}
 	
 	
+	/** ED15052
+	 * ajoute des champs accessibles par {$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+	 */
+	function getQuery() {
+		//Ajout systématique du champ vtiger_contactaddress.mailingstreet2
+		//Ajout systématique du champ vtiger_contactdetails.isgroup
+		$listQuery = parent::getQuery();
+		foreach(array('vtiger_contactaddress.mailingstreet2', 'vtiger_contactdetails.isgroup') as $fieldName)
+			if(!preg_match('/SELECT.+'.preg_quote($fieldName).'.+FROM\s/i', $listQuery))
+				$listQuery = preg_replace('/^\s*SELECT\s/i', 'SELECT '.$fieldName.',', $listQuery);
+		return $listQuery;
+	}
 
 	/** 
 	 * Function to get the list view entries
@@ -84,19 +96,35 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 	 * ED150424 : add module prefix char ('C') when searching on 'contact_no' field
 	 */
 	public function getListViewEntries($pagingModel) {
+		//TODO add mailingstreet2
+		
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		
-		
 		if(is_array($searchKey)){
+			$operators = $this->get('operator');
 			for($i = 0; $i < count($searchKey); $i++){
-				if($searchKey[$i] == 'contact_no' && $searchValue[$i] && is_numeric($searchValue[$i][0]))
-				$searchValue[$i] = $this->getModuleCustomNumberingPrefix() . $searchValue[$i];
-				$this->set('search_value', $searchValue);
-				break;
+				//add module prefix char ('C') when searching on 'contact_no' field
+				if($searchKey[$i] == 'contact_no' && $searchValue[$i] && is_numeric($searchValue[$i][0])){
+					$searchValue[$i] = $this->getModuleCustomNumberingPrefix() . $searchValue[$i];
+					$this->set('search_value', $searchValue);
+				}
+				//une recherche sur le nom s'effectue aussi sur le mailingstreet2 si c'est un groupe
+				// name LIKE % OR (mailingstreet2 LIKE % OR isgroup == 0 )
+				else if($searchKey[$i] == 'lastname' && $searchValue[$i]){
+					/* un sous-tableau
+					*/
+					$searchKey[$i] = array('lastname', null, array('mailingstreet2', null, 'isgroup'));
+					$searchValue[$i] = array( $searchValue[$i], null, array($searchValue[$i], null, '1'));
+					$operators[$i] = array( $operators[$i], 'OR', array($operators[$i], 'AND', 'e'));
+					$this->set('search_key', $searchKey);
+					$this->set('search_value', $searchValue);
+					$this->set('operator', $operators);
+				}
 			}
 		}
 		elseif($searchKey == 'contact_no' && $searchValue && is_numeric($searchValue[0])){
+			//add module prefix char ('C') when searching on 'contact_no' field
 			$this->set('search_value', $this->getModuleCustomNumberingPrefix() . $searchValue);
 		}
 		return parent::getListViewEntries($pagingModel);

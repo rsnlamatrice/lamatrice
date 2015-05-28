@@ -11,6 +11,9 @@
 class Settings_Vtiger_ConfigModule_Model extends Settings_Vtiger_Module_Model {
 
 	var $fileName = 'config.inc.php';
+	//ED150521
+	var $config_domain = '';
+	
 	var $completeData;
 	var $data;
 
@@ -40,7 +43,8 @@ class Settings_Vtiger_ConfigModule_Model extends Settings_Vtiger_Module_Model {
 	 */
 	public function getEditViewUrl() {
 		$menuItem = $this->getMenuItem();
-		return '?module=Vtiger&parent=Settings&view=ConfigEditorEdit&block='.$menuItem->get('blockid').'&fieldid='.$menuItem->get('fieldid');
+		return '?module=Vtiger&parent=Settings&view=ConfigEditorEdit&block='.$menuItem->get('blockid').'&fieldid='.$menuItem->get('fieldid')
+			. '&config_domain=' . $this->config_domain;
 	}
 
 	/**
@@ -49,7 +53,8 @@ class Settings_Vtiger_ConfigModule_Model extends Settings_Vtiger_Module_Model {
 	 */
 	public function getDetailViewUrl() {
 		$menuItem = $this->getMenuItem();
-		return '?module=Vtiger&parent=Settings&view=ConfigEditorDetail&block='.$menuItem->get('blockid').'&fieldid='.$menuItem->get('fieldid');
+		return '?module=Vtiger&parent=Settings&view=ConfigEditorDetail&block='.$menuItem->get('blockid').'&fieldid='.$menuItem->get('fieldid')
+			. '&config_domain=' . $this->config_domain;
 	}
 
 	/**
@@ -120,17 +125,17 @@ class Settings_Vtiger_ConfigModule_Model extends Settings_Vtiger_Module_Model {
 	 */
 	public function getEditableFields() {
 		return array(
-//			'CALENDAR_DISPLAY'				=> array('label' => 'LBL_MINI_CALENDAR_DISPLAY',			'fieldType' => 'checkbox'),
-//			'WORLD_CLOCK_DISPLAY'			=> array('label' => 'LBL_WORLD_CLOCK_DISPLAY',				'fieldType' => 'checkbox'),
-//			'CALCULATOR_DISPLAY'			=> array('label' => 'LBL_CALCULATOR_DISPLAY',				'fieldType' => 'checkbox'),
-//			'USE_RTE'						=> array('label' => 'LBL_USE_RTE',							'fieldType' => 'checkbox'),
-			'HELPDESK_SUPPORT_EMAIL_ID'		=> array('label' => 'LBL_HELPDESK_SUPPORT_EMAILID',			'fieldType' => 'input'),
-			'HELPDESK_SUPPORT_NAME'			=> array('label' => 'LBL_HELPDESK_SUPPORT_NAME',			'fieldType' => 'input'),
-			'upload_maxsize'				=> array('label' => 'LBL_MAX_UPLOAD_SIZE',					'fieldType' => 'input'),
-//			'history_max_viewed'			=> array('label' => 'LBL_MAX_HISTORY_VIEWED',				'fieldType' => 'input'),
-			'default_module'				=> array('label' => 'LBL_DEFAULT_MODULE',					'fieldType' => 'picklist'),
+//			'CALENDAR_DISPLAY'			=> array('label' => 'LBL_MINI_CALENDAR_DISPLAY',		'fieldType' => 'checkbox'),
+//			'WORLD_CLOCK_DISPLAY'			=> array('label' => 'LBL_WORLD_CLOCK_DISPLAY',			'fieldType' => 'checkbox'),
+//			'CALCULATOR_DISPLAY'			=> array('label' => 'LBL_CALCULATOR_DISPLAY',			'fieldType' => 'checkbox'),
+//			'USE_RTE'				=> array('label' => 'LBL_USE_RTE',				'fieldType' => 'checkbox'),
+			'HELPDESK_SUPPORT_EMAIL_ID'		=> array('label' => 'LBL_HELPDESK_SUPPORT_EMAILID',		'fieldType' => 'input'),
+			'HELPDESK_SUPPORT_NAME'			=> array('label' => 'LBL_HELPDESK_SUPPORT_NAME',		'fieldType' => 'input'),
+			'upload_maxsize'			=> array('label' => 'LBL_MAX_UPLOAD_SIZE',			'fieldType' => 'input'),
+//			'history_max_viewed'			=> array('label' => 'LBL_MAX_HISTORY_VIEWED',			'fieldType' => 'input'),
+			'default_module'			=> array('label' => 'LBL_DEFAULT_MODULE',			'fieldType' => 'picklist'),
 			'listview_max_textlength'		=> array('label' => 'LBL_MAX_TEXT_LENGTH_IN_LISTVIEW',		'fieldType' => 'input'),
-			'list_max_entries_per_page'		=> array('label' => 'LBL_MAX_ENTRIES_PER_PAGE_IN_LISTVIEW',	'fieldType' => 'input')
+			'list_max_entries_per_page'		=> array('label' => 'LBL_MAX_ENTRIES_PER_PAGE_IN_LISTVIEW',	'fieldType' => 'input'),
 		);
 	}
 
@@ -183,8 +188,15 @@ class Settings_Vtiger_ConfigModule_Model extends Settings_Vtiger_Module_Model {
 	 * Function to get the instance of Config module model
 	 * @return <Settings_Vtiger_ConfigModule_Model> $moduleModel
 	 */
-	public static function getInstance() {
-		$moduleModel = new self();
+	public static function getInstance($config_domain = false) {
+		switch($config_domain){
+		case 'RSN' :
+			$moduleModel = new Settings_Vtiger_ConfigModuleRSN_Model();
+			break;
+		default:
+			$moduleModel = new self();
+			break;
+		}
 		$moduleModel->getViewableData();
 		return $moduleModel;
 	}

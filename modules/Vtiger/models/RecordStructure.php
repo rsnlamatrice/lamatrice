@@ -120,4 +120,14 @@ class Vtiger_RecordStructure_Model extends Vtiger_Base_Model {
 		$instance->setModule($moduleModel);
 		return $instance;
 	}
+	
+	/** ED150526
+	 * getField among blocks structure
+	 */
+	public function getField($fieldName){
+		foreach($this->getStructure() as $block)
+			foreach($block as $field_name => $field)
+				if(strcmp($field_name, $fieldName) === 0)
+					return $field;
+	}
 }

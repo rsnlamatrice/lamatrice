@@ -1,6 +1,6 @@
 /backup
 /cache
-/config.*
+/config.*.php
 /licence
 /logs
 
