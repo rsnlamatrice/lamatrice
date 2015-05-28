@@ -384,6 +384,7 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 				? this.id.replace('_fieldName_isgroup_', '_fieldName_')
 				: this.id.replace('_fieldName_', '_fieldName_isgroup_');
 			jQuery('#'+other).val(this.value);
+			jQuery('.mailingstreet2-synchronized').html(this.value);
 		});
 		//affiche/masque la saisie sous "isgroup"
 		jQuery('input[name="isgroup"]').on('change',function(e){

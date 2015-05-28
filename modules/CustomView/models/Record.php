@@ -223,7 +223,9 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		$setDefault = $this->get('setdefault');
 		$setMetrics = $this->get('setmetrics');
 		$status = $this->get('status');
-
+		//ED150528 adds description
+		$description = $this->get('description');
+		
 		if($status == self::CV_STATUS_PENDING) {
 			if($currentUserModel->isAdminUser()) {
 				$status = self::CV_STATUS_PUBLIC;
@@ -233,17 +235,15 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		if(!$cvId) {
 			$cvId = $db->getUniqueID("vtiger_customview");
 			$this->set('cvid', $cvId);
-
-			$sql = 'INSERT INTO vtiger_customview(cvid, viewname, setdefault, setmetrics, entitytype, status, userid) VALUES (?,?,?,?,?,?,?)';
-			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $currentUserModel->getId());
+			$sql = 'INSERT INTO vtiger_customview(cvid, viewname, setdefault, setmetrics, entitytype, status, userid, description) VALUES (?,?,?,?,?,?,?,?)';
+			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $currentUserModel->getId(), $description);
 			$db->pquery($sql, $params);
 
 		} else {
 
-			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=? WHERE cvid=?';
-			$params = array($viewName, $setDefault, $setMetrics, $status, $cvId);
-			$db->pquery($sql, $params);
-
+			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=?, description=? WHERE cvid=?';
+			$params = array($viewName, $setDefault, $setMetrics, $status, $description, $cvId);
+			$result = $db->pquery($sql, $params);
 			$db->pquery('DELETE FROM vtiger_cvcolumnlist WHERE cvid = ?', array($cvId));
 			$db->pquery('DELETE FROM vtiger_cvstdfilter WHERE cvid = ?', array($cvId));
 			$db->pquery('DELETE FROM vtiger_cvadvfilter WHERE cvid = ?', array($cvId));
