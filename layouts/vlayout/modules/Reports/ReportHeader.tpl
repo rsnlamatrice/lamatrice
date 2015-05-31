@@ -14,7 +14,7 @@
 		<i id="tButtonImage" class="{if $LEFTPANELHIDE neq '1'}icon-chevron-left{else}icon-chevron-right{/if}"></i>
 	</div>
 	<div class="reportsDetailHeader row-fluid">
-        <input type="hidden" name="date_filters" data-value='{ZEND_JSON::encode($DATE_FILTERS)}' />
+        <input type="hidden" name="date_filters" data-value='{Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($DATE_FILTERS))}' />ICICICIC
 		<div class="reportHeader row-fluid span12">
 			<div class='span4' style="position:relative;left:10px">
 				{if $REPORT_MODEL->isEditable() eq true}

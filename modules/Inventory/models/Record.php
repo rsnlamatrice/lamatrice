@@ -13,6 +13,8 @@
  */
 class Inventory_Record_Model extends Vtiger_Record_Model {
 
+	private static $currencies_cache;
+
 	public static function getInstanceById($record, $moduleName){
 		$instance = parent::getInstanceById($record, $moduleName);
 		$instance->calculateBalance();
@@ -21,7 +23,11 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 
 	function getCurrencyInfo() {
 		$moduleName = $this->getModuleName();
-		$currencyInfo = getInventoryCurrencyInfo($moduleName, $this->getId());
+		//ED150529 : use static cache
+		$currencyId = $this->get('currency_id');
+		if($currencyId && !is_array(self::$currencies_cache))
+			self::$currencies_cache = array();
+		$currencyInfo = getInventoryCurrencyInfo($moduleName, $this->getId(), $currencyId, self::$currencies_cache);
 		return $currencyInfo;
 	}
 
