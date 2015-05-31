@@ -102,6 +102,14 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		return $this->rawData;
 	}
 
+	/** ED150526
+	 * Function to get raw data
+	 * @return <Array>
+	 */
+	public function getRawDataFieldValue($field) {
+		return $this->rawData[$field];
+	}
+
 	/**
 	 * Function to set raw data
 	 * @param <Array> $data
