@@ -35,6 +35,9 @@
 					{if $COUNTER eq 0 && ($RECORD->get($NAME_FIELD))}&nbsp;{assign var=COUNTER value=$COUNTER+1}{/if}
 				{/if}
 			{/foreach}
+			{if $RECORD->get('isgroup') eq '1'}
+			       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD->get('mailingstreet2'))}</span>
+		       {/if}
 			</h4>
 		</span>
 		<span class="row-fluid">

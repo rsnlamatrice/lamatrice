@@ -137,7 +137,12 @@
         </tr>
         <tr>
             <td width="83%">
-                <span class="pull-right">(-)&nbsp;<b><a href="javascript:void(0)"  id="finalDiscount">{vtranslate('LBL_DISCOUNT',$MODULE)}</a></b></span>
+                <span class="pull-right">(-)&nbsp;<b><a href="javascript:void(0)" id="finalDiscount"
+		    {if $FINAL.discount_final_source}
+			title="{$FINAL.discount_final_source}"
+			style="color: red;"
+		    {/if}
+		    >{vtranslate('LBL_DISCOUNT',$MODULE)}</a></b></span>
             </td>
             <td>
                 <span id="discountTotal_final" class="pull-right discountTotal_final">{if $FINAL.discountTotal_final}{$FINAL.discountTotal_final}{else}0.00{/if}</span>
@@ -191,7 +196,22 @@
                 <span class="pull-right">(+)&nbsp;<b>{vtranslate('LBL_SHIPPING_AND_HANDLING_CHARGES',$MODULE)} </b></span>
             </td>
             <td>
-                <span class="pull-right"><input id="shipping_handling_charge" name="shipping_handling_charge" data-validation-engine="validate[funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]" type="text" class="lineItemInputBox" value="{if $FINAL.shipping_handling_charge}{$FINAL.shipping_handling_charge}{else}0.00{/if}" /></span>
+                <span class="pull-right">
+		    <input id="shipping_handling_charge" name="shipping_handling_charge" data-validation-engine="validate[funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]" type="text" class="lineItemInputBox" value="{if $FINAL.shipping_handling_charge}{$FINAL.shipping_handling_charge}{else}0.00{/if}" />
+		    {* ED150529 TODO déplacer dans .js, convertir le input avec le plugin vu pour les pourcentages *}
+		    <a onclick="var $input=$(this).prevAll('input:first')
+				    , value = parseFloat($input.val().replace(',', '.'))
+				    , offset = 3;
+				    $input.val(value + offset).focusout();
+				    return false;"
+			style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer; float:right;">+</a>
+		    <a onclick="var $input=$(this).prevAll('input:first')
+				    , value = parseFloat($input.val().replace(',', '.'))
+				    , offset = 3;
+				    $input.val(Math.max(0, value - offset)).focusout();
+				    return false;"
+			style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer; float:right;">-</a>
+		</span>
             </td>
         </tr>
 		<tr>
@@ -242,7 +262,7 @@
             <td><span id="tax_final" class="pull-right tax_final">{if $FINAL.tax_totalamount}{$FINAL.tax_totalamount}{else}0.00{/if}</span></td>
         </tr>
         <!-- Group Tax - ends -->
-        <tr>
+        <tr {*ED150529 TODO 'hide' should be configurable *}class="hide">
             <td width="83%">
                 <span class="pull-right">(+)&nbsp;<b><a href="javascript:void(0)" id="shippingHandlingTax">{vtranslate('LBL_TAX_FOR_SHIPPING_AND_HANDLING',$MODULE)} </a></b></span>
 

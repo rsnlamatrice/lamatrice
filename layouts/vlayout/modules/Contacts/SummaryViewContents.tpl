@@ -101,6 +101,10 @@
 								
 							{else}
 								{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+								{if $FIELD_NAME eq 'lastname' && $RECORD->get('isgroup') eq '1' && $RECORD->get('mailingstreet2')}
+									&nbsp;-&nbsp;{$RECORD->get('mailingstreet2')}
+								{/if}
+								
 							{/if}
 						</span>
 						{if $FIELD_MODEL->isEditable() eq 'true' && ($FIELD_MODEL->getFieldDataType()!=Vtiger_Field_Model::REFERENCE_TYPE) && $IS_AJAX_ENABLED && $FIELD_MODEL->isAjaxEditable() eq 'true' && $FIELD_MODEL->get('uitype') neq 69}

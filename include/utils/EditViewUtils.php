@@ -388,9 +388,9 @@ function getAssociatedProducts($module,$focus,$seid='')
 	//To avoid NaN javascript error, here we assign 0 initially to' %of price' and 'Direct Price reduction'(For Final Discount)
 	$discount_amount_final = '0.00';
 	$discount_amount_final = number_format($discount_amount_final, $no_of_decimal_places,'.','');
-    $product_Detail[1]['final_details']['discount_percentage_final'] = 0;
+	$product_Detail[1]['final_details']['discount_percentage_final'] = 0;
 	$product_Detail[1]['final_details']['discount_amount_final'] = $discount_amount_final;
-
+	
 	if($focus->column_fields['hdnDiscountPercent'] != '0')
 	{
 		$finalDiscount = ($subTotal*$discountPercent/100);

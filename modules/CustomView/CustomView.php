@@ -183,6 +183,7 @@ class CustomView extends CRMEntity {
 			$customviewlist["setmetrics"] = $cvrow["setmetrics"];
 			$customviewlist["userid"] = $cvrow["userid"];
 			$customviewlist["status"] = $cvrow["status"];
+			$customviewlist["description"] = $cvrow["description"];
 		}
 		return $customviewlist;
 	}

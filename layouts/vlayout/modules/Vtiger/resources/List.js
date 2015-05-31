@@ -1955,7 +1955,7 @@ jQuery.Class("Vtiger_List_Js",{
 			, $actions = $th.children('.actionImages');
 			if ($actions.length === 0) {
 				$('<span class="actionImages"></span>')
-					.append($('<a href class="icon-refresh"></a>')
+					.append($('<a href class="icon-refresh" title="'+app.vtranslate('JS_REFRESH')+'"></a>')
 						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
 						.click(function(){
 							//TODO do not use url parameters that contains search_key and search_value
@@ -1963,7 +1963,7 @@ jQuery.Class("Vtiger_List_Js",{
 							return false;
 						})
 					)
-					.append($('<a href class="icon-trash"></a>')
+					.append($('<a href class="icon-remove-sign" title="'+app.vtranslate('JS_RESET_FILTERS')+'"></a>')
 						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
 						.click(function(){
 							$(this).parents('th:first').nextAll('th').find(':input:visible').val('');

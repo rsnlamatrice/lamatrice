@@ -113,7 +113,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 					else {
 						$rsnAboRevueCourant = $rsnAboRevue;
 						$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
-						$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " .($startDateOfNextAbo));
+						$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
 						var_dump('$startDateOfNextAbo', $startDateOfNextAbo);
 						break;
 					}
@@ -195,7 +195,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 				
 				$aboRevue->save();
 				$aboRevue->set('mode', '');
-				$log->debug("handleAfterSaveInvoiceAbonnementsEvent 'nouveau $aboRevue'");
+				$log->debug("handleAfterSaveInvoiceAbonnementsEvent 'nouveau $aboRevue->getLabel()'");
 				var_dump('$aboRevue', 'nouveau $aboRevue');
 				break;
 			}

@@ -30,7 +30,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		if ($taxDetails) {
 			return $taxDetails;
 		}
-
+		
 		$record = $this->getId();
 		if ($record) {
 			$relatedProducts = getAssociatedProducts($this->getModuleName(), $this->getEntity());
@@ -149,6 +149,15 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		$userModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$moduleName = $parentRecordModel->getModuleName();
 
+		//
+		if($moduleName === 'Contacts'){
+			/* ED141016 génération du compte du contact si manquant */
+			$accountRecordModel = $parentRecordModel->getAccountRecordModel();
+			$moduleName = $accountRecordModel->getModuleName();
+			$parentRecordModel = $accountRecordModel;
+			//echo('<pre>');var_dump($parentRecordModel);echo('</pre>');
+		}
+		
 		$data = array();
 		$fieldMappingList = $parentRecordModel->getInventoryMappingFields();
 
@@ -165,6 +174,16 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 				$data[$inventoryField] = $fieldMapping['defaultValue'];
 			}
 		}
+		
+		if($moduleName === 'Accounts'){
+			/* ED150529 initialisation de la remise */
+			$discountpc = $parentRecordModel->get('discountpc');
+			//$inventoryField = 'discount_percent'; //'hdnDiscountPercent';
+			$inventoryFieldMapping = 'discountpc';
+			if(is_numeric($discountpc))
+				$data[$inventoryFieldMapping] = $discountpc;
+		}
+		
 		return $this->setData($data);
 	}
 
@@ -206,23 +225,23 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
      *
      */
     public function getPDFFileName() {
-		$moduleName = $this->getModuleName();
-		if ($moduleName == 'Quotes') {
-			vimport("~~/modules/$moduleName/QuotePDFController.php");
-			$controllerClassName = "Vtiger_QuotePDFController";
-		} else {
-			vimport("~~/modules/$moduleName/$moduleName" . "PDFController.php");
-			$controllerClassName = "Vtiger_" . $moduleName . "PDFController";
-		}
+	$moduleName = $this->getModuleName();
+	if ($moduleName == 'Quotes') {
+		vimport("~~/modules/$moduleName/QuotePDFController.php");
+		$controllerClassName = "Vtiger_QuotePDFController";
+	} else {
+		vimport("~~/modules/$moduleName/$moduleName" . "PDFController.php");
+		$controllerClassName = "Vtiger_" . $moduleName . "PDFController";
+	}
 
-		$recordId = $this->getId();
-		$controller = new $controllerClassName($moduleName);
-        $controller->loadRecord($recordId);
+	$recordId = $this->getId();
+	$controller = new $controllerClassName($moduleName);
+	$controller->loadRecord($recordId);
 
-        $sequenceNo = getModuleSequenceNumber($moduleName,$recordId);
-		$translatedName = vtranslate($moduleName, $moduleName);
-        $filePath = "storage/$translatedName"."_".$sequenceNo.".pdf";
-        //added file name to make it work in IE, also forces the download giving the user the option to save
+	$sequenceNo = getModuleSequenceNumber($moduleName,$recordId);
+	$translatedName = vtranslate($moduleName, $moduleName);
+	$filePath = "storage/$translatedName"."_".$sequenceNo.".pdf";
+	 //added file name to make it work in IE, also forces the download giving the user the option to save
         $controller->Output($filePath,'F');
         return $filePath;
     }
@@ -238,7 +257,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	/* ED150129
-	 * le champ balance n'est gŽrŽ nulle part
+	 * le champ balance n'est géré nulle part
 	*/
 	public function calculateBalance(){
 		$moduleName = $this->getModuleName();

@@ -476,6 +476,13 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 					'3' => array( 'label' => 'Définitive', 'icon' => 'ui-icon ui-icon-close darkred' ),
 				);
 			default:
+				if(strpos($fieldname,'addressformat') > 0)
+					return array(
+						'NC1' => array( 'title' => 'Normal', 'icon' => 'icon-rsn-small-formataddress-NC1' ),
+						'CN1' => array( 'title' => 'Groupe avant', 'icon' => 'icon-rsn-small-formataddress-CN1' ),
+						'C1' => array( 'title' => 'Sans le nom', 'icon' => 'icon-rsn-small-formataddress-C1' ),
+						'N1' => array( 'title' => 'Sans le groupe', 'icon' => 'icon-rsn-small-formataddress-N1' ),
+					);
 				return array();
 		}
 	}

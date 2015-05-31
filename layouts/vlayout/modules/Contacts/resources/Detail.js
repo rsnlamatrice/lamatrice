@@ -262,6 +262,14 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			);
 		});
 
+		/* ED50528
+		 * Contact -> mailingstreet2 synchronized
+		*/
+		detailContentsHolder.on('change', 'input[name="mailingstreet2"]', function(e){
+			$('.' + this.getAttribute('name') + '-synchronized').html(this.value);
+			
+		});
+
 		// ED141008
 		var relatedModuleName = this.getRelatedModuleName(detailContentsHolder);
 		switch (relatedModuleName ){

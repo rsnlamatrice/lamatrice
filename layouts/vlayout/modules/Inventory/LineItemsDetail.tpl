@@ -173,7 +173,6 @@
 		    </span>
 		</td>
 	    </tr>
-	    <tr>
 	    {if $FINAL_DETAILS.taxtype eq 'group'}
 		<tr>
 		    <td width="83%">
@@ -190,6 +189,7 @@
 		    </td>
 		</tr>
 	    {/if}
+	    <tr {*ED150529 TODO 'hide' should be configurable *}style="display: none;">
 		<td width="83%">
 		    <span class="pull-right">
 			{assign var=SHIPPING_HANDLING_TAX_INFO value="{vtranslate('LBL_SHIPPING_AND_HANDLING_CHARGES',$MODULE_NAME)} = {$FINAL_DETAILS["shipping_handling_charge"]}\r\n{foreach item=tax_details from=$FINAL_DETAILS["sh_taxes"]}{$tax_details["taxlabel"]} : {$tax_details["percentage"]} % = {$tax_details["amount"]}\r\n{/foreach}\r\n{vtranslate('LBL_TOTAL_TAX_AMOUNT',$MODULE_NAME)} = {$FINAL_DETAILS['shtax_totalamount']}"}
