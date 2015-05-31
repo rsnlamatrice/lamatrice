@@ -399,7 +399,8 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			$fieldPrefixe.'city' => 'mailingcity',
 			$fieldPrefixe.'state' => 'mailingstate',
 			$fieldPrefixe.'zip' => 'mailingzip',
-			$fieldPrefixe.'country' => 'mailingcountry'
+			$fieldPrefixe.'country' => 'mailingcountry',
+			$fieldPrefixe.'addressformat' => 'mailingaddressformat',
 		);
 		//echo '<pre>';
 		foreach($mapping as $sourceField => $destField){

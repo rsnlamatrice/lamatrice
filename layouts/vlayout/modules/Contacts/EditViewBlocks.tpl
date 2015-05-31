@@ -42,7 +42,7 @@
 				{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} - {$RECORD_STRUCTURE_MODEL->getRecordName()}
 			
 				{if $RECORD_MODEL->get('isgroup') eq '1' && $RECORD_MODEL->get('mailingstreet2')}
-				       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD_MODEL->get('mailingstreet2'))}
+				       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD_MODEL->get('mailingstreet2'))}</span>
 			       {/if}
 			</h3>
 		{else}
@@ -67,6 +67,8 @@
 				|| $FIELD_NAME eq 'mailingstreet2'
 				|| $FIELD_NAME eq 'otherstreet3'
 				|| $FIELD_NAME eq 'mailingstreet3'
+				|| $FIELD_NAME eq 'otheraddressformat'
+				|| $FIELD_NAME eq 'mailingaddressformat'
 				|| $FIELD_NAME eq 'mailingzip'
 				|| $FIELD_NAME eq 'otherzip'
 				|| $FIELD_NAME eq 'mailingpobox'
@@ -132,7 +134,18 @@
 							<span class="subFieldLabel">Pays</span>
 						{elseif $FIELD_NAME eq 'otherstreet'
 						|| $FIELD_NAME eq 'mailingstreet'}
-							<span class="subFieldLabel">&nbsp;</span>
+							<span class="subFieldLabel ui-buttonset-small">
+								{* addressformat *}
+								{assign var=TITLE value='Format de l\'adresse'}
+								{assign var=FIELD_NAMETMP value=$FIELD_NAME}
+								{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
+								{assign var=FIELD_NAME value=str_replace('street','addressformat', $FIELD_NAME)}
+								{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+								{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+								{assign var=FIELD_NAME value=$FIELD_NAMETMP}
+								{assign var=FIELD_MODEL value=$FIELD_MODELTMP}	
+							</span>
 							<span class="subFieldLabel">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</span>
 							<span class="subFieldLabel" style="color: #88bbbb;">&gt;</span>
 						{else}
@@ -158,7 +171,7 @@
 									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}									
-								
+									
 									<br>
 									{* street3 *}
 									{assign var=TITLE value='Complément d\'adresse, bât., rés., ...'}
@@ -249,18 +262,31 @@
 							
 							{*isgroup : add duplicate mailingstreet2 *}
 							{if $FIELD_NAME eq 'isgroup'}
-								<div class="isgroup_mailingstreet2-holder {if !$RECORD_MODEL->get('isgroup')}hide{/if}"
+								<div class="mailingstreet2-synchronize-holder {if !$RECORD_MODEL->get('isgroup')}hide{/if}"
 								 title="Nom apparaissant en 2ème ligne d'adresse">
-								{* isgroup_mailingstreet2 *}
-								{assign var=TITLE value='Structure ou chez'}
-								{assign var=FIELD_NAMETMP value=$FIELD_NAME}
-								{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
-								{assign var=FIELD_NAME value='mailingstreet2'}
-								{assign var=FIELD_MODEL value=$RECORD_STRUCTURE_MODEL->getField($FIELD_NAME)}
-								{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-								{include file=vtemplate_path($UITYPEMODEL,$MODULE) FORCE_FIELD_NAME='isgroup_mailingstreet2' BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
-								{assign var=FIELD_NAME value=$FIELD_NAMETMP}
-								{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
+									{* isgroup_mailingstreet2 *}
+									{assign var=TITLE value='Structure ou chez'}
+									{assign var=FIELD_NAMETMP value=$FIELD_NAME}
+									{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
+									{assign var=FIELD_NAME value='mailingstreet2'}
+									{assign var=FIELD_MODEL value=$RECORD_STRUCTURE_MODEL->getField($FIELD_NAME)}
+									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+									{include file=vtemplate_path($UITYPEMODEL,$MODULE) FORCE_FIELD_NAME='mailingstreet2_synchronize' BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-medium'}
+									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
+									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
+					       
+									<span class="subFieldLabel ui-buttonset-small marginRight10px" style="float: right;">
+										{* addressformat *}
+										{assign var=TITLE value='Format de l\'adresse'}
+										{assign var=FIELD_NAMETMP value=$FIELD_NAME}
+										{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
+										{assign var=FIELD_NAME value='mailingaddressformat'}
+										{assign var=FIELD_MODEL value=$RECORD_STRUCTURE_MODEL->getField($FIELD_NAME)}
+										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+										{include file=vtemplate_path($UITYPEMODEL,$MODULE) FORCE_FIELD_NAME='mailingaddressformat_synchronize' BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+										{assign var=FIELD_NAME value=$FIELD_NAMETMP}
+										{assign var=FIELD_MODEL value=$FIELD_MODELTMP}	
+									</span>
 								</div>
 							{/if}
 						</div>

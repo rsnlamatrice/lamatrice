@@ -81,15 +81,6 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 						|| $sourceModule === 'Potentials'
 						|| ($sourceModule === 'Vendors' && $moduleName === 'PurchaseOrder'))) {
 				$parentRecordModel = Vtiger_Record_Model::getInstanceById($sourceRecord, $sourceModule);
-				//
-				if($sourceModule === 'Contacts'){
-					/* ED141016 gŽnŽration du compte du contact si manquant */
-					$accountRecordModel = $parentRecordModel->getAccountRecordModel();
-					$sourceModule = $accountRecordModel->getModuleName();
-					$sourceRecord = $accountRecordModel->getId();
-					//echo('<pre>');var_dump($sourceRecord);echo('</pre>');
-					//$parentRecordModel = $accountRecordModel; pas nŽcessaire et en plus, a ne fonctionne pas
-				}
 				
 				$recordModel->setParentRecordData($parentRecordModel);
 			}
@@ -110,7 +101,26 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 				$recordModel->set($fieldName, $fieldModel->getDBInsertValue($fieldValue));				
 			}
 		}
+		//ED150529
+		if($recordModel->get('discountpc')){
+			$fieldName = 'discount_percent';
+			$fieldModel = $fieldList[$fieldName];
+			
+			$recordModel->set($fieldName, $fieldModel->getDBInsertValue($recordModel->get('discountpc')));
+			
+			if(!is_array($relatedProducts))
+				$relatedProducts = array(array('final_details' => array()));
 				
+			if(!is_array($relatedProducts[1]['final_details']))
+				$relatedProducts[1]['final_details'] = array();
+			
+			$relatedProducts[1]['final_details'] = array_merge($relatedProducts[1]['final_details'], array(
+				'discount_final_source' => 'Account',
+				'discount_type_final' => 'percentage',
+				'discount_percentage_final' => $recordModel->get($fieldName),
+			));
+		}
+		
 		$recordStructureInstance = Vtiger_RecordStructure_Model::getInstanceFromRecordModel($recordModel,
 				Vtiger_RecordStructure_Model::RECORD_STRUCTURE_MODE_EDIT);
 		

@@ -42,10 +42,11 @@
 		    {assign var=PICKLIST_CLASS value=''}
 		{/if}
 		{assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
+		{assign var=PICKLIST_TITLE value=$FIELD_LABEL|cat:' '|cat:$PICKLIST_ITEM['title']}
 	    {else}
 		{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
 	    {/if}
-	    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$FIELD_LABEL}">
+	    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
 		{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
 		{$PICKLIST_LABEL}</label>
 	    {break}

@@ -124,7 +124,7 @@ class VtigerInventoryOperation extends VtigerModuleOperation {
 		if (!empty($element['hdnSubTotal'])) {
 			$_REQUEST['subtotal'] = $element['hdnSubTotal'];
 		}
-
+		
 		if (($element['hdnDiscountAmount'])) {
 			$_REQUEST['discount_type_final'] = 'amount';
 			$_REQUEST['discount_amount_final'] = $element['hdnDiscountAmount'];
