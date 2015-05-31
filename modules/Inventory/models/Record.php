@@ -156,7 +156,10 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			$parentField = $fieldMapping['parentField'];
 			$inventoryField = $fieldMapping['inventoryField'];
 			$fieldModel = Vtiger_Field_Model::getInstance($parentField,  Vtiger_Module_Model::getInstance($moduleName));
-			if ($fieldModel->getPermissions()) {
+			if (!$fieldModel) {
+				echo sprintf('! Champ %s manquant dans le module %s !', $parentField, $moduleName);
+				//$data[$inventoryField] = sprintf('! Champ %s manquant dans le module %s !', $parentField, $moduleName);
+			} elseif ($fieldModel->getPermissions()) {
 				$data[$inventoryField] = $parentRecordModel->get($parentField);
 			} else {
 				$data[$inventoryField] = $fieldMapping['defaultValue'];
