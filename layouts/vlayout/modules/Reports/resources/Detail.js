@@ -29,6 +29,9 @@ Vtiger_Detail_Js("Reports_Detail_Js",{},{
 	
 	calculateValues : function(){
 		//handled advanced filters saved values.
+		//ED150529
+		if (!this.advanceFilterInstance)
+			return '';
 		var advfilterlist = this.advanceFilterInstance.getValues();
 		return JSON.stringify(advfilterlist);
 	},
