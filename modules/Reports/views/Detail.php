@@ -26,7 +26,7 @@ class Reports_Detail_View extends Vtiger_Index_View {
 		}
 	}
 
-	const REPORT_LIMIT = 1000;
+	const REPORT_LIMIT = 99;//ED150529 1000
 
 	function preProcess(Vtiger_Request $request) {
 		parent::preProcess($request);
