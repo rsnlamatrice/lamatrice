@@ -234,7 +234,7 @@ class ListViewController {
 
 		$useAsterisk = get_use_asterisk($this->user->id);
 		//var_dump('$rowCount'); var_dump($rowCount);
-								
+		
 		$data = array();
 		for ($i = 0; $i < $rowCount; ++$i) {
 			//Getting the recordId
@@ -390,7 +390,12 @@ class ListViewController {
 								$cursym_convrate = getCurrencySymbolandCRate($currencyId);
 								$currencySymbol = $cursym_convrate['symbol'];
 							} else {
-								$currencyInfo = getInventoryCurrencyInfo($module, $recordId);
+								
+								$currencyId = $this->db->query_result($result, $i, 'currency_id');
+								if(!isset($currencies_cache))
+									$currencies_cache = array();
+		
+								$currencyInfo = getInventoryCurrencyInfo($module, $recordId, $currencyId, $currencies_cache);
 								$currencySymbol = $currencyInfo['currency_symbol'];
 								/*ED140922*/
 								if($currencyInfo)

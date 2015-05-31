@@ -97,6 +97,12 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 			$listQuery = preg_replace('/(RIGHT|FULL|INNER|(?<!LEFT))\sJOIN vtiger_inventoryproductrel/i', ' LEFT JOIN vtiger_inventoryproductrel ', $listQuery);
 			$listQuery = str_replace(' WHERE ', ' WHERE (vtiger_inventoryproductrel.sequence_no IS NULL OR vtiger_inventoryproductrel.sequence_no = 1) AND ', $listQuery);
 		}
+		if(strpos($listQuery, 'vtiger_invoice.total') !== FALSE
+		&& strpos($listQuery, 'vtiger_invoice.currency_id') === FALSE){
+			$listQuery = preg_replace('/^\s*SELECT\s/i', 'SELECT vtiger_invoice.currency_id,', $listQuery);
+			
+		}
+		$db = PearDatabase::getInstance();
 		return $listQuery;
 	}
 

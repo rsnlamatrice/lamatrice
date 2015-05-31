@@ -772,35 +772,49 @@ function getInventoryTaxType($module, $id)
 /**	function used to get the price type for the entity (PO, SO, Quotes or Invoice)
  *	@param string $module - module name
  *	@param int $id - id of the PO or SO or Quotes or Invoice
+ *	//ED150529
+ *  @param int $currency_id known, for cache
+ *  @param array $currencies_cache, for cache.
  *	@return string $pricetype - pricetype for the given entity which will be unitprice or secondprice
  */
-function getInventoryCurrencyInfo($module, $id)
+function getInventoryCurrencyInfo($module, $id, $currencyId = FALSE, &$currencies_cache = FALSE)
 {
 	global $log, $adb;
-
-	$log->debug("Entering into function getInventoryCurrencyInfo($module, $id).");
+	
+	$log->debug("Entering into function getInventoryCurrencyInfo($module, $id, $currencyId).");
 
 	$inv_table_array = Array('PurchaseOrder'=>'vtiger_purchaseorder','SalesOrder'=>'vtiger_salesorder','Quotes'=>'vtiger_quotes','Invoice'=>'vtiger_invoice');
 	$inv_id_array = Array('PurchaseOrder'=>'purchaseorderid','SalesOrder'=>'salesorderid','Quotes'=>'quoteid','Invoice'=>'invoiceid');
 
 	$inventory_table = $inv_table_array[$module];
 	/* ED 140922 */
-	if(!$inventory_table)
-		return false;
-
-	$inventory_id = $inv_id_array[$module];
-	$res = $adb->pquery("select currency_id, $inventory_table.conversion_rate as conv_rate, vtiger_currency_info.* from $inventory_table
-						inner join vtiger_currency_info on $inventory_table.currency_id = vtiger_currency_info.id
-						where $inventory_id=?", array($id));
-
-	$currency_info = array();
-	$currency_info['currency_id'] = $adb->query_result($res,0,'currency_id');
-	$currency_info['conversion_rate'] = $adb->query_result($res,0,'conv_rate');
-	$currency_info['currency_name'] = $adb->query_result($res,0,'currency_name');
-	$currency_info['currency_code'] = $adb->query_result($res,0,'currency_code');
-	$currency_info['currency_symbol'] = $adb->query_result($res,0,'currency_symbol');
-
-	$log->debug("Exit from function getInventoryCurrencyInfo($module, $id).");
+	if($inventory_table){
+		/* ED150529 */
+		if($currencyId){
+			if(!is_array($currencies_cache))
+				$currencies_cache = array();
+			elseif(isset($currencies_cache[$currencyId])){
+				$log->debug("Exit from function getInventoryCurrencyInfo($module, $id, $currencyId, from_cache).");
+				return $currencies_cache[$currencyId];
+			}
+		}
+	
+		$inventory_id = $inv_id_array[$module];
+		$res = $adb->pquery("select currency_id, $inventory_table.conversion_rate as conv_rate, vtiger_currency_info.* from $inventory_table
+							inner join vtiger_currency_info on $inventory_table.currency_id = vtiger_currency_info.id
+							where $inventory_id=?", array($id));
+	
+		$currency_info = array();
+		$currency_info['currency_id'] = $adb->query_result($res,0,'currency_id');
+		$currency_info['conversion_rate'] = $adb->query_result($res,0,'conv_rate');
+		$currency_info['currency_name'] = $adb->query_result($res,0,'currency_name');
+		$currency_info['currency_code'] = $adb->query_result($res,0,'currency_code');
+		$currency_info['currency_symbol'] = $adb->query_result($res,0,'currency_symbol');
+		if(is_array($currencies_cache))
+			$currencies_cache[$currency_info['currency_id']] = $currency_info;
+	}
+	
+	$log->debug("Exit from function getInventoryCurrencyInfo($module, $id, $currencyId).");
 
 	return $currency_info;
 }
