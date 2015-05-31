@@ -27,11 +27,19 @@
 		<div class="filterBlocksAlignment">
 			<h4 class="filterHeaders">{vtranslate('LBL_BASIC_DETAILS',$MODULE)} :</h4>
 			<div class="row-fluid">
-				<span class="span">{vtranslate('LBL_VIEW_NAME',$MODULE)}*</span>
+				<span class="span span2">{vtranslate('LBL_VIEW_NAME',$MODULE)}*</span>
 				<input  class="span" type="text" id="viewname" data-validation-engine='validate[required]' name="viewname" value="{$CUSTOMVIEW_MODEL->get('viewname')}">
 				<span class="span"><input id="setdefault" type="checkbox" name="setdefault" value="1" {if $CUSTOMVIEW_MODEL->isDefault()} checked="checked"{/if}><span class="alignMiddle"> {vtranslate('LBL_SET_AS_DEFAULT',$MODULE)}</span></span>
 				<span class="span"><input id="setmetrics" name="setmetrics" type="checkbox" value="1" {if $CUSTOMVIEW_MODEL->get('setmetrics') eq '1'} checked="checked"{/if}><span class="alignMiddle"> {vtranslate('LBL_LIST_IN_METRICS',$MODULE)}</span></span>
 				<span class="span"><input id="status" name="status" type="checkbox" {if $CUSTOMVIEW_MODEL->isSetPublic()} value="{$CUSTOMVIEW_MODEL->get('status')}" checked="checked" {else} value="{$CV_PENDING_VALUE}" {/if}><span class="alignMiddle"> {vtranslate('LBL_SET_AS_PUBLIC',$MODULE)}</span></span>
+				
+			</div>
+			<br>
+			<div class="row-fluid">
+				<span class="span span2">{vtranslate('LBL_DESCRIPTION_INFORMATION')}</span>
+				<span class="span span5">
+					<textarea class="row-fluid" name="description">{$CUSTOMVIEW_MODEL->get('description')}</textarea>
+				
 			</div>
 			<br>
 			<h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_COLUMNS',$MODULE)} ({vtranslate('LBL_MAX_NUMBER_FILTER_COLUMNS')}):</h4>
