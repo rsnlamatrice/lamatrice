@@ -120,6 +120,13 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
   width: 6em;
 }
 
+/* alignement à droite des colonnes numériques */
+td.listViewEntryValue[data-field-type="currency"]
+, td.listViewEntryValue[data-field-type="double"]{
+  text-align: right;
+  padding-right: 16px;
+}
+
 /* pickListValuesTable Picklist settings */
 .pickListValue .picklist-color {
   display: none;

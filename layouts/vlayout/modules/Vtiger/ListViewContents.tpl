@@ -26,7 +26,8 @@
 {if $MODULE neq 'RsnDons'}
 {assign var = ALPHABETS_LABEL value = vtranslate('LBL_ALPHABETS', 'Vtiger')}
 {assign var = ALPHABETS value = ','|explode:$ALPHABETS_LABEL}
-
+{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
+							
 <div class="alphabetSorting noprint">
 	<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
 		<tbody>
@@ -117,7 +118,6 @@
 						{if $LISTVIEW_HEADER->isNameField() eq true or $UITYPE eq '4'}
 							<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
 						{else if $UITYPE eq '72'}
-							{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
 							{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
 								{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
 							{else}
