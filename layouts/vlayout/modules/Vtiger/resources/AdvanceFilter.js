@@ -72,9 +72,9 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	 */
 	initializeOperationMappingDetails : function() {
 		var filterContainer = this.getFilterContainer();
-		this.fieldTypeConditionMapping = jQuery('input[name="advanceFilterOpsByFieldType"]',filterContainer).data('value');
-		this.conditonOperatorLabelMapping = jQuery('input[name="advanceFilterOptions"]',filterContainer).data('value');
-		this.dateConditionInfo = jQuery('[name="date_filters"]').data('value');;
+		this.fieldTypeConditionMapping = jQuery('input[name="advanceFilterOpsByFieldType"]:first',filterContainer).data('value');
+		this.conditonOperatorLabelMapping = jQuery('input[name="advanceFilterOptions"]:first',filterContainer).data('value');
+		this.dateConditionInfo = jQuery('[name="date_filters"]:first').data('value');;
 		return this;
 	},
 
