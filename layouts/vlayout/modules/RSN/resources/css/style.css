@@ -44,6 +44,11 @@ label {
 .icon-rsn-small-smiley-100 {    background-position: -113px -1px; }
 .icon-rsn-small-smiley-query {    background-position: -129px -1px; }
 
+.icon-rsn-small-formataddress-NC1 {    background-position: -145px -1px; }
+.icon-rsn-small-formataddress-CN1 {    background-position: -161px -1px; }
+.icon-rsn-small-formataddress-C1 {    background-position: -177px -1px; }
+.icon-rsn-small-formataddress-N1 {    background-position: -193px -1px; }
+
 .detailViewTitle .rsn-summaryImg {
     display: inline-block;
     width: 48px;
@@ -86,6 +91,9 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 .ui-buttonset .ui-state-active [class^="icon-"] {
   opacity: 1;
 }
+.ui-buttonset-small .ui-buttonset .ui-button {
+  padding: 4px;
+}
 
 /* jQuery UI icons
  * add color class
@@ -110,6 +118,13 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 
 #RSNMediaRelations_editView_fieldName_daterelation {
   width: 6em;
+}
+
+/* alignement à droite des colonnes numériques */
+td.listViewEntryValue[data-field-type="currency"]
+, td.listViewEntryValue[data-field-type="double"]{
+  text-align: right;
+  padding-right: 16px;
 }
 
 /* pickListValuesTable Picklist settings */

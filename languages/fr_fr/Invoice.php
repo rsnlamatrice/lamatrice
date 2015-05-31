@@ -63,6 +63,9 @@ $languageStrings = array(
 	'LBL_THIS' => 'Ce',
 	'LBL_IS_DELETED_FROM_THE_SYSTEM_PLEASE_REMOVE_OR_REPLACE_THIS_ITEM' => 'est supprimé du système. Veuillez supprimer ou remplacer cet article.',
 	'LBL_THIS_LINE_ITEM_IS_DELETED_FROM_THE_SYSTEM_PLEASE_REMOVE_THIS_LINE_ITEM' => 'Cette ligne est supprimée du système. Veuillez supprimer ou remplacer cet article.',
+	
+	/* ED150529 override */
+	'LBL_ITEMS_TOTAL'              => 'Total'                 , 
 );
 
 $jsLanguageStrings = array(

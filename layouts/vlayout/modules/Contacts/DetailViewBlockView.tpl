@@ -95,27 +95,30 @@ affichage du dŽtail d'un contact
 				 <td class="fieldValue {$WIDTHTYPE}" id="{$MODULE}_detailView_fieldValue_{$FIELD_MODEL->getName()}" {if ($FIELD_MODEL->get('uitype') eq "19") && ($FIELD_NAME neq "rsnnpaicomment") or $FIELD_MODEL->get('uitype') eq '20'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
 					 <span class="value" data-field-type="{$FIELD_MODEL->getFieldDataType()}">
 						{if $BLOCK_DO_NOT && $FIELD_MODEL->get('uitype') == '56' }{* ED141005 *}
-			{include file=vtemplate_path('uitypes/Boolean.tpl',$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+						{include file=vtemplate_path('uitypes/Boolean.tpl',$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 						{elseif $FIELD_MODEL->get('uitype') eq '15'}{* ED141005 *}
 							{$RECORD->getDisplayValue($FIELD_NAME)}
 						{* ED150105 "referent du compte" masque si pas de compte *}
 						{elseif ($MODULE_NAME eq 'Contacts') && ($FIELD_NAME == 'reference') && (!$RECORD->get('account_id'))}
 							<i>pas de compte</i>
 						{else}
-                        {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+							{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+							
+							{if $FIELD_NAME eq 'lastname' && $RECORD->get('isgroup') eq '1'}
+							       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD->get('mailingstreet2'))}</span>
+						       {/if}
 						{/if}
 					 </span>
 					 {if $IS_AJAX_ENABLED && $FIELD_MODEL->isEditable() eq 'true' && ($FIELD_MODEL->getFieldDataType()!=Vtiger_Field_Model::REFERENCE_TYPE) && $FIELD_MODEL->isAjaxEditable() eq 'true'}
 						 <span class="hide edit">
 						{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD}
-                             {if $FIELD_MODEL->getFieldDataType() eq 'multipicklist'}
-                                <input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}[]' data-prev-value='{$FIELD_MODEL->getDisplayValue($FIELD_MODEL->get('fieldvalue'))}' />
-                             {else}
-                                 <input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}' data-prev-value='{Vtiger_Util_Helper::toSafeHTML($FIELD_MODEL->getDisplayValue($FIELD_MODEL->get('fieldvalue')))}' />
-                             {/if}
+						{if $FIELD_MODEL->getFieldDataType() eq 'multipicklist'}
+						   <input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}[]' data-prev-value='{$FIELD_MODEL->getDisplayValue($FIELD_MODEL->get('fieldvalue'))}' />
+						{else}
+						    <input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}' data-prev-value='{Vtiger_Util_Helper::toSafeHTML($FIELD_MODEL->getDisplayValue($FIELD_MODEL->get('fieldvalue')))}' />
+						{/if}
 						 </span>
 					 {/if}
-					 
 					{*rsnnpaicomment*}
 					{if $FIELD_NAME eq 'rsnnXXXpai'}
 					<div class="pull-right">

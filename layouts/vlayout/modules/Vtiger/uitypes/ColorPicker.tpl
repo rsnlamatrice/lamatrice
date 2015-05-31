@@ -17,9 +17,9 @@
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
 {assign var="FIELD_NAME" value=$FIELD_MODEL->get('name')}
 {assign var="VALUE" value=$FIELD_MODEL->get('fieldvalue')}
-{assign var="INPUT_ID" value="`$MODULE`_editView_fieldName_`$FIELD_NAME`"} {*{$MODULE}_editView_fieldName_{$FIELD_NAME}*}
+{assign var="INPUT_ID" value=uniqid('f')}{*"`$MODULE`_editView_fieldName_`$FIELD_NAME`"*} {*{$MODULE}_editView_fieldName_{$FIELD_NAME}*}
 <input id="{$INPUT_ID}" type="hidden" 
-	class="colorField input-large {if $FIELD_MODEL->isNameField()}nameField{/if}" 
+	class="input-large {if $FIELD_MODEL->isNameField()}nameField{/if} colorField" 
 	data-validation-engine="validate[{if $FIELD_MODEL->isMandatory() eq true}required,{/if}funcCall[Vtiger_Base_Validator_Js.invokeValidation]]" 
 	name="{$FIELD_MODEL->getFieldName()}" 
 	value="{$VALUE}"
@@ -28,4 +28,11 @@
 	{/if} 
 data-fieldinfo='{$FIELD_INFO}' {if !empty($SPECIAL_VALIDATOR)}data-validator={Zend_Json::encode($SPECIAL_VALIDATOR)}{/if} />
 <div id="{$INPUT_ID}-colorSelector" class="colorpicker-holder"><div style="background-color: {$VALUE}"></div></div>
+{if !$FIELD_MODEL->isReadOnly()}
+<script>if ($('#{$INPUT_ID}-colorSelector').length == 0){* that happens with quick create modal form *}
+	$(document).ready(function(){
+		app.registerEventForColorPickerFields($('#{$INPUT_ID}-colorSelector'));
+	});
+</script>
+{/if}
 {/strip}

@@ -14,11 +14,17 @@
 -->*}
 {strip}
 {assign var="FIELD_INFO" value=Zend_Json::encode($FIELD_MODEL->getFieldInfo())}
-{assign var=FIELD_NAME value=$FIELD_MODEL->getFieldName()}
+{assign var="SOURCE_FIELD_NAME" value=$FIELD_MODEL->getFieldName()}
+{*ED150526*}
+{if isset($FORCE_FIELD_NAME)}
+		{assign var="FIELD_NAME" value=$FORCE_FIELD_NAME}
+{else}
+		{assign var="FIELD_NAME" value=$FIELD_MODEL->getFieldName()}
+{/if}
 {assign var=FIELD_LABEL value=Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode(vtranslate($FIELD_MODEL->get('label'), $MODULE_NAME)))}
 {if $RECORD}{assign var=RECORD_MODEL value=$RECORD}{/if}
 {if !$RECORD_MODEL}RECORD_MODEL manquant {*echo_callstack()*}{/if}
-{assign var=PICKLIST_LABELS value=$RECORD_MODEL->getPicklistValuesDetails($FIELD_NAME)}
+{assign var=PICKLIST_LABELS value=$RECORD_MODEL->getPicklistValuesDetails($SOURCE_FIELD_NAME)}
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
 {assign var=SELECTED_VALUE value=$FIELD_MODEL->get('fieldvalue')}
 {assign var=UID value=uniqid('btnset')}
@@ -33,6 +39,7 @@
 		{assign var=PICKLIST_CLASS value=''}
 	    {/if}
 	    {assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
+	    {assign var=PICKLIST_TITLE value=$FIELD_LABEL|cat:' '|cat:$PICKLIST_ITEM['title']}
 	{else}
 	    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
 	{/if}
@@ -46,7 +53,7 @@
         {if trim(decode_html($SELECTED_VALUE)) eq trim($PICKLIST_KEY)}
                 checked="checked"
         {/if}
-        /><label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$FIELD_LABEL}">
+        /><label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
             {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
             {$PICKLIST_LABEL}</label>
     {/foreach}

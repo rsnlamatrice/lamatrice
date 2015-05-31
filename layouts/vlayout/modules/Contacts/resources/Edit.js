@@ -23,7 +23,9 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 			'mailingzip' : 'bill_code',
 			'otherzip' : 'ship_code',
 			'mailingcountry' : 'bill_country',
-			'othercountry' : 'ship_country'
+			'othercountry' : 'ship_country',
+			'mailingaddressformat' : 'bill_addressformat',
+			'otheraddressformat' : 'ship_addressformat',
 			}
 	},
 							
@@ -36,7 +38,8 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		'othercity' : 'mailingcity',
 		'otherstate' : 'mailingstate',
 		'otherzip' : 'mailingzip',
-		'othercountry' : 'mailingcountry'
+		'othercountry' : 'mailingcountry',
+		'otheraddressformat' : 'mailingaddressformat',
 	},
 	
 	//ED150312
@@ -49,7 +52,8 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		'mailingcity' : 'city',
 		'mailingstate' : 'state',
 		'mailingzip' : 'zip',
-		'mailingcountry' : 'country'
+		'mailingcountry' : 'country',
+		'mailingaddressformat' : 'addressformat'
 	},
 	
 	
@@ -378,19 +382,29 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 	 */
 	registerEventForSynchronizeGroupNameMailingStreet2 : function(container){
 		var thisInstance = this;
-		//syncrhonise les deux zones de saisie
-		jQuery('#Contacts_editView_fieldName_isgroup_mailingstreet2, #Contacts_editView_fieldName_mailingstreet2').on('change',function(e){
-			var other = this.id.indexOf('_fieldName_isgroup_') > 0
-				? this.id.replace('_fieldName_isgroup_', '_fieldName_')
-				: this.id.replace('_fieldName_', '_fieldName_isgroup_');
+		//synchronise les deux zones de saisie
+		jQuery('#Contacts_editView_fieldName_mailingstreet2_synchronize, #Contacts_editView_fieldName_mailingstreet2').on('change',function(e){
+			var other = /_synchronize$/.test(this.id)
+				? this.id.replace(/_synchronize$/, '')
+				: this.id + '_synchronize';
 			jQuery('#'+other).val(this.value);
+			//refresh header
+			jQuery('.mailingstreet2-synchronized').html(this.value);
+		});
+		//buttonset du format de l'adresse
+		jQuery('input[name="mailingaddressformat"], input[name="mailingaddressformat_synchronize"]').on('change',function(e){
+			var name = this.getAttribute('name')
+			, other = /_synchronize$/.test(name)
+				? name.replace(/_synchronize$/, '')
+				: name + '_synchronize';
+			jQuery('input[name="' + other + '"][value="' + this.value + '"]').attr("checked","checked").button('refresh');
 		});
 		//affiche/masque la saisie sous "isgroup"
 		jQuery('input[name="isgroup"]').on('change',function(e){
 			if(this.checked && this.value == 1)
-				$('.isgroup_mailingstreet2-holder').show();
+				$('.mailingstreet2-synchronize-holder').show();
 			else
-				$('.isgroup_mailingstreet2-holder').hide();
+				$('.mailingstreet2-synchronize-holder').hide();
 		});
 	},
 	
