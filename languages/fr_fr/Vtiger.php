@@ -844,4 +844,7 @@ $jsLanguageStrings = array(
 	'JS_RECORDS_ARE_GETTING_DELETED' => 'Enregistrements en cours de suppression',
 	'JS_RECORD_GETTING_DELETED' => 'Enregistrement en cours de suppression',
 	'JS_NO_RESULTS_FOUND' => 'Aucun resultat trouvé',
+	
+	'JS_RESET_FILTERS' => 'Effacer les filtres',
+	'JS_REFRESH' => 'Actualiser', 
 );
