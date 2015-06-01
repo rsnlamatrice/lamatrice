@@ -73,7 +73,28 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 	
 		//$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
-		
+		$orderBy = $this->get('orderby');
+		if(!$orderBy) {
+			switch($relatedModuleName){
+			 case "RSNAboRevues":
+				$this->set('orderby', 'debutabo');
+				$this->set('sortorder', 'DESC');
+				break;
+			 case "Invoice":
+				$this->set('orderby', 'invoicedate');
+				$this->set('sortorder', 'DESC');
+				break;
+			 case "Campaigns":
+			 case "Contacts":
+			 case "Documents":
+			 case "Critere4D":
+				$this->set('orderby', 'dateapplication');
+				$this->set('sortorder', 'DESC');
+				break;
+			 default:
+				break;
+			}
+		}
 		$relatedRecordModelsList = parent::getEntries($pagingModel);
 		$relatedModulesInfo = $relationModel->getModulesInfoForDetailView();
 

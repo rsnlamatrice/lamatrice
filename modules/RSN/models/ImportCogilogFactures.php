@@ -9,6 +9,9 @@ define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
 define('MAX_QUERY_ROWS', 1000); //DEBUG
 
+define('CURRENCY_ID', 1);
+define('CONVERSION_RATE', 1);
+
 
 require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
 
@@ -151,6 +154,7 @@ class RSN_CogilogFacturesRSN_Import {
 			, "produit"."section" AS "section_produit"
 			, "produit"."codetva" AS "tva_produit"
 			, "produit"."indisponible" AS "indisponible"
+			, "codetauxtva"."taux" AS "taux_tva"
 			FROM gfactu00002 facture
 			JOIN gclien00002 cl
 				ON facture.id_gclien = cl.id
@@ -326,6 +330,9 @@ class RSN_CogilogFacturesRSN_Import {
 			//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 			$record->set('typedossier', 'Facture'); //TODO
 			$record->set('invoicestatus', 'Paid');//TODO
+			$record->set('currency_id', CURRENCY_ID);
+			$record->set('conversion_rate', CONVERSION_RATE);
+			$record->set('hdnTaxType', 'individual');
                     
 		    
 			$coupon = self::findCoupon($srcRow);
@@ -351,12 +358,19 @@ class RSN_CogilogFacturesRSN_Import {
 					ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
 				SET invoice_no = CONCAT('COG', ?)
 				, total = ?
+				, subtotal = ?
+				, taxtype = ?
 				, smownerid = ?
 				, createdtime = ?
 				, modifiedtime = ?
 				WHERE invoiceid = ?
 			";
-			$result = $db->pquery($query, array($cogId, $srcRow['netht']+$srcRow['nettva'], ASSIGNEDTO_ALL
+			$total = $srcRow['netht']+$srcRow['nettva'];
+			$result = $db->pquery($query, array($cogId
+							    , $total
+							    , $total
+							    , 'individual'
+							    , ASSIGNEDTO_ALL
 							    , substr($srcRow['tssaisie'], 0, 20)
 							    , substr($srcRow['tsmod'], 0, 20)
 							    , $record->getId()));
@@ -369,6 +383,18 @@ class RSN_CogilogFacturesRSN_Import {
 	}
 
 
+	static $allTaxes;
+	
+	private static function getTax($rate){
+		if(!$rate)
+			return false;
+		if(!self::$allTaxes)
+			self::$allTaxes = getAllTaxes();
+		foreach(self::$allTaxes as $tax)
+			if($tax['percentage'] == $rate)
+				return $tax;
+		return false;
+	}
 	
 	/* Import des lignes de factures
 	 * Les lignes sont dans vtiger_inventoryproductrel
@@ -384,9 +410,21 @@ class RSN_CogilogFacturesRSN_Import {
 		$listprice = $srcRow['prix_unit_ht'];
 		$discount_amount = $srcRow['total_ligne_ht'] - $qty * $listprice;
 		
+		$tax = self::getTax($srcRow['taux_tva']);
+		if($tax){
+			$taxName = $tax['taxname'];
+			$taxValue = $tax['percentage'];
+		}
+		else {
+			$taxName = 'tax1';
+			$taxValue = null;
+		}
+		
+		$incrementOnDel = $product instanceof Services_Record_Model ? 0 : 1;
+		
 		$db = PearDatabase::getInstance();
-		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount) VALUES(?,?,?,?,?,?)";
-		$qparams = array($invoice->getId(), $product->getId(), $sequence, $qty, $listprice, $discount_amount);
+		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel, $taxName) VALUES(?,?,?,?,?,?,?,?)";
+		$qparams = array($invoice->getId(), $product->getId(), $sequence, $qty, $listprice, $discount_amount, $incrementOnDel, $taxValue);
 		//$db->setDebug(true);
 		$db->pquery($query, $qparams);
 		//$db->setDebug(false);

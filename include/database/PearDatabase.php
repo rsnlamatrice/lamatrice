@@ -808,7 +808,7 @@ class PearDatabase{
 		}
 		$this->database = ADONewConnection($this->dbType);
 
-/*ED140906*/
+//ED140906
 //$this->database->debug = (true); 
 
 		$result = $this->database->PConnect($this->dbHostName, $this->userName, $this->userPassword, $this->dbName);
