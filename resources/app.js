@@ -1279,7 +1279,7 @@ var app = {
 		if(typeof window[moduleClassName] == 'undefined') {
 			moduleClassName = "Vtiger_"+view+"_Js";
 		}
-        if(typeof window[moduleClassName] != 'undefined') {
+        if(typeof window[moduleClassName] == 'function') {
 			return new window[moduleClassName]();
 		}
 	},

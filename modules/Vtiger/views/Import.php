@@ -164,7 +164,7 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 		$ownerId = $request->get('foruser');
 
 		$user = Users_Record_Model::getCurrentUserModel();
-		$dbTableName = Import_Utils_Helper::getDbTableName($user);
+		$dbTableName = Import_Utils_Helper::getDbTableName($user, $moduleName);
 
 		if(!$user->isAdminUser() && $user->id != $ownerId) {
 			$viewer->assign('MESSAGE', 'LBL_PERMISSION_DENIED');
@@ -218,7 +218,7 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 	//TODO need to move it to an action
 	function clearCorruptedData(Vtiger_Request $request) {
 		$user = Users_Record_Model::getCurrentUserModel();
-		Import_Utils_Helper::clearUserImportInfo($user);
+		Import_Utils_Helper::clearUserImportInfo($user, $request->getModule());
 		$this->importBasicStep($request);
 	}
 
@@ -266,7 +266,7 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 			}
 		}
 
-		if(Import_Utils_Helper::isUserImportBlocked($user)) {
+		if(Import_Utils_Helper::isUserImportBlocked($user, $moduleName)) {
 			$importInfo = Import_Queue_Action::getUserCurrentImportInfo($user);
 			if($importInfo != null) {
 				Import_Main_View::showImportStatus($importInfo, $user);
@@ -276,6 +276,6 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 				exit;
 			}
 		}
-		Import_Utils_Helper::clearUserImportInfo($user);
+		Import_Utils_Helper::clearUserImportInfo($user, $moduleName);
 	}
 }

@@ -1188,7 +1188,7 @@ function createRecords($obj) {
 	$moduleFields = $moduleMeta->getModuleFields();
 	$focus = CRMEntity::getInstance($moduleName);
 
-	$tableName = Import_Utils_Helper::getDbTableName($obj->user);
+	$tableName = Import_Utils_Helper::getDbTableName($obj->user, $moduleName);
 	$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. Import_Data_Action::$IMPORT_RECORD_NONE .' GROUP BY subject';
 
 	if($obj->batchImport) {
@@ -1359,7 +1359,7 @@ function importRecord($obj, $inventoryFieldData, $lineItemDetails) {
 
 function getImportStatusCount($obj) {
 	global $adb;
-	$tableName = Import_Utils_Helper::getDbTableName($obj->user);
+	$tableName = Import_Utils_Helper::getDbTableName($obj->user, $obj->get('module'));
 	$result = $adb->query('SELECT status FROM '.$tableName. ' GROUP BY subject');
 
 	$statusCount = array('TOTAL' => 0, 'IMPORTED' => 0, 'FAILED' => 0, 'PENDING' => 0,
@@ -1401,8 +1401,7 @@ function undoLastImport($obj, $user) {
 	$owner = new Users();
 	$owner->id = $ownerId;
 	$owner->retrieve_entity_info($ownerId, 'Users');
-
-	$dbTableName = Import_Utils_Helper::getDbTableName($owner);
+	$dbTableName = Import_Utils_Helper::getDbTableName($owner, $moduleName);
 
 	if(!is_admin($user) && $user->id != $owner->id) {
 		$viewer = new Import_UI_Viewer();

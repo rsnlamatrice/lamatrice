@@ -23,7 +23,8 @@ $languageStrings = array(
 	'LBL_SAVE_COPY'                => 'Enregistrer en copie'        , 
 	'LBL_CANCEL'                   => 'Annuler'                     , 
 	'LBL_BACK'                     => 'Retour'                      , 
-	'LBL_IMPORT'                   => 'Importer'                    , 
+	'LBL_IMPORT'                   => 'Importer'                    ,
+	'LBL_RSN_IMPORT'               => 'Import préconfiguré'         , 
 	'LBL_EXPORT'                   => 'Exporter'                    ,
         'LBL_PRINT'                   => 'Imprimer...'                    ,
 	'LBL_FIND_DUPLICATES'          => 'Trouver les doublons'        , 
@@ -720,6 +721,12 @@ $languageStrings = array(
         
         'LBL_CONVERT_AS'                   => 'Convertir en',
 	'LBL_ERROR'                     => 'Erreur',
+	'LBL_COMMA' => 'virgule',
+	'LBL_SEMICOLON' => 'point-virgule',
+	'LBL_TAB' => 'tabulation',
+	'LBL_COMMA_PLURAL' => 'virgules',
+	'LBL_SEMICOLON_PLURAL' => 'points-virgules',
+	'LBL_TAB_PLURAL' => 'tabulations'
         
         //Rapports (notez l'espace en fin de mot)
         'A_faire_LBL_COMMENTAIRE ' => 'Commentaire',

@@ -49,7 +49,7 @@ class Import_FileReader_Reader {
 	}
 
 	public function getFilePath() {
-		return Import_Utils_Helper::getImportFilePath($this->user);
+		return Import_Utils_Helper::getImportFilePath($this->user, $this->request->get('module'));
 	}
 
 	public function getFileHandler() {
@@ -90,7 +90,7 @@ class Import_FileReader_Reader {
 	public function createTable() {
 		$db = PearDatabase::getInstance();
 
-		$tableName = Import_Utils_Helper::getDbTableName($this->user);
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, $this->moduleModel->get('name'));//TO CHECK
 		$fieldMapping = $this->request->get('field_mapping');
         $moduleFields = $this->moduleModel->getFields();
         $columnsListQuery = 'id INT PRIMARY KEY AUTO_INCREMENT, status INT DEFAULT 0, recordid INT';
@@ -107,7 +107,7 @@ class Import_FileReader_Reader {
 	public function addRecordToDB($columnNames, $fieldValues) {
 		$db = PearDatabase::getInstance();
 
-		$tableName = Import_Utils_Helper::getDbTableName($this->user);
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, $this->moduleModel->get('name')); // TO CHECK
 		$db->pquery('INSERT INTO '.$tableName.' ('. implode(',', $columnNames).') VALUES ('. generateQuestionMarks($fieldValues) .')', $fieldValues);
 		$this->numberOfRecordsRead++;
 	}
