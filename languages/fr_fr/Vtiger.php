@@ -726,7 +726,7 @@ $languageStrings = array(
 	'LBL_TAB' => 'tabulation',
 	'LBL_COMMA_PLURAL' => 'virgules',
 	'LBL_SEMICOLON_PLURAL' => 'points-virgules',
-	'LBL_TAB_PLURAL' => 'tabulations'
+	'LBL_TAB_PLURAL' => 'tabulations',
         
         //Rapports (notez l'espace en fin de mot)
         'A_faire_LBL_COMMENTAIRE ' => 'Commentaire',
