@@ -124,7 +124,7 @@ class Import_ListView_Model extends Vtiger_ListView_Model {
 		$db = PearDatabase::getInstance();
 
 		$user = Users_Record_Model::getCurrentUserModel();
-		$userDBTableName = Import_Utils_Helper::getDbTableName($user);
+		$userDBTableName = Import_Utils_Helper::getDbTableName($user, $this->getModule()->get('name'));
 
 		$result = $db->pquery('SELECT recordid FROM '.$userDBTableName.' WHERE status NOT IN (?,?) AND recordid IS NOT NULL',Array(Import_Data_Action::$IMPORT_RECORD_FAILED,  Import_Data_Action::$IMPORT_RECORD_SKIPPED));
 		$noOfRecords = $db->num_rows($result);

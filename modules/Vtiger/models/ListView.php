@@ -461,6 +461,14 @@ var_dump($listResult);*/
 							'linkurl' => $moduleModel->getImportUrl(),
 							'linkicon' => ''
 			);
+
+			// For RSN Import Module
+			$advancedLinks[] = array(
+							'linktype' => 'LISTVIEW',
+							'linklabel' => 'LBL_RSN_IMPORT',
+							'linkurl' => $moduleModel->getRSNImportUrl(),
+							'linkicon' => ''
+			);
 		}
 
 		$exportPermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'Export');
