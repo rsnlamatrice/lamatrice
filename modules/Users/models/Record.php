@@ -624,6 +624,21 @@ class Users_Record_Model extends Vtiger_Record_Model {
 		}
 		return false;
 	}
+
+	/**
+	 * Function to get instance of user model by id
+	 * @param <Int> $userId
+	 * @return <Users_Record_Model>
+	 */
+	public static function getInstanceById($userId) {
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery('SELECT id FROM vtiger_users WHERE id = ?', array($userId));
+
+		if ($db->num_rows($result)) {
+			return Users_Record_Model::getInstanceById($db->query_result($result, 0, 'id'), 'Users');
+		}
+		return false;
+	}
 	
 	/**
 	 * Function to delete the current Record Model
