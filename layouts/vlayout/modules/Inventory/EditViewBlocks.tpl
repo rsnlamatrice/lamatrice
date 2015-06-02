@@ -115,7 +115,9 @@
 			<tr>
 			{assign var=COUNTER value=0}
 			{foreach key=FIELD_NAME item=FIELD_MODEL from=$BLOCK_FIELDS name=blockfields}
-
+				{if $FIELD_NAME eq 'accountdiscounttype'}{* already included in LineItemsEdit.tpl *}
+					{continue}
+				{/if}
 				{assign var="isReferenceField" value=$FIELD_MODEL->getFieldDataType()}
 				{if $FIELD_MODEL->get('uitype') eq "20" or $FIELD_MODEL->get('uitype') eq "19"}
 					{if $COUNTER eq '1'}

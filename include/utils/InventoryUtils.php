@@ -262,7 +262,8 @@ function getAllTaxes($available='all', $sh='',$mode='',$id='')
 		$tablename = 'vtiger_shippingtaxinfo';
 		$value_table='vtiger_inventoryshippingrel';
 		if($mode == 'edit' && id != '') {
-			$sql = "SELECT * FROM $tablename WHERE deleted=0";
+			$sql = "SELECT * FROM $tablename"
+				. ($include_deleted ? '' : ' WHERE deleted=0');
 			$result = $adb->pquery($sql, array());
 			$noofrows=$adb->num_rows($result);
 			for($i=0; $i<$noofrows; $i++) {

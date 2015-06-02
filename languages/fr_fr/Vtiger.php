@@ -556,7 +556,7 @@ $languageStrings = array(
 	'LBL_GLOBAL_SEARCH_MAX_MESSAGE_FOR_MODULE' => 'Seul les 100 premiers résultats sont affichés. Utiliser le recherche avancée pour plus de précisions dans les résultats', 
 	'LBL ACTION'                   => 'Action'                      ,
 	'LBL_NOTE'                     => 'Note'                        , 
-	'LBL_SELECT_OPTION'            => 'Choisir une option'            , 
+	'LBL_SELECT_OPTION'            => 'Choisir une option'            ,
 	'LBL_TOOLTIP'                  => 'Gestion des info-bulles'          , 
 	'LBL_MODULE_SEQUENCE_NUMBERING' => 'Numérotation des modules'   ,
 	'LBL_CUSTOM_FIELD_MAPPING'     => 'Mapping des champs personnalisés'        , 
@@ -736,6 +736,8 @@ $languageStrings = array(
         'A_faire_Estimation_durée ' => 'Durée estimée',
 	
         'Address format' => 'Format de l\'adresse',
+        
+        'LBL_ACCOUNT_DISCOUNT_TYPE' => 'Remise type',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

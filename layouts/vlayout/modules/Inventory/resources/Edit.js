@@ -235,6 +235,20 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return false;
 	},
 
+	/** ED150602
+	 * inventory_accountdiscounttype_holder
+	 */
+	getAccountDiscountType : function(){
+		return $('#inventory_accountdiscounttype_holder :radio:checked:first').val();
+	},
+
+	/** ED150602
+	 * inventory_accountdiscounttype_holder
+	 */
+	setAccountDiscountType : function(account_discount_type){
+		$('#inventory_accountdiscounttype_holder input[value="' + account_discount_type + '"]').attr("checked","checked").button('refresh');
+	},
+	
 	/**
 	 * Function which gives edit view form
 	 * @return : jQuery object which represents the form element
@@ -298,6 +312,20 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 */
 	getLineItemTotalElement : function(lineItemRow) {
 		return jQuery('.productTotal', lineItemRow);
+	},
+
+	/*ED150602
+	 *
+	 */
+	setLineDiscountPercentage : function(lineItemRow, discountpc){
+		this.setLineDiscount(lineItemRow, discountpc, Inventory_Edit_Js.percentageDiscountType);
+	},
+	setLineDiscount : function(lineItemRow, discountpc, discount_type){
+		lineItemRow.find('.discountUI input.discount_'+discount_type+'.discountVal').val(discountpc);
+		if (discountpc) {
+			lineItemRow.find('.discountUI input.discount_type').val(discount_type);
+			lineItemRow.find('.discountUI input[type="radio"][data-discount-type="'+discount_type+'"].discounts')[0].checked = true;
+		}
 	},
 
 	/**
@@ -632,7 +660,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		);
 	},
 
-    mapResultsToFields: function(referenceModule,element,responseData){
+	mapResultsToFields: function(referenceModule,element,responseData){
 		var parentRow = jQuery(element).closest('tr.'+this.rowClass);
 		var lineItemNameElment = jQuery('input.productName',parentRow);
 
@@ -642,6 +670,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var selectedName = recordData.name;
 			var unitPrice = recordData.listprice;
 			var taxes = recordData.taxes;
+			//ED150602 discount % from account discount type
+			var discountpc = recordData.discountpc;
+			
 			if(referenceModule == 'Products') {
 				parentRow.data('quantity-in-stock',recordData.quantityInStock);
 			}
@@ -654,19 +685,20 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			jQuery('textarea.lineItemCommentBox',parentRow).val(description);
 			var taxUI = this.getTaxDiv(taxes,parentRow);
 			jQuery('.taxDivContainer',parentRow).html(taxUI);
-            if(this.isIndividualTaxMode()) {
-                parentRow.find('.productTaxTotal').removeClass('hide')
-            }else{
-                parentRow.find('.productTaxTotal').addClass('hide')
-            }
+			if(this.isIndividualTaxMode()) {
+			    parentRow.find('.productTaxTotal').removeClass('hide')
+			}else{
+			    parentRow.find('.productTaxTotal').addClass('hide')
+			}
+			this.setLineDiscountPercentage(parentRow, discountpc);
 		}
 		if(referenceModule == 'Products'){
 			this.loadSubProducts(parentRow);
 		}
 
 		jQuery('.qty',parentRow).trigger('focusout');
-    },
-
+	},
+	
 	showPopup : function(params) {
 		var aDeferred = jQuery.Deferred();
 		var popupInstance = Vtiger_Popup_Js.getInstance();
@@ -1682,13 +1714,19 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				var tdElement = element.closest('td');
 				var selectedModule = tdElement.find('.lineItemPopup').data('moduleName');
 				var popupElement = tdElement.find('.lineItemPopup');
-				var dataUrl = "index.php?module=Inventory&action=GetTaxes&record="+selectedItemData.id+"&currency_id="+jQuery('#currency_id option:selected').val();
+				
+				/* ED150602 account discount type */
+				var account_discount_type = thisInstance.getAccountDiscountType();
+				
+				var dataUrl = "index.php?module=Inventory&action=GetTaxes&record="+selectedItemData.id
+					+"&currency_id="+jQuery('#currency_id option:selected').val()
+					+"&accountdiscounttype="+account_discount_type;
 				AppConnector.request(dataUrl).then(
 					function(data){
 						for(var id in data){
 							if(typeof data[id] == "object"){
-							var recordData = data[id];
-							thisInstance.mapResultsToFields(selectedModule, popupElement, recordData);
+								var recordData = data[id];
+								thisInstance.mapResultsToFields(selectedModule, popupElement, recordData);
 							}
 						}
 					},
@@ -1975,6 +2013,53 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	},
 
+
+	/**
+	 * Lors de la sélection d'un compte
+	 * ED150602
+	 */
+	registerAccountSelectionEvent : function(container) {
+		var thisInstance = this;
+		jQuery('input[name="account_id"]', container).on(Vtiger_Edit_Js.referenceSelectionEvent, function(e, data){
+			//Affectation de discounttype
+			
+			var selectedName = data['selectedName'];
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : selectedName + '...',
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			thisInstance.getRecordDetails(data).then(
+				function(recordDetails){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+									
+					var account_discount_type = recordDetails.result.data.discounttype;
+					thisInstance.setAccountDiscountType(account_discount_type);
+					
+					account_discount_type = thisInstance.getAccountDiscountType();
+				},
+				function(error, err){
+					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+				}
+			);
+		});
+	},
+
+	/**
+	 * Lors de la sélection du type de remise
+	 * ED150602
+	 */
+	registerAccountDiscountTypeSelectionEvent : function(container) {
+		var thisInstance = this;
+		jQuery('#inventory_accountdiscounttype_holder input', container).on('change', function(e, data){
+			//Affectation des remises
+			
+			var account_discount_type = this.value;
+		});
+	},
+	
 	/*ED150515
 	 * auto-filled management of invoicestatus field
 	 * invoicestatus is changed when balance changed, but if '.auto-filled:not()'
@@ -2014,6 +2099,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
     registerBasicEvents : function(container) {
 		this._super(container);
 		this.registerTypeSelectionEvent(container); /*ED141219*/
+		this.registerAccountSelectionEvent(container); /*ED150602*/
+		this.registerAccountDiscountTypeSelectionEvent(container); /*ED150602*/
 		this.registerInvoiceStatusEvent(container);
 		this.registerSaveEvent(container); /*ED141219*/
 		this.registerReferenceSelectionEvent(container);
