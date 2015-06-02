@@ -736,6 +736,8 @@ $languageStrings = array(
         'A_faire_Estimation_durée ' => 'Durée estimée',
 	
         'Address format' => 'Format de l\'adresse',
+        
+        'LBL_ACCOUNT_DISCOUNT_TYPE' => 'Remise type',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

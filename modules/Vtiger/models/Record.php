@@ -475,6 +475,15 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 					'2' => array( 'label' => 'A confirmer', 'icon' => 'ui-icon ui-icon-close orange' ),
 					'3' => array( 'label' => 'Définitive', 'icon' => 'ui-icon ui-icon-close darkred' ),
 				);
+	
+			case 'discounttype':
+			case 'accountdiscounttype':
+				return array(
+					'0' => array( 'label' => 'sans' ),
+					'dv' => array( 'label' => 'Dépôt-vente'),
+					'grp' => array( 'label' => 'Groupe'),
+				);
+			
 			default:
 				if(strpos($fieldname,'addressformat') > 0)
 					return array(
