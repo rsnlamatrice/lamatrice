@@ -563,13 +563,12 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 				} elseif(self::$IMPORT_RECORD_FAILED == $status) {
 					$statusCount['FAILED']++;
 
-				} elseif(self::$IMPORT_RECORD_SKIPPED == $status) {
-					$statusCount['SKIPPED']++;
-
 				} else {
 					$statusCount['IMPORTED']++;
 					switch($status) {
 						case self::$IMPORT_RECORD_CREATED	:	$statusCount['CREATED']++;
+																break;
+						case self::$IMPORT_RECORD_SKIPPED	:	$statusCount['SKIPPED']++;
 																break;
 						case self::$IMPORT_RECORD_UPDATED	:	$statusCount['UPDATED']++;
 																break;
