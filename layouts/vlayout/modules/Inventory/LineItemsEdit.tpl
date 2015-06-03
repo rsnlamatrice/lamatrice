@@ -32,7 +32,7 @@
 	    {* ED1506022 remise type *}
             <th>{assign var=FIELD_MODEL value=$RECORD->getField('accountdiscounttype')}
 		{if $FIELD_MODEL}
-		    {vtranslate('LBL_ACCOUNT_DISCOUNT_TYPE')}
+		    <a id="inventory_accountdiscounttype_setter">{vtranslate('LBL_ACCOUNT_DISCOUNT_TYPE')}</a>
 		    <div id="inventory_accountdiscounttype_holder">
 			{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE)}
 		    </div>
