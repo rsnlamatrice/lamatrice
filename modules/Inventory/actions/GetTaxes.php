@@ -39,11 +39,11 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				'description' => decode_html($recordModel->get('description')),
 				'quantityInStock' => $recordModel->get('qtyinstock')
 			);
-			
 			//ED150602
 			if($accountdiscounttype
 			&& $recordModel->get('discountpc_' . $accountdiscounttype))
 				$data['discountpc'] = $recordModel->get('discountpc_' . $accountdiscounttype);
+				
 			$response->setResult(array( $recordId => $data ));
 		} else {
 			foreach($idList as $id) {
@@ -54,17 +54,22 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				foreach ($priceDetails as $currencyDetails) {
 					if ($currencyId == $currencyDetails['curid']) {
 						$conversionRate = $currencyDetails['conversionrate'];
+						break;
 					}
 				}
 
 				$listPrice = (float)$recordModel->get('unit_price') * (float)$conversionRate;
-				$info[] = array(
-							$id => array(
-								'id'=>$id, 'name'=>decode_html($recordModel->getName()),
-								'taxes'=>$taxes, 'listprice'=>$listPrice,
-								'description' => $recordModel->get('description'),
-								'quantityInStock' => $recordModel->get('qtyinstock')
-							));
+				$data = array(
+					'id'=>$id, 'name'=>decode_html($recordModel->getName()),
+					'taxes'=>$taxes, 'listprice'=>$listPrice,
+					'description' => $recordModel->get('description'),
+					'quantityInStock' => $recordModel->get('qtyinstock')
+				);
+				//ED150602
+				if($accountdiscounttype
+				&& $recordModel->get('discountpc_' . $accountdiscounttype))
+					$data['discountpc'] = $recordModel->get('discountpc_' . $accountdiscounttype);
+				$info[] = array($id => $data);
 			}
 			$response->setResult($info);
 		}

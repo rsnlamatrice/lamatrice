@@ -95,24 +95,6 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
   padding: 4px;
 }
 
-/* ui-buttonset in header : reverse colors */
-/*form#EditView th .ui-buttonset .ui-button {
-  color: #ffffff;
-  background-image: linear-gradient(#ffffff, #ffffff 25%, #363636);
-}
-form#EditView th .ui-buttonset .ui-state-active {
-  color: #5a5a5a;
-  background-image: linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
-}*/
-
-#inventory_accountdiscounttype_holder {
-  display: inline-block;
-  margin-left: 12px;
-  padding: 3px 2px 3px 4px;
-  background-color: #a6a6a6;
-  border-radius: 4px;
-}
-
 /* jQuery UI icons
  * add color class
  */
@@ -247,6 +229,16 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
     white-space: nowrap;
 }
 
+#inventory_accountdiscounttype_holder {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 3px 2px 3px 4px;
+  background-color:  rgba(255, 255, 255, 0.30);
+  border-radius: 4px;
+}
+#inventory_accountdiscounttype_setter {
+  cursor: pointer;
+}
 
 /* layouts\vlayout\modules\Vtiger\ListViewContents.tpl
  */

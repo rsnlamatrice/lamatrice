@@ -317,15 +317,30 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	/*ED150602
 	 *
 	 */
-	setLineDiscountPercentage : function(lineItemRow, discountpc){
-		this.setLineDiscount(lineItemRow, discountpc, Inventory_Edit_Js.percentageDiscountType);
-	},
-	setLineDiscount : function(lineItemRow, discountpc, discount_type){
-		lineItemRow.find('.discountUI input.discount_'+discount_type+'.discountVal').val(discountpc);
-		if (discountpc) {
-			lineItemRow.find('.discountUI input.discount_type').val(discount_type);
-			lineItemRow.find('.discountUI input[type="radio"][data-discount-type="'+discount_type+'"].discounts')[0].checked = true;
+	setLineItemDiscountPercentage : function(lineItemRow, discountpc){
+		if (!(typeof lineItemRow === 'object')) {
+			var productId = parseInt(lineItemRow)
+			, container;
+			lineItemRow = $('#lineItemTab input.selectedModuleId[value="' + productId + '"]', container).parents('tr.lineItemRow');
 		}
+		if (lineItemRow.length == 0) {
+			//console.log('Impossible de trouver la ligne contenant l\article ' + productId);
+			return;
+		}
+		this.setLineItemDiscount(lineItemRow, discountpc, Inventory_Edit_Js.percentageDiscountType);
+	},
+	setLineItemDiscount : function(lineItemRow, discountpc, discount_type){
+		lineItemRow.find('.discountUI input.discount_'+discount_type+'.discountVal').val(discountpc);
+		if (!discountpc){
+			discountpc = 0;
+			discount_type = 'zero';
+		}
+		lineItemRow.find('.discountUI input.discount_type').val(parseFloat(discount_type));
+		lineItemRow.find('.discountUI input[type="radio"][data-discount-type="'+discount_type+'"].discounts').each(function(){
+			this.checked = true;
+		});
+		
+		this.quantityChangeActions(lineItemRow);
 	},
 
 	/**
@@ -690,7 +705,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			}else{
 			    parentRow.find('.productTaxTotal').addClass('hide')
 			}
-			this.setLineDiscountPercentage(parentRow, discountpc);
+			this.setLineItemDiscountPercentage(parentRow, discountpc);
 		}
 		if(referenceModule == 'Products'){
 			this.loadSubProducts(parentRow);
@@ -1150,7 +1165,15 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @params : lineItemRow - element which will represent lineItemRow
 	 */
 	quantityChangeActions : function(lineItemRow) {
-		this.lineItemRowCalculations(lineItemRow);
+		/*ED150603*/
+		if (lineItemRow.length >1){
+			var thisInstance = this;
+			lineItemRow.each(function(){
+				thisInstance.lineItemRowCalculations($(this));
+			});
+		}
+		else
+			this.lineItemRowCalculations(lineItemRow);
 		this.lineItemToTalResultCalculations();
 	},
 
@@ -2037,8 +2060,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 									
 					var account_discount_type = recordDetails.result.data.discounttype;
 					thisInstance.setAccountDiscountType(account_discount_type);
-					
-					account_discount_type = thisInstance.getAccountDiscountType();
 				},
 				function(error, err){
 					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
@@ -2046,7 +2067,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			);
 		});
 	},
-
+	
 	/**
 	 * Lors de la sélection du type de remise
 	 * ED150602
@@ -2054,9 +2075,53 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerAccountDiscountTypeSelectionEvent : function(container) {
 		var thisInstance = this;
 		jQuery('#inventory_accountdiscounttype_holder input', container).on('change', function(e, data){
-			//Affectation des remises
-			
-			var account_discount_type = this.value;
+			jQuery('#inventory_accountdiscounttype_setter', container).css({'text-decoration' : 'underline'});
+		});
+		jQuery('#inventory_accountdiscounttype_setter', container).on('click', function(e, data){
+			//Affectation de la remise à tous les articles
+			/* ED150602 account discount type */
+			var account_discount_type = thisInstance.getAccountDiscountType();
+			if (account_discount_type && account_discount_type !== '0') {
+				//liste des articles
+				var productIds = [];
+				jQuery('#lineItemTab input.selectedModuleId', container).each(function(){
+					if(this.value){
+						//var $module = $('.lineItemType:first', this.parentNode);
+						productIds.push(this.value);
+					}
+				});
+				if (productIds.length) {
+
+					
+					var dataUrl = "index.php?module=Inventory&action=GetTaxes"
+						+"&idlist=["+productIds.join(',')+']'
+						+"&currency_id="+jQuery('#currency_id option:selected').val()
+						+"&accountdiscounttype="+account_discount_type;
+					AppConnector.request(dataUrl).then(
+						function(data){
+							data = data.result;
+							if (data)
+								for(var index in data)
+									if(typeof data[index] == "object")
+										for(var id in data[index])
+											if (data[index][id].discountpc !== undefined)
+												thisInstance.setLineItemDiscountPercentage(id, data[index][id].discountpc);
+							
+						},
+						function(error,err){
+	
+						}
+					);					
+				}
+			}
+			else {
+				//Set remise à 0 sur toutes les lignes
+				jQuery('#lineItemTab input.selectedModuleId', container).each(function(){
+					if(this.value){
+						thisInstance.setLineItemDiscountPercentage($(this).parents('tr.lineItemRow'), 0);
+					}
+				});
+			}
 		});
 	},
 	
