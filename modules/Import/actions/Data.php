@@ -155,7 +155,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			$entityIdComponents = vtws_getIdComponents($entityInfo['id']);
 			$recordId = $entityIdComponents[1];
 		}
-		$adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user) . ' SET status=?, recordid=? WHERE id=?',
+		$adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=?, recordid=? WHERE id=?',
 				array($entityInfo['status'], $recordId, $entryId));
 	}
 
@@ -168,8 +168,8 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 		$moduleMeta = $moduleHandler->getMeta();
 		$moduleObjectId = $moduleMeta->getEntityId();
 		$moduleFields = $moduleMeta->getModuleFields();
-
-		$tableName = Import_Utils_Helper::getDbTableName($this->user);
+		
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, $moduleName);
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. Import_Data_Action::$IMPORT_RECORD_NONE;
 
 		if($this->batchImport) {
@@ -546,7 +546,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 	public function getImportStatusCount() {
 		$adb = PearDatabase::getInstance();
 
-		$tableName = Import_Utils_Helper::getDbTableName($this->user);
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, $this->module);
 		$result = $adb->query('SELECT status FROM '.$tableName);
 
 		$statusCount = array('TOTAL' => 0, 'IMPORTED' => 0, 'FAILED' => 0, 'PENDING' => 0,
@@ -641,9 +641,9 @@ class Import_Data_Action extends Vtiger_Action_Controller {
      *  @parms $user <User Record Model> Current Users
      *  @returns <Array> Import Records with the list of skipped records and failed records
      */
-    public static function getImportDetails($user){
+    public static function getImportDetails($user, $moduleName){
         $adb = PearDatabase::getInstance();
-        $tableName = Import_Utils_Helper::getDbTableName($user);
+        $tableName = Import_Utils_Helper::getDbTableName($user, $moduleName);
 		$result = $adb->pquery("SELECT * FROM $tableName where status IN (?,?)",array(self::$IMPORT_RECORD_SKIPPED,self::$IMPORT_RECORD_FAILED));
         $importRecords = array();
         if($result) {

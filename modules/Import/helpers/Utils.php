@@ -17,7 +17,7 @@ class Import_Utils_Helper {
 	static $AUTO_MERGE_MERGEFIELDS = 3;
 
 	static $supportedFileEncoding = array('UTF-8'=>'UTF-8', 'ISO-8859-1'=>'ISO-8859-1');
-	static $supportedDelimiters = array(','=>'comma', ';'=>'semicolon');
+	static $supportedDelimiters = array(','=>'LBL_COMMA', ';'=>'LBL_SEMICOLON', '	'=>'LBL_TAB');
 	static $supportedFileExtensions = array('csv','vcf');
 
 	public function getSupportedFileExtensions() {
@@ -52,9 +52,9 @@ class Import_Utils_Helper {
 		return $import_dir;
 	}
 
-	public static function getImportFilePath($user) {
+	public static function getImportFilePath($user, $moduleName) {
 		$importDirectory = self::getImportDirectory();
-		return $importDirectory. "IMPORT_".$user->id;
+		return $importDirectory. "IMPORT_".$user->id."_".$moduleName;
 	}
 
 
@@ -78,7 +78,7 @@ class Import_Utils_Helper {
 		return $fileReader;
 	}
 
-	public static function getDbTableName($user) {
+	public static function getDbTableName($user, $moduleName) {
 		$configReader = new Import_Config_Model();
 		$userImportTablePrefix = $configReader->get('userImportTablePrefix');
 
@@ -88,6 +88,11 @@ class Import_Utils_Helper {
         } else {
             $tableName .= $user->id;
         }
+
+        if ($moduleName) {
+        	$tableName .= '_' . $moduleName;
+        }
+
         return $tableName;
 	}
 
@@ -120,9 +125,9 @@ class Import_Utils_Helper {
 		self::showErrorPage($errorMessage, '', $customActions);
 	}
 
-	public static function isUserImportBlocked($user) {
+	public static function isUserImportBlocked($user, $moduleName) {
 		$adb = PearDatabase::getInstance();
-		$tableName = self::getDbTableName($user);
+		$tableName = self::getDbTableName($user, $moduleName);
 
 		if(Vtiger_Utils::CheckTable($tableName)) {
 			$result = $adb->query('SELECT 1 FROM '.$tableName.' WHERE status = '.  Import_Data_Action::$IMPORT_RECORD_NONE);
@@ -133,9 +138,9 @@ class Import_Utils_Helper {
 		return false;
 	}
 
-	public static function clearUserImportInfo($user) {
+	public static function clearUserImportInfo($user, $moduleName) {
 		$adb = PearDatabase::getInstance();
-		$tableName = self::getDbTableName($user);
+		$tableName = self::getDbTableName($user, $moduleName);
 
 		$adb->query('DROP TABLE IF EXISTS '.$tableName);
 		Import_Lock_Action::unLock($user);
@@ -181,7 +186,7 @@ class Import_Utils_Helper {
 
 		$uploadMaxSize = self::getMaxUploadSize();
 		$importDirectory = self::getImportDirectory();
-		$temporaryFileName = self::getImportFilePath($current_user);
+		$temporaryFileName = self::getImportFilePath($current_user, $request->get("module"));
 
 		if($_FILES['import_file']['error']) {
 			$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));

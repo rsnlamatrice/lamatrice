@@ -188,6 +188,11 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			$inventoryFieldMapping = 'discountpc';
 			if(is_numeric($discountpc))
 				$data[$inventoryFieldMapping] = $discountpc;
+				
+				
+		
+			//ED150529
+			$data['accountdiscounttype'] = $parentRecordModel->get('discounttype');
 		}
 		
 		return $this->setData($data);
