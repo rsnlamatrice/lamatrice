@@ -738,6 +738,8 @@ $languageStrings = array(
         'Address format' => 'Format de l\'adresse',
         
         'LBL_ACCOUNT_DISCOUNT_TYPE' => 'Remise type',
+        
+        'LBL_ALREADY_SENT_2_COMPTA' => 'La facture est en comptabilité',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 
