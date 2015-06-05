@@ -105,7 +105,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	 * @return <array>
 	 */
 	public function getInventoryMappingFields() {
-		return array(
+		return array(	
 				//Billing Address Fields
 				array('parentField'=>'bill_city', 'inventoryField'=>'bill_city', 'defaultValue'=>''),
 				array('parentField'=>'bill_street', 'inventoryField'=>'bill_street', 'defaultValue'=>''),

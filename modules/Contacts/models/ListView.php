@@ -82,9 +82,11 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		//Ajout systématique du champ vtiger_contactaddress.mailingstreet2
 		//Ajout systématique du champ vtiger_contactdetails.isgroup
 		$listQuery = parent::getQuery();
-		foreach(array('vtiger_contactaddress.mailingstreet2', 'vtiger_contactdetails.isgroup') as $fieldName)
-			if(!preg_match('/SELECT.+'.preg_quote($fieldName).'.+FROM\s/i', $listQuery))
+		foreach(array('vtiger_contactaddress.mailingstreet2', 'vtiger_contactdetails.isgroup') as $fieldName){
+			if(!preg_match('/SELECT.+'.preg_quote($fieldName).'.+FROM\s/i', $listQuery)
+			&& strpos($listQuery, explode('.',$tableName)[0]))
 				$listQuery = preg_replace('/^\s*SELECT\s/i', 'SELECT '.$fieldName.',', $listQuery);
+		}
 		return $listQuery;
 	}
 

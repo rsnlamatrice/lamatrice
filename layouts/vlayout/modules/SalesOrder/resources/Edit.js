@@ -26,7 +26,7 @@ Inventory_Edit_Js("SalesOrder_Edit_Js",{},{
 	 */
 	getPopUpParams : function(container) {
 		var params = this._super(container);
-        var sourceFieldElement = jQuery('input[class="sourceField"]',container);
+		var sourceFieldElement = jQuery('input[class="sourceField"]',container);
 
 		if(sourceFieldElement.attr('name') == 'contact_id' || sourceFieldElement.attr('name') == 'potential_id') {
 			var form = this.getForm();
