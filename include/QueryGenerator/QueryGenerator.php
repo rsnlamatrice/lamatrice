@@ -908,7 +908,6 @@ class QueryGenerator {
 			$fieldSql .= ')';
 			$fieldSqlList[$index] = $fieldSql;
 		}
-		
 		foreach ($this->manyToManyRelatedModuleConditions as $index=>$conditionInfo) {
 			$relatedModuleMeta = RelatedModuleMeta::getInstance($this->meta->getTabName(),
 					$conditionInfo['relatedModule']);
@@ -1254,7 +1253,6 @@ class QueryGenerator {
 			if(empty($advfilterlist) || count($advfilterlist) <= 0) {
 				return ;
 			}
-
 			if($this->conditionInstanceCount > 0) {
 				$this->startGroup(self::$AND);
 			} else {
@@ -1313,7 +1311,6 @@ class QueryGenerator {
 			}
 			$this->endGroup();
 		} else {
-			
 			if(isset($input['search_field']) && $input['search_field'] !="") {
 				$search_fields = $input['search_field'];
 				$search_texts = $input['search_text'];
@@ -1383,12 +1380,14 @@ class QueryGenerator {
 			$value = $search_text;
 			$stringConvert = function_exists(iconv) ? @iconv("UTF-8",$default_charset,$value)
 					: $value;
-			if(!$this->isStringType($type)) {
+			if($stringConvert !== FALSE //ED150605 ne rien faire en cas d'erreur de traduction
+			&& !$this->isStringType($type)) {
 				$value=trim($stringConvert);
 			}
 
 			switch($type){
 			case 'picklist':
+				//ED150605 : ici, vu bug où la valeur du pick list vaut le nom traduit du module (mais ça pourrait être n'importe quelle traduction) et pourrit la requête
 				global $mod_strings;
 				// Get all the keys for the for the Picklist value
 				$mod_keys = array_keys($mod_strings, $value);

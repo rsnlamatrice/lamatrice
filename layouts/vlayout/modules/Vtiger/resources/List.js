@@ -2019,7 +2019,8 @@ jQuery.Class("Vtiger_List_Js",{
 			if (operator === null) {
 				operator = $input.attr('data-operator');
 			}
-			else {
+			//ED150605 : select text is translated value
+			else if($input[0].tagName != 'SELECT') {
 				searchValue = operator[2];
 				if (operator != null)
 					operator = operator[1].trim().toUpperCase();

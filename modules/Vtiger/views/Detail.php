@@ -127,7 +127,6 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 	function process(Vtiger_Request $request) {
 		$mode = $request->getMode();
 		if(!empty($mode)) {
-			
 			echo $this->invokeExposedMethod($mode, $request);
 			return;
 		}
