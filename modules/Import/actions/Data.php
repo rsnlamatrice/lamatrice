@@ -643,7 +643,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
      */
     public static function getImportDetails($user, $moduleName){
         $adb = PearDatabase::getInstance();
-        $tableName = Import_Utils_Helper::getDbTableName($user, $moduleName); // tmp
+        $tableName = Import_Utils_Helper::getDbTableName($user, $moduleName);
 		$result = $adb->pquery("SELECT * FROM $tableName where status IN (?,?)",array(self::$IMPORT_RECORD_SKIPPED,self::$IMPORT_RECORD_FAILED));
         $importRecords = array();
         if($result) {
