@@ -19,5 +19,5 @@
  */
  
 include('config.inc.php');
-
+include('config.RSN.inc.php');
 ?>
