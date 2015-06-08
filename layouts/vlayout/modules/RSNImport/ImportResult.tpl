@@ -19,13 +19,13 @@
 	{/if}
 	<tr>
 		<td valign="top">
-			{include file="Import_Result_Details.tpl"|@vtemplate_path:'Import'}<!--TMP Import Module ???? -->
+			{include file="ImportResultDetails.tpl"|@vtemplate_path:'RSNImport'}<!--TMP Import Module ???? -->
 		</td>
 	</tr>
 	<tr>
 		<td align="right" colspan="2">
-			<button name="next" class="cancel btn"
-			onclick="return window.open('index.php?module={$MODULE}&for_module={$FOR_MODULE}&view=List&start=1&foruser={$OWNER_ID}','test','width=700,height=650,resizable=1,scrollbars=0,top=150,left=200');"><strong>{'LBL_VIEW_LAST_IMPORTED_RECORDS'|@vtranslate:$MODULE}</strong></button>
+			<button class="cancel btn"
+			onclick="return window.open('index.php?module={$FOR_MODULE}&view=List&start=1&foruser={$OWNER_ID}','test','width=700,height=650,resizable=1,scrollbars=0,top=150,left=200');"><strong>{'LBL_VIEW_LAST_IMPORTED_RECORDS'|@vtranslate:$MODULE}</strong></button>
 		<!--{include file='Import_Finish_Buttons.tpl'|@vtemplate_path:'Import'}--><!--TMP Import Module ???? -->
 		</td>
 	</tr>

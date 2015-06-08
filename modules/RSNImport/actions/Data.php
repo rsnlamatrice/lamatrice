@@ -13,11 +13,11 @@ class RSNImport_Data_Action extends Import_Data_Action {
 
 	public function updateImportStatusForCancel() {
 		$adb = PearDatabase::getInstance();
-		$adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=' . self::$IMPORT_RECORD_SKIPPED . ' WHERE status=' . self::$IMPORT_RECORD_NONE,
+		$adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=' . self::$IMPORT_RECORD_FAILED . ' WHERE status=' . self::$IMPORT_RECORD_NONE,
 			array());
 	}
 
-	public static function runScheduledImport() {
+	public static function runScheduledImport() {//TODO email or log when schedule import is running and ended !!
 		global $current_user;
 		$scheduledImports = self::getScheduledImport();
 		$vtigerMailer = new Vtiger_Mailer();
@@ -62,6 +62,42 @@ class RSNImport_Data_Action extends Import_Data_Action {
 		//tmp mail
 		//Vtiger_Mailer::dispatchQueue(null);
 	}
+
+	public static function getImportDetails($user, $moduleName){
+        $adb = PearDatabase::getInstance();
+        $tableName = Import_Utils_Helper::getDbTableName($user, $moduleName);
+		$result = $adb->pquery("SELECT * FROM $tableName where status IN (?,?)",array(self::$IMPORT_RECORD_SKIPPED,self::$IMPORT_RECORD_FAILED));
+        $importRecords = array();
+
+        if($result) {
+            $headers = $adb->getColumnNames($tableName);
+			$numOfHeaders = count($headers);
+
+            for ($i=3; $i<$numOfHeaders; ++$i) {
+                $importRecords['headers'][] = $headers[$i];
+            }
+
+			$noOfRows = $adb->num_rows($result);
+
+			for ($i=0; $i<$noOfRows; ++$i) {
+                $row = $adb->fetchByAssoc($result,$i);
+                $record= new Vtiger_Base_Model();
+
+                foreach ($importRecords['headers'] as $header) {
+                    $record->set($header,$row[$header]);
+                }
+
+                if ($row['status'] == self::$IMPORT_RECORD_SKIPPED) {
+                    $importRecords['skipped'][] = $record;
+                } else {
+                    $importRecords['failed'][] = $record;
+                }
+            }
+
+        	return $importRecords;
+        }
+    }
+	
 
 	public static function getScheduledImport() {
 

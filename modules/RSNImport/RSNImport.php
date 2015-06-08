@@ -1,11 +1,23 @@
 <?php
+/*********************************************************************************
+ * To create a new import:
+ *    - Create a new class in RSNImport module that inherite from Import class.
+ *		 -> the showConfiguration method is called when the user choose this import class. It must return a template containing the configuration parameter. If there is no configuration, just don't overload the method.
+ *		 -> the preImportData method must save new imported data in the temporary table. (if the cass inherite from ImportFromFile, use the parseAndSaveFile method)
+ *		 -> the getImportModules method must return an array containing all the module concerned by the import. (By default, it return only the curent module)
+ *       -> the get<<Module>>Field methods must return a list of the imported field in the concerned module.
+ *       -> the import<<Module>> methods process to the import from temporary table. If the method does not exit for a module, the default import method is called.
+ *    - Add a row in the vtiger_rsnimportsources table.
+ *       -> `tabid` is the linked module
+ *       -> `class` is the name of the previously created class.
+ *
+ * 
+ ********************************************************************************/
 
 class RSNImport {
-	//tmp add and remove table / Schedule rox on install enable / uninstall disable
-
 	public function vtlib_handler($moduleName, $eventType) {
 		if ($eventType == 'module.postinstall') {
-			self::addRsnImportSource();
+			self::addRsnImportSourceTable();
 			self::initImportSources();
 			self::addScheduleTask();
 		} else if ($eventType == 'module.enabled') {
@@ -15,7 +27,10 @@ class RSNImport {
 		}
 	}
 
-	static function addRsnImportSource() {
+	/**
+	 * Method to create the rsnimportsource table.
+	 */
+	static function addRsnImportSourceTable() {
 		$db = PearDatabase::getInstance();
 		$sql = "CREATE TABLE IF NOT EXISTS `vtiger_rsnimportsources` (
 			`importsourcesid` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -28,6 +43,10 @@ class RSNImport {
 		$db->pquery($sql);
 	}
 
+	/**
+	 * Method to init the import sources.
+	 *  It clear the importsource table and insert the default values.
+	 */
 	static function initImportSources() {
 		$db = PearDatabase::getInstance();
 		$sql = "TRUNCATE `vtiger_rsnimportsources`;";
@@ -38,6 +57,9 @@ class RSNImport {
 		$db->pquery($sql);
 	}
 
+	/** 
+	 * Method to add the schedule task in the cron_task table.
+	 */
 	static function addScheduleTask() {
 		$db = PearDatabase::getInstance();
 		$sql = "DELETE FROM `vtiger_cron_task` WHERE name = 'Schedule RSNImport';";
@@ -47,6 +69,9 @@ class RSNImport {
 		$db->pquery($sql);
 	}
 
+	/**
+	 * Method to enable import cron task
+	 */
 	static function enableScheduleTask() {
 		$db = PearDatabase::getInstance();
 		$sql = "UPDATE `vtiger_cron_task`
@@ -55,6 +80,9 @@ class RSNImport {
 		$db->pquery($sql);
 	}
 
+	/**
+	 * Method to disable import cron task
+	 */
 	static function disableScheduleTask() {
 		$db = PearDatabase::getInstance();
 		$sql = "UPDATE `vtiger_cron_task`

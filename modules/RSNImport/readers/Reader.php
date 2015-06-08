@@ -1,44 +1,37 @@
 <?php
 
-class RSNImport_Reader_Reader {//tmp add datasource ??
-
-	//tmp witch attribute are usefull ??
-	var $status='success';
-	var $numberOfRecordsRead = 0;
+class RSNImport_Reader_Reader {
 	var $errorMessage='';
 	var $user;
 	var $request;
-    var $moduleModel;
 
-	public function  __construct($request, $user) {//tmp 
+	public function  __construct($request, $user) {
 		$this->request = $request;
 		$this->user = $user;
-        //$this->moduleModel = Vtiger_Module_Model::getInstance($this->request->get('for_module'));
 	}
 
-	public function getStatus() {
-		return $this->status;
-	}
-
+	/**
+	 * Method to get the error message.
+	 * @return string - the error message.
+	 */
 	public function getErrorMessage() {
 		return $this->errorMessage;
 	}
 
-	public function getNumberOfRecordsRead() {
-		return $this->numberOfRecordsRead;
-	}
-
+	/**
+	 * Method to convert a string to another charset.
+	 * @param string $value : the string to convert.
+	 * @param string $fromCharset : the $value string curent charset.
+	 * @param string $toEncoding : the new charset.
+	 * @return string - the encoded string.
+	 */
 	public function convertCharacterEncoding($value, $fromCharset, $toCharset) {
-		if (function_exists("mb_convert_encoding")) {
+		if (function_exists("mb_convert_encoding") && $fromCharset != "macintosh" && $toCharset != "macintosh") {
 			$value = mb_convert_encoding($value, $toCharset, $fromCharset);
 		} else {
 			$value = iconv($fromCharset, $toCharset, $value);
 		}
 		return $value;
-	}
-
-	public function readNextRecord() {
-		// Sub-class need to implement this
 	}
 }
 ?>

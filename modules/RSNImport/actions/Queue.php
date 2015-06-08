@@ -1,6 +1,5 @@
 <?php
 
-//tmp do not use the import queue table but it's own -> like that we can manage hour own import !
 class RSNImport_Queue_Action extends Import_Queue_Action {
 	static $importQueueTable = 'vtiger_rsnimport_queue';
 
@@ -32,9 +31,9 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 				array($db->getUniqueID(self::$importQueueTable),
 						$user->id,
 						getTabid($module),
-						$request->get('ImportSource'),//tmp importSourceId to check 
-						Zend_Json::encode((object) $fieldMapping),// tmp !!!!!!!
-						Zend_Json::encode((object) $defaultValues),// tmp !!!!!
+						$request->get('ImportSource'),
+						Zend_Json::encode((object) $fieldMapping),
+						Zend_Json::encode((object) $defaultValues),// tmp usefull ??
 						$request->get('merge_type'),
 						Zend_Json::encode($request->get('merge_fields')),
 						$status));

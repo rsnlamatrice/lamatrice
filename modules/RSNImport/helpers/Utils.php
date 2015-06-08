@@ -7,9 +7,21 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 	static $AUTO_MERGE_OVERWRITE = 2;
 	static $AUTO_MERGE_MERGEFIELDS = 3;
 
-	static $supportedFileEncoding = array('UTF-8'=>'UTF-8', 'ISO-8859-1'=>'ISO-8859-1');
+	static $supportedFileEncoding = array('UTF-8'=>'UTF-8', 'ISO-8859-1'=>'ISO-8859-1', 'macintosh'=> 'macintosh');
 	static $supportedDelimiters = array(','=>'LBL_COMMA', ';'=>'LBL_SEMICOLON', '	'=>'LBL_TAB');
 	static $supportedFileExtensions = array('csv','xml','json');
+
+	public function getSupportedFileExtensions() {
+		return self::$supportedFileExtensions;
+	}
+
+	public function getSupportedFileEncoding() {
+		return self::$supportedFileEncoding;
+	}
+
+	public function getSupportedDelimiters() {
+		return self::$supportedDelimiters;
+	}
 
 	public static function getFileReaderInfo($type) {
 		$configReader = new RSNImport_Config_Model();
@@ -61,12 +73,6 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 			$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
 			return false;
 		}
-		/*$fileReader = Import_Utils_Helper::getFileReader($request, $current_user); //tmp
-
-		if($fileReader == null) {
-			$request->set('error_message', vtranslate('LBL_INVALID_FILE', 'Import'));
-			return false;
-		}*/
 
 		return true;
 	}
@@ -112,7 +118,7 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
         return $fieldTypes;
     }
 
-    static function getDBColumnType($fieldObject,$fieldTypes){
+    static function getDBColumnType($fieldObject,$fieldTypes) {
         $columnsListQuery = '';
         $fieldName = $fieldObject->getName();
         $dataType = $fieldObject->getFieldDataType();

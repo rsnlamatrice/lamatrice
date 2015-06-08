@@ -1,11 +1,10 @@
 <?php
 
-//tmp Index ??
 class RSNImport_Index_View extends Vtiger_Index_View {
 
 	function __construct() {
 		parent::__construct();
-		$this->exposeMethod('continueImport');//tmp continueImport ?? where is methode and what it is used for ???
+		$this->exposeMethod('continueImport');
 		$this->exposeMethod('preImport');
 		$this->exposeMethod('uploadAndParse');
 		$this->exposeMethod('selectImportSource');
@@ -17,7 +16,12 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		$this->exposeMethod('cancelImport');
 	}
 
-	function checkPermission(Vtiger_Request $request) {//tmp use rsnimport permission
+	/**
+	 * Method to check if curent user has permission to import in the concerned module.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function checkPermission(Vtiger_Request $request) {
+		// TODO: use rsnimport permission
 		$moduleName = $request->get('for_module');
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
@@ -27,15 +31,19 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		}
 	}
 
+	/**
+	 * Method to catch rsnimport request and redirect to the current step method.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
 	function process(Vtiger_Request $request) {
-		global $VTIGER_BULK_SAVE_MODE;//tmp use for what ??
+		// TODO:  $mode == 'import' -> probleme if F5 on import result page -> many time the same import.
+		global $VTIGER_BULK_SAVE_MODE;
 		$previousBulkSaveMode = $VTIGER_BULK_SAVE_MODE;
-		$VTIGER_BULK_SAVE_MODE = true;
+		$VTIGER_BULK_SAVE_MODE = false;
 		$moduleName = $request->get('for_module');
 		$mode = $request->getMode();
-		if(!empty($mode)) {//tmp use new mode !
-			// Added to check the status of import
-			if($mode == 'continueImport' || $mode == 'preImport' || $mode == 'selectImportSource') {//|| $mode == 'import' -> probleme if F5 on import result page -> multiple import !!
+		if(!empty($mode)) {
+			if($mode == 'continueImport' || $mode == 'preImport' || $mode == 'selectImportSource') {
 				$this->checkImportStatus($request);
 			}
 			$this->invokeExposedMethod($mode, $request);
@@ -48,7 +56,7 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 	}
 
 	/**
-	 * Function to get the list of Script models to be included
+	 * Method to get the list of Script models to be included
 	 * @param Vtiger_Request $request
 	 * @return <Array> - List of Vtiger_JsScript_Model instances
 	 */
@@ -65,7 +73,11 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		return $headerScriptInstances;
 	}
 
-	function selectImportSource(Vtiger_Request $request) { // tmp
+	/**
+	 * Method to display the firt step of the import (the select import source step).
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function selectImportSource(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->get('for_module');
 
@@ -73,12 +85,16 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		$viewer->assign('MODULE', 'RSNImport');
 		$sources = RSNImport_Utils_Helper::getSourceList($moduleName);
 		$viewer->assign('SOURCES', $sources);
-
-		//$viewer->assign('ERROR_MESSAGE', $request->get('error_message')); // tmp ??
+		$viewer->assign('ERROR_MESSAGE', $request->get('error_message'));
 
 		return $viewer->view('SelectImportSource.tpl', 'RSNImport');
 	}
 
+	/**
+	 * Method to get an instance of the import controller. It use the ImportSource parameter to retrive the name of the import class.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @return Import - An instance of the import controller, or null.
+	 */
 	function getImportController(Vtiger_Request $request) {
 		$className = $request->get('ImportSource');
 		if ($className) {
@@ -92,88 +108,63 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		return null;
 	}
 	
-	function preImport(Vtiger_Request $request) { // tmp
+	/**
+	 * Method to process the second step of the import (the pre-import data step).
+	 *  This method pre-import and display data.
+	 *  If pre-import failed, it display the fisrtstep view.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function preImport(Vtiger_Request $request) {
 		$importController = $this->getImportController($request);
 
 		if ($importController->preImportData($request)) {
-			$this->displayDataPreview($request, $importController->getPreviewData(), $importController);//tmp
+			$importController->displayDataPreview();
 		} else {
 			$this->selectImportSource($request);
 		}
 	}
 
-	function displayDataPreview(Vtiger_Request $request, $previewData, $importController) {
-		$viewer = $this->getViewer($request);
-		$moduleName = $request->get('for_module');
-		$viewer->assign('FOR_MODULE', $moduleName);
-		$viewer->assign('MODULE', 'RSNImport');
-		$viewer->assign('PREVIEW_DATA', $previewData);
-		$viewer->assign('IMPORT_SOURCE', $request->get('ImportSource'));
-
-		//$viewer->assign('ERROR_MESSAGE', $request->get('error_message')); // tmp ??
-
-		return $viewer->view($importController->getPreviewTemplateName(), 'RSNImport');
-	}
-
+	/**
+	 * Method to process the third step of the import (the import step).
+	 * @param Vtiger_Request $request: the curent request.
+	 */
 	function import(Vtiger_Request $request) {
 		$importController = $this->getImportController($request);
 		$importController->import();
 	}
 
-	function undoImport(Vtiger_Request $request) { // tmp: use function of import module ?? () // tmp manage multiple module !!
-		$viewer = new Vtiger_Viewer();
-		$db = PearDatabase::getInstance();
-
-		$moduleName = $request->get('for_module');
+	/**
+	 * Method to undo the last import for a specific user and a specific import type.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function undoImport(Vtiger_Request $request) {
 		$ownerId = $request->get('foruser');
-
 		$user = Users_Record_Model::getCurrentUserModel();
-		$dbTableName = Import_Utils_Helper::getDbTableName($user, $moduleName);
 
 		if(!$user->isAdminUser() && $user->id != $ownerId) {
 			$viewer->assign('MESSAGE', 'LBL_PERMISSION_DENIED');
 			$viewer->view('OperationNotPermitted.tpl', 'Vtiger');
 			exit;
 		}
-        $previousBulkSaveMode = $VTIGER_BULK_SAVE_MODE;
-        $VTIGER_BULK_SAVE_MODE = true;  
-		$query = "SELECT recordid FROM $dbTableName WHERE status = ? AND recordid IS NOT NULL";
-		//For inventory modules
-		$inventoryModules = getInventoryModules();
-		if(in_array($moduleName, $inventoryModules)){
-			$query .=' GROUP BY subject';
-		}
-		//End
-		$result = $db->pquery($query, array(Import_Data_Action::$IMPORT_RECORD_CREATED));
-		$noOfRecords = $db->num_rows($result);
-		$noOfRecordsDeleted = 0;
-        $entityData = array();
-		for($i=0; $i<$noOfRecords; $i++) {
-			$recordId = $db->query_result($result, $i, 'recordid');
-			if(isRecordExists($recordId) && isPermitted($moduleName, 'Delete', $recordId) == 'yes') {
-				$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
-                $recordModel->setId($recordId);
-                $recordModel->delete();
-                $focus = $recordModel->getEntity();
-                $focus->id = $recordId;
-                $entityData[] = VTEntityData::fromCRMEntity($focus);
-				$noOfRecordsDeleted++;
-			}
-		}
-        $entity = new VTEventsManager($db);        
-        $entity->triggerEvent('vtiger.batchevent.delete',$entityData);
-        $VTIGER_BULK_SAVE_MODE = $previousBulkSaveMode;
-		$viewer->assign('FOR_MODULE', $moduleName);
-		$viewer->assign('MODULE', 'Import');
-		$viewer->assign('TOTAL_RECORDS', $noOfRecords);
-		$viewer->assign('DELETED_RECORDS_COUNT', $noOfRecordsDeleted);
-		$viewer->view('ImportUndoResult.tpl', 'Import');
+
+        $importController = $this->getImportController($request);
+        $importController->undoImport($ownerId);
 	}
 
-	function lastImportedRecords(Vtiger_Request $request) { // tmp : to managed !!
+	/**
+	 * Method to get the last imported records.
+	 *  (this method is curently not used ...)
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function lastImportedRecords(Vtiger_Request $request) {
+		// TODO : do not call an Import module methode ?
 		Vtiger_Import_View::lastImportedRecords($request);
 	}
 
+	/**
+	 * Method to clear the pre-import tables and display the first step template.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
 	function clearCorruptedData(Vtiger_Request $request) {
 		$user = Users_Record_Model::getCurrentUserModel();
 		$importController = $this->getImportController($request);
@@ -186,12 +177,16 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		}
 
 		foreach($modules as $moduleName) {
-			Import_Utils_Helper::clearUserImportInfo($user, $moduleName);//tmp $user -> only one user can cancel import ...
+			Import_Utils_Helper::clearUserImportInfo($user, $moduleName);
 		}
 
 		$this->selectImportSource($request);
 	}
 
+	/**
+	 * Method to cancel the current running import and display the status of the import.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
 	function cancelImport(Vtiger_Request $request) {
 		$user = Users_Record_Model::getCurrentUserModel();
 		$importController = $this->getImportController($request);
@@ -205,7 +200,8 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		}
 
 		foreach($modules as $moduleName) {
-			$importInfo = RSNImport_Queue_Action::getImportInfo($moduleName, $user);//tmp $user -> only one user can cancel import ...
+			//TOTO : Allow admin to cancel import !
+			$importInfo = RSNImport_Queue_Action::getImportInfo($moduleName, $user);
 			if($importInfo != null) {
 				array_push($importInfos, $importInfo);
 				$importUser  =Users_Record_Model::getInstanceById($importInfo['user_id'], 'Users');
@@ -219,7 +215,13 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 		RSNImport_Import_View::showImportStatus($importInfos, $user, $forModule);
 	}
 
-	function checkImportStatus(Vtiger_Request $request) { // tmp import template called ...
+	/**
+	 * Method to check if there is no import currently running or cortrupted data in the temporary import table.
+	 *  It display the right template ifthere is currupted data or locked table.
+	 *  If there is no probleme, it clear the informations of the last import.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function checkImportStatus(Vtiger_Request $request) {
 		$forModule = $request->get('for_module');
 		$user = Users_Record_Model::getCurrentUserModel();
 		$mode = $request->getMode();
@@ -229,7 +231,8 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 			$request->set('ImportSource', $importSource);
 			$importController = $this->getImportController($request);
 			$modules = $importController->getImportModules();
-		} else {//tmp get only currentmodule name, or get preconfigured list by module ??
+		} else {
+			//tmp get only currentmodule name, or get preconfigured list by module ??
 			$modules = array($forModule);
 		}
 
@@ -243,8 +246,8 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 				$lockedBy = $lockInfo['userid'];
 				$statusOk = false;
 				if($user->id != $lockedBy && !$user->isAdminUser()) {
-					RSNImport_Utils_Helper::showImportLockedError($lockInfo);//tmp module blocked ??
-					exit;//tmp exit ???
+					RSNImport_Utils_Helper::showImportLockedError($lockInfo);
+					exit;
 				} else {
 					if($mode == 'continueImport' && $user->id == $lockedBy) {
 						
@@ -261,11 +264,10 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 				}
 			}
 
-			if(RSNImport_Utils_Helper::isUserImportBlocked($user, $moduleName)) {//tmp check all module !!!
+			if(RSNImport_Utils_Helper::isUserImportBlocked($user, $moduleName)) {
 				$importInfo = RSNImport_Queue_Action::getImportInfo($moduleName, $user);
 				$statusOk = false;
 				if($importInfo != null) {
-					//var_dump($importInfo);
 					$showStatus = true;
 					continue;
 				} else {
@@ -275,7 +277,7 @@ class RSNImport_Index_View extends Vtiger_Index_View {
 						RSNImport_Utils_Helper::showImportTableBlockedError($moduleName, $user, $importSource);
 					}
 
-					exit;//tmp exit ???
+					exit;
 				}
 			}
 		}

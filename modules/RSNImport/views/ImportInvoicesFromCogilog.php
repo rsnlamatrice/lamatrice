@@ -1,5 +1,6 @@
 <?php
 
+//TODO : implement import!
 class RSNImport_ImportInvoicesFromCogilog_View extends RSNImport_Import_View {
 
 	public function getSource() {
