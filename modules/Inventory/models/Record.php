@@ -155,16 +155,28 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		$userModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$moduleName = $parentRecordModel->getModuleName();
 
-		//
+		$data = array();
+		
+		//ED150605
+		if($moduleName === 'Accounts'){
+			
+			$mainContactRecordModel = $parentRecordModel->getRelatedMainContacts();
+			if($mainContactRecordModel)
+				foreach($mainContactRecordModel as $contactId=>$contact){
+					$data['contact_id'] = $contactId;
+					break;
+				}
+		}
+		//ED150500
 		if($moduleName === 'Contacts'){
+			
 			/* ED141016 génération du compte du contact si manquant */
 			$accountRecordModel = $parentRecordModel->getAccountRecordModel();
 			$moduleName = $accountRecordModel->getModuleName();
 			$parentRecordModel = $accountRecordModel;
+			$data['account_id'] = $accountRecordModel->getId();
 			//echo('<pre>');var_dump($parentRecordModel);echo('</pre>');
 		}
-		
-		$data = array();
 		$fieldMappingList = $parentRecordModel->getInventoryMappingFields();
 
 		foreach ($fieldMappingList as $fieldMapping) {
@@ -188,13 +200,10 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			$inventoryFieldMapping = 'discountpc';
 			if(is_numeric($discountpc))
 				$data[$inventoryFieldMapping] = $discountpc;
-				
-				
 		
 			//ED150529
 			$data['accountdiscounttype'] = $parentRecordModel->get('discounttype');
 		}
-		
 		return $this->setData($data);
 	}
 
@@ -210,9 +219,9 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	  * Function to get the send email pdf url
 	  * @return <string>
 	  */
-    public function getSendEmailPDFUrl() {
-        return 'module='.$this->getModuleName().'&view=SendEmail&mode=composeMailData&record='.$this->getId();
-    }
+	public function getSendEmailPDFUrl() {
+	    return 'module='.$this->getModuleName().'&view=SendEmail&mode=composeMailData&record='.$this->getId();
+	}
 
 	/**
 	 * Function to get this record and details as PDF

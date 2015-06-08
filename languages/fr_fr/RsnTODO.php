@@ -9,8 +9,8 @@
  ************************************************************************************/
 
 $languageStrings = array(
-	'RsnTODO' => 'A faire',
-	'SINGLE_RsnTODO' => 'A faire',
+	'RsnTODO' => 'A Faire',
+	'SINGLE_RsnTODO' => 'A Faire',
 	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
 	'LBL_BLOCK_REPONSE' => 'Réponse',
 	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations complémentaires',

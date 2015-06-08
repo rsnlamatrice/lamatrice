@@ -14,10 +14,14 @@
         <br>
         <div class="row-fluid">
             <div class="pull-right">
-				<button class="btn btn-success" type="submit"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
-				<a class="cancelLink" type="reset" onclick="javascript:window.history.back();">{vtranslate('LBL_CANCEL', $MODULE)}</a>
-			</div>
-			<div class="clearfix"></div>
+		{if !$NOT_EDITABLE}
+		    <button class="btn btn-success" type="submit"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
+		{elseif !is_numeric($NOT_EDITABLE)}
+		    <i>{vtranslate($NOT_EDITABLE, $MODULE)}</i>
+		{/if}
+		<a class="cancelLink" type="reset" onclick="javascript:window.history.back();">{vtranslate('LBL_CANCEL', $MODULE)}</a>
+	    </div>
+	    <div class="clearfix"></div>
         </div>
     </form>
 </div>

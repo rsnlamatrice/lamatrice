@@ -29,15 +29,23 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 			);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($detailViewLinks);
 
-            $sendEmailLink = array(
-                'linklabel' => vtranslate('LBL_SEND_MAIL_PDF', $moduleName),
-                'linkurl' => 'javascript:Inventory_Detail_Js.sendEmailPDFClickHandler(\''.$recordModel->getSendEmailPDFUrl().'\')',
-                'linkicon' => ''
-            );
-
-            $linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($sendEmailLink);
+			$sendEmailLink = array(
+			    'linklabel' => vtranslate('LBL_SEND_MAIL_PDF', $moduleName),
+			    'linkurl' => 'javascript:Inventory_Detail_Js.sendEmailPDFClickHandler(\''.$recordModel->getSendEmailPDFUrl().'\')',
+			    'linkicon' => ''
+			);
+	    
+			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($sendEmailLink);
 		}
 
+		//ED150603 : remove "delete" menu if sent2compta
+		if($recordModel->get('sent2compta'))
+			foreach($linkModelList['DETAILVIEW'] as $index => $link)
+				if(strpos($link->get('linkurl'), '.deleteRecord(') > 0){
+					unset($linkModelList['DETAILVIEW'][$index]);
+					break;
+				}
+		
 		return $linkModelList;
 	}
 

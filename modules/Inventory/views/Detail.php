@@ -15,6 +15,12 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 		parent::preProcess($request);
 	}
 
+	function isAjaxEnabled($recordModel){
+		if($recordModel->get('sent2compta'))
+			return false;
+		return parent::isAjaxEnabled($recordModel);
+	}
+	
 	/**
 	 * Function returns Inventory details
 	 * @param Vtiger_Request $request
@@ -136,7 +142,7 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 
 		$jsFileNames = array(
 			'modules.Inventory.resources.Popup',
-            'modules.Inventory.resources.Detail',
+			'modules.Inventory.resources.Detail',
 			'modules.Inventory.resources.Edit',
 			"modules.$moduleName.resources.Detail",
 		);
