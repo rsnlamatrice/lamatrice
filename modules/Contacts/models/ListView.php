@@ -81,6 +81,9 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 	function getQuery() {
 		//Ajout systématique du champ vtiger_contactaddress.mailingstreet2
 		//Ajout systématique du champ vtiger_contactdetails.isgroup
+		// et ce, si la table est présente dans la jointure
+		//TODO add join vtiger_contactaddress, vtiger_contactdetails
+		//$queryGenerator = $this->get('query_generator');
 		$listQuery = parent::getQuery();
 		foreach(array('vtiger_contactaddress.mailingstreet2', 'vtiger_contactdetails.isgroup') as $fieldName){
 			if(!preg_match('/SELECT.+'.preg_quote($fieldName).'.+FROM\s/i', $listQuery)
@@ -112,7 +115,7 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 					$this->set('search_value', $searchValue);
 				}
 				//une recherche sur le nom s'effectue aussi sur le mailingstreet2 si c'est un groupe
-				// name LIKE % OR (mailingstreet2 LIKE % OR isgroup == 0 )
+				// lastname LIKE % OR (mailingstreet2 LIKE % OR isgroup == 0 )
 				else if($searchKey[$i] == 'lastname' && $searchValue[$i]){
 					/* un sous-tableau
 					*/

@@ -673,4 +673,35 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		}
 		return $data;
 	}
+	
+	/** ED150609
+	 * trigger events
+	 */
+	public function triggerEvent($eventName = 'vtiger.entity.aftersave, vtiger.entity.aftersave.final'){
+		$focus = $this->getCRMEntity();
+		$focus->triggerEvent($eventName);
+	}
+	
+	/** ED150609
+	 * return CRMEntity intitialized with this record data
+	 */
+	public function getCRMEntity(){
+		//Get CRMEntity
+		$moduleName = $this->getModuleName();
+		$focus = CRMEntity::getInstance($moduleName);
+		//Set fields values
+		$fields = $focus->column_fields;
+		foreach($fields as $fieldName => $fieldValue) {
+			$fieldValue = $this->get($fieldName);
+			//echo '<pre>'; var_dump($fieldName, $fieldValue);echo '</pre>'; 
+			if(is_array($fieldValue)){
+				$focus->column_fields[$fieldName] = $fieldValue;
+			}else if($fieldValue !== null) {
+				$focus->column_fields[$fieldName] = decode_html($fieldValue);
+			}
+		}
+		$focus->mode = $this->get('mode');
+		$focus->id = $this->getId();
+		return $focus;
+	}
 }

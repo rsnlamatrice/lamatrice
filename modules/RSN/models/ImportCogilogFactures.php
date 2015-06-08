@@ -172,6 +172,9 @@ class RSN_CogilogFacturesRSN_Import {
 		/* Attention à ne pas importer une facture en cours de saisie */
 		$query .= ' WHERE facture.datepiece < CURRENT_DATE 
 		';
+		if(true)
+			$query .= ' AND (facture.numero = 3315 AND facture.annee = 2015)';
+		else
 		if($factMax)
 			$query .= ' AND ((facture.numero > '.$factMax.' AND facture.annee = '.$anneeMax.')
 			OR facture.annee > '.$anneeMax.')';
@@ -204,6 +207,13 @@ class RSN_CogilogFacturesRSN_Import {
 			$product = self::importLigneFacture($ligne_facture, $invoice, $contact, $sequence++);
 		}
 		//Update totals
+		
+		global $log;
+		
+		$log->debug("BEFORE " . basename(__FILE__) . " raise event handler(" . $invoice->getId() . ", " . $invoice->get('mode') . " )");
+		//raise event handler
+		$invoice->triggerEvent('vtiger.entity.aftersave');
+		$log->debug("AFTER " . basename(__FILE__) . " raise event handler");
 		
 		return $invoice;
 	}
@@ -279,7 +289,7 @@ class RSN_CogilogFacturesRSN_Import {
 	 */
 	private static function importFacture($srcRow, $contact){
 			
-		$cogId = substr($srcRow['annee'], 2,2) . str_pad ($srcRow['numero'], 5, '0', STR_PAD_LEFT);
+		$cogId = substr($srcRow['annee'], 2, 2) . str_pad ($srcRow['numero'], 5, '0', STR_PAD_LEFT);
 		/*var_dump($cogId);
 		return;*/
 	
@@ -348,8 +358,9 @@ class RSN_CogilogFacturesRSN_Import {
                             echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
                             return false;
                         }
-			
-			$record->set('mode','');
+			echo "<pre><code>Nouvelle facture ".$record->getId()."</code></pre>";
+                            
+			$record->set('mode','edit');
 			//This field is not manage by save()
 			$record->set('invoice_no','COG'.$cogId);
 			//set invoice_no
@@ -371,8 +382,8 @@ class RSN_CogilogFacturesRSN_Import {
 							    , $total
 							    , 'individual'
 							    , ASSIGNEDTO_ALL
-							    , substr($srcRow['tssaisie'], 0, 20)
-							    , substr($srcRow['tsmod'], 0, 20)
+							    , substr($srcRow['tssaisie'], 0, 19)
+							    , $srcRow['tsmod'] ? substr($srcRow['tsmod'], 0, 19) : substr($srcRow['tssaisie'], 0, 19)
 							    , $record->getId()));
 			
 			if( ! $result)

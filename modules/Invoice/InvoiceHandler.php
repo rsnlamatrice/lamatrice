@@ -45,6 +45,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$data = $entity->getData();
 		$invoice = Vtiger_Record_Model::getInstanceById($invoiceId, $moduleName);
 		$lineItems = $invoice->getProducts();
+		$log->debug("handleAfterSaveInvoiceEvent lineItems " . print_r($lineItems, true));
 		$categories = array(); //items by category
 		$invoiceData = false; //first item
 		foreach($lineItems as $nLine => $lineItem){
@@ -55,6 +56,9 @@ class RSNInvoiceHandler extends VTEventHandler {
 				$categories[$productCategory] = array();
 			$categories[$productCategory][$nLine] = $lineItem;
 		}
+		
+		$log->debug("handleAfterSaveInvoiceEvent Categories " . print_r(array_keys($categories), true));
+		
 		foreach($categories as $productCategory => $categoryItems)
 			switch($productCategory){
 			case 'Abonnement' :
@@ -206,5 +210,9 @@ class RSNInvoiceHandler extends VTEventHandler {
 	
 	/* ED150507 Règles de gestion lors de la validation d'une facture, d'après le montant total */
 	public function handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems){
+		global $log;
+		$log->debug("IN handleAfterSaveInvoiceTotalEvent");
+		
+		$log->debug("OUT handleAfterSaveInvoiceTotalEvent");
 	}
 }
