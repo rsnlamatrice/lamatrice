@@ -3,6 +3,15 @@
 class RSNImport_Queue_Action extends Import_Queue_Action {
 	static $importQueueTable = 'vtiger_rsnimport_queue';
 
+	/**
+	 * Methode to add an import in the queue table.
+	 *  It create the table if it dos not exist.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @param $user : the curent user.
+	 * @param string $module : the import module name.
+	 * @param array $fieldMapping : the field mapping.
+	 * @param array $defaultValues : the default field values.
+	 */
 	public static function add($request, $user, $module, $fieldMapping, $defaultValues) {
 		$db = PearDatabase::getInstance();
 
@@ -39,7 +48,10 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 						$status));
 	}
 
-
+	/** 
+	 * Method to remove an import of the queue table.
+	 * @param int $importId : the id of the import do remove.
+	 */
 	public static function remove($importId) {
 		$db = PearDatabase::getInstance();
 		if(Vtiger_Utils::CheckTable(self::$importQueueTable)) {
@@ -47,6 +59,10 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		}
 	}
 
+	/** 
+	 * Method to remove all import of the queue table for a specific user.
+	 * @param $user : the concerned user.
+	 */
 	public static function removeForUser($user) {
 		$db = PearDatabase::getInstance();
 		if(Vtiger_Utils::CheckTable(self::$importQueueTable)) {
@@ -54,6 +70,11 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		}
 	}
 
+	/** 
+	 * Method to get one import information for a specific user.
+	 * @param $user : the concerned user.
+	 * @return the information about one import.
+	 */
 	public static function getUserCurrentImportInfo($user) {
 		$db = PearDatabase::getInstance();
 
@@ -68,6 +89,11 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		return null;
 	}
 
+	/** 
+	 * Method to get all import informations for a specific user.
+	 * @param $user : the concerned user.
+	 * @return array : the import informations.
+	 */
 	public static function getUserCurrentImportInfos($user) {
 		$db = PearDatabase::getInstance();
 		$result = array();
@@ -88,6 +114,12 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		return $result;
 	}
 
+	/** 
+	 * Method to get import information for specific user and a specific module.
+	 * @param string $module : the concerned module name.
+	 * @param $user : the concerned user.
+	 * @return array : the import information.
+	 */
 	public static function getImportInfo($module, $user) {
 		$db = PearDatabase::getInstance();
 		
@@ -103,6 +135,11 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		return null;
 	}
 
+	/** 
+	 * Method to get import informations using id.
+	 * @param int $importId : the id of the desired import.
+	 * @return array : the import information.
+	 */
 	public static function getImportInfoById($importId) {
 		$db = PearDatabase::getInstance();
 
@@ -117,6 +154,11 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		return null;
 	}
 
+	/** 
+	 * Method to get all import informations.
+	 * @param boolean $status : if true, get only import info where import info = true. Else, get all import info.
+	 * @return array : the import informations.
+	 */
 	public static function getAll($status=false) {
 		$db = PearDatabase::getInstance();
 
@@ -137,6 +179,11 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		return $scheduledImports;
 	}
 
+	/** 
+	 * Method to organize import informations.
+	 * @param $rowData: the data from db.
+	 * @return array : the importorganized informations.
+	 */
 	static function getImportInfoFromResult($rowData) {
 		return array(
 			'id' => $rowData['importid'],
@@ -151,11 +198,22 @@ class RSNImport_Queue_Action extends Import_Queue_Action {
 		);
 	}
 
+	/** 
+	 * Method to update statues of an import.
+	 * @param int $importId : the id of the import to update.
+	 * @param $status: the new status of the import.
+	 */
 	static function updateStatus($importId, $status) {
 		$db = PearDatabase::getInstance();
 		$db->pquery('UPDATE ' . self::$importQueueTable . ' SET status=? WHERE importid=?', array($status, $importId));
 	}
 
+	/** 
+	 * Method to get the name of the import source class name for a specific user and a specific module.
+	 * @param string $module : the module name.
+	 * @param $user : the current user.
+	 * @return string : the import class name.
+	 */
 	public static function getImportClassName($module, $user) {
 		$db = PearDatabase::getInstance();
 

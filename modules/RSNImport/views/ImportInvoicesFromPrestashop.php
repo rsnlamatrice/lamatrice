@@ -3,35 +3,71 @@
 define('ASSIGNEDTO_ALL', '7');
 define('COUPON_FOLDERID', '9');
 
-//TODO : end the implementationof this import!
+//TODO : end the implementation of this import!
 class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFile_View {
 
 	private $coupon = null;
 
+	/**
+	 * Method to get the source import label to display.
+	 * @return string - The label.
+	 */
 	public function getSource() {
 		return 'LBL_PRESTASHOP';
 	}
 
+	/**
+	 * Method to get the source type label to display.
+	 * @return string - The label.
+	 */
 	public function getSourceType() {
 		return 'LBL_CSV_FILE';
 	}
 
+	/**
+	 * Method to get the modules that are concerned by the import.
+	 * @return array - An array containing concerned module names.
+	 */
 	public function getImportModules() {
 		return array('Contacts', 'Invoice');
 	}
 
+	/**
+	 * Method to get the suported file delimiters for this import.
+	 * @return array - an array of string containing the supported file delimiters.
+	 */
 	public function getDefaultFileDelimiter() {
 		return '	';
 	}
 
+	/**
+	 * Method to get the suported file extentions for this import.
+	 * @return array - an array of string containing the supported file extentions.
+	 */
 	public function getSupportedFileExtentions() {
 		return array('csv');
 	}
 
+	/**
+	 * Method to default file extention for this import.
+	 * @return string - the default file extention.
+	 */
+	public function getDefaultFileType() {
+		return 'csv';
+	}
+
+	/**
+	 * Method to default file enconding for this import.
+	 * @return string - the default file encoding.
+	 */
 	public function getDefaultFileEncoding() {
 		return 'macintosh';
 	}
 
+	/**
+	 * Method to get the imported fields for the contact module.
+	 * @return array - the imported fields for the contact module.
+	 */
 	public function getContactsFields() {
 		return array(
 			'lastname',
@@ -48,6 +84,10 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 			);
 	}
 
+	/**
+	 * Method to get the imported fields for the invoice module.
+	 * @return array - the imported fields for the invoice module.
+	 */
 	function getInvoiceFields() {
 		return array(
 			'lastname',
@@ -68,7 +108,51 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 			);
 	}
 
-	function importInvoiceLine($invoice, $invoiceLine, $sequence/*, $contact*/){//tmp to check
+	/**
+	 * Method to process to the import of the invoice module.
+	 * @param RSNImport_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importInvoice($importDataController) {
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
+		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImport_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY subject';
+
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+
+		if ($numberOfRecords <= 0) {
+			return;
+		}
+
+		$row = $adb->raw_query_result_rowdata($result, 0);
+		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
+		$invoiceData = array($row);
+
+		for ($i = 1; $i < $numberOfRecords; ++$i) {
+			$row = $adb->raw_query_result_rowdata($result, $i);
+			$invoiceSubject = $row['subject'];
+
+			if ($previousInvoiceSubjet == $invoiceSubject) {
+				array_push($invoiceData, $row);
+			} else {
+				$this->importOneInvoice($invoiceData, $importDataController);
+				$invoiceData = array($row);
+				$previousInvoiceSubjet = $invoiceSubject;
+			}
+		}
+
+		$this->importOneInvoice($invoiceData, $importDataController);
+	}
+
+	/**
+	 * Method to process to the import a line of the invoice.
+	 * @param $invoice : the concerned invoice.
+	 * @param $invoiceLine : the line to import.
+	 * @param int $sequence : the line number of this invoice.
+	 */
+	function importInvoiceLine($invoice, $invoiceLine, $sequence){
+	//TODO : end implementation of this method !
+
 		/*$product = $this->getProductOrService($srcRow);
 		if(!$product)
 			return false;
@@ -83,8 +167,13 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		$db->pquery($query, $qparams);
 	}
 
+	/**
+	 * Method to process to the import of a one invoice.
+	 * @param $invoiceData : the data of the invoice to import
+	 * @param RSNImport_Data_Action $importDataController : an instance of the import data controller.
+	 */
 	function importOneInvoice($invoiceData, $importDataController) {
-		//tmp check sizeof $invoiceata
+		//TODO check sizeof $invoiceata
 		$contact = $this->getContact($invoiceData[0]['firstname'], $invoiceData[0]['lastname'], $invoiceData[0]['email']);
 		if ($contact != null) {
 			$account = $contact->getAccountRecordModel();
@@ -146,7 +235,7 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 					$invoiceId = $record->getId();
 
 					if(!$invoiceId){
-						//tmp error
+						//TODO: manage error
 	                    echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
 	                    foreach ($invoiceData as $invoiceLine) {
 							$entityInfo = array(
@@ -187,11 +276,11 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 					return $record;//tmp 
 				}
 			} else {
+				//TODO: manage error
 				echo "<pre><code>Unable to find Account</code></pre>";
-				
 			}
 		} else {
-			foreach ($invoiceData as $invoiceLine) {//tmp duplicated code !!
+			foreach ($invoiceData as $invoiceLine) {//TODO: remove duplicated code
 				$entityInfo = array(
 					'status'	=>	RSNImport_Data_Action::$IMPORT_RECORD_FAILED,
 				);
@@ -205,38 +294,11 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return true;
 	}
 
-	function importInvoice($importDataController) {
-		$adb = PearDatabase::getInstance();
-		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
-		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImport_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY subject';
-
-		$result = $adb->query($sql);
-		$numberOfRecords = $adb->num_rows($result);
-
-		if ($numberOfRecords <= 0) {
-			return;
-		}
-
-		$row = $adb->raw_query_result_rowdata($result, 0);
-		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
-		$invoiceData = array($row);
-
-		for ($i = 1; $i < $numberOfRecords; ++$i) {
-			$row = $adb->raw_query_result_rowdata($result, $i);
-			$invoiceSubject = $row['subject'];
-
-			if ($previousInvoiceSubjet == $invoiceSubject) {
-				array_push($invoiceData, $row);
-			} else {
-				$this->importOneInvoice($invoiceData, $importDataController);
-				$invoiceData = array($row);
-				$previousInvoiceSubjet = $invoiceSubject;
-			}
-		}
-
-		$this->importOneInvoice($invoiceData, $importDataController);
-	}
-
+	/**
+	 * Method that check if a product exist.
+	 * @param $product : the product to check.
+	 * @return boolean : true if the product exist.
+	 */
 	function productExist($product) {
 		$db = PearDatabase::getInstance();
 		$query = 'SELECT productid FROM vtiger_products p JOIN vtiger_crmentity e on p.productid = e.crmid WHERE p.productcode = ? AND e.deleted = FALSE LIMIT 1';
@@ -252,11 +314,20 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
         return ($db->num_rows($result) == 1);
 	}
 
+	/**
+	 * Method that pre import a contact.
+	 * @param $contactValues : the values of the contact to import.
+	 */
 	function preImportContact($contactValues) {
 		$contact = new RSNImport_Preimport_Model($contactValues, $this->user, 'Contacts');
 		$contact->save();
 	}
 
+	/**
+	 * Method that pre import an invoice.
+	 *  It adone row in the temporary pre-import table by invoice line.
+	 * @param $invoiceData : the data of the invoice to import.
+	 */
 	function preImportInvoice($invoiceData) {
 		$invoiceValues = $this->getInvoiceValues($invoiceData);
 		foreach ($invoiceValues as $invoiceLine) {
@@ -265,6 +336,13 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		}
 	}
 
+	/**
+	 * Method that retrieve a contact.
+	 * @param string $firstname : the firstname of the contact.
+	 * @param string $lastname : the lastname of the contact.
+	 * @param string $email : the mail of the contact.
+	 * @return the row data of the contact | null if the contact is not found.
+	 */
 	function getContact($firstname, $lastname, $email) {
 		$query = "SELECT contactid, deleted
 			FROM vtiger_contactdetails
@@ -288,6 +366,10 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return null;
 	}
 
+	/**
+	 * Method that pre-import a contact if he does bnot exist in database.
+	 * @param $invoice : the invoice data.
+	 */
 	function checkContact($invoice) {
 		$contactData = $this->getContactValues($invoice['invoiceInformations']);
 		$query = "SELECT contactid, deleted
@@ -307,6 +389,12 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		}
 	}
 
+	/**
+	 * Method that check if a product is allready in the specified array.
+	 * @param $product : the product to check.
+	 * @param $productArray : the array of product.
+	 * @return boolean : true if the product is in the array.
+	 */
 	function productIsInArray($product, $productArray) {
 		for ($i = 0; $i < sizeof($productArray); ++$i) {
 			if ($product['productcode'] == $productArray[$i]['productcode']) {
@@ -317,6 +405,12 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return false;
 	}
 
+	/**
+	 * Method that check if there is new products in the file to import.
+	 *  If there is some new products found, it ended the process and display the "new product found" template
+	 * @param RSNImport_FileReader_Reader $fileReader : the reader of the uploaded file.
+	 * @return boolean : true if there is no new product.
+	 */
 	function checkNewProducts(RSNImport_FileReader_Reader $fileReader) {
 		$newProducts = array();
 
@@ -348,16 +442,21 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 				$viewer->assign('HELPDESK_SUPPORT_NAME', $HELPDESK_SUPPORT_NAME);
 				$viewer->view('NewProductsFound.tpl', 'RSNImport');
 
-				exit;//tmp js not loaded !!!
+				exit;//TODO: Be carefull: in this case, JS is not loaded !!!
 			}
 		} else {
+			//TODO: manage error
 			echo "not openned ...";
-			//tmp throw new exception ??
 		}
 
 		return true;
 	}
 
+	/**
+	 * Method to parse the uploaded file and save data to the temporary pre-import table.
+	 * @param RSNImport_FileReader_Reader $filereader : the reader of the uploaded file.
+	 * @return boolean - true if pre-import is ended successfully
+	 */
 	function parseAndSaveFile(RSNImport_FileReader_Reader $fileReader) {
 		if ($this->checkNewProducts($fileReader)) {
 			$this->clearPreImportTable();
@@ -378,6 +477,7 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 
 				$fileReader->close();
 			} else {
+				//TODO: manage error
 				echo "not openned ...";
 			}
 		}
@@ -385,7 +485,12 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return false;
 	}
 
-	private function getCoupon(){//tmp to check !!
+	/**
+	 * Method that return the coupon for prestashop source.
+	 *  It cache the value in the $this->coupon attribute.
+	 * @return the coupon.
+	 */
+	private function getCoupon(){
 		if ($this->coupon == null) {
 			$codeAffaire='BOUTIQUE';
 			$query = "SELECT vtiger_crmentity.crmid
@@ -412,11 +517,22 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return $this->coupon;
 	}
 
-
-	function isDate($string) {//TODO do not put this function here!
+	/**
+	 * Method that check if a string is a formatted date (DD/MM/YYYY).
+	 * @param string $string : the string to check.
+	 * @return boolean - true if the string is a date.
+	 */
+	function isDate($string) {
+	//TODO do not put this function here ?
 		return preg_match("/^[0-3][0-9]-[0-1][0-9]-[0-9]{4}$/", $string);//only true for french format
 	}
 
+	/**
+	 * Method that check if a line of the file is a client information line.
+	 *  It assume that the line is a client information line only and only if the first data is a date.
+	 * @param array $line : the data of the file line.
+	 * @return boolean - true if the line is a client information line.
+	 */
 	function isClientInformationLine($line) {
 		if (sizeof($line) > 0 && $line[0] != "" && $this->isDate($line[0])) {
 			return true;
@@ -425,6 +541,11 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return false;
 	}
 
+	/**
+	 * Method that move the cursor of the file reader to the beginning of the next found invoice.
+	 * @param RSNImport_FileReader_Reader $filereader : the reader of the uploaded file.
+	 * @return boolean - false if error or if no invoice found.
+	 */
 	function moveCursorToNextInvoice(RSNImport_FileReader_Reader $fileReader) {
 		do {
 			$cursorPosition = $fileReader->getCurentCursorPosition();
@@ -441,6 +562,11 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return true;
 	}
 
+	/**
+	 * Method that return the information of the next first invoice found in the file.
+	 * @param RSNImport_FileReader_Reader $filereader : the reader of the uploaded file.
+	 * @return the invoice information | null if no invoice found.
+	 */
 	function getNextInvoice(RSNImport_FileReader_Reader $fileReader) {
 		$nextLine = $fileReader->readNextDataLine($fileReader);
 		if ($nextLine != false) {
@@ -471,7 +597,12 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return null;
 	}
 
-	function getContactValues($invoiceInformations) {//tmp needed field ???
+	/**
+	 * Method that return the formated information of a contact found in the file.
+	 * @param $invoiceInformations : the invoice informations data found in the file.
+	 * @return array : the formated data of the contact.
+	 */
+	function getContactValues($invoiceInformations) {
 		$contactMapping = array(
 			'lastname'			=> $invoiceInformations[46],
 			'firstname'			=> $invoiceInformations[45],
@@ -489,6 +620,11 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return $contactMapping;
 	}
 
+	/**
+	 * Method that return the formated information of a product found in the file.
+	 * @param $product : the product data found in the file.
+	 * @return array : the formated data of the product.
+	 */
 	function getProductValues($product) {
 		$product = array(
 			'productname'	=> $product[2],
@@ -502,6 +638,11 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return $product;
 	}
 
+	/**
+	 * Method that return the product id using his code.
+	 * @param $productcode : the code of the product.
+	 * @return int - the product id | null.
+	 */
 	function getProductId($productcode) {
 		$db = PearDatabase::getInstance();
 		$query = 'SELECT productid FROM vtiger_products p JOIN vtiger_crmentity e on p.productid = e.crmid WHERE p.productcode = ? AND e.deleted = FALSE LIMIT 1';
@@ -523,7 +664,13 @@ class RSNImport_ImportInvoicesFromPrestashop_View extends RSNImport_ImportFromFi
 		return null;
 	}
 
-	function getInvoiceValues($invoice) {//tmp 
+	/**
+	 * Method that return the formated information of an invoice found in the file.
+	 * @param $invoice : the invoice data found in the file.
+	 * @return array : the formated data of the invoice.
+	 */
+	function getInvoiceValues($invoice) {
+	//TODO end implementation of this method
 		$invoiceValues = array();
 
 		foreach ($invoice['detail'] as $product) {

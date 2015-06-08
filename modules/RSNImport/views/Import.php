@@ -9,7 +9,6 @@ class RSNImport_Import_View extends Vtiger_View_Controller{
 		parent::__construct();
 		$this->request = $request;
 		$this->user = $user;
-
 		$this->exposeMethod('showConfiguration');
 	}
 
@@ -240,7 +239,7 @@ class RSNImport_Import_View extends Vtiger_View_Controller{
 	}
 
 	/**
-	 * Method to process to the import for a specific module.
+	 * Method to process to the import of a specific module.
 	 *  It call the import<<Module>> method if exist. Else it call the default import method.
 	 * @param RSNImport_Data_Action $importDataController : an instance of the import data controller.
 	 * @param string $module: the module name

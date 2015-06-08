@@ -6,18 +6,30 @@ class RSNImport_Data_Action extends Import_Data_Action {
 		$this->importSource = $importInfo['importsourceclass'];
 	}
 
+	/**
+	 * Method to ended an import.
+	 *  It unlock the module for new import and remove the concerned import of the table.
+	 */
 	public function finishImport() {
 		RSNImport_Lock_Action::unLock($this->user, $this->module);
 		RSNImport_Queue_Action::remove($this->id);
 	}
 
+	/**
+	 * Method to update the status of an import on cancel.
+	 */
 	public function updateImportStatusForCancel() {
 		$adb = PearDatabase::getInstance();
 		$adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=' . self::$IMPORT_RECORD_FAILED . ' WHERE status=' . self::$IMPORT_RECORD_NONE,
 			array());
 	}
 
-	public static function runScheduledImport() {//TODO email or log when schedule import is running and ended !!
+	/**
+	 * Method called by the cron when there is scheduled import.
+	 *  It process to the import of all scheduled import.
+	 */
+	public static function runScheduledImport() {
+	//TODO email or log when schedule import is running and ended !!
 		global $current_user;
 		$scheduledImports = self::getScheduledImport();
 		$vtigerMailer = new Vtiger_Mailer();
@@ -63,6 +75,12 @@ class RSNImport_Data_Action extends Import_Data_Action {
 		//Vtiger_Mailer::dispatchQueue(null);
 	}
 
+	/**
+	 * Methode to get the detail of an import by user and module.
+	 * @param $user : the concerned user
+	 * @param string $moduleName : the concerned module name.
+	 * @return array - the detail of the import.
+	 */
 	public static function getImportDetails($user, $moduleName){
         $adb = PearDatabase::getInstance();
         $tableName = Import_Utils_Helper::getDbTableName($user, $moduleName);
@@ -98,7 +116,10 @@ class RSNImport_Data_Action extends Import_Data_Action {
         }
     }
 	
-
+    /**
+	 * Methode to get all the scheduled import in the queue table.
+	 * @return array - the scheduled import.
+	 */
 	public static function getScheduledImport() {
 
 		$scheduledImports = array();
@@ -114,6 +135,11 @@ class RSNImport_Data_Action extends Import_Data_Action {
 		return $scheduledImports;
 	}
 
+	/**
+	 * Generic getter.
+	 * @param string $propertyName.
+	 * @return the value of the property specified in parameter.
+	 */
 	public function get($propertyName) {
 		if(property_exists($this,$propertyName)) {
 			return $this->$propertyName;

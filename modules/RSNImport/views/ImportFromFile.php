@@ -112,7 +112,7 @@ class RSNImport_ImportFromFile_View extends RSNImport_Import_View {
 	/**
 	 * Method to parse the uploaded file and save data to the temporary pre-import table.
 	 *  This method must be overload in the child class.
-	 * @param $filereader : the reader of the uploaded file.
+	 * @param RSNImport_FileReader_Reader $filereader : the reader of the uploaded file.
 	 */
 	function parseAndSaveFile(RSNImport_FileReader_Reader $fileReader) {
 		return false;

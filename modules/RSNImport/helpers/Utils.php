@@ -11,18 +11,35 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 	static $supportedDelimiters = array(','=>'LBL_COMMA', ';'=>'LBL_SEMICOLON', '	'=>'LBL_TAB');
 	static $supportedFileExtensions = array('csv','xml','json');
 
+	/**
+	 * Method to get the default suported file extentions.
+	 * @return array - the file extentions.
+	 */
 	public function getSupportedFileExtensions() {
 		return self::$supportedFileExtensions;
 	}
 
+	/**
+	 * Method to get the default suported file encodings.
+	 * @return array - the file encodings.
+	 */
 	public function getSupportedFileEncoding() {
 		return self::$supportedFileEncoding;
 	}
 
+	/**
+	 * Method to get the default suported file delimiters.
+	 * @return array - the file delimiters.
+	 */
 	public function getSupportedDelimiters() {
 		return self::$supportedDelimiters;
 	}
 
+	/**
+	 * Method to get information about file readers in the config model file for a specific file type.
+	 * @param string $type : the file type.
+	 * @return array - the filereader informations.
+	 */
 	public static function getFileReaderInfo($type) {
 		$configReader = new RSNImport_Config_Model();
 		$importTypeConfig = $configReader->get('importTypes');
@@ -32,6 +49,12 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 		return null;
 	}
 
+	/**
+	 * Method to get the needed file reader according to the request parameters.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @param $user : the current user.
+	 * @return RSNImport_FileReader_Reader - the filereader.
+	 */
 	public static function getFileReader($request, $user) {
 		$fileReaderInfo = self::getFileReaderInfo($request->get('file_type'));
 		if(!empty($fileReaderInfo)) {
@@ -43,6 +66,11 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 		return $fileReader;
 	}
 
+	/**
+	 * Method to validate uploaded file and to move it to the temporary location.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @return boolean - true if success.
+	 */
 	static function validateFileUpload($request) {
 		$current_user = Users_Record_Model::getCurrentUserModel();
 
@@ -77,6 +105,13 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 		return true;
 	}
 
+	/**
+	 * Method to create the temporary pre-import table for a specific user and a specific module.
+	 * @param array $fields : the needed field.
+	 * @param $user : the current user.
+	 * @param $module : the current module.
+	 * @return boolean - true if success.
+	 */
 	static function createTable($fields, $user, $module) {
 		$moduleModel = Vtiger_Module_Model::getInstance($module);
 		$db = PearDatabase::getInstance();
@@ -97,6 +132,11 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 		return true;
 	}
 
+	/**
+	 * Method to get the type of fields in the table.
+	 * @param Vtiger_Module_Model $moduleModel
+	 * @return array - the field types.
+	 */
 	static function getModuleFieldDBColumnType($moduleModel) {
         $db = PearDatabase::getInstance();
         $result = $db->pquery('SELECT tablename FROM vtiger_field WHERE tabid=? GROUP BY tablename', array($moduleModel->getId()));
@@ -118,6 +158,12 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
         return $fieldTypes;
     }
 
+    /**
+	 * Method to get the type of a column in the table.
+	 * @param  $fieldObject
+	 * @param  $fieldTypes
+	 * @return string - the field type.
+	 */
     static function getDBColumnType($fieldObject,$fieldTypes) {
         $columnsListQuery = '';
         $fieldName = $fieldObject->getName();
@@ -131,6 +177,11 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
         return $columnsListQuery;
     }
 
+    /**
+	 * Method to clear the last import informations for thecurent user.
+	 * @param  $user : the current user.
+	 * @param  string $moduleName : the module name.
+	 */
     public static function clearUserImportInfo($user, $moduleName) {
 		$adb = PearDatabase::getInstance();
 		$tableName = self::getDbTableName($user, $moduleName);
@@ -140,6 +191,11 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 		RSNImport_Queue_Action::removeForUser($user);
 	}
 
+	/**
+	 * Method to import cource list for a specific module.
+	 * @param  string $moduleName : the module name.
+	 * @return array - the source list.
+	 */
 	public static function getSourceList($moduleName = false) {
 		$db = PearDatabase::getInstance();
 		$return_values = array();
@@ -170,10 +226,20 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
         return $return_values;
 	}
 
+	/**
+	 * Method to get the class using its name.
+	 * @param  string $className : the class name.
+	 * @return the class.
+	 */
 	public static function getClassFromName($className) {
 		return Vtiger_Loader::getComponentClassName('View', $className, 'RSNImport');;
 	}
 
+	/**
+	 * Method to get the import source class name.
+	 * @param  int $importSourcesId : the import source id.
+	 * @return string: the import class name.
+	 */
 	public static function getImportSourceClassName($importSourcesId) {
 		$db = PearDatabase::getInstance();
 		$return_values = array();
@@ -194,10 +260,21 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
         return '';
 	}
 
+	/**
+	 * Method to get the import source class.
+	 * @param  int $importSourcesId : the import source id.
+	 * @return string: the import class.
+	 */
 	public static function getImportSourceClass($importSourcesId) {
 		return self::getClassFromName(self::getImportSourceClassName($importSourcesId));
 	}
 
+	/**
+	 * Method to display error when import table is blocked.
+	 * @param  string $moduleName : the name of the concerned module.
+	 * @param  $user : the name of the concerned user.
+	 * @param  string $importSource : the import source class name.
+	 */
 	public static function showImportTableBlockedError($moduleName, $user, $importSource) {
 		$errorMessage = vtranslate('ERR_UNIMPORTED_RECORDS_EXIST', 'RSNImport');
 		$cancelUrl = 'index.php?module=RSNImport&for_module=' . $moduleName . '&view=Index&mode=clearCorruptedData';
@@ -210,6 +287,12 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 		self::showErrorPage($errorMessage, '', $customActions);
 	}
 
+	/**
+	 * Method to get the number of record preimported for a specific module and a specific user.
+	 * @param  $user : the name of the concerned user.
+	 * @param  string $moduleName : the name of the concerned module.
+	 * @return int - the number of record.
+	 */
 	public static function getNumberOfRecords($user, $moduleName) {
 		$tableName = self::getDbTableName($user, $moduleName);
 		$db = PearDatabase::getInstance();
@@ -222,6 +305,11 @@ class RSNImport_Utils_Helper extends  Import_Utils_Helper {
 		return $db->query_result($result, 0, 0);
 	}
 
+	/**
+	 * Method to get an instance of the import controller using its class name.
+	 * @param  string $className : the class name.
+	 * @return RSNImport_Import_View - the instance of the import class.
+	 */
 	public static function getImportController($className) {
 		if ($className) {
 			$importClass = self::getClassFromName($className);
