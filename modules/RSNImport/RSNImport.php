@@ -14,7 +14,58 @@
  * 
  ********************************************************************************/
 
-class RSNImport {
+class RSNImport extends Vtiger_CRMEntity {
+    
+        var $table_name = 'vtiger_rsnimportsources_av';
+	var $table_index= 'importsourcesid';
+
+	/**
+	 * Mandatory table for supporting custom fields.
+	 */
+	var $customFieldTable = Array();//'vtiger_rsnimportsourcescf', 'importsourcesid'
+
+	/**
+	 * Mandatory for Saving, Include tables related to this module.
+	 */
+	var $tab_name = Array('vtiger_crmentity', 'vtiger_rsnimportsources_av');
+        
+        /**
+	 * Mandatory for Saving, Include tablename and tablekey columnname here.
+	 */
+	var $tab_name_index = Array(
+		'vtiger_crmentity' => 'crmid',
+		'vtiger_rsndons' => 'importsourcesid',
+                );
+
+	/**
+	 * Mandatory for Listing (Related listview)
+	 */
+	var $list_fields = Array (
+		'LBL_CLASS' => array('rsnimportsources', 'class'),
+
+	);
+	var $list_fields_name = Array (
+		'LBL_CLASS' => 'compte',
+
+	);
+
+	// Make the field link to detail view
+	var $list_link_field = '';
+
+	// For Popup listview and UI type support
+	var $search_fields = Array(
+		'LBL_CLASS' => array('rsndons', 'origine'),
+
+	);
+	var $search_fields_name = Array (
+		'LBL_ORIGINE' => 'origine',
+		'LBL_ORIGINE_DETAIL' => 'origine_detail',
+		'LBL_MONTANT' => 'montant',
+		'LBL_DATEDON' => 'invoicedate',
+		'LBL_COMPTE' => 'compte',
+
+	);
+
 	public function vtlib_handler($moduleName, $eventType) {
 		if ($eventType == 'module.postinstall') {
 			self::addRsnImportSourceTable();

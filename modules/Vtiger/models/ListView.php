@@ -466,7 +466,7 @@ var_dump($listResult);*/
 			$advancedLinks[] = array(
 							'linktype' => 'LISTVIEW',
 							'linklabel' => 'LBL_RSN_IMPORT',
-							'linkurl' => $moduleModel->getRSNImportUrl(),
+							'linkurl' => $moduleModel->getRSNImportSourcesUrl(),
 							'linkicon' => ''
 			);
 		}

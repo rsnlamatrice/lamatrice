@@ -1,9 +1,25 @@
 <?php
+/*+**********************************************************************************
+ * The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * ("License"); You may not use this file except in compliance with the License
+ * The Original Code is:  vtiger CRM Open Source
+ * The Initial Developer of the Original Code is vtiger.
+ * Portions created by vtiger are Copyright (C) vtiger.
+ * All Rights Reserved.
+ ************************************************************************************/
 
 $languageStrings = array(
-	'RSN_IMPORT' => 'Import préconfiguré',
-	'LBL_RSN_IMPORT' => 'Import préconfiguré',
-	'LBL_RSN_IMPORT' => 'Import préconfiguré',
+	'RSNImportSources' => 'Importations préconfigurées',
+	'SINGLE_RSNImportSources' => 'Importation préconfigurée',
+	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
+	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations du système',
+	'LBL_TABID' => 'Table liée',
+	'LBL_DISABLED' => 'Désactivée',
+	'LBL_CLASS' => 'Classe',
+	'LBL_SORTORDERID' => 'Index de tri',
+	'LBL_DESCRIPTION' => 'Description',
+	'LBL_MODIFICATIONS' => 'Modifications',
+
 	'LBL_NEXT_BUTTON_LABEL' => 'Suivant',
 	'LBL_IMPORT_BUTTON_LABEL' => 'Importer',
 	'LBL_TRY_AGAIN' => 'Réessayer!',
@@ -73,3 +89,5 @@ $languageStrings = array(
 	'failed'                       => 'Enregistrements avec erreur'              , 
 	'Skip'                       => 'Ignorer'
 );
+
+?>

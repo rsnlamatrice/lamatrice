@@ -732,7 +732,7 @@ class QueryGenerator {
 				}
 			}
 		}
-
+		
 		$sql .= $this->meta->getEntityAccessControlQuery();
 		$this->fromClause = $sql;
 		return $sql;

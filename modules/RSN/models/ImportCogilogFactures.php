@@ -322,7 +322,7 @@ class RSN_CogilogFacturesRSN_Import {
 		else {
 			$record = Vtiger_Record_Model::getCleanInstance('Invoice');
 			$record->set('mode','create');
-			$record->set('bill_street', $srcRow['num']. ' ' .$srcRow['voie']);
+			$record->set('bill_street', trim($srcRow['num']. ' ' .$srcRow['voie']));
 			$record->set('bill_street2', $srcRow['nom1']);
 			$record->set('bill_street3', $srcRow['compad1']);
 			$record->set('bill_pobox', $srcRow['compad2']);
@@ -359,7 +359,7 @@ class RSN_CogilogFacturesRSN_Import {
                             return false;
                         }
 			echo "<pre><code>Nouvelle facture ".$record->getId()."</code></pre>";
-                            
+                           
 			$record->set('mode','edit');
 			//This field is not manage by save()
 			$record->set('invoice_no','COG'.$cogId);
@@ -387,7 +387,7 @@ class RSN_CogilogFacturesRSN_Import {
 							    , $record->getId()));
 			
 			if( ! $result)
-				$db->echoError();;
+				$db->echoError();
 		}
 		
 		return $record;		

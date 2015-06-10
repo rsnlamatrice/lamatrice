@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnimportsources</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnimportsources` (
+  `rsnimportsourcesid` int(11) NOT NULL DEFAULT '0',
+    `tabid` INT(11) DEFAULT NULL,
+    `disabled` VARCHAR(5) DEFAULT NULL,
+    `class` VARCHAR(128) DEFAULT NULL,
+    `sortorderid` INT(11) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    PRIMARY KEY (`rsnimportsourcesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnimportsourcescf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnimportsourcescf` (
+  `rsnimportsourcesid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnimportsourcesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

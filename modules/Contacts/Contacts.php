@@ -54,7 +54,7 @@ class Contacts extends CRMEntity {
 				    'vtiger_contactaddress'=>'contactaddressid',
 				    'vtiger_contactsubdetails'=>'contactsubscriptionid',
 				    'vtiger_contactscf'=>'contactid',
-				    'vtiger_customerdetails'=>'customerid'
+				    'vtiger_customerdetails'=>'customerid',
 				);
 	/**
 	 * Mandatory table for supporting custom fields.

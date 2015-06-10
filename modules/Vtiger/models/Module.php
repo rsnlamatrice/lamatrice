@@ -354,8 +354,8 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 * Function to get the url for the Import action of the module
 	 * @return <String> - url
 	 */
-	public function getRSNImportUrl() {
-		return 'index.php?module=RSNImport&view=Index&for_module='.$this->get('name');
+	public function getRSNImportSourcesUrl() {
+		return 'index.php?module=RSNImportSources&view=Index&for_module='.$this->get('name');
 	}
 
 	/**
