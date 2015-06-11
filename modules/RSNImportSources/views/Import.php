@@ -482,6 +482,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	static function getTax($rate){
 		if(!$rate)
 			return false;
+		$rate = (float)str_replace(',', '.', $rate);
 		if(!self::$allTaxes)
 			self::$allTaxes = getAllTaxes();
 		foreach(self::$allTaxes as $tax)

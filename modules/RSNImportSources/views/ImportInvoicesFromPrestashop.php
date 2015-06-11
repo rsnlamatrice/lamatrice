@@ -78,7 +78,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'mailingcity',
 			'mailingcountry',
 			'phone',
-			'mobile'
+			'mobile',
+			'accounttype',
+			'leadsource',
 		);
 	}
 
@@ -101,7 +103,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'country',
 			'subject',
 			'invoicedate',
-			//line
+			//lines
+			'productcode',
 			'productid',
 			'article',
 			'isproduct',
@@ -157,20 +160,26 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
         
 		$qty = $invoiceLine['quantity'];
 		$listprice = $invoiceLine['prix_unit_ht'];
+		
+		//N'importe pas les lignes de frais de port à 0
+		if($listprice == 0
+		&& $invoiceLine['productcode'] == 'ZFPORT')
+			return;
+		
 		$discount_amount = 0;
 		$tax = self::getTax($invoiceLine['taxrate']);
 		if($tax){
 			$taxName = $tax['taxname'];
 			$taxValue = $tax['percentage'];
 			$totalTax += $qty * $listprice * ($taxValue/100);
-			var_dump('$totalTax', $totalTax, "$qty * $listprice * ($taxValue/100)");
+			//var_dump('$totalTax', $totalTax, "$qty * $listprice * ($taxValue/100)");
 		}
 		else {
 			$taxName = 'tax1';
 			$taxValue = null;
 		}
 		$totalAmountHT += $qty * $listprice;
-		var_dump('$totalAmountHT', $totalAmountHT, "$qty * $listprice");
+		//var_dump('$totalAmountHT', $totalAmountHT, "$qty * $listprice", $invoiceLine['taxrate']);
 		
 		$incrementOnDel = $invoiceLine['isproduct'] ? 1 : 0;
 		
@@ -179,11 +188,6 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $qty, $listprice, $discount_amount, $incrementOnDel, $taxValue);
 		//$db->setDebug(true);
 		$db->pquery($query, $qparams);
-		/*
-		$db = PearDatabase::getInstance();
-		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice) VALUES(?,?,?,?,?)";//discount_amount ?
-		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $invoiceLine['quantity'], $invoiceLine['listprice']);//tmp price and taxes !!!
-		$db->pquery($query, $qparams);*/
 	}
 
 	/**
@@ -208,11 +212,11 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					FROM vtiger_invoice
 					JOIN vtiger_crmentity
 					    ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
-					WHERE subject = ? AND deleted = FALSE
+					WHERE invoice_no = ? AND deleted = FALSE
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
-				$result = $db->pquery($query, array($invoiceData[0]['subject']));
+				$result = $db->pquery($query, array($sourceId));//$invoiceData[0]['subject']
 				if($db->num_rows($result)){
 					//already imported !!
 					$row = $db->fetch_row($result, 0); 
@@ -246,7 +250,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('invoicestatus', 'Paid');//TODO
+					$record->set('invoicestatus', 'Approuvée');//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
@@ -453,7 +457,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	}
 
 	/**
-	 * Method that pre-import a contact if he does bnot exist in database.
+	 * Method that pre-import a contact if he does not exist in database.
 	 * @param $invoice : the invoice data.
 	 */
 	function checkContact($invoice) {
@@ -614,9 +618,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		return preg_match("/^[0-3][0-9][-\/][0-1][0-9][-\/][0-9]{2,4}$/", $string);//only true for french format
 	}
 	/**
-	 * Method that check if a string is a formatted date (DD/MM/YYYY).
-	 * @param string $string : the string to check.
-	 * @return boolean - true if the string is a date.
+	 * Method that returns a formatted date for mysql (Y-m-d).
+	 * @param string $string : the string to format.
+	 * @return string - formated date.
 	 */
 	function getMySQLDate($string) {
 		$dateArray = preg_split('/[-\/]/', $string);
@@ -700,17 +704,19 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	function getContactValues($invoiceInformations) {
 		$contactMapping = array(
-			'lastname'			=> $invoiceInformations[46],
-			'firstname'			=> $invoiceInformations[45],
-			'email'				=> $invoiceInformations[22],
+			'lastname'		=> $invoiceInformations[46],
+			'firstname'		=> $invoiceInformations[45],
+			'email'			=> $invoiceInformations[22],
 			'mailingstreet'		=> $invoiceInformations[13],
 			'mailingstreet2'	=> $invoiceInformations[14],
 			'mailingstreet3'	=> $invoiceInformations[15],
 			'mailingzip'		=> $invoiceInformations[16],
 			'mailingcity'		=> $invoiceInformations[17],
 			'mailingcountry' 	=> $invoiceInformations[19],
-			'phone'				=> $invoiceInformations[20],
-			'mobile'			=> $invoiceInformations[21]
+			'phone'			=> $invoiceInformations[20],
+			'mobile'		=> $invoiceInformations[21],
+			'accounttype'		=> 'Boutique',
+			'leadsource'		=> 'BOUTIQUE',
 			);
 
 		return $contactMapping;
@@ -745,7 +751,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			FROM vtiger_products p
 			JOIN vtiger_crmentity e
 				ON p.productid = e.crmid
-			WHERE p.productcode = ? AND e.deleted = FALSE LIMIT 1';
+			WHERE p.productcode = ? AND e.deleted = FALSE
+			LIMIT 1';
 		$result = $db->pquery($query, array($productcode));
 
 		if ($db->num_rows($result) == 1) {
@@ -755,7 +762,12 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			return $row['productid'];
 		}
 
-		$query = 'SELECT serviceid FROM vtiger_service s JOIN vtiger_crmentity e on s.serviceid = e.crmid WHERE s.productcode = ? AND e.deleted = FALSE LIMIT 1';
+		$query = 'SELECT serviceid, label
+			FROM vtiger_service s
+			JOIN vtiger_crmentity e
+				ON s.serviceid = e.crmid
+			WHERE s.productcode = ? AND e.deleted = FALSE
+			LIMIT 1';
 		$result = $db->pquery($query, array($productcode));
 
 		if ($db->num_rows($result) == 1) {
@@ -796,6 +808,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			$product_name = '';
 			$taxrate = ((float)str_replace(',', '.', $product[8]))/100;
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
+				'productcode'	=> $product[1],
 				'productid'	=> $this->getProductId($product[1], $isProduct, $product_name),
 				'quantity'	=> $product[5],
 				'article'	=> $product_name,
