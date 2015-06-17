@@ -1211,7 +1211,7 @@ class Contacts extends CRMEntity {
 			INNER JOIN vtiger_crmentity
 				ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
 			LEFT OUTER JOIN vtiger_contactdetails
-				ON vtiger_contactdetails.contactid = vtiger_invoice.contactid
+				ON vtiger_contactdetails.accountid = vtiger_invoice.accountid
 			LEFT OUTER JOIN vtiger_salesorder
 				ON vtiger_salesorder.salesorderid = vtiger_invoice.salesorderid
 			LEFT JOIN vtiger_groups

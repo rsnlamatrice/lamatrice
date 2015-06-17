@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsndonateursweb</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsndonateursweb` (
+  `rsndonateurswebid` int(11) NOT NULL DEFAULT '0',
+    `contactid` INT(11) DEFAULT NULL,
+    `recu` VARCHAR(5) DEFAULT NULL,
+    `frequency` INT(11) DEFAULT NULL,
+    `relatedmoduleid` INT(19) DEFAULT NULL,
+    `paiementid` VARCHAR(128) DEFAULT NULL,
+    `revue` VARCHAR(5) DEFAULT NULL,
+    `abocode` VARCHAR(128) DEFAULT NULL,
+    `clicksource` VARCHAR(128) DEFAULT NULL,
+    `firstname` VARCHAR(128) DEFAULT NULL,
+    `lastname` VARCHAR(128) DEFAULT NULL,
+    `dateaboend` DATE DEFAULT NULL,
+    `listesn` VARCHAR(128) DEFAULT NULL,
+    `paiementerror` INT(11) DEFAULT NULL,
+    `optauto` VARCHAR(128) DEFAULT NULL,
+    `ipaddress` VARCHAR(128) DEFAULT NULL,
+    `address` VARCHAR(128) DEFAULT NULL,
+    `address3` VARCHAR(128) DEFAULT NULL,
+    `externalid` INT(11) DEFAULT NULL,
+    `modepaiement` VARCHAR(128) DEFAULT NULL,
+    `zipcode` VARCHAR(128) DEFAULT NULL,
+    `city` VARCHAR(128) DEFAULT NULL,
+    `email` VARCHAR(128) DEFAULT NULL,
+    `country` VARCHAR(128) DEFAULT NULL,
+    `phone` VARCHAR(128) DEFAULT NULL,
+    `datedon` DATE DEFAULT NULL,
+    `amount` DECIMAL(25,8) DEFAULT NULL,
+    PRIMARY KEY (`rsndonateurswebid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsndonateurswebcf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsndonateurswebcf` (
+  `rsndonateurswebid` int(11) NOT NULL,
+  PRIMARY KEY (`rsndonateurswebid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

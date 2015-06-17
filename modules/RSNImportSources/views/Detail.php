@@ -1,6 +1,6 @@
 <?php
 
-class RSNImportSources_Detail_View extends Import_List_View {
+class RSNImportSources_Detail_View extends Vtiger_Detail_View {
 
     /**
      * Method to get details about import specified in request parameters.

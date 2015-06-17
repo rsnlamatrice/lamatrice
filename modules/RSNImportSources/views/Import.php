@@ -330,7 +330,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 			$noOfRecords = $db->num_rows($result);
 			$noOfRecordsDeleted = 0;
-	        $entityData = array();
+			$entityData = array();
 
 			for($i=0; $i<$noOfRecords; $i++) {
 				$recordId = $db->query_result($result, $i, 'recordid');
@@ -346,10 +346,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 
 			//TODO: Check for what is used commented line ???
-	        // $entity = new VTEventsManager($db);        
-	        // $entity->triggerEvent('vtiger.batchevent.delete',$entityData);
-	        $viewer = new Vtiger_Viewer();
-	        $viewer->assign('FOR_MODULE', $module);
+			// $entity = new VTEventsManager($db);        
+			// $entity->triggerEvent('vtiger.batchevent.delete',$entityData);
+			$viewer = new Vtiger_Viewer();
+			$viewer->assign('FOR_MODULE', $module);
 			$viewer->assign('MODULE', 'RSNImportSources');
 			$viewer->assign('TOTAL_RECORDS', $noOfRecords);
 			$viewer->assign('DELETED_RECORDS_COUNT', $noOfRecordsDeleted);
@@ -448,10 +448,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	public static function showResult($importInfo, $importStatusCount) {
 		$moduleName = $importInfo['module'];
 		$ownerId = $importInfo['user_id'];
-        $viewer = new Vtiger_Viewer();
+		$viewer = new Vtiger_Viewer();
         
 		$viewer->assign('SKIPPED_RECORDS',$skippedRecords);
-        $viewer->assign('FOR_MODULE', $moduleName);
+		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('OWNER_ID', $ownerId);
 		$viewer->assign('IMPORT_RESULT', $importStatusCount);

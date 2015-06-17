@@ -15,7 +15,9 @@ class RSNImportSources_FileReader_Reader extends RSNImportSources_Reader_Reader 
 	 * @return boolean - true if sucess.
 	 */
 	public function open() {
-	// TODO: check if file is allready open.
+		ini_set("auto_detect_line_endings", true);
+		
+		// TODO: check if file is already open.
 		if ($this->fileHandler == null) {
 			$this->fileHandler = $this->getFileHandler();
 			return ($this->fileHandler != null);

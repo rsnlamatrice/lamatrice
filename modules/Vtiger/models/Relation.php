@@ -210,7 +210,8 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		$db = PearDatabase::getInstance();
 
 		$skipReltionsList = array('get_history');
-		$query = 'SELECT vtiger_relatedlists.*,vtiger_tab.name as modulename FROM vtiger_relatedlists 
+		$query = 'SELECT vtiger_relatedlists.*,vtiger_tab.name as modulename
+			FROM vtiger_relatedlists 
 			INNER JOIN vtiger_tab on vtiger_relatedlists.related_tabid = vtiger_tab.tabid
 			WHERE vtiger_relatedlists.tabid = ? AND related_tabid != 0';
 
