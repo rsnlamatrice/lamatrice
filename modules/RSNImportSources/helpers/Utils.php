@@ -206,12 +206,13 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				JOIN vtiger_tab tab ON ris.tabid = tab.tabid
 				WHERE ris.disabled = FALSE';
 
+		$params = array();
 		if ($moduleName) {
 			$query .= ' AND tab.name = ?';
-			$result = $db->pquery($query, array($moduleName));
-		} else {
-			$result = $db->pquery($query);
+			$params[] = $moduleName;
 		}
+		$query .= ' ORDER BY sortorderid';
+		$result = $db->pquery($query, $params);
 
 		$noOfRecords = $db->num_rows($result);
 		for($i=0; $i<$noOfRecords; $i++) {

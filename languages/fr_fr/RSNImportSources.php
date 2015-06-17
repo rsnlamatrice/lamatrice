@@ -40,8 +40,10 @@ $languageStrings = array(
 	'LBL_DELIMITER'                => 'Délimiteur'                  , 
 	'LBL_HAS_HEADER'               => 'Contient une ligne d\'entêtes',
 	'LBL_IMPORT_NEEDED_FILE_DELIMITER' => 'délimité par des',
-	'LBL_NEW_PRODUCT_FOUND_DURING_IMPORT' => 'nouveau produit trouvé pendant l\'import.<br/>Veuillez l\'ajouter avant d\'importer les factures',
-	'LBL_NEW_PRODUCT_FOUND_DURING_IMPORT_PLURAL' => 'nouveaux produits trouvés pendant l\'import.<br/>Veuillez les ajouter avant d\'importer les factures',
+	'LBL_NEW_PRODUCT_FOUND_DURING_IMPORT' => 'nouveau produit trouvé pendant l\'import. Veuillez l\'ajouter avant d\'importer les factures',
+	'LBL_NEW_PRODUCT_FOUND_DURING_IMPORT_PLURAL' => 'nouveaux produits trouvés pendant l\'import. Veuillez les ajouter avant d\'importer les factures',
+	'LBL_NEW_CURRENCY_FOUND_DURING_IMPORT' => 'nouvelle device trouvée pendant l\'import. Veuillez l\'ajouter avant d\'importer la suite',
+	'LBL_NEW_CURRENCY_FOUND_DURING_IMPORT_PLURAL' => 'nouvelles devises trouvées pendant l\'import. Veuillez les ajouter avant d\'importer la suite',
 	'LBL_RETURN' => 'Retour',
 	'LBL_PRODUCTCODE' => 'code produit',
 	'LBL_PRODUCTNAME' => 'nom du produit',
@@ -92,6 +94,8 @@ $languageStrings = array(
 	'LBL_PAYPAL' => 'Paypal',
 	'LBL_COGILOG' => 'Cogilog',
         'LBL_DONATEURSWEB' => 'Donateurs web',
+        'LBL_DONATEURSWEB_4D' => 'Donateurs web depuis 4D',
+	
 );
 
 ?>

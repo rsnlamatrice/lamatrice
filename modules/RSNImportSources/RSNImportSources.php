@@ -30,7 +30,8 @@ class RSNImportSources extends Vtiger_CRMEntity {
 	var $tab_name_index = Array(
 		'vtiger_crmentity' => 'crmid',
 		'vtiger_rsnimportsources' => 'rsnimportsourcesid',
-		'vtiger_rsnimportsourcescf'=>'rsnimportsourcesid');
+		'vtiger_rsnimportsourcescf'=>'rsnimportsourcesid'
+	);
 
 	/**
 	 * Mandatory for Listing (Related listview)
@@ -39,13 +40,12 @@ class RSNImportSources extends Vtiger_CRMEntity {
 		'LBL_TABID' => array('rsnimportsources', 'tabid'),
 		'LBL_DISABLED' => array('rsnimportsources', 'disabled'),
 		'LBL_CLASS' => array('rsnimportsources', 'class'),
-
 	);
+	
 	var $list_fields_name = Array (
 		'LBL_TABID' => 'tabid',
 		'LBL_DISABLED' => 'disabled',
 		'LBL_CLASS' => 'class',
-
 	);
 
 	// Make the field link to detail view

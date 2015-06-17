@@ -11,7 +11,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	var $request;
 	var $user;
 
-	public function  __construct($request, $user) {
+	public function  __construct($request = FALSE, $user = FALSE) {
 		parent::__construct();
 		$this->request = $request;
 		$this->user = $user;
@@ -292,7 +292,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$modules = $this->getImportModules();
 		
 		$viewer = new Vtiger_Viewer();
-		$viewer->view('header.tpl', 'RSNImportSources');
+		$viewer->view('ImportHeader.tpl', 'RSNImportSources');
 		
 		for ($i = sizeof($modules)-1; $i >=0; --$i) {
 			$noOfRecords = $this->doUndoImport($modules[$i], $user);//tmp noOfrecord !!
@@ -300,7 +300,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		
 		$viewer->assign('MODULE', $this->getMainImportModule());
 		$viewer->view('okButton.tpl', 'RSNImportSources');
-			$viewer->view('footer.tpl', 'RSNImportSources');
+			$viewer->view('ImportFooter.tpl', 'RSNImportSources');
 		
 		$VTIGER_BULK_SAVE_MODE = $previousBulkSaveMode;
 	}
@@ -382,7 +382,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('IMPORT_SOURCE', $importInfos[0]['importsourceclass']);
-		$viewer->view('header.tpl', 'RSNImportSources');
+		$viewer->view('ImportHeader.tpl', 'RSNImportSources');
 		$importEnded = true;
 
 		foreach($importInfos as $importInfo) {
@@ -421,7 +421,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			$viewer->view('ImportDoneButtons.tpl', 'RSNImportSources');
 		}
 
-		$viewer->view('footer.tpl', 'RSNImportSources');
+		$viewer->view('ImportFooter.tpl', 'RSNImportSources');
 	}
 
 	/**
@@ -489,6 +489,56 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			if($tax['percentage'] == $rate)
 				return $tax;
 		return false;
+	}
+	
+	/**
+	 * Method that return the product id using his code.
+	 * @param $productcode : the code of the product.
+	 * @return int - the product id | null.
+	 */
+	function getProductId($productcode, &$isProduct = NULL, &$name = NULL) {
+        //TODO cache
+        
+		$db = PearDatabase::getInstance();
+		if($isProduct !== TRUE){
+			$query = 'SELECT serviceid, label
+				FROM vtiger_service s
+				JOIN vtiger_crmentity e
+					ON s.serviceid = e.crmid
+				WHERE s.productcode = ?
+				AND e.deleted = FALSE
+				AND discontinued = 1
+				LIMIT 1';
+			$result = $db->pquery($query, array($productcode));
+	
+			if ($db->num_rows($result) == 1) {
+				$row = $db->fetch_row($result, 0);
+				$isProduct = false;
+				$name = $row['label'];
+				return $row['serviceid'];
+			}
+		}
+		//produits
+		if($isProduct !== FALSE){
+			$query = 'SELECT productid, label
+				FROM vtiger_products p
+				JOIN vtiger_crmentity e
+					ON p.productid = e.crmid
+				WHERE p.productcode = ?
+				AND e.deleted = FALSE
+				AND discontinued = 1
+				LIMIT 1';
+			$result = $db->pquery($query, array($productcode));
+	
+			if ($db->num_rows($result) == 1) {
+				$row = $db->fetch_row($result, 0);
+				$isProduct = true;
+				$name = $row['label'];
+				return $row['productid'];
+			}
+		}
+
+		return null;
 	}
 }
 

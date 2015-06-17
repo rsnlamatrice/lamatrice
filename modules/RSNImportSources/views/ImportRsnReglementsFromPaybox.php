@@ -1,7 +1,11 @@
 <?php
+/**
+ * Importation des réglements effectués sur Paybox, c'est à dire la boutique Prestashop
+ * Cet import s'effectue après l'importation des Donateurs web (qui fournit les coordonnées des contacts)
+ * et après l'import Boutique qui référencent les factures de la boutique.
+ * Les écritures DR et DP correspondent aux données RSNDonateursWeb et génèrent des factures de dons, les autres correspondent aux factures boutique.
+ */
 
-
-//TODO : end the implementation of this import!
 class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSources_ImportFromFile_View {
 
 	private $coupon = null;
@@ -65,6 +69,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	/**
 	 * Method to get the imported fields for the contact module.
 	 * @return array - the imported fields for the contact module.
+	 *
+	 * Les contacts doivent tous pré-exister du fait des imports DonateursWeb ou Boutique
 	 */
 	public function getContactsFields() {
 		return array(
@@ -87,6 +93,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	/**
 	 * Method to get the imported fields for the invoice module.
 	 * @return array - the imported fields for the invoice module.
+	 *
+	 * Factures des dons DR et DP
 	 */
 	function getInvoiceFields() {
 		return array(
@@ -103,6 +111,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'country',
 			'subject',
 			'invoicedate',
+			'invoicetype',
 			//lines
 			'productcode',
 			'productid',
@@ -122,7 +131,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	function getRsnReglementsFields() {
 		return array(
 			//header
-			'	',
+			'numpiece',
 			'dateregl',
 			'dateoperation',
 			'email',
@@ -405,39 +414,15 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 		return true;
 	}
-
-	/**
-	 * Method that check if a product exist.
-	 * @param $product : the product to check.
-	 * @return boolean : true if the product exist.
-	 */
-	function productExist($product) {
-		$db = PearDatabase::getInstance();
-		$query = 'SELECT productid FROM vtiger_products p JOIN vtiger_crmentity e on p.productid = e.crmid WHERE p.productcode = ? AND e.deleted = FALSE LIMIT 1';
-		$result = $db->pquery($query, array($product['productcode']));
-
-		if ($db->num_rows($result) == 1) {
-			return true;
-		}
-
-		$query = 'SELECT * FROM vtiger_service s JOIN vtiger_crmentity e on s.serviceid = e.crmid WHERE s.productcode = ? AND e.deleted = FALSE LIMIT 1';
-		$result = $db->pquery($query, array($product['productcode']));
-
-        return ($db->num_rows($result) == 1);
-	}
-
 	
 	/**
 	 * Method that pre import an invoice.
 	 *  It adone row in the temporary pre-import table by invoice line.
 	 * @param $invoiceData : the data of the invoice to import.
 	 */
-	function preImportInvoice($invoiceData) {
-		$invoiceValues = $this->getInvoiceValues($invoiceData);
-		foreach ($invoiceValues as $invoiceLine) {
-			$invoice = new RSNImportSources_Preimport_Model($invoiceLine, $this->user, 'Invoice');
-			$invoice->save();
-		}
+	function preImportInvoice($invoiceData, $donateurWeb) {
+		$invoiceValues = $this->getInvoiceValues($invoiceData, $donateurWeb);
+		$invoice = new RSNImportSources_Preimport_Model($invoiceValues, $this->user, 'Invoice');
 	}
 
 	/**
@@ -477,7 +462,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @param $invoice : the invoice data.
 	 */
 	function checkContact($invoice) {
-		$contactData = $this->getContactValues($invoice['invoiceInformations']);
+		$contactData = $this->getContactValues($invoice);
 		$query = "SELECT contactid, deleted
 			FROM vtiger_contactdetails
                         JOIN vtiger_crmentity
@@ -497,20 +482,64 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		}
 	}
 
-	/**
-	 * Method that check if a product is already in the specified array.
-	 * @param $product : the product to check.
-	 * @param $productArray : the array of product.
-	 * @return boolean : true if the product is in the array.
-	 */
-	function productIsInArray($product, $productArray) {
-		for ($i = 0; $i < sizeof($productArray); ++$i) {
-			if ($product['productcode'] == $productArray[$i]['productcode']) {
-				return true;
-			}
-		}
 
-		return false;
+	/**
+	 * Method that pre-import an invoice if it does not exist in database.
+	 * @param $reglement : the rsnreglements data.
+	 * @return invoiceid if exists or true if pre-import
+	 */
+	function checkInvoice($reglement) {
+		$invoiceData = $this->getInvoiceValues($reglement);
+		$query = "SELECT crmid
+			FROM vtiger_invoice
+                        JOIN vtiger_crmentity
+                            ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+			WHERE deleted = FALSE
+		";
+		switch($invoiceData['invoicetype']){
+		case 'BOU':
+			$query .= " AND invoice_no LIKE CONCAT('BOU%-', ?)";
+			$queryParams = array($invoiceData['sourceid']);
+			break;
+		case 'DP':
+		case 'DR':
+			$query .= " AND invoice_no = ?";
+			$queryParams = array($invoiceData['sourceid']);
+			break;
+		default:
+			var_dump('$reglement : ', $reglement);
+			var_dump('$invoiceData : ', $invoiceData);
+			echo '<pre>Erreur : Type de facture inconnu "'.$invoiceData['invoicetype'].'"</pre>';
+			return false;
+			break;
+		}
+		$query .= " LIMIT 1";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $queryParams);
+		if(!$db->num_rows($result)){
+			if($invoiceData['invoicetype'] == 'BOU'){
+				var_dump('$query : ', $query, $queryParams);
+				var_dump('$reglement : ', $reglement);
+				var_dump('$invoiceData : ', $invoiceData);
+				echo '<pre>Erreur : La facture Boutique est introuvable pour la référence "'.$invoiceData['sourceid'].'"</pre>';
+				return false;
+			}
+			$donateurWeb = $this->getDonateurWeb($reglement);
+			
+			if(!$donateurWeb){
+				//var_dump('$query : ', $query, $queryParams);
+				var_dump('$reglement : ', $reglement);
+				var_dump('$invoiceData : ', $invoiceData);
+				//echo_callstack();
+				echo '<pre>Erreur : L\'enregistrement Donateur Web est introuvable pour la référence "'.$invoiceData['sourceid'].'"</pre>';
+				return false;
+			}
+			$this->preImportInvoice($invoiceData, $donateurWeb);
+			return true;
+		}
+		$row = $db->fetch_row($result, 0);
+			
+		return $row['crmid'];
 	}
 
 	/**
@@ -559,6 +588,49 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 		return true;
 	}
+	/**
+	 * Method that check if there is currencies found in file exist.
+	 *  If there is some new currencies found, it ended the process and display the "new currency found" template
+	 * @param RSNImportSources_FileReader_Reader $fileReader : the reader of the uploaded file.
+	 * @return boolean : true if there is no new product.
+	 */
+	function checkCurrencies(RSNImportSources_FileReader_Reader $fileReader) {
+		$newCurrencies = array();
+
+		if($fileReader->open()) {
+			if ($this->moveCursorToNextRsnReglement($fileReader)) {
+				$i = 0;
+				do {
+					$reglement = $this->getNextRsnReglement($fileReader);
+					if ($reglement != null) {
+						$currency = $this->getCurrency($reglement);
+						if (!$this->getCurrencyId($currency)) {
+							array_push($newCurrencies, $currency);
+						} 
+					}
+				} while ($reglement != null);
+			}
+
+			$fileReader->close();
+
+			if (sizeof($newProducts) > 0) {
+				global $HELPDESK_SUPPORT_NAME;
+				$viewer = new Vtiger_Viewer();
+				$viewer->assign('FOR_MODULE', 'Invoice');
+				$viewer->assign('MODULE', 'RSNImportSources');
+				$viewer->assign('NEW_CURRENCIES', $newCurrencies);
+				$viewer->assign('HELPDESK_SUPPORT_NAME', $HELPDESK_SUPPORT_NAME);
+				$viewer->view('NewCurrenciesFound.tpl', 'RSNImportSources');
+
+				exit;//TODO: Be carefull: in this case, JS is not loaded !!!
+			}
+		} else {
+			//TODO: manage error
+			echo "not opened ...";
+		}
+
+		return true;
+	}
 
 	/**
 	 * Method to parse the uploaded file and save data to the temporary pre-import table.
@@ -566,24 +638,29 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @return boolean - true if pre-import is ended successfully
 	 */
 	function parseAndSaveFile(RSNImportSources_FileReader_Reader $fileReader) {
-		if ($this->checkNewProducts($fileReader)) {
+		if ($this->checkCurrencies($fileReader)) {
 			$this->clearPreImportTable();
 
 			if($fileReader->open()) {
-				if ($this->moveCursorToNextInvoice($fileReader)) {
+				if ($this->moveCursorToNextRsnReglement($fileReader)) {
 					$i = 0;
 					do {
-						$rsnreglement = $this->getNextRsnReglements($fileReader);
-						if ($rsnreglement != null) {
-							$this->checkInvoice($rsnreglement);
-							$this->preImportRsnReglement($rsnreglement);
+						$reglement = $this->getNextRsnReglement($fileReader);
+						if ($reglement != null) {
+							$reglement = $this->getRsnReglementsValues($reglement);
+							if(!$this->checkInvoice($reglement)){
+								$error = 'LBL_INVOICE_MISSING';
+								echo 'Facture ou Donateur web manquant.<br>Les importations "Donateurs Web" et "Boutique" ont-elles bien été effectuées ?';
+								break;
+							}
+							$this->preImportRsnReglement($reglement);
 						}
-					} while ($rsnreglement != null);
+					} while ($reglement != null);
 
 				}
 
 				$fileReader->close(); 
-				return true;
+				return !isset($error);
 			} else {
 				//TODO: manage error
 				echo "not opened ...";
@@ -591,13 +668,22 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		}
 		return false;
 	}
-
+	/**
+	 * Method that pre import an invoice.
+	 *  It adone row in the temporary pre-import table by invoice line.
+	 * @param $reglementData : the data of the invoice to import.
+	 */
+	function preImportRsnReglement($reglementData) {
+		$reglementValues = $this->getRsnReglementsValues($reglementData);
+		$reglement = new RSNImportSources_Preimport_Model($reglementValues, $this->user, 'RsnReglements');
+		$reglement->save();
+	}
 	/**
 	 * Method that return the coupon for prestashop source.
 	 *  It cache the value in the $this->coupon attribute.
 	 * @return the coupon.
 	 */
-	private function getCoupon(){
+	function getCoupon(){
 		if ($this->coupon == null) {
 			$codeAffaire='BOUTIQUE';
 			$query = "SELECT vtiger_crmentity.crmid
@@ -687,7 +773,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
 	 * @return boolean - false if error or if no invoice found.
 	 */
-	function moveCursorToNextRsnReglements(RSNImportSources_FileReader_Reader $fileReader) {
+	function moveCursorToNextRsnReglement(RSNImportSources_FileReader_Reader $fileReader) {
 		do {
 			$cursorPosition = $fileReader->getCurentCursorPosition();
 			$nextLine = $fileReader->readNextDataLine($fileReader);
@@ -696,7 +782,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				return false;
 			}
 
-		} while(!$this->isValideInformationLine($nextLine));
+		} while(!$this->isValidInformationLine($nextLine));
 
 		$fileReader->moveCursorTo($cursorPosition);
 
@@ -704,25 +790,19 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	}
 
 	/**
-	 * Method that return the information of the next first invoice found in the file.
+	 * Method that return the information of the next first reglement found in the file.
 	 * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
-	 * @return the invoice information | null if no invoice found.
+	 * @return the reglement information | null if no reglement found.
 	 */
-	function getNextInvoice(RSNImportSources_FileReader_Reader $fileReader) {
+	function getNextRsnReglement(RSNImportSources_FileReader_Reader $fileReader) {
 		$nextLine = $fileReader->readNextDataLine($fileReader);
 		if ($nextLine != false) {
-			$invoice = array(
-				'invoiceInformations' => $nextLine,
-				'detail' => array());
+			$reglement = $nextLine;
 			do {
 				$cursorPosition = $fileReader->getCurentCursorPosition();
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
-				if (!$this->isClientInformationLine($nextLine)) {
-					if ($nextLine[1] != null && $nextLine[1] != '') {
-						array_push($invoice['detail'], $nextLine);
-					}
-				} else {
+				if ($this->isValidInformationLine($nextLine)) {
 					break;
 				}
 
@@ -732,90 +812,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				$fileReader->moveCursorTo($cursorPosition);
 			}
 
-			return $invoice;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Method that return the formated information of a contact found in the file.
-	 * @param $invoiceInformations : the invoice informations data found in the file.
-	 * @return array : the formated data of the contact.
-	 */
-	function getContactValues($invoiceInformations) {
-		$contactMapping = array(
-			'lastname'		=> $invoiceInformations[46],
-			'firstname'		=> $invoiceInformations[45],
-			'email'			=> $invoiceInformations[22],
-			'mailingstreet'		=> $invoiceInformations[13],
-			'mailingstreet2'	=> $invoiceInformations[14],
-			'mailingstreet3'	=> $invoiceInformations[15],
-			'mailingzip'		=> $invoiceInformations[16],
-			'mailingcity'		=> $invoiceInformations[17],
-			'mailingcountry' 	=> $invoiceInformations[19],
-			'phone'			=> $invoiceInformations[20],
-			'mobile'		=> $invoiceInformations[21],
-			'accounttype'		=> 'Boutique',
-			'leadsource'		=> 'BOUTIQUE',
-			);
-
-		return $contactMapping;
-	}
-
-	/**
-	 * Method that returns the formated information of a product found in the file.
-	 * @param $product : the product data found in the file.
-	 * @return array : the formated data of the product.
-	 */
-	function getProductValues($product) {
-		$product = array(
-			'productcode'	=> $product[1],
-			'productname'	=> $product[2],
-			'unit_price'	=> $product[3],//TTC, TODO HT
-			'qty_per_unit'	=> 1,
-			'taxrate'	=> $product[8],
-		);
-		return $product;
-	}
-
-	/**
-	 * Method that return the product id using his code.
-	 * @param $productcode : the code of the product.
-	 * @return int - the product id | null.
-	 */
-	function getProductId($productcode, &$isProduct, &$name) {
-        //TODO cache
-        
-		$db = PearDatabase::getInstance();
-		$query = 'SELECT productid, label
-			FROM vtiger_products p
-			JOIN vtiger_crmentity e
-				ON p.productid = e.crmid
-			WHERE p.productcode = ? AND e.deleted = FALSE
-			LIMIT 1';
-		$result = $db->pquery($query, array($productcode));
-
-		if ($db->num_rows($result) == 1) {
-			$row = $db->fetch_row($result, 0);
-			$isProduct = true;
-			$name = $row['label'];
-			return $row['productid'];
-		}
-
-		$query = 'SELECT serviceid, label
-			FROM vtiger_service s
-			JOIN vtiger_crmentity e
-				ON s.serviceid = e.crmid
-			WHERE s.productcode = ? AND e.deleted = FALSE
-			LIMIT 1';
-		$result = $db->pquery($query, array($productcode));
-
-		if ($db->num_rows($result) == 1) {
-			$row = $db->fetch_row($result, 0);
-			$isProduct = false;
-			$name = $row['label'];
-			return $row['serviceid'];
+			return $reglement;
 		}
 
 		return null;
@@ -824,50 +821,194 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	/**
 	 * Method that return the formated information of an invoice found in the file.
 	 * @param $invoice : the invoice data found in the file.
+	 * @param $donateurWeb : donateur web avec la même référence
 	 * @return array : the formated data of the invoice.
 	 */
-	function getInvoiceValues($invoice) {
-	//TODO end implementation of this method
-		$invoiceValues = array();
-		$date = $this->getMySQLDate($invoice['invoiceInformations'][0]);
-		$invoiceHeader = array(
-			'sourceid'		=> $invoice['invoiceInformations'][41],
-			'lastname'		=> $invoice['invoiceInformations'][46],
-			'firstname'		=> $invoice['invoiceInformations'][45],
-			'email'			=> $invoice['invoiceInformations'][22],
-			'street'		=> $invoice['invoiceInformations'][13],
-			'street2'		=> $invoice['invoiceInformations'][14],
-			'street3'		=> $invoice['invoiceInformations'][15],
-			'zip'			=> $invoice['invoiceInformations'][16],
-			'city'			=> $invoice['invoiceInformations'][17],
-			'country' 		=> $invoice['invoiceInformations'][19],
-			'subject'		=> $invoice['invoiceInformations'][11],
+	function getInvoiceValues($reglement, $donateurWeb = FALSE) {
+		$reference = $reglement['numpiece'];//DR05707_20150225130243 ou 4297;CP;25-04-15-17:38:33
+		if(!$reference)
+			return false;
+		if(strpos($reference, ';') !== FALSE)
+			$referenceParts = explode( ';', $reference);
+		else
+			$referenceParts = explode( '_', $reference);
+		$sourceId = $referenceParts[0];
+		$date = $this->getMySQLDate($reglement['dateregl']);
+		$invoiceType = $this->getInvoiceType($sourceId);
+		switch($invoiceType){
+		case 'BOU':
+			//4297;CP;25-04-15-17:38:33
+			break;
+		case 'DP':
+			//DP05707_20150225130243
+			$product = array(
+				'code' => 'ADLB',
+				'name' => 'Don ponctuel',
+			);
+			break;
+		case 'DR':
+			//DR05707
+			$product = array(
+				'code' => 'ADETAL',
+				'name' => 'Don régulier',
+			);
+			break;
+		}
+		/* $dWDateDon:=[JournalPaybox]DateOfIssue_4D
+		$aWDateDon:=Chaine($dWDateDon)
+		$dWDateEcheance:=[JournalPaybox]Date_4D
+		$aWDateEcheance:=Chaine($dWDateEcheance)
+		C_TEXTE($tPaquetCogilog)
+		C_ENTIER LONG($eCompteur)
+		$bRefInconnu:=Faux
+		$aWMontantBrut:=Chaine(([JournalPaybox]Amount/100))
+		C_ALPHA(30;$aCodeProduit)
+		$aCodeProduit:="ADETAL"
+		$CompteDeVente:="511104"
+		$codeAffaire:="PAYBOX"
+		$tCommentaire:=$tCommentaire+$aWDateDon+◊aTab+Chaine([Adresse]RefFiche)+◊aTab+$aWMontantBrut+◊aTab
+		ENVOYER PAQUET($hDocLog;$tCommentaire)
+		$tCommentaire:=""*/
+	
+		$invoiceValues = array(
+			'sourceid'		=> $sourceId,
+			'invoicetype'		=> $invoiceType,
+			'subject'		=> $reference,
 			'invoicedate'		=> $date,
 		);
-		foreach ($invoice['detail'] as $product) {
-			$isProduct = true;
-			$product_name = '';
-			$taxrate = ((float)str_replace(',', '.', $product[8]))/100;
-			array_push($invoiceValues, array_merge($invoiceHeader, array(
-				'productcode'	=> $product[1],
-				'productid'	=> $this->getProductId($product[1], $isProduct, $product_name),
-				'quantity'	=> $product[5],
-				'article'	=> $product_name,
-				'prix_unit_ht'	=> $product[3] / (1 + $taxrate),
-				'isproduct'	=> $isProduct,
-				'taxrate'	=> $product[8],
-            
-            /*1 RECEVOIR PAQUET($hDocref;$aCodeProduit;◊aTab)
-            2 RECEVOIR PAQUET($hDocref;$aNomProduit;◊aTab)
-            3 RECEVOIR PAQUET($hDocref;$aPrixUProduit;◊aTab)
-            4 RECEVOIR PAQUET($hDocref;$tInutilisé1;◊aTab)  `"1"
-            5 RECEVOIR PAQUET($hDocref;$aQuantitéProduit;◊aTab)
-            6 RECEVOIR PAQUET($hDocref;$tInutilisé2;◊aTab)  `"0"
-            7 RECEVOIR PAQUET($hDocref;$aCodeTVA;◊aTab)  `"0|12|3"
-            8 RECEVOIR PAQUET($hDocref;$aTauxTVA;◊aTab)  `<date> ?*/
-			)));
+		if($donateurWeb){
+			foreach(array('lastname', 'firstname', 'email', 'street', 'street2', 'street3', 'zip', 'city', 'country') as $fieldName)
+				$invoiceValues[$fieldName] = $donateurWeb->get($fieldName);
 		}
+		if(isset($product))
+			$isProduct = false;
+			$invoiceValues = array_merge($invoiceValues, array(
+				'productcode'	=> $product['code'],
+				'productid'	=> $this->getProductId($product['code'], $isProduct),
+				'quantity'	=> 1,
+				'article'	=> $product['name'],
+				'prix_unit_ht'	=> $reglement['amount'],
+				'isproduct'	=> false,
+				'taxrate'	=> 0.0,
+			));
 
 		return $invoiceValues;
 	}
+
+
+	/**
+	 * Method that return the formated information of an invoice found in the file.
+	 * @param $reglement : the invoice data found in the file.
+	 * @return array : the formated data of the invoice.
+	 */
+	function getRsnReglementsValues($reglement) {
+	//TODO end implementation of this method
+		$date = $this->getMySQLDate($reglement[9], $reglement[10]);
+		$dateoperation = $this->getMySQLDate($reglement[6]);
+		$currency = $this->getCurrency($reglement);
+		$reference = $reglement[12];
+		$typeregl = $this->getTypeRegl($reference);
+		$numpiece = $reference;
+		$reglementValues = array(
+			'numpiece'		=> $numpiece,
+			'dateregl'		=> $date,
+			'dateoperation'		=> $dateoperation,
+			'email'			=> $reglement[13],
+			'amount'		=> $reglement[17] / 100,
+			'currency'		=> $currency,
+			'payment'		=> $reglement[23],
+			'paymentstatus'		=> $reglement[28],
+			'ip'			=> $reglement[30],
+			'errorcode'		=> $reglement[31],
+			'bank'			=> $reglement[1],
+			'typeregl'		=> $typeregl,
+			'rsnmoderegl'		=> 'PAYBOX',
+		);
+
+		return $reglementValues;
+	}
+	
+	/**
+	 * Retourne le type de facture associée : Boutique, Don Régulier, Don Ponctuel
+	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
+	 */
+	function getTypeRegl($reference){
+		if($reference[0] == 'D') 
+			if($reference[1] == 'R')
+				return 'Don régulier';
+			elseif($reference[1] == 'P')
+				return 'Don ponctuel';
+		return 'Facture';
+	}
+	
+	
+	/**
+	 * Retourne le type de facture associée : BOU, DR, DP
+	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
+	 */
+	function getInvoiceType($reference){
+		if($reference[0] == 'D') 
+			if($reference[1] == 'R')
+				return 'DR';
+			elseif($reference[1] == 'P')
+				return 'DP';
+		return 'BOU';
+	}
+	
+	/**
+	 *
+	 *
+	 */
+	function getCurrency($reglement){
+		$currencyCode = $reglement[18];
+		switch ($currencyCode){
+		case '978':
+			return 'Euro';
+		}
+		return $currencyCode;
+	}
+	
+	/**
+	 *
+	 *
+	 */
+	function getCurrencyId($currency){
+		if(!$currency)
+			return false;
+		if($currency == 'Euro')
+			return CURRENCY_ID;
+		//TODO
+		return 0;
+	}
+	
+	/**
+	 *
+	 *
+	 */
+	function getDonateurWeb($reglement){
+		$reference = $reglement['numpiece'];//DR05707_20150225130243 ou 4297;CP;25-04-15-17:38:33
+		if(!$reference)
+			return false;
+		
+		$query = "SELECT crmid
+			FROM vtiger_rsndonateursweb
+                        JOIN vtiger_crmentity
+                            ON vtiger_rsndonateursweb.rsndonateurswebid = vtiger_crmentity.crmid
+			WHERE deleted = FALSE
+			AND paiementid = ?
+			AND isvalid = 1 /* TODO existing 0 should raise error */
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, array($reference));
+		if(!$db->num_rows($result)){
+			//var_dump('getDonateurWeb',$query, array($reference));
+			return false;
+		}
+		$row = $db->fetch_row($result, 0);
+		return Vtiger_Record_Model::getInstanceById( $row['crmid'], 'RSNDonateursWeb');
+	}
+	
 }
+
+?>

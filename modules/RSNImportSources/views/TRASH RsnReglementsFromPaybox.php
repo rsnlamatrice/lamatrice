@@ -69,7 +69,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	function getRsnReglementsFields() {
 		return array(
 			//header
-			'	',
+			'numpiece',
 			'dateregl',
 			'dateoperation',
 			'email',

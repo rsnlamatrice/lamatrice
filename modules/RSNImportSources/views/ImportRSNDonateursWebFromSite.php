@@ -114,7 +114,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'lastname',
 			'address',
 			'address3',
-			'zipcode',
+			'zip',
 			'city',
 			'country',
 			'phone',
@@ -175,7 +175,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			if ($account != null) {
 				$sourceId = $rsndonateurswebData[0]['externalid'];
 		
-				//test sur donateur_no == $sourceId
+				//test sur externalid == $sourceId
 				$query = "SELECT crmid
 					FROM vtiger_rsndonateursweb
 					JOIN vtiger_crmentity
@@ -235,13 +235,20 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 					
 					
 					$entryId = $this->getEntryId("RSNDonateursWeb", $rsndonateurswebId);
+					foreach ($rsndonateurswebData as $rsndonateurswebLine) {
+						$entityInfo = array(
+							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
+							'id'		=> $entryId
+						);
+						$importDataController->updateImportStatus($rsndonateurswebLine[id], $entityInfo);
+					}
 					
 					$record->set('mode','edit');
 					$query = "UPDATE vtiger_rsndonateursweb
 						JOIN vtiger_crmentity
 							ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
 						SET smownerid = ?
-						/*, createdtime = ?*/
+						"/*, createdtime = ?*/."
 						WHERE rsndonateurswebid = ?
 					";
 					$result = $db->pquery($query, array(ASSIGNEDTO_ALL
@@ -325,16 +332,18 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
                         JOIN vtiger_crmentity
                             ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 			WHERE deleted = FALSE
-			AND (	(UPPER(firstname) = UPPER(?)
-					AND UPPER(lastname) = UPPER(?))
-				OR UPPER(lastname) = UPPER(CONCAT(?, ' ', ?))
+			AND (	(UPPER(firstname) = ?
+					AND UPPER(lastname) = ?)
+				OR UPPER(lastname) = CONCAT(?, ' ', ?)
 			)
-			AND UPPER(email) = UPPER(?)
+			AND LOWER(email) = ?
 			LIMIT 1
 		";
 
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($firstname, remove_accent($lastname), remove_accent($lastname), $firstname, $email));
+		$result = $db->pquery($query, array(strtoupper($firstname), strtoupper(remove_accent($lastname))
+						    , strtoupper(remove_accent($lastname)), strtoupper($firstname)
+						    , strtolower($email)));
 
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
@@ -356,15 +365,17 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
                         JOIN vtiger_crmentity
                             ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 			WHERE deleted = FALSE
-			AND ((UPPER(firstname) = UPPER(?)
-				AND UPPER(lastname) = UPPER(?))
-			    OR UPPER(lastname) = UPPER(CONCAT(?, ' ', ?))
+			AND ((UPPER(firstname) = ?
+				AND UPPER(lastname) = ?)
+			    OR UPPER(lastname) = CONCAT(?, ' ', ?)
 			)
-			AND UPPER(email) = UPPER(?)
+			AND LOWER(email) = ?
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($contactData['firstname'], remove_accent($contactData['lastname']), remove_accent($contactData['lastname']), $contactData['firstname'], $contactData['email']));
+		$result = $db->pquery($query, array(strtoupper($contactData['firstname']), strtoupper(remove_accent($contactData['lastname']))
+						    , strtoupper(remove_accent($contactData['lastname'])), strtoupper($contactData['firstname'])
+						    , strtolower($contactData['email'])));
 		if(!$db->num_rows($result)){
 			$this->preImportContact($contactData);
 		}
@@ -427,7 +438,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	function getMySQLDateAboEnd($string) {
 		if(!$string)
 			return '';
-		return '20' . substr($string, 0,2) . '-' . substr($string, 2, 2) . '-00';
+		return '20' . substr($string, 0,2) . '-' . substr($string, 2, 2) . '-01';
 	}
 
 	/**
@@ -584,7 +595,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'email'			=> $rsndonateursweb['donInformations'][8],
 			'address'		=> $rsndonateursweb['donInformations'][3],
 			'address3'		=> $rsndonateursweb['donInformations'][4],
-			'zipcode'		=> $rsndonateursweb['donInformations'][5],
+			'zip'			=> $rsndonateursweb['donInformations'][5],
 			'city'			=> mb_strtoupper($rsndonateursweb['donInformations'][6]),
 			'country' 		=> $country == 'France' ? '' : $country,
 			'datedon'		=> $date,

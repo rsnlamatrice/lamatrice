@@ -87,7 +87,7 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		$listQuery = parent::getQuery();
 		foreach(array('vtiger_contactaddress.mailingstreet2', 'vtiger_contactdetails.isgroup') as $fieldName){
 			if(!preg_match('/SELECT.+'.preg_quote($fieldName).'.+FROM\s/i', $listQuery)
-			&& strpos($listQuery, explode('.',$tableName)[0]))
+			&& strpos($listQuery, explode('.',$fieldName)[0]))
 				$listQuery = preg_replace('/^\s*SELECT\s/i', 'SELECT '.$fieldName.',', $listQuery);
 		}
 		return $listQuery;

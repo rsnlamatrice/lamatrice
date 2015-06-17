@@ -12,22 +12,24 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 	 * @param array $fieldMapping : the field mapping.
 	 * @param array $defaultValues : the default field values.
 	 */
-	public static function add($request, $user, $module, $fieldMapping, $defaultValues) {
+	public static function add($request, $user, $module, $fieldMapping, $defaultValues = null) {
+		if(!$defaultValues)
+			$defaultValues = null;
 		$db = PearDatabase::getInstance();
 
 		if (!Vtiger_Utils::CheckTable(self::$importQueueTable)) {
 			Vtiger_Utils::CreateTable(
-							self::$importQueueTable,
-							"(importid INT NOT NULL PRIMARY KEY,
-								userid INT NOT NULL,
-								tabid INT NOT NULL,
-								importsourceclass VARCHAR(64) NOT NULL,
-								field_mapping TEXT,
-								default_values TEXT,
-								merge_type INT,
-								merge_fields TEXT,
-								status INT default 0)",
-							true);
+				self::$importQueueTable,
+				"(importid INT NOT NULL PRIMARY KEY,
+					userid INT NOT NULL,
+					tabid INT NOT NULL,
+					importsourceclass VARCHAR(64) NOT NULL,
+					field_mapping TEXT,
+					default_values TEXT,
+					merge_type INT,
+					merge_fields TEXT,
+					status INT default 0)",
+				true);
 		}
 
 		if($request->get('is_scheduled')) {

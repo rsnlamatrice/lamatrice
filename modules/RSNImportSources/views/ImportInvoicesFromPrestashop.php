@@ -738,47 +738,6 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		return $product;
 	}
 
-	/**
-	 * Method that return the product id using his code.
-	 * @param $productcode : the code of the product.
-	 * @return int - the product id | null.
-	 */
-	function getProductId($productcode, &$isProduct, &$name) {
-        //TODO cache
-        
-		$db = PearDatabase::getInstance();
-		$query = 'SELECT productid, label
-			FROM vtiger_products p
-			JOIN vtiger_crmentity e
-				ON p.productid = e.crmid
-			WHERE p.productcode = ? AND e.deleted = FALSE
-			LIMIT 1';
-		$result = $db->pquery($query, array($productcode));
-
-		if ($db->num_rows($result) == 1) {
-			$row = $db->fetch_row($result, 0);
-			$isProduct = true;
-			$name = $row['label'];
-			return $row['productid'];
-		}
-
-		$query = 'SELECT serviceid, label
-			FROM vtiger_service s
-			JOIN vtiger_crmentity e
-				ON s.serviceid = e.crmid
-			WHERE s.productcode = ? AND e.deleted = FALSE
-			LIMIT 1';
-		$result = $db->pquery($query, array($productcode));
-
-		if ($db->num_rows($result) == 1) {
-			$row = $db->fetch_row($result, 0);
-			$isProduct = false;
-			$name = $row['label'];
-			return $row['serviceid'];
-		}
-
-		return null;
-	}
 
 	/**
 	 * Method that return the formated information of an invoice found in the file.
@@ -804,7 +763,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'invoicedate'		=> $date,
 		);
 		foreach ($invoice['detail'] as $product) {
-			$isProduct = true;
+			$isProduct = null;
 			$product_name = '';
 			$taxrate = ((float)str_replace(',', '.', $product[8]))/100;
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
