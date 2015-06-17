@@ -179,7 +179,7 @@ class RSNImportSources extends Vtiger_CRMEntity {
 		$sql = "DELETE FROM `vtiger_cron_task` WHERE name = 'Schedule RSNImportSources';";
 		$db->pquery($sql);
 		$sql = "INSERT INTO `vtiger_cron_task` (`name`, `handler_file`, `frequency`, `laststart`, `lastend`, `status`, `module`, `sequence`, `description`) VALUES
-			('Schedule RSNImportSources', 'cron/modules/RSNImportSources/ScheduledImport.service', 900, 0, 0, 1, 'RSNImportSources', 7, 'Recommended frequency for RSNImportSources is 15 mins');";
+			('Schedule RSNImportSources', 'cron/modules/RSNImportSources/ScheduledImport.service', 900, 0, 0, 1, 'RSNImportSources', 7, 'Importations préconfigurées des données de RSN');";
 		$db->pquery($sql);
 	}
 

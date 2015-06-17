@@ -8,7 +8,7 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-
+global $VTIGER_BULK_SAVE_MODE;
 $previousBulkSaveMode = $VTIGER_BULK_SAVE_MODE;
 $VTIGER_BULK_SAVE_MODE = false;
 
@@ -17,7 +17,7 @@ require_once   'includes/runtime/Controller.php';
 require_once   'includes/runtime/BaseModel.php';
 require_once   'includes/runtime/Globals.php';
 
-RSNImport_Data_Action::runScheduledImport();
+RSNImportSources_Data_Action::runScheduledImport();
 
 $VTIGER_BULK_SAVE_MODE = $previousBulkSaveMode;
 
