@@ -86,7 +86,6 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 	 * @return Vtiger_Record_Model or Module specific Record Model instance
 	 */
 	protected function getRecordModelFromRequest(Vtiger_Request $request) {
-				
 		$moduleName = $request->getModule();
 		$recordId = $request->get('record');
 

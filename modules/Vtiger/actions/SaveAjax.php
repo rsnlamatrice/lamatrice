@@ -118,7 +118,6 @@ class Vtiger_SaveAjax_Action extends Vtiger_Save_Action {
 		 * Les valeurs de plusieurs champs sont passés par fields
 		 */
 		$fieldsValues = $this->getRequestFieldsValues($request);
-		
 		$moduleName = $request->getModule();
 		$recordId = $request->get('record');
 
@@ -146,7 +145,7 @@ class Vtiger_SaveAjax_Action extends Vtiger_Save_Action {
 					}
 					$recordModel->set($fieldName, $fieldValue);
 				}
-				$recordModel->set($fieldName, $fieldValue);
+				//$recordModel->set($fieldName, $fieldValue);
 			}
 		} else {
 			$moduleModel = Vtiger_Module_Model::getInstance($moduleName);

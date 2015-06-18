@@ -463,6 +463,7 @@ echo "</pre>//saveentity\r\n";
 					//Added to avoid function call getDBInsertDateValue in ajax save
 					if (isset($current_user->date_format) && !$ajaxSave) {
 						$fldvalue = getValidDBInsertDateValue($this->column_fields[$fieldname]);
+						//var_dump ($fieldname, $uitype, isset($current_user->date_format), !$ajaxSave, $this->column_fields[$fieldname], $fldvalue);
 					} else {
 						$fldvalue = $this->column_fields[$fieldname];
 					}
