@@ -188,7 +188,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 
 		$adb->query('DROP TABLE IF EXISTS '.$tableName);
 		RSNImportSources_Lock_Action::unLock($user);
-		RSNImportSources_Queue_Action::removeForUser($user);
+		RSNImportSources_Queue_Action::removeForUserAndModule($user, $moduleName);
 	}
 
 	/**
@@ -317,7 +317,6 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		if ($className) {
 			$importClass = self::getClassFromName($className);
 			$user = Users_Record_Model::getCurrentUserModel();
-			var_dump($user);
 			$importController = new $importClass($request, $user);
 
 			return $importController;
