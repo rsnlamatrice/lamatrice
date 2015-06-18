@@ -418,7 +418,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 */
 	function isDate($string) {
 		//TODO do not put this function here ?
-		return preg_match("/^20[0-9][0-9][-\/][0-3][0-9][-\/][0-3][0-9]/", $string);//only true for french format
+		return preg_match("/^(20)?[0-9][0-9][-\/][0-3][0-9][-\/][0-3][0-9]/", $string);//only true for french format
 	}
 	/**
 	 * Method that returns a formatted date for mysql (Y-m-d).

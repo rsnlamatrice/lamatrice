@@ -73,6 +73,17 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 	}
 
 	/** 
+	 * Method to remove all import of the queue table for a specific user.
+	 * @param $user : the concerned user.
+	 */
+	public static function removeForUserAndModule($user, $module) {
+		$db = PearDatabase::getInstance();
+		if(Vtiger_Utils::CheckTable(self::$importQueueTable)) {
+			$db->pquery('DELETE FROM ' . self::$importQueueTable . ' WHERE userid=? AND tabid = (SELECT tabid FROM vtiger_tab WHERE name = ? LIMIT 1)', array($user->id, $module));
+		}
+	}
+
+	/** 
 	 * Method to get one import information for a specific user.
 	 * @param $user : the concerned user.
 	 * @return the information about one import.
