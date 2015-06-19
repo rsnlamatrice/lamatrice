@@ -233,7 +233,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 				}
 				else {
 					$record = Vtiger_Record_Model::getCleanInstance('Invoice');
-					$record->set('MODE', 'create');
+					$record->set('mode', 'create');
 					$record->set('bill_street', $invoiceData[0]['street']);
 					$record->set('bill_street2', $invoiceData[0]['street2']);
 					$record->set('bill_street3', $invoiceData[0]['street3']);

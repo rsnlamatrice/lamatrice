@@ -201,7 +201,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 				}
 				else {
 					$record = Vtiger_Record_Model::getCleanInstance('RSNDonateursWeb');
-					$record->set('MODE', 'create');
+					$record->set('mode', 'create');
 					foreach($rsndonateurswebData[0] as $fieldName => $value)
 						if(!is_numeric($fieldName) && $fieldName != 'id')
 							$record->set($fieldName, $value);
@@ -327,7 +327,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($firstname, $lastname, $email) {
-		$query = "SELECT contactid, deleted
+		$query = "SELECT contactid
 			FROM vtiger_contactdetails
                         JOIN vtiger_crmentity
                             ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
@@ -360,7 +360,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	function checkContact($rsndonateursweb) {
 		$contactData = $this->getContactValues($rsndonateursweb['donInformations']);
 		//TODO : cache
-		$query = "SELECT contactid, deleted
+		$query = "SELECT contactid
 			FROM vtiger_contactdetails
                         JOIN vtiger_crmentity
                             ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid

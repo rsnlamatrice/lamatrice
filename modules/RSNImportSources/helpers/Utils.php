@@ -196,21 +196,24 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	 * @param  string $moduleName : the module name.
 	 * @return array - the source list.
 	 */
-	public static function getSourceList($moduleName = false) {
+	public static function getSourceList($moduleName) {
 		$db = PearDatabase::getInstance();
 		$return_values = array();
 
-		$query = 	'SELECT vtiger_crmentity.crmid, tab.name, ris.class
+		$query = 	'SELECT vtiger_crmentity.crmid/*, tab.name*/, ris.class, ris.title
 				FROM vtiger_rsnimportsources ris
 				JOIN vtiger_crmentity ON ris.rsnimportsourcesid = vtiger_crmentity.crmid
-				JOIN vtiger_tab tab ON ris.tabid = tab.tabid
-				WHERE ris.disabled = FALSE';
+				/*JOIN vtiger_tab tab ON ris.tabid = tab.tabid*/
+				WHERE ris.disabled = FALSE
+				AND vtiger_crmentity.deleted = FALSE';
 
 		$params = array();
-		if ($moduleName) {
-			$query .= ' AND tab.name = ?';
+		//if ($moduleName) {
+			$query .= ' AND (ris.modules LIKE CONCAT(\'%\', ?, \'%\')';
+			$query .= ' OR ris.modules LIKE CONCAT(\'%\', ?, \'%\'))';
 			$params[] = $moduleName;
-		}
+			$params[] = vtranslate($moduleName);
+		//}
 		$query .= ' ORDER BY sortorderid';
 		$result = $db->pquery($query, $params);
 
@@ -218,12 +221,12 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		for($i=0; $i<$noOfRecords; $i++) {
 			$class = self::getClassFromName($db->query_result($result, $i, 'class'));
 			array_push($return_values, array(
-				id 			=> $db->query_result($result, $i, 'crmid'),
-				module 		=> $db->query_result($result, $i, 'name'),
+				id 		=> $db->query_result($result, $i, 'crmid'),
+				module 		=> $moduleName, //$db->query_result($result, $i, 'name'),
 				classname 	=> $db->query_result($result, $i, 'class'),
-				sourcename => $class::getSource(),
-				sourcetype => $class::getSourceType()
-				));
+				sourcename 	=> $db->query_result($result, $i, 'title'),//$class::getSource(),
+				sourcetype 	=> $class::getSourceType()
+			));
 		}
         
         return $return_values;

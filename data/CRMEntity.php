@@ -316,9 +316,10 @@ echo "</pre>//saveentity\r\n";
 		$log->info("function insertIntoEntityTable " . $module . ' vtiger_table name ' . $table_name);
 		global $adb;
 		$insertion_mode = $this->mode;
-
+			
 		//Checkin whether an entry is already is present in the vtiger_table to update
 		if ($insertion_mode == 'edit') {
+			
 			$tablekey = $this->tab_name_index[$table_name];
 			// Make selection on the primary key of the module table to check.
 			$check_query = "select $tablekey from $table_name where $tablekey=?";
@@ -546,7 +547,7 @@ echo "</pre>//saveentity\r\n";
 				array_push($value, $fldvalue);
 			}
 		}
-
+		
 		if ($insertion_mode == 'edit') {
 			if ($module == 'Potentials') {
 				$dbquery = 'select sales_stage from vtiger_potential where potentialid = ?';

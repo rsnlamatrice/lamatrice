@@ -210,8 +210,8 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 					$queryGenerator->setFields($fieldsList);
 					
 					/* ED140827
-					* Erreur SQL, manque un AND car dŽjˆ initialisŽ avec un premier filtre (import de contacts)
-					* Les imports rŽutilisent le filtre en-cours.
+					* Erreur SQL, manque un AND car dÂŽjÂˆ initialisÂŽ avec un premier filtre (import de contacts)
+					* Les imports rÂŽutilisent le filtre en-cours.
 					*/
 					$counter = $queryGenerator->conditionInstanceCount;
 					
@@ -351,6 +351,9 @@ class Import_Data_Action extends Vtiger_Action_Controller {
  		$defaultFieldValues = $this->getDefaultFieldValues($moduleMeta);
 		foreach ($fieldData as $fieldName => $fieldValue) {
 			$fieldInstance = $moduleFields[$fieldName];
+			//ED150619 : tolÃ©rance sur champs de RSNImportSources
+			if(!$fieldInstance)
+				continue;
 			if ($fieldInstance->getFieldDataType() == 'owner') {
 				$ownerId = getUserId_Ol(trim($fieldValue));
 				if (empty($ownerId)) {

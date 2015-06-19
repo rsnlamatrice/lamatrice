@@ -136,7 +136,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'dateoperation',
 			'email',
 			'amount',
-			'currency',
+			'currency_id',
 			'payment',
 			'paymentstatus',
 			'ip',
@@ -147,12 +147,195 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		);
 	}
 	
+
+	/**
+	 * Method to process to the import of the RSNReglements module.
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importRsnReglements($importDataController) {
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
+		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY numpiece';
+
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+
+		if ($numberOfRecords <= 0) {
+			return;
+		}
+
+		$row = $adb->raw_query_result_rowdata($result, 0);
+		$previousReglementSubjet = $row['numpiece'];
+		$reglementData = array($row);
+
+		for ($i = 1; $i < $numberOfRecords; ++$i) {
+			$row = $adb->raw_query_result_rowdata($result, $i);
+			$reglementSubject = $row['numpiece'];
+
+			if ($previousReglementSubjet == $reglementSubject) {
+				array_push($reglementData, $row);
+			} else {
+				$this->importOneRsnReglements($reglementData, $importDataController);
+				$reglementData = array($row);
+				$previousReglementSubjet = $reglementSubject;
+			}
+		}
+
+		$this->importOneRsnReglements($reglementData, $importDataController);
+	}
+
+	
+	/**
+	 * Method to process to the import of a one invoice.
+	 * @param $reglementData : the data of the invoice to import
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importOneRsnReglements($reglementData, $importDataController) {
+					
+		global $log;
+		$reglement = $reglementData[0];
+		//TODO check sizeof $reglementata
+		$invoice = $this->getInvoice($reglement);
+		
+		//var_dump('importOneRsnReglements', $reglement, $invoice);
+		
+		if ($invoice != null) {
+			$accountId = $invoice->get('account_id');
+
+			if ($accountId != null) {
+				$numpiece = $reglement['numpiece'];
+		
+				$query = "SELECT crmid, rsnreglementsid
+					FROM vtiger_rsnreglements
+					JOIN vtiger_crmentity
+					    ON vtiger_rsnreglements.rsnreglementsid = vtiger_crmentity.crmid
+					WHERE numpiece = ? AND deleted = FALSE
+					LIMIT 1
+				";
+				$db = PearDatabase::getInstance();
+				$result = $db->pquery($query, array($numpiece));
+				if($db->num_rows($result)){
+					//already imported !!
+					$row = $db->fetch_row($result, 0); 
+					$entryId = $this->getEntryId("RsnReglements", $row['crmid']);
+					foreach ($reglementData as $reglementLine) {
+						$entityInfo = array(
+							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED,
+							'id'		=> $entryId
+						);
+						
+						//TODO update all with array
+						$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
+					}
+				}
+				else {
+					$record = Vtiger_Record_Model::getCleanInstance('RsnReglements');
+					$record->set('mode', 'create');
+					$record->set('numpiece', $reglement['numpiece']);
+					$record->set('rsnmoderegl', $reglement['rsnmoderegl']);
+					$record->set('dateregl', $reglement['dateregl']);
+					$record->set('rsnbanque', $reglement['rsnbanque']);
+					$record->set('amount', str_replace('.', ',', $reglement['amount']));
+					$record->set('currency_id', $reglement['currency_id']);
+					$record->set('dateoperation', $reglement['dateoperation']);
+					$record->set('account_id', $accountId);
+					$record->set('typeregl', $reglement['typeregl']);
+					
+					//$db->setDebug(true);
+					$record->save();
+					$reglementId = $record->getId();
+
+					if(!$reglementId){
+						//TODO: manage error
+						echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
+						foreach ($reglementData as $reglementLine) {
+							$entityInfo = array(
+								'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+							);
+							
+							//TODO update all with array
+							$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
+						}
+
+						return false;
+					}
+					
+					$record->set('mode','edit');
+					
+					//Relation Facture/Réglement
+					$this->addInvoiceReglementRelation($record, $invoice);
+					
+					return $record;//tmp 
+				}
+			} else {
+				//TODO: manage error
+				echo "<pre><code>Unable to find Account</code></pre>";
+			}
+		} else {
+			foreach ($reglementData as $reglementLine) {//TODO: remove duplicated code
+				$entityInfo = array(
+					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+				);
+				
+				$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
+			}
+
+			return false;
+		}
+
+		return true;
+	}
+	
+	/**
+	 * Associe le réglement à la facture.
+	 * Met à jour la facture
+	 */
+	function addInvoiceReglementRelation($reglement, $invoice){
+		global $adb;
+		$query = 'INSERT INTO vtiger_crmentityrel(crmid, module, relcrmid, relmodule)
+			VALUES( ?, \'RsnReglements\', ?, \'Invoice\')';
+		$params = array($reglement->getId(), $invoice->getId());
+		$result = $adb->query($query, $params);
+		
+		if(!$result) {//duplicate
+			$adb->echoError();
+			return false;
+		}
+		$query = 'UPDATE vtiger_invoice
+			SET receivedreference = CONCAT(IF(receivedreference IS NULL OR receivedreference = \'\', \'\', CONCAT(receivedreference, \', \')), ?)
+			, receivedcomments = CONCAT(IF(receivedcomments IS NULL OR receivedcomments = \'\', \'\', CONCAT(receivedcomments, \'\\n\')), ?)
+			, receivedmoderegl = CONCAT(IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', \'\', CONCAT(receivedmoderegl, \', \')), ?)
+			, received = IFNULL(received,0) + ?
+			, balance = IFNULL(balance,0) - ?
+			, invoicestatus = IF(ABS(balance < 0.01), \'PAID\', invoicestatus)
+			WHERE invoiceid = ?';
+			
+		$amount = str_replace(',', '.', $reglement->get('amount'));
+		
+		$params = array(
+			$reglement->get('numpiece')
+			, 'PAYBOX'
+			, $reglement->get('rsnmoderegl')
+			, $amount
+			, $amount
+			, $invoice->getId()
+		);
+		
+		$result = $adb->query($query, $params);
+		
+		if(!$result) {
+			$adb->echoError();
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Method to process to the import of the invoice module.
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importInvoice($importDataController) {
-		$adb = PearDatabase::getInstance();
+		global $adb;
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY subject';
 
@@ -266,7 +449,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				}
 				else {
 					$record = Vtiger_Record_Model::getCleanInstance('Invoice');
-					$record->set('MODE', 'create');
+					$record->set('mode', 'create');
 					$record->set('bill_street', $invoiceData[0]['street']);
 					$record->set('bill_street2', $invoiceData[0]['street2']);
 					$record->set('bill_street3', $invoiceData[0]['street3']);
@@ -369,31 +552,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 					$record->triggerEvent('vtiger.entity.aftersave');
 					$log->debug("AFTER " . basename(__FILE__) . " raise event handler");
 					
-					////This field is not manage by save()
-					//$query = "UPDATE vtiger_invoice
-					//	JOIN vtiger_crmentity
-					//		ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
-					//	SET smownerid = ?
-					//	WHERE invoiceid = ?
-					//";// TODO: invoice_no = ?, total = ?
-					//$result = $db->pquery($query, array(ASSIGNEDTO_ALL, $invoiceId));
-					//
-					//if( ! $result)
-					//	$db->echoError();
-					//
-					//$entryId = $this->getEntryId("Invoice", $invoiceId);
-					//$sequence = 0;
-					//
-					//foreach ($invoiceData as $invoiceLine) {
-					//	$this->importInvoiceLine($record, $invoiceLine, ++$sequence);
-					//	$entityInfo = array(
-					//		'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
-					//		'id'		=> $entryId
-					//	);
-					//	
-					//	$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
-					//}
-					//
 					return $record;//tmp 
 				}
 			} else {
@@ -421,8 +579,10 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @param $invoiceData : the data of the invoice to import.
 	 */
 	function preImportInvoice($invoiceData, $donateurWeb) {
-		$invoiceValues = $this->getInvoiceValues($invoiceData, $donateurWeb);
+		$invoiceValues = $this->getInvoiceValues(null, $invoiceData, $donateurWeb);
 		$invoice = new RSNImportSources_Preimport_Model($invoiceValues, $this->user, 'Invoice');
+		$invoice->save();
+		//var_dump('preImportInvoice', $invoiceData, $invoiceValues);
 	}
 
 	/**
@@ -483,6 +643,45 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	}
 
 
+	/**
+	 * Method that returns the invoice associated with data.
+	 * @param $reglement : the rsnreglements data.
+	 * @return invoice record
+	 */
+	function getInvoice($reglement) {
+		$invoiceData = $this->getInvoiceValues($reglement);
+		$query = "SELECT crmid
+			FROM vtiger_invoice
+                        JOIN vtiger_crmentity
+                            ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+			WHERE deleted = FALSE
+		";
+		switch($invoiceData['invoicetype']){
+		case 'BOU':
+			$query .= " AND invoice_no LIKE CONCAT('BOU%-', ?)";
+			$queryParams = array($invoiceData['sourceid']);
+			break;
+		case 'DP':
+		case 'DR':
+			$query .= " AND invoice_no = ?";
+			$queryParams = array($invoiceData['sourceid']);
+			break;
+		default:
+			var_dump('$reglement : ', $reglement);
+			var_dump('$invoiceData : ', $invoiceData);
+			echo '<pre>Erreur : Type de facture inconnu "'.$invoiceData['invoicetype'].'"</pre>';
+			return false;
+			break;
+		}
+		$query .= " LIMIT 1";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $queryParams);
+		if($db->num_rows($result)){
+			$row = $db->fetch_row($result, 0);
+			return Vtiger_Record_Model::getInstanceById($row['crmid'], 'Invoice');
+		}
+	}
+	
 	/**
 	 * Method that pre-import an invoice if it does not exist in database.
 	 * @param $reglement : the rsnreglements data.
@@ -674,7 +873,10 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @param $reglementData : the data of the invoice to import.
 	 */
 	function preImportRsnReglement($reglementData) {
-		$reglementValues = $this->getRsnReglementsValues($reglementData);
+		if(isset($reglementData['numpiece']))
+			$reglementValues = $reglementData;
+		else
+			$reglementValues = $this->getRsnReglementsValues($reglementData);
 		$reglement = new RSNImportSources_Preimport_Model($reglementValues, $this->user, 'RsnReglements');
 		$reglement->save();
 	}
@@ -824,64 +1026,66 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @param $donateurWeb : donateur web avec la même référence
 	 * @return array : the formated data of the invoice.
 	 */
-	function getInvoiceValues($reglement, $donateurWeb = FALSE) {
-		$reference = $reglement['numpiece'];//DR05707_20150225130243 ou 4297;CP;25-04-15-17:38:33
-		if(!$reference)
-			return false;
-		if(strpos($reference, ';') !== FALSE)
-			$referenceParts = explode( ';', $reference);
-		else
-			$referenceParts = explode( '_', $reference);
-		$sourceId = $referenceParts[0];
-		$date = $this->getMySQLDate($reglement['dateregl']);
-		$invoiceType = $this->getInvoiceType($sourceId);
-		switch($invoiceType){
-		case 'BOU':
-			//4297;CP;25-04-15-17:38:33
-			break;
-		case 'DP':
-			//DP05707_20150225130243
-			$product = array(
-				'code' => 'ADLB',
-				'name' => 'Don ponctuel',
-			);
-			break;
-		case 'DR':
-			//DR05707
-			$product = array(
-				'code' => 'ADETAL',
-				'name' => 'Don régulier',
-			);
-			break;
-		}
-		/* $dWDateDon:=[JournalPaybox]DateOfIssue_4D
-		$aWDateDon:=Chaine($dWDateDon)
-		$dWDateEcheance:=[JournalPaybox]Date_4D
-		$aWDateEcheance:=Chaine($dWDateEcheance)
-		C_TEXTE($tPaquetCogilog)
-		C_ENTIER LONG($eCompteur)
-		$bRefInconnu:=Faux
-		$aWMontantBrut:=Chaine(([JournalPaybox]Amount/100))
-		C_ALPHA(30;$aCodeProduit)
-		$aCodeProduit:="ADETAL"
-		$CompteDeVente:="511104"
-		$codeAffaire:="PAYBOX"
-		$tCommentaire:=$tCommentaire+$aWDateDon+◊aTab+Chaine([Adresse]RefFiche)+◊aTab+$aWMontantBrut+◊aTab
-		ENVOYER PAQUET($hDocLog;$tCommentaire)
-		$tCommentaire:=""*/
+	function getInvoiceValues($reglement, $invoiceValues = FALSE, $donateurWeb = FALSE) {
+		if(!$invoiceValues){
+			$reference = $reglement['numpiece'];//DR05707_20150225130243 ou 4297;CP;25-04-15-17:38:33
+			if(!$reference)
+				return false;
+			if(strpos($reference, ';') !== FALSE)
+				$referenceParts = explode( ';', $reference);
+			else
+				$referenceParts = explode( '_', $reference);
+			$sourceId = $referenceParts[0];
+			$date = $reglement['dateregl'];
+			$invoiceType = $this->getInvoiceType($sourceId);
+			switch($invoiceType){
+			case 'BOU':
+				//4297;CP;25-04-15-17:38:33
+				break;
+			case 'DP':
+				//DP05707_20150225130243
+				$product = array(
+					'code' => 'ADLB',
+					'name' => 'Don ponctuel',
+				);
+				break;
+			case 'DR':
+				//DR05707
+				$product = array(
+					'code' => 'ADETAL',
+					'name' => 'Don régulier',
+				);
+				break;
+			}
+			/* $dWDateDon:=[JournalPaybox]DateOfIssue_4D
+			$aWDateDon:=Chaine($dWDateDon)
+			$dWDateEcheance:=[JournalPaybox]Date_4D
+			$aWDateEcheance:=Chaine($dWDateEcheance)
+			C_TEXTE($tPaquetCogilog)
+			C_ENTIER LONG($eCompteur)
+			$bRefInconnu:=Faux
+			$aWMontantBrut:=Chaine(([JournalPaybox]Amount/100))
+			C_ALPHA(30;$aCodeProduit)
+			$aCodeProduit:="ADETAL"
+			$CompteDeVente:="511104"
+			$codeAffaire:="PAYBOX"
+			$tCommentaire:=$tCommentaire+$aWDateDon+◊aTab+Chaine([Adresse]RefFiche)+◊aTab+$aWMontantBrut+◊aTab
+			ENVOYER PAQUET($hDocLog;$tCommentaire)
+			$tCommentaire:=""*/
 	
-		$invoiceValues = array(
-			'sourceid'		=> $sourceId,
-			'invoicetype'		=> $invoiceType,
-			'subject'		=> $reference,
-			'invoicedate'		=> $date,
-		);
+			$invoiceValues = array(
+				'sourceid'		=> $sourceId,
+				'invoicetype'		=> $invoiceType,
+				'subject'		=> $reference,
+				'invoicedate'		=> $date,
+			);
+		}
+		
 		if($donateurWeb){
 			foreach(array('lastname', 'firstname', 'email', 'street', 'street2', 'street3', 'zip', 'city', 'country') as $fieldName)
-				$invoiceValues[$fieldName] = $donateurWeb->get($fieldName);
+				$invoiceValues[$fieldName] = decode_html($donateurWeb->get($fieldName));
 		}
-		if(isset($product))
-			$isProduct = false;
+		if(isset($product) && $reglement)
 			$invoiceValues = array_merge($invoiceValues, array(
 				'productcode'	=> $product['code'],
 				'productid'	=> $this->getProductId($product['code'], $isProduct),
@@ -906,6 +1110,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$date = $this->getMySQLDate($reglement[9], $reglement[10]);
 		$dateoperation = $this->getMySQLDate($reglement[6]);
 		$currency = $this->getCurrency($reglement);
+		$currencyId = $this->getCurrencyId($currency);
 		$reference = $reglement[12];
 		$typeregl = $this->getTypeRegl($reference);
 		$numpiece = $reference;
@@ -915,7 +1120,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'dateoperation'		=> $dateoperation,
 			'email'			=> $reglement[13],
 			'amount'		=> $reglement[17] / 100,
-			'currency'		=> $currency,
+			'currency_id'		=> $currencyId,
 			'payment'		=> $reglement[23],
 			'paymentstatus'		=> $reglement[28],
 			'ip'			=> $reglement[30],

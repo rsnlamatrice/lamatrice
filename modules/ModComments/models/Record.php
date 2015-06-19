@@ -46,7 +46,8 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 			} else {
 				$imagePath = $commentor->getImageDetails();
 				if (!empty($imagePath[0]['name'])) {
-					return '../' . $imagePath[0]['path'] . '_' . $imagePath[0]['name'];
+					//ED150619 : j'enlève '../' .
+					return $imagePath[0]['path'] . '_' . $imagePath[0]['name'];
 				}
 			}
 		}

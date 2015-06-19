@@ -186,7 +186,6 @@
 			}else if(isset($row[$meta->getObectIndexColumn()]) && strcmp($meta->getObectIndexColumn(),"id")!==0){
 				unset($row[$meta->getObectIndexColumn()]);
 			}
-			
 			foreach ($row as $field => $value) {
 				$row[$field] = html_entity_decode($value, ENT_QUOTES, $default_charset);
 			}

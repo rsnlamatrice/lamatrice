@@ -164,7 +164,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				}
 				else {
 					$record = Vtiger_Record_Model::getCleanInstance('RsnReglements');
-					$record->set('MODE', 'create');
+					$record->set('mode', 'create');
 					$record->set('numpiece', $reglementData[0]['numpiece']);
 					$record->set('rsnmoderegl', $reglementData[0]['rsnmoderegl']);
 					$record->set('dateregl', $reglementData[0]['dateregl']);
@@ -325,7 +325,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			$sourceId = $invoiceData[0]['sourceid'];
 			
 			$record = Vtiger_Record_Model::getCleanInstance('Invoice');
-			$record->set('MODE', 'create');
+			$record->set('mode', 'create');
 			$record->set('bill_street', $invoiceData[0]['street']);
 			$record->set('bill_street2', $invoiceData[0]['street2']);
 			$record->set('bill_street3', $invoiceData[0]['street3']);
