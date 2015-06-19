@@ -251,8 +251,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			LEFT JOIN vtiger_groups ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 			LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
 			WHERE vtiger_crmentity.deleted = 0
-			AND (vtiger_invoice.contactid = '.$recordId.'
-			OR vtiger_contactdetails.contactid = '.$recordId.')'
+			AND (vtiger_contactdetails.contactid = '.$recordId.')'
 			;
 			$relatedModuleName = $relatedModule->getName();
 			$query .= $this->getSpecificRelationQuery($relatedModuleName);
@@ -290,6 +289,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	/* 
 	 * Cas particuliers de la fonction ci-dessus pour les modules affichant une seule catégorie de service
 	 * ED150203
+	 * AV150619
 	 */
 	public function getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory) {
 		$focus = CRMEntity::getInstance($this->getName());
@@ -308,7 +308,6 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 				) as montant
 			, p.servicename as origine, "" as origine_detail
 			, p.serviceid
-			, f.invoiceid as vtiger_rsndonsid
 			, p.servicecategory
 			, fcf.campaign_no
 			, fcf.notesid

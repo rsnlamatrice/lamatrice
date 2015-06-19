@@ -1028,7 +1028,7 @@ class Contacts extends CRMEntity {
 				$button .= "<input title='". getTranslatedString('LBL_ADD_NEW')." ". getTranslatedString($singular_modname)."' accessyKey='F' class='crmbutton small create' onclick='fnvshobj(this,\"sendmail_cont\");sendmail(\"$this_module\",$id);' type='button' name='button' value='". getTranslatedString('LBL_ADD_NEW')." ". getTranslatedString($singular_modname)."'></td>";
 			}
 		}
-
+		//AV150619
 		$userNameSql = getSqlForNameInDisplayFormat(array('first_name'=>
 							'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 		$query = "
@@ -1040,7 +1040,7 @@ class Contacts extends CRMEntity {
 					FROM (
 						SELECT vtiger_contactaddresses.contactaddressesid,
 							vtiger_contactaddresses.contactid,
-							vtiger_contactaddresses.addresstype, vtiger_contactaddresses.comments,
+							vtiger_contactaddresses.addresstype, vtiger_contactaddresses.comments, vtiger_contactaddresses.addressformat,
 							`rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`,
 							0 AS is_current_address
 						FROM vtiger_contactaddresses
@@ -1052,7 +1052,7 @@ class Contacts extends CRMEntity {
 						UNION "/* add current address from contactaddress */."
 						SELECT vtiger_contactaddress.contactaddressid,
 							vtiger_contactaddress.contactaddressid,
-							'LBL_CURRENT_ADDRESS', NULL,
+							'LBL_CURRENT_ADDRESS', NULL, NULL,
 							`rsnnpai`, `rsnnpaicomment`, `mailingcity`, `mailingstreet`, `mailingstreet2`, `mailingstreet3`
 							, `mailingcountry`, `mailingstate`, `mailingpobox`, `mailingzip`,
 							1 AS is_current_address

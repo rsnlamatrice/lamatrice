@@ -149,7 +149,8 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 			$this->record = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);
 		}
 		$detailViewLinkParams = array('MODULE'=>$moduleName,'RECORD'=>$recordId);
-		$detailViewLinks = $this->record->getDetailViewLinks($detailViewLinkParams);
+		//AV150619
+		$detailViewLinks = $this->record->getDetailViewLinks($detailViewLinkParams, true);
 
 		$selectedTabLabel = $request->get('tab_label');
 
