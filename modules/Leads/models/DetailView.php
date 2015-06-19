@@ -12,17 +12,18 @@ class Leads_DetailView_Model extends Accounts_DetailView_Model {
 	/**
 	 * Function to get the detail view links (links and widgets)
 	 * @param <array> $linkParams - parameters which will be used to calicaulate the params
+	 * @param boolean $countRelatedEntity - AV150619
 	 * @return <array> - array of link models in the format as below
 	 *                   array('linktype'=>list of link models);
 	 */
-	public function getDetailViewLinks($linkParams) {
+	public function getDetailViewLinks($linkParams, $countRelatedEntity = false) {
 		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 
 		$moduleModel = $this->getModule();
 		$recordModel = $this->getRecord();
 		$emailModuleModel = Vtiger_Module_Model::getInstance('Emails');
 
-		$linkModelList = Vtiger_DetailView_Model::getDetailViewLinks($linkParams);
+		$linkModelList = Vtiger_DetailView_Model::getDetailViewLinks($linkParams, $countRelatedEntity);
 
 		if($currentUserModel->hasModulePermission($emailModuleModel->getId())) {
 			$basicActionLink = array(
