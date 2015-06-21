@@ -226,19 +226,19 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 
 			$query .= $relationQuery;
 		}
-
-		$result = $db->pquery($query, array());
-		if(!$result){
-				$db->echoError();
-				echo "<pre>$query</pre>";
-				return $quantities;
+		if($query) {
+				$result = $db->pquery($query, array());
+				if(!$result){
+						$db->echoError();
+						echo "<pre>$query</pre>";
+						return $quantities;
+				}
+				
+				for ($i = 0; $i < $db->num_rows($result); ++$i) {
+					$row = $db->query_result_rowdata($result, $i);
+					$quantities[$row['module']] = $row['quantity'];
+				}
 		}
-		
-		for ($i = 0; $i < $db->num_rows($result); ++$i) {
-			$row = $db->query_result_rowdata($result, $i);
-			$quantities[$row['module']] = $row['quantity'];
-		}
-
 		return $quantities;
 	}
 
