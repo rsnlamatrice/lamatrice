@@ -354,8 +354,8 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 * Function to get the url for the Import action of the module
 	 * @return <String> - url
 	 */
-	public function getRSNImportUrl() {
-		return 'index.php?module=RSNImport&view=Index&for_module='.$this->get('name');
+	public function getRSNImportSourcesUrl() {
+		return 'index.php?module=RSNImportSources&view=Index&for_module='.$this->get('name');
 	}
 
 	/**
@@ -1407,6 +1407,35 @@ class Vtiger_Module_Model extends Vtiger_Module {
 			$query = appendFromClauseToQuery($query, $nonAdminQuery);
 		}
 		return $query;
+	}
+	
+	/** ED150619
+	 * Function to get relation query for particular module with function name
+	 * Similar to getRelationQuery but overridable.
+	 * @param <record> $recordId
+	 * @param <String> $functionName
+	 * @param Vtiger_Module_Model $relatedModule
+	 * @return <String>
+	 */
+	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
+		
+		$relationQuery = $this->getRelationQuery($recordId, $functionName, $relatedModule);
+
+		switch($relatedModule->getName()){
+		 case 'Calendar':
+				//MySQL ne tolère la duplication de nom de champ (ici 'status') dans une sous-requête, alors qu'il le tolère en requête principale
+				$relationQuery = str_replace('vtiger_crmentity.*, vtiger_activity.*'
+											 ,'vtiger_crmentity.crmid, vtiger_crmentity.smownerid, vtiger_crmentity.setype, vtiger_activity.*'
+											 ,$relationQuery);
+				break;
+		}
+		
+		return 'SELECT COUNT(*) quantity'
+				. ', \'' . $relatedModule->getName() . '\' module'
+				. ', \'' . $functionName . '\' functionName'
+				. ' FROM (' . 
+						$relationQuery .
+				') `' . $relatedModule->getName() . '_' . $functionName . '_query`';
 	}
 
 	/**

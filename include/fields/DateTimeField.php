@@ -105,7 +105,12 @@ class DateTimeField {
 		} elseif ($format == 'yyyy-mm-dd') {
 			list($y, $m, $d) = explode('-', $date);
 		}
-
+		//ED150618 contains time
+		if(strlen($y)>4){
+			list($y, $t) = explode(' ', $y);
+			if($t)
+				$d .= ' ' . $t;
+		}
 		if (!$y && !$m && !$d) {
 			$dbDate = '';
 		} else {

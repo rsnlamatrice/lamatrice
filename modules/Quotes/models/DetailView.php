@@ -13,13 +13,14 @@ class Quotes_DetailView_Model extends Inventory_DetailView_Model {
 	/**
 	 * Function to get the detail view links (links and widgets)
 	 * @param <array> $linkParams - parameters which will be used to calicaulate the params
+	 * @param boolean $countRelatedEntity - AV150619
 	 * @return <array> - array of link models in the format as below
 	 *                   array('linktype'=>list of link models);
 	 */
-	public function getDetailViewLinks($linkParams) {
+	public function getDetailViewLinks($linkParams, $countRelatedEntity = false) {
 		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 
-		$linkModelList = parent::getDetailViewLinks($linkParams);
+		$linkModelList = parent::getDetailViewLinks($linkParams, $countRelatedEntity);
 		$recordModel = $this->getRecord();
 
 		$invoiceModuleModel = Vtiger_Module_Model::getInstance('Invoice');

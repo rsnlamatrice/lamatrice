@@ -184,15 +184,20 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		this.addNewCondition(conditionGroup);
 	},
 	
-	getFieldSpecificType : function(fieldSelected) {
+	/* ED150619 add	@param forConditionList (default value is false)
+	 * 	if true, 'picklist' || 'multipicklist' || 'buttonset return PL instead of V
+	 */
+	getFieldSpecificType : function(fieldSelected, forConditionList) {
 		var fieldInfo = fieldSelected.data('fieldinfo');
 		if (fieldInfo) {//ED150225 adds "if"
 			var type = fieldInfo.type;
-			if(type == 'reference'){
+			if(type == 'reference')
 				return 'V';
-			}
-		}
-		
+			//ED150619
+			if (forConditionList
+			&& (type == 'picklist' || type == 'multipicklist' || type == 'buttonset'))
+				return 'PL';
+		}		
 		return fieldSelected.data('fieldtype');
 	},
 	
@@ -206,14 +211,13 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		var conditionSelectElement = row.find('select[name="comparator"]');
 		var conditionSelected = conditionSelectElement.val();
 		var fieldSelected = fieldSelect.find('option:selected');
-		var fieldSpecificType = this.getFieldSpecificType(fieldSelected)
+		var fieldSpecificType = this.getFieldSpecificType(fieldSelected, true)
 		var conditionList = this.getConditionListFromType(fieldSpecificType);
 		//for none in field name
 		if(typeof conditionList == 'undefined') {
 			conditionList = {};
 			conditionList['none'] = 'None';
 		}
-
 		var options = '';
 		for(var key in conditionList) {
 			//IE Browser consider the prototype properties also, it should consider has own properties only.
@@ -511,20 +515,25 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 					|| fieldType == 'buttonset') { //ED150225
 					for(var key in fieldList) {
 						var field = fieldList[key];
-						if(field == 'value' && valueSelectElement.is('input')) {
-							var commaSeperatedValues = valueSelectElement.val();
-							var pickListValues = valueSelectElement.data('picklistvalues');
-							var valuesArr = commaSeperatedValues.split(',');
-							var newvaluesArr = [];
-							for(i=0;i<valuesArr.length;i++){
-								if(typeof pickListValues[valuesArr[i]] != 'undefined'){
-									newvaluesArr.push(pickListValues[valuesArr[i]]);
-								} else {
-									newvaluesArr.push(valuesArr[i]);
-								}
+						if(field == 'value' && valueSelectElement.is('input')){
+							if(rowValues.comparator == 'ct' || rowValues.comparator == 'kt') {
+								rowValues[field] = valueSelectElement.val();
 							}
-							var reconstructedCommaSeperatedValues = newvaluesArr.join(',');
-							rowValues[field] = reconstructedCommaSeperatedValues;
+							else {
+								var commaSeperatedValues = valueSelectElement.val();
+								var pickListValues = valueSelectElement.data('picklistvalues');
+								var valuesArr = commaSeperatedValues.split(',');
+								var newvaluesArr = [];
+								for(i=0;i<valuesArr.length;i++){
+									if(typeof pickListValues[valuesArr[i]] != 'undefined'){
+										newvaluesArr.push(pickListValues[valuesArr[i]]);
+									} else {
+										newvaluesArr.push(valuesArr[i]);
+									}
+								}
+								var reconstructedCommaSeperatedValues = newvaluesArr.join(',');
+								rowValues[field] = reconstructedCommaSeperatedValues;
+							}
 						} else if(field == 'value' && valueSelectElement.is('select') && fieldType == 'picklist'){
 							var value = valueSelectElement.val();
 							if(value == null){
@@ -666,7 +675,7 @@ Vtiger_Picklist_Field_Js('AdvanceFilter_Picklist_Field_Js',{},{
 
 	getUi : function(){
 		var comparatorSelectedOptionVal = this.get('comparatorElementVal');
-		if(comparatorSelectedOptionVal == 'e' || comparatorSelectedOptionVal =='n'){
+		if(comparatorSelectedOptionVal == 'e' || comparatorSelectedOptionVal =='n' || comparatorSelectedOptionVal == 'ca' || comparatorSelectedOptionVal =='ka'){
 			var html = '<select class="select2 row-fluid" multiple name="'+ this.getName() +'[]">';
 			var pickListValues = this.getPickListValues();
 			var selectedOption = app.htmlDecode(this.getValue());
@@ -682,6 +691,13 @@ Vtiger_Picklist_Field_Js('AdvanceFilter_Picklist_Field_Js',{},{
 			var selectContainer = jQuery(html);
 			this.addValidationToElement(selectContainer);
 			return selectContainer;
+		//ED150619
+		} else if(comparatorSelectedOptionVal == 'ct' || comparatorSelectedOptionVal == 'kt'){
+			var html = '<input type="text" name="'+ this.getName() +'[]"  />';
+			var selectContainer = jQuery(html).val(app.htmlDecode(this.getValue()));
+			this.addValidationToElement(selectContainer);
+			return selectContainer;
+		
 		} else {
 			var selectedOption = app.htmlDecode(this.getValue());
 			var pickListValues = this.getPickListValues();
@@ -710,6 +726,8 @@ Vtiger_Multipicklist_Field_Js('AdvanceFilter_Multipicklist_Field_Js',{},{
 		switch (comparatorSelectedOptionVal){
 		case 's':
 		case 'ew':
+		case 'ct':
+		case 'kt':
 			var html = '<input type="text" name="'+ this.getName() +'[]"  />';
 			var selectContainer = jQuery(html).val(app.htmlDecode(this.getValue()));
 			this.addValidationToElement(selectContainer);

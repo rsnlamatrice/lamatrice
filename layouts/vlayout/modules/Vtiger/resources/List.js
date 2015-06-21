@@ -995,6 +995,15 @@ jQuery.Class("Vtiger_List_Js",{
 			}
 			thisInstance.massActionSave(form, true).then(
 				function(data) {
+					//ED150618
+					if (typeof data.result === 'string') {
+						var message = data.result;
+						var params = {
+							text: message,
+							type: data.success ? 'info' : 'error'
+						};
+						Vtiger_Helper_Js.showMessage(params);
+					}
 					thisInstance.getListViewRecords();
 					Vtiger_List_Js.clearList();
 				},

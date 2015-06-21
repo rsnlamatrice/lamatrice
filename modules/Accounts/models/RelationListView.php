@@ -85,11 +85,13 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$this->set('sortorder', 'DESC');
 				break;
 			 case "Campaigns":
-			 case "Contacts":
 			 case "Documents":
 			 case "Critere4D":
 				$this->set('orderby', 'dateapplication');
 				$this->set('sortorder', 'DESC');
+				break;
+			 case "Contacts":
+				//dateapplication n'existe pas, TODO order by
 				break;
 			 default:
 				break;

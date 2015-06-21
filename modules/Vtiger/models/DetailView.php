@@ -55,7 +55,7 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 	 * @return <array> - array of link models in the format as below
 	 *                   array('linktype'=>list of link models);
 	 */
-	public function getDetailViewLinks($linkParams) {
+	public function getDetailViewLinks($linkParams, $countRelatedEntity = false) {
 		$linkTypes = array('DETAILVIEWBASIC','DETAILVIEW');
 		$moduleModel = $this->getModule();
 		$recordModel = $this->getRecord();
@@ -114,7 +114,7 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 			}
 		}
 
-		$relatedLinks = $this->getDetailViewRelatedLinks();
+		$relatedLinks = $this->getDetailViewRelatedLinks($countRelatedEntity);
 
 		foreach($relatedLinks as $relatedLinkEntry) {
 			$relatedLink = Vtiger_Link_Model::getInstanceFromValues($relatedLinkEntry);
@@ -141,7 +141,7 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 	 * Function to get the detail view related links
 	 * @return <array> - list of links parameters
 	 */
-	public function getDetailViewRelatedLinks() {
+	public function getDetailViewRelatedLinks($countRelatedEntity = false) {
 		$recordModel = $this->getRecord();
 		$moduleName = $recordModel->getModuleName();
 		$parentModuleModel = $this->getModule();
@@ -180,23 +180,88 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 					'linkurl' => $recordModel->getDetailViewUrl().'&mode=showRecentActivities&page=1',
 					'linkicon' => ''
 			);
-		}
-
+		}		
 
 		$relationModels = $parentModuleModel->getRelations();
-
+		//AV150619
+		$quantities = ($countRelatedEntity) ? $this->getRelatedEntitiesNumber($parentModuleModel, $relationModels) : null;
 		foreach($relationModels as $relation) {
 			//TODO : Way to get limited information than getting all the information
 			$link = array(
 					'linktype' => 'DETAILVIEWRELATED',
 					'linklabel' => $relation->get('label'),
 					'linkurl' => $relation->getListUrl($recordModel),
-					'linkicon' => ''
+					'linkicon' => '',
+					'quantity' => $quantities[$relation->get('modulename')]//AV150619
 			);
 			$relatedLinks[] = $link;
+			
+		}
+		return $relatedLinks;
+	}
+
+	/**
+	 * Function to get the number of related entity 
+	 * @author AV150619
+	 * @param $parentModuleModel : the parent module controller.
+	 * @param $relationModels
+	 * @return int - the number of related entity.
+	 */
+	public function getRelatedEntitiesNumber($parentModuleModel, $relationModels) {
+		$quantities = array();
+		
+		$db = PearDatabase::getInstance();
+		$first = true;
+		$query = "";
+		foreach($relationModels as $relation) {
+			$relationQuery = $parentModuleModel->getRelationCounterQuery($this->record->getId(), $relation->get('name'), Vtiger_Module_Model::getInstance($relation->get('modulename')));
+			if(!$relationQuery)
+				continue;
+			
+			if(!$first) {
+				$query .= "\r\nUNION\r\n";
+			} else {
+				$first = false;
+			}
+
+			$query .= $relationQuery;
+		}
+		if($query) {
+				$result = $db->pquery($query, array());
+				if(!$result){
+						$db->echoError();
+						echo "<pre>$query</pre>";
+						return $quantities;
+				}
+				
+				for ($i = 0; $i < $db->num_rows($result); ++$i) {
+					$row = $db->query_result_rowdata($result, $i);
+					$quantities[$row['module']] = $row['quantity'];
+				}
+		}
+		return $quantities;
+	}
+
+	/**
+	 * Function to get the number of related entity 
+	 * @author AV150619
+	 * @param $parentModuleModel : the parent module controller.
+	 * @param $functionName : the name of the function in order to get the SQL query.
+	 * @param $relatedModule : the related module controller.
+	 * @return int - the number of related entity.
+	 */
+	public function getRelatedEntityNumber($parentModuleModel, $functionName, $relatedModule) {
+		$db = PearDatabase::getInstance();
+		$query =  $parentModuleModel->getRelationQuery($this->record->getId(), $functionName, $relatedModule);
+		$query = 'SELECT COUNT(*) FROM (' . $query . ') t';
+		$result = $db->pquery($query, array());
+
+		if($db->num_rows($result) > 0) {
+			$row = $db->query_result_rowdata($result, 0);
+			return $row[0];
 		}
 
-		return $relatedLinks;
+		return 0;
 	}
 
 	/**

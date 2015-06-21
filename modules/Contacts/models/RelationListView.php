@@ -75,7 +75,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 	    //Added to support dateapplication
 	    $field = new Vtiger_Field_Model();
 	    $field->set('name', 'dateapplication');
-	    $field->set('column', strtolower( 'dateapplication' ));
+	    $field->set('column', 'dateapplication');
 	    $field->set('label', 'Date d\'application');
 	    $field->set('typeofdata', 'D');
 	    $field->set('uitype', 6);

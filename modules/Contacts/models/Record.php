@@ -294,7 +294,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	public function synchronizeAddressToOthers(){
 		if(!is_array(self::$preventInfiniteSave))
 			self::$preventInfiniteSave = array();
-		elseif(in_array(self::$preventInfiniteSave, $this->getId()))
+		elseif(in_array($this->getId(), self::$preventInfiniteSave))
 			return;
 		self::$preventInfiniteSave[] = $this->getId();
 		$this->updateAccountAddress();

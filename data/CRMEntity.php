@@ -74,7 +74,7 @@ class CRMEntity {
 			die("<center>" .getTranslatedString('LBL_MANDATORY_FIELD_MISSING')."</center>");
 		}
 
-		$this->db->println("TRANS saveentity starts $module");
+		$this->db->println("TRANS saveentity starts $module, id = $fileid");
 		$this->db->startTransaction();
 
 
@@ -316,9 +316,10 @@ echo "</pre>//saveentity\r\n";
 		$log->info("function insertIntoEntityTable " . $module . ' vtiger_table name ' . $table_name);
 		global $adb;
 		$insertion_mode = $this->mode;
-
+			
 		//Checkin whether an entry is already is present in the vtiger_table to update
 		if ($insertion_mode == 'edit') {
+			
 			$tablekey = $this->tab_name_index[$table_name];
 			// Make selection on the primary key of the module table to check.
 			$check_query = "select $tablekey from $table_name where $tablekey=?";
@@ -463,6 +464,7 @@ echo "</pre>//saveentity\r\n";
 					//Added to avoid function call getDBInsertDateValue in ajax save
 					if (isset($current_user->date_format) && !$ajaxSave) {
 						$fldvalue = getValidDBInsertDateValue($this->column_fields[$fieldname]);
+						//var_dump ($fieldname, $uitype, isset($current_user->date_format), !$ajaxSave, $this->column_fields[$fieldname], $fldvalue);
 					} else {
 						$fldvalue = $this->column_fields[$fieldname];
 					}
@@ -545,7 +547,7 @@ echo "</pre>//saveentity\r\n";
 				array_push($value, $fldvalue);
 			}
 		}
-
+		
 		if ($insertion_mode == 'edit') {
 			if ($module == 'Potentials') {
 				$dbquery = 'select sales_stage from vtiger_potential where potentialid = ?';
@@ -816,7 +818,37 @@ echo($params);*/
 			//Event triggering code ends
 		}
 	}
+	
+	/** ED150608
+	 * Function to trigger event
+	 * @param $eventName :: Type varchar
+	 */
+	function triggerEvent($eventName = 'vtiger.entity.aftersave, vtiger.entity.aftersave.final', $eventsManager = null, $entityData = null) {
+		global $log;
+		$log->debug("triggerEvents, eventName is " . $eventName);
 
+		//Event triggering code
+		require_once("include/events/include.inc");
+		global $adb;
+		
+		if(!$eventsManager){
+			$eventsManager = new VTEventsManager($adb);
+			// Initialize Event trigger cache
+			$eventsManager->initTriggerCache();
+		}
+		if(!$entityData)
+			$entityData = VTEntityData::fromCRMEntity($this);
+		
+		if(!is_array($eventName))
+			$eventName = explode(',', $eventName);
+			
+		//Event triggering code
+		foreach($eventName as $event)
+			$eventsManager->triggerEvent(trim($event), $entityData);
+		
+		return $this;
+	}
+		
 	function process_list_query($query, $row_offset, $limit = -1, $max_per_page = -1) {
 		global $list_max_entries_per_page;
 		$this->log->debug("process_list_query: " . $query);

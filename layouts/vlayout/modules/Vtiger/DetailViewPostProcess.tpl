@@ -28,8 +28,12 @@
 							data-module="{preg_replace('/.*relatedModule=(\w+).*/', '$1', $RELATED_LINK->getUrl())}">
 							{* Assuming most of the related link label would be module name - we perform dual translation *}
 							{assign var="DETAILVIEWRELATEDLINKLBL" value= vtranslate($RELATED_LINK->getLabel(), $RELATED_LINK->getLabel())}
+							{assign var="RELATED_ENTITY_NUMBER" value= $RELATED_LINK->get('quantity')}{*<!--/* AV150619 */-->*}
 							
-							<a href="javascript:void(0);" class="textOverflowEllipsis" style="width:auto" title="{vtranslate($RELATED_LINK->getLabel(),{$MODULE_NAME})}"><strong>{$DETAILVIEWRELATEDLINKLBL}</strong></a>
+							<a href="javascript:void(0);" class="textOverflowEllipsis" style="width:auto" title="{vtranslate($RELATED_LINK->getLabel(),{$MODULE_NAME})}">
+								<strong>{$DETAILVIEWRELATEDLINKLBL}
+								{if $RELATED_ENTITY_NUMBER gt 0}<span class="relcount">{$RELATED_ENTITY_NUMBER}</span>{/if}{*<!--/* AV150619 */-->*}
+								</strong></a>
 						</li>
 						{/foreach}
 					</ul>

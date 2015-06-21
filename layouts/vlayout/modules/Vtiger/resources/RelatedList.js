@@ -57,6 +57,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 				jQuery('.pageNumbers',thisInstance.relatedContentContainer).tooltip();
 				aDeferred.resolve(responseData);
 				jQuery('input[name="currentPageNum"]', thisInstance.relatedContentContainer).val(completeParams.page);
+				thisInstance.updateRelatedCounter(); //ED150619
 				// Let listeners know about page state change.
 				app.notifyPostAjaxReady();
 			},
@@ -66,6 +67,35 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 			}
 		);
 		return aDeferred.promise();
+	},
+	
+	/** ED150619
+	* Update the related tab counter from related list informations
+	**/
+	updateRelatedCounter : function(){
+	    var noOfEntries = jQuery('#noOfEntries').val();
+	    if (noOfEntries === '' || isNaN(noOfEntries))
+			return;
+		var pageNumber = jQuery('[name="currentPageNum"]').val();
+	    var pageLimit = jQuery('#pageLimit').val();
+	    if (pageNumber != 1
+		|| pageLimit == noOfEntries) {
+			var totalCount = jQuery('#totalCount').val();	
+			if (totalCount === '' || isNaN(totalCount)){
+				if(pageLimit != noOfEntries) //last page
+					totalCount = parseInt(pageLimit) * (pageNumber - 1) + parseInt(noOfEntries);
+				else
+					return; //many pages
+			}
+	    }
+	    else
+			totalCount = noOfEntries;
+	    var $tab = jQuery('.related  .active')
+	    , $tabCounter = jQuery('.relcount', $tab);
+	    if ($tabCounter.length == 0) 
+			$tabCounter = $('<span class="relcount"/>')
+				.appendTo($tab.find('strong'));
+	    $tabCounter.html(totalCount);
 	},
 	
 	triggerDisplayTypeEvent : function() {

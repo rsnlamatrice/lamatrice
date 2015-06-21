@@ -30,6 +30,7 @@ class RSN {
 			$this->add_rsncity_table();
 			$this->add_invoice_handler();
 			$this->add_customview_description_field();
+			$this->add_customview_orderbyfields_field();
 			$this->registerEvents();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
@@ -219,6 +220,12 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 	
 	static function add_customview_description_field() {
 		$sql = "ALTER TABLE `vtiger_customview` ADD `description` TEXT NULL";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($sql);
+	}
+	
+	static function add_customview_orderbyfields_field() {
+		$sql = "ALTER TABLE `vtiger_customview` ADD `orderbyfields` VARCHAR(512) NULL";
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($sql);
 	}

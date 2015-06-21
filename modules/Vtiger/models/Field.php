@@ -785,6 +785,11 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			/* ED150225 */
 			'vwi' => 'LBL_EXISTS',
 			'vwx' => 'LBL_EXCLUDED',
+			/* ED150619 */
+			'ct' => 'LBL_CONTAINS_TEXT',
+			'kt' => 'LBL_DOES_NOT_CONTAIN_TEXT',
+			'ca' => 'LBL_CONTAINS_ALL',
+			'ka' => 'LBL_DOES_NOT_CONTAIN_ALL',
 		);
 	}
 
@@ -794,7 +799,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 */
 	public static function getAdvancedFilterOpsByFieldType() {
 		return array(
-			'V' => array('e','n','s','ew','c','k','y'),
+			'V' => array('e','n','s','ew','c','k','y'),//ED150619 : 'ct','kt' added in js for picklist only
 			'N' => array('e','n','l','g','m','h', 'y'),
 			'T' => array('e','n','l','g','m','h','bw','b','a','y'),
 			'I' => array('e','n','l','g','m','h','y'),
@@ -807,6 +812,8 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			'VW' => array('vwi','vwx'),
 			/* ED150507 */
 			'PANEL' => array('vwi','vwx'),
+			/* ED150619 Picklist, MultiPicklist, ButtonSet */
+			'PL' => array('e','n','s','ew','c','k','ct','kt','ca','ka','y'),
 		);
 	}
 

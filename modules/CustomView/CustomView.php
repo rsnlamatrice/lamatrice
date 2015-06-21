@@ -32,6 +32,11 @@ $adv_filter_options = array("e" => "" . $mod_strings['equals'] . "",
 	"b" => "" . $mod_strings['before'] . "",
 	"a" => "" . $mod_strings['after'] . "",
 	"bw" => "" . $mod_strings['between'] . "",
+	//ED150922
+	"ct" => "" . $mod_strings['contains text'] . "",
+	"kt" => "" . $mod_strings['does not contain text'] . "",
+	"ca" => "" . $mod_strings['contains all'] . "",
+	"ka" => "" . $mod_strings['does not contain any'] . "",
 );
 
 class CustomView extends CRMEntity {
@@ -184,6 +189,7 @@ class CustomView extends CRMEntity {
 			$customviewlist["userid"] = $cvrow["userid"];
 			$customviewlist["status"] = $cvrow["status"];
 			$customviewlist["description"] = $cvrow["description"];
+			$customviewlist["orderbyfields"] = $cvrow["orderbyfields"];
 		}
 		return $customviewlist;
 	}
@@ -1476,14 +1482,16 @@ class CustomView extends CRMEntity {
 				$rtvalue = " like '" . formatForSqlLike($value, 1) . "'";
 			}
 		}
-		if ($comparator == "c") {
+		if ($comparator == "c"
+		|| $comparator == "ct" || $comparator == "ca") { //ED150619 TODO
 			if (trim($value) == "" && ($datatype == "V" || $datatype == "E")) {
 				$rtvalue = " like '" . formatForSqlLike($value, 3) . "'";
 			} else {
 				$rtvalue = " like '" . formatForSqlLike($value) . "'";
 			}
 		}
-		if ($comparator == "k") {
+		if ($comparator == "k"
+		|| $comparator == "kt" || $comparator == "ka") { //ED150619 TODO
 			if (trim($value) == "" && ($datatype == "V" || $datatype == "E")) {
 				$rtvalue = " not like ''";
 			} else {

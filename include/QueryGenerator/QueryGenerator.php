@@ -732,7 +732,7 @@ class QueryGenerator {
 				}
 			}
 		}
-
+		
 		$sql .= $this->meta->getEntityAccessControlQuery();
 		$this->fromClause = $sql;
 		return $sql;
@@ -901,6 +901,10 @@ class QueryGenerator {
 				}
 				if($conditionInfo['operator'] == 'n' && ($field->getFieldDataType() == 'owner' || $field->getFieldDataType() == 'picklist') ) {
 					$fieldGlue = ' AND';
+				}
+				//ED150622
+				elseif($conditionInfo['operator'] == 'ca' || $conditionInfo['operator'] == 'ka') {
+					$fieldGlue = ' AND';
 				} else {
 					$fieldGlue = ' OR';
 				}
@@ -967,7 +971,7 @@ class QueryGenerator {
 		&& $this->ignoreComma == false) {
 			//ED150302 sic
 			$valueArray = explode(',' , $value);
-			if ($fieldDataType == 'multipicklist' && in_array($operator, array('e', 'n'))) {
+			if ($fieldDataType === 'multipicklist' && in_array($operator, array('e', 'n'))) {
 				$valueArray = getCombinations($valueArray);
 				foreach ($valueArray as $key => $value) {
 					$valueArray[$key] = ltrim($value, ' |##| ');
@@ -1060,15 +1064,16 @@ class QueryGenerator {
 				$value = $db->sql_escape_string($value);
 			}
 
-			if(trim($value) == '' && ($operator == 's' || $operator == 'ew' || $operator == 'c')
+			if(trim($value) == '' && ($operator == 's' || $operator == 'ew' || $operator == 'c' || $operator == 'ct' || $operator == 'ca') //ED150619 ct
 					&& ($this->isStringType($fieldDataType) ||
 					$fieldDataType == 'picklist' ||
-					$fieldDataType == 'multipicklist')) {
+					$fieldDataType == 'multipicklist' ||
+					$fieldDataType == 'buttonset')) {
 				$sql[] = "LIKE ''";
 				continue;
 			}
 
-			if(trim($value) == '' && ($operator == 'k') &&
+			if(trim($value) == '' && ($operator == 'k' || $operator == 'kt' || $operator == 'ka') && //ED150619 kt
 					$this->isStringType($fieldDataType)) {
 				$sql[] = "NOT LIKE ''";
 				continue;
@@ -1085,9 +1090,13 @@ class QueryGenerator {
 				case 'ew': $sqlOperator = "LIKE";
 					$value = "%$value";
 					break;
+				case 'ct'://ED150619
+				case 'ca'://ED150619
 				case 'c': $sqlOperator = "LIKE";
 					$value = "%$value%";
 					break;
+				case 'kt'://ED150619
+				case 'ka'://ED150619
 				case 'k': $sqlOperator = "NOT LIKE";
 					$value = "%$value%";
 					break;

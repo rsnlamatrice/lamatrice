@@ -366,8 +366,9 @@ class Vtiger_Functions {
 						$columns[$i] = "IFNULL($columns[$i],'')"; 
 				
 				// NOTE: Ignore field-permission check for non-admin (to compute record label).
-				$columnString = count($columns) < 2? $columns[0] :
-					sprintf("concat(%s)", implode(",' ',", $columns));
+				$columnString = count($columns) < 2
+					? $columns[0]
+					: sprintf("concat(%s)", implode(",' ',", $columns));
 
 				//ED150512 adds TRIM()
 				$sql = sprintf('SELECT TRIM(%s) AS label, %s AS id FROM %s WHERE %s IN (%s)',

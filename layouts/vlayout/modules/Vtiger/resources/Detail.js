@@ -198,8 +198,8 @@ jQuery.Class("Vtiger_Detail_Js",{
 		var pageNumber = jQuery('[name="currentPageNum"]').val();
 		var detailInstance = Vtiger_Detail_Js.getInstance();
 		detailInstance.loadRelatedList(pageNumber);
-	}
-
+	},
+	
 },{
 	detailViewContentHolder : false,
 	detailViewForm : false,

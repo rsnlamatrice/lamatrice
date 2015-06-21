@@ -53,6 +53,12 @@ class CustomView_Save_Action extends Vtiger_Action_Controller {
 		if(!empty($selectedColumnsList)) {
 			$customViewData['columnslist'] = $selectedColumnsList;
 		}
+		//ED150622
+		$selectedOrderByFieldsList = $request->get('orderbyfields');
+		if(!empty($selectedOrderByFieldsList)) {
+			$customViewData['orderbyfields'] = $selectedOrderByFieldsList;
+		}
+		
 		$stdFilterList = $request->get('stdfilterlist');
 		if(!empty($stdFilterList)) {
 			$customViewData['stdfilterlist'] = $stdFilterList;

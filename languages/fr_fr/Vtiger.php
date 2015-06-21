@@ -172,6 +172,12 @@ $languageStrings = array(
 	'LBL_ENDS_WITH'                => 'fini par'                    , 
 	'LBL_CONTAINS'                 => 'contient'                    , 
 	'LBL_DOES_NOT_CONTAIN'         => 'ne contient pas'           , 
+	/*ED150619*/
+	'LBL_CONTAINS_TEXT'            => 'contient le texte'                    , 
+	'LBL_DOES_NOT_CONTAIN_TEXT'    => 'ne contient pas le texte'           , 
+	'LBL_CONTAINS_ALL'             => 'contient tous'                    , 
+	'LBL_DOES_NOT_CONTAIN_ALL'     => 'ne contient aucun'           , 
+	
 	'LBL_LESS_THAN'                => 'inférieur à'               , 
 	'LBL_GREATER_THAN'             => 'supérieur à'               , 
 	'LBL_LESS_THAN_OR_EQUAL'       => 'inférieur ou égal'         , 
@@ -301,8 +307,13 @@ $languageStrings = array(
 	'LBL_VIEW_NAME'                => 'Nom de la vue'                   , 
 	'LBL_CREATE_VIEW'              => 'Créer une vue'           , 
 	'LBL_BASIC_DETAILS'            => 'Détails'               , 
-	'LBL_CHOOSE_COLUMNS'           => 'Choisir une colonne et l\'ordre'    , 
-	'LBL_MAX_NUMBER_FILTER_COLUMNS' => 'Max 7'                       , 
+	'LBL_CHOOSE_COLUMNS'           => 'Choisir les colonnes et leur ordre'    , 
+	'LBL_MAX_NUMBER_FILTER_COLUMNS' => '12 max'                       , 
+	//ED150622
+	'LBL_CHOOSE_ORDERBY_COLUMNS'   => 'Choisir les colonnes de tri'    ,
+	'LBL_SHOW'					   => 'Afficher'    ,
+	'LBL_CLICK_TO_EDIT'			   => 'Cliquer pour modifier'    ,
+	
 	'LBL_FILTER_ON_DATE'           => 'Filtrer sur la date'              , 
 	'LBL_CHOOSE_FILTER_CONDITIONS' => 'Choisir les conditions'    , 
 	'LBL_SET_AS_DEFAULT'           => 'Filtre par défault'              , 
@@ -740,6 +751,8 @@ $languageStrings = array(
         'LBL_ACCOUNT_DISCOUNT_TYPE' => 'Remise type',
         
         'LBL_ALREADY_SENT_2_COMPTA' => 'La facture est en comptabilité',
+        
+        'LBL_LABEL' => 'Libellé',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

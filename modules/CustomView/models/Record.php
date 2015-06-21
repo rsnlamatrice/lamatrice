@@ -225,7 +225,11 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		$status = $this->get('status');
 		//ED150528 adds description
 		$description = $this->get('description');
-		
+		//ED150622 adds orderbyfields
+		$orderbyfields = $this->get('orderbyfields');
+		if(is_array($orderbyfields))
+				$orderbyfields = implode('|', $orderbyfields);
+				
 		if($status == self::CV_STATUS_PENDING) {
 			if($currentUserModel->isAdminUser()) {
 				$status = self::CV_STATUS_PUBLIC;
@@ -235,14 +239,15 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		if(!$cvId) {
 			$cvId = $db->getUniqueID("vtiger_customview");
 			$this->set('cvid', $cvId);
-			$sql = 'INSERT INTO vtiger_customview(cvid, viewname, setdefault, setmetrics, entitytype, status, userid, description) VALUES (?,?,?,?,?,?,?,?)';
-			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $currentUserModel->getId(), $description);
+			$sql = 'INSERT INTO vtiger_customview(cvid, viewname, setdefault, setmetrics, entitytype, status, userid, description, orderbyfields)
+				VALUES (?,?,?,?,?,?,?,?,?)';
+			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $currentUserModel->getId(), $description, $orderbyfields);
 			$db->pquery($sql, $params);
 
 		} else {
 
-			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=?, description=? WHERE cvid=?';
-			$params = array($viewName, $setDefault, $setMetrics, $status, $description, $cvId);
+			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=?, description=?, orderbyfields=? WHERE cvid=?';
+			$params = array($viewName, $setDefault, $setMetrics, $status, $description, $orderbyfields, $cvId);
 			$result = $db->pquery($sql, $params);
 			$db->pquery('DELETE FROM vtiger_cvcolumnlist WHERE cvid = ?', array($cvId));
 			$db->pquery('DELETE FROM vtiger_cvstdfilter WHERE cvid = ?', array($cvId));
@@ -447,6 +452,17 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 			$selectedFields[$columnIndex] = $columnName;
 		}
 		return $selectedFields;
+	}
+
+	/** ED150622
+	 * Function to get the list of selected orderby fields for the current custom view
+	 * @return <Array> List of Field Column Names
+	 */
+	public function getSelectedOrderByFields() {
+		$orderbyfields = $this->get('orderbyfields');
+		if(!$orderbyfields)
+				return array();
+		return explode('|', $orderbyfields);
 	}
 
 	/**
@@ -1076,5 +1092,28 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 			$viewId = $customView->getViewId($module);
 		}
 		return self::getInstanceById($viewId);
+	}
+	
+	/** ED150622
+	 * @param &$orderBy
+	 * @param &$sortOrder
+	 */
+	public function getOrderByFieldsInfos(){
+		$orderBy = '';
+		$sortOrder = '';
+		$fields = $this->get('orderbyfields');
+		if($fields){
+				$fields = explode('|', $fields);
+				for($i = 0; $i < count($fields); $i++){
+						$fields[$i] = explode(':', $fields[$i]);
+						if($orderBy) { $orderBy .= ','; $sortOrder .= ','; }
+						$orderBy .= $fields[$i][2];
+						$sortOrder .= $fields[$i][0];
+						//TODO more fields
+						break;
+				}
+				//var_dump($fields,$orderBy, $sortOrder);
+		}
+		return array($orderBy, $sortOrder);
 	}
 }

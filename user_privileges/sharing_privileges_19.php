@@ -102,6 +102,10 @@ $Products_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $Products_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$Vendors_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$Vendors_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 $Services_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $Services_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
@@ -193,5 +197,17 @@ $RSNBanques_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 $RSNBanqAgences_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNBanqAgences_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNAboRevues_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNAboRevues_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNImportSources_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNImportSources_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNDonateursWeb_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNDonateursWeb_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 ?>

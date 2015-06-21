@@ -178,7 +178,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 					thisInstance.registerEventToEditRelatedStatus();
 				}
 				/* ED14122
-				 * rŽ-enregistre les ŽvŽnements des ŽlŽments de la liste (sŽlection de date, saisie du champ de donnŽes)
+				 * ré-enregistre les événements des éléments de la liste (sélection de date, saisie du champ de données)
 				 */
 				switch (relatedModuleName ){
 				case "Critere4D":

@@ -45,7 +45,7 @@
 	<tr>
 	    <td>
 		<div class="row-fluid">
-		    {$LINE_ITEM_DETAIL["productName$INDEX"]}
+		    {$LINE_ITEM_DETAIL["hdnProductcode$INDEX"]} - {$LINE_ITEM_DETAIL["productName$INDEX"]}
 		</div>
 		{if $LINE_ITEM_DETAIL["productDeleted$INDEX"]}
 			<div class="row-fluid redColor deletedItem">
