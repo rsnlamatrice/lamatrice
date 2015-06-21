@@ -1823,8 +1823,9 @@ class Accounts extends CRMEntity {
 					FROM (
 						SELECT vtiger_contactaddresses.contactaddressesid,
 							vtiger_contactaddresses.contactid,
-							vtiger_contactaddresses.addresstype, vtiger_contactaddresses.comments,
-							`rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`,
+							vtiger_contactaddresses.addresstype, vtiger_contactaddresses.comments
+							, vtiger_contactaddresses.addressformat
+							, `rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`,
 							0 AS is_current_address
 						FROM vtiger_contactaddresses
 						JOIN vtiger_contactdetails
@@ -1833,8 +1834,9 @@ class Accounts extends CRMEntity {
 						UNION "/* add current address from contactaddress */."
 						SELECT vtiger_contactaddress.contactaddressid,
 							vtiger_contactaddress.contactaddressid,
-							'LBL_CURRENT_ADDRESS', NULL,
-							`rsnnpai`, `rsnnpaicomment`, `mailingcity`, `mailingstreet`, `mailingstreet2`, `mailingstreet3`
+							'LBL_CURRENT_ADDRESS', NULL
+							, NULL /*addressformat*/
+							, `rsnnpai`, `rsnnpaicomment`, `mailingcity`, `mailingstreet`, `mailingstreet2`, `mailingstreet3`
 							, `mailingcountry`, `mailingstate`, `mailingpobox`, `mailingzip`,
 							1 AS is_current_address
 						FROM vtiger_contactaddress

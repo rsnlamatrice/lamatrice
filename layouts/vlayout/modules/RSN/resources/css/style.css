@@ -260,3 +260,8 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
 .listViewEntriesTable .listViewHeaders.filters th + th {
   padding: 0px 5px 5px 5px !important;
 }
+/* compteur des tables liées */
+.related .nav li a .relcount {
+  float: right;
+  /*color: darkblue;*/
+}

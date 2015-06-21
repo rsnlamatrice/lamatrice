@@ -30,7 +30,10 @@
 							{assign var="DETAILVIEWRELATEDLINKLBL" value= vtranslate($RELATED_LINK->getLabel(), $RELATED_LINK->getLabel())}
 							{assign var="RELATED_ENTITY_NUMBER" value= $RELATED_LINK->get('quantity')}{*<!--/* AV150619 */-->*}
 							
-							<a href="javascript:void(0);" class="textOverflowEllipsis" style="width:auto" title="{vtranslate($RELATED_LINK->getLabel(),{$MODULE_NAME})}"><strong>{$DETAILVIEWRELATEDLINKLBL} {if $RELATED_ENTITY_NUMBER gt 0}({$RELATED_ENTITY_NUMBER}){/if}{*<!--/* AV150619 */-->*}</strong></a>
+							<a href="javascript:void(0);" class="textOverflowEllipsis" style="width:auto" title="{vtranslate($RELATED_LINK->getLabel(),{$MODULE_NAME})}">
+								<strong>{$DETAILVIEWRELATEDLINKLBL}
+								{if $RELATED_ENTITY_NUMBER gt 0}<span class="relcount">{$RELATED_ENTITY_NUMBER}</span>{/if}{*<!--/* AV150619 */-->*}
+								</strong></a>
 						</li>
 						{/foreach}
 					</ul>

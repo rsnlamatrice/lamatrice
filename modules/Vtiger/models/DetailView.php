@@ -208,25 +208,32 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 	 * @return int - the number of related entity.
 	 */
 	public function getRelatedEntitiesNumber($parentModuleModel, $relationModels) {
+		$quantities = array();
+		
 		$db = PearDatabase::getInstance();
 		$first = true;
 		$query = "";
 		foreach($relationModels as $relation) {
+			$relationQuery = $parentModuleModel->getRelationCounterQuery($this->record->getId(), $relation->get('name'), Vtiger_Module_Model::getInstance($relation->get('modulename')));
+			if(!$relationQuery)
+				continue;
+			
 			if(!$first) {
-				$query .= " UNION ";
+				$query .= "\r\nUNION\r\n";
 			} else {
 				$first = false;
 			}
 
-			$query .= 'SELECT COUNT(*) quantity, "' . $relation->get('modulename') . '" module  FROM (' . 
-					$parentModuleModel->getRelationQuery($this->record->getId(), $relation->get('name'), Vtiger_Module_Model::getInstance($relation->get('modulename'))) .
-					') ' . $relation->get('modulename') . "_query";
+			$query .= $relationQuery;
 		}
 
 		$result = $db->pquery($query, array());
-
-		$quantities = array();
-
+		if(!$result){
+				$db->echoError();
+				echo "<pre>$query</pre>";
+				return $quantities;
+		}
+		
 		for ($i = 0; $i < $db->num_rows($result); ++$i) {
 			$row = $db->query_result_rowdata($result, $i);
 			$quantities[$row['module']] = $row['quantity'];

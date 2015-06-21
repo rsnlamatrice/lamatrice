@@ -273,6 +273,30 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 	}
 	
 
+	
+	/** ED150619
+	 * Function to get relation query for particular module with function name
+	 * Similar to getRelationQuery but overridable.
+	 * @param <record> $recordId
+	 * @param <String> $functionName
+	 * @param Vtiger_Module_Model $relatedModule
+	 * @return <String>
+	 */
+	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
+				
+		switch($relatedModule->getName()){
+		 case 'ContactAddresses' :
+		 case 'ContactEmails' :
+		 case 'Contacts' :
+				//don't show if not > 1
+				$query = parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
+				$query = preg_replace('/^SELECT\sCOUNT\(\*\)/', 'SELECT IF(COUNT(*)>1, COUNT(*), 0)', $query);
+				return $query;
+		 default:
+			return parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
+		}
+	}
+	
 	/**
 	 * Function to save a given record model of the current module
 	 * @param Vtiger_Record_Model $recordModel

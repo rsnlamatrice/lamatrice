@@ -1408,6 +1408,35 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		}
 		return $query;
 	}
+	
+	/** ED150619
+	 * Function to get relation query for particular module with function name
+	 * Similar to getRelationQuery but overridable.
+	 * @param <record> $recordId
+	 * @param <String> $functionName
+	 * @param Vtiger_Module_Model $relatedModule
+	 * @return <String>
+	 */
+	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
+		
+		$relationQuery = $this->getRelationQuery($recordId, $functionName, $relatedModule);
+
+		switch($relatedModule->getName()){
+		 case 'Calendar':
+				//MySQL ne tolère la duplication de nom de champ (ici 'status') dans une sous-requête, alors qu'il le tolère en requête principale
+				$relationQuery = str_replace('vtiger_crmentity.*, vtiger_activity.*'
+											 ,'vtiger_crmentity.crmid, vtiger_crmentity.smownerid, vtiger_crmentity.setype, vtiger_activity.*'
+											 ,$relationQuery);
+				break;
+		}
+		
+		return 'SELECT COUNT(*) quantity'
+				. ', \'' . $relatedModule->getName() . '\' module'
+				. ', \'' . $functionName . '\' functionName'
+				. ' FROM (' . 
+						$relationQuery .
+				') `' . $relatedModule->getName() . '_' . $functionName . '_query`';
+	}
 
 	/**
 	 * Function to get Non admin access control query
