@@ -15,9 +15,14 @@ var Vtiger_CustomView_Js = {
 
 	//This will store the columns selection container
 	columnSelectElement : false,
-
 	//This will store the input hidden selectedColumnsList element
 	selectedColumnsList : false,
+
+	//ED150622
+	//This will store the "order by" fields selection container
+	orderByFieldsSelectElement : false,
+	//This will store the input hidden selectedOrderByFieldsList element
+	selectedOrderByFieldsList : false,
 
 	loadFilterView : function(url) {
 		jQuery('#loadingListViewModal').modal();
@@ -58,6 +63,12 @@ var Vtiger_CustomView_Js = {
 		return Vtiger_CustomView_Js.columnListSelect2Element;
 	},
 
+	/** ED150622
+	 */
+	getOrderByFieldsListSelect2Element : function() {
+		return Vtiger_CustomView_Js.orderByFieldsListSelect2Element;
+	},
+
 	/**
 	 * Function to get the view columns selection element
 	 * @return : jQuery object of view columns selection element
@@ -69,6 +80,17 @@ var Vtiger_CustomView_Js = {
 		return Vtiger_CustomView_Js.columnSelectElement;
 	},
 
+	/** ED150622
+	 * Function to get the view "order by" fields selection element
+	 * @return : jQuery object of view fields selection element
+	 */
+	getOrderByFieldsSelectElement : function() {
+		if(Vtiger_CustomView_Js.orderByFieldsSelectElement == false) {
+			Vtiger_CustomView_Js.orderByFieldsSelectElement = jQuery('#viewOrderByFieldsSelect');
+		}
+		return Vtiger_CustomView_Js.orderByFieldsSelectElement;
+	},
+
 	/**
 	 * Function to get the selected columns list
 	 * @return : jQuery object of selectedColumnsList
@@ -78,6 +100,17 @@ var Vtiger_CustomView_Js = {
 			Vtiger_CustomView_Js.selectedColumnsList = jQuery('#selectedColumnsList');
 		}
 		return Vtiger_CustomView_Js.selectedColumnsList;
+	},
+
+	/** ED150622
+	 * Function to get the selected "order by" columns list
+	 * @return : jQuery object of selectedOrderByFieldsList
+	 */
+	getSelectedOrderByFieldsList : function() {
+		if(Vtiger_CustomView_Js.selectedOrderByFieldsList == false) {
+			Vtiger_CustomView_Js.selectedOrderByFieldsList = jQuery('#selectedOrderByFieldsList');
+		}
+		return Vtiger_CustomView_Js.selectedOrderByFieldsList;
 	},
 
 	/**
@@ -95,6 +128,21 @@ var Vtiger_CustomView_Js = {
             });
 	},
 
+	/** ED150622
+	 * Function to regiser the event to make the columns list sortable
+	 */
+	makeOrderByFieldsListSortable : function() {
+		var select2Element = Vtiger_CustomView_Js.getOrderByFieldsListSelect2Element();
+		//TODO : peform the selection operation in context this might break if you have multi select element in advance filter
+		//The sorting is only available when Select2 is attached to a hidden input field.
+		var chozenChoiceElement = select2Element.find('ul.select2-choices');
+		chozenChoiceElement.sortable({
+                'containment': chozenChoiceElement,
+                start: function() { Vtiger_CustomView_Js.getSelectedOrderByFieldsList().select2("onSortStart"); },
+                update: function() { Vtiger_CustomView_Js.getSelectedOrderByFieldsList().select2("onSortEnd"); }
+            });
+	},
+
 	/**
 	 * Function which will get the selected columns with order preserved
 	 * @return : array of selected values in order
@@ -102,6 +150,31 @@ var Vtiger_CustomView_Js = {
 	getSelectedColumns : function() {
 		var columnListSelectElement = Vtiger_CustomView_Js.getColumnSelectElement();
 		var select2Element = Vtiger_CustomView_Js.getColumnListSelect2Element();
+
+		var selectedValuesByOrder = new Array();
+		var selectedOptions = columnListSelectElement.find('option:selected');
+
+		var orderedSelect2Options = select2Element.find('li.select2-search-choice').find('div');
+		orderedSelect2Options.each(function(index,element){
+			var chosenOption = jQuery(element);
+			selectedOptions.each(function(optionIndex, domOption){
+				var option = jQuery(domOption);
+				if(option.html() == chosenOption.html()) {
+					selectedValuesByOrder.push(option.val());
+					return false;
+				}
+			});
+		});
+		return selectedValuesByOrder;
+	},
+
+	/**
+	 * Function which will get the selected "order by" fields with order preserved
+	 * @return : array of selected values in order
+	 */
+	getSelectedOrderByFields : function() {
+		var columnListSelectElement = Vtiger_CustomView_Js.getOrderByFieldsSelectElement();
+		var select2Element = Vtiger_CustomView_Js.getOrderByFieldsListSelect2Element();
 
 		var selectedValuesByOrder = new Array();
 		var selectedOptions = columnListSelectElement.find('option:selected');
@@ -201,6 +274,14 @@ var Vtiger_CustomView_Js = {
 		app.changeSelectElementView(selectElement, 'select2', {maximumSelectionSize: 12,dropdownCss : {'z-index' : 0}});
 	},
 
+	/** ED150622
+	 * Function which will register the select2 elements for order by columns selection
+	 */
+	registerSelect2ElementForOrderByFieldsSelection : function() {
+		var selectElement = Vtiger_CustomView_Js.getOrderByFieldsSelectElement();
+		app.changeSelectElementView(selectElement, 'select2', {maximumSelectionSize: 12,dropdownCss : {'z-index' : 0}});
+	},
+
 	/**
 	 * Function which will register the name changed event to show save copy button
 	 * ED150212
@@ -237,6 +318,8 @@ var Vtiger_CustomView_Js = {
 
 	registerEvents: function(){
 		Vtiger_CustomView_Js.registerSelect2ElementForColumnsSelection();
+		//ED150622
+		Vtiger_CustomView_Js.registerSelect2ElementForOrderByFieldsSelection();
 		
 		//ED150212
 		Vtiger_CustomView_Js.registerNameChangedEvent();
@@ -248,6 +331,10 @@ var Vtiger_CustomView_Js = {
 
 		var select2Element = app.getSelect2ElementFromSelect(Vtiger_CustomView_Js.getColumnSelectElement());
 		Vtiger_CustomView_Js.columnListSelect2Element = select2Element;
+		
+		//ED150622
+		select2Element = app.getSelect2ElementFromSelect(Vtiger_CustomView_Js.getOrderByFieldsSelectElement());
+		Vtiger_CustomView_Js.orderByFieldsListSelect2Element = select2Element;
 
 		//To arrange the chosen choices in the order that is selected
 		Vtiger_CustomView_Js.arrangeSelectChoicesInOrder();
@@ -257,11 +344,13 @@ var Vtiger_CustomView_Js = {
 		});
 
 		Vtiger_CustomView_Js.makeColumnListSortable();
+		//ED150622
+		Vtiger_CustomView_Js.makeOrderByFieldsListSortable();
 
 		jQuery("#CustomView").submit(function(e) {
 			
 			//ED150212
-			// save as button
+			// 'save as' button
 			var saveAsCopy = e.target.id == "customViewSubmitCopy";
 			
 			var selectElement = Vtiger_CustomView_Js.getColumnSelectElement();
@@ -316,6 +405,9 @@ var Vtiger_CustomView_Js = {
 				var advfilterlist = Vtiger_CustomView_Js.advanceFilterInstance.getValues();
 				jQuery('#advfilterlist').val(JSON.stringify(advfilterlist));
 				jQuery('input[name="columnslist"]', contentsContainer).val(JSON.stringify(Vtiger_CustomView_Js.getSelectedColumns()));
+				//ED150622
+				jQuery('input[name="orderbyfields"]', contentsContainer).val(JSON.stringify(Vtiger_CustomView_Js.getSelectedOrderByFields()));
+				
 				Vtiger_CustomView_Js.saveAndViewFilter();
 				return false;
 			} else {

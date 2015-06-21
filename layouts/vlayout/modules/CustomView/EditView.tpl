@@ -11,6 +11,7 @@
 -->*}
 {strip}
 {assign var=SELECTED_FIELDS value=$CUSTOMVIEW_MODEL->getSelectedFields()}
+{assign var=SELECTED_ORDERBY_FIELDS value=$CUSTOMVIEW_MODEL->getSelectedOrderByFields()}
 <div class="row-fluid span">
 	<form class="form-horizontal" id="CustomView" name="CustomView" method="post" action="index.php">
 		<input type=hidden name="record" id="record" value="{$RECORD_ID}" />
@@ -38,11 +39,17 @@
 			<div class="row-fluid">
 				<span class="span span2">{vtranslate('LBL_DESCRIPTION_INFORMATION')}</span>
 				<span class="span span5">
-					<textarea class="row-fluid" name="description">{$CUSTOMVIEW_MODEL->get('description')}</textarea>
-				
+						<a onclick="$(this).next().removeClass('hide').end().remove();" title="{vtranslate('LBL_CLICK_TO_EDIT')}">
+								{if $CUSTOMVIEW_MODEL->get('description')}
+										{str_replace("\n", "<br>", htmlentities($CUSTOMVIEW_MODEL->get('description')))}
+								{else}
+										<h4><small>{vtranslate('LBL_SHOW')}</small></h4>
+								{/if}
+						</a>
+						<textarea class="row-fluid hide" name="description">{htmlentities($CUSTOMVIEW_MODEL->get('description'))}</textarea>
 			</div>
 			<br>
-			<h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_COLUMNS',$MODULE)} ({vtranslate('LBL_MAX_NUMBER_FILTER_COLUMNS')}):</h4>
+			<h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_COLUMNS',$MODULE)} ({vtranslate('LBL_MAX_NUMBER_FILTER_COLUMNS')}) :</h4>
 			<div class="columnsSelectDiv">
 				{assign var=MANDATORY_FIELDS value=array()}
 				<select data-placeholder="{vtranslate('LBL_ADD_MORE_COLUMNS',$MODULE)}" multiple class="select2-container columnsSelect" id="viewColumnsSelect">
@@ -65,6 +72,31 @@
 				</select>
 				<input type="hidden" name="columnslist" value='{ZEND_JSON::encode($SELECTED_FIELDS)}' />
 				<input id="mandatoryFieldsList" type="hidden" value='{ZEND_JSON::encode($MANDATORY_FIELDS)}' />
+			</div>
+			<br>
+			<h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_ORDERBY_COLUMNS',$MODULE)} :
+			 {if ! $SELECTED_ORDERBY_FIELDS}<a onclick="$(this).parent().next().removeClass('hide').end().end().remove();">
+				<small> {vtranslate('LBL_SHOW')}</small></a>{/if}
+			 </h4>
+			<div class="columnsSelectDiv {if ! $SELECTED_ORDERBY_FIELDS}hide{/if}">
+				<select data-placeholder="{vtranslate('LBL_ADD_MORE_COLUMNS',$MODULE)}" multiple class="select2-container columnsSelect" id="viewOrderByFieldsSelect">
+				{foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE}
+					<optgroup label='{vtranslate($BLOCK_LABEL, $SOURCE_MODULE)}'>
+					{foreach key=FIELD_NAME item=FIELD_MODEL from=$BLOCK_FIELDS}
+						{foreach item=SORT_ORDER from=array('ASC:','DESC:')}
+							{assign var=ORDER_KEY value=$SORT_ORDER|cat:$FIELD_MODEL->getCustomViewColumnName()}
+							<option value="{$ORDER_KEY}" data-field-name="{$SORT_ORDER|cat:$FIELD_NAME}"
+							{if in_array($ORDER_KEY, $SELECTED_ORDERBY_FIELDS)}
+								selected
+							{/if}
+							>{vtranslate($FIELD_MODEL->get('label'), $SOURCE_MODULE)} {if $SORT_ORDER eq 'DESC:'} (inverse){/if}
+							</option>
+						{/foreach}
+					{/foreach}
+					</optgroup>
+				{/foreach}
+				</select>
+				<input type="hidden" name="orderbyfields" value='{ZEND_JSON::encode($SELECTED_ORDERBY_FIELDS)}' />
 			</div>
 			<br>
 			<h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_FILTER_CONDITIONS', $MODULE)}:</h4>

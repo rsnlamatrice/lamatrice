@@ -129,16 +129,21 @@ class Vtiger_List_View extends Vtiger_Index_View {
 
 
 		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
-		
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'), 'CVID'=>$cvId);
 		$linkModels = $listViewModel->getListViewMassActions($linkParams);
 
 		$pagingModel = new Vtiger_Paging_Model();
 		$pagingModel->set('page', $pageNumber);
 
+		//ED150622
+		if(empty($orderBy) && $cvId) {
+			$customView = CustomView_Record_Model::getInstanceById($cvId);
+			list($orderBy, $sortOrder) = $customView->getOrderByFieldsInfos();
+		}
+		
 		if(!empty($orderBy)) {
 			$listViewModel->set('orderby', $orderBy);
-			$listViewModel->set('sortorder',$sortOrder);
+			$listViewModel->set('sortorder', $sortOrder);
 		}
 
 		$searchKey = $request->get('search_key');

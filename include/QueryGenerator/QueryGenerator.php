@@ -1067,7 +1067,8 @@ class QueryGenerator {
 			if(trim($value) == '' && ($operator == 's' || $operator == 'ew' || $operator == 'c' || $operator == 'ct' || $operator == 'ca') //ED150619 ct
 					&& ($this->isStringType($fieldDataType) ||
 					$fieldDataType == 'picklist' ||
-					$fieldDataType == 'multipicklist')) {
+					$fieldDataType == 'multipicklist' ||
+					$fieldDataType == 'buttonset')) {
 				$sql[] = "LIKE ''";
 				continue;
 			}
