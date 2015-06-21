@@ -33,7 +33,8 @@
 					<div class="control-label">{vtranslate('LBL_ASSIGN_TO_ROLE',$QUALIFIED_MODULE)}</div>
 					<div class="controls">
 						<select class="rolesList" name="rolesSelected[]" multiple style="min-width: 220px" data-placeholder="{vtranslate('LBL_CHOOSE_ROLES',$QUALIFIED_MODULE)}">
-							<option value="all">{vtranslate('LBL_ALL_ROLES',$QUALIFIED_MODULE)}</option>
+							{*ED150619 All is selected by default *}
+							<option value="all" selected="selected">{vtranslate('LBL_ALL_ROLES',$QUALIFIED_MODULE)}</option>
 							{foreach from=$ROLES_LIST item=ROLE}
 								<option value="{$ROLE->get('roleid')}">{$ROLE->get('rolename')}</option>
 							{/foreach}

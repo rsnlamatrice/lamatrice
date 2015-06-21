@@ -172,6 +172,12 @@ $languageStrings = array(
 	'LBL_ENDS_WITH'                => 'fini par'                    , 
 	'LBL_CONTAINS'                 => 'contient'                    , 
 	'LBL_DOES_NOT_CONTAIN'         => 'ne contient pas'           , 
+	/*ED150619*/
+	'LBL_CONTAINS_TEXT'            => 'contient le texte'                    , 
+	'LBL_DOES_NOT_CONTAIN_TEXT'    => 'ne contient pas le texte'           , 
+	'LBL_CONTAINS_ALL'             => 'contient tous'                    , 
+	'LBL_DOES_NOT_CONTAIN_ALL'     => 'ne contient aucun'           , 
+	
 	'LBL_LESS_THAN'                => 'inférieur à'               , 
 	'LBL_GREATER_THAN'             => 'supérieur à'               , 
 	'LBL_LESS_THAN_OR_EQUAL'       => 'inférieur ou égal'         , 

@@ -30,6 +30,8 @@
 						{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
 						{if $FIELD_MODEL->getFieldDataType() == 'reference'}
 							{$FIELD_TYPE='V'}
+						{elseif $FIELD_MODEL->getFieldDataType() == 'picklist' || $FIELD_MODEL->getFieldDataType() == 'multipicklist' || $FIELD_MODEL->getFieldDataType() == 'buttonset'}
+							{$FIELD_TYPE='PL'}
 						{/if}
 						{$FIELD_INFO['value'] = decode_html($CONDITION_INFO['value'])}
 						selected="selected"

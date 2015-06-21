@@ -32,6 +32,8 @@ $adv_filter_options = array("e" => "" . $mod_strings['equals'] . "",
 	"b" => "" . $mod_strings['before'] . "",
 	"a" => "" . $mod_strings['after'] . "",
 	"bw" => "" . $mod_strings['between'] . "",
+	"ct" => "" . $mod_strings['contains text'] . "",
+	"kt" => "" . $mod_strings['doas not contain text'] . "",
 );
 
 class CustomView extends CRMEntity {
