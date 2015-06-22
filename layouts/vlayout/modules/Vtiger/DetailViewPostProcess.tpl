@@ -31,9 +31,9 @@
 							{assign var="RELATED_ENTITY_NUMBER" value= $RELATED_LINK->get('quantity')}{*<!--/* AV150619 */-->*}
 							
 							<a href="javascript:void(0);" class="textOverflowEllipsis" style="width:auto" title="{vtranslate($RELATED_LINK->getLabel(),{$MODULE_NAME})}">
-								<strong>{$DETAILVIEWRELATEDLINKLBL}
+								<strong>{$DETAILVIEWRELATEDLINKLBL}</strong>
 								{if $RELATED_ENTITY_NUMBER gt 0}<span class="relcount">{$RELATED_ENTITY_NUMBER}</span>{/if}{*<!--/* AV150619 */-->*}
-								</strong></a>
+							</a>
 						</li>
 						{/foreach}
 					</ul>
