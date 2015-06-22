@@ -558,10 +558,10 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			case 'cb':
 				if($data[$col_frequency]=='1')
 					return "DON_ETALE";
-				return 'PAYBOX';
+				return 'PayBox';
 				
 			case 'paypal':
-				return 'PAYPAL';
+				return 'PayPal';
 				
 			case 'cheque':
 			case 'virement':

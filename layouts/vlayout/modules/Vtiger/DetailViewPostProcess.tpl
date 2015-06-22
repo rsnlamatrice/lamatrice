@@ -32,7 +32,8 @@
 							
 							<a href="javascript:void(0);" class="textOverflowEllipsis" style="width:auto" title="{vtranslate($RELATED_LINK->getLabel(),{$MODULE_NAME})}">
 								<strong>{$DETAILVIEWRELATEDLINKLBL}</strong>
-								{if $RELATED_ENTITY_NUMBER gt 0}<span class="relcount">{$RELATED_ENTITY_NUMBER}</span>{/if}{*<!--/* AV150619 */-->*}
+								{* AV150619, ED see css *}
+								{if $RELATED_ENTITY_NUMBER gt 0}<span class="relcount">{$RELATED_ENTITY_NUMBER}</span>{/if}
 							</a>
 						</li>
 						{/foreach}

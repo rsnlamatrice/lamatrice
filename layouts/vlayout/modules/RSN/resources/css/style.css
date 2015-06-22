@@ -268,5 +268,6 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
   float: left;
 }
 .related .nav li a .relcount {
+  /* float: right; ne fonctionne pas, dans ce contexte, sur FireFox/Mac */
   font-weight: bold;
 }

@@ -482,7 +482,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	static function getTax($rate){
 		if(!$rate)
 			return false;
-		$rate = (float)str_replace(',', '.', $rate);
+		$rate = self::str_to_float($rate);
 		if(!self::$allTaxes)
 			self::$allTaxes = getAllTaxes();
 		foreach(self::$allTaxes as $tax)
@@ -539,6 +539,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		}
 
 		return null;
+	}
+	
+	static function str_to_float($str){
+		if(!is_string($str))
+			return $str;
+		return (float)str_replace(',', '.', $str);
 	}
 }
 

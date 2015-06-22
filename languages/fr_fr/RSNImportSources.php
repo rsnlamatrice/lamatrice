@@ -90,8 +90,8 @@ $languageStrings = array(
 	'Skip'                       => 'Ignorer',
         
 	'LBL_PRESTASHOP' => 'Prestashop',
-	'LBL_PAYBOX' => 'Paybox',
-	'LBL_PAYPAL' => 'Paypal',
+	'LBL_PAYBOX' => 'PayBox',
+	'LBL_PAYPAL' => 'PayPal',
 	'LBL_COGILOG' => 'Cogilog',
         'LBL_DONATEURSWEB' => 'Donateurs web',
         'LBL_DONATEURSWEB_4D' => 'Donateurs web depuis 4D',

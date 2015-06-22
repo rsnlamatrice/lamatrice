@@ -157,7 +157,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY numpiece';
 
-		$result = $adb->query($sql);
+		$result = $adb->pquery($sql);
 		$numberOfRecords = $adb->num_rows($result);
 
 		if ($numberOfRecords <= 0) {
@@ -265,6 +265,17 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 					//Relation Facture/Réglement
 					$this->addInvoiceReglementRelation($record, $invoice);
 					
+					$entryId = $this->getEntryId("RsnReglements", $reglementId);
+					foreach ($reglementData as $reglementLine) {
+						$entityInfo = array(
+							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
+							'id'		=> $entryId
+						);
+						
+						//TODO update all with array
+						$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
+					}
+					
 					return $record;//tmp 
 				}
 			} else {
@@ -292,38 +303,55 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 */
 	function addInvoiceReglementRelation($reglement, $invoice){
 		global $adb;
-		$query = 'INSERT INTO vtiger_crmentityrel(crmid, module, relcrmid, relmodule)
-			VALUES( ?, \'RsnReglements\', ?, \'Invoice\')';
+		$query = 'INSERT INTO vtiger_crmentityrel (crmid, module, relcrmid, relmodule)
+			VALUES ( ?, \'RsnReglements\', ?, \'Invoice\')';
 		$params = array($reglement->getId(), $invoice->getId());
-		$result = $adb->query($query, $params);
-		
+		$result = $adb->pquery($query, $params);
 		if(!$result) {//duplicate
 			$adb->echoError();
 			return false;
 		}
+		
+		//mise à jour de la facture
 		$query = 'UPDATE vtiger_invoice
-			SET receivedreference = CONCAT(IF(receivedreference IS NULL OR receivedreference = \'\', \'\', CONCAT(receivedreference, \', \')), ?)
-			, receivedcomments = CONCAT(IF(receivedcomments IS NULL OR receivedcomments = \'\', \'\', CONCAT(receivedcomments, \'\\n\')), ?)
-			, receivedmoderegl = CONCAT(IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', \'\', CONCAT(receivedmoderegl, \', \')), ?)
-			, received = IFNULL(received,0) + ?
-			, balance = IFNULL(balance,0) - ?
-			, invoicestatus = IF(ABS(balance < 0.01), \'PAID\', invoicestatus)
+			SET received = IFNULL(received,0) + ?
+			, balance = received - total
+			, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)
 			WHERE invoiceid = ?';
 			
-		$amount = str_replace(',', '.', $reglement->get('amount'));
+		$amount = self::str_to_float($reglement->get('amount'));
 		
 		$params = array(
-			$reglement->get('numpiece')
-			, 'PAYBOX'
-			, $reglement->get('rsnmoderegl')
-			, $amount
-			, $amount
+			  $amount
 			, $invoice->getId()
 		);
 		
-		$result = $adb->query($query, $params);
+		$result = $adb->pquery($query, $params);
 		
 		if(!$result) {
+			var_dump(/*$query,*/ $params);
+			$adb->echoError();
+			return false;
+		}
+		
+		//mise à jour de la facture
+		$query = 'UPDATE vtiger_invoicecf
+			SET receivedreference = IF(receivedreference IS NULL OR receivedreference = \'\', ?, CONCAT(receivedreference, \', \', ?))
+			, receivedcomments = IF(receivedcomments IS NULL OR receivedcomments = \'\', ?, CONCAT(receivedcomments, \'\\n\', ?))
+			, receivedmoderegl = IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', ?, CONCAT(receivedmoderegl, \', \', ?))
+			WHERE invoiceid = ?';
+		
+		$params = array(
+			$reglement->get('numpiece'), $reglement->get('numpiece')
+			, 'Import PayBox', 'Import PayBox'
+			, $reglement->get('rsnmoderegl'), $reglement->get('rsnmoderegl')
+			, $invoice->getId()
+		);
+		
+		$result = $adb->pquery($query, $params);
+		
+		if(!$result) {
+			var_dump(/*$query,*/ $params);
 			$adb->echoError();
 			return false;
 		}
@@ -339,7 +367,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY subject';
 
-		$result = $adb->query($sql);
+		$result = $adb->pquery($sql);
 		$numberOfRecords = $adb->num_rows($result);
 
 		if ($numberOfRecords <= 0) {
@@ -1127,7 +1155,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'errorcode'		=> $reglement[31],
 			'bank'			=> $reglement[1],
 			'typeregl'		=> $typeregl,
-			'rsnmoderegl'		=> 'PAYBOX',
+			'rsnmoderegl'		=> 'PayBox',
 		);
 
 		return $reglementValues;

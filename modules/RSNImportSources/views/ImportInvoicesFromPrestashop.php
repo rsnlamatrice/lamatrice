@@ -158,8 +158,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	function importInvoiceLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
         
-		$qty = $invoiceLine['quantity'];
-		$listprice = $invoiceLine['prix_unit_ht'];
+		$qty = self::str_to_float($invoiceLine['quantity']);
+		$listprice = self::str_to_float($invoiceLine['prix_unit_ht']);
 		
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
@@ -731,9 +731,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$product = array(
 			'productcode'	=> $product[1],
 			'productname'	=> $product[2],
-			'unit_price'	=> $product[3],//TTC, TODO HT
+			'unit_price'	=> self::str_to_float($product[3]),//TTC, TODO HT
 			'qty_per_unit'	=> 1,
-			'taxrate'	=> $product[8],
+			'taxrate'	=> self::str_to_float($product[8]),
 		);
 		return $product;
 	}
@@ -765,15 +765,15 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		foreach ($invoice['detail'] as $product) {
 			$isProduct = null;
 			$product_name = '';
-			$taxrate = ((float)str_replace(',', '.', $product[8]))/100;
+			$taxrate = self::str_to_float($product[8])/100;
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
 				'productcode'	=> $product[1],
 				'productid'	=> $this->getProductId($product[1], $isProduct, $product_name),
-				'quantity'	=> $product[5],
+				'quantity'	=> self::str_to_float($product[5]),
 				'article'	=> $product_name,
-				'prix_unit_ht'	=> $product[3] / (1 + $taxrate),
+				'prix_unit_ht'	=> self::str_to_float($product[3]) / (1 + $taxrate),
 				'isproduct'	=> $isProduct,
-				'taxrate'	=> $product[8],
+				'taxrate'	=> self::str_to_float($product[8]),
             
             /*1 RECEVOIR PAQUET($hDocref;$aCodeProduit;◊aTab)
             2 RECEVOIR PAQUET($hDocref;$aNomProduit;◊aTab)

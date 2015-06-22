@@ -277,6 +277,8 @@ class Vtiger_Util_Helper {
 		 	break;
 		 case 'mailingzip':
 		 	$fieldName = 'rsnzipcode';
+		 case 'rsnmoderegl':
+		 	$fieldName = 'receivedmoderegl';
 		 default:
 			break;
 		}
