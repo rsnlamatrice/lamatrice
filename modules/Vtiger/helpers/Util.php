@@ -257,6 +257,10 @@ class Vtiger_Util_Helper {
 		switch($fieldName){
 		 case 'mailingstate': //module Contacts
 		 case 'otherstate': //module Contacts
+		 case 'bill_state': //modules
+		 case 'ship_state': //modules
+		 case 'address_state': //module Users 
+		 case 'state': //module Contacts
 			$fieldName = 'rsnregion';
 			break;
 		 case 'bill_country':
@@ -277,6 +281,8 @@ class Vtiger_Util_Helper {
 		 	break;
 		 case 'mailingzip':
 		 	$fieldName = 'rsnzipcode';
+		 case 'rsnmoderegl':
+		 	$fieldName = 'receivedmoderegl';
 		 default:
 			break;
 		}

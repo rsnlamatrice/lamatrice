@@ -1,21 +1,25 @@
 <?php
 /**
- * Importation des réglements effectués sur Paybox, c'est à dire la boutique Prestashop
+ * Importation des réglements effectués sur Paypal, c'est à dire des dons effectués depuis le site web
  * Cet import s'effectue après l'importation des Donateurs web (qui fournit les coordonnées des contacts)
- * et après l'import Boutique qui référencent les factures de la boutique.
- * Les écritures DR et DP correspondent aux données RSNDonateursWeb et génèrent des factures de dons, les autres correspondent aux factures boutique.
+ * Les écritures avec un n° d'objet correspondent aux données RSNDonateursWeb et génèrent des factures de dons.
+ * Les écritures sans n° d'objet génèrent, éventuellement un contact, et des factures de dons.
+ * Les réglements des commissions de Paypal sont à générer en Facture Fournisseur, à transférer en compta.
+ * D'autres écritures, en montant négatif, correspondent à l'abonnement à DotSpirit.
+ * Elles sont générées comme des Factures Fournisseur et doivent être transférées à la compta.
+ * DotSpirit ne devrait plus, à ce jour, utiliser PayPal.
  */
 
-class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSources_ImportFromFile_View {
+class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSources_ImportFromFile_View {
 
-	private $coupons = array();
+	private $coupons = null;
 
 	/**
 	 * Method to get the source import label to display.
 	 * @return string - The label.
 	 */
 	public function getSource() {
-		return 'LBL_PAYBOX';
+		return 'LBL_PAYPAL';
 	}
 
 	/**
@@ -31,7 +35,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @return array - An array containing concerned module names.
 	 */
 	public function getImportModules() {
-		return array('Invoice', 'RsnReglements');
+		return array('Contacts', 'Invoice'/*, 'PurchaseOrder'*/, 'RsnReglements');
 	}
 
 	/**
@@ -82,6 +86,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'mailingstreet3',
 			'mailingzip',
 			'mailingcity',
+			'mailingstate',
 			'mailingcountry',
 			'phone',
 			'mobile',
@@ -108,6 +113,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'street3',
 			'zip',
 			'city',
+			'state',
 			'country',
 			'subject',
 			'invoicedate',
@@ -132,18 +138,22 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		return array(
 			//header
 			'numpiece',
+			'refdonateurweb',
 			'dateregl',
-			'dateoperation',
 			'email',
 			'amount',
+			'commission',
 			'currency_id',
-			'payment',
-			'paymentstatus',
-			'ip',
-			'errorcode',
-			'bank',
 			'typeregl',
 			'rsnmoderegl',
+			'phone',
+			'lastname',
+			'street',
+			'street3',
+			'zip',
+			'city',
+			'state',
+			'country',
 		);
 	}
 	
@@ -165,19 +175,19 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		}
 
 		$row = $adb->raw_query_result_rowdata($result, 0);
-		$previousReglementSubjet = $row['numpiece'];
+		$previousReglementKey = $row['numpiece'];
 		$reglementData = array($row);
 
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
-			$reglementSubject = $row['numpiece'];
+			$reglementKey = $row['numpiece'];
 
-			if ($previousReglementSubjet == $reglementSubject) {
+			if ($previousReglementKey == $reglementKey) {
 				array_push($reglementData, $row);
 			} else {
 				$this->importOneRsnReglements($reglementData, $importDataController);
 				$reglementData = array($row);
-				$previousReglementSubjet = $reglementSubject;
+				$previousReglementKey = $reglementKey;
 			}
 		}
 
@@ -343,7 +353,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		
 		$params = array(
 			$reglement->get('numpiece'), $reglement->get('numpiece')
-			, 'Import PayBox', 'Import PayBox'
+			, 'Import PayPal', 'Import PayPal'
 			, $reglement->get('rsnmoderegl'), $reglement->get('rsnmoderegl')
 			, $invoice->getId()
 		);
@@ -375,19 +385,19 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		}
 
 		$row = $adb->raw_query_result_rowdata($result, 0);
-		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
+		$previousInvoiceKey = $row['sourceid'];//tmp subject, use invoice_no ???
 		$invoiceData = array($row);
 
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
-			$invoiceSubject = $row['subject'];
+			$invoiceKey = $row['sourceid'];
 
-			if ($previousInvoiceSubjet == $invoiceSubject) {
+			if ($previousInvoiceKey == $invoiceKey) {
 				array_push($invoiceData, $row);
 			} else {
 				$this->importOneInvoice($invoiceData, $importDataController);
 				$invoiceData = array($row);
-				$previousInvoiceSubjet = $invoiceSubject;
+				$previousInvoiceKey = $invoiceKey;
 			}
 		}
 
@@ -630,6 +640,51 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	}
 
 	/**
+	 * Method that pre-import a contact if he does not exist in database.
+	 * @param $invoice : the invoice data.
+	 */
+	function checkContact($invoice, $reglement) {
+		$contactData = $this->getContactValues($invoice, $reglement);
+		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		
+		if(!$id){
+			$this->preImportContact($contactData);
+		}
+	}
+
+
+	/**
+	 * Method that return the formated information of a contact found in the file.
+	 * @param $invoiceInformations : the invoice informations data found in the file.
+	 * @return array : the formated data of the contact.
+	 */
+	function getContactValues($invoice, $reglement) {
+		if(!isset($invoice['sourceid']))
+			$invoice = $this->getInvoiceValues($invoice);
+		if(preg_match('/^0?6/', $reglement['phone']))
+			$mobile = $reglement['phone'];
+		else
+			$phone = $reglement['phone'];
+		$contactMapping = array(
+			'lastname'		=> $invoice['lastname'],
+			'firstname'		=> $invoice['firstname'],
+			'email'			=> $invoice['email'],
+			'mailingstreet'		=> $invoice['street'],
+			'mailingstreet2'	=> $invoice['street2'],
+			'mailingstreet3'	=> $invoice['street3'],
+			'mailingzip'		=> $invoice['zip'],
+			'mailingcity'		=> $invoice['city'],
+			'mailingcountry' 	=> $invoice['country'],
+			'phone'			=> $phone,
+			'mobile'		=> $mobile,
+			'accounttype'		=> 'Donateur Web',
+			'leadsource'		=> 'PAYPAL',
+			);
+
+		return $contactMapping;
+	}
+
+	/**
 	 * Method that returns the invoice associated with data.
 	 * @param $reglement : the rsnreglements data.
 	 * @return invoice record
@@ -643,10 +698,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			WHERE deleted = FALSE
 		";
 		switch($invoiceData['invoicetype']){
-		case 'BOU':
-			$query .= " AND invoice_no LIKE CONCAT('BOU%-', ?)";
-			$queryParams = array($invoiceData['sourceid']);
-			break;
 		case 'DP':
 		case 'DR':
 			$query .= " AND invoice_no = ?";
@@ -682,9 +733,9 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			WHERE deleted = FALSE
 		";
 		switch($invoiceData['invoicetype']){
-		case 'BOU':
-			$query .= " AND invoice_no LIKE CONCAT('BOU%-', ?)";
-			$queryParams = array($invoiceData['sourceid']);
+		case 'PI':
+			//TODO Purchase invoice
+			return false;
 			break;
 		case 'DP':
 		case 'DR':
@@ -702,22 +753,10 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $queryParams);
 		if(!$db->num_rows($result)){
-			if($invoiceData['invoicetype'] == 'BOU'){
-				var_dump('$query : ', $query, $queryParams);
-				var_dump('$reglement : ', $reglement);
-				var_dump('$invoiceData : ', $invoiceData);
-				echo '<pre>Erreur : La facture Boutique est introuvable pour la référence "'.$invoiceData['sourceid'].'"</pre>';
-				return false;
-			}
 			$donateurWeb = $this->getDonateurWeb($reglement);
 			
 			if(!$donateurWeb){
-				//var_dump('$query : ', $query, $queryParams);
-				var_dump('$reglement : ', $reglement);
-				var_dump('$invoiceData : ', $invoiceData);
-				//echo_callstack();
-				echo '<pre>Erreur : L\'enregistrement Donateur Web est introuvable pour la référence "'.$invoiceData['sourceid'].'"</pre>';
-				return false;
+				$this->checkContact($invoiceData, $reglement);
 			}
 			$this->preImportInvoice($invoiceData, $donateurWeb);
 			return true;
@@ -726,7 +765,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			
 		return $row['crmid'];
 	}
-	
+
 	/**
 	 * Method that check if there is currencies found in file exist.
 	 *  If there is some new currencies found, it ended the process and display the "new currency found" template
@@ -809,7 +848,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	}
 	/**
 	 * Method that pre import an RsnReglements.
-	 *  It adone row in the temporary pre-import table by RsnReglements line.
+	 *  It adone row in the temporary pre-import table by invoice line.
 	 * @param $reglementData : the data of the invoice to import.
 	 */
 	function preImportRsnReglement($reglementData) {
@@ -821,12 +860,12 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$reglement->save();
 	}
 	/**
-	 * Method that return the coupon for prestashop source.
+	 * Method that return the coupon for source.
 	 *  It cache the value in the $this->coupon attribute.
 	 * @return the coupon.
 	 */
 	function getCoupon($reglement){
-		$typeregl = $this->getInvoiceType($reglement['reference']);
+		/*$typeregl = $this->getInvoiceType($reglement['reference']);
 		switch($typeregl){
 		 case 'DR':
 			$codeAffaire='PAYBOX';
@@ -837,7 +876,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		 default:
 			$codeAffaire='BOUTIQUE';
 			break;
-		}
+		}*/
+		$codeAffaire='PAYPAL';
 		if (!isset($this->coupons[$codeAffaire])) {
 			$query = "SELECT vtiger_crmentity.crmid
 				FROM vtiger_notes
@@ -883,23 +923,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 */
 	function getMySQLDate($string, $hour = FALSE) {
 		
-		if($hour){
-			switch(strlen($hour)){
-			case 1:
-			case 2:
-				$hour = '00:' . $hour;
-				break;
-			case 3:
-				$hour = '0' . $hour[0] . ':' . substr($hour,1);
-				break;
-			case 4:
-				$hour = substr($hour,0,2) . ':' . substr($hour,2);
-				break;
-			default:
-				$hour = '';
-				break;
-			}
-		}
 		$dateArray = preg_split('/[-\/]/', $string);
 		return $dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0]
 			. ($hour ? ' ' . $hour : '');
@@ -913,10 +936,10 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 */
 	function isValidInformationLine($line) {
 		if (sizeof($line) > 0 && $line[0] != ""
-		    && $this->isDate($line[6]) //date
-		    && $line[31] == "" //ErrorCode
-		    && $line[28] == "Télécollecté" //Status
-		    && $line[3] == '1' //Rank
+		    && $this->isDate($line[0]) //date
+		    && $line[5] == "Terminé"
+		    && self::str_to_float($line[7]) !== FALSE
+		    && self::str_to_float($line[7]) > 0
 		) {
 			return true;
 		}
@@ -925,7 +948,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	}
 
 	/**
-	 * Method that move the cursor of the file reader to the beginning of the next found RsnReglements.
+	 * Method that move the cursor of the file reader to the beginning of the next found invoice.
 	 * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
 	 * @return boolean - false if error or if no invoice found.
 	 */
@@ -982,22 +1005,17 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 */
 	function getInvoiceValues($reglement, $invoiceValues = FALSE, $donateurWeb = FALSE) {
 		if(!$invoiceValues){
-			$reference = $reglement['numpiece'];//DR05707_20150225130243 ou 4297;CP;25-04-15-17:38:33
-			if(!$reference)
-				return false;
-			if(strpos($reference, ';') !== FALSE)
-				$referenceParts = explode( ';', $reference);
-			else
-				$referenceParts = explode( '_', $reference);
-			$sourceId = $referenceParts[0];
 			$date = $reglement['dateregl'];
-			$invoiceType = $this->getInvoiceType($sourceId);
+			$invoiceType = $this->getInvoiceType($reglement['typeregl']);
+			
+			$sourceId = $reglement['refdonateurweb'] ? $reglement['refdonateurweb'] : $reglement['numpiece'];//transactionid
+			$sourceId = $invoiceType . $sourceId;
+				
 			switch($invoiceType){
-			case 'BOU':
-				//4297;CP;25-04-15-17:38:33
+			case 'PI': //Purchase invoice
+				throw new Exception('Facture fournisseur non encore gérée');
 				break;
 			case 'DP':
-				//DP05707_20150225130243
 				$product = array(
 					'code' => 'ADLB',
 					'name' => 'Don ponctuel',
@@ -1011,33 +1029,22 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				);
 				break;
 			}
-			/* $dWDateDon:=[JournalPaybox]DateOfIssue_4D
-			$aWDateDon:=Chaine($dWDateDon)
-			$dWDateEcheance:=[JournalPaybox]Date_4D
-			$aWDateEcheance:=Chaine($dWDateEcheance)
-			C_TEXTE($tPaquetCogilog)
-			C_ENTIER LONG($eCompteur)
-			$bRefInconnu:=Faux
-			$aWMontantBrut:=Chaine(([JournalPaybox]Amount/100))
-			C_ALPHA(30;$aCodeProduit)
-			$aCodeProduit:="ADETAL"
-			$CompteDeVente:="511104"
-			$codeAffaire:="PAYBOX"
-			$tCommentaire:=$tCommentaire+$aWDateDon+◊aTab+Chaine([Adresse]RefFiche)+◊aTab+$aWMontantBrut+◊aTab
-			ENVOYER PAQUET($hDocLog;$tCommentaire)
-			$tCommentaire:=""*/
 	
 			$invoiceValues = array(
 				'sourceid'		=> $sourceId,
 				'invoicetype'		=> $invoiceType,
-				'subject'		=> $reference,
+				'subject'		=> $product['name'],
 				'invoicedate'		=> $date,
 			);
 		}
 		
 		if($donateurWeb){
-			foreach(array('lastname', 'firstname', 'email', 'street', 'street2', 'street3', 'zip', 'city', 'country') as $fieldName)
+			foreach(array('lastname', 'firstname', 'email', 'street', 'street2', 'street3', 'zip', 'city', 'state', 'country') as $fieldName)
 				$invoiceValues[$fieldName] = decode_html($donateurWeb->get($fieldName));
+		}
+		elseif($reglement){
+			foreach(array('lastname', 'email', 'street', 'street3', 'zip', 'city', 'state', 'country') as $fieldName)
+				$invoiceValues[$fieldName] = $reglement[$fieldName];
 		}
 		if(isset($product) && $reglement)
 			$invoiceValues = array_merge($invoiceValues, array(
@@ -1055,49 +1062,66 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 
 	/**
-	 * Method that return the formated information of an RsnReglements found in the file.
+	 * Method that return the formated information of an invoice found in the file.
 	 * @param $reglement : the invoice data found in the file.
 	 * @return array : the formated data of the invoice.
 	 */
 	function getRsnReglementsValues($reglement) {
 	//TODO end implementation of this method
-		$date = $this->getMySQLDate($reglement[9], $reglement[10]);
-		$dateoperation = $this->getMySQLDate($reglement[6]);
+		$date = $this->getMySQLDate($reglement[0], $reglement[1]);
+		$dateoperation = $this->getMySQLDate($reglement[0]);
 		$currency = $this->getCurrency($reglement);
 		$currencyId = $this->getCurrencyId($currency);
-		$reference = $reglement[12];
-		$typeregl = $this->getTypeRegl($reference);
-		$numpiece = $reference;
+		$refdonateurweb = trim(str_replace('\'', '', $reglement[16]));
+		$numpiece = $reglement[12];
+		$typeregl = $this->getTypeRegl($reglement[4]);
 		$reglementValues = array(
 			'numpiece'		=> $numpiece,
+			'refdonateurweb'	=> $refdonateurweb,
 			'dateregl'		=> $date,
-			'dateoperation'		=> $dateoperation,
-			'email'			=> $reglement[13],
-			'amount'		=> self::str_to_float($reglement[17]) / 100,
+			'email'			=> $reglement[10],
+			'phone'			=> $reglement[39],
+			'amount'		=> self::str_to_float($reglement[7]),
+			'commission'		=> self::str_to_float($reglement[8]),
 			'currency_id'		=> $currencyId,
-			'payment'		=> $reglement[23],
-			'paymentstatus'		=> $reglement[28],
-			'ip'			=> $reglement[30],
-			'errorcode'		=> $reglement[31],
-			'bank'			=> $reglement[1],
 			'typeregl'		=> $typeregl,
-			'rsnmoderegl'		=> 'PayBox',
+			'rsnmoderegl'		=> 'PayPal',
+			'lastname'		=> $reglement[3],
+			'street'		=> $reglement[33],
+			'street3'		=> $reglement[34],
+			'zip'			=> $reglement[37],
+			'city'			=> $reglement[35],
+			'state'			=> $reglement[36],
+			'country'		=> $reglement[38],
 		);
 
 		return $reglementValues;
+	}
+	
+	
+	/**
+	 * Method that pre import a contact.
+	 * @param $contactValues : the values of the contact to import.
+	 */
+	function preImportContact($contactValues) {
+		$contact = new RSNImportSources_Preimport_Model($contactValues, $this->user, 'Contacts');
+		$contact->save();
 	}
 	
 	/**
 	 * Retourne le type de facture associée : Boutique, Don Régulier, Don Ponctuel
 	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
 	 */
-	function getTypeRegl($reference){
-		if($reference[0] == 'D') 
-			if($reference[1] == 'R')
-				return 'Don régulier';
-			elseif($reference[1] == 'P')
-				return 'Don ponctuel';
-		return 'Facture';
+	function getTypeRegl($type){
+		switch($type){
+		 case 'Don reçu':
+			return 'Don ponctuel';
+		 case 'Paiement d\'abonnement envoyé':
+			return 'Facture fournisseur'; //DotSpirit
+		 case 'Paiement récurrent reçu':
+			return 'Don régulier';
+		}
+		return FALSE;
 	}
 	
 	
@@ -1105,13 +1129,19 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * Retourne le type de facture associée : BOU, DR, DP
 	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
 	 */
-	function getInvoiceType($reference){
-		if($reference[0] == 'D') 
-			if($reference[1] == 'R')
-				return 'DR';
-			elseif($reference[1] == 'P')
-				return 'DP';
-		return 'BOU';
+	function getInvoiceType($typeregl){
+		switch($typeregl){
+		 case 'Don ponctuel':
+			return 'DP';
+		 case 'Don régulier':
+			return 'DR';
+		 case 'Facture fournisseur':
+			return 'PI'; //DotSpirit
+		 default:
+			echo_callstack();
+			throw new Exception('Type de réglement inconnu : "' . $typeregl . '"');
+		}
+		return FALSE;
 	}
 	
 	/**
@@ -1119,9 +1149,9 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 *
 	 */
 	function getCurrency($reglement){
-		$currencyCode = $reglement[18];
+		$currencyCode = $reglement[6];
 		switch ($currencyCode){
-		case '978':
+		case 'EUR':
 			return 'Euro';
 		}
 		return $currencyCode;
@@ -1141,12 +1171,12 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	}
 	
 	/**
-	 *
+	 * Returns DonateursWeb record if 'numpiece' is not empty
 	 *
 	 */
 	function getDonateurWeb($reglement){
-		$reference = $reglement['numpiece'];//DR05707_20150225130243 ou 4297;CP;25-04-15-17:38:33
-		if(!$reference)
+		$refdonateurweb = $reglement['refdonateurweb'];//4297
+		if(!$refdonateurweb)
 			return false;
 		
 		$query = "SELECT crmid
@@ -1159,7 +1189,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($reference));
+		$result = $db->pquery($query, array($refdonateurweb));
 		if(!$db->num_rows($result)){
 			//var_dump('getDonateurWeb',$query, array($reference));
 			return false;

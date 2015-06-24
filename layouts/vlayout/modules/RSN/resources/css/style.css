@@ -261,7 +261,13 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
   padding: 0px 5px 5px 5px !important;
 }
 /* compteur des tables liées */
+.related .nav li a {
+  text-align: right;
+}
+.related .nav li a strong {
+  float: left;
+}
 .related .nav li a .relcount {
-  float: right;
-  /*color: darkblue;*/
+  /* float: right; ne fonctionne pas, dans ce contexte, sur FireFox/Mac */
+  font-weight: bold;
 }
