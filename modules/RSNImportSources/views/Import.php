@@ -544,7 +544,56 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	static function str_to_float($str){
 		if(!is_string($str))
 			return $str;
+		if(is_nan($str[0]))//TODO ".50"
+			return false;
 		return (float)str_replace(',', '.', $str);
+	}
+	
+	
+
+	/**
+	 * Method that retrieve a contact id.
+	 * @param string $firstname : the firstname of the contact.
+	 * @param string $lastname : the lastname of the contact.
+	 * @param string $email : the email of the contact.
+	 * @return the id of the contact | null if the contact is not found.
+	 */
+	function getContactId($firstname, $lastname, $email) {
+		$query = "SELECT crmid
+			FROM vtiger_contactdetails
+                        JOIN vtiger_crmentity
+                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			WHERE deleted = FALSE
+			AND ((UPPER(firstname) = ?
+				AND UPPER(lastname) = ?)
+			    OR UPPER(lastname) IN (?,?)
+			)
+			AND LOWER(email) = ?
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+		
+		$fullName = strtoupper(trim(remove_accent($lastname) . ' ' . $firstname));
+		if(!$firstname)
+			$fullNameReverse = implode(' ', array_reverse(explode(' ', $fullName)));
+		else
+			$fullNameReverse = strtoupper(trim($firstname . ' ' . remove_accent($lastname)));
+		
+		if(!$fullNameReverse){
+			echo_callstack();
+			return false;
+		}
+		
+		$result = $db->pquery($query, array(strtoupper($firstname), strtoupper(remove_accent($lastname))
+						    , $fullName
+						    , $fullNameReverse
+						    , strtolower($email)));
+
+		if($db->num_rows($result)){
+			return $db->query_result($result, 0, 0);
+		}
+
+		return null;
 	}
 }
 

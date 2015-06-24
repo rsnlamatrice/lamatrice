@@ -121,7 +121,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	function importInvoice($importDataController) {
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
-		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY subject';
+		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
 
 		$result = $adb->query($sql);
 		$numberOfRecords = $adb->num_rows($result);
@@ -432,25 +432,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($firstname, $lastname, $email) {
-		$query = "SELECT contactid, deleted
-			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND ((UPPER(firstname) = UPPER(?)
-                    AND UPPER(lastname) = UPPER(?))
-                OR UPPER(lastname) = UPPER(CONCAT(?, ' ', ?))
-            )
-			AND UPPER(email) = UPPER(?)
-			LIMIT 1
-		";
-
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($firstname, remove_accent($lastname), remove_accent($lastname), $firstname, $email));
-
-		if($db->num_rows($result)){
+		$id = $this->getContactId($firstname, $lastname, $email);
+		if($id){
 			$row = $db->fetch_row($result, 0);
-			return Vtiger_Record_Model::getInstanceById($row['contactid'], 'Contacts');
+			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
 
 		return null;
@@ -462,21 +447,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	function checkContact($invoice) {
 		$contactData = $this->getContactValues($invoice['invoiceInformations']);
-		$query = "SELECT contactid, deleted
-			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND ((UPPER(firstname) = UPPER(?)
-                    AND UPPER(lastname) = UPPER(?))
-                OR UPPER(lastname) = UPPER(CONCAT(?, ' ', ?))
-            )
-			AND UPPER(email) = UPPER(?)
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($contactData['firstname'], remove_accent($contactData['lastname']), remove_accent($contactData['lastname']), $contactData['firstname'], $contactData['email']));
-		if(!$db->num_rows($result)){
+		
+		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		
+		if(!$id){
 			$this->preImportContact($contactData);
 		}
 	}
