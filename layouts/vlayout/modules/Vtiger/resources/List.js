@@ -379,7 +379,7 @@ jQuery.Class("Vtiger_List_Js",{
 		if(typeof css == 'undefined'){
 			css = {};
 		}
-		var css = jQuery.extend({'text-align' : 'left'},css);
+		css = jQuery.extend({'text-align' : 'left'},css);
 
 		AppConnector.request(actionParams).then(
 			function(data) {
@@ -586,7 +586,7 @@ jQuery.Class("Vtiger_List_Js",{
 		});
 
 		var defaultParams = this.getDefaultParams();
-		var urlParams = jQuery.extend(defaultParams, urlParams);
+		urlParams = jQuery.extend(defaultParams, urlParams);
 		AppConnector.requestPjax(urlParams).then(
 			function(data){
 				progressIndicatorElement.progressIndicator({

@@ -26,7 +26,7 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 	},
 	
 	/* ED150515
-	 * Sélection d'un coupon : affectation de la campagne
+	 * Sélection d'un coupon : affectation de la campagne, chargement de la liste des produits et services
 	 */
 	couponSelectionEventHandler : function(data, container){
 		
@@ -37,7 +37,7 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 			var params = {
 				'record' : notesid
 				, 'source_module' : 'Documents'
-				, 'related_data' : 'Campaigns'
+				, 'related_data' : 'Campaigns,Products,Services'
 			};
 			var selectedName = data['selectedName'];
 			
@@ -64,36 +64,13 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 				function(data){
 					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
 					
-					var $dest = container.find('input[name="campaign_no"]');
-					if ($dest.length == 0) {
-						alert('Zone de saisie de la Campagne introuvable');
-						return;
-					}
-					if ($dest.val() && !$dest.attr('auto-filled')) {
-						//console.log('Campagne déjà sélectionnée');
-						return;
-					}
 					var response = data['result']
 					, campaigns = response['related_data']['Campaigns']
-					, campaign = false
-					//, campaigndate = ''
-					;
-					if (!campaigns)
-						return;
-					for(var i in campaigns) {
-						//if(campaigndate < campaigns[i]['date']
-						campaign = campaigns[i];
-						break;
-					}
-					if (!campaign) {
-						//alert('Coupon sans Campagne');
-						return;
-					}
-					$dest
-						.val(campaign.id)
-						.attr('auto-filled', 1);
-					$dest.nextAll('.input-prepend:first').children('input:first')
-						.val(campaign.campaignname);
+					, products = response['related_data']['Products']
+					, services = response['related_data']['Services'];
+					
+					thisInstance.setCampaign(container, campaigns);
+					thisInstance.setProductsAndServices(container, jQuery.extend(products, services));
 				},
 				function(error, err){
 					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
@@ -101,7 +78,73 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 			);
 		}
 	},
-
+	
+	setCampaign : function(container, campaigns) {
+		if (!campaigns) return;
+		var $dest = container.find('input[name="campaign_no"]');
+		if ($dest.length == 0) {
+			alert('Zone de sélection de la Campagne introuvable');
+			return;
+		}
+		if ($dest.val() && !$dest.attr('auto-filled')) {
+			//console.log('Campagne déjà sélectionnée');
+			return;
+		}
+		var campaign = false;
+		for(var i in campaigns) {
+			//if(campaigndate < campaigns[i]['date']
+			campaign = campaigns[i];
+			break;
+		}
+		if (!campaign) {
+			//alert('Coupon sans Campagne');
+			return;
+		}
+		$dest
+			.val(campaign.id)
+			.attr('auto-filled', 1);
+		$dest.nextAll('.input-prepend:first').children('input:first')
+			.val(campaign.campaignname);
+	},
+	
+	setProductsAndServices : function(container, products) {
+		if (!products) return;
+		var thisInstance = this
+		, $items = this.getLineItemContentsContainer();
+		for(var id in products) {
+			var product = products[id];
+			if ($items.find('.selectedModuleId[value="' + id + '"]').length) 
+				continue;
+			var productName = product['productname']
+			,   productcode = product['productcode'];
+				
+			if (productName){
+				jQuery('#addProduct', container).click();
+			}
+			else{
+				productName = product['servicename'];
+				jQuery('#addService', container).click();
+			}
+			var sequenceNumber = thisInstance.rowSequenceHolder
+			,   $row = $items.find('#row' + sequenceNumber + '.' + thisInstance.rowClass)
+			, $input = $row.find('#productName' + sequenceNumber)
+			, $inputId = $row.find('#hdnProductId' + sequenceNumber);
+			
+			$input.val(thisInstance.htmlDecode(productName));
+			$inputId.val(id);
+			thisInstance.autoCompleteSelected($input, {type: true, id: id});
+			thisInstance.setQuantityValue($row, 0);
+		}
+		//remove empty product row
+		$input = $items.find('.selectedModuleId').filter(function() { return !this.value; });
+		if ($input.length) 
+			$input.parents('.' + thisInstance.rowClass + ':not(#row0)').remove();
+	},
+	//ED150625
+	htmlDecode : function(value) {
+	   return (typeof value === 'undefined') ? '' : $('<div/>').html(value).text();
+	},
+	
 	/**
 	 * Function to get popup params
 	 */

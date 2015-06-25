@@ -269,6 +269,15 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return parseFloat(jQuery('.qty', lineItemRow).val());
 	},
 
+	/** ED150625
+	 * Function which gives quantity value
+	 * @params : lineItemRow - row which represents the line item
+	 * @return : string
+	 */
+	setQuantityValue : function(lineItemRow, qty){
+		return jQuery('.qty', lineItemRow).val(qty);
+	},
+
 	/**
 	 * Function which will give me list price value
 	 * @params : lineItemRow - row which represents the line item
@@ -1728,35 +1737,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			},
 			'select' : function(event, ui ){
 				var selectedItemData = ui.item;
-				//To stop selection if no results is selected
-				if(typeof selectedItemData.type != 'undefined' && selectedItemData.type=="no results"){
-					return false;
-				}
 				var element = jQuery(this);
-				element.attr('disabled','disabled');
-				var tdElement = element.closest('td');
-				var selectedModule = tdElement.find('.lineItemPopup').data('moduleName');
-				var popupElement = tdElement.find('.lineItemPopup');
-				
-				/* ED150602 account discount type */
-				var account_discount_type = thisInstance.getAccountDiscountType();
-				
-				var dataUrl = "index.php?module=Inventory&action=GetTaxes&record="+selectedItemData.id
-					+"&currency_id="+jQuery('#currency_id option:selected').val()
-					+"&accountdiscounttype="+account_discount_type;
-				AppConnector.request(dataUrl).then(
-					function(data){
-						for(var id in data){
-							if(typeof data[id] == "object"){
-								var recordData = data[id];
-								thisInstance.mapResultsToFields(selectedModule, popupElement, recordData);
-							}
-						}
-					},
-					function(error,err){
-
-					}
-				);
+				thisInstance.autoCompleteSelected(element, selectedItemData);
 			},
 			'change' : function(event, ui) {
 				var element = jQuery(this);
@@ -1768,6 +1750,41 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	},
 
+	/* ED150625
+	 * moved from above
+	 */
+	autoCompleteSelected : function( element, selectedItemData ){
+		var thisInstance = this;
+		//To stop selection if no results is selected
+		if(typeof selectedItemData.type != 'undefined' && selectedItemData.type=="no results"){
+			return false;
+		}
+		element.attr('disabled','disabled');
+		var tdElement = element.closest('td');
+		var selectedModule = tdElement.find('.lineItemPopup').data('moduleName');
+		var popupElement = tdElement.find('.lineItemPopup');
+		
+		/* ED150602 account discount type */
+		var account_discount_type = thisInstance.getAccountDiscountType();
+		
+		var dataUrl = "index.php?module=Inventory&action=GetTaxes&record="+selectedItemData.id
+			+"&currency_id="+jQuery('#currency_id option:selected').val()
+			+"&accountdiscounttype="+account_discount_type;
+		AppConnector.request(dataUrl).then(
+			function(data){
+				for(var id in data){
+					if(typeof data[id] == "object"){
+						var recordData = data[id];
+						thisInstance.mapResultsToFields(selectedModule, popupElement, recordData);
+					}
+				}
+			},
+			function(error,err){
+
+			}
+		);
+	},
+	
 	registerClearLineItemSelection : function() {
 		var thisInstance = this;
 		var lineItemTable = this.getLineItemContentsContainer();
