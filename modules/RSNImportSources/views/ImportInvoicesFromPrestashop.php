@@ -121,7 +121,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	function importInvoice($importDataController) {
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
-		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY subject';
+		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
 
 		$result = $adb->query($sql);
 		$numberOfRecords = $adb->num_rows($result);
@@ -158,8 +158,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	function importInvoiceLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
         
-		$qty = $invoiceLine['quantity'];
-		$listprice = $invoiceLine['prix_unit_ht'];
+		$qty = self::str_to_float($invoiceLine['quantity']);
+		$listprice = self::str_to_float($invoiceLine['prix_unit_ht']);
 		
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
@@ -432,25 +432,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($firstname, $lastname, $email) {
-		$query = "SELECT contactid, deleted
-			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND ((UPPER(firstname) = UPPER(?)
-                    AND UPPER(lastname) = UPPER(?))
-                OR UPPER(lastname) = UPPER(CONCAT(?, ' ', ?))
-            )
-			AND UPPER(email) = UPPER(?)
-			LIMIT 1
-		";
-
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($firstname, remove_accent($lastname), remove_accent($lastname), $firstname, $email));
-
-		if($db->num_rows($result)){
+		$id = $this->getContactId($firstname, $lastname, $email);
+		if($id){
 			$row = $db->fetch_row($result, 0);
-			return Vtiger_Record_Model::getInstanceById($row['contactid'], 'Contacts');
+			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
 
 		return null;
@@ -462,21 +447,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	function checkContact($invoice) {
 		$contactData = $this->getContactValues($invoice['invoiceInformations']);
-		$query = "SELECT contactid, deleted
-			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND ((UPPER(firstname) = UPPER(?)
-                    AND UPPER(lastname) = UPPER(?))
-                OR UPPER(lastname) = UPPER(CONCAT(?, ' ', ?))
-            )
-			AND UPPER(email) = UPPER(?)
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($contactData['firstname'], remove_accent($contactData['lastname']), remove_accent($contactData['lastname']), $contactData['firstname'], $contactData['email']));
-		if(!$db->num_rows($result)){
+		
+		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		
+		if(!$id){
 			$this->preImportContact($contactData);
 		}
 	}
@@ -731,9 +705,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$product = array(
 			'productcode'	=> $product[1],
 			'productname'	=> $product[2],
-			'unit_price'	=> $product[3],//TTC, TODO HT
+			'unit_price'	=> self::str_to_float($product[3]),//TTC, TODO HT
 			'qty_per_unit'	=> 1,
-			'taxrate'	=> $product[8],
+			'taxrate'	=> self::str_to_float($product[8]),
 		);
 		return $product;
 	}
@@ -765,15 +739,15 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		foreach ($invoice['detail'] as $product) {
 			$isProduct = null;
 			$product_name = '';
-			$taxrate = ((float)str_replace(',', '.', $product[8]))/100;
+			$taxrate = self::str_to_float($product[8])/100;
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
 				'productcode'	=> $product[1],
 				'productid'	=> $this->getProductId($product[1], $isProduct, $product_name),
-				'quantity'	=> $product[5],
+				'quantity'	=> self::str_to_float($product[5]),
 				'article'	=> $product_name,
-				'prix_unit_ht'	=> $product[3] / (1 + $taxrate),
+				'prix_unit_ht'	=> self::str_to_float($product[3]) / (1 + $taxrate),
 				'isproduct'	=> $isProduct,
-				'taxrate'	=> $product[8],
+				'taxrate'	=> self::str_to_float($product[8]),
             
             /*1 RECEVOIR PAQUET($hDocref;$aCodeProduit;◊aTab)
             2 RECEVOIR PAQUET($hDocref;$aNomProduit;◊aTab)

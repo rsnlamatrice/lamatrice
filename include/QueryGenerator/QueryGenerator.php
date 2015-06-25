@@ -355,9 +355,28 @@ class QueryGenerator {
 									$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. $relationInfos['fieldName'];
 								else
 									$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. substr($relationInfos['fieldName'], strpos($relationInfos['fieldName'], '.')+1);
-								$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
-								$newQuery[0] = $selectColumnSql.' ';
-								$relatedSql = implode("\nFROM ", $newQuery);
+								
+								if(isset($relationInfos['relationTableName'])){
+									//salement fait pour Invoice / RsnReglements. cf modules/Inventory/models/Relation.php
+									$subQueryTable = uniqid('subq_');
+									$subQueryField =  $subQueryTable . '.' . $relationInfos['relatedFieldName'];
+									$relatedSql = 'SELECT ' . $relationInfos['fieldName']
+										. ' FROM ' . $relationInfos['relationTableName']
+										. ' JOIN (' . $relatedSql . ') ' . $subQueryTable
+										. ' 	ON ' . $relationInfos['relationTableName'] . '.' . $relationInfos['relatedSourceFieldName']
+										. '		= ' . $subQueryField
+										;
+								}
+								else {
+									$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
+									$newQuery[0] = $selectColumnSql.' ';
+									
+									$relatedSql = implode("\nFROM ", $newQuery);
+									
+								}
+								
+								//echo '<br><br><br><br><pre>'; print_r($relatedSql); echo '</pre>';
+								
 								
 								$sourceFieldName = isset($relationInfos['sourceFieldName']) ? $relationInfos['sourceFieldName'] : $this->getSQLColumn('id');
 							}

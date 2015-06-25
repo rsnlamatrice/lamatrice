@@ -89,7 +89,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
 				
 		switch($relatedModule->getName()){
-		 case 'RsnReglements' :
+		// case 'RsnReglements' :
 		 case 'Contacts' :
 				//don't show if not > 1
 				$query = parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);

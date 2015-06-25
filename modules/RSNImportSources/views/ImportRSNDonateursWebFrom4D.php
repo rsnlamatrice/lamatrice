@@ -81,10 +81,10 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 			case 'cb':
 				if($data[$col_frequency]=='1')
 					return "DON_ETALE";
-				return 'PAYBOX';
+				return 'PayBox';
 				
 			case 'paypal':
-				return 'PAYPAL';
+				return 'PayPal';
 				
 			case 'cheque':
 			case 'virement':

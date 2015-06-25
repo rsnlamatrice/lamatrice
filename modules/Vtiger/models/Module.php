@@ -1423,19 +1423,19 @@ class Vtiger_Module_Model extends Vtiger_Module {
 
 		switch($relatedModule->getName()){
 		 case 'Calendar':
-				//MySQL ne tolère la duplication de nom de champ (ici 'status') dans une sous-requête, alors qu'il le tolère en requête principale
-				$relationQuery = str_replace('vtiger_crmentity.*, vtiger_activity.*'
-											 ,'vtiger_crmentity.crmid, vtiger_crmentity.smownerid, vtiger_crmentity.setype, vtiger_activity.*'
-											 ,$relationQuery);
-				break;
+			//MySQL ne tolère la duplication de nom de champ (ici 'status') dans une sous-requête, alors qu'il le tolère en requête principale
+			$relationQuery = str_replace('vtiger_crmentity.*, vtiger_activity.*'
+				,'vtiger_crmentity.crmid, vtiger_crmentity.smownerid, vtiger_crmentity.setype, vtiger_activity.*'
+				,$relationQuery);
+			break;
 		}
 		
 		return 'SELECT COUNT(*) quantity'
-				. ', \'' . $relatedModule->getName() . '\' module'
-				. ', \'' . $functionName . '\' functionName'
-				. ' FROM (' . 
-						$relationQuery .
-				') `' . $relatedModule->getName() . '_' . $functionName . '_query`';
+			. ', \'' . $relatedModule->getName() . '\' module'
+			. ', \'' . $functionName . '\' functionName'
+			. ' FROM (' . 
+					$relationQuery .
+			') `' . $relatedModule->getName() . '_' . $functionName . '_query`';
 	}
 
 	/**

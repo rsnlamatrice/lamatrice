@@ -90,11 +90,13 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 	    }
 	    else
 			totalCount = noOfEntries;
+		if (totalCount == 0)
+			totalCount = '';
 	    var $tab = jQuery('.related  .active')
 	    , $tabCounter = jQuery('.relcount', $tab);
 	    if ($tabCounter.length == 0) 
 			$tabCounter = $('<span class="relcount"/>')
-				.appendTo($tab.find('strong'));
+				.appendTo($tab.find('a:first'));
 	    $tabCounter.html(totalCount);
 	},
 	

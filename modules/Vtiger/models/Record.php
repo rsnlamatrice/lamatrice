@@ -485,7 +485,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				);
 			
 			default:
-				if(strpos($fieldname,'addressformat') > 0)
+				if(strpos($fieldname,'addressformat') >= 0)
 					return array(
 						'NC1' => array( 'title' => 'Normal', 'icon' => 'icon-rsn-small-formataddress-NC1' ),
 						'CN1' => array( 'title' => 'Groupe avant', 'icon' => 'icon-rsn-small-formataddress-CN1' ),
