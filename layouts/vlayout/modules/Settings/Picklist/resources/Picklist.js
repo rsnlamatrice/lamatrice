@@ -243,6 +243,17 @@ var Settings_Picklist_Js = {
 				Vtiger_Helper_Js.showPnotify(params);
 				return;
 			} else{
+				/* ED150625 : Comma is forbidden */
+				var container = jQuery('#createViewContents').find('.modal');
+				var newValueEle = jQuery('[name="newValue"]',container);
+				var newValue = newValueEle.val();
+				if(newValue.indexOf(',') >= 0) {
+					var errorMessage = app.vtranslate('JS_DO_NOT_USE_COMMA');
+					newValueEle.validationEngine('showPrompt', errorMessage+' '+'"'+newValue+'"'  , 'error','bottomLeft',true);
+					e.preventDefault();
+					return;
+				}
+				
 				var params = {
 					module : app.getModuleName(),
 					parent : app.getParentModuleName(),
@@ -395,6 +406,16 @@ var Settings_Picklist_Js = {
 					e.preventDefault();
 					return;
 				}
+				/* ED150625 : Comma is forbidden */
+				var newValueEle = jQuery('[name="newValue"]',container);
+				var newValue = newValueEle.val();
+				if(newValue.indexOf(',') >= 0) {
+					var errorMessage = app.vtranslate('JS_DO_NOT_USE_COMMA');
+					newValueEle.validationEngine('showPrompt', errorMessage+' '+'"'+newValue+'"'  , 'error','bottomLeft',true);
+					e.preventDefault();
+					return;
+				}
+				
 				var invalidFields = form.data('jqv').InvalidFields;
 				if(invalidFields.length == 0){
 					form.find('[name="saveButton"]').attr('disabled',"disabled");
@@ -443,6 +464,14 @@ var Settings_Picklist_Js = {
 					e.preventDefault();
 					return;
 				}
+				/* ED150625 : Comma is forbidden */
+				if(newValue.indexOf(',') >= 0) {
+					var errorMessage = app.vtranslate('JS_DO_NOT_USE_COMMA');
+					newValueEle.validationEngine('showPrompt', errorMessage+' '+'"'+newValue+'"'  , 'error','bottomLeft',true);
+					e.preventDefault();
+					return;
+				}
+				
 				var oldValue = jQuery('[name="oldValue"]',form).val();
 				var params = jQuery(e.currentTarget).serializeFormData();
 				params.newValue = newValue;

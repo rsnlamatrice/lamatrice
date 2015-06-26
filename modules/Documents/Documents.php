@@ -10,6 +10,7 @@
 
  //ED150625
 define('COUPON_FOLDERID', '9');
+define('COUPON_FOLDERNAME', 'Coupons');
 
 include_once('config.php');
 require_once('include/logging.php');

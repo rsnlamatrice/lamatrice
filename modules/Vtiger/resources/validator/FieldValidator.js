@@ -78,6 +78,12 @@ Vtiger_Base_Validator_Js("Vtiger_PositiveNumber_Validator_Js",{
 	 */
 	validate: function(){
 		var fieldValue = this.getFieldValue();
+		//ED150625 comma accepted
+		if(fieldValue.indexOf('.') === -1 && fieldValue.indexOf(',') >= 0){
+			fieldValue = fieldValue.replace(',', '.');
+			this.setFieldValue(fieldValue);
+		}
+		
 		var negativeRegex= /(^[-]+\d+)$/ ;
 		if(isNaN(fieldValue) || fieldValue < 0 || fieldValue.match(negativeRegex)){
 			var errorInfo = app.vtranslate('JS_ACCEPT_POSITIVE_NUMBER');

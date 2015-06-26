@@ -69,6 +69,8 @@ $languageStrings = array(
 	
 	/*ED140000*/
         'LBL_BLOCK_DO_NOT'              => 'Ne pas'                     ,
+        
+        'Is Converted From Lead'        => 'Fiche provenant d\'un prospect',
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 

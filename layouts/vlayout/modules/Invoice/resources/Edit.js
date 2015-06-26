@@ -108,7 +108,7 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 	},
 	
 	setProductsAndServices : function(container, products) {
-		if (!products) return;
+		if (!products || products.length === 0) return;
 		var thisInstance = this
 		, $items = this.getLineItemContentsContainer();
 		for(var id in products) {

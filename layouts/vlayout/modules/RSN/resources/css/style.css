@@ -271,3 +271,9 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
   /* float: right; ne fonctionne pas, dans ce contexte, sur FireFox/Mac */
   font-weight: bold;
 }
+
+/* invoice product line, replacing smallInputBox */
+.tinyInputBox {
+    height: 12px;
+    width: 20%;
+}

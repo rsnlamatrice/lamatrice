@@ -103,6 +103,13 @@ jQuery.Class("Vtiger_Edit_Js",{
 		    'src_field' : sourceField,
 		    'src_record' : sourceRecordId
 	    }
+	    
+	    //ED150625
+	    var fieldInfo = sourceFieldElement.data('fieldinfo');
+	    if (fieldInfo.search_key) {
+		params.search_key = fieldInfo.search_key;
+		params.search_value = fieldInfo.search_value;
+	    }
     
 	    if(isMultiple) {
 		params.multi_select = true ;

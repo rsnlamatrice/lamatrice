@@ -89,8 +89,6 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 
 		if(!$this->listViewEntries) {
 			$this->listViewEntries = $dataModelInstance->getListViewEntries($pagingModel);
-			var_dump(count($this->listViewEntries));
-			die();
 		}
 
 		if(!$this->listViewHeaders){
@@ -143,5 +141,92 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 		$response->setEmitType(Vtiger_Response::$EMIT_JSON);
 		$response->setResult($result);
 		$response->emit();
+	}
+
+	/** ED150626
+	 * Function that generates source records Query based on the mode
+	 * @param Vtiger_Request $request
+	 * @return <String> export query
+	 */
+	function getFromQuery(Vtiger_Request $request) {
+		return getRecordSelectionQuery($request, 'From');
+	}
+	
+	/** ED150626
+	 * Function that generates tested among records Query based on the mode
+	 * @param Vtiger_Request $request
+	 * @return <String> export query
+	 */
+	function getAmongQuery(Vtiger_Request $request) {
+		return getRecordSelectionQuery($request, 'Among');
+	}
+	
+	/** ED150626
+	 * Function that generates source or among records Query based on the mode
+	 * @param Vtiger_Request $request
+	 * @return <String> export query
+	 */
+	private function getRecordSelectionQuery(Vtiger_Request $request, $params_prefix) {
+		$currentUser = Users_Record_Model::getCurrentUserModel();
+		$mode = $request->getMode();
+		$cvId = $request->get('viewname');
+		$moduleName = $request->get('source_module');
+
+		$queryGenerator = new QueryGenerator($moduleName, $currentUser);
+		$queryGenerator->initForCustomViewById($cvId);
+		$fieldInstances = $this->moduleFieldInstances;
+
+        $accessiblePresenceValue = array(0,2);
+		foreach($fieldInstances as $field) {
+            // Check added as querygenerator is not checking this for admin users
+            $presence = $field->get('presence');
+            if(in_array($presence, $accessiblePresenceValue)) {
+                $fields[] = $field->getName();
+            }
+        }
+		$queryGenerator->setFields($fields);
+		$query = $queryGenerator->getQuery();
+
+		if(in_array($moduleName, getInventoryModules())){
+			$query = $this->moduleInstance->getFindDuplicateFromQuery($this->focus, $query);
+		}
+
+		$this->accessibleFields = $queryGenerator->getFields();
+
+		switch($mode) {
+			case $params_prefix.'AllData' :	return $query;
+									break;
+
+			case $params_prefix.'CurrentPage' :	$pagingModel = new Vtiger_Paging_Model();
+										$limit = $pagingModel->getPageLimit();
+
+										$currentPage = $request->get('page');
+										if(empty($currentPage)) $currentPage = 1;
+
+										$currentPageStart = ($currentPage - 1) * $limit;
+										if ($currentPageStart < 0) $currentPageStart = 0;
+										$query .= ' LIMIT '.$currentPageStart.','.$limit;
+
+										return $query;
+										break;
+
+			case $params_prefix.'SelectedRecords' :	$idList = $this->getRecordsListFromRequest($request);
+											$baseTable = $this->moduleInstance->get('basetable');
+											$baseTableColumnId = $this->moduleInstance->get('basetableid');
+											if(!empty($idList)) {
+												if(!empty($baseTable) && !empty($baseTableColumnId)) {
+													$idList = implode(',' , $idList);
+													$query .= ' AND '.$baseTable.'.'.$baseTableColumnId.' IN ('.$idList.')';
+												}
+											} else {
+												$query .= ' AND '.$baseTable.'.'.$baseTableColumnId.' NOT IN ('.implode(',',$request->get('excluded_ids')).')';
+											}
+											return $query;
+											break;
+
+
+			default :	return $query;
+						break;
+		}
 	}
 }

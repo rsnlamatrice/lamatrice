@@ -16,7 +16,7 @@ $languageStrings = array(
 	'LBL_RENAME_VALUE'             => 'Renommer Valeur'                , 
 	'LBL_DELETE_VALUE'             => 'Supprimer Valeur'                , 
 	'LBL_ITEMS'                    => 'Valeurs'                      , 
-	'LBL_DRAG_ITEMS_TO_RESPOSITION' => 'Déplacer items pour les repositionner', 
+	'LBL_DRAG_ITEMS_TO_RESPOSITION' => 'Déplacer les items pour les repositionner', 
 	'LBL_SELECT_AN_ITEM_TO_RENAME_OR_DELETE' => 'Choisir un item à renommer ou supprimer', 
 	'LBL_TO_DELETE_MULTIPLE_HOLD_CONTROL_KEY' => 'Utiliser la touche "Ctrl" pour sélectionner plusieurs valeurs à supprimer',
         'LBL_NON_EDITABLE_PICKLIST_VALUES' => 'Item(s) non modifiable(s)'   ,
@@ -54,4 +54,5 @@ $jsLanguageStrings = array(
 	'JS_SEQUENCE_UPDATED_SUCCESSFULLY' => 'Séquence mise à jour', 
 	'JS_VALUE_ASSIGNED_SUCCESSFULLY' => 'Valeurs assignées' , 
 	'JS_PLEASE_SELECT_MODULE'      => 'Choisir un module'        , 
+	'JS_DO_NOT_USE_COMMA'           => 'Merci de ne pas utiliser de virgule dans le texte', 
 );

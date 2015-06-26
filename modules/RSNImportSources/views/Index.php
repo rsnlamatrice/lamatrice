@@ -147,8 +147,8 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 			exit;
 		}
 
-        $importController = $this->getImportController($request);
-        $importController->undoImport($ownerId);
+		$importController = $this->getImportController($request);
+		$importController->undoImport($ownerId);
 	}
 
 	/**

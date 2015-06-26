@@ -461,6 +461,26 @@ jQuery.Class("Vtiger_List_Js",{
 	},
 
 	showDuplicateSearchForm : function(url) {
+		
+		/*ED150626*/
+		var listInstance = Vtiger_List_Js.getInstance();
+		// Compute selected ids, excluded ids values, along with cvid value and pass as url parameters
+		var selectedIds = listInstance.readSelectedIds(true);
+		var excludedIds = listInstance.readExcludedIds(true);
+		var cvId = listInstance.getCurrentCvId();
+		var pageNumber = jQuery('#pageNumber').val();
+
+		url += '&selected_ids='+selectedIds+'&excluded_ids='+excludedIds+'&viewname='+cvId+'&page='+pageNumber;
+	
+		var listViewInstance = Vtiger_List_Js.getInstance();
+		var searchValue = listViewInstance.getAlphabetSearchValue();
+
+		if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
+			url += '&search_key='+listViewInstance.getRequestSearchField('string')
+				+'&search_value='+(typeof searchValue == 'object' ? JSON.stringify(searchValue) : searchValue)
+				+'&operator='+listViewInstance.getSearchOperator('string');
+		}
+		
 		app.showModalWindow("", url, function() {
 			Vtiger_List_Js.registerDuplicateSearchButtonEvent();
 		});

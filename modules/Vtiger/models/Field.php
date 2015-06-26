@@ -553,6 +553,14 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			$pickListValues[vtranslate('LBL_GROUPS', $this->getModuleName())] = $groupList;
 			$this->fieldInfo['picklistvalues'] = $pickListValues;
 			break;
+		
+		//ED150625
+		case 'reference':
+			$searchInfos = $this->getPopupSearchInfo();
+			if(is_array($searchInfos))
+				$this->fieldInfo = array_merge($this->fieldInfo, $searchInfos);
+			break;
+		
 		default:
 			break;
 		}
@@ -1215,5 +1223,13 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			case 'vwi': return "IN ";
 			case 'vwx': return " NOT IN ";
 		}
+	}
+	
+	/** ED150625
+	 * Returns parameters to filter popup selection list of a reference field.
+	 * Data added to FieldInfo
+	 */
+	public function getPopupSearchInfo(){
+		return '';
 	}
 }

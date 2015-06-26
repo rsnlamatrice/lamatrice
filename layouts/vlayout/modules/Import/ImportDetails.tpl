@@ -11,7 +11,7 @@
 -->*}
 {strip}
 <div class="popupEntriesDiv textAlignCenter">
-	<h3>{vtranslate($TYPE, $MODULE)}</h3>
+	<h3>{vtranslate($TYPE, 'Import')}</h3>
 </div>
 <table class="table table-bordered listViewEntriesTable">
 	<thead>
