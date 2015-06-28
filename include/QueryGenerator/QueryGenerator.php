@@ -803,6 +803,14 @@ class QueryGenerator {
 					}
 					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
 				}
+				elseif($conditionInfo['operator'] == 'IN' && $fieldName == 'id'){
+					$fieldName = $this->getSQLColumn('id');
+					$valueSql = $conditionInfo['value'];
+					if($valueSql[0] != '(')
+						$valueSql = "($valueSql)";
+					$sqlOperator = " IN ";
+					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
+				}
 				continue;
 			}
 			$fieldSql = '(';
@@ -1402,7 +1410,15 @@ class QueryGenerator {
 		}
 		$moduleFields = $this->meta->getModuleFields();
 		$field = $moduleFields[$fieldName];
-		$type = $field->getFieldDataType();
+		
+		//ED150628
+		if(!$field && $fieldName == 'id'){
+			//$fieldName = $this->meta->getIdColumn();
+			$type = 'integer';
+		}
+		else
+			$type = $field->getFieldDataType();
+			
 		if(isset($search_text) && $search_text!="") {
 			// search other characters like "|, ?, ?" by jagi
 			$value = $search_text;

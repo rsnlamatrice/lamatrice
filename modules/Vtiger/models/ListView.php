@@ -395,14 +395,14 @@ var_dump($listResult);*/
 		
 		if($moreFilters)
 			$queryGenerator->setAdvFilterListMore($moreFilters);
-		
+			
 		if (!empty($viewId) && $viewId != "0") {
 			$queryGenerator->initForCustomViewById($viewId);
 
 			//Used to set the viewid into the session which will be used to load the same filter when you refresh the page
 			$viewId = $customView->getViewId($moduleName);
 		} else {
-			$viewId = $customView->getViewId($moduleName);	
+			$viewId = $customView->getViewId($moduleName, 'all');//ED150628 : , 'all'
 			if(!empty($viewId) && $viewId != 0) {
 				$queryGenerator->initForDefaultCustomView();
 			} else {

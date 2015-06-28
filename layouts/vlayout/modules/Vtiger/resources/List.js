@@ -101,6 +101,83 @@ jQuery.Class("Vtiger_List_Js",{
 		}
 
 	},
+	/* ED150628
+	 * function to trigger Assign Critere4D to selected contacts
+	 * @params: assign critere4D url.
+	 */
+	triggerAssignCritere4D : function(massActionUrl){
+		var listInstance = Vtiger_List_Js.getInstance();
+		var validationResult = listInstance.checkListRecordSelected();
+		if(validationResult != true){
+			var relatedModuleName = 'Critere4D';
+			this.showSelectRelationPopup(relatedModuleName).then(function(data){
+				var ids = [];
+				for (var id in data) {
+					ids.push(id);
+				}
+				if (ids && ids.length > 0)
+					massActionUrl += '&related_ids=' + ids.join(',');
+					Vtiger_List_Js.triggerMassAction(massActionUrl, Vtiger_List_Js.postAssignCritere4DEdit);
+			});
+		} else {
+			listInstance.noRecordSelectedAlert();
+		}
+	},
+	//ED150628 : sélection d'enregistrements
+	showSelectRelationPopup : function(relatedModulename){
+		var aDeferred = jQuery.Deferred();
+		var thisInstance = this;
+		var popupInstance = Vtiger_Popup_Js.getInstance();
+		var parameters = {
+			'module' : relatedModulename,
+			'src_module' : app.getModuleName(),
+			'src_record' : 0,//this.parentRecordId,
+			'multi_select' : false
+		}
+		popupInstance.show(parameters, function(responseString){
+				//jQuery('<pre/>').html(responseString).dialog({ title: "showSelectRelationPopup"});
+				var responseData = JSON.parse(responseString);
+				aDeferred.resolve(responseData);
+			}
+		);
+		return aDeferred.promise();
+	},
+	
+	postAssignCritere4DEdit : function(massEditContainer) {
+		massEditContainer.find('form').on('submit', function(e){
+			e.preventDefault();
+			var form = jQuery(e.currentTarget);
+			
+			var listInstance = Vtiger_List_Js.getInstance();
+			listInstance.massActionSave(form).then(
+				function(data) {
+					//ED150618
+					if (data.error)
+						data.result = data.error.message;
+					if (typeof data.result === 'string') {
+						var message = data.result;
+						var params = {
+							text: message,
+							type: data.success ? 'info' : 'error'
+						};
+						Vtiger_Helper_Js.showMessage(params);
+					}
+					if (data.success){
+						listInstance.getListViewRecords();
+						Vtiger_List_Js.clearList();
+					}
+				},
+				function(error,err){
+					var params = {
+						text: error,
+						type: 'error'
+					};
+					Vtiger_Helper_Js.showMessage(params);
+				}
+			);
+		});
+	},
+	
 	/*
 	 * function to trigger 'show email list'
 	 * @params: send email url , module name.
@@ -336,7 +413,7 @@ jQuery.Class("Vtiger_List_Js",{
 	},
 
 
-	triggerMassAction : function(massActionUrl,callBackFunction,beforeShowCb, css) {
+	triggerMassAction : function(massActionUrl, callBackFunction, beforeShowCb, css) {
 
 		//TODO : Make the paramters as an object
 		if(typeof beforeShowCb == 'undefined') {
@@ -350,57 +427,72 @@ jQuery.Class("Vtiger_List_Js",{
 		var listInstance = Vtiger_List_Js.getInstance();
 		var validationResult = listInstance.checkListRecordSelected();
 		if(validationResult != true){
-		// Compute selected ids, excluded ids values, along with cvid value and pass as url parameters
-		var selectedIds = listInstance.readSelectedIds(true);
-		var excludedIds = listInstance.readExcludedIds(true);
-		var cvId = listInstance.getCurrentCvId();
-		var postData = {
-			"viewname" : cvId,
-			"selected_ids":selectedIds,
-			"excluded_ids" : excludedIds
-		};
-
-		var listViewInstance = Vtiger_List_Js.getInstance();
-		var searchValue = listViewInstance.getAlphabetSearchValue();
-
-		if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
-			postData['search_key'] = listViewInstance.getRequestSearchField();
-			postData['search_value'] = searchValue;
-			postData['operator'] = listViewInstance.getSearchOperator();
-		    }
-
-		var actionParams = {
-			"type":"POST",
-			"url":massActionUrl,
-			"dataType":"html",
-			"data" : postData
-		};
-
-		if(typeof css == 'undefined'){
-			css = {};
-		}
-		css = jQuery.extend({'text-align' : 'left'},css);
-
-		AppConnector.request(actionParams).then(
-			function(data) {
-				if(data) {
-					var result = beforeShowCb(data);
-					if(!result) {
-						return;
-					}
-					app.showModalWindow(data,function(data){
-						if(typeof callBackFunction == 'function'){
-							callBackFunction(data);
-							//listInstance.triggerDisplayTypeEvent();
-						}
-					},css)
-
+			// Compute selected ids, excluded ids values, along with cvid value and pass as url parameters
+			var selectedIds = listInstance.readSelectedIds(true);
+			var excludedIds = listInstance.readExcludedIds(true);
+			var cvId = listInstance.getCurrentCvId();
+			var postData = {
+				"viewname" : cvId,
+				"selected_ids":selectedIds,
+				"excluded_ids" : excludedIds
+			};
+	
+			var listViewInstance = Vtiger_List_Js.getInstance();
+			var searchValue = listViewInstance.getAlphabetSearchValue();
+	
+			if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
+				postData['search_key'] = listViewInstance.getRequestSearchField();
+				postData['search_value'] = searchValue;
+				postData['operator'] = listViewInstance.getSearchOperator();
 				}
-			},
-			function(error,err){
-
+	
+			var actionParams = {
+				"type":"POST",
+				"url":massActionUrl,
+				"dataType":"html",
+				"data" : postData
+			};
+	
+			if(typeof css == 'undefined'){
+				css = {};
 			}
-		);
+			css = jQuery.extend({'text-align' : 'left'},css);
+	
+			var loadingMessage = jQuery('.listViewLoadingMsg').text();
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : loadingMessage,
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			
+			AppConnector.request(actionParams).then(
+				function(data) {
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					})
+					if(data) {
+						var result = beforeShowCb(data);
+						if(!result) {
+							return;
+						}
+						app.showModalWindow(data,function(data){
+							if(typeof callBackFunction == 'function'){
+								callBackFunction(data);
+								//listInstance.triggerDisplayTypeEvent();
+							}
+						},css)
+	
+					}
+				},
+				function(error,err){
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					})
+	
+				}
+			);
 		} else {
 			listInstance.noRecordSelectedAlert();
 		}
@@ -697,73 +789,7 @@ jQuery.Class("Vtiger_List_Js",{
 		return alert(app.vtranslate('JS_PLEASE_SELECT_ONE_RECORD'));
 	},
 
-	massActionSave : function(form, isMassEdit){
-		if(typeof isMassEdit == 'undefined') {
-			isMassEdit = false;
-		}
-		var aDeferred = jQuery.Deferred();
-		var massActionUrl = form.serializeFormData();
-		if(isMassEdit) {
-			var fieldsChanged = false;
-            var massEditFieldList = jQuery('#massEditFieldsNameList').data('value');
-			for(var fieldName in massEditFieldList){
-                var fieldInfo = massEditFieldList[fieldName];
-
-                var fieldElement = form.find('[name="'+fieldInfo.name+'"]');
-                if(fieldInfo.type == "reference") {
-                    //get the element which will be shown which has "_display" appended to actual field name
-                    fieldElement = form.find('[name="'+fieldInfo.name+'_display"]');
-                }else if(fieldInfo.type == "multipicklist") {
-                    fieldElement = form.find('[name="'+fieldInfo.name+'[]"]');
-                }
-
-                //Not all fields will be enabled for mass edit
-                if(fieldElement.length == 0) {
-                    continue;
-                }
-
-                var validationElement = fieldElement.filter('[data-validation-engine]');
-                //check if you have element enabled has changed
-                if(validationElement.length == 0){
-                    if(fieldInfo.type == "multipicklist") {
-                        fieldName = fieldName+"[]";
-                    }
-                    delete massActionUrl[fieldName];
-                    if(fieldsChanged != true){
-                        fieldsChanged = false;
-                    }
-                } else {
-                    fieldsChanged = true;
-                }
-			}
-			if(fieldsChanged == false){
-				Vtiger_Helper_Js.showPnotify(app.vtranslate('NONE_OF_THE_FIELD_VALUES_ARE_CHANGED_IN_MASS_EDIT'));
-				form.find('[name="saveButton"]').removeAttr('disabled');
-				aDeferred.reject();
-				return aDeferred.promise();
-			}
-			//on submit form trigger the massEditPreSave event
-			var massEditPreSaveEvent = jQuery.Event(Vtiger_List_Js.massEditPreSave);
-			form.trigger(massEditPreSaveEvent);
-			if(massEditPreSaveEvent.isDefaultPrevented()) {
-				form.find('[name="saveButton"]').removeAttr('disabled');
-				aDeferred.reject();
-				return aDeferred.promise();
-			}
-		}
-		AppConnector.request(massActionUrl).then(
-			function(data) {
-				app.hideModalWindow();
-				aDeferred.resolve(data);
-			},
-			function(error,err){
-				app.hideModalWindow();
-				aDeferred.reject(error,err);
-			}
-		);
-		return aDeferred.promise();
-	},
-
+	
 	/*
 	 * Function to check the view permission of a record after save
 	 */
@@ -1029,8 +1055,91 @@ jQuery.Class("Vtiger_List_Js",{
 				},
 				function(error,err){
 				}
-			)
+			);
 		});
+	},
+
+	massActionSave : function(form, isMassEdit){
+		if(typeof isMassEdit == 'undefined') {
+			isMassEdit = false;
+		}
+		var aDeferred = jQuery.Deferred();
+		var massActionUrl = form.serializeFormData();
+		if(isMassEdit) {
+			var fieldsChanged = false;
+            var massEditFieldList = jQuery('#massEditFieldsNameList').data('value');
+			for(var fieldName in massEditFieldList){
+                var fieldInfo = massEditFieldList[fieldName];
+
+                var fieldElement = form.find('[name="'+fieldInfo.name+'"]');
+                if(fieldInfo.type == "reference") {
+                    //get the element which will be shown which has "_display" appended to actual field name
+                    fieldElement = form.find('[name="'+fieldInfo.name+'_display"]');
+                }else if(fieldInfo.type == "multipicklist") {
+                    fieldElement = form.find('[name="'+fieldInfo.name+'[]"]');
+                }
+
+                //Not all fields will be enabled for mass edit
+                if(fieldElement.length == 0) {
+                    continue;
+                }
+
+                var validationElement = fieldElement.filter('[data-validation-engine]');
+                //check if you have element enabled has changed
+                if(validationElement.length == 0){
+                    if(fieldInfo.type == "multipicklist") {
+                        fieldName = fieldName+"[]";
+                    }
+                    delete massActionUrl[fieldName];
+                    if(fieldsChanged != true){
+                        fieldsChanged = false;
+                    }
+                } else {
+                    fieldsChanged = true;
+                }
+			}
+			if(fieldsChanged == false){
+				Vtiger_Helper_Js.showPnotify(app.vtranslate('NONE_OF_THE_FIELD_VALUES_ARE_CHANGED_IN_MASS_EDIT'));
+				form.find('[name="saveButton"]').removeAttr('disabled');
+				aDeferred.reject();
+				return aDeferred.promise();
+			}
+			//on submit form trigger the massEditPreSave event
+			var massEditPreSaveEvent = jQuery.Event(Vtiger_List_Js.massEditPreSave);
+			form.trigger(massEditPreSaveEvent);
+			if(massEditPreSaveEvent.isDefaultPrevented()) {
+				form.find('[name="saveButton"]').removeAttr('disabled');
+				aDeferred.reject();
+				return aDeferred.promise();
+			}
+		}
+		
+		var loadingMessage = jQuery('.listViewLoadingMsg').text();
+		var progressIndicatorElement = jQuery.progressIndicator({
+			'message' : loadingMessage,
+			'position' : 'html',
+			'blockInfo' : {
+				'enabled' : true
+			}
+		});
+		
+		AppConnector.request(massActionUrl).then(
+			function(data) {
+				progressIndicatorElement.progressIndicator({
+					'mode' : 'hide'
+				})
+				app.hideModalWindow();
+				aDeferred.resolve(data);
+			},
+			function(error,err){
+				progressIndicatorElement.progressIndicator({
+					'mode' : 'hide'
+				})
+				app.hideModalWindow();
+				aDeferred.reject(error,err);
+			}
+		);
+		return aDeferred.promise();
 	},
 	/*
 	 * Function to register List view Page Navigation

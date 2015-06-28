@@ -68,9 +68,13 @@ $languageStrings = array(
 	'Reseller'                     => 'Revendeur'                   , 
 	
 	/*ED140000*/
-        'LBL_BLOCK_DO_NOT'              => 'Ne pas'                     ,
-        
-        'Is Converted From Lead'        => 'Fiche provenant d\'un prospect',
+	'LBL_BLOCK_DO_NOT'              => 'Ne pas'                     ,
+	
+	'Is Converted From Lead'        => 'Fiche provenant d\'un prospect',
+	
+	'LBL_ASSIGN_CRITERE4D'        => 'Affecter un critère',
+	'LBL_ASSIGN_CRITERE4D_MULTI'        => 'Affecter des critères',
+	'LBL_UNASSIGN_CRITERE4D'        => 'Supprimer un critère affecté',
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 
