@@ -69,7 +69,7 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 			$massActionLink = array(
 				'linktype' => 'LISTVIEWMASSACTION',
 				'linklabel' => 'LBL_UNASSIGN_CRITERE4D',
-				'linkurl' => 'javascript:Vtiger_List_Js.triggerUnassignCritere4D("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=unassignCritere4D")',
+				'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignCritere4D("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=unassignCritere4D")',
 				'linkicon' => ''
 			);
 			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);

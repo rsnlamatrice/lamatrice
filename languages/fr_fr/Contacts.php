@@ -72,9 +72,11 @@ $languageStrings = array(
 	
 	'Is Converted From Lead'        => 'Fiche provenant d\'un prospect',
 	
-	'LBL_ASSIGN_CRITERE4D'        => 'Affecter un critère',
-	'LBL_ASSIGN_CRITERE4D_MULTI'        => 'Affecter des critères',
+	'LBL_ASSIGN_CRITERE4D'        	=> 'Affecter un critère',
+	'LBL_ASSIGN_CRITERE4D_MULTI'  	=> 'Affecter des critères',
 	'LBL_UNASSIGN_CRITERE4D'        => 'Supprimer un critère affecté',
+	'LBL_UNASSIGN_CRITERE4D_MULTI'  => 'Supprimer les affectations de critères',
+	'LBL_IN_RELATION_WITH'			=> 'en relation avec'
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 

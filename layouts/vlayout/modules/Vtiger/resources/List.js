@@ -103,6 +103,7 @@ jQuery.Class("Vtiger_List_Js",{
 	},
 	/* ED150628
 	 * function to trigger Assign Critere4D to selected contacts
+	 * also used to unassign
 	 * @params: assign critere4D url.
 	 */
 	triggerAssignCritere4D : function(massActionUrl){
@@ -110,7 +111,8 @@ jQuery.Class("Vtiger_List_Js",{
 		var validationResult = listInstance.checkListRecordSelected();
 		if(validationResult != true){
 			var relatedModuleName = 'Critere4D';
-			this.showSelectRelationPopup(relatedModuleName).then(function(data){
+			var forUnassign = /unassign/.test(massActionUrl);
+			this.showSelectRelationPopup(relatedModuleName, forUnassign).then(function(data){
 				var ids = [];
 				for (var id in data) {
 					ids.push(id);
@@ -123,8 +125,11 @@ jQuery.Class("Vtiger_List_Js",{
 			listInstance.noRecordSelectedAlert();
 		}
 	},
-	//ED150628 : sélection d'enregistrements
-	showSelectRelationPopup : function(relatedModulename){
+	/* ED150628 : sélection d'enregistrements
+	 * @param relatedModulename
+	 * @param addSourceParameters : used for unassignement, to show only related records
+	 */ 
+	showSelectRelationPopup : function(relatedModulename, addSourceParameters){
 		var aDeferred = jQuery.Deferred();
 		var thisInstance = this;
 		var popupInstance = Vtiger_Popup_Js.getInstance();
@@ -133,6 +138,25 @@ jQuery.Class("Vtiger_List_Js",{
 			'src_module' : app.getModuleName(),
 			'src_record' : 0,//this.parentRecordId,
 			'multi_select' : false
+		}
+		if (addSourceParameters){
+			var listInstance = Vtiger_List_Js.getInstance()
+			, selectedIds = listInstance.readSelectedIds(true)
+			, excludedIds = listInstance.readExcludedIds(true)
+			, cvId = listInstance.getCurrentCvId();
+			jQuery.extend(parameters, {
+				"src_viewname" : cvId,
+				"src_selected_ids":selectedIds,
+				"src_excluded_ids" : excludedIds
+			});
+			var searchValue = listInstance.getAlphabetSearchValue();
+			if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
+				jQuery.extend(parameters, {
+					'src_search_key' : listInstance.getRequestSearchField('string'),
+					'src_search_value' : (typeof searchValue == 'object' ? JSON.stringify(searchValue) : searchValue),
+					'src_operator' : listInstance.getSearchOperator('string')
+				});
+			}
 		}
 		popupInstance.show(parameters, function(responseString){
 				//jQuery('<pre/>').html(responseString).dialog({ title: "showSelectRelationPopup"});
@@ -177,6 +201,8 @@ jQuery.Class("Vtiger_List_Js",{
 			);
 		});
 	},
+	
+	
 	
 	/*
 	 * function to trigger 'show email list'
