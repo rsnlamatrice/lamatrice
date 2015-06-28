@@ -48,6 +48,7 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 		$customViewModel = $this->getCustomViewToGetRecordsListFromRequest($request);
 		if($customViewModel) {
 			$excludedIds = $request->get('excluded_ids');
+			$module = $request->get('module');
 			return $customViewModel->getRecordIdsQuery($excludedIds, $module, false, $asColumnName);
 		}
 	}

@@ -300,7 +300,7 @@ class QueryGenerator {
 								$sourceFieldName = $this->getSQLColumn('id');
 								$viewFilters = false; //TODO sure ?
 								$panelRecord = Vtiger_Record_Model::getInstanceById($filter['viewid'], $filter['relatedmodulename']);
-								$relatedSql =  $panelRecord->getExecutionSQLWithIntegratedParams();
+								$relatedSql  = $panelRecord->getExecutionSQLWithIntegratedParams();
 		
 							}
 							else { //"normal" relation
@@ -494,6 +494,7 @@ class QueryGenerator {
 			$this->query = $query;
 			
 			//print_r('<pre>'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+			//echo_callstack();
 			
 			return $query;
 		} else {
@@ -790,6 +791,9 @@ class QueryGenerator {
 				 * sub view
 				 */
 				if($this->isViewOperators($conditionInfo['operator'])) {
+					//ED150628
+					if($fieldName == 'id')
+						$fieldName = $this->getSQLColumn('id');
 					$valueSql = $conditionInfo['value'];
 					if($valueSql[0] != '(')
 						$valueSql = "($valueSql)";

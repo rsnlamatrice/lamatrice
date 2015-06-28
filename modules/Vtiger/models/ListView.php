@@ -239,7 +239,9 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 	//echo("<p style=\"margin-top:6em\"> ICICICI getListViewEntries $listQuery </p>");
 	
 		$sourceModule = $this->get('src_module');
-		if(!empty($sourceModule)) {
+		if(!empty($sourceModule)
+		&& !empty( $this->get('src_field')) && !empty($this->get('src_record')) //ED150628
+		) {
 			if(method_exists($moduleModel, 'getQueryByModuleField')) {
 				$overrideQuery = $moduleModel->getQueryByModuleField($sourceModule, $this->get('src_field'), $this->get('src_record'), $listQuery);
 				if(!empty($overrideQuery)) {
@@ -263,19 +265,19 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 			    $referenceNameFields = $referenceModuleModel->getNameFields();
 			    $columnList = array();
 			    foreach($referenceNameFields as $nameField) {
-				$fieldModel = $referenceModuleModel->getField($nameField);
-				$columnList[] = $fieldModel->get('table').$orderByFieldModel->getName().'.'.$fieldModel->get('column');
+					$fieldModel = $referenceModuleModel->getField($nameField);
+					$columnList[] = $fieldModel->get('table').$orderByFieldModel->getName().'.'.$fieldModel->get('column');
 			    }
 			    if(count($columnList) > 1) {
-				$referenceNameFieldOrderBy[] = getSqlForNameInDisplayFormat(array('first_name'=>$columnList[0],'last_name'=>$columnList[1]),'Users').' '.$sortOrder;
+					$referenceNameFieldOrderBy[] = getSqlForNameInDisplayFormat(array('first_name'=>$columnList[0],'last_name'=>$columnList[1]),'Users').' '.$sortOrder;
 			    } else {
-				$referenceNameFieldOrderBy[] = implode('', $columnList).' '.$sortOrder ;
+					$referenceNameFieldOrderBy[] = implode('', $columnList).' '.$sortOrder ;
 			    }
 			}
 			$listQuery .= ' ORDER BY '. implode(',',$referenceNameFieldOrderBy);
 			
 		    }else{
-			$listQuery .= ' ORDER BY '. $orderBy . ' ' .$sortOrder;
+				$listQuery .= ' ORDER BY '. $orderBy . ' ' .$sortOrder;
 		    }
 		}
 
@@ -534,5 +536,63 @@ var_dump($listResult);*/
 		$listFields = array_merge($listFields, $fieldsList);
 		$queryGenerator->setFields($listFields);
 		$this->get('query_generator', $queryGenerator);
+	}
+
+
+	//TODO A refaire et synthétiser avec modules\Vtiger\actions\Mass.php
+
+	//ED150628
+	//Initially added for modules\Vtiger\views\Popup.php
+	protected function getRecordsQueryFromRequest(&$asColumnName = FALSE, $parameter_prefix = 'src_') {
+		$selectedIds = $this->get($parameter_prefix.'selected_ids');
+
+		if(!empty($selectedIds) && $selectedIds != 'all') {
+			if(!empty($selectedIds) && count($selectedIds) > 0) {
+				
+				if(!$asColumnName){
+					$sourceModule = $this->get($parameter_prefix.'module');
+					$moduleModel = Vtiger_Module_Model::getInstance($sourceModule);
+					$asColumnName = $moduleModel->get('basetableid');
+				}
+				$query = '';
+				for($i = 0; $i < count($selectedIds); $i++){
+					if($i) $query .= ' UNION SELECT ' . $selectedIds[$i];
+					else $query = 'SELECT ' . $selectedIds[$i] . ' AS ' . $asColumnName;
+				}
+				
+				return $query;
+			}
+		}
+		$customViewModel = $this->getCustomViewToGetRecordsListFromRequest($parameter_prefix);
+		if($customViewModel) {
+			$excludedIds = $this->get($parameter_prefix.'excluded_ids');
+			return $customViewModel->getRecordIdsQuery($excludedIds, $module, false, $asColumnName);
+		}
+	}
+	//ED150628
+	private function getCustomViewToGetRecordsListFromRequest($parameter_prefix = 'src_') {
+		$cvId = $this->get($parameter_prefix.'viewname');
+		if(!empty($cvId) && ($cvId=="undefined" || $cvId=="all")){
+			$sourceModule = $this->get($parameter_prefix.'module');
+			$cvRecord = CustomView_Record_Model::getAllFilterByModule($sourceModule);
+			if(!$cvRecord){
+				var_dump("Impossible de trouver la vue par défaut, nommé 'All' pour le module $sourceModule.");
+				return;
+			}
+			$cvId = $cvRecord->getId();
+		}
+
+		$customViewModel = CustomView_Record_Model::getInstanceById($cvId);
+		if($customViewModel) {
+			$searchKey = $this->get($parameter_prefix.'search_key');
+			$searchValue = $this->get($parameter_prefix.'search_value');
+			$operator = $this->get($parameter_prefix.'operator');
+			if(!empty($operator)) {
+			    $customViewModel->set('operator', $operator);
+			    $customViewModel->set('search_key', $searchKey);
+			    $customViewModel->set('search_value', $searchValue);
+			}
+			return $customViewModel;
+		}
 	}
 }

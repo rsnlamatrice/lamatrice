@@ -61,16 +61,16 @@ class Documents extends CRMEntity {
 
 	var $search_fields = Array(
 					'Title' => Array('notes'=>'notes_title'),
+					'Folder Name' => Array('attachmentsfolder'=>'foldername'),
 					'File Name' => Array('notes'=>'filename'),
 					'Assigned To' => Array('crmentity'=>'smownerid'),
-					'Folder Name' => Array('attachmentsfolder'=>'foldername')
 		);
 
 	var $search_fields_name = Array(
 					'Title' => 'notes_title',
+					'Folder Name' => 'folderid',
 					'File Name' => 'filename',
 					'Assigned To' => 'assigned_user_id',
-					'Folder Name' => 'folderid'
 	);
 	var $list_link_field= 'notes_title';
 	var $old_filename = '';

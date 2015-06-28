@@ -137,7 +137,7 @@ jQuery.Class("Vtiger_List_Js",{
 			'module' : relatedModulename,
 			'src_module' : app.getModuleName(),
 			'src_record' : 0,//this.parentRecordId,
-			'multi_select' : false
+			'multi_select' : !!addSourceParameters
 		}
 		if (addSourceParameters){
 			var listInstance = Vtiger_List_Js.getInstance()

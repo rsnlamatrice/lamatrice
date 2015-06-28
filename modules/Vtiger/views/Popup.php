@@ -90,6 +90,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		$sourceRecord = $request->get('src_record');
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$searchOperator = $request->get('operator');
 		$currencyId = $request->get('currency_id');
 
 		//To handle special operation when selecting record from Popup
@@ -127,6 +128,19 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		if((!empty($searchKey)) && (!empty($searchValue)))  {
 			$listViewModel->set('search_key', $searchKey);
 			$listViewModel->set('search_value', $searchValue);
+			$listViewModel->set('operator', $searchOperator);//ED150628
+		}
+		
+		//ED150628 : for related only
+		if(!empty($request->get('src_viewname')))  {
+			$listViewModel->set('src_viewname', $request->get('src_viewname'));
+			$listViewModel->set('src_selected_ids', $request->get('src_selected_ids'));
+			$listViewModel->set('src_excluded_ids', $request->get('src_excluded_ids'));
+		}
+		if(!empty($request->get('src_search_key')))  {
+			$listViewModel->set('src_search_key', $request->get('src_search_key'));
+			$listViewModel->set('src_search_value', $request->get('src_search_value'));
+			$listViewModel->set('src_operator', $request->get('src_operator'));
 		}
 
 		if(!$this->listViewHeaders){

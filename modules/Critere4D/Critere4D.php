@@ -56,25 +56,25 @@ class Critere4D extends Vtiger_CRMEntity {
 
 	// For Popup listview and UI type support
 	var $search_fields = array (
-		'LBL_ORDREDETRI' => array('critere4d', 'ordredetri'),
 		'LBL_NOM' => array('critere4d', 'nom'),
 		'LBL_CATEGORIE' => array('critere4d', 'categorie'),
 		'LBL_ORIGINE' => array('critere4d', 'origine'),
 		'LBL_COMMENTAIRE' => array('critere4d', 'commentaire'),
 		'LBL_USAGE_DEBUT' => array('critere4d', 'usage_debut'),
 		'LBL_USAGE_FIN' => array('critere4d', 'usage_fin'),
+		'LBL_ORDREDETRI' => array('critere4d', 'ordredetri'),
 		'LBL__COUNTER_' => array('critere4dcontrel', '_counter_critere4dcontrel'),
 		'LBL_DATEAPPLICATION' => array('critere4dcontrel', 'dateapplication'),
 
 );
 	var $search_fields_name = array (
-		'LBL_ORDREDETRI' => 'ordredetri',
 		'LBL_NOM' => 'nom',
 		'LBL_CATEGORIE' => 'categorie',
 		'LBL_ORIGINE' => 'origine',
 		'LBL_COMMENTAIRE' => 'commentaire',
 		'LBL_USAGE_DEBUT' => 'usage_debut',
 		'LBL_USAGE_FIN' => 'usage_fin',
+		'LBL_ORDREDETRI' => 'ordredetri',
 		'LBL__COUNTER_' => '_counter_critere4dcontrel',
 		'LBL_DATEAPPLICATION' => 'dateapplication',
 
