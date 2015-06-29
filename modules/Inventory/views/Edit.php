@@ -24,6 +24,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$shippingTaxes = $recordModel->getShippingTaxes();
 			$relatedProducts = $recordModel->getProducts();
 			$viewer->assign('MODE', '');
+			$viewer->assign('IS_DUPLICATE_FROM', $record);
 			
 		} elseif (!empty($record)) {
                
@@ -141,7 +142,6 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		}
 		$currencies = Inventory_Module_Model::getAllCurrencies();
 		$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($moduleName);
-
 		$viewer->assign('PICKIST_DEPENDENCY_DATASOURCE',Zend_Json::encode($picklistDependencyDatasource));
 		$viewer->assign('RECORD',$recordModel);
 		$viewer->assign('RECORD_STRUCTURE_MODEL', $recordStructureInstance);
@@ -166,7 +166,16 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		//ED150603
 		if($recordModel->get('sent2compta'))
 			$viewer->assign('NOT_EDITABLE', 'LBL_ALREADY_SENT_2_COMPTA');
-				
+		
+		//ED150629
+		if($moduleName == 'PurchaseOrder'){
+			if($request->get('potype') && !$recordModel->get('potype')){
+				$recordModel->set('potype', $request->get('potype'));
+			}
+			$fieldList['potype']->set('fieldvalue', $recordModel->get('potype'));
+			$viewer->assign('POTYPE_FIELD_MODEL', $fieldList['potype']);
+		}
+		
 		$viewer->view('EditView.tpl', 'Inventory');
 	}
 

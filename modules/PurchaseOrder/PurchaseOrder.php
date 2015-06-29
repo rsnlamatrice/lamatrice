@@ -112,6 +112,12 @@ class PurchaseOrder extends CRMEntity {
 
 	function save_module($module)
 	{
+		
+		//ED150629 : Seuls les documents de type Bon de réception peuvent avec le status (et donc la gestion de stock) 'Commande reçue'
+		if($this->column_fields['postatus'] === 'Received Shipment'
+		&& $this->column_fields['potype'] !== 'receipt')
+			$this->column_fields['postatus'] = '';
+		
 		global $adb, $updateInventoryProductRel_deduct_stock;
 		$updateInventoryProductRel_deduct_stock = false;
 		//in ajax save we should not call this function, because this will delete all the existing product values

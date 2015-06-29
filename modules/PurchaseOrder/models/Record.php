@@ -46,4 +46,32 @@ class PurchaseOrder_Record_Model extends Inventory_Record_Model {
 			$purchaseOrderStatus = $db->query_result($result,0,"postatus");
 			return $purchaseOrderStatus;
 	}
+	
+	/**
+	 * ED150629
+	 * getPicklistValuesDetails
+	 */
+	public function getPicklistValuesDetails($fieldname){
+		switch($fieldname){
+			case 'potype'://type de document
+				return array(
+					'order' => array( 'label' => 'Commande', 'icon' => 'ui-icon potype order' ),
+					'receipt' => array( 'label' => 'Bon de réception', 'icon' => 'ui-icon potype receipt' ),
+					'invoice' => array( 'label' => 'Facture', 'icon' => 'ui-icon potype invoice' )
+				);
+			
+			default:
+				return parent::getPicklistValuesDetails($fieldname);
+		}
+	}
+
+	/**
+	 * Funtion to get Duplicate Record Url
+	 * @return <String>
+	 */
+	public function getDuplicateRecordAsPOTypeUrl($new_potype) {
+		$module = $this->getModule();
+		return 'index.php?module='.$this->getModuleName().'&view='.$module->getEditViewName().'&record='.$this->getId().'&isDuplicate=true&potype='.$new_potype;
+
+	}
 }

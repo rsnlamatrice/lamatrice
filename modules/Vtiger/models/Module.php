@@ -1430,8 +1430,8 @@ class Vtiger_Module_Model extends Vtiger_Module {
 			$relationQuery = preg_replace('/(vtiger_activity\.\*,.*)vtiger_recurringevents.recurringtype,/'
 				,'$1'
 				,$relationQuery);
-			$relationQuery = preg_replace('/(vtiger_activity\.\*,.*)AS\sstatus\s/'
-				,'$1AS status2 '
+			$relationQuery = preg_replace('/(vtiger_(activity|crmentity)\.\*,.*)AS\sstatus\s/'
+				,'$1AS status_getRelationCounterQuery '
 				,$relationQuery);
 			break;
 		}

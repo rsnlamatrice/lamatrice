@@ -277,3 +277,18 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
     height: 12px;
     width: 20%;
 }
+
+/* purchase order potype */
+.ui-icon.potype {
+  height: 22px;
+  width: 23px;
+}
+.ui-icon.potype.order {
+  background-image: url('../images/potype-order.jpg');
+}
+.ui-icon.potype.receipt {
+  background-image: url('../images/potype-receipt.jpg');
+}
+.ui-icon.potype.invoice {
+  background-image: url('../images/potype-invoice.jpg');
+}

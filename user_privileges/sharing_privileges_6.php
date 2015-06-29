@@ -210,4 +210,8 @@ $RSNDonateursWeb_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNDonateursWeb_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$PurchaseReceipt_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$PurchaseReceipt_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 ?>
