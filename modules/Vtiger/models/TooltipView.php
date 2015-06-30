@@ -111,14 +111,26 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 	 * Function to get the instance
 	 * @param <String> $moduleName - module name
 	 * @param <String> $recordId - record id
+	 * @param <Boolean> $tryOtherModule - swap Services/Products module if record is not found. Prevents infinity recursivity
 	 * @return <Vtiger_DetailView_Model>
 	 */
-	public static function getInstance($moduleName,$recordId) {
+	public static function getInstance($moduleName, $recordId, $tryOtherModule = true) {
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'TooltipView', $moduleName);
 		$instance = new $modelClassName();
 
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		
-		return $instance->setModule($moduleModel)->loadRecord($recordId);
+		$instance->setModule($moduleModel)->loadRecord($recordId);
+		
+		//ED150630
+		if(!$instance->record->getId() && $tryOtherModule){
+			if($moduleName === 'Services'){
+				return self::getInstance('Products', $recordId, false);
+			}
+			elseif($moduleName === 'Products'){
+				return self::getInstance('Services', $recordId, false);
+			}
+		}
+		return $instance;
 	}
 }

@@ -92,7 +92,8 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 			totalCount = noOfEntries;
 		if (totalCount == 0)
 			totalCount = '';
-	    var $tab = jQuery('.related  .active')
+		var relatedModuleName = jQuery('.relatedContainer input.relatedModuleName').val()
+	    , $tab = jQuery('.related li[data-module="'+relatedModuleName+'"]')
 	    , $tabCounter = jQuery('.relcount', $tab);
 	    if ($tabCounter.length == 0) 
 			$tabCounter = $('<span class="relcount"/>')

@@ -33,6 +33,9 @@ class Vtiger_TooltipAjax_View extends Vtiger_PopupAjax_View {
 		$recordId = $request->get('record');
 		$tooltipViewModel = Vtiger_TooltipView_Model::getInstance($moduleName, $recordId);
 
+		//ED150630 : Services/Products may have been swapped
+		$moduleName = $tooltipViewModel->getModule()->getName();
+		
 		$viewer->assign('MODULE', $moduleName);
 
 		$viewer->assign('MODULE_MODEL', $tooltipViewModel->getRecord()->getModule());

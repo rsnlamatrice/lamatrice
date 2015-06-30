@@ -360,7 +360,8 @@ class QueryGenerator {
 									//salement fait pour Invoice / RsnReglements. cf modules/Inventory/models/Relation.php
 									$subQueryTable = uniqid('subq_');
 									$subQueryField =  $subQueryTable . '.' . $relationInfos['relatedFieldName'];
-									$relatedSql = 'SELECT ' . $relationInfos['fieldName']
+									$relSourceFieldName = isset($relationInfos['sourceFieldNameInRelation']) ? $relationInfos['sourceFieldNameInRelation'] : $relationInfos['fieldName'];
+									$relatedSql = 'SELECT ' . $relSourceFieldName
 										. ' FROM ' . $relationInfos['relationTableName']
 										. ' JOIN (' . $relatedSql . ') ' . $subQueryTable
 										. ' 	ON ' . $relationInfos['relationTableName'] . '.' . $relationInfos['relatedSourceFieldName']

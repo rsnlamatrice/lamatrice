@@ -88,6 +88,7 @@ Vtiger_List_Js("Inventory_List_Js",{
 	
 	registerEvents : function(){
 		this.registerEventForProductListToolTip();
+		app.listenPostAjaxReady(this.registerEventForProductListToolTip);
 		this._super();
 	}
 });
