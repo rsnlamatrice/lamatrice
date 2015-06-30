@@ -329,7 +329,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	function getContact($firstname, $lastname, $email) {
 		$id = $this->getContactId($firstname, $lastname, $email);
 		if($id){
-			$row = $db->fetch_row($result, 0);
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
 

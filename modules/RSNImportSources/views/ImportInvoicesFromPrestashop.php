@@ -434,7 +434,6 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	function getContact($firstname, $lastname, $email) {
 		$id = $this->getContactId($firstname, $lastname, $email);
 		if($id){
-			$row = $db->fetch_row($result, 0);
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
 

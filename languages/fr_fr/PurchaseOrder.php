@@ -11,21 +11,21 @@
  * December 2013  
  ************************************************************************************/
 $languageStrings = array(
-	'SINGLE_PurchaseOrder'         => 'Commande fournisseur'        , 
+	'SINGLE_PurchaseOrder'         => 'Document fournisseur'        , 
 	'LBL_EXPORT_TO_PDF'            => 'Export PDF'                  , 
 	'LBL_SEND_MAIL_PDF'            => 'Envoi PDF par Email'         , 
-	'LBL_ADD_RECORD'               => 'Ajouter Commande fournisseur'          , 
-	'LBL_RECORDS_LIST'             => 'Liste des Commandes fournisseur'                       , 
+	'LBL_ADD_RECORD'               => 'Ajouter un document fournisseur'          , 
+	'LBL_RECORDS_LIST'             => 'Liste des Documents fournisseur'                       , 
 	'LBL_COPY_SHIPPING_ADDRESS'    => 'Copier l\'adresse de livraison'       , 
 	'LBL_COPY_BILLING_ADDRESS'     => 'Copier l\'adresse de facturation'        , 
-	'LBL_PO_INFORMATION'           => 'Détail commande'            , 
-	'PurchaseOrder No'             => 'Commande N°'                , 
+	'LBL_PO_INFORMATION'           => 'Détail du document'            , 
+	'PurchaseOrder No'             => 'Document N°'                , 
 	'Requisition No'               => 'Ref demande'                 , 
 	'Tracking Number'              => 'Ref de suivi'                , 
 	'Sales Commission'             => 'Commission'                  , 
 	'LBL_PAID'                     => 'Soldé'                        , 
 	'LBL_BALANCE'                  => 'Balance'                     , 
-	'Received Shipment'            => 'Reçu'                       , 
+	'Received Shipment'            => 'Commande reçue'                       , 
 	
 	//Translations used for Export to Pdf
 	'Valid Date' => 'Date de validité',
@@ -42,4 +42,13 @@ $languageStrings = array(
 	'Tax' => 'Taxe',
 	'Contact Name' => 'Nom contact',
 	'Grand Total:' => 'Total:',
+        
+        //ED150629
+        'LBL_POTYPE' => 'Type de document',
+        'LBL_POTYPE_order' => 'Commande fournisseur',
+        'LBL_POTYPE_receipt' => 'Bon de réception',
+        'LBL_POTYPE_invoice' => 'Facture fournisseur',
+        'LBL_DUPLICATE_AS_ORDER' => 'Dupliquer en Commande fournisseur',
+        'LBL_DUPLICATE_AS_RECEIPT' => 'Dupliquer en Bon de réception',
+        'LBL_DUPLICATE_AS_INVOICE' => 'Dupliquer en Facture fournisseur',
 );

@@ -726,7 +726,7 @@ var app = {
 		}
 
 		elements.each(function( index ) {
-			//TOTO: generalized auto-complete for Chosen type.
+			//TODO: generalized auto-complete for Chosen type.
 			var tagName = $( this )[0].tagName.toLowerCase();
 			switch (tagName) {
 			case 'input':
@@ -776,19 +776,29 @@ var app = {
 
 	/**
 	 * AV150421
+	 * @returns jso {fieldName: fieldValue, fieldName: fieldValue, fieldName: fieldValue}
 	 */
 	onInputValueChange: function(field) {
 		var autoFillFields = this.getAutoFillFields(field);
-		var values = this.parseAutoFillValues(field.val());
+		var fieldValue = field.val()
+		, values = this.parseAutoFillValues(fieldValue)
+		, fieldName = field.attr('name')
+		, fieldsValue = {};
 
 		for (var i=0; i < autoFillFields.length; ++i) {
 			if (values[i]){
-				$('input[name="' + autoFillFields[i] +  '"]').val(values[i]);
+				$input = $('input[name="' + autoFillFields[i] +  '"]');
+				$input.val(values[i]);
+				//En DetailView, il faut aussi modifier le span 
+				$input.parents('.fieldValue:first').children('span.value').text(values[i]);
+				fieldsValue[autoFillFields[i] ] = values[i];
 			}
 			//tmp chosen !!!
 		}
-
-		field.val(this.getRealValue(field.val()));
+		fieldsValue[fieldName] = this.getRealValue(fieldValue);
+		field.val(fieldsValue[fieldName]);
+		
+		return fieldsValue;
 	},
 
 	/**

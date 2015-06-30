@@ -684,7 +684,8 @@ jQuery.Class("Vtiger_Popup_Js",{
 		var thisInstance = this;
 		var popupPageContentsContainer = this.getPopupPageContainer();
 		popupPageContentsContainer.on('click','.listViewEntries',function(e){
-		    thisInstance.getListViewEntries(e);
+			if (!/entrySelectorCell/.test(e.target.className))//ED150628 : prevent clic in first cell
+			    thisInstance.getListViewEntries(e);
 		});
 	},
 

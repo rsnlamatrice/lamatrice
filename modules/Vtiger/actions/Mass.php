@@ -11,6 +11,50 @@
 abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 
 	protected function getRecordsListFromRequest(Vtiger_Request $request) {
+		$selectedIds = $request->get('selected_ids');
+		if(!empty($selectedIds) && $selectedIds != 'all') {
+			if(!empty($selectedIds) && count($selectedIds) > 0) {
+				return $selectedIds;
+			}
+		}
+		
+		$customViewModel = $this->getCustomViewToGetRecordsListFromRequest($request);
+		if($customViewModel) {
+			$excludedIds = $request->get('excluded_ids');
+			return $customViewModel->getRecordIds($excludedIds,$module);
+		}
+	}
+
+	//ED150628
+	protected function getRecordsQueryFromRequest(Vtiger_Request $request, &$asColumnName = FALSE) {
+		$selectedIds = $request->get('selected_ids');
+
+		if(!empty($selectedIds) && $selectedIds != 'all') {
+			if(!empty($selectedIds) && count($selectedIds) > 0) {
+				
+				if(!$asColumnName){
+					$moduleModel = $this->getModule();
+					$asColumnName = $moduleModel->get('basetableid');
+				}
+				$query = '';
+				for($i = 0; $i < count($selectedIds); $i++){
+					if($i) $query .= ' UNION SELECT ' . $selectedIds[$i];
+					else $query = 'SELECT ' . $selectedIds[$i] . ' AS ' . $asColumnName;
+				}
+				
+				return $query;
+			}
+		}
+		$customViewModel = $this->getCustomViewToGetRecordsListFromRequest($request);
+		if($customViewModel) {
+			$excludedIds = $request->get('excluded_ids');
+			$module = $request->get('module');
+			return $customViewModel->getRecordIdsQuery($excludedIds, $module, false, $asColumnName);
+		}
+	}
+	
+	//ED150628
+	private function getCustomViewToGetRecordsListFromRequest(Vtiger_Request $request) {
 		$cvId = $request->get('viewname');
 		$module = $request->get('module');
 		if(!empty($cvId) && $cvId=="undefined"){
@@ -21,14 +65,6 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 				return;
 			}
 			$cvId = $cvRecord->getId();
-		}
-		$selectedIds = $request->get('selected_ids');
-		$excludedIds = $request->get('excluded_ids');
-
-		if(!empty($selectedIds) && $selectedIds != 'all') {
-			if(!empty($selectedIds) && count($selectedIds) > 0) {
-				return $selectedIds;
-			}
 		}
 
 		$customViewModel = CustomView_Record_Model::getInstanceById($cvId);
@@ -41,7 +77,7 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 			    $customViewModel->set('search_key', $searchKey);
 			    $customViewModel->set('search_value', $searchValue);
 			}
-			return $customViewModel->getRecordIds($excludedIds,$module);
+			return $customViewModel;
 		}
 	}
 }

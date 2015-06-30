@@ -424,10 +424,11 @@ jQuery.Class("Vtiger_Detail_Js",{
 
 		var recordId = this.getRecordId();
 
-		var data = {};
-		if(typeof fieldDetailList != 'undefined'){
+		var data;
+		if(typeof fieldDetailList !== 'undefined')
 			data = fieldDetailList;
-		}
+		else
+		    data = {};
 
 		data['record'] = recordId;
 
@@ -1068,6 +1069,17 @@ jQuery.Class("Vtiger_Detail_Js",{
 			
 			ajaxData[fieldName] = fieldValue ;
 			changedFields[fieldName] = fieldNameValueMap ;
+			
+			//ED150626
+			//validation de code postal contenant encore [ville][pays]
+			if (fieldValue.indexOf('[') >= 0) {
+			    syncFields = app.getAutoFillFields(fieldElement);
+			    if (syncFields.length > 0) {
+				ajaxData = jQuery.extend(ajaxData, app.onInputValueChange(fieldElement));
+			    }
+			}
+			
+			
 			changedElements.push(editElement);
 		    }); //end of each element 
 		    

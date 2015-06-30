@@ -68,14 +68,14 @@ class Services extends CRMEntity {
 	var $search_fields = Array(
 		/* Format: Field Label => Array(tablename, columnname) */
 		// tablename should not have prefix 'vtiger_'
-		'Service No'=>Array('service'=>'service_no'),
 		'Service Name'=>Array('service'=>'servicename'),
+		'Service No'=>Array('service'=>'service_no'),
 		'Price'=>Array('service'=>'unit_price')
 	);
 	var $search_fields_name = Array(
 		/* Format: Field Label => fieldname */
-		'Service No'=>'service_no',
 		'Service Name'=>'servicename',
+		'Service No'=>'service_no',
 		'Price'=>'unit_price'
 	);
 

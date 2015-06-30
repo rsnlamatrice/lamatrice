@@ -26,15 +26,30 @@
 			<input type="hidden" name="sourceRecord" value="{$SOURCE_RECORD}" />
 			<input type="hidden" name="relationOperation" value="{$IS_RELATION_OPERATION}" />
 		{/if}
-		<div class="contentHeader row-fluid">
-		{assign var=SINGLE_MODULE_NAME value='SINGLE_'|cat:$MODULE}
-		{if $RECORD_ID neq ''}
-			<h3 title="{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} {$RECORD_STRUCTURE_MODEL->getRecordName()}">{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} - {$RECORD_STRUCTURE_MODEL->getRecordName()}</h3>
-            <hr>
-        {else}
-			<h3>{vtranslate('LBL_CREATING_NEW', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)}</h3>
-            <hr>
+		{if $IS_DUPLICATE_FROM}{* ED150207 *}
+			<input type="hidden" name="isDuplicateFrom" value="{$IS_DUPLICATE_FROM}" />
 		{/if}
+		<div class="contentHeader row-fluid">
+			{assign var=SINGLE_MODULE_NAME value='SINGLE_'|cat:$MODULE}
+			{* ED150629 PurchaseOrder *}
+			{if isset($POTYPE_FIELD_MODEL)}
+				{assign var=POTYPE_LABEL value=vtranslate('LBL_POTYPE_'|cat:$POTYPE_FIELD_MODEL->get('fieldvalue'), $MODULE)}
+				{if $RECORD_ID neq ''}
+					<h3 title="{vtranslate('LBL_EDITING', $MODULE)} {$POTYPE_LABEL} {$RECORD_STRUCTURE_MODEL->getRecordName()}">{vtranslate('LBL_EDITING', $MODULE)} {$POTYPE_LABEL} - {$RECORD_STRUCTURE_MODEL->getRecordName()}
+				{else}
+					<h3>{vtranslate('LBL_CREATING_NEW', $MODULE)} {$POTYPE_LABEL}
+				{/if}
+				<span class="span2">
+					{assign var=FIELD_MODEL value=$POTYPE_FIELD_MODEL}
+					{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$MODULE) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE RECORD=$RECORD RECORD_MODEL=$RECORD}
+				</span>
+			{elseif $RECORD_ID neq ''}
+				<h3 title="{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} {$RECORD_STRUCTURE_MODEL->getRecordName()}">{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} - {$RECORD_STRUCTURE_MODEL->getRecordName()}
+			{else}
+				<h3>{vtranslate('LBL_CREATING_NEW', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)}
+			{/if}
+			</h3><hr>
+		
 			<span class="pull-right">
 				{if !$NOT_EDITABLE}
 					<button class="btn btn-success" type="submit"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>

@@ -177,8 +177,8 @@ class PearDatabase{
 		return false;
     }
 	//ED150417
-	function echoError($msg='') {
-		echo("<pre>ADODB error ".$msg."->[".$this->database->ErrorNo()."]".$this->database->ErrorMsg()."</pre>");
+	function echoError($msg='', $return = FALSE) {
+		return print_r("<pre>ADODB error ".$msg."->[".$this->database->ErrorNo()."]".$this->database->ErrorMsg()."</pre>", $return);
     }
 
     function change_key_case($arr) {

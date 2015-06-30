@@ -83,7 +83,10 @@
 		{/if}
 	</td>
 	<td>
-		<input id="{$qty}" name="{$qty}" type="text" class="qty smallInputBox" data-validation-engine="validate[required,funcCall[Vtiger_GreaterThanZero_Validator_Js.invokeValidation]]" value="{if !empty($data.$qty)}{$data.$qty}{else}1{/if}"/>
+		<input id="{$qty}" name="{$qty}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_GreaterThanZero_Validator_Js.invokeValidation]]" value="{if !empty($data.$qty)}{$data.$qty}{else}1{/if}"
+		 class="qty tinyInputBox" onfocus="$(this).select()"/>
+		<a style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer;" onclick="var $input=$(this).prevAll('input:first'), value = parseFloat($input.val().replace(',', '.')).toFixed(2), offset = 1;$input.val(value + offset).focusout();return false;">+</a>
+		<a style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer;" onclick="var $input=$(this).prevAll('input:first'), value = parseFloat($input.val().replace(',', '.')).toFixed(2), offset = 1;$input.val(Math.max(0, value - offset)).focusout();return false;">-</a>
 		{if $MODULE neq 'PurchaseOrder'}
 		<br>
 		<span class="stockAlert redColor {if $data.$qty <= $data.$qtyInStock}hide{/if}" >
@@ -95,7 +98,8 @@
 	</td>
 	<td>
 		<div>
-			<input id="{$listPrice}" name="{$listPrice}" value="{if !empty($data.$listPrice)}{$data.$listPrice}{else}0{/if}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]" class="listPrice smallInputBox" />
+			<input id="{$listPrice}" name="{$listPrice}" value="{if !empty($data.$listPrice)}{$data.$listPrice}{else}0{/if}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]"
+			class="listPrice tinyInputBox" onfocus="$(this).select()"/>
 			&nbsp;
 			{assign var=PRICEBOOK_MODULE_MODEL value=Vtiger_Module_Model::getInstance('PriceBooks')}
 			{if $PRICEBOOK_MODULE_MODEL->isPermitted('DetailView')}

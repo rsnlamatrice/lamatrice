@@ -43,6 +43,9 @@
         {if trim(decode_html($SELECTED_VALUE)) eq trim($PICKLIST_KEY)}
                 checked="checked"
         {/if}
+		{if $FIELD_MODEL->isReadOnly()} 
+				disabled="disabled"
+		{/if}
         /><label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
             {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
             {$PICKLIST_LABEL}</label>

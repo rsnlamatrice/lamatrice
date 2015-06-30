@@ -1,7 +1,6 @@
 <?php
 
 define('ASSIGNEDTO_ALL', '7');
-define('COUPON_FOLDERID', '9');
 
 define('CURRENCY_ID', 1);
 define('CONVERSION_RATE', 1);

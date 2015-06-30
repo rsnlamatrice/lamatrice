@@ -674,7 +674,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
         }
     }
 	
-	public function getImportRecordStatus($value) {
+	public static function getImportRecordStatus($value) {
 		$status = '';
 		switch ($value) {
 			case 'created': $status = self::$IMPORT_RECORD_CREATED;	break;
@@ -683,6 +683,18 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			case 'merged' :	$status = self::$IMPORT_RECORD_MERGED;	break;
 			case 'failed' :	$status = self::$IMPORT_RECORD_FAILED;	break;
 			case 'none' :	$status = self::$IMPORT_RECORD_NONE;	break;
+		}
+		return $status;
+	}
+	public static function getImportRecordStatusLabel($value) {
+		$status = '';
+		switch ($value) {
+			case self::$IMPORT_RECORD_CREATED: $status = 'created';	break;
+			case self::$IMPORT_RECORD_SKIPPED: $status = 'skipped';	break;
+			case self::$IMPORT_RECORD_UPDATED: $status = 'updated';	break;
+			case self::$IMPORT_RECORD_MERGED : $status = 'merged';	break;
+			case self::$IMPORT_RECORD_FAILED : $status = 'failed';	break;
+			case self::$IMPORT_RECORD_NONE   : $status = 'none';	break;
 		}
 		return $status;
 	}

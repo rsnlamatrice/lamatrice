@@ -168,6 +168,29 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 	 */
 	public function getRecordIds($skipRecords=false, $module) {
 		$db = PearDatabase::getInstance();
+		$moduleModel = $this->getModule();
+		$moduleName = $moduleModel->get('name');
+		$baseTableName = $moduleModel->get('basetable');
+		$baseTableId = $moduleModel->get('basetableid');
+		
+		$listQuery = $this->getRecordIdsQuery($skipRecords, $module, true);
+		
+		//echo("<pre>$listQuery</pre>");
+		$result = $db->query($listQuery);
+		$noOfRecords = $db->num_rows($result);
+		$recordIds = array();
+		for($i=0; $i<$noOfRecords; ++$i) {
+			$recordIds[] = $db->query_result($result, $i, $baseTableId);
+		}
+		return $recordIds;
+	}
+
+	/** ED150628 extracted from above
+	 * Function which provides the records for the current view
+	 * @param <Boolean> $skipRecords - List of the RecordIds to be skipped
+	 * @return <Array> query to get list of RecordsIds
+	 */
+	public function getRecordIdsQuery($skipRecords=false, $module, $distinct = TRUE, &$asColumnName = FALSE) {
 		$cvId = $this->getId();
 		$moduleModel = $this->getModule();
 		$moduleName = $moduleModel->get('name');
@@ -192,21 +215,16 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		if($skipRecords && !empty($skipRecords) && is_array($skipRecords) && count($skipRecords) > 0) {
 			$listQuery .= ' AND '.$baseTableName.'.'.$baseTableId.' NOT IN ('. implode(',', $skipRecords) .')';
 		}
-		
+		if(!$asColumnName)
+				$asColumnName = $baseTableId;
 		//ED150428
 		//query may contains a join to related table, making multiple instance of same record id
-		$listQuery = "SELECT DISTINCT $baseTableId
-			FROM ($listQuery) a
-		";
-		
+		if($distinct)
+				$listQuery = "SELECT DISTINCT $baseTableId AS $asColumnName
+					FROM ($listQuery) a
+				";
 		//echo("<pre>$listQuery</pre>");
-		$result = $db->query($listQuery);
-		$noOfRecords = $db->num_rows($result);
-		$recordIds = array();
-		for($i=0; $i<$noOfRecords; ++$i) {
-			$recordIds[] = $db->query_result($result, $i, $baseTableId);
-		}
-		return $recordIds;
+		return $listQuery;
 	}
 
 	/**

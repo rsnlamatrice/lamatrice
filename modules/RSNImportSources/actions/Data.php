@@ -81,10 +81,23 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 	 * @param string $moduleName : the concerned module name.
 	 * @return array - the detail of the import.
 	 */
-	public static function getImportDetails($user, $moduleName){
+	public static function getImportDetails($user, $moduleName, $statusType = FALSE){
         $adb = PearDatabase::getInstance();
         $tableName = Import_Utils_Helper::getDbTableName($user, $moduleName);
-		$result = $adb->pquery("SELECT * FROM $tableName where status IN (?,?)",array(self::$IMPORT_RECORD_SKIPPED,self::$IMPORT_RECORD_FAILED));
+		$params = array();
+		if(!$statusType)
+			$statusType = array(self::$IMPORT_RECORD_SKIPPED,self::$IMPORT_RECORD_FAILED);
+		else {
+			if(!is_array($statusType))
+				$statusType = array($statusType);
+			
+			for ($i=0; $i<count($statusType); ++$i) {
+				if(!is_numeric($statusType[$i]))
+					$statusType[$i] = Import_Data_Action::getImportRecordStatus($statusType[$i]);
+			}
+		}
+		$params = array_merge($params, $statusType);
+		$result = $adb->pquery("SELECT * FROM $tableName where status IN (" . generateQuestionMarks($statusType) . ")", $params);
         $importRecords = array();
 
         if($result) {
@@ -105,11 +118,7 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
                     $record->set($header,$row[$header]);
                 }
 
-                if ($row['status'] == self::$IMPORT_RECORD_SKIPPED) {
-                    $importRecords['skipped'][] = $record;
-                } else {
-                    $importRecords['failed'][] = $record;
-                }
+                $importRecords[Import_Data_Action::getImportRecordStatusLabel($row['status'])][] = $record;
             }
 
         	return $importRecords;

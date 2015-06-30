@@ -66,7 +66,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		$this->set('shippingTaxDetails', $shippingTaxDetails);
 		return $shippingTaxDetails;
 	}
-
+	
 	function getProducts() {
 		$relatedProducts = getAssociatedProducts($this->getModuleName(), $this->getEntity());
 		$productsCount = count($relatedProducts);

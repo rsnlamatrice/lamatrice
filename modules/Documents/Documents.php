@@ -8,6 +8,10 @@
  * All Rights Reserved.
  ********************************************************************************/
 
+ //ED150625
+define('COUPON_FOLDERID', '9');
+define('COUPON_FOLDERNAME', 'Coupons');
+
 include_once('config.php');
 require_once('include/logging.php');
 require_once('include/database/PearDatabase.php');
@@ -57,16 +61,16 @@ class Documents extends CRMEntity {
 
 	var $search_fields = Array(
 					'Title' => Array('notes'=>'notes_title'),
+					'Folder Name' => Array('attachmentsfolder'=>'foldername'),
 					'File Name' => Array('notes'=>'filename'),
 					'Assigned To' => Array('crmentity'=>'smownerid'),
-					'Folder Name' => Array('attachmentsfolder'=>'foldername')
 		);
 
 	var $search_fields_name = Array(
 					'Title' => 'notes_title',
+					'Folder Name' => 'folderid',
 					'File Name' => 'filename',
 					'Assigned To' => 'assigned_user_id',
-					'Folder Name' => 'folderid'
 	);
 	var $list_link_field= 'notes_title';
 	var $old_filename = '';
@@ -687,6 +691,64 @@ class Documents extends CRMEntity {
 			//}
 		}
 	}
+
+	 /**
+	 * Function to get Documents related Products
+	 * @param  integer   $id  - contactid
+	 * returns related Products record in array format
+	 */
+	 function get_products($id, $cur_tab_id, $rel_tab_id, $actions=false) {
+		global $log, $singlepane_view,$currentModule,$current_user;
+		$log->debug("Entering get_products(".$id.") method ...");
+		$this_module = $currentModule;
+
+		$related_module = vtlib_getModuleNameById($rel_tab_id);
+		require_once("modules/$related_module/$related_module.php");
+		$other = new $related_module();
+		vtlib_setup_modulevars($related_module, $other);
+		$singular_modname = vtlib_toSingular($related_module);
+
+		$parenttab = getParentTab();
+
+		if($singlepane_view == 'true')
+			$returnset = '&return_module='.$this_module.'&return_action=DetailView&return_id='.$id;
+		else
+			$returnset = '&return_module='.$this_module.'&return_action=CallRelatedList&return_id='.$id;
+
+		$button = '';
+
+		if($actions) {
+			if(is_string($actions)) $actions = explode(',', strtoupper($actions));
+			if(in_array('SELECT', $actions) && isPermitted($related_module,4, '') == 'yes') {
+				$button .= "<input title='".getTranslatedString('LBL_SELECT')." ". getTranslatedString($related_module). "' class='crmbutton small edit' type='button' onclick=\"return window.open('index.php?module=$related_module&return_module=$currentModule&action=Popup&popuptype=detailview&select=enable&form=EditView&form_submit=false&recordid=$id&parenttab=$parenttab','test','width=640,height=602,resizable=0,scrollbars=0');\" value='". getTranslatedString('LBL_SELECT'). " " . getTranslatedString($related_module) ."'>&nbsp;";
+			}
+			if(in_array('ADD', $actions) && isPermitted($related_module,1, '') == 'yes') {
+				$button .= "<input title='".getTranslatedString('LBL_ADD_NEW'). " ". getTranslatedString($singular_modname) ."' class='crmbutton small create'" .
+					" onclick='this.form.action.value=\"EditView\";this.form.module.value=\"$related_module\"' type='submit' name='button'" .
+					" value='". getTranslatedString('LBL_ADD_NEW'). " " . getTranslatedString($singular_modname) ."'>&nbsp;";
+			}
+		}
+
+		$query = 'SELECT vtiger_products.productid, vtiger_products.productname, vtiger_products.productcode,
+		 		  vtiger_products.commissionrate, vtiger_products.qty_per_unit, vtiger_products.unit_price,
+				  vtiger_crmentity.crmid, vtiger_crmentity.smownerid,
+				FROM vtiger_products
+				INNER JOIN vtiger_inventoryproductrel
+					ON vtiger_inventoryproductrel.productid=vtiger_products.productid
+				INNER JOIN vtiger_productcf
+					ON vtiger_products.productid = vtiger_productcf.productid 
+				INNER JOIN vtiger_crmentity
+					ON vtiger_crmentity.crmid = vtiger_products.productid
+			   WHERE vtiger_contactdetails.contactid = '.$id.' and vtiger_crmentity.deleted = 0';
+
+		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
+
+		if($return_value == null) $return_value = Array();
+		$return_value['CUSTOM_BUTTON'] = $button;
+
+		$log->debug("Exiting get_products method ...");
+		return $return_value;
+	 }
 
 }
 ?>

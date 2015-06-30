@@ -90,12 +90,13 @@ class CustomView extends CRMEntity {
 
 	/** To get the customViewId of the specified module
 	 * @param $module -- The module Name:: Type String
+	 * @param $viewname -- value to use instead of $_REQUEST['viewname'] //ED150628
 	 * @returns  customViewId :: Type Integer
 	 */
-	function getViewId($module) {
+	function getViewId($module, $viewname = FALSE) {
 		global $adb, $current_user;
 		$now_action = vtlib_purify($_REQUEST['action']);
-		if (empty($_REQUEST['viewname'])) {
+		if (!$viewname && empty($_REQUEST['viewname'])) {
 			//ED150507 : Attention, bad record occured
 			if (isset($_SESSION['lvs'][$module]["viewname"]) && $_SESSION['lvs'][$module]["viewname"] != '') {
 				$viewid = $_SESSION['lvs'][$module]["viewname"];
@@ -121,7 +122,8 @@ class CustomView extends CRMEntity {
 				$viewid = $adb->query_result($cvresult, 0, 'cvid');
 			}
 		} else {
-			$viewname = vtlib_purify($_REQUEST['viewname']);
+			if(!$viewname)
+				$viewname = vtlib_purify($_REQUEST['viewname']);
 			if (!is_numeric($viewname)) {
 				if (strtolower($viewname) == 'all' || $viewname == 0) {
 					$viewid = $this->getViewIdByName('All', $module);

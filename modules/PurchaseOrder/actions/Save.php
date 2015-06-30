@@ -7,5 +7,4 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  *************************************************************************************/
-class PurchaseOrder_Save_Action extends Inventory_Save_Action {
-}
+class PurchaseOrder_Save_Action extends Inventory_Save_Action {}

@@ -89,6 +89,8 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 
 		if(!$this->listViewEntries) {
 			$this->listViewEntries = $dataModelInstance->getListViewEntries($pagingModel);
+			var_dump(count($this->listViewEntries));
+			die();
 		}
 
 		if(!$this->listViewHeaders){

@@ -10,15 +10,22 @@ Vtiger_BaseValidator_Js("Vtiger_NumberValidator_Js",{},{
 	error: "",
 	validate: function(){
 		var field = this.fieldInfo;
+		var value = field.val();
+	
+		//ED150625 comma accepted
+		if(value.indexOf('.') === -1 && value.indexOf(',') >= 0){
+			value = value.replace(',', '.');
+			field.val(value);
+		}
 		if(jQuery(field).attr('id') == "probability"){
-			if (isNaN(field.val())) {
+			if (isNaN(value)) {
 				// this allows the use of i18 for the error msgs
 				this.getOnlyNumbersError;
-			}else if(field.val() > 100){
+			}else if(value > 100){
 				this.getProbabilityNumberError;
 			}
 		}
-		if (isNaN(field.val())) {
+		if (isNaN(value)) {
 			 // this allows the use of i18 for the error msgs
 			this.getOnlyNumbersError;
 		}

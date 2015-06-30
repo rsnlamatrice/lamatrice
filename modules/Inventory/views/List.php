@@ -20,16 +20,20 @@ class Inventory_List_View extends Vtiger_List_View {
 		$moduleName = $request->getModule();
 		$modulePopUpFile = 'modules.'.$moduleName.'.resources.Popup';
 		$moduleEditFile = 'modules.'.$moduleName.'.resources.Edit';
+		$moduleListFile = 'modules.'.$moduleName.'.resources.List';//ED150625
 		unset($headerScriptInstances[$modulePopUpFile]);
 		unset($headerScriptInstances[$moduleEditFile]);
+		unset($headerScriptInstances[$moduleListFile]);//ED150625
 
 
 		$jsFileNames = array(
 			'modules.Inventory.resources.Edit',
 			'modules.Inventory.resources.Popup',
+			'modules.Inventory.resources.List',//ED150625
 		);
 		$jsFileNames[] = $modulePopUpFile;
 		$jsFileNames[] = $moduleEditFile;
+		$jsFileNames[] = $moduleListFile;//ED150625
 		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
 		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
 		return $headerScriptInstances;
