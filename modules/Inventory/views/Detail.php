@@ -16,7 +16,8 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 	}
 
 	function isAjaxEnabled($recordModel){
-		if($recordModel->get('sent2compta'))
+		if($recordModel->get('sent2compta')
+		|| $recordModel->get('potype'))//ED150630 PurchaseOrder : already managed with field model
 			return false;
 		return parent::isAjaxEnabled($recordModel);
 	}

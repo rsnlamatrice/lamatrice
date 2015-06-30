@@ -17,9 +17,14 @@ class Critere4D_Relation_Model extends Vtiger_Relation_Model {
 	 */
 	public function getModulesInfoForDetailView() {
 		return array(
-			'Contacts' => array('fieldName' => 'contactid'
+			'Contacts' => array('fieldName' => 'contactid' //contactid pour le update des arguments de la relation, 'critere4did' pour la jointure par CustomView
 					    , 'tableName' => 'vtiger_critere4dcontrel'
-				),
+						
+					   , 'sourceFieldName' => 'vtiger_critere4d.critere4did' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_critere4dcontrel.critere4did' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_critere4dcontrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'contactid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'contactid'),
 		);
 	}
 

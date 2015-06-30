@@ -219,8 +219,7 @@ class RsnDons_Module_Model extends Vtiger_Module_Model {
 		if(isset($entity->getListQuery))
 			$query = $entity->getListQuery('Documents');
 		else {
-			$FOLDER_COUPON_ID = 9; //TODO CONSTANTE FOLDER_COUPON_ID
-			$query = getListQuery('Documents', ' AND vtiger_notes.folderid=' . $FOLDER_COUPON_ID);
+			$query = getListQuery('Documents', ' AND vtiger_notes.folderid=' . COUPON_FOLDERID);
 		}
 		//Ajoute la jointure avec les campagnes rattachées aux coupons
 		$query = explode(' WHERE ', $query);

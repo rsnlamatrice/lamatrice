@@ -55,7 +55,6 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
         $query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty);
 
 		$query .= " LIMIT $startIndex, ". ($pageLimit+1);
-		
 		$result = $db->pquery($query, array());
         $rows = $db->num_rows($result);
         $this->result = $result;

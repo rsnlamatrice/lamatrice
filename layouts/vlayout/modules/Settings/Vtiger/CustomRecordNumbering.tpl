@@ -21,7 +21,7 @@
             <div class="span12">
                 <table id="customRecordNumbering" class="table table-bordered">
                 {assign var=DEFAULT_MODULE_DATA value=$DEFAULT_MODULE_MODEL->getModuleCustomNumberingData()}
-                {assign var=DEFAULT_MODULE_NAME value=$DEFAULT_MODULE_MODEL->getName()}
+                {assign var=DEFAULT_SEQUENCE_NAME value=$DEFAULT_MODULE_MODEL->getSequenceName()}
                     <thead>
                         <tr>
                             <th width="30%">
@@ -43,9 +43,11 @@
                         <td class="fieldValue">
                             <select class="chzn-select" name="sourceModule">
                                 {foreach key=index item=MODULE_MODEL from=$SUPPORTED_MODULES}
-                                    {assign var=MODULE_NAME value=$MODULE_MODEL->get('name')}
-                                    <option value={$MODULE_NAME} {if $MODULE_NAME eq $DEFAULT_MODULE_NAME} selected {/if}>
-                                        {vtranslate($MODULE_NAME, $MODULE_NAME)}
+                                    {assign var=MODULE_NAME value=$MODULE_MODEL->getName()}
+                                    {assign var=SEQUENCE_NAME value=$MODULE_MODEL->getSequenceName()}
+                                    {assign var=MODULE_LABEL value=$MODULE_MODEL->get('label')}
+                                    <option value={$SEQUENCE_NAME} data-module={$MODULE_NAME} {if $SEQUENCE_NAME eq $DEFAULT_SEQUENCE_NAME} selected {/if}>
+                                        {vtranslate($MODULE_LABEL, $MODULE_NAME)}
                                     </option>
                                 {/foreach}
                             </select>

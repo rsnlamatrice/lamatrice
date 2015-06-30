@@ -33,6 +33,7 @@
 			{assign var=SINGLE_MODULE_NAME value='SINGLE_'|cat:$MODULE}
 			{* ED150629 PurchaseOrder *}
 			{if isset($POTYPE_FIELD_MODEL)}
+				<input type="hidden" name="potype" value="{$POTYPE_FIELD_MODEL->get('fieldvalue')}"/>
 				{assign var=POTYPE_LABEL value=vtranslate('LBL_POTYPE_'|cat:$POTYPE_FIELD_MODEL->get('fieldvalue'), $MODULE)}
 				{if $RECORD_ID neq ''}
 					<h3 title="{vtranslate('LBL_EDITING', $MODULE)} {$POTYPE_LABEL} {$RECORD_STRUCTURE_MODEL->getRecordName()}">{vtranslate('LBL_EDITING', $MODULE)} {$POTYPE_LABEL} - {$RECORD_STRUCTURE_MODEL->getRecordName()}
@@ -136,6 +137,9 @@
 			{foreach key=FIELD_NAME item=FIELD_MODEL from=$BLOCK_FIELDS name=blockfields}
 				{if $FIELD_NAME eq 'accountdiscounttype'}{* already included in LineItemsEdit.tpl *}
 					{continue}
+				{* ED150629 PurchaseOrder : sent2compta only for invoices *}
+				{elseif $FIELD_NAME eq 'sent2compta' && isset($POTYPE_FIELD_MODEL) && $POTYPE_FIELD_MODEL->get('fieldvalue') neq 'invoice'}
+						{continue}
 				{/if}
 				{assign var="isReferenceField" value=$FIELD_MODEL->getFieldDataType()}
 				{if $FIELD_MODEL->get('uitype') eq "20" or $FIELD_MODEL->get('uitype') eq "19"}

@@ -20,9 +20,11 @@ class Inventory_Relation_Model extends Vtiger_Relation_Model {
 					   , 'sourceFieldName' => 'vtiger_account.accountid'),
 			
 			'RsnReglements' => array('fieldName' => 'relcrmid', 'tableName' => 'vtiger_crmentityrel'
-					   , 'sourceFieldName' => 'vtiger_invoice.invoiceid'
-					   , 'relationTableName' => 'vtiger_crmentityrel'
-					   , 'relatedFieldName' => 'rsnreglementsid'
+									 
+					   , 'sourceFieldName' => 'vtiger_invoice.invoiceid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_crmentityrel.relcrmid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_crmentityrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'rsnreglementsid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
 					   , 'relatedSourceFieldName' => 'crmid'),
 		);
 	}

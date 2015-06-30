@@ -1487,13 +1487,20 @@ echo($params);*/
 
 	// END
 
-	function updateMissingSeqNumber($module) {
-        global $log, $adb;
+	/** ED150630 : distinguish sequence name and module name
+	 * @param $module
+	 * @param $sequenceName
+	 */
+	function updateMissingSeqNumber($module, $sequenceName = false) {
+		global $log, $adb;
 		$log->debug("Entered updateMissingSeqNumber function");
 
+		if(!$sequenceName)
+			$sequenceName = $module;
+		
 		vtlib_setup_modulevars($module, $this);
 
-		if (!$this->isModuleSequenceConfigured($module))
+		if (!$this->isModuleSequenceConfigured($sequenceName))
 			return;
 
 		$tabid = getTabid($module);
@@ -1516,7 +1523,7 @@ echo($params);*/
 					$returninfo['totalrecords'] = $adb->num_rows($records);
 					$returninfo['updatedrecords'] = 0;
 
-					$modseqinfo = $this->getModuleSeqInfo($module);
+					$modseqinfo = $this->getModuleSeqInfo($sequenceName);
 					$prefix = $modseqinfo[0];
 					$cur_id = $modseqinfo[1];
 
@@ -1528,7 +1535,7 @@ echo($params);*/
 						$returninfo['updatedrecords'] = $returninfo['updatedrecords'] + 1;
 					}
 					if ($old_cur_id != $cur_id) {
-						$adb->pquery("UPDATE vtiger_modentity_num set cur_id=? where semodule=? and active=1", Array($cur_id, $module));
+						$adb->pquery("UPDATE vtiger_modentity_num set cur_id=? where semodule=? and active=1", Array($cur_id, $sequenceName));
 					}
 				}
 			} else {

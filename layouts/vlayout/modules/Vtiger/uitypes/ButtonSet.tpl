@@ -46,7 +46,7 @@
 		{if $FIELD_MODEL->isReadOnly()} 
 				disabled="disabled"
 		{/if}
-        /><label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
+        /><label for="{$UID}{$PICKLIST_KEY}" class="ui-buttonset {$PICKLIST_CLASS}">
             {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
             {$PICKLIST_LABEL}</label>
     {/foreach}
