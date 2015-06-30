@@ -94,6 +94,9 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 .ui-buttonset-small .ui-buttonset .ui-button {
   padding: 4px;
 }
+label.ui-buttonset > span {
+  vertical-align: middle;
+}
 
 /* jQuery UI icons
  * add color class
@@ -291,4 +294,7 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
 }
 .ui-icon.potype.invoice {
   background-image: url('../images/potype-invoice.jpg');
+}
+.detailViewTitle label.ui-buttonset {
+  font-size: 16px;
 }

@@ -27,15 +27,15 @@ class PurchaseOrder_ListView_Model extends Inventory_ListView_Model {
 		$createPermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'EditView');
 		if($createPermission) {
 
-                    //Suppression du bouton Add par défaut
-                    foreach($links['LISTVIEWBASIC'] as $index => $basicLink) 
-                        if($basicLink->get('linklabel') === 'LBL_ADD_RECORD'){
-                            unset($links['LISTVIEWBASIC'][$index]);
-                            break;
-                        }
+			//Suppression du bouton Add par défaut
+			foreach($links['LISTVIEWBASIC'] as $index => $basicLink) 
+				if($basicLink->get('linklabel') === 'LBL_ADD_RECORD'){
+					unset($links['LISTVIEWBASIC'][$index]);
+					break;
+				}
                         
-                    foreach(array('order','receipt','invoice') as $potype)
-			$basicLinks[] = array(
+            foreach(array('order','receipt','invoice') as $potype)
+				$basicLinks[] = array(
 					'linktype' => 'LISTVIEWBASIC',
 					'linklabel' => 'LBL_POTYPE_' . $potype,
 					'linkurl' => $moduleModel->getCreateRecordUrl() . '&potype=' . $potype,

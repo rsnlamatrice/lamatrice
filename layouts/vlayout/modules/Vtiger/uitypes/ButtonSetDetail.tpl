@@ -8,8 +8,8 @@
    * All Rights Reserved.
   *
   * ED141005
-  * picklist affiché en bouton radio
-  * passage du paramètre LABELS contenant un tableau [value=name]
+  * picklist affichÃ© en bouton radio
+  * passage du paramÃ¨tre LABELS contenant un tableau [value=name]
   * ou retour de tableau par RECORD_MODEL->getPicklistValuesDetails($FIELD_NAME)
  ********************************************************************************/
 -->*}
@@ -46,7 +46,7 @@
 	    {else}
 		{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
 	    {/if}
-	    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
+	    <label for="{$UID}{$PICKLIST_KEY}" class="ui-buttonset {$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
 		{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
 		{$PICKLIST_LABEL}</label>
 	    {break}

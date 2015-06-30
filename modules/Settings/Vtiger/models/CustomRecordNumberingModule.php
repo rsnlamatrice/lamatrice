@@ -23,15 +23,21 @@ class Settings_Vtiger_CustomRecordNumberingModule_Model extends Vtiger_Module_Mo
 
 	/**
 	 * Function to get Instance of this module
-	 * @param <String> $moduleName
+	 * @param <String> $sequenceName
+	 * @param <Integer> $tabId
+	 * //ED150630
+	 * @param <String> $realModuleName
+	 * @param <String> $moduleLabel
 	 * @return <Settings_Vtiger_CustomRecordNumberingModule_Model> $moduleModel
 	 */
-	public static function getInstance($moduleName, $tabId = false) {
+	public static function getInstance($moduleName, $tabId = false, $sequenceName = FALSE, $sequenceLabel = FALSE) {
 		$moduleModel = new self();
 		$moduleModel->name = $moduleName;
 		if ($tabId) {
 			$moduleModel->id = $tabId;
 		}
+		$moduleModel->set('sequence_name', $sequenceName ? $sequenceName : $moduleName);
+		$moduleModel->set('label', $sequenceLabel ? $sequenceLabel : $moduleName);
 		return $moduleModel;
 	}
 
@@ -48,9 +54,26 @@ class Settings_Vtiger_CustomRecordNumberingModule_Model extends Vtiger_Module_Mo
 
 		for($i=0; $i<$numOfRows; $i++) {
 			$tabId = $db->query_result($result, $i, 'tabid');
-			$modulesModels[$tabId] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($db->query_result($result, $i, 'name'), $tabId);
+			//ED150630 : attention, changement d'indexation (on passe de l'id au nom du module)
+			//$modulesModels[$tabId] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($db->query_result($result, $i, 'name'), $tabId);
+			$moduleName = $db->query_result($result, $i, 'name');
+			switch($moduleName){
+			case 'PurchaseOrder':
+				foreach(array('order', 'receipt', 'invoice') as $potype)
+					$modulesModels[$moduleName . '_' . $potype] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId, $moduleName . '_' . $potype, 'LBL_POTYPE_' . $potype);
+				
+				break;
+			case 'Documents':
+				$modulesModels[$moduleName] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId);
+				foreach(array(COUPON_FOLDERNAME) as $folder)
+					$modulesModels[$moduleName . '_' . $folder] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId, $moduleName . '_' . $folder, $folder);
+				
+				break;
+			default:
+				$modulesModels[$moduleName] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId);
+				break;
+			}
 		}
-
 		return $modulesModels;
 	}
 
@@ -59,28 +82,35 @@ class Settings_Vtiger_CustomRecordNumberingModule_Model extends Vtiger_Module_Mo
 	 * @return <Array> data of custom numbering data
 	 */
 	public function getModuleCustomNumberingData() {
-		$moduleInfo = $this->getFocus()->getModuleSeqInfo($this->getName());
+		$moduleInfo = $this->getFocus()->getModuleSeqInfo($this->getSequenceName());
 		return array(
 				'prefix' => $moduleInfo[0],
 				'sequenceNumber' => $moduleInfo[1]
 		);
 	}
 
+	//ED150630
+	public function getSequenceName(){
+		$sequenceName = $this->get('sequence_name');
+		if($sequenceName)
+			return $sequenceName;
+		return $this->getName();
+	}
 	/**
 	 * Function to set Module sequence
 	 * @return <Array> result of success
 	 */
 	public function setModuleSequence() {
-		$moduleName = $this->getName();
+		$sequenceName = $this->getSequenceName();
 		$prefix = $this->get('prefix');
 		$sequenceNumber = $this->get('sequenceNumber');
 
-		$status = $this->getFocus()->setModuleSeqNumber('configure', $moduleName, $prefix, $sequenceNumber);
+		$status = $this->getFocus()->setModuleSeqNumber('configure', $sequenceName, $prefix, $sequenceNumber);
 
 		$success = array('success' => $status);
 		if (!$status) {
 			$db = PearDatabase::getInstance();
-			$result = $db->pquery("SELECT cur_id FROM vtiger_modentity_num WHERE semodule = ? AND prefix = ?", array($moduleName, $prefix));
+			$result = $db->pquery("SELECT cur_id FROM vtiger_modentity_num WHERE semodule = ? AND prefix = ?", array($sequenceName, $prefix));
 			$success['sequenceNumber'] = $db->query_result($result, 0, 'cur_id');
 		}
 
@@ -92,7 +122,9 @@ class Settings_Vtiger_CustomRecordNumberingModule_Model extends Vtiger_Module_Mo
 	 * @return <Array> result of success
 	 */
 	public function updateRecordsWithSequence() {
-		return $this->getFocus()->updateMissingSeqNumber($this->getName());
+		$sequenceName = $this->getSequenceName();
+		$moduleName = $this->getName();
+		return $this->getFocus()->updateMissingSeqNumber($moduleName, $sequenceName);
 	}
 
 }

@@ -304,7 +304,8 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 			|| (($searchKey[0] == 'c' || $searchKey[0] == 'C')
 			    && is_numeric(substr($searchKey,1))))
 		)){
-			$query = 'SELECT vtiger_crmentity.label, vtiger_crmentity.crmid, vtiger_crmentity.setype, vtiger_crmentity.createdtime
+			$query = 'SELECT CONCAT(vtiger_crmentity.label, " (", vtiger_contactdetails.contact_no, ")") AS label
+				, vtiger_crmentity.crmid, vtiger_crmentity.setype, vtiger_crmentity.createdtime
 				FROM vtiger_crmentity
 				JOIN vtiger_contactdetails
 					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid

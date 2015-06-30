@@ -29,7 +29,7 @@
 						</span>&nbsp;
 					{/if}
 				{/foreach}
-				<span>
+				<div>
 					<span style="float: left; margin-right: 1em;">
 					{assign var=FIELD_MODEL value=$MODULE_MODEL->getField('potype')}
 					{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
@@ -38,7 +38,7 @@
 					{assign var=FIELD_MODEL value=$MODULE_MODEL->getField('vendor_id')}
 					{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 					</span>
-				</span>
+				</div>
 			</span>
 		</span>
 	</span>

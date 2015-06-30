@@ -110,20 +110,19 @@ class PurchaseOrder extends CRMEntity {
 		$this->column_fields = getColumnFields('PurchaseOrder');
 	}
 
-	function save_module($module)
-	{
+	function save_module($module){
 		
 		//ED150629 : Seuls les documents de type Bon de réception peuvent avec le status (et donc la gestion de stock) 'Commande reçue'
-		if($this->column_fields['postatus'] === 'Received Shipment'
-		&& $this->column_fields['potype'] !== 'receipt')
-			$this->column_fields['postatus'] = '';
+		$manageStock = $this->column_fields['potype'] === 'receipt';
 		
 		global $adb, $updateInventoryProductRel_deduct_stock;
 		$updateInventoryProductRel_deduct_stock = false;
 		//in ajax save we should not call this function, because this will delete all the existing product values
 		if($_REQUEST['action'] != 'PurchaseOrderAjax' && $_REQUEST['ajxaction'] != 'DETAILVIEW'
 				&& $_REQUEST['action'] != 'MassEditSave' && $_REQUEST['action'] != 'ProcessDuplicates'
-				&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false) {
+				&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false
+				&& $manageStock // type incompatible
+		){
 
 			$requestProductIdsList = $requestQuantitiesList = array();
 			$totalNoOfProducts = $_REQUEST['totalProductCount'];
@@ -193,6 +192,19 @@ class PurchaseOrder extends CRMEntity {
 		$adb->pquery($update_query, $update_params);
 	}
 
+	/* ED150630
+	 * Compteur de l'entité
+	 * Différencie les compteurs suivant le type de po
+	 */
+	function setModuleSeqNumber($mode, $module, $req_str = '', $req_no = '') {
+		if(strpos($module, '_') === FALSE){
+			if(!$this->column_fields['potype'])
+				die('potype manquant');
+			$module .= '_' . $this->column_fields['potype'];
+		}
+		return parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
+	}
+	
 	/** Function to get activities associated with the Purchase Order
 	 *  This function accepts the id as arguments and execute the MySQL query using the id
 	 *  and sends the query and the id as arguments to renderRelatedActivities() method

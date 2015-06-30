@@ -749,6 +749,22 @@ class Documents extends CRMEntity {
 		$log->debug("Exiting get_products method ...");
 		return $return_value;
 	 }
-
+	
+	/* ED150630
+	 * Compteur de l'entité
+	 * Différencie les compteurs suivant le dossier
+	 */
+	function setModuleSeqNumber($mode, $module, $req_str = '', $req_no = '') {
+		if(strpos($module, '_') === FALSE){
+			if(!$this->column_fields['folderid'])
+				die('folderid manquant');
+			switch($this->column_fields['folderid']){
+			 case COUPON_FOLDERID :
+				$module .= '_' . COUPON_FOLDERNAME;
+				break;
+			}
+		}
+		return parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
+	}
 }
 ?>

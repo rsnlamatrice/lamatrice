@@ -217,7 +217,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$moduleName = $request->getModule();
 
 		if(!$this->record){
-		$this->record = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);
+				$this->record = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);
 		}
 		$recordModel = $this->record->getRecord();
 		$recordStrucure = Vtiger_RecordStructure_Model::getInstanceFromRecordModel($recordModel, Vtiger_RecordStructure_Model::RECORD_STRUCTURE_MODE_DETAIL);
@@ -257,7 +257,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$viewer->assign('IS_AJAX_ENABLED', $this->isAjaxEnabled($recordModel));
 		$viewer->assign('SUMMARY_RECORD_STRUCTURE', $recordStrucure->getStructure());
 		
-		/* ED141210 court-circuite les activitŽs */
+		/* ED141210 court-circuite les activitÅ½s */
 		$no_activities = $viewer->getVariable('NO_ACTIVITIES_WIDGET');
 		if(!$no_activities){
 			$viewer->assign('RELATED_ACTIVITIES', $this->getActivities($request));

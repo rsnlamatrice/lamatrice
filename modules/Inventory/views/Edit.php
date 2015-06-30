@@ -19,6 +19,11 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 
 		if(!empty($record)  && $request->get('isDuplicate') == true) {
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
+			
+			//ED150630
+			if($recordModel->get('sent2compta'))
+				$recordModel->set('sent2compta', null);
+				
 			$currencyInfo = $recordModel->getCurrencyInfo();
 			$taxes = $recordModel->getProductTaxes();
 			$shippingTaxes = $recordModel->getShippingTaxes();
@@ -168,12 +173,17 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$viewer->assign('NOT_EDITABLE', 'LBL_ALREADY_SENT_2_COMPTA');
 		
 		//ED150629
-		if($moduleName == 'PurchaseOrder'){
-			if($request->get('potype') && !$recordModel->get('potype')){
+		if($moduleName === 'PurchaseOrder'){
+			if($request->get('potype') && (empty($record) || $request->get('isDuplicate'))){
 				$recordModel->set('potype', $request->get('potype'));
 			}
 			$fieldList['potype']->set('fieldvalue', $recordModel->get('potype'));
 			$viewer->assign('POTYPE_FIELD_MODEL', $fieldList['potype']);
+			
+			if($recordModel->get('potype') !== 'invoice'){
+				//suppression du champ sent2compta ailleurs qu'en facture
+			}
+			
 		}
 		
 		$viewer->view('EditView.tpl', 'Inventory');

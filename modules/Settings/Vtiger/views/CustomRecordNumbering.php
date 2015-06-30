@@ -17,7 +17,13 @@ class Settings_Vtiger_CustomRecordNumbering_View extends Settings_Vtiger_Index_V
 
 		$sourceModule = $request->get('sourceModule');
 		if ($sourceModule) {
-			$defaultModuleModel = $supportedModules[getTabid($sourceModule)];
+			//ED150630 : attention, changement d'indexation (on passe de l'id au nom du module)
+			//$defaultModuleModel = $supportedModules[getTabid($sourceModule)];
+			$defaultModuleModel = $supportedModules[$sourceModule];
+			if(!$defaultModuleModel)
+				foreach($supportedModules AS $defaultModuleModel)
+					if($defaultModuleModel->getName() == $sourceModule)
+						break;
 		} else {
 			$defaultModuleModel = reset($supportedModules);
 		}
