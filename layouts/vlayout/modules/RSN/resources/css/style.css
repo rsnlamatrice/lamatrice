@@ -59,6 +59,10 @@ label {
     margin-top: 8px;
 }
 
+
+.ui-icon.square-green { width: 12px; height: 12px; background-image: url(../images/Square-green.png); }
+.ui-icon.square-red { width: 12px; height: 12px; background-image: url(../images/Square-red.png); }
+
 .visible-on-hover {
   min-width: 2em;
 }

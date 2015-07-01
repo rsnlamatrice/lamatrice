@@ -28,6 +28,15 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	}
 
 	/**
+	 * Function to set is abonné
+	 * @param $isAbonne
+	 * @return <Boolean> - 
+	 */
+	public function setAbonne($isAbonne) {
+		return $this->set('isabonne', $isAbonne ? 1 : 0);
+	}
+
+	/**
 	 * Function to test if abotype equals 'Abonné(e) à vie'
 	 * @return <Boolean> - 
 	 */
@@ -107,4 +116,23 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 			return $toDay;
 		return $this->getFinAbo();
 	}
+	
+		/**
+	 * ED141005
+	 * getPicklistValuesDetails
+	 */
+	public function getPicklistValuesDetails($fieldname){
+		switch($fieldname){
+			case 'isabonne':
+				return array(
+					'0' => array( 'label' => 'Non', 'icon' => 'ui-icon square-red' ),
+					'1' => array( 'label' => 'Oui', 'icon' => 'ui-icon square-green' )
+				);
+			
+			default:
+				return parent::getPicklistValuesDetails($fieldname);
+		}
+	}
+	
+
 }

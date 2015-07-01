@@ -58,14 +58,20 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
 			$massActionLink = array(
 				'linktype' => 'LISTVIEWMASSACTION',
+				'linklabel' => '---',
+				'linkurl' => '',
+				'linkicon' => ''
+			);
+			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+		
+			$massActionLink = array(
+				'linktype' => 'LISTVIEWMASSACTION',
 				'linklabel' => 'LBL_ASSIGN_CRITERE4D',
 				'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignCritere4D("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=assignCritere4D")',
 				'linkicon' => ''
 			);
 			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
-		}
-		$moduleModel = $this->getModule();
-		if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
+		
 			$massActionLink = array(
 				'linktype' => 'LISTVIEWMASSACTION',
 				'linklabel' => 'LBL_UNASSIGN_CRITERE4D',
