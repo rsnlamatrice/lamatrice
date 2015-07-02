@@ -97,6 +97,7 @@ class ListViewController {
 				} else {
 					//TODO handle multiple module names overriding each other.
 					$nameList = getEntityName($module, $idList);
+					//ED140000
 					if($meta->getUIColorField()){
 						$moduleModel = Vtiger_Module_Model::getInstance($module);
 						$uicolorField = Vtiger_Field_Model::getInstance( $meta->getUIColorField(), $moduleModel);

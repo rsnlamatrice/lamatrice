@@ -6,6 +6,7 @@
 //Valeurs exactes des items de la picklist rsnabotype
 define('RSNABOREVUES_TYPE_ABO_PAYANT', 'Abonné(e) payant');
 define('RSNABOREVUES_TYPE_ABO_A_VIE', 'Abonné(e) à vie');
+define('RSNABOREVUES_TYPE_ABO_ADHERENT', 'Abonné(e) comme adhérent(e)');
 define('RSNABOREVUES_TYPE_NE_PAS_ABONNER', 'Ne pas abonner');
 define('RSNABOREVUES_TYPE_NON_ABONNE', 'Non abonné');
 define('RSNABOREVUES_TYPE_NUM_DECOUVERTE', 'Un n° découverte');
@@ -43,6 +44,14 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	public function isTypeAbonneAVie() {
 		return $this->get('abotype') == RSNABOREVUES_TYPE_ABO_A_VIE;
 	}
+
+	/**
+	 * Function to test if abotype equals 'Abonnement groupé'
+	 * @return <Boolean> - 
+	 */
+	public function isTypeAboGroupe() {
+		return $this->get('abotype') == RSNABOREVUES_TYPE_ABO_GROUPE;
+	}
 	
 	/**
 	 * Function to test if abotype equals 'Ne pas abonner'
@@ -50,6 +59,22 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function isTypeNePasAbonner() {
 		return $this->get('abotype') == RSNABOREVUES_TYPE_NE_PAS_ABONNER;
+	}
+	
+	/**
+	 * Function to test if abotype equals 'Revue découverte'
+	 * @return <Boolean> - 
+	 */
+	public function isTypeDecouverte() {
+		return $this->get('abotype') == RSNABOREVUES_TYPE_NUM_DECOUVERTE;
+	}
+	
+	/**
+	 * Function to test if abotype equals 'Merci de votre soutien'
+	 * @return <Boolean> - 
+	 */
+	public function isTypeMerciSoutien() {
+		return $this->get('abotype') == RSNABOREVUES_TYPE_NUM_MERCI;
 	}
 	
 	/**
@@ -87,6 +112,21 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	/**
+	 * Function to get le nombre d'exemplaires
+	 * @return <DateTime> - 
+	 */
+	public function getNbExemplaires() {
+		return $this->get('nbexemplaires');
+	}
+	/**
+	 * Function to set le nombre d'exemplaires
+	 * @return $this 
+	 */
+	public function setNbExemplaires($value) {
+		return $this->set('nbexemplaires', $value);
+	}
+	
+	/**
 	 * Retourne la date à partir de laquelle un nouvel abonnement peut être ajouté à la suite
 	 * Teste que l'abonnement n'est pas en cours ou que le type permet de commencer un nouvel abonnement
 	 * @return <DateTime> - 
@@ -117,7 +157,7 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 		return $this->getFinAbo();
 	}
 	
-		/**
+	/**
 	 * ED141005
 	 * getPicklistValuesDetails
 	 */

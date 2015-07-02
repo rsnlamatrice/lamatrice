@@ -284,7 +284,8 @@ class Vtiger_Functions {
 			$metadatas = self::getCRMRecordMetadata($ids);
 			$result = array();
 			foreach ($metadatas as $data) {
-				$result[$data['crmid']] = $data['label'];
+				if(!$module || $data['setype'] == $module) //ED150702 : limite le retour au module demandé
+					$result[$data['crmid']] = $data['label'];
 			}
 			return $result;
 		}

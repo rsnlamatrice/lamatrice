@@ -264,7 +264,7 @@ class WebserviceField{
 			}
 			
 			//to handle hardcoding done for Calendar module todo activities.
-			if($this->tabid == 9 && $this->fieldName =='parent_id'){
+			if(($this->tabid == 9 || $this->tabid == 16) && $this->fieldName =='parent_id'){
 				$referenceTypes[] = 'Invoice';
 				$referenceTypes[] = 'Quotes';
 				$referenceTypes[] = 'PurchaseOrder';
@@ -278,6 +278,7 @@ class WebserviceField{
 			if(!is_admin($current_user)) {
 				array_push($accessibleTypes, 'Users');
 			}
+			//var_dump($this->tabid, $this->fieldName, $accessibleTypes,$referenceTypes, array_intersect($accessibleTypes,$referenceTypes));
 			$referenceTypes = array_values(array_intersect($accessibleTypes,$referenceTypes));
 			$referenceList[$this->getFieldId()] = $referenceTypes;
 			$this->referenceList = $referenceTypes;

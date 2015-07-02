@@ -1,8 +1,8 @@
 <?php
 /*+***********************************************************************************
  * Affiche la page d'un outil
- * La liste est affichée dans le bandeau vertical de gauche,
- * 	initialisée dans Module.php::getSideBarLinks()
+ * La liste est affichÃ©e dans le bandeau vertical de gauche,
+ * 	initialisÃ©e dans Module.php::getSideBarLinks()
  *************************************************************************************/
 require_once('modules/RSN/models/ImportCogilogFactures.php');
 require_once('modules/RSN/models/ImportCogilogAffaires.php');
@@ -15,7 +15,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		return parent::preProcess($request, $request);
 	}
 	
-	/* les url doivent contenir le paramètre sub désignant l'outil à afficher */
+	/* les url doivent contenir le paramÃ¨tre sub dÃ©signant l'outil Ã  afficher */
 	public function process(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
@@ -91,6 +91,10 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->defineMissingLabels();
 			break;
 		
+		case 'TestsED' :
+			$this->addRelatedTask();
+			break;
+		
 		default:
 			$viewer->assign('HTML_DATA', "Inconnu : \"$sub\"");
 			break;
@@ -151,10 +155,10 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		else
 			$query = 'SELECT * FROM ' . $table_name . ' LIMIT 50';
 		
-		// Exécution de la requête SQL
+		// ExÃ©cution de la requÃªte SQL
 		$result = pg_query($query);
 		if(!$result){
-			return '<code>Échec de la requête : ' . pg_last_error() .'</code>'
+			return '<code>Ã‰chec de la requÃªte : ' . pg_last_error() .'</code>'
 					. '<br>'.$query;
 		}
 		
@@ -164,7 +168,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		    $rows[] = $line;
 		}
 		
-		// Libère le résultat
+		// LibÃ¨re le rÃ©sultat
 		pg_free_result($result);
 		
 		// Ferme la connexion
@@ -174,7 +178,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	}
 	
 	private function get_db_connect(){
-		// Connexion, sélection de la base de données
+		// Connexion, sÃ©lection de la base de donnÃ©es
 		include_once('config.cogilog.php');
 		global $cogilog_config;
 		$cxString = 'host='.$cogilog_config['db_server'].' port='.$cogilog_config['db_port'].' dbname='.$cogilog_config['db_name'].' user='.$cogilog_config['db_username'].' password='.$cogilog_config['db_password'];

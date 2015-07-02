@@ -44,38 +44,138 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$invoiceId = $entity->getId();
 		$data = $entity->getData();
 		$invoice = Vtiger_Record_Model::getInstanceById($invoiceId, $moduleName);
+		
+		$account = Vtiger_Record_Model::getInstanceById($invoice->get('account_id'), 'Accounts');
+		if(!$account){
+			$log->debug("handleAfterSaveInvoiceEvent, pas de compte défini");
+			//TODO Alert
+			return;
+		}
+		
 		$lineItems = $invoice->getProducts();
 		$log->debug("handleAfterSaveInvoiceEvent lineItems " . print_r($lineItems, true));
 		$categories = array(); //items by category
 		$invoiceData = false; //first item
+		$totalDons = 0;
 		foreach($lineItems as $nLine => $lineItem){
 			if(!$invoiceData)
 				$invoiceData = $lineItem;
-			$productCategory = $lineItem['hdnProductCategory'.$nLine];
+			$productCategory = html_entity_decode($lineItem['hdnProductCategory'.$nLine]);
 			if(!array_key_exists($productCategory, $categories))
 				$categories[$productCategory] = array();
 			$categories[$productCategory][$nLine] = $lineItem;
+				
+			if($productCategory == 'Dons'){
+				$totalDons += (float)$lineItem[ 'netPrice'.$nLine ];
+			}
 		}
 		
 		$log->debug("handleAfterSaveInvoiceEvent Categories " . print_r(array_keys($categories), true));
 		
+		//Traitement par catégorie de produits
+		//Abonnements
 		foreach($categories as $productCategory => $categoryItems)
 			switch($productCategory){
 			case 'Abonnement' :
-				$this->handleAfterSaveInvoiceAbonnementsEvent($invoice, $categoryItems);
+				$this->handleAfterSaveInvoiceAbonnementsEvent($invoice, $categoryItems, $account);
 				break;
 			default:
 				break;
 			}
+		//Autres, après les abonnements
+		foreach($categories as $productCategory => $categoryItems)
+			switch($productCategory){
+			case 'Adhésion' :
+				$this->handleAfterSaveInvoiceAdhesionEvent($invoice, $categoryItems, $account);
+				break;
+			default:
+				break;
+			}
+		//Sur le critère du montant total de la facture
 		if($invoiceData){
-			$this->handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems);
+			$this->handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems, $account, $totalDons);
 		}
+		
 		$log->debug("OUT handleAfterSaveInvoiceEvent");
+	}
+	
+	/* ED150507 Règles de gestion lors de la validation d'une facture, article d'adhésion
+	 * Abonnement d'un an
+	 */
+	public function handleAfterSaveInvoiceAdhesionEvent($invoice, $categoryItems, $account){
+		global $log;
+		$log->debug("IN handleAfterSaveInvoiceAdhesionEvent");
+		
+		$toDay = new DateTime();
+		$invoiceDate = new DateTime($invoice->get('invoicedate'));
+		$rsnAboRevues = $account->getRSNAboRevues();
+		
+		//Contrôle si cette facture a déjà généré un abonnement
+		if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoice->getId())){
+			$log->debug("handleAfterSaveInvoiceAdhesionEvent, cette facture a déjà généré un abonnement");
+			return;
+		}
+		
+		//Parcourt l'historique pour clôturer les en-cours périmés
+		self::check_IsAbonne_vs_DateFin($rsnAboRevues);
+		
+		//Parcourt l'historique par date décroissante
+		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
+			if($rsnAboRevue->isAbonne()){
+				if($rsnAboRevue->isTypeAbonneAVie()){
+					$log->debug("handleAfterSaveInvoiceAdhesionEvent, isTypeAbonneAVie");
+					return;
+				}
+				else {
+					$rsnAboRevueCourant = $rsnAboRevue;
+					break;
+				}
+			}
+			elseif($rsnAboRevue->isTypeNePasAbonner()){
+				$log->debug("handleAfterSaveInvoiceAdhesionEvent, isTypeNePasAbonner");
+				return;
+			}
+		}
+		if($rsnAboRevueCourant){
+			$dateDebut = $rsnAboRevueCourant->getFinAbo();
+		}
+		else {
+			$dateDebut = $invoiceDate;
+		}
+		$dateFin = self::getDateFinAbo($dateDebut, 12);
+		
+		if($dateFin && $dateFin > $toDay){
+			$aboRevue = $this->createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, RSNABOREVUES_TYPE_ABO_ADHERENT);
+		}
+		$log->debug("OUT handleAfterSaveInvoiceAdhesionEvent");
+	}
+	
+	/**
+	 * Création d'un abonnement
+	 */
+	public function createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, $aboType){
+		global $log;
+		$toDay = new DateTime();
+		
+		$aboRevue = Vtiger_Record_Model::getCleanInstance('RSNAboRevues');
+		$aboRevue->set('mode', 'create');
+		$aboRevue->set('account_id', $account->getId());
+		$aboRevue->set('sourceid', $invoice->getId());
+		$aboRevue->setAbonne(!$dateFin || ($dateFin > $toDay && $dateFin > $dateDebut));
+		$aboRevue->setDebutAbo($dateDebut);
+		$aboRevue->setFinAbo($dateFin);
+		$aboRevue->set('rsnabotype', $aboType);
+		$aboRevue->set('nbexemplaires', $nbExemplaires);
+		
+		$aboRevue->save();
+		$aboRevue->set('mode', '');
+		$log->debug("handleAfterSaveInvoiceAdhesionEvent 'nouveau $aboRevue->getLabel()'");
+		return $aboRevue;
 	}
 	
 	/* ED150507 Règles de gestion lors de la validation d'une facture, article d'abonnement
 	*/
-	public function handleAfterSaveInvoiceAbonnementsEvent($invoice, $categoryItems){
+	public function handleAfterSaveInvoiceAbonnementsEvent($invoice, $categoryItems, $account){
 		global $log;
 		$log->debug("IN handleAfterSaveInvoiceAbonnementsEvent");
 		
@@ -83,12 +183,6 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$prochaineRevue = $productModel->getProchaineRevue();
 		if(!$prochaineRevue){
 			$log->debug("handleAfterSaveInvoiceAbonnementsEvent, pas de prochaineRevue définie");
-			//TODO Alert
-			return;
-		}
-		$account = Vtiger_Record_Model::getInstanceById($invoice->get('account_id'), 'Accounts');
-		if(!$account){
-			$log->debug("handleAfterSaveInvoiceAbonnementsEvent, pas de compte défini");
 			//TODO Alert
 			return;
 		}
@@ -101,28 +195,17 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$rsnAboRevueCourant = false;
 		if($rsnAboRevues){
 			//Contrôle si cette facture a déjà généré un abonnement
-			foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
-				if($rsnAboRevue->get('sourceid') == $invoiceId){
-					$log->debug("handleAfterSaveInvoiceAbonnementsEvent, cette facture a déjà généré un abonnement");
-					//TODO Alert
-					return;
-				}
+			if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoiceId)){
+				$log->debug("handleAfterSaveInvoiceAbonnementsEvent, cette facture a déjà généré un abonnement");
+				return;
 			}
+			
 			//Parcourt l'historique pour clôturer les en-cours périmés
-			foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
-				if( $rsnAboRevue->isAbonne()
-				&& $rsnAboRevue->getFinAbo()
-				&& $rsnAboRevue->getFinAbo() < $toDay){
-					$log->debug("handleAfterSaveInvoiceAbonnementsEvent rsnAboRevue abonnement périmé");
-					$rsnAboRevue->setAbonne(false);
-					$rsnAboRevue->set('mode', 'edit');
-					$rsnAboRevue->save();
-				}
-			}
+			self::check_IsAbonne_vs_DateFin($rsnAboRevues);
+			
 			//Parcourt l'historique par date décroissante
 			foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
-				$isAbonne = $rsnAboRevue->isAbonne();
-				if($isAbonne){
+				if($rsnAboRevue->isAbonne()){
 					if($rsnAboRevue->isTypeAbonneAVie()){
 						$rsnAboRevueCourant = $rsnAboRevue;
 						$abonneAVie = true;
@@ -146,16 +229,9 @@ class RSNInvoiceHandler extends VTEventHandler {
 		//Décompte des abonnements groupés
 		$nbExemplairesGroupes = 0;
 		foreach($categoryItems as $nLine => $lineItem){
-			switch($productCode){
-			case 'RABO': //Abonnement d'un an à la revue
-			case 'RABOS': //Abonnement de soutien d'un an à la revue				
-				break;
-			case 'RSGR': //Abonnements groupés
+			$productCode = $lineItem['hdnProductcode'.$nLine];
+			if($productCode === 'RSGR'){ //Abonnements groupés (supplémentaires)
 				$nbExemplairesGroupes += $lineItem['qty'.$nLine];
-				break;
-			default:
-				//TODO What to do ?
-				continue;
 			}
 		}
 		
@@ -178,8 +254,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 					$aboType = RSNABOREVUES_TYPE_ABO_PAYANT; //TODO Distinguer "de soutien" ?
 				//TODO $dateFin dépend de l'historique actuel
 				$dateDebut = $startDateOfNextAbo && $startDateOfNextAbo > $invoiceDate ? $startDateOfNextAbo : $invoiceDate;
-				$dateFin = clone $dateDebut; // $prochaineRevue->get('sales_start_date')
-				$dateFin->modify( '+1 month' )->modify( '+1 year' );
+				$dateFin = self::getDateFinAbo($dateDebut, 12);
 				
 				$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " . ($startDateOfNextAbo ? $startDateOfNextAbo->format('d/m/Y') : 'false')
 					    . ", dateDebut = " . $dateDebut->format('d/m/Y') . ' (' . ($dateDebut === $dateFin ? "===" : "!!!") . ')'
@@ -216,8 +291,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 				//TODO vérifier si c'est un n° ou 1 an
 				$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
 				$dateDebut = $startDateOfNextAbo ? $startDateOfNextAbo : $invoiceDate;
-				$dateFin = new DateTime();
-				$dateFin->modify( '+3 month' );
+				$dateFin = self::getDateFinAbo($toDay, 3);
 				//L'abonnement actuel finit dans plus de 3 mois
 				if($dateDebut > $dateFin)
 					continue;
@@ -233,28 +307,72 @@ class RSNInvoiceHandler extends VTEventHandler {
 				continue;
 			}
 			if($dateFin){
-				
-				$aboRevue = Vtiger_Record_Model::getCleanInstance('RSNAboRevues');
-				$aboRevue->set('mode', 'create');
-				$aboRevue->set('account_id', $account->getId());
-				$aboRevue->set('sourceid', $invoiceId);
-				$aboRevue->setAbonne(!$dateFin || $dateFin > $today);
-				$aboRevue->setDebutAbo($dateDebut);
-				$aboRevue->setFinAbo($dateFin);
-				$aboRevue->set('rsnabotype', $aboType);
-				$aboRevue->set('nbexemplaires', $nbExemplaires);
-				
-				$aboRevue->save();
-				$aboRevue->set('mode', '');
-				$log->debug("handleAfterSaveInvoiceAbonnementsEvent 'nouveau $aboRevue->getLabel()'");
+				$aboRevue = $this->createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, $aboType);
 				break;
 			}
 		}
 		
+		//Il est important d'avoir un abonnement pour chaque facture (via le champ sourceid)
+		// pour que le prochain enregistrement de la facture ne recrée pas une modif cumulative
 		if($nbExemplairesGroupes){
 			//TODO 
 			$log->debug("handleAfterSaveInvoiceAbonnementsEvent : Attention, abonnements supplémentaires sans abonnement principal");
 			
+			$aboType = RSNABOREVUES_TYPE_ABO_GROUPE;
+					
+			//Parcourt l'historique par date décroissante pour trouver un abonnement groupé
+			$rsnAboRevueCourant = false;
+			$dateDebut = false;
+			foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
+				$isAbonne = $rsnAboRevue->isAbonne();
+				if($isAbonne){
+					if($rsnAboRevue->isTypeAboGroupe()
+					|| $rsnAboRevue->getNbExemplaires() > 1
+					|| $dateDebut == $invoiceDate()){
+						$dateDebut = $rsnAboRevue->getDebutAbo();
+						$dateFin = $rsnAboRevue->getFinAbo();
+						if(!$dateFin){
+							$log->debug("handleAfterSaveInvoiceAbonnementsEvent, un abonnement groupé existe sans date de fin");
+							$dateDebut = $invoiceDate;
+						}
+						//A 3 mois de la fin d'un précédent abonnement, on prolonge
+						elseif(abs($rsnAboRevue->getFinAbo() - $invoiceDate) < 3*24*3600){
+							$dateDebut = $invoiceDate;
+							$dateFin = self::getDateFinAbo($dateDebut, 12);
+							$rsnAboRevue->set('mode', 'edit');
+							if($rsnAboRevue->getNbExemplaires() < $nbExemplairesGroupes)
+								$rsnAboRevue->setNbExemplaires($nbExemplairesGroupes);
+							$rsnAboRevue->setFinAbo($invoiceDate);
+							$rsnAboRevue->save();
+							
+							$rsnAboRevueCourant = $rsnAboRevue;
+						}
+						else {//sinon , on crée un abonnement parallèle
+							$dateDebut = $invoiceDate;
+						}
+						$log->debug("handleAfterSaveInvoiceAbonnementsEvent, isTypeAboGroupe");
+						break;
+					}
+				}
+			}
+			if($nbExemplairesGroupes
+			&& (!$dateFin || $dateFin > $toDay)){
+				if(!$dateDebut){
+					if($rsnAboRevueCourant){
+						$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
+						$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
+						$dateDebut = $startDateOfNextAbo && $startDateOfNextAbo > $invoiceDate ? $startDateOfNextAbo : $invoiceDate;
+					}
+					else {
+						$dateDebut = $invoiceDate;
+					}
+				}
+				$dateFin = self::getDateFinAbo($dateDebut, 12);
+				if($dateFin > $toDay){
+					$aboRevue = $this->createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplairesGroupes, $aboType);
+				}
+			}
+			$this->addRelatedTask($invoice, "Veuillez contrôler l'abonnement groupé du contact.");
 		}
 		
 		
@@ -262,11 +380,162 @@ class RSNInvoiceHandler extends VTEventHandler {
 		return $aboRevue;
 	}
 	
+	
+	/**
+	 * Déjà traité
+	 */
+	public static function isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoiceId){
+		//Contrôle si cette facture a déjà généré un abonnement
+		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
+			if($rsnAboRevue->get('sourceid') == $invoiceId){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	//Parcourt l'historique pour clôturer les en-cours périmés
+	public static function check_IsAbonne_vs_DateFin($rsnAboRevues){
+		global $log;
+		$toDay = new DateTime();
+		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
+			if( $rsnAboRevue->isAbonne()
+			&& $rsnAboRevue->getFinAbo()
+			&& $rsnAboRevue->getFinAbo() < $toDay){
+				$log->debug("handleAfterSaveInvoiceAbonnementsEvent rsnAboRevue abonnement périmé");
+				$rsnAboRevue->setAbonne(false);
+				$rsnAboRevue->set('mode', 'edit');
+				$rsnAboRevue->save();
+			}
+		}
+	}
+	
+	public static function getDateFinAbo($dateDebut, $nbMonths){
+		$dateFin = clone $dateDebut; // $prochaineRevue->get('sales_start_date')
+		$dateFin->modify('first day of this month')->modify( '+' . $nbMonths . ' month' );
+		return $dateFin;
+	}
+	
 	/* ED150507 Règles de gestion lors de la validation d'une facture, d'après le montant total */
-	public function handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems){
+	public function handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems, $account, $totalDons){
 		global $log;
 		$log->debug("IN handleAfterSaveInvoiceTotalEvent");
 		
+		$grandTotal = (float)$lineItems[1]['final_details']['grandTotal'];
+		
+		$toDay = new DateTime();
+		
+		$country = $account->get('billcountry');
+		$foreigner = $country && $country != 'France';
+		
+		$nbTrimestresGratos = false; //càd, n° de la revue
+		$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
+		
+		//TODO : prélèvement == 1 an
+		
+		// Les étrangers, pour moins de 20€ n'ont le droit à rien
+		if($grandTotal < 20 && $foreigner){
+			//walou
+		}
+		// Pour plus de 48 € de commande ou de dons, un an
+		elseif($grandTotal >= 48){
+			$nbTrimestresGratos = 4;
+		}
+		// Pour des dons de moins de 10 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
+		elseif($grandTotal < 48 && $totalDons < 10){
+			$nbTrimestresGratos = 1;
+		}
+		// Pour des dons de moins de 48 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
+		elseif($grandTotal < 48 && $totalDons < 48){
+			$nbTrimestresGratos = 1;
+		}
+		// Pour moins de 48 € de commande, un n° de découverte si le dernier n° envoyé date d'un an au moins
+		elseif($grandTotal < 48){
+			$nbTrimestresGratos = 1;
+		}
+		// Pour moins de 10 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
+		elseif($grandTotal < 10){
+			$nbTrimestresGratos = 1;
+		}
+		// Abonnement d'un an
+		else {
+			$nbTrimestresGratos = 4;
+		}
+		
+		$rsnAboRevues = $account->getRSNAboRevues();
+		
+		//Contrôle si cette facture a déjà généré un abonnement
+		if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoice->getId())){
+			$log->debug("handleAfterSaveInvoiceTotalEvent, cette facture a déjà généré un abonnement");
+			return;
+		}
+		//Parcourt l'historique pour clôturer les en-cours périmés
+		self::check_IsAbonne_vs_DateFin($rsnAboRevues);
+		
+		//Parcourt l'historique par date décroissante
+		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
+			if($rsnAboRevue->isAbonne()){
+				if($rsnAboRevue->isTypeAbonneAVie()){
+					$rsnAboRevueCourant = $rsnAboRevue;
+					$abonneAVie = true;
+					$log->debug("handleAfterSaveInvoiceAbonnementsEvent, abonneAVie");
+					break;
+				}
+				else {
+					$rsnAboRevueCourant = $rsnAboRevue;
+					$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
+					$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
+					break;
+				}
+			}
+			elseif($rsnAboRevue->isTypeNePasAbonner()){
+				$log->debug("handleAfterSaveInvoiceAbonnementsEvent, isTypeNePasAbonner");
+				return;
+			}
+		}
+		
+		
+		if($nbTrimestresGratos){
+			$invoiceDate = new DateTime($invoice->get('invoicedate'));
+			$dateFin = self::getDateFinAbo($invoiceDate, $nbTrimestresGratos * 3 + 1);
+			if($rsnAboRevueCourant){
+				$dateDebut = $rsnAboRevueCourant->getFinAbo();
+			}
+			else {
+				$dateDebut = $invoiceDate;
+			}
+			if($dateFin > $dateDebut && $dateFin > $toDay)
+				$aboRevue = $this->createAboRevue($invoice, $account, $dateDebut, $dateFin, 1, $aboType);
+		}
+		
 		$log->debug("OUT handleAfterSaveInvoiceTotalEvent");
+		die();
 	}
+	
+	//Ajoute une tâche d'alerte
+	public function addRelatedTask($invoice, $message){
+		global $log;
+		
+		$log->debug("handleAfterSaveInvoice addRelatedTask IN");
+		
+		$task = Vtiger_Record_Model::getCleanInstance('Calendar');
+		
+		$task->set('mode', 'create');
+		$task->set('date_start', date('Y-m-d'));
+		$task->set('contact_id', $invoice->get('contact_id'));
+		$task->set('parent_id', $invoice->getId());
+		$task->set('parent_type', 'Invoice');
+		$task->set('subject', $message);
+		$task->set('eventstatus', 'Planned');
+		$task->set('activitytype', 'Contrôle des données');
+		if(strlen($message) > 255)
+			$task->set('description', $message);
+		
+		$task->save();
+		$task->set('mode', '');
+		$log->debug("handleAfterSaveInvoice addRelatedTask OUT");
+		
+		return $task;
+	}
+	
 }

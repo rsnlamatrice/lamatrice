@@ -150,21 +150,6 @@ Class Calendar_Edit_View extends Vtiger_Edit_View {
 		$viewer->assign('INVITIES_SELECTED', $recordModel->getInvities());
 		$viewer->assign('CURRENT_USER', $currentUser);
 		
-		/* ED140916 TEST*/
-		$tous_les_rel2 = array(
-			"1" => "Mon premier",
-			"2" => "Mon second",
-			"3" => "Mon troisieme",
-			"4" => "Mon quatrieme",
-		);
-		$viewer->assign('TOUS_LES_REL2', $tous_les_rel2);
-	
-		$mes_rel2 = array(
-			"2",
-			"3",
-		);
-		$viewer->assign('MES_REL2', $mes_rel2);
-
 		$viewer->view('EditView.tpl', $moduleName);
 	}
 
