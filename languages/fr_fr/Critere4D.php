@@ -27,7 +27,7 @@ $languageStrings = array(
 	'LBL_CUSTOM_INFORMATION' => '',
 	'LBL__COUNTER_' => 'Affectations',
 	'LBL_DATEAPPLICATION' => 'Date d\'application',
-
+	'LBL_DELETE_RELATIONS' => 'Supprimer les affectations',
 );
 
 ?>

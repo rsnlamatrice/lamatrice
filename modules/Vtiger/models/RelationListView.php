@@ -136,6 +136,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		foreach($deleteLinks as $deleteLinksModel) {
 			$deleteLinksModel->set('_deleteRelation',true)->set('_module',$relationModel->getRelationModuleModel());
 		}
+		
 		$addLinks = $this->getAddRelationLinks();
 		$links = array_merge($selectLinks, $addLinks, $deleteLinks);
 		$relatedLink = array();
@@ -173,7 +174,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 	public function getDeleteRelationLinks() {
 		$relationModel = $this->getRelationModel();
 		$deleteLinkModel = array();
-
+		
 		if(!$relationModel->isDeleteActionSupported()) {
 			return $deleteLinkModel;
 		}
@@ -183,7 +184,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		$deleteLinkList = array(
 			array(
 				'linktype' => 'LISTVIEWBASIC',
-				'linklabel' => vtranslate('LBL_DELETE')." ".vtranslate($relatedModel->get('label')),
+				'linklabel' => vtranslate('LBL_DELETE_RELATIONS', $relationModel->getParentModuleModel()->getName()),
 				'linkurl' => $this->getDeleteRelationUrl(),
 				'linkicon' => '',
 			)
@@ -250,11 +251,18 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		}
 		
 		$query = $this->getRelationQuery();
+		
+		//ED150704
+		$searchKey = $this->get('search_key');
+		if(!empty($searchKey)) {
+			$query = $this->updateQueryWithSearchCondition($query);
+		}
+
 		//echo "<pre>".__FILE__." getRelationQuery : $query</pre>";
 		if ($this->get('whereCondition')) {
 			$query = $this->updateQueryWithWhereCondition($query);
 		}
-
+		
 		
 		$startIndex = $pagingModel->getStartIndex();
 		$pageLimit = $pagingModel->getPageLimit();
@@ -291,6 +299,11 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		//echo "<pre>".__FILE__." : $query</pre>";
 		//echo_callstack();
 		$result = $db->pquery($limitQuery, array());
+		//ED150704
+		if(!$result){
+			echo "<code>Désolé, la formulation de la recherche provoque une erreur.</code>";
+			return array();
+		}
 		$relatedRecordList = array();
 		
 		$max_rows = min($db->num_rows($result), $pageLimit);/* ED140907 + 1 instead of two db query */
@@ -380,9 +393,41 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			}
 			break;
 		}
+		
+		//ED150704
+		$this->initListViewHeadersFilters($listViewHeaders);
+		
 		return $headerFields;
 	}
 
+	/** ED150414
+	 * Function to init fields as list view header filters
+	 * @return <Array> - List of Vtiger_Field_Model instances
+	 */
+	protected function initListViewHeadersFilters($listViewHeaders) {
+		
+		$search_fields = $this->get('search_key');
+		$search_texts = $this->get('search_value');
+		$operators = $this->get('operator');
+		//ED150414 may be array of fields, then values and operators are also arrays
+		if(!is_array($search_fields))
+			$search_fields = array($search_fields);
+		if(!is_array($search_texts))
+			$search_texts = array($search_texts);
+		if(!is_array($operators))
+			$operators = array($operators);
+		for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++){
+			$fieldName = $search_fields[$i];
+			if(isset($listViewHeaders[$fieldName])
+			&&  !($search_texts[$i] == '' && $operators[$i] == 'e')){
+				//var_dump($fieldName, $search_texts[$i]);
+				$listViewHeaders[$fieldName]->set('fieldvalue', $search_texts[$i]);
+				$listViewHeaders[$fieldName]->set('filterOperator', $operators[$i]);
+			}
+		}
+		return $listViewHeaders;
+	}
+	
 	/**
 	 * Function to get Relation query
 	 * @return <String>
@@ -466,6 +511,91 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		} else {
 			$updatedQuery = $relationQuery . ' WHERE ' . $condition;
 		}
+		return $updatedQuery;
+	}
+
+	/** ED150704
+	 * Function to update relation query
+	 * @param <String> $relationQuery
+	 * @return <String> $updatedQuery
+	 */
+	public function updateQueryWithSearchCondition($relationQuery) {
+		$condition = '';
+
+		$searchKey = $this->get('search_key');
+		$searchValue = $this->get('search_value');
+		$operator = $this->get('operator');
+		//var_dump($searchKey, $operator, $searchValue);
+		$whereCondition = array();
+		for($i = 0; $i < count($searchKey); $i++){
+			$value = str_replace("'", "\'", $searchValue[$i]);
+			switch($operator[$i]) {
+				case 'e': $sqlOperator = "=";
+					break;
+				case 'n': $sqlOperator = "<>";
+					break;
+				case 's': $sqlOperator = "LIKE";
+					$value = "$value%";
+					break;
+				case 'ew': $sqlOperator = "LIKE";
+					$value = "%$value";
+					break;
+				case 'ct'://ED150619
+				case 'ca'://ED150619
+				case 'c': $sqlOperator = "LIKE";
+					$value = "%$value%";
+					break;
+				case 'kt'://ED150619
+				case 'ka'://ED150619
+				case 'k': $sqlOperator = "NOT LIKE";
+					$value = "%$value%";
+					break;
+				case 'l': $sqlOperator = "<";
+					break;
+				case 'g': $sqlOperator = ">";
+					break;
+				case 'm': $sqlOperator = "<=";
+					break;
+				case 'h': $sqlOperator = ">=";
+					break;
+				case 'a': $sqlOperator = ">";
+					break;
+				case 'b': $sqlOperator = "<";
+					break;
+				/*ED150307*/
+				case 'vwi': $sqlOperator = " IN ";
+					break;
+				case 'vwx': $sqlOperator = " NOT IN ";
+					break;
+			}
+			
+			//TODO
+			//cas particulier, conversion fieldname -> columnname
+			switch($searchKey[$i]){
+			 case 'accounttype':
+				$searchKey[$i] = 'contacttype';
+				break;
+			}
+			
+			$whereCondition[] = $searchKey[$i] .' '. $sqlOperator . " '" . $value . "'";
+		}
+		
+		$condition = implode(' AND ', $whereCondition);
+
+		$pos = stripos($relationQuery, 'where');
+		if ($pos) {
+			$split = spliti('where', $relationQuery);
+			$updatedQuery = $split[0] . ' WHERE
+			' . $split[1] . ' AND ' . $condition;
+		} else {
+			$updatedQuery = $relationQuery . ' WHERE
+			' . $condition;
+		}
+		
+		
+		
+		//echo "<pre>$updatedQuery</pre>";
+		
 		return $updatedQuery;
 	}
 

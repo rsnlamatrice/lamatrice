@@ -753,6 +753,8 @@ $languageStrings = array(
         'LBL_ALREADY_SENT_2_COMPTA' => 'La facture est en comptabilité',
         
         'LBL_LABEL' => 'Libellé',
+		
+		'LBL_DELETE_RELATIONS' => 'Supprimer les relations',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

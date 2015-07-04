@@ -376,7 +376,13 @@ jQuery.Class("Vtiger_Detail_Js",{
 
 	getSelectedTab : function() {
 		var tabContainer = this.getTabContainer();
-		return tabContainer.find('li.active');
+		$tab = tabContainer.find('li.active');
+		//ED150704
+		if ($tab.length === 0) {
+			var relatedModuleName = this.getRelatedModuleName();
+			$tab = tabContainer.find('li[data-module="' + relatedModuleName + '"]:first');
+		}
+		return $tab;
 	},
 
 	getTabContainer : function(){

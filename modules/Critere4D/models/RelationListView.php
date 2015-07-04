@@ -36,6 +36,9 @@ class Critere4D_RelationListView_Model extends Vtiger_RelationListView_Model {
 		    return parent::getHeaders();
 		}
 
+		//ED150704
+		$this->initListViewHeadersFilters($headerFields);
+		
 		return $headerFields;
 	}
 	

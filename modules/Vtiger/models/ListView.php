@@ -157,7 +157,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 	 * Function to init fields as list view header filters
 	 * @return <Array> - List of Vtiger_Field_Model instances
 	 */
-	private function initListViewHeadersFilters($listViewHeaders) {
+	protected function initListViewHeadersFilters($listViewHeaders) {
 		
 		$search_fields = $this->get('search_key');
 		$search_texts = $this->get('search_value');

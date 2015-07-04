@@ -27,22 +27,29 @@
             <input type='hidden' id='totalCount' value="{$TOTAL_ENTRIES}">
             <div class="relatedHeader">
                 <div class="btn-toolbar row-fluid">
-                    <div class="span6">
-                        {foreach item=RELATED_LINK from=$RELATED_LIST_LINKS['LISTVIEWBASIC']}
-                            <div class="btn-group">
-                                {assign var=IS_SELECT_BUTTON value={$RELATED_LINK->get('_selectRelation')}}
-                                {assign var=IS_SEND_EMAIL_BUTTON value={$RELATED_LINK->get('_sendEmail')}}
-                                <button type="button" class="btn addButton
-				    {if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
-				    {if $IS_SELECT_BUTTON eq true} data-moduleName='{$RELATED_LINK->get('_module')->get('name')}' {/if}
-				    {if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
-				    {if $IS_SEND_EMAIL_BUTTON eq true}	onclick="{$RELATED_LINK->getUrl()}" {else} data-url="{$RELATED_LINK->getUrl()}"{/if}
-				    {if ($IS_SELECT_BUTTON eq false) and ($IS_SEND_EMAIL_BUTTON eq false)}
-					name="addButton"><i class="icon-plus icon-white"></i>
-				    {else}
-					> {* closing the button tag *}
-				    {/if}&nbsp;<strong>{$RELATED_LINK->getLabel()}</strong>
-				</button>
+                    <div class="span8">
+                    {foreach item=RELATED_LINK from=$RELATED_LIST_LINKS['LISTVIEWBASIC']}
+                        <div class="btn-group">
+                            {assign var=IS_SELECT_BUTTON value={$RELATED_LINK->get('_selectRelation')}}
+                            {assign var=IS_DELETE_BUTTON value={$RELATED_LINK->get('_deleteRelation')}}
+                            <button type="button" class="btn addButton
+                            {if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
+			    {if $IS_SELECT_BUTTON eq true} data-moduleName={$RELATED_LINK->get('_module')->get('name')} {/if}
+			    {if ($RELATED_LINK->isPageLoadLink())}
+				{if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
+				data-url="{$RELATED_LINK->getUrl()}"
+			    {/if}
+			    {if $IS_DELETE_BUTTON eq true} name="deleteButton"
+			    {elseif $IS_SELECT_BUTTON neq true} name="addButton"
+			    {/if}>
+			    {if $RELATED_LINK->get('linkicon')}
+				<i class="{$RELATED_LINK->get('linkicon')} icon-white"></i>
+			    {elseif $IS_DELETE_BUTTON eq true}
+				<i class="icon-minus icon-white"></i>
+			    {elseif $IS_SELECT_BUTTON eq false}
+				<i class="icon-plus icon-white"></i>
+			    {/if}
+			    &nbsp;<strong>{$RELATED_LINK->getLabel()}</strong></button>
 			    </div>
 			{/foreach}
     &nbsp;
@@ -107,25 +114,48 @@
         <table class="table table-bordered listViewEntriesTable">
             <thead>
                 <tr class="listViewHeaders">
+					<th width="5%">
+						{if count($RELATED_RECORDS)}<input type="checkbox" id="listViewEntriesMainCheckBox" />{/if}
+					</th>
                     {foreach item=HEADER_FIELD from=$RELATED_HEADERS}
-							<th nowrap class="{$WIDTHTYPE}">
+						<th nowrap class="{$WIDTHTYPE}">
                             {if $HEADER_FIELD->get('column') eq 'access_count' or $HEADER_FIELD->get('column') eq 'idlists' }
                                 <a href="javascript:void(0);" class="noSorting">{vtranslate($HEADER_FIELD->get('label'), $RELATED_MODULE->get('name'))}</a>
                             {elseif $HEADER_FIELD->get('column') eq 'time_start'}
                             {else}
-                                <a href="javascript:void(0);" class="relatedListHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $HEADER_FIELD->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-fieldname="{$HEADER_FIELD->get('column')}">{vtranslate($HEADER_FIELD->get('label'), $RELATED_MODULE->get('name'))}
+                                <a href="javascript:void(0);" class="relatedListHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $HEADER_FIELD->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-fieldname="{$HEADER_FIELD->get('column')}">
+									{if $HEADER_FIELD->get('column') eq 'isgroup'}Particulier Structure
+									{else}{vtranslate($HEADER_FIELD->get('label'), $RELATED_MODULE->get('name'))}
+									{/if}
                                     &nbsp;&nbsp;{if $COLUMN_NAME eq $HEADER_FIELD->get('column')}<img class="{$SORT_IMAGE} icon-white">{/if}
                                 </a>
                             {/if}
                         </th>
                     {/foreach}
-		    <th nowrap class="{$WIDTHTYPE}">
-		    <th nowrap class="{$WIDTHTYPE}">
-                    </th>
+					<th/><th/>
                 </tr>
+				{if count($RELATED_RECORDS)}
+					{foreach item=RELATED_RECORD from=$RELATED_RECORDS}{break}{/foreach}
+				{else}
+					{assign var=RELATED_RECORD value=Vtiger_Record_Model::getCleanInstance($RELATED_MODULE->get('name'))}
+				{/if}
+				<tr class="listViewHeaders filters">
+					<th width="5%">
+					</th>
+					
+					{foreach item=HEADER_FIELD from=$RELATED_HEADERS}
+						<th nowrap {if $HEADER_FIELD@last} colspan="2" {/if}>
+							{include file=vtemplate_path($HEADER_FIELD->getUITypeModel()->getHeaderFilterTemplateName(), $RELATED_MODULE->get('name')) FIELD_MODEL=$HEADER_FIELD}
+						</th>
+					{/foreach}
+					<th/>
+				</tr>
             </thead>
             {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
                 <tr class="listViewEntries" data-id='{$RELATED_RECORD->getId()}' data-recordUrl='{$RELATED_RECORD->getDetailViewUrl()}'>
+					<th width="5%" class="{$WIDTHTYPE}">
+						<input type="checkbox" value="{$RELATED_RECORD->getId()}" class="listViewEntriesCheckBox"/>
+					</th>
                     {foreach item=HEADER_FIELD from=$RELATED_HEADERS}
                         {assign var=RELATED_HEADERNAME value=$HEADER_FIELD->get('name')}
 			<td nowrap class="{$WIDTHTYPE}">
@@ -141,7 +171,7 @@
 			    *	
 			    *}
                             {elseif $RELATED_HEADERNAME eq 'dateapplication'}
-				{assign var=FIELD_NAME value=$RELATED_HEADERNAME}
+								{assign var=FIELD_NAME value=$RELATED_HEADERNAME}
                                 <div class="input-append span3 row-fluid dateapplication">
 				    {assign var=I value=0}
 				    {assign var=DATE_IDS value=$RELATED_RECORD->get($FIELD_NAME)}
