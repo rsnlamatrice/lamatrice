@@ -31,6 +31,8 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName, $label);
 
+		$viewer = $this->getViewer($request);
+		
 		$orderBy = $request->get('orderby');
 		$sortOrder = $request->get('sortorder');
 		if($sortOrder == 'ASC') {
@@ -44,7 +46,23 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			$relationListView->set('orderby', $orderBy);
 			$relationListView->set('sortorder',$sortOrder);
 		}
-
+		
+		//ED150701
+		$searchKey = $request->get('search_key');
+		$searchValue = $request->get('search_value');
+		$operator = $request->get('operator');
+			
+		if(!empty($operator)) {
+			$relationListView->set('operator', $operator);
+			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
+			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
+		}
+		//ED150414 $searchValue == 0 is acceptable
+		if(!empty($searchKey) && (!empty($searchValue) || ($searchValue == '0'))) {
+			$relationListView->set('search_key', $searchKey);
+			$relationListView->set('search_value', $searchValue);
+		}
+		
 		$models = $relationListView->getEntries($pagingModel);
 		
 		$links = $relationListView->getLinks();
@@ -58,7 +76,6 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		$relatedModuleModel = $relationModel->getRelationModuleModel();
 		$relationField = $relationModel->getRelationField();
 
-		$viewer = $this->getViewer($request);
 		$viewer->assign('RELATED_RECORDS' , $models);
 		$viewer->assign('PARENT_RECORD', $parentRecordModel);
 		$viewer->assign('RELATED_LIST_LINKS', $links);

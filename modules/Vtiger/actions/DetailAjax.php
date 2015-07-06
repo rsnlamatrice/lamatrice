@@ -6,9 +6,11 @@
  * The Initial Developer of the Original Code is vtiger.
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
+ *
+ * ED150704 : previously only for campaigns
  *************************************************************************************/
 
-class Campaigns_DetailAjax_Action extends Vtiger_BasicAjax_Action {
+class Vtiger_DetailAjax_Action extends Vtiger_BasicAjax_Action {
 
 	public function __construct() {
 		parent::__construct();

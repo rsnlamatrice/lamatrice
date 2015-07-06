@@ -18,7 +18,7 @@ Vtiger_List_Js("Critere4D_List_Js",{},{
 		var selectedIdsDataAttr = 'selectedIds';
 		var selectedIdsElementDataAttributes = selectedIdsElement.data();
 		var selectedIds = selectedIdsElementDataAttributes[selectedIdsDataAttr];
-		if (selectedIds == "") {
+		if (selectedIds == "" || selectedIds == null) {
 			selectedIds = new Array();
 			this.writeSelectedIds(selectedIds);
 		} else {
@@ -41,7 +41,7 @@ Vtiger_List_Js("Critere4D_List_Js",{},{
 		var excludedIdsDataAttr = 'excludedIds';
 		var excludedIdsElementDataAttributes = exlcudedIdsElement.data();
 		var excludedIds = excludedIdsElementDataAttributes[excludedIdsDataAttr];
-		if (excludedIds == "") {
+		if (excludedIds == "" || excludedIds == null) {
 			excludedIds = new Array();
 			this.writeExcludedIds(excludedIds);
 		}else{

@@ -181,15 +181,18 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		}
 		$db = PearDatabase::getInstance();
 
-		$query = 'SELECT vtiger_relatedlists.*,vtiger_tab.name as modulename FROM vtiger_relatedlists
+		//ED150704 : search prefered label
+		$query = 'SELECT vtiger_relatedlists.*,vtiger_tab.name as modulename, IF(label = ?, 0, 1) AS SearchedLabel
+					FROM vtiger_relatedlists
 					INNER JOIN vtiger_tab on vtiger_tab.tabid = vtiger_relatedlists.related_tabid AND vtiger_tab.presence != 1
-					WHERE vtiger_relatedlists.tabid = ? AND related_tabid = ?';
-		$params = array($parentModuleModel->getId(), $relatedModuleModel->getId());
+					WHERE vtiger_relatedlists.tabid = ? AND related_tabid = ?
+					ORDER BY SearchedLabel
+					LIMIT 1';
+		$params = array();
+		$params[] = empty($label) ? '' : $label;
+		$params[] = $parentModuleModel->getId();
+		$params[] = $relatedModuleModel->getId();
 
-		if(!empty($label)) {
-			$query .= ' AND label = ?';
-			$params[] = $label;
-		}
 		
 		$result = $db->pquery($query, $params);
 		if($db->num_rows($result)) {

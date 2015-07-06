@@ -9,12 +9,12 @@
  ************************************************************************************/
 
 $languageStrings = array(
-	'Critere4D' => 'Criteres 4D',
-	'SINGLE_Critere4D' => 'Critere 4D',
+	'Critere4D' => 'Critères de contact',
+	'SINGLE_Critere4D' => 'Critère de contact',
 	'LBL_BASIC_DETAILS' => '',
 	'LBL_CATEGORIE' => 'Catégorie',
 	'LBL_NOM' => 'nom',
-	'LBL_NOM_INFO' => 'Critere4D',
+	'LBL_NOM_INFO' => 'Critère de contact',
 	'LBL_ORIGINE' => 'origine',
 	'LBL_COMMENTAIRE' => 'commentaire',
 	'LBL_COMMENTAIRE_INFO' => 'commentaire',
@@ -27,7 +27,7 @@ $languageStrings = array(
 	'LBL_CUSTOM_INFORMATION' => '',
 	'LBL__COUNTER_' => 'Affectations',
 	'LBL_DATEAPPLICATION' => 'Date d\'application',
-
+	'LBL_DELETE_RELATIONS' => 'Supprimer les affectations',
 );
 
 ?>

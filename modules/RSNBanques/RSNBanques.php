@@ -162,4 +162,66 @@ class RSNBanques extends Vtiger_CRMEntity {
 		
 		$log->debug("Invoking deleteDuplicatesFromPickList(".$pickListName.") method ...DONE");
 	}
+	
+	
+	//Enregistrement d'un record
+	function saveentity($module, $fileid = '') {
+		parent::saveentity($module, $fileid);
+		self::PicklistValuesTransfer();
+	}
+	
+	/** ED150706
+	 * duplique les données de RSNBanques vers la picklist vtiger_rsnbanque
+	 */
+	public static function PicklistValuesTransfer(){
+		global $adb,$log;
+		
+		//insert missing
+		$sql = "INSERT INTO `vtiger_rsnbanque`(`rsnbanque`, `sortorderid`, `presence`) 
+			SELECT UPPER(vtiger_rsnbanques.name), 0, 1
+			FROM vtiger_rsnbanques
+			JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = vtiger_rsnbanques.rsnbanquesid
+			WHERE `disabled`=0 AND vtiger_crmentity.deleted = 0
+			AND vtiger_rsnbanques.name NOT IN (
+				SELECT vtiger_rsnbanque.rsnbanque
+				FROM vtiger_rsnbanque
+			)
+		";
+		$result = $adb->query($sql);
+		if(!$result){
+			$adb->echoError('Erreur de mise à jour de la liste des banques.');
+			return false;
+		}
+
+		// rank
+		$sql = "SET @pos := 0";
+		$result = $adb->query($sql);
+		if(!$result){
+			$adb->echoError('Erreur de mise à jour de préparation du tri de la liste des banques.');
+			var_dump($sql);
+			return false;
+		}
+		$sql = "UPDATE vtiger_rsnbanque
+			SET sortorderid = ( SELECT @pos := @pos + 1 )
+			ORDER BY rsnbanque ASC";
+		$result = $adb->query($sql);
+		if(!$result){
+			$adb->echoError('Erreur de mise à jour du tri de la liste des banques.');
+			var_dump($sql);
+			return false;
+		}
+
+		//seq = max
+		$sql = "UPDATE `vtiger_rsnbanque_seq`
+			SET `id`= (SELECT MAX(rsnbanqueid) FROM vtiger_rsnbanque)";
+		$result = $adb->query($sql);
+		if(!$result){
+			$adb->echoError('Erreur de mise à jour du compteur de la liste des banques.');
+			return false;
+		}
+		
+		return true;
+		
+	}
 }

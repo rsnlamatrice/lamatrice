@@ -1450,6 +1450,7 @@ function constructTwoDimensionalArray($var)
            		$code .= $key.'=>array(';
 			foreach($secarr as $seckey => $secvalue)
 			{
+				if(empty($secvalue)) $secvalue = '0';//ED150706 : due to bug TODO Why ? !! Achtung : this sets access to action if missing
 				$code .= $seckey.'=>'.$secvalue.',';
 			}
 			$code .= '),';

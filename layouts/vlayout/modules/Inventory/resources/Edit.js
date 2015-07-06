@@ -2163,7 +2163,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				thisInstance.getLineItemContentsContainer().find('tr.'+thisInstance.rowClass).each(function(){
 						// isProductSelected() semble retourner l'inverse de ce qu'elle dit...
 						var $productField = $(this).find('.productName');
-						if(!$productField.val()){
+						if(!$productField.val()
+						|| $productField.val() === ' - ' //ED150701
+						){
 							jQuery(this).remove();
 							oneDeleted = true;
 						}

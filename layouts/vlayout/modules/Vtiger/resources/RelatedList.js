@@ -588,6 +588,160 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 			});
 		return aDeferred.promise();
 	},
+	
+	/** ED150704
+	 *
+	 */
+
+	/* ED150412
+	 * Function to register change in header filter inputs
+	 */
+	registerEventForHeaderFilterChange : function() {
+		var thisInstance = this;
+		var listViewPageDiv = thisInstance.relatedContentContainer;
+		listViewPageDiv.on('hover','.listViewHeaders.filters', function(e){
+			var $th = $(this).children('th:first')
+			, $actions = $th.children('.actionImages');
+			if ($actions.length === 0) {
+				$('<span class="actionImages"></span>')
+					.append($('<a href class="icon-refresh" title="'+app.vtranslate('JS_REFRESH')+'"></a>')
+						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
+						.click(function(){
+							//TODO do not use url parameters that contains search_key and search_value
+							$(this).parents('tr:first').find(':input:visible:first').change();//TODO function
+							return false;
+						})
+					)
+					.append($('<a href class="icon-remove-sign" title="'+app.vtranslate('JS_RESET_FILTERS')+'"></a>')
+						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
+						.click(function(){
+							$(this).parents('th:first').nextAll('th').find(':input:visible').val('');
+							return false;
+						})
+					)
+					.appendTo($th)
+				;
+			}
+		});
+		listViewPageDiv.on('change','.listViewHeaders.filters :input',function(e) {
+			e.stopImmediatePropagation();
+			
+			var urlParams = thisInstance.getHeadersFiltersUrlParams(e, {
+				"search_key" : [],
+				"search_value" : [],
+				"operator" : [],
+				"page"	:	1
+			});
+			jQuery('#recordsCount').val('');
+			//To Set the page number as first page
+			jQuery('#pageNumber').val('1');
+			jQuery('#pageToJump').val('1');
+			jQuery('#totalPageCount').text("");
+			
+			thisInstance.loadRelatedList(urlParams).then(
+				function(data){
+					thisInstance.setCurrentPageNumber(1);
+				},
+
+				function(textStatus, errorThrown){
+				}
+			);
+		});
+	},
+	
+	/* ED150412
+	 * Function to register change in header filter inputs
+	 */
+	getHeadersFiltersUrlParams : function(e, urlParams) {
+		
+		jQuery(e.currentTarget).parents('.listViewHeaders.filters:first').find(':input[data-field-name]').each(function(){
+			var $input = jQuery(this)
+			//, $th = $input.parents('th:first')
+			, searchValue = $input.val()//TODO Checkbox : On click event + e.currentTarget.checked
+			if (searchValue == ''
+			|| ($input[0].tagName == 'SELECT') && searchValue == ' ')
+				return;
+			var searchType = $input.attr('data-field-type')
+			, searchKey = $input.attr('data-field-name')
+			, operator = /^\s*([\=\>\<\!\%]+|\%\-|[\!N]?IN\s|[\!N]?PARMIS\s)\s*(.*)$/i.exec(searchValue);
+			if (operator === null) {
+				operator = $input.attr('data-operator');
+			}
+			//ED150605 : select text is translated value
+			else if($input[0].tagName != 'SELECT') {
+				searchValue = operator[2];
+				if (operator != null)
+					operator = operator[1].trim().toUpperCase();
+			}
+			if (operator != null) {
+				//see include\QueryGenerator\QueryGenerator.php : line 1051
+				switch(operator){
+				 case '=' :
+					operator = 'e';
+					break;
+				 case '!' :
+				 case '<>' :
+					operator = searchValue.substr('%') < 0 ? 'n' : 'k';
+					break;
+				 case '!%' :
+				 case '<>%' :
+					operator = 'k';
+					break;
+				 case '>' :
+					operator = 'g';
+					break;
+				 case '>=' :
+					operator = 'h';
+					break;
+				 case '<' :
+					operator = 'l';
+					break;
+				 case '<=' :
+					operator = 'm';
+					break;
+				 case '%' : // like % %
+					operator = 'c';
+					break;
+				 case '%-' : // ends with
+					operator = 'ew';
+					break;
+				 case 'IN' :
+				 case 'PARMIS' :
+					operator = 'vwi';
+					break;
+				 case 'NIN' :
+				 case 'NPARMIS' :
+				 case '!PARMIS' :
+					operator = 'vwx';
+					break;
+				}
+			}
+			else
+				operator = 's';
+			if (operator == 's') 
+				switch (searchType) {
+				 case 'date':
+					operator = 'e';
+					break;
+				 case 'integer':
+				 case 'currency':
+				 case 'double':
+					operator = 'h';
+					break;
+				 case 'multipicklist' :
+					operator = 'c';
+					break;
+				 default:
+					break;
+				}
+			urlParams.search_key.push(searchKey);
+			urlParams.search_value.push(searchValue);
+			urlParams.operator.push(operator);
+		});
+		return urlParams;
+	},
+	/* end of ED header filters */
+	
 	init : function(parentId, parentModule, selectedRelatedTabElement, relatedModuleName){
 		this.selectedRelatedTabElement = selectedRelatedTabElement,
 		this.parentRecordId = parentId;
@@ -596,6 +750,9 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		this.relatedTabsContainer = selectedRelatedTabElement.closest('div.related');
 		this.detailViewContainer = this.relatedTabsContainer.closest('div.detailViewContainer');
 		this.relatedContentContainer = jQuery('div.contents',this.detailViewContainer);
+		//ED150704
+		this.registerEventForHeaderFilterChange();
+		
 		Vtiger_Helper_Js.showHorizontalTopScrollBar();
 	}
 })

@@ -133,7 +133,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	
 	
 	/** ED150507
-	 * Function to get RSNAboRevues array for this account
+	 * Function to get RSNAboRevues array for this account, order by decreasing date
 	 */
 	public function getRSNAboRevues($isabonneOnly = false){
 		

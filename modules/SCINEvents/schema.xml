@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_scinevents</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_scinevents` (
+  `scineventsid` int(11) NOT NULL DEFAULT '0',
+    `scininstallationsid` INT(19) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    `scinsource` VARCHAR(128) DEFAULT NULL,
+    `internalcomment` TEXT DEFAULT NULL,
+    `title` VARCHAR(128) DEFAULT NULL,
+    `dateevent` DATE DEFAULT NULL,
+    `urlsource` VARCHAR(256) DEFAULT NULL,
+    `gravite` VARCHAR(128) DEFAULT NULL,
+    PRIMARY KEY (`scineventsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_scineventscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_scineventscf` (
+  `scineventsid` int(11) NOT NULL,
+  PRIMARY KEY (`scineventsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
