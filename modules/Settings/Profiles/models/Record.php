@@ -439,7 +439,7 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 			$db->pquery('DELETE FROM vtiger_profile2globalpermissions WHERE profileid=?', array($profileId));
 		}
 		$db->pquery($sql, $params);
-
+		
 		$sql = 'INSERT INTO vtiger_profile2globalpermissions(profileid, globalactionid, globalactionpermission) VALUES (?,?,?)';
 		$params = array($profileId, Settings_Profiles_Module_Model::GLOBAL_ACTION_VIEW, $this->tranformInputPermissionValue($this->get('viewall')));
 		$db->pquery($sql, $params);
@@ -477,6 +477,7 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 							}
 						}
 					}
+					var_dump($moduleModel->getId(), $permissions);
 					$this->saveModulePermissions($moduleModel, $permissions);
 				}
 			}
@@ -525,7 +526,7 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 						$utilityIdsList[$actionId] = $permission;
 					}
 				}
-
+					
 				//Update process
 				if ($profileActionPermissions) {
 					//Standard permissions

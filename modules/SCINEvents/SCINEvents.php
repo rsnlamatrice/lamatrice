@@ -10,65 +10,73 @@
 
 include_once 'modules/Vtiger/CRMEntity.php';
 
-class RSNBanques extends Vtiger_CRMEntity {
-	var $table_name = 'vtiger_rsnbanques';
-	var $table_index= 'rsnbanquesid';
+class SCINEvents extends Vtiger_CRMEntity {
+	var $table_name = 'vtiger_scinevents';
+	var $table_index= 'scineventsid';
 
 	/**
 	 * Mandatory table for supporting custom fields.
 	 */
-	var $customFieldTable = Array('vtiger_rsnbanquescf', 'rsnbanquesid');
+	var $customFieldTable = Array('vtiger_scineventscf', 'scineventsid');
 
 	/**
 	 * Mandatory for Saving, Include tables related to this module.
 	 */
-	var $tab_name = Array('vtiger_crmentity', 'vtiger_rsnbanques', 'vtiger_rsnbanquescf');
+	var $tab_name = Array('vtiger_crmentity', 'vtiger_scinevents', 'vtiger_scineventscf');
 
 	/**
 	 * Mandatory for Saving, Include tablename and tablekey columnname here.
 	 */
 	var $tab_name_index = Array(
 		'vtiger_crmentity' => 'crmid',
-		'vtiger_rsnbanques' => 'rsnbanquesid',
-		'vtiger_rsnbanquescf'=>'rsnbanquesid');
+		'vtiger_scinevents' => 'scineventsid',
+		'vtiger_scineventscf'=>'scineventsid');
 
 	/**
 	 * Mandatory for Listing (Related listview)
 	 */
-	var $list_fields = array (
-		'LBL_CODEBANQUE' => array('rsnbanques', 'codebanque'),
-		'LBL_NAME' => array('rsnbanques', 'name'),
-		'LBL_SHORTNAME' => array('rsnbanques', 'shortname'),
+	var $list_fields = Array (
+		'LBL_SCINSOURCE' => array('scinevents', 'scinsource'),
+		'LBL_SCININSTALLATIONSID' => array('scinevents', 'scininstallationsid'),
+		'LBL_DESCRIPTION' => array('scinevents', 'description'),
+		'LBL_DATEEVENT' => array('scinevents', 'dateevent'),
+		'LBL_GRAVITE' => array('scinevents', 'gravite'),
+		'LBL_TITLE' => array('scinevents', 'title'),
 
-);
-	var $list_fields_name = array (
-		'LBL_CODEBANQUE' => 'codebanque',
-		'LBL_NAME' => 'name',
-		'LBL_SHORTNAME' => 'shortname',
+	);
+	var $list_fields_name = Array (
+		'LBL_SCINSOURCE' => 'scinsource',
+		'LBL_SCININSTALLATIONSID' => 'scininstallationsid',
+		'LBL_DESCRIPTION' => 'description',
+		'LBL_DATEEVENT' => 'dateevent',
+		'LBL_GRAVITE' => 'gravite',
+		'LBL_TITLE' => 'title',
 
-);
+	);
 
 	// Make the field link to detail view
 	var $list_link_field = '';
 
 	// For Popup listview and UI type support
-	var $search_fields = array (
-		'LBL_SHORTNAME' => array('rsnbanques', 'shortname'),
-		'LBL_DISABLED' => array('rsnbanques', 'disabled'),
-		'LBL_NAME' => array('rsnbanques', 'name'),
-		'LBL_CODEBANQUE' => array('rsnbanques', 'codebanque'),
+	var $search_fields = Array(
+		'LBL_DATEEVENT' => array('scinevents', 'dateevent'),
+		'LBL_GRAVITE' => array('scinevents', 'gravite'),
+		'LBL_TITLE' => array('scinevents', 'title'),
+		'LBL_SCINSOURCE' => array('scinevents', 'scinsource'),
+		'LBL_SCININSTALLATIONSID' => array('scinevents', 'scininstallationsid'),
 
-);
-	var $search_fields_name = array (
-		'LBL_SHORTNAME' => 'shortname',
-		'LBL_DISABLED' => 'disabled',
-		'LBL_NAME' => 'name',
-		'LBL_CODEBANQUE' => 'codebanque',
+	);
+	var $search_fields_name = Array (
+		'LBL_DATEEVENT' => 'dateevent',
+		'LBL_GRAVITE' => 'gravite',
+		'LBL_TITLE' => 'title',
+		'LBL_SCINSOURCE' => 'scinsource',
+		'LBL_SCININSTALLATIONSID' => 'scininstallationsid',
 
-);
+	);
 
 	// For Popup window record selection
-	var $popup_fields = array('');
+	var $popup_fields = Array ('');
 
 	// For Alphabetical search
 	var $def_basicsearch_col = '';
@@ -78,15 +86,15 @@ class RSNBanques extends Vtiger_CRMEntity {
 
 	// Used when enabling/disabling the mandatory fields for the module.
 	// Refers to vtiger_field.fieldname values.
-	var $mandatory_fields = array('createdtime', 'modifiedtime', '');
+	var $mandatory_fields = Array('','assigned_user_id');
 
 	var $default_order_by = '';
 	var $default_sort_order='ASC';
 
-	function RSNBanques() {
-		$this->log =LoggerManager::getLogger('RSNBanques');
+	function SCINEvents() {
+		$this->log =LoggerManager::getLogger('SCINEvents');
 		$this->db = PearDatabase::getInstance();
-		$this->column_fields = getColumnFields('RSNBanques');
+		$this->column_fields = getColumnFields('SCINEvents');
 	}
 
 	/**
@@ -161,67 +169,5 @@ class RSNBanques extends Vtiger_CRMEntity {
 		}
 		
 		$log->debug("Invoking deleteDuplicatesFromPickList(".$pickListName.") method ...DONE");
-	}
-	
-	
-	//Enregistrement d'un record
-	function saveentity($module, $fileid = '') {
-		parent::saveentity($module, $fileid);
-		self::PicklistValuesTransfer();
-	}
-	
-	/** ED150706
-	 * duplique les données de RSNBanques vers la picklist vtiger_rsnbanque
-	 */
-	public static function PicklistValuesTransfer(){
-		global $adb,$log;
-		
-		//insert missing
-		$sql = "INSERT INTO `vtiger_rsnbanque`(`rsnbanque`, `sortorderid`, `presence`) 
-			SELECT UPPER(vtiger_rsnbanques.name), 0, 1
-			FROM vtiger_rsnbanques
-			JOIN vtiger_crmentity
-				ON vtiger_crmentity.crmid = vtiger_rsnbanques.rsnbanquesid
-			WHERE `disabled`=0 AND vtiger_crmentity.deleted = 0
-			AND vtiger_rsnbanques.name NOT IN (
-				SELECT vtiger_rsnbanque.rsnbanque
-				FROM vtiger_rsnbanque
-			)
-		";
-		$result = $adb->query($sql);
-		if(!$result){
-			$adb->echoError('Erreur de mise à jour de la liste des banques.');
-			return false;
-		}
-
-		// rank
-		$sql = "SET @pos := 0";
-		$result = $adb->query($sql);
-		if(!$result){
-			$adb->echoError('Erreur de mise à jour de préparation du tri de la liste des banques.');
-			var_dump($sql);
-			return false;
-		}
-		$sql = "UPDATE vtiger_rsnbanque
-			SET sortorderid = ( SELECT @pos := @pos + 1 )
-			ORDER BY rsnbanque ASC";
-		$result = $adb->query($sql);
-		if(!$result){
-			$adb->echoError('Erreur de mise à jour du tri de la liste des banques.');
-			var_dump($sql);
-			return false;
-		}
-
-		//seq = max
-		$sql = "UPDATE `vtiger_rsnbanque_seq`
-			SET `id`= (SELECT MAX(rsnbanqueid) FROM vtiger_rsnbanque)";
-		$result = $adb->query($sql);
-		if(!$result){
-			$adb->echoError('Erreur de mise à jour du compteur de la liste des banques.');
-			return false;
-		}
-		
-		return true;
-		
 	}
 }

@@ -95,6 +95,15 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->addRelatedTask();
 			break;
 		
+		case 'PicklistValuesTransfer' :
+			
+			var_dump("Liste des banques");
+			$focus = CRMEntity::getInstance('RSNBanques');
+			$focus::PicklistValuesTransfer();
+			
+			
+			break;
+		
 		default:
 			$viewer->assign('HTML_DATA', "Inconnu : \"$sub\"");
 			break;

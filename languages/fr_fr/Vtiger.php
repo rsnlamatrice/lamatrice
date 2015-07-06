@@ -754,7 +754,9 @@ $languageStrings = array(
         
         'LBL_LABEL' => 'Libellé',
 		
-		'LBL_DELETE_RELATIONS' => 'Supprimer les relations',
+	'LBL_DELETE_RELATIONS' => 'Supprimer les relations',
+        
+	'LBL_SCINEVENTS' => 'Evénements',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

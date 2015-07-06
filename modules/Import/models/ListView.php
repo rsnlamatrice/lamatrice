@@ -109,6 +109,9 @@ class Import_ListView_Model extends Vtiger_ListView_Model {
 		$instance = new $modelClassName();
 
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		if(!$moduleModel)
+			throw new Exception("Module '$moduleName' introuvable");
+		
 		$queryGenerator = new QueryGenerator($moduleModel->get('name'), $currentUser);
 
 		$customView = new CustomView();
