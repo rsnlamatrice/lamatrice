@@ -302,3 +302,11 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
 .detailViewTitle label.ui-buttonset {
   font-size: 16px;
 }
+
+/* relatedlist with header filters row */
+#detailView .table th {
+  border-bottom: none !important;
+}
+#detailView .table tr:last-of-type th {
+  border-bottom: 1px solid #d3d3d3 !important;
+}

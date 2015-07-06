@@ -5,15 +5,21 @@
  ********************************************************************************/
 -->*}
 {strip}
-{if !isset($FIELD_MODEL)}{assign var=FIELD_MODEL value=$LISTVIEW_HEADER}{/if}
+{if !isset($FIELD_MODEL)}
+	{if isset($LISTVIEW_HEADER)}{assign var=FIELD_MODEL value=$LISTVIEW_HEADER}
+	{elseif isset($HEADER_FIELD)}{assign var=FIELD_MODEL value=$HEADER_FIELD}{/if}
+{/if}
 {if !isset($INPUT_CLASS)}
     {assign var="INPUT_CLASS" value='input-small'}
 {/if}
 {assign var=PICKLIST_VALUES value=$FIELD_MODEL->getPicklistValues()}
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
 {assign var="FIELD_VALUE_LIST" value=explode(' |##| ',$FIELD_MODEL->get('fieldvalue'))}{*sic*}
-{if $RECORD}{assign var=RECORD_MODEL value=$RECORD}{/if}
-{if !$RECORD_MODEL}RECORD_MODEL manquant{/if}
+{if !$RECORD_MODEL}
+	{if $RELATED_RECORD}{assign var=RECORD_MODEL value=$RELATED_RECORD}
+	{elseif $RECORD}{assign var=RECORD_MODEL value=$RECORD}
+	{else !$RECORD_MODEL}RECORD_MODEL manquant{/if}
+{/if}
 {assign var=PICKLIST_LABELS value=$RECORD_MODEL->getPicklistValuesDetails($FIELD_MODEL->getFieldName())}
 <select id="{$MODULE}_{$smarty.request.view}_headerFilter_fieldName_{$FIELD_MODEL->get('name')}"
         class="{$INPUT_CLASS}" 

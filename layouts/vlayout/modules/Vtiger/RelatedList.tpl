@@ -33,8 +33,8 @@
 				{if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
 				data-url="{$RELATED_LINK->getUrl()}"
 			    {/if}
-			    {if $IS_DELETE_BUTTON eq true}name="deleteButton"
-			    {elseif $IS_SELECT_BUTTON neq true}name="addButton"
+			    {if $IS_DELETE_BUTTON eq true} name="deleteButton"
+			    {elseif $IS_SELECT_BUTTON neq true} name="addButton"
 			    {/if}>
 			    {if $RELATED_LINK->get('linkicon')}
 				<i class="{$RELATED_LINK->get('linkicon')} icon-white"></i>

@@ -34,8 +34,8 @@ class Critere4D_RelatedList_View extends Vtiger_RelatedList_View {
 			$viewer->assign('CUSTOM_VIEWS', CustomView_Record_Model::getAllByGroup($relatedModuleName));
 			$viewer->assign('DATE_FORMAT', $user_model->get('date_format'));
 				    
-			//$viewer->assign('SELECTED_IDS', $request->get('selectedIds'));
-			//$viewer->assign('EXCLUDED_IDS', $request->get('excludedIds'));
+			$viewer->assign('SELECTED_IDS', $request->get('selectedIds'));
+			$viewer->assign('EXCLUDED_IDS', $request->get('excludedIds'));
 		}
 		return parent::process($request);
 	}
