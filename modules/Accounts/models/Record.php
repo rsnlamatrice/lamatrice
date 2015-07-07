@@ -41,10 +41,12 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		$relatedModuleName = 'Contacts';
 		$parentId = $this->getId();
 		
-		$query = "SELECT vtiger_crmentity.crmid, vtiger_crmentity.label, vtiger_contactdetails.*
+		$query = "SELECT vtiger_crmentity.crmid, vtiger_crmentity.label, vtiger_contactdetails.*, vtiger_contactaddress.*
 			FROM vtiger_contactdetails
 			JOIN vtiger_crmentity
 				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			LEFT JOIN vtiger_contactaddress
+				ON vtiger_contactaddress.contactaddressid = vtiger_crmentity.crmid
 			WHERE vtiger_crmentity.deleted = 0
 			AND vtiger_contactdetails.accountid = ?
 			AND vtiger_contactdetails.reference = 1

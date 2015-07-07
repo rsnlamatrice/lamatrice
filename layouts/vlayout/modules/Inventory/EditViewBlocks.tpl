@@ -66,10 +66,18 @@
 				{assign var=REGLEMENTS_BLOCK_FIELDS value=$BLOCK_FIELDS}
 				{continue}
 			{/if}
+			{assign var=IS_HIDDEN value=($BLOCK_LABEL eq 'LBL_DESCRIPTION_INFORMATION' || $BLOCK_LABEL eq 'LBL_CUSTOM_INFORMATION')}
 			<table class="table table-bordered blockContainer showInlineTable">
-			<tr>
-				<th class="blockHeader" colspan="4">{vtranslate($BLOCK_LABEL, $MODULE)}</th>
-			</tr>
+			<thead><tr>
+				<th class="blockHeader" colspan="4">
+					{if $IS_HIDDEN}
+						<img class="cursorPointer alignMiddle blockToggle {if !($IS_HIDDEN)} hide {/if} "  src="{vimage_path('arrowRight.png')}" data-mode="hide"}>
+						<img class="cursorPointer alignMiddle blockToggle {if ($IS_HIDDEN)} hide {/if}"  src="{vimage_path('arrowDown.png')}" data-mode="show"}>
+						&nbsp;&nbsp;
+					{/if}
+					{vtranslate($BLOCK_LABEL, $MODULE)}</th>
+			</tr></thead>
+			<tbody {if $IS_HIDDEN} class="hide" {/if}>
 			{if ($BLOCK_LABEL eq 'LBL_ADDRESS_INFORMATION') and ($MODULE neq 'PurchaseOrder') }
 				<tr>
 				<td class="fieldLabel {$WIDTHTYPE}" name="copyHeader1">
@@ -78,11 +86,11 @@
 				<td class="fieldValue {$WIDTHTYPE}" name="copyAddress1">
 					<div class="row-fluid">
 						<div class="span5">
-							<span class="row-fluid margin0px">
+							{*ED150707 <span class="row-fluid margin0px">
 								<label class="radio">
 								  <input type="radio" name="copyAddressFromRight" class="accountAddress" data-copy-address="billing" checked="">{vtranslate('SINGLE_Accounts', $MODULE)}
 								</label>
-							</span>
+							</span>*}
 							<span class="row-fluid margin0px">
 								<label class="radio">
 								  <input type="radio" name="copyAddressFromRight" class="contactAddress" data-copy-address="billing" checked="">{vtranslate('SINGLE_Contacts', $MODULE)}
@@ -107,11 +115,11 @@
 				<td class="fieldValue {$WIDTHTYPE}" name="copyAddress2">
 					<div class="row-fluid">
 						<div class="span5">
-							<span class="row-fluid margin0px">
+							{*ED150707 <span class="row-fluid margin0px">
 								<label class="radio">
 								  <input type="radio" name="copyAddressFromLeft" class="accountAddress" data-copy-address="shipping" checked="">{vtranslate('SINGLE_Accounts', $MODULE)}
 								</label>
-							</span>
+							</span>*}
 							<span class="row-fluid margin0px">
 								<label class="radio">
 								  <input type="radio" name="copyAddressFromLeft" class="contactAddress" data-copy-address="shipping" checked="">{vtranslate('SINGLE_Contacts', $MODULE)}
@@ -140,6 +148,8 @@
 				{* ED150629 PurchaseOrder : sent2compta only for invoices *}
 				{elseif $FIELD_NAME eq 'sent2compta' && isset($POTYPE_FIELD_MODEL) && $POTYPE_FIELD_MODEL->get('fieldvalue') neq 'invoice'}
 						{continue}
+				{elseif $MODULE neq 'PurchaseOrder' && $FIELD_NAME eq 'account_id'}
+						{continue}
 				{/if}
 				{assign var="isReferenceField" value=$FIELD_MODEL->getFieldDataType()}
 				{if $FIELD_MODEL->get('uitype') eq "20" or $FIELD_MODEL->get('uitype') eq "19"}
@@ -157,6 +167,11 @@
 				<td class="fieldLabel {$WIDTHTYPE}">
 					{if $isReferenceField neq "reference"}<label class="muted pull-right marginRight10px">{/if}
 					{if $FIELD_MODEL->isMandatory() eq true && $isReferenceField neq "reference"} <span class="redColor">*</span> {/if}
+					{if $MODULE neq 'PurchaseOrder' && $FIELD_NAME eq 'contact_id'}
+						{* ED150707 hide account input *}
+						{assign var=ACCOUNT_FIELD value=$BLOCK_FIELDS['account_id']}
+						<input type="hidden" name="{$ACCOUNT_FIELD->get('name')}" value="{$ACCOUNT_FIELD->get('fieldvalue')}"/>
+					{/if}
 					{if $isReferenceField eq "reference"}
 						{assign var="REFERENCE_LIST" value=$FIELD_MODEL->getReferenceList()}
 						{assign var="REFERENCE_LIST_COUNT" value=count($REFERENCE_LIST)}
@@ -196,6 +211,7 @@
 				{/if}
 			{/foreach}
 			</tr>
+			</tbody>
 			</table>
 			<br>
 		{/foreach}

@@ -1630,22 +1630,72 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var thisInstance = this;
 
 		jQuery('input[name="contact_id"]', container).on(Vtiger_Edit_Js.referenceSelectionEvent, function(e, data){
-			thisInstance.referenceSelectionEventHandler(data, container);
+			//ED150707 don't ask if it is empty
+			thisInstance.referenceSelectionEventHandler(data, container, !thisInstance.isEmptyAddress(container));
+			
+			//ED150707 set account_id
+			thisInstance.contactSelectionEventHandler(data, container);
 		});
 	},
 
+	/** ED150707
+	 * Tests if addresses contain data or not
+	 */
+	isEmptyAddress : function(container){
+		var addressDetails = this.addressFieldsMapping['Contacts'];
+		for(var key in addressDetails) {
+			if(container.find('[name="'+key+'"]').val())
+				return false;
+		}
+		return true;
+	},
+	
 	/**
 	 * Reference Fields Selection Event Handler
+	 *
+	 * @param askUser (default is True) //ED150707
 	 */
-	referenceSelectionEventHandler : function(data,container){
+	referenceSelectionEventHandler : function(data,container, askUser){
 		var thisInstance = this;
-		var message = app.vtranslate('OVERWRITE_EXISTING_MSG1')+app.vtranslate('SINGLE_'+data['source_module'])+' ('+data['selectedName']+') '+app.vtranslate('OVERWRITE_EXISTING_MSG2');
-		Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
-		function(e) {
+		if (askUser === false) {
 			thisInstance.copyAddressDetails(data, container);
+		}
+		else {
+			var message = app.vtranslate('OVERWRITE_EXISTING_MSG1')+app.vtranslate('SINGLE_'+data['source_module'])+' ('+data['selectedName']+') '+app.vtranslate('OVERWRITE_EXISTING_MSG2');
+			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
+				function(e) {
+					thisInstance.copyAddressDetails(data, container);
+				},
+				function(error, err){
+				});
+		}
+	},
+	
+	/** ED150707
+	 * Contact Selection Event Handler
+	 * Set account id and invoice title
+	 * 
+	 */
+	contactSelectionEventHandler : function(data,container){
+		var thisInstance = this;
+		var sourceModule = data['source_module'];
+		
+		thisInstance.getRecordDetails(data).then(
+			function(data){
+				var response = data['result'];
+				container.find('input[name="account_id"]').val(response.data.account_id);
+				
+				var subject = (response.data.firstname + " " + response.data.lastname
+					+ "/" + response.data.mailingzip
+					+ " " + response.data.contact_no).trim();
+				container.find('input[name="subject"]:empty').val(subject);
+				
+				var account_discount_type = response.data.discounttype;
+				thisInstance.setAccountDiscountType(account_discount_type);
 			},
-		function(error, err){
-		});
+			function(error, err){
+
+			});
 	},
 
 	/**
@@ -2176,6 +2226,40 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				}
 		});
 	},
+
+	/** ED150707
+	 * Copy from Detail.js
+	 */
+	registerBlockAnimationEvent : function(){
+		var detailContentsHolder = this.getForm();
+		detailContentsHolder.on('click','.blockToggle',function(e){
+			var currentTarget =  jQuery(e.currentTarget);
+			var blockId = currentTarget.data('id');
+			var closestBlock = currentTarget.closest('.blockContainer');
+			var bodyContents = closestBlock.find('tbody');
+			var data = currentTarget.data();
+			var module = app.getModuleName();
+			var hideHandler = function() {
+				bodyContents.hide('slow');
+				app.cacheSet(module+'.'+blockId, 0)
+			}
+			var showHandler = function() {
+				bodyContents.show();
+				app.cacheSet(module+'.'+blockId, 1)
+			}
+			var data = currentTarget.data();
+			if(data.mode == 'show'){
+				hideHandler();
+				currentTarget.hide();
+				closestBlock.find("[data-mode='hide']").show();
+			}else{
+				showHandler();
+				currentTarget.hide();
+				closestBlock.find("[data-mode='show']").show();
+			}
+		});
+
+	},
 	
 	/**
 	 * Function which will register all the events
@@ -2188,6 +2272,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.registerInvoiceStatusEvent(container);
 		this.registerSaveEvent(container); /*ED141219*/
 		this.registerReferenceSelectionEvent(container);
+		this.registerBlockAnimationEvent(); /*ED150707*/
 	},
 	
     registerEvents: function(){

@@ -164,17 +164,23 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			if($mainContactRecordModel)
 				foreach($mainContactRecordModel as $contactId=>$contact){
 					$data['contact_id'] = $contactId;
+					$data['subject'] = trim($contact['label']
+								. '/' . $contact['mailingzip']
+								. ' ' . $contact['contact_no']);
 					break;
 				}
 		}
 		//ED150500
 		if($moduleName === 'Contacts'){
-			
+			$subject = trim($parentRecordModel->get('firstname') . ' ' . $parentRecordModel->get('lastname')
+						. '/' . $parentRecordModel->get('mailingzip')
+						. ' ' . $parentRecordModel->get('contact_no'));
 			/* ED141016 génération du compte du contact si manquant */
 			$accountRecordModel = $parentRecordModel->getAccountRecordModel();
 			$moduleName = $accountRecordModel->getModuleName();
 			$parentRecordModel = $accountRecordModel;
 			$data['account_id'] = $accountRecordModel->getId();
+			$data['subject'] = $subject;
 			//echo('<pre>');var_dump($parentRecordModel);echo('</pre>');
 		}
 		$fieldMappingList = $parentRecordModel->getInventoryMappingFields();

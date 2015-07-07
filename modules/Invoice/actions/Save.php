@@ -22,6 +22,7 @@ class Invoice_Save_Action extends Inventory_Save_Action {
 
 		//Reverting the action value to $_REQUEST
 		$_REQUEST['action'] = $request->get('action');
+		
 		return $recordModel;
 	}
 }

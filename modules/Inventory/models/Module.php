@@ -126,4 +126,22 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 		
 		return $query;
 	}
+	
+	
+
+	/**
+	 * Function to save a given record model of the current module
+	 * @param Vtiger_Record_Model $recordModel
+	 */
+	public function saveRecord(Vtiger_Record_Model $recordModel) {
+		
+		//ED150707 : missing account_id
+		if(!$recordModel->get('account_id') || $recordModel->get('account_id') =='0'){
+			$contactRecordModel = Vtiger_Record_Model::getInstanceById($recordModel->get('contact_id'), 'Contacts');
+			$accountRecordModel = $contactRecordModel->getAccountRecordModel();
+			$recordModel->set('account_id', $accountRecordModel->getId());
+		}
+		
+		return parent::saveRecord($recordModel);
+	}
 }
