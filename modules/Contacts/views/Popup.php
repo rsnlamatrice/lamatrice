@@ -22,7 +22,7 @@ class Contacts_Popup_View extends Vtiger_Popup_View {
 			$relatedParentModule = $request->get('related_parent_module');
 				    $relatedParentId = $request->get('related_parent_id');
 	    
-			if(empty($relatedParentModule)) {
+			if(empty($relatedParentModule) || $relatedParentModule === 'undefined') {
 			    return parent::initializeListViewContents($request, $viewer);
 			}
 

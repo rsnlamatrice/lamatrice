@@ -31,20 +31,24 @@ class Products_RelationListView_Model extends Vtiger_RelationListView_Model {
 	//ED150630 buttons add for each potype
 	public function getAddRelationLinks() {
 		$addLinkModels = parent::getAddRelationLinks();
-		$addUrl = $this->getCreateViewUrl();
-		foreach($addLinkModels as $index => $addLinkModel){
-			if($addLinkModel->get('linkurl') == $addUrl){
-				unset($addLinkModels[$index]);
-				$found = true;
-				break;
+		
+		$relationModel = $this->getRelationModel();
+		if($relationModel->getRelationModuleModel()->getName() === 'PurchaseOrder') {
+			$addUrl = $this->getCreateViewUrl();
+			foreach($addLinkModels as $index => $addLinkModel){
+				if($addLinkModel->get('linkurl') == $addUrl){
+					unset($addLinkModels[$index]);
+					$found = true;
+					break;
+				}
 			}
-		}
-		if(isset($found)){
-			foreach(array('order', 'receipt', 'invoice') as $potype){
-				$newLink = clone $addLinkModel;
-				$newLink->set('linklabel', vtranslate('LBL_POTYPE_' . $potype, 'PurchaseOrder'));
-				$newLink->set('linkurl', $addUrl . '&potype=' . $potype);
-				$addLinkModels[] = $newLink;
+			if(isset($found)){
+				foreach(array('order', 'receipt', 'invoice') as $potype){
+					$newLink = clone $addLinkModel;
+					$newLink->set('linklabel', vtranslate('LBL_POTYPE_' . $potype, 'PurchaseOrder'));
+					$newLink->set('linkurl', $addUrl . '&potype=' . $potype);
+					$addLinkModels[] = $newLink;
+				}
 			}
 		}
 		return $addLinkModels;

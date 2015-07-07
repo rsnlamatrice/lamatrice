@@ -95,7 +95,6 @@ class RSNInvoiceHandler extends VTEventHandler {
 		if($invoiceData){
 			$this->handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems, $account, $totalDons);
 		}
-		
 		$log->debug("OUT handleAfterSaveInvoiceEvent");
 	}
 	
@@ -509,7 +508,6 @@ class RSNInvoiceHandler extends VTEventHandler {
 		}
 		
 		$log->debug("OUT handleAfterSaveInvoiceTotalEvent");
-		die();
 	}
 	
 	//Ajoute une tâche d'alerte

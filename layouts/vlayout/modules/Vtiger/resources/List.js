@@ -1459,11 +1459,52 @@ jQuery.Class("Vtiger_List_Js",{
 
 	/*
 	 * Function  to register click event for list view check box.
+	 *
+	 * ED150707 adds helper : checkboxing with CTRL down makes a range selection  
 	 */
 	registerCheckBoxClickEvent : function(){
 		var listViewPageDiv = this.getListViewContainer();
 		var thisInstance = this;
 		listViewPageDiv.delegate('.listViewEntriesCheckBox','click',function(e){
+			//ED150707 helper : checkboxing with MAJ key down makes a range selection 
+			if (e.type){ //real event
+				if (e.metaKey || e.shiftKey) {
+					var founded = false
+					, currentTarget = e.currentTarget
+					, callback = arguments.callee; //this function
+					
+					if (!thisInstance.previous_listViewEntriesCheckBox) {
+						//first checkbox
+						thisInstance.previous_listViewEntriesCheckBox = jQuery('.listViewEntriesCheckBox:first').get(0);
+						if(thisInstance.previous_listViewEntriesCheckBox.checked != currentTarget.checked){
+							thisInstance.previous_listViewEntriesCheckBox.checked = currentTarget.checked;
+							callback.call(this, { currentTarget : thisInstance.previous_listViewEntriesCheckBox });
+						}
+								
+					}
+					jQuery('.listViewEntriesCheckBox').each( function(index,element) {
+						if (!founded) { //search for first
+							if (this === currentTarget) { //bottom to above
+								thisInstance.previous_listViewEntriesCheckBox.checked = currentTarget.checked;
+								callback.call(this, { currentTarget : thisInstance.previous_listViewEntriesCheckBox });
+								currentTarget = thisInstance.previous_listViewEntriesCheckBox;
+								founded = true;
+							}
+							else if (this === thisInstance.previous_listViewEntriesCheckBox) {
+								founded = true;
+							}
+							return;
+						}
+						if (this === currentTarget) 
+							return false; //the end
+						this.checked = currentTarget.checked;
+						callback.call(this, { currentTarget : this }); //manage each checkbox individualy
+					
+					});
+				}
+				thisInstance.previous_listViewEntriesCheckBox = e.currentTarget;
+			}
+			
 			var selectedIds = thisInstance.readSelectedIds();
 			var excludedIds = thisInstance.readExcludedIds();
 			var elem = jQuery(e.currentTarget);
