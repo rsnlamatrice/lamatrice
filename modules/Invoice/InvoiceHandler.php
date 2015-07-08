@@ -327,7 +327,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 				if($isAbonne){
 					if($rsnAboRevue->isTypeAboGroupe()
 					|| $rsnAboRevue->getNbExemplaires() > 1
-					|| $dateDebut == $invoiceDate()){
+					|| $dateDebut == $invoiceDate){
 						$dateDebut = $rsnAboRevue->getDebutAbo();
 						$dateFin = $rsnAboRevue->getFinAbo();
 						if(!$dateFin){
