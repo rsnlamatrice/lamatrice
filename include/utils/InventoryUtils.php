@@ -469,25 +469,33 @@ function updateInventoryProductRel($entity) {
 
 	$statusChanged = false;
 	$vtEntityDelta = new VTEntityDelta ();
-	$oldEntity = $vtEntityDelta-> getOldValue($moduleName, $entity_id, $statusFieldName);
+	$oldEntity = $vtEntityDelta->getOldValue($moduleName, $entity_id, $statusFieldName);
 	$recordDetails = $entity->getData();
 	$statusChanged = $vtEntityDelta->hasChanged($moduleName, $entity_id, $statusFieldName);
+	
+	$log->debug("statusChanged = $statusChanged");
+		
 	if($statusChanged) {
 		if($recordDetails[$statusFieldName] == $statusFieldValue) {
+			$log->debug("statusFieldName $statusFieldName == $statusFieldValue");
 			$adb->pquery("UPDATE vtiger_inventoryproductrel SET incrementondel=0 WHERE id=?",array($entity_id));
 			$updateInventoryProductRel_deduct_stock = false;
 			if(empty($update_product_array)) {
 				addProductsToStock($entity_id);
 			}
 		} elseif($oldEntity == $statusFieldValue) {
+			$log->debug("oldEntity $oldEntity == $statusFieldValue");
 			$updateInventoryProductRel_deduct_stock = false;
 			deductProductsFromStock($entity_id);
 		}
 	} elseif($recordDetails[$statusFieldName] == $statusFieldValue) {
+		$log->debug("status NOT Changed $statusFieldName == $statusFieldValue");
 		$updateInventoryProductRel_deduct_stock = false;
 	}
 
 	if($updateInventoryProductRel_deduct_stock) {
+		$log->debug("updateInventoryProductRel_deduct_stock");
+		
 		$adb->pquery("UPDATE vtiger_inventoryproductrel SET incrementondel=1 WHERE id=?",array($entity_id));
 
 		$product_info = $adb->pquery("SELECT productid,sequence_no, quantity from vtiger_inventoryproductrel WHERE id=?",array($entity_id));
@@ -509,9 +517,8 @@ function updateInventoryProductRel($entity) {
 				}
 			}
 		}
-
-		$log->debug("Exit from function updateInventoryProductRel(".$entity_id.")");
 	}
+	$log->debug("Exit from function updateInventoryProductRel(".$entity_id.")");
 }
 
 /**	Function used to save the Inventory product details for the passed entity

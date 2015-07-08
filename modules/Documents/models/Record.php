@@ -132,5 +132,71 @@ class Documents_Record_Model extends Vtiger_Record_Model {
 		$relationListView = Vtiger_RelationListView_Model::getInstance($this, $relatedModuleName, '');
 		return $relationListView->getEntries($pagingModel);
 	}
+	
+	/** ED150708
+	 * Function to get List of Fields which are related from Documents to Inventory Record
+	 * @return <array>
+	 */
+	public function getInventoryMappingFields() {
+		$mapping = array();
+		$campaigns = $this->getRelatedCampaigns();
+		foreach($campaigns as $campaign){
+			$mapping[] = array('inventoryField'=>'campaign_no', 'defaultValue'=>$campaign->getId());
+			break;
+		}
+		return $mapping;
+	}
+	
+	/** ED150708
+	 *
+	 */
+	function getRelatedProductsAndServices(){
+		$pagingModel = new Vtiger_Paging_Model();
+		$pagingModel->set('page', 1);
+		
+		$relatedModuleName = 'Products';
+		$relationListView = Vtiger_RelationListView_Model::getInstance($this, $relatedModuleName, '');
+		$entries = $relationListView->getEntries($pagingModel);
+		
+		$relatedModuleName = 'Services';
+		$relationListView = Vtiger_RelationListView_Model::getInstance($this, $relatedModuleName, '');
+		
+		$entries = array_merge($entries, $relationListView->getEntries($pagingModel));
+		
+		return $entries;
+	}
+	
+	/** ED150708
+	 * Retourne le tableau des tous les produits et services associés au coupon
+	 * Affecte les quantités à 0
+	 * Utilisé pour initialiser une nouvelle facture à partir d'un coupon
+	 */
+	public function getRelatedProductsDetailsForInventoryModule($inventory) {
+		$products = $this->getRelatedProductsAndServices();
+		$index = 1;
+		$relatedProducts = array();
+		foreach($products as $product){
+			$productDetails = $product->getDetailsForInventoryModule($inventory);
+			if($productDetails){
+				$productDetails[1]['qty1'] = 0;
+				if($index === 1){
+					$relatedProducts = $productDetails;
+				}
+				else {
+					//rename labels ending with '1'
+					foreach($productDetails[1] as $detailIndex => $detail){
+						if($detailIndex[strlen($detailIndex)-1] === '1'){
+							unset($productDetails[1][$detailIndex]);
+							$detailIndex = substr($detailIndex, 0, strlen($detailIndex)-1) . $index;
+							$productDetails[1][$detailIndex] = $detail;
+						}
+					}
+					$relatedProducts[$index] = $productDetails[1];
+				}
+				++$index;
+			}
+		}
+		return $relatedProducts;
+	}
 
 }

@@ -48,7 +48,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 				$referenceId = $request->get('quote_id');
 			}
 
-			$parentRecordModel = Inventory_Record_Model::getInstanceById($referenceId);
+			$parentRecordModel = Inventory_Record_Model::getInstanceById($referenceId, 'SalesOrder');
 			$currencyInfo = $parentRecordModel->getCurrencyInfo();
 			$taxes = $parentRecordModel->getProductTaxes();
 			$shippingTaxes = $parentRecordModel->getShippingTaxes();
@@ -56,7 +56,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 			$recordModel->setRecordFieldValues($parentRecordModel);
 			
-		} else {            
+		} else {  
 			
 			$taxes = Inventory_Module_Model::getAllProductTaxes();
 			$shippingTaxes = Inventory_Module_Model::getAllShippingTaxes();
@@ -85,13 +85,22 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			} elseif ($sourceRecord && ($sourceModule === 'Accounts'
 						|| $sourceModule === 'Contacts'
 						|| $sourceModule === 'Potentials'
+						|| $sourceModule === 'Documents'
 						|| ($sourceModule === 'Vendors' && $moduleName === 'PurchaseOrder'))) {
 				$parentRecordModel = Vtiger_Record_Model::getInstanceById($sourceRecord, $sourceModule);
 				
 				$recordModel->setParentRecordData($parentRecordModel);
+				
+				if($sourceModule === 'Documents')//Coupon
+					$relatedProducts = $parentRecordModel->getRelatedProductsDetailsForInventoryModule($recordModel);
+			}
+			//ED150708 : 'coupon libre' par défaut
+			if($moduleName === 'Invoice'
+			&& !$recordModel->get('notesid')){
+				$recordModel->set('notesid', COUPON_LIBRE_ID);//in Documents.php
 			}
 		}
-
+		
 		$moduleModel = $recordModel->getModule();
 		$fieldList = $moduleModel->getFields();
 		$requestFieldList = array_intersect_key($request->getAll(), $fieldList);
