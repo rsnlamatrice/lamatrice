@@ -45,15 +45,16 @@ class Services extends CRMEntity {
 	var $list_fields = Array(
    		/* Format: Field Label => Array(tablename, columnname) */
 		// tablename should not have prefix 'vtiger_'
-		'Service No'=>Array('service'=>'service_no'),
+		'Service Code'=>Array('service'=>'productcode'),
 		'Service Name'=>Array('service'=>'servicename'),
 		'Commission Rate'=>Array('service'=>'commissionrate'),
 		'No of Units'=>Array('service'=>'qty_per_unit'),
-		'Price'=>Array('service'=>'unit_price')
+		'Price'=>Array('service'=>'unit_price'),
+		'Actif'=>Array('service'=>'discontinued'),
 	);
 	var $list_fields_name = Array(
 		/* Format: Field Label => fieldname */
-		'Service No'=>'service_no',
+		'Service Code'=>'productcode',
 		'Service Name'=>'servicename',
 		'Category'=>'servicecategory',
 		'No of Units'=>'qty_per_unit',
@@ -69,14 +70,16 @@ class Services extends CRMEntity {
 		/* Format: Field Label => Array(tablename, columnname) */
 		// tablename should not have prefix 'vtiger_'
 		'Service Name'=>Array('service'=>'servicename'),
-		'Service No'=>Array('service'=>'service_no'),
-		'Price'=>Array('service'=>'unit_price')
+		'Service Code'=>Array('service'=>'productcode'),
+		'Category'=>Array('service'=>'servicecategory'),
+		'Price'=>Array('service'=>'unit_price'),
 	);
 	var $search_fields_name = Array(
 		/* Format: Field Label => fieldname */
 		'Service Name'=>'servicename',
-		'Service No'=>'service_no',
-		'Price'=>'unit_price'
+		'Service Code'=>'productcode',
+		'Category'=>'servicecategory',
+		'Price'=>'unit_price',
 	);
 
 	// For Popup window record selection

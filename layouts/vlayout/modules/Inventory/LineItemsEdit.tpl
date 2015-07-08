@@ -208,18 +208,8 @@
                 <span class="pull-right">
 		    <input id="shipping_handling_charge" name="shipping_handling_charge" data-validation-engine="validate[funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]" type="text" class="lineItemInputBox" value="{if $FINAL.shipping_handling_charge}{$FINAL.shipping_handling_charge}{else}0.00{/if}" />
 		    {* ED150529 TODO déplacer dans .js, convertir le input avec le plugin vu pour les pourcentages *}
-		    <a onclick="var $input=$(this).prevAll('input:first')
-				    , value = parseFloat($input.val().replace(',', '.'))
-				    , offset = 5;
-				    $input.val(value + offset).focusout();
-				    return false;"
-			style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer; float:right;">+</a>
-		    <a onclick="var $input=$(this).prevAll('input:first')
-				    , value = parseFloat($input.val().replace(',', '.'))
-				    , offset = 5;
-				    $input.val(Math.max(0, value - offset)).focusout();
-				    return false;"
-			style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer; float:right;">-</a>
+		    <a id="shipping_handling_charge_plus" data-offset="5">+</a>
+		    <a id="shipping_handling_charge_minus" data-offset="-5">-</a>
 		</span>
             </td>
         </tr>

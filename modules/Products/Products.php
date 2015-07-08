@@ -33,16 +33,17 @@ class Products extends CRMEntity {
 	// This is the list of vtiger_fields that are in the lists.
 	var $list_fields = Array(
 		'Product Name'=>Array('products'=>'productname'),
-		'Part Number'=>Array('products'=>'productcode'),
+		'Category'=>Array('products'=>'productcategory'),
 		'Commission Rate'=>Array('products'=>'commissionrate'),
-		'Qty/Unit'=>Array('products'=>'qty_per_unit'),
-		'Unit Price'=>Array('products'=>'unit_price')
+		//'Qty/Unit'=>Array('products'=>'qty_per_unit'),
+		'Unit Price'=>Array('products'=>'unit_price'),
+		'Actif'=>Array('products'=>'discontinued'),
 	);
 	var $list_fields_name = Array(
 		'Product Name'=>'productname',
 		'Part Number'=>'productcode',
 		'Category'=>'productcategory',
-		'Qty/Unit'=>'qty_per_unit',
+		//'Qty/Unit'=>'qty_per_unit',
 		'Unit Price'=>'unit_price',
 		'Actif' => 'discontinued',
 	);
@@ -52,12 +53,14 @@ class Products extends CRMEntity {
 	var $search_fields = Array(
 		'Product Name'=>Array('products'=>'productname'),
 		'Part Number'=>Array('products'=>'productcode'),
-		'Unit Price'=>Array('products'=>'unit_price')
+		'Category'=>Array('products'=>'productcategory'),
+		'Unit Price'=>Array('products'=>'unit_price'),
 	);
 	var $search_fields_name = Array(
 		'Product Name'=>'productname',
 		'Part Number'=>'productcode',
-		'Unit Price'=>'unit_price'
+		'Category'=>'productcategory',
+		'Unit Price'=>'unit_price',
 	);
 
     var $required_fields = Array(

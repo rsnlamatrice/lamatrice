@@ -11,7 +11,7 @@ require_once 'modules/Emails/mail.php';
 //die('PAUSE');
 class Inventory_Save_Action extends Vtiger_Save_Action {
     public function process(Vtiger_Request $request) {
-	return parent::process($request);
+		return parent::process($request);
     }
 
     protected function getRecordModelFromRequest(Vtiger_Request $request) {

@@ -774,8 +774,8 @@ $jsLanguageStrings = array(
 	'INVALID_NUMBER_OF'            => 'Nombre invalide'              , 
 	'INVALID_NUMBER'               => 'Nombre invalide'              , 
 	'JS_LBL_ARE_YOU_SURE_YOU_WANT_TO_DELETE' => 'êtes-vous certain de supprimer ?', 
-	'OVERWRITE_EXISTING_MSG1'      => 'Ecraser l\adresse existante par l\'adresse sélectionnée', 
-	'OVERWRITE_EXISTING_MSG2'      => 'Détails adresse'             , 
+	'OVERWRITE_EXISTING_MSG1'      => 'Ecraser l\adresse existante par l\'adresse de ', 
+	'OVERWRITE_EXISTING_MSG2'      => '?'  /*Détails adresse*/           , 
 	'SINGLE_Accounts'              => 'Compte'                , 
 	'SINGLE_Contacts'              => 'Contact'                     , 
 	'LBL_DELETE_CONFIRMATION'      => 'êtes-vous certain de supprimer?', 
@@ -875,4 +875,5 @@ $jsLanguageStrings = array(
 	
 	'JS_RESET_FILTERS' => 'Effacer les filtres',
 	'JS_REFRESH' => 'Actualiser', 
+	'SINGLE_Vendors' => 'Fournisseur',
 );

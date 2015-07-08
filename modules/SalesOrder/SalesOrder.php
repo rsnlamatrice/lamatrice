@@ -124,19 +124,32 @@ class SalesOrder extends CRMEntity {
 	{
 
 		//Checking if quote_id is present and updating the quote status
-		if($this->column_fields["quote_id"] != '')
-		{
-        		$qt_id = $this->column_fields["quote_id"];
-        		$query1 = "update vtiger_quotes set quotestage='Accepted' where quoteid=?";
-        		$this->db->pquery($query1, array($qt_id));
+		if($this->column_fields["quote_id"] != ''){
+			$qt_id = $this->column_fields["quote_id"];
+			$query1 = "update vtiger_quotes set quotestage='Accepted' where quoteid=?";
+			$this->db->pquery($query1, array($qt_id));
 		}
 
 		//in ajax save we should not call this function, because this will delete all the existing product values
 		if($_REQUEST['action'] != 'SalesOrderAjax' && $_REQUEST['ajxaction'] != 'DETAILVIEW'
 				&& $_REQUEST['action'] != 'MassEditSave' && $_REQUEST['action'] != 'ProcessDuplicates'
 				&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false) {
+			
+			//ED150708 remove qty in demand
+			global $adb;
+			$recordId = $this->id;
+			$sql = "UPDATE vtiger_products
+				JOIN vtiger_inventoryproductrel
+				ON vtiger_products.productid = vtiger_inventoryproductrel.productid
+				SET vtiger_products.qtyindemand = vtiger_products.qtyindemand - vtiger_inventoryproductrel.quantity
+				WHERE id = ?";
+			$result = $adb->pquery($sql, array($recordId));
+			if(!$result){
+				$adb->echoError('Erreur de mise à jour des quantités demandées');
+				die();
+			}
 			//Based on the total Number of rows we will save the product relationship with this entity
-			saveInventoryProductDetails($this, 'SalesOrder');
+			saveInventoryProductDetails($this, 'SalesOrder', false, '+');
 		}
 
 		// Update the currency id and the conversion rate for the sales order
@@ -254,6 +267,7 @@ class SalesOrder extends CRMEntity {
 			(vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname
 			end as user_name from vtiger_invoice
 			inner join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_invoice.invoiceid
+			inner join vtiger_invoicecf on vtiger_invoicecf.invoiceid=vtiger_invoice.invoiceid
 			left outer join vtiger_account on vtiger_account.accountid=vtiger_invoice.accountid
 			inner join vtiger_salesorder on vtiger_salesorder.salesorderid=vtiger_invoice.salesorderid
 			left join vtiger_users on vtiger_users.id=vtiger_crmentity.smownerid

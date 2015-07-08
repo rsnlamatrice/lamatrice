@@ -70,7 +70,7 @@ Inventory_Edit_Js("PurchaseOrder_Edit_Js",{},{
 		var thisInstance = this;
 		
 		jQuery('input[name="vendor_id"]', container).on(Vtiger_Edit_Js.referenceSelectionEvent, function(e, data){
-			thisInstance.referenceSelectionEventHandler(data, container);
+			thisInstance.referenceSelectionEventHandler(data, container, !thisInstance.isEmptyAddress(container));
 		});
 	},
     

@@ -172,6 +172,9 @@ class Products_Record_Model extends Vtiger_Record_Model {
 			$productPrices = $this->getModule()->getPricesForProducts($currentUser->get('currency_id'), array($productId), $this->getModuleName());
 			$productDetails[$i]['listPrice'.$i] = number_format((int)$productPrices[$productId], $currentUser->get('no_of_currency_decimals'),'.','');
 		}
+		
+		if($productDetails[1]['entityType1'] === 'Services')
+			unset($productDetails[1]['qtyInStock1']);
 		return $productDetails;
 	}
 
