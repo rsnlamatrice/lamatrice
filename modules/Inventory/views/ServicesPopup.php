@@ -30,5 +30,21 @@ class Inventory_ServicesPopup_View extends Vtiger_Popup_View {
 		$viewer->assign('GETURL', 'getTaxesURL');
 		$viewer->assign('VIEW', 'ServicesPopup');
 	}
+	
+	 /**
+	 * Function to get the list of Script models to be included
+	 * @param Vtiger_Request $request
+	 * @return <Array> - List of Vtiger_JsScript_Model instances
+	 */
+	function getHeaderScripts(Vtiger_Request $request) {
+		$headerScriptInstances = parent::getHeaderScripts($request);
+
+		$jsFileNames = array('modules.Inventory.resources.Popup');
+		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
+		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
+
+		return $headerScriptInstances;
+	}
+
 
 }

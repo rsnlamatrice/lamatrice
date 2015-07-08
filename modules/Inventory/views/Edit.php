@@ -170,7 +170,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 
 		//ED150603
 		if($recordModel->get('sent2compta'))
-			$viewer->assign('NOT_EDITABLE', 'LBL_ALREADY_SENT_2_COMPTA');
+			$viewer->assign('NOT_EDITABLE', vtranslate('LBL_ALREADY_SENT_2_COMPTA', $moduleName) . ' (' . $recordModel->getDisplayValue('sent2compta') . ')');
 		
 		//ED150629
 		if($moduleName === 'PurchaseOrder'){

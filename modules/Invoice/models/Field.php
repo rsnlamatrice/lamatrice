@@ -11,7 +11,7 @@
 /**
  * Vtiger Field Model Class
  */
-class Invoice_Field_Model extends Vtiger_Field_Model {
+class Invoice_Field_Model extends Inventory_Field_Model {
 	
 	/** ED150625
 	 * Returns parameters to filter popup selection list of a reference field.

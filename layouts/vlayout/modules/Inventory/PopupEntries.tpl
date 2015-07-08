@@ -38,7 +38,8 @@
 				{/if}
 				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
 				<th class="{$WIDTHTYPE}">
-					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $ORDER_BY eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
+					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $ORDER_BY eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">
+						{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
 						{if $ORDER_BY eq $LISTVIEW_HEADER->get('column')}<img class="sortImage" src="{vimage_path( $SORT_IMAGE, $MODULE)}">{else}<img class="hide sortingImage" src="{vimage_path( 'downArrowSmall.png', $MODULE)}">{/if}</a>
 				</th>
 				{/foreach}
@@ -75,7 +76,7 @@
 					<a class="subproducts"><b>{vtranslate('Sub Products',$MODULE_NAME)}</b></a>
 					<!--<img class="lineItemPopup cursorPointer alignMiddle" data-popup="ProductsPopup" title="{vtranslate('Products',$MODULE)}" data-module-name="Products" data-field-name="productid" src="{vimage_path('Products.png')}"/>-->
 				{else} 
-					{vtranslate('LBL_NOT_A_BUNDLE',$MODULE_NAME)}
+					{*ED150708 vtranslate('LBL_NOT_A_BUNDLE',$MODULE_NAME)*}
 				{/if}
 			</td>
 		</tr>

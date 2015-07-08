@@ -12,6 +12,10 @@ require_once 'include/Webservices/DataTransform.php';
 require_once 'vtlib/Vtiger/Utils.php';
 require_once 'data/CRMEntity.php';
 require_once 'include/QueryGenerator/QueryGenerator.php';
+require_once 'vtlib/Vtiger/Mailer.php';
+require_once 'modules/Vtiger/helpers/Util.php';
+require_once 'includes/runtime/LanguageHandler.php';
+
 
 require_once 'include/simple_html_dom.php';
 require_once dirname(__FILE__) . '/ImportFromEDF.php';
