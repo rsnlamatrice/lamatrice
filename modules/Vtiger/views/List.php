@@ -60,7 +60,8 @@ class Vtiger_List_View extends Vtiger_Index_View {
 
 
 	function process (Vtiger_Request $request) {
-		$viewer = $this->getViewer ($request);
+		
+		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$this->viewName = $request->get('viewname');
@@ -69,7 +70,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$viewer->assign('MODULE_MODEL', $moduleModel);
 		$viewer->assign('CURRENT_USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		
-                $recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
+        $recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 		$viewer->assign('RECORD_MODEL', $recordModel);
 		$viewer->view('ListViewContents.tpl', $moduleName);
 		
@@ -264,8 +265,8 @@ class Vtiger_List_View extends Vtiger_Index_View {
 	 * Function to get the page count for list
 	 * @return total number of pages
 	 */
-	function getPageCount(Vtiger_Request $request){
-		$listViewCount = $this->getListViewCount($request);
+	function getPageCount(Vtiger_Request $request){	
+		$listViewCount = $this->getListViewCount($request);	
 		$pagingModel = new Vtiger_Paging_Model();
 		$pageLimit = $pagingModel->getPageLimit();
 		$pageCount = ceil((int) $listViewCount / (int) $pageLimit);

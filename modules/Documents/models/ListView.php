@@ -149,8 +149,6 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		}
 
 		$listQuery = $this->getQuery();
-		//ED141018 bug ? vtiger_attachmentsfolderfolderid
-		$listQuery = str_replace('vtiger_attachmentsfolderfolderid', 'vtiger_attachmentsfolder', $listQuery);
 
 		$sourceModule = $this->get('src_module');
 		if(!empty($sourceModule)) {
@@ -222,7 +220,10 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		$queryGenerator = $this->get('query_generator');
 		$listQuery = $queryGenerator->getQuery();
 		/* ED141010 get uicolor field also */
-		if(strpos($listQuery,'vtiger_attachmentsfolder'))
+		$matches = array();
+		if(strpos($listQuery,'vtiger_attachmentsfolderfolderid'))
+			$listQuery = preg_replace('/^SELECT\s/', 'SELECT vtiger_attachmentsfolderfolderid.uicolor, ', $listQuery, 1);
+		elseif(strpos($listQuery,'vtiger_attachmentsfolder'))
 			$listQuery = preg_replace('/^SELECT\s/', 'SELECT vtiger_attachmentsfolder.uicolor, ', $listQuery, 1);
 		return $listQuery;
 	}
