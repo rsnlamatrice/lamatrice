@@ -368,6 +368,11 @@ var_dump($listResult);*/
 		$listQuery = 'SELECT count(*) AS count FROM (' . $listQuery . ') q';
 		
 		$listResult = $db->pquery($listQuery, array());
+		if(!$listResult){
+			$db->echoError('Impossible de compter le nombre de lignes.');
+			echo '<pre>'; print_r($listQuery); echo '</pre>'; 
+			return 0;
+		}
 		return $db->query_result($listResult, 0, 'count');
 	}
 
