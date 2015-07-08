@@ -44,17 +44,18 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 						WHERE vtiger_crmentity.deleted = 0 AND vtiger_activity.activitytype <> 'Emails'
 							AND (vtiger_seactivityrel.crmid = ".$recordId;*/
 			$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
-				, vtiger_crmentity.*, f.*
+				, vtiger_crmentity.crmid, vtiger_crmentity.createdtime, vtiger_crmentity.modifiedtime, vtiger_crmentity.label
+				, vtiger_rsnprelvirement.*
 				, vtiger_crmentity.smownerid AS assigned_user_id
-				FROM `vtiger_rsnprelvirement` f
+				FROM `vtiger_rsnprelvirement`
 				INNER JOIN `vtiger_crmentity`
-					ON vtiger_crmentity.crmid = f.rsnprelvirementid
+					ON vtiger_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
 				LEFT JOIN vtiger_users
 					ON vtiger_users.id = vtiger_crmentity.smownerid
 				LEFT JOIN vtiger_groups
 					ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 				WHERE vtiger_crmentity.deleted = 0
-				AND f.rsnprelevementsid = '.$recordId;
+				AND vtiger_rsnprelvirement.rsnprelevementsid = '.$recordId;
 			$relatedModuleName = $relatedModule->getName();
 			$query .= $this->getSpecificRelationQuery($relatedModuleName);
 			$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);

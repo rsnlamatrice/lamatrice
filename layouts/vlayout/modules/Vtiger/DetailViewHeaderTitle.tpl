@@ -15,7 +15,8 @@
 			<span class="recordLabel font-x-x-large textOverflowEllipsis span pushDown" title="{$RECORD->getName()}">
 				{foreach item=NAME_FIELD from=$MODULE_MODEL->getNameFields()}{*$NAME_FIELD*}
 					{assign var=FIELD_MODEL value=$MODULE_MODEL->getField($NAME_FIELD)}
-					{if $FIELD_MODEL->getPermissions()}
+					{if !$FIELD_MODEL}Champ {$NAME_FIELD} introuvable dans {basename(__FILE__)}
+					{elseif $FIELD_MODEL->getPermissions()}
 						<span class="{$NAME_FIELD}">
 								
 						{if ($FIELD_MODEL->get('uitype') eq '72' || $FIELD_MODEL->get('uitype') eq '71')}{*Amount, add currency symbol*}
