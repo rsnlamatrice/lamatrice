@@ -38,7 +38,7 @@ class SCINEvents extends Vtiger_CRMEntity {
 	var $list_fields = Array (
 		'LBL_SCINSOURCE' => array('scinevents', 'scinsource'),
 		'LBL_SCININSTALLATIONSID' => array('scinevents', 'scininstallationsid'),
-		'LBL_DESCRIPTION' => array('scinevents', 'description'),
+		'LBL_DESCRIPTION' => array('scinevents', 'pagecontent'),
 		'LBL_DATEEVENT' => array('scinevents', 'dateevent'),
 		'LBL_GRAVITE' => array('scinevents', 'gravite'),
 		'LBL_TITLE' => array('scinevents', 'title'),
@@ -47,7 +47,7 @@ class SCINEvents extends Vtiger_CRMEntity {
 	var $list_fields_name = Array (
 		'LBL_SCINSOURCE' => 'scinsource',
 		'LBL_SCININSTALLATIONSID' => 'scininstallationsid',
-		'LBL_DESCRIPTION' => 'description',
+		'LBL_DESCRIPTION' => 'pagecontent',
 		'LBL_DATEEVENT' => 'dateevent',
 		'LBL_GRAVITE' => 'gravite',
 		'LBL_TITLE' => 'title',
