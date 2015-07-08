@@ -31,8 +31,7 @@ class RSNMediaRelations_Record_Model extends Vtiger_Record_Model {
 					
 				);
 			default:
-				//die($fieldname);
-				return array();
+				return parent::getPicklistValuesDetails($fieldname);
 		}
 	}
 	
