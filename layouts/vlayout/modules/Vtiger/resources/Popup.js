@@ -435,11 +435,13 @@ jQuery.Class("Vtiger_Popup_Js",{
 				return aDeferred.promise();
 			}
 			this.getPageCount().then(function(data){
-				var pageCount = data['result']['page'];
-				if(pageCount == 0){
-					pageCount = 1;
+				if (typeof data === 'object') {//ED150708
+					var pageCount = data['result']['page'];
+					if(pageCount == 0){
+						pageCount = 1;
+					}
+					element.text(pageCount);
 				}
-				element.text(pageCount);
 				aDeferred.resolve();
 			});
 		} else{
@@ -710,7 +712,7 @@ jQuery.Class("Vtiger_Popup_Js",{
 			function(data) {
 				var response;
 				if(typeof data != "object"){
-					if (data[0] == "<")
+					if (/^\s*\</.test(data))//ED150708 data[0] == "<")
 						response = data;
 					else
 						response = JSON.parse(data);

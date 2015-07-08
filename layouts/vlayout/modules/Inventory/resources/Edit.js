@@ -266,7 +266,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : string
 	 */
 	getQuantityValue : function(lineItemRow){
-		return parseFloat(jQuery('.qty', lineItemRow).val());
+		return this.parseFloat(jQuery('.qty', lineItemRow).val());
 	},
 
 	/** ED150625
@@ -284,7 +284,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : string
 	 */
 	getListPriceValue : function(lineItemRow) {
-		return parseFloat(jQuery('.listPrice',lineItemRow).val());
+		return this.parseFloat(jQuery('.listPrice',lineItemRow).val());
 	},
 
 	setListPriceValue : function(lineItemRow, listPriceValue) {
@@ -311,7 +311,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : string
 	 */
 	getLineItemTotal : function(lineItemRow) {
-		return parseFloat(this.getLineItemTotalElement(lineItemRow).text());
+		return this.parseFloat(this.getLineItemTotalElement(lineItemRow).text());
 	},
 
 	/**
@@ -369,7 +369,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : string
 	 */
 	getDiscountTotal : function(lineItemRow) {
-		return parseFloat(jQuery('.discountTotal',lineItemRow).text());
+		return this.parseFloat(jQuery('.discountTotal',lineItemRow).text());
 	},
 
 	/**
@@ -389,7 +389,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : string
 	 */
 	getTotalAfterDiscount : function(lineItemRow) {
-		return parseFloat(jQuery('.totalAfterDiscount',lineItemRow).text());
+		return this.parseFloat(jQuery('.totalAfterDiscount',lineItemRow).text());
 	},
 
 	/**
@@ -409,7 +409,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : string
 	 */
 	getLineItemTaxTotal : function(lineItemRow){
-		return parseFloat(jQuery('.productTaxTotal', lineItemRow).text());
+		return this.parseFloat(jQuery('.productTaxTotal', lineItemRow).text());
 	},
 
 	/**
@@ -429,7 +429,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : string
 	 */
 	getLineItemNetPrice : function(lineItemRow) {
-		return parseFloat(jQuery('.netPrice',lineItemRow).text());
+		return this.parseFloat(jQuery('.netPrice',lineItemRow).text());
 	},
 
 	setNetTotal : function(netTotalValue){
@@ -438,7 +438,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	getNetTotal : function() {
-		return parseFloat(jQuery('#netTotal').text());
+		return this.parseFloat(jQuery('#netTotal').text());
 	},
 
 	/**
@@ -450,7 +450,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	getFinalDiscountTotal : function() {
-		return parseFloat(jQuery('#discountTotal_final').text());
+		return this.parseFloat(jQuery('#discountTotal_final').text());
 	},
 	
 	setGroupTaxTotal : function(groupTaxTotalValue) {
@@ -458,11 +458,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	getGroupTaxTotal : function() {
-		return parseFloat(jQuery('#tax_final').text());
+		return this.parseFloat(jQuery('#tax_final').text());
 	},
 
 	getShippingAndHandling : function() {
-		return parseFloat(this.getShippingAndHandlingControlElement().val());
+		return this.parseFloat(this.getShippingAndHandlingControlElement().val());
 	},
 
 	setShippingAndHandlingTaxTotal : function() {
@@ -478,11 +478,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	getShippingAndHandlingTaxTotal : function() {
-		return parseFloat(jQuery('#shipping_handling_tax').text());
+		return this.parseFloat(jQuery('#shipping_handling_tax').text());
 	},
 
 	getAdjustmentValue : function() {
-		return parseFloat(this.getAdjustmentTextElement().val());
+		return this.parseFloat(this.getAdjustmentTextElement().val());
 	},
 
 	isAdjustMentAddType : function() {
@@ -523,12 +523,19 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	getGrandTotal : function() {
-		return parseFloat(jQuery('#grandTotal').text());
+		return this.parseFloat(jQuery('#grandTotal').text());
 	},
 	
 
 	getReceived : function() {
-		return parseFloat(jQuery('#received').val());
+		return this.parseFloat(jQuery('#received').val());
+	},
+	
+	//ED150708 : comma to dot before parseFloat
+	parseFloat : function($value){
+		if (typeof $value === 'numeric')
+			return $value;
+		return parseFloat($value.replace(',', '.'));
 	},
 	
 	//ED150129 : set balance (solde, reste à payer)
@@ -1121,6 +1128,23 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		editForm.on('click','.cancelLink',function(){
 			jQuery('.closeDiv').trigger('click')
 		})
+	},
+
+	//ED150708 : boutons + et - des frais d'expédition
+	registerShippingChargeButtonsEvent : function(container) {
+		var thisInstance = this;
+		container.on('click','#shipping_handling_charge_plus, #shipping_handling_charge_minus',function(e){
+			var $this=$(this)
+			, $input = thisInstance.getShippingAndHandlingControlElement()
+			, value = thisInstance.parseFloat($input.val())
+			, offset = thisInstance.parseFloat($this.attr('data-offset'));
+			if (offset < 0 && (value + offset) < 0)
+				value = 0;
+			else
+				value = value + offset;
+			$input.val(value).focusout();
+			return false;		
+		});
 	},
 
 	lineItemResultActions: function(){
@@ -2032,7 +2056,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * Function to check for relation operation
 	 * if relation exist calculation should happen by default
 	 */
-	registerForRealtionOperation : function(){
+	registerForRelationOperation : function(){
 		var form = this.getForm();
 		var relationExist = form.find('[name="relationOperation"]').val();
 		if(relationExist){
@@ -2054,7 +2078,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * Function to get the pre tax total
 	 */
 	getPreTaxTotal : function() {
-		return parseFloat(jQuery('#preTaxTotal').text());
+		return this.parseFloat(jQuery('#preTaxTotal').text());
 	},
 	
 	/**
@@ -2213,9 +2237,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				thisInstance.getLineItemContentsContainer().find('tr.'+thisInstance.rowClass).each(function(){
 						// isProductSelected() semble retourner l'inverse de ce qu'elle dit...
 						var $productField = $(this).find('.productName');
-						if(!$productField.val()
-						|| $productField.val() === ' - ' //ED150701
-						){
+						if(!$productField.val()){
 							jQuery(this).remove();
 							oneDeleted = true;
 						}
@@ -2273,6 +2295,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.registerSaveEvent(container); /*ED141219*/
 		this.registerReferenceSelectionEvent(container);
 		this.registerBlockAnimationEvent(); /*ED150707*/
+		this.registerShippingChargeButtonsEvent(container); /* ED150708 */
 	},
 	
     registerEvents: function(){
@@ -2283,6 +2306,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		//TODO : this might be costier operation. This we added to calculate tax for each line item
 		this.makeLineItemsSortable();
 		this.checkLineItemRow();
-		this.registerForRealtionOperation();
+		this.registerForRelationOperation();
     }
 });
