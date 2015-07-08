@@ -135,6 +135,20 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			}
 		}
 
+		//ED150708
+		if($parentRecordModel->getModuleName() === 'SalesOrder'){
+			$subject = 'Dépôt-vente';
+			if($parentRecordModel->get('contact_id')){
+				$contact = Vtiger_Record_Model::getInstanceById($parentRecordModel->get('contact_id'), 'Contacts');
+				if($contact){
+					$subject .= ' ' . trim($contact->get('firstname') . ' ' . $contact->get('lastname')
+						. '/' . $contact->get('mailingzip')
+						. ' ' . $contact->get('contact_no'));
+				}
+			}
+			$this->set('subject', $subject);
+		}
+		
 		return $recordModel;
 	}
 
@@ -188,14 +202,19 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		foreach ($fieldMappingList as $fieldMapping) {
 			$parentField = $fieldMapping['parentField'];
 			$inventoryField = $fieldMapping['inventoryField'];
-			$fieldModel = Vtiger_Field_Model::getInstance($parentField,  Vtiger_Module_Model::getInstance($moduleName));
-			if (!$fieldModel) {
-				echo sprintf('! Champ %s manquant dans le module %s !', $parentField, $moduleName);
-				//$data[$inventoryField] = sprintf('! Champ %s manquant dans le module %s !', $parentField, $moduleName);
-			} elseif ($fieldModel->getPermissions()) {
-				$data[$inventoryField] = $parentRecordModel->get($parentField);
-			} else {
+			if(!$parentField){
 				$data[$inventoryField] = $fieldMapping['defaultValue'];
+			}
+			else {
+				$fieldModel = Vtiger_Field_Model::getInstance($parentField,  Vtiger_Module_Model::getInstance($moduleName));
+				if (!$fieldModel) {
+					echo sprintf('! Champ %s manquant dans le module %s !', $parentField, $moduleName);
+					//$data[$inventoryField] = sprintf('! Champ %s manquant dans le module %s !', $parentField, $moduleName);
+				} elseif ($fieldModel->getPermissions()) {
+					$data[$inventoryField] = $parentRecordModel->get($parentField);
+				} else {
+					$data[$inventoryField] = $fieldMapping['defaultValue'];
+				}
 			}
 		}
 		
@@ -209,6 +228,9 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		
 			//ED150529
 			$data['accountdiscounttype'] = $parentRecordModel->get('discounttype');
+		}
+		elseif($moduleName === 'Documents'){
+			//Coupon : load related products && services
 		}
 		return $this->setData($data);
 	}
@@ -279,6 +301,11 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	public static function getCleanInstance($moduleName){
 		$instance = parent::getCleanInstance($moduleName);
 		$instance->set('invoicedate', date('Y-m-d'));
+		
+		//ED150708
+		if($moduleName === 'Invoice'){
+			$instance->set('notesid', COUPON_LIBRE_ID);
+		}
 		return $instance;
 	}
 	

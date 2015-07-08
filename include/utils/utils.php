@@ -1900,4 +1900,14 @@ function remove_accent($str)
                 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o');
   return str_replace($a, $b, $str);
 }
+
+/** ED150708
+ * Remove field list in SQL query
+ * SELECT a, b, c FROM xxx becomes SELECT 1 FROM xxx
+ */
+function simplifySQLSelectFields($sqlSelect, $replaceFieldsWith = 'vtiger_crmentity.crmid'){
+	//TODO non testé, non valide car il peut y avoir des UNION
+	return preg_replace('/(\s*SELECT\s+)((?<!\sFROM\s))(\sFROM\s)/', '$1' . $replaceFieldsWith . '$3 ', $sqlSelect);
+}
+
 ?>

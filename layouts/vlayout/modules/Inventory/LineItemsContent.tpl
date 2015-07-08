@@ -83,10 +83,11 @@
 		{/if}
 	</td>
 	<td>
-		<input id="{$qty}" name="{$qty}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_GreaterThanZero_Validator_Js.invokeValidation]]" value="{if !empty($data.$qty)}{$data.$qty}{else}1{/if}"
+		<input id="{$qty}" name="{$qty}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_GreaterThanZero_Validator_Js.invokeValidation]]"
+			   value="{if !empty($data.$qty) || $data.$qty === 0}{$data.$qty}{else}1{/if}"
 		 class="qty tinyInputBox" onfocus="$(this).select()"/>
-		<a style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer;" onclick="var $input=$(this).prevAll('input:first'), value = parseFloat($input.val().replace(',', '.')).toFixed(2), offset = 1;$input.val(value + offset).focusout();return false;">+</a>
-		<a style="font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer;" onclick="var $input=$(this).prevAll('input:first'), value = parseFloat($input.val().replace(',', '.')).toFixed(2), offset = 1;$input.val(Math.max(0, value - offset)).focusout();return false;">-</a>
+		<a class="qty_helper_plus">+</a>
+		<a class="qty_helper_minus">-</a>
 		{if $MODULE neq 'PurchaseOrder'}
 		<br>
 		<span class="stockAlert redColor {if $data.$qty <= $data.$qtyInStock}hide{/if}" >

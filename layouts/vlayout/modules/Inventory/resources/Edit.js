@@ -533,6 +533,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	
 	//ED150708 : comma to dot before parseFloat
 	parseFloat : function($value){
+		if (!$value)
+			return 0.0;
 		if (typeof $value === 'numeric')
 			return $value;
 		return parseFloat($value.replace(',', '.'));
@@ -1147,6 +1149,23 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	},
 
+	//ED150708 : boutons + et - des quantités
+	registerQuantityButtonsEvent : function(container) {
+		var thisInstance = this;
+		container.on('click','a.qty_helper_plus, a.qty_helper_minus',function(e){
+			var $this=$(this)
+			, $input = $this.prevAll('input.qty:first')
+			, value = thisInstance.parseFloat($input.val())
+			, offset = this.className.indexOf('_minus') > 0 ? -1 : 1;
+			if (offset < 0 && (value + offset) < 0)
+				value = 0;
+			else
+				value = value + offset;
+			$input.val(value).focusout();
+			return false;		
+		});
+	},
+
 	lineItemResultActions: function(){
 		var thisInstance = this;
 		var lineItemResultTab = this.getLineItemResultContainer();
@@ -1685,7 +1704,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			thisInstance.copyAddressDetails(data, container);
 		}
 		else {
-			var message = app.vtranslate('OVERWRITE_EXISTING_MSG1')+app.vtranslate('SINGLE_'+data['source_module'])+' ('+data['selectedName']+') '+app.vtranslate('OVERWRITE_EXISTING_MSG2');
+			var message = app.vtranslate('OVERWRITE_EXISTING_MSG1')+data['selectedName']+ ' (' + app.vtranslate('SINGLE_'+data['source_module'])+')'+' '+app.vtranslate('OVERWRITE_EXISTING_MSG2');
 			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
 				function(e) {
 					thisInstance.copyAddressDetails(data, container);
@@ -2296,6 +2315,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.registerReferenceSelectionEvent(container);
 		this.registerBlockAnimationEvent(); /*ED150707*/
 		this.registerShippingChargeButtonsEvent(container); /* ED150708 */
+		this.registerQuantityButtonsEvent(container); /* ED150708 */
 	},
 	
     registerEvents: function(){

@@ -114,14 +114,12 @@ class PurchaseOrder extends CRMEntity {
 		
 		//ED150629 : Seuls les documents de type Bon de réception peuvent avec le status (et donc la gestion de stock) 'Commande reçue'
 		$manageStock = $this->column_fields['potype'] === 'receipt';
-		
 		global $adb, $updateInventoryProductRel_deduct_stock;
 		$updateInventoryProductRel_deduct_stock = false;
 		//in ajax save we should not call this function, because this will delete all the existing product values
 		if($_REQUEST['action'] != 'PurchaseOrderAjax' && $_REQUEST['ajxaction'] != 'DETAILVIEW'
 				&& $_REQUEST['action'] != 'MassEditSave' && $_REQUEST['action'] != 'ProcessDuplicates'
 				&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false
-				&& $manageStock // type incompatible
 		){
 
 			$requestProductIdsList = $requestQuantitiesList = array();
@@ -132,47 +130,49 @@ class PurchaseOrder extends CRMEntity {
 				$requestQuantitiesList[$productId] =  $_REQUEST['qty'.$i];
 			}
 
-			if($this->mode == '' && $this->column_fields['postatus'] === 'Received Shipment') {																			//Updating Product stock quantity during create mode
-				foreach ($requestProductIdsList as $productId) {
-					addToProductStock($productId, $requestQuantitiesList[$productId]);
-				}
-			} else if ($this->column_fields['postatus'] === 'Received Shipment' && $this->mode != '') {		//Updating Product stock quantity during edit mode
-				$recordId = $this->id;
-				$result = $adb->pquery("SELECT productid, quantity FROM vtiger_inventoryproductrel WHERE id = ?", array($recordId));
-				$numOfRows = $adb->num_rows($result);
-				for ($i=0; $i<$numOfRows; $i++) {
-					$productId = $adb->query_result($result, $i, 'productid');
-					$productIdsList[$productId] = $productId;
-					$quantitiesList[$productId] = $adb->query_result($result, $i, 'quantity');
-				}
-
-				$newProductIds = array_diff($requestProductIdsList, $productIdsList);
-				if ($newProductIds) {
-					foreach ($newProductIds as $productId) {
+			if($manageStock){
+				if($this->mode == '' && $this->column_fields['postatus'] === 'Received Shipment') {																			//Updating Product stock quantity during create mode
+					foreach ($requestProductIdsList as $productId) {
 						addToProductStock($productId, $requestQuantitiesList[$productId]);
 					}
-				}
-
-				$deletedProductIds = array_diff($productIdsList, $requestProductIdsList);
-				if ($deletedProductIds) {
-					foreach ($deletedProductIds as $productId) {
-						$productStock= getPrdQtyInStck($productId);
-						$quantity = $productStock - $quantitiesList[$productId];
-						updateProductQty($productId, $quantity);
+				} else if ($this->column_fields['postatus'] === 'Received Shipment' && $this->mode != '') {		//Updating Product stock quantity during edit mode
+					$recordId = $this->id;
+					$result = $adb->pquery("SELECT productid, quantity FROM vtiger_inventoryproductrel WHERE id = ?", array($recordId));
+					$numOfRows = $adb->num_rows($result);
+					for ($i=0; $i<$numOfRows; $i++) {
+						$productId = $adb->query_result($result, $i, 'productid');
+						$productIdsList[$productId] = $productId;
+						$quantitiesList[$productId] = $adb->query_result($result, $i, 'quantity');
 					}
-				}
-
-				$updatedProductIds = array_intersect($productIdsList, $requestProductIdsList);
-				if ($updatedProductIds) {
-					foreach ($updatedProductIds as $productId) {
-						$quantityDiff = $quantitiesList[$productId] - $requestQuantitiesList[$productId];
-						if ($quantityDiff < 0) {
-							$quantityDiff = -($quantityDiff);
-							addToProductStock($productId, $quantityDiff);
-						} elseif ($quantityDiff > 0) {
+	
+					$newProductIds = array_diff($requestProductIdsList, $productIdsList);
+					if ($newProductIds) {
+						foreach ($newProductIds as $productId) {
+							addToProductStock($productId, $requestQuantitiesList[$productId]);
+						}
+					}
+	
+					$deletedProductIds = array_diff($productIdsList, $requestProductIdsList);
+					if ($deletedProductIds) {
+						foreach ($deletedProductIds as $productId) {
 							$productStock= getPrdQtyInStck($productId);
-							$quantity = $productStock - $quantityDiff;
+							$quantity = $productStock - $quantitiesList[$productId];
 							updateProductQty($productId, $quantity);
+						}
+					}
+	
+					$updatedProductIds = array_intersect($productIdsList, $requestProductIdsList);
+					if ($updatedProductIds) {
+						foreach ($updatedProductIds as $productId) {
+							$quantityDiff = $quantitiesList[$productId] - $requestQuantitiesList[$productId];
+							if ($quantityDiff < 0) {
+								$quantityDiff = -($quantityDiff);
+								addToProductStock($productId, $quantityDiff);
+							} elseif ($quantityDiff > 0) {
+								$productStock= getPrdQtyInStck($productId);
+								$quantity = $productStock - $quantityDiff;
+								updateProductQty($productId, $quantity);
+							}
 						}
 					}
 				}
@@ -181,7 +181,7 @@ class PurchaseOrder extends CRMEntity {
 			//Based on the total Number of rows we will save the product relationship with this entity
 			saveInventoryProductDetails($this, 'PurchaseOrder', $this->update_prod_stock);
 
-			if ($this->mode != '') {
+			if ($manageStock && $this->mode != '') {
 				$updateInventoryProductRel_deduct_stock = true;
 			}
 		}

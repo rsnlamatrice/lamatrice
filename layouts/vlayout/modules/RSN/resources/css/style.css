@@ -289,6 +289,9 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
 #shipping_handling_charge_plus, #shipping_handling_charge_minus {
   font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer; float:right;
 }
+a.qty_helper_plus, a.qty_helper_minus {
+  font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer;
+}
 
 /* purchase order potype */
 .ui-icon.potype {

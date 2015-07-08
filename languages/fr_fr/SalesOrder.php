@@ -53,4 +53,6 @@ $languageStrings = array(
 	'Tax' => 'Taxe',
 	'Contact Name' => 'Nom contact',
 	'Grand Total:' => 'Total:',
+	
+	'Recurring Invoice Information' => 'Génération périodique de facture',
 );
