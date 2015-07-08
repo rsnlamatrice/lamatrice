@@ -118,18 +118,6 @@ $ProjectMilestone_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $ProjectMilestone_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
-$ProjectTask_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$ProjectTask_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$Project_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$Project_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$SMSNotifier_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$SMSNotifier_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
 $Critere4D_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $Critere4D_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
