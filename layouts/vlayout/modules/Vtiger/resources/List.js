@@ -102,15 +102,14 @@ jQuery.Class("Vtiger_List_Js",{
 
 	},
 	/* ED150628
-	 * function to trigger Assign Critere4D to selected contacts
+	 * function to trigger Assign entities to selected contacts
 	 * also used to unassign
-	 * @params: assign critere4D url.
+	 * @params: assign entity url.
 	 */
-	triggerAssignCritere4D : function(massActionUrl){
+	triggerAssignRelatedEntities : function(massActionUrl, relatedModuleName){
 		var listInstance = Vtiger_List_Js.getInstance();
 		var validationResult = listInstance.checkListRecordSelected();
 		if(validationResult != true){
-			var relatedModuleName = 'Critere4D';
 			var forUnassign = /unassign/.test(massActionUrl);
 			this.showSelectRelationPopup(relatedModuleName, forUnassign).then(function(data){
 				var ids = [];

@@ -6,16 +6,16 @@
 class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 	function __construct() {
 		parent::__construct();
-		$this->exposeMethod('assignCritere4D');
-		$this->exposeMethod('unassignCritere4D');
+		$this->exposeMethod('assignRelatedEntities');
+		$this->exposeMethod('unassignRelatedEntities');
 	}
 	
-	function assignCritere4D(Vtiger_Request $request){
+	function assignRelatedEntities(Vtiger_Request $request){
 		//var_dump($request);
 		
 		$module = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($module);
-		$relatedModuleName = 'Critere4D';
+		$relatedModuleName = $request->get('relatedmodule');
 		$relatedRecords = Vtiger_Module_Model::getInstance($module);
 		
 		$cvId = $request->get('viewname');
@@ -41,7 +41,7 @@ class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE',$module);
-		$viewer->assign('RELATED_MODULE', $relatedModules);
+		$viewer->assign('RELATED_MODULE', $relatedModuleName);
 		$viewer->assign('RELATED_ENTRIES', $listViewEntries);
 		
 		$viewer->assign('SELECTED_IDS', $selectedIds);
@@ -62,13 +62,13 @@ class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		$viewer->assign('CURRENT_DATE', DateTimeField::convertToUserFormat(date('Y-m-d')));
 		
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
-		$viewer->view('AssignCritere4D.tpl', $module);
+		$viewer->view('AssignRelatedEntities.tpl', $module);
 	}
 	
 	/**
 	 * Suppression en masse des relations
 	 */
-	function unassignCritere4D(Vtiger_Request $request){
+	function unassignRelatedEntities(Vtiger_Request $request){
 		$module = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($module);
 		$relatedModuleName = 'Critere4D';
@@ -97,7 +97,7 @@ class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE',$module);
-		$viewer->assign('RELATED_MODULE', $relatedModules);
+		$viewer->assign('RELATED_MODULE', $relatedModuleName);
 		$viewer->assign('RELATED_ENTRIES', $listViewEntries);
 		
 		$viewer->assign('SELECTED_IDS', $selectedIds);
@@ -118,6 +118,6 @@ class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		$viewer->assign('CURRENT_DATE', DateTimeField::convertToUserFormat(date('Y-m-d')));
 		
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
-		$viewer->view('UnassignCritere4D.tpl', $module);
+		$viewer->view('UnassignRelatedEntities.tpl', $module);
 	}
 }

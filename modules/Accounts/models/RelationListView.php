@@ -23,16 +23,36 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 		switch($relatedModuleModel->name){
 		  case "Critere4D":
 		    
-			$headerFields = array();
-		
-		      $headerFieldNames = $relatedModuleModel->getRelatedListFields();
-		      foreach($headerFieldNames as $fieldName) {
-			  $headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
-		      }
-		      
 		      /* Champs issus de critere4dcontrel */
-		      $headerFields = Critere4D_RelationListView_Model::get_related_fields($headerFields);
+		      $headerFields = Critere4D_RelationListView_Model::get_related_fields(parent::getHeaders());
 		      
+		    break;
+		  case "Documents":
+		    
+				$headerFields = array();//parent::getHeaders()
+				$headerFieldNames = array(
+					'notes_title', 'folderid'
+				);
+				foreach($headerFieldNames as $fieldName) {
+					$headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
+				}
+		    
+				/* Champs issus de critere4dcontrel */
+				$headerFields = Documents_RelationListView_Model::get_related_fields($headerFields);
+				
+		    break;
+		  case "Campaigns":
+				$headerFields = array();//parent::getHeaders()
+				$headerFieldNames = array(
+					'campaignname', 'campaigntype'
+				);
+				foreach($headerFieldNames as $fieldName) {
+					$headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
+				}
+		    
+				/* Champs issus de critere4dcontrel */
+				$headerFields = Documents_RelationListView_Model::get_related_fields($headerFields);
+				
 		    break;
 		
 		  case "Invoice":
@@ -46,11 +66,6 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 		      }
 		      
 		    break;
-		  
-		case "Documents":
-			// ajoute dateapplication
-			$headerFields = array_merge(parent::getHeaders(), $relatedModuleModel->getRelationHeaders());
-			break;
 	
 		  default:
 			return parent::getHeaders();

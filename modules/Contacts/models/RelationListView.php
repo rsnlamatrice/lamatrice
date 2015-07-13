@@ -27,6 +27,33 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 		      $headerFields = Critere4D_RelationListView_Model::get_related_fields(parent::getHeaders());
 		      
 		    break;
+		  case "Documents":
+		    
+				$headerFields = array();//parent::getHeaders()
+				$headerFieldNames = array(
+					'notes_title', 'folderid'
+				);
+				foreach($headerFieldNames as $fieldName) {
+					$headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
+				}
+		    
+				/* Champs issus de critere4dcontrel */
+				$headerFields = Documents_RelationListView_Model::get_related_fields($headerFields);
+				
+		    break;
+		  case "Campaigns":
+				$headerFields = array();//parent::getHeaders()
+				$headerFieldNames = array(
+					'campaignname', 'campaigntype'
+				);
+				foreach($headerFieldNames as $fieldName) {
+					$headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
+				}
+		    
+				/* Champs issus de critere4dcontrel */
+				$headerFields = Documents_RelationListView_Model::get_related_fields($headerFields);
+				
+		    break;
 		
 		  case "Contacts":
 		    
@@ -150,6 +177,16 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			
 				$fieldRels = Critere4D_RelationListView_Model::get_related_fields();
 				break;
+			
+			  case "Documents":
+				$query = "SELECT dateapplication,
+					data AS rel_data, $fieldName
+					FROM $tableName
+					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
+					AND crmid = ?";
+			
+				$fieldRels = Documents_RelationListView_Model::get_related_fields();
+				break;
 			  case "Campaigns":
 				$query = "SELECT dateapplication,
 					data AS rel_data, $fieldName
@@ -223,7 +260,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 						    break;
 						}
 						$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
-						if($values === null)
+						if(!is_array($values))//1er tour
 							$values = array($value);
 						else
 							$values[] = $value;

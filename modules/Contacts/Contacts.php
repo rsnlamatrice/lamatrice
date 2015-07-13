@@ -1993,6 +1993,10 @@ class Contacts extends CRMEntity {
 				$adb->pquery("INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication)
 					     VALUES(?,?,NOW())", array($with_crmid, $crmid));
 
+			} elseif($with_module == 'Documents') {
+				$adb->pquery("INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication)
+					     VALUES(?,?,NOW())", array($with_crmid, $crmid));
+
 			} elseif($with_module == 'Contacts') {
 				$adb->pquery("INSERT INTO vtiger_contactscontrel (contactid, relcontid, contreltype, dateapplication)
 					     VALUES(?,?, NULL, NOW())", array($with_crmid, $crmid));

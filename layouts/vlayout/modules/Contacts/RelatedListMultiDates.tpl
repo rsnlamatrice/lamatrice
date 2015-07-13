@@ -1,12 +1,12 @@
 {*<!--
 /*********************************************************************************
 ** ED140918 copie de Vtiger/RelatedList.tpl
-    specifique aux critere4d du contact
+    specifique aux critere4d ou documents du contact
 *
 ********************************************************************************/
 -->*}
 {strip}
-    <div class="relatedContainer{if $WIDGET_INSIDE} widget-content critere4d{/if}">
+    <div class="relatedContainer{if $WIDGET_INSIDE} widget-content multidates{/if}">
       {if !$WIDGET_INSIDE}
 	<input type="hidden" name="currentPageNum" value="{$PAGING->getCurrentPage()}" />
         <input type="hidden" name="relatedModuleName" class="relatedModuleName" value="{$RELATED_MODULE->get('name')}" />
@@ -169,8 +169,11 @@
 				{/foreach}
 				</div>
 					
-                            {*elseif $RELATED_HEADERNAME eq 'data'}
-                                {($RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME))*}
+                            
+							{* ED141224 *}
+							{elseif ($RELATED_HEADERNAME eq 'folderid')}
+									<div style="background-color:{$RELATED_RECORD->get('uicolor')}; margin-left:0;" class="picklistvalue-uicolor">&nbsp;</div>
+								{$RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME)}
                             {else}
                                 {$RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME, false, true)}
                             {/if}

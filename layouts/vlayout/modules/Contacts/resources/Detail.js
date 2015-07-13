@@ -67,9 +67,10 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			relatedController.nextPageHandler().then(function(data){
 				switch (relatedModuleName) {
 				  case "Critere4D":
-					var relatedCritere4DCntModule = jQuery(data).find('[name="dateapplication"]:first').val();
-					if(relatedCritere4DCntModule){
-						thisInstance.registerRelatedCritere4DCntActions(true);
+				  case "Documents":
+					var relatedMultiDatesCntModule = jQuery(data).find('[name="dateapplication"]:first').val();
+					if(relatedMultiDatesCntModule){
+						thisInstance.registerRelatedMultiDatesCntActions(true);
 					}
 					break;
 				  case "Contacts":
@@ -90,9 +91,10 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			relatedController.previousPageHandler().then(function(data){
 				switch (relatedModuleName) {
 				  case "Critere4D":
-					var relatedCritere4DCntModule = jQuery(data).find('[name="dateapplication"]:first').val();
-					if(relatedCritere4DCntModule){
-						thisInstance.registerRelatedCritere4DCntActions(true);
+				  case "Documents":
+					var relatedMultiDatesCntModule = jQuery(data).find('[name="dateapplication"]:first').val();
+					if(relatedMultiDatesCntModule){
+						thisInstance.registerRelatedMultiDatesCntActions(true);
 					}
 					break;
 				  case "Contacts":
@@ -121,9 +123,10 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			relatedController.pageJumpHandler(e).then(function(data){
 				switch (relatedModuleName) {
 				  case "Critere4D":
-					var relatedCritere4DCntModule = jQuery(data).find('[name="dateapplication"]:first').val();
-					if(relatedCritere4DCntModule){
-						thisInstance.registerRelatedCritere4DCntActions(true);
+				  case "Documents":
+					var relatedMultiDatesCntModule = jQuery(data).find('[name="dateapplication"]:first').val();
+					if(relatedMultiDatesCntModule){
+						thisInstance.registerRelatedMultiDatesCntActions(true);
 					}
 					break;
 				  case "Contacts":
@@ -165,6 +168,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
 			switch (relatedModuleName ){
 			case "Critere4D":
+		    case "Documents":
 			case "Contacts":
 				var relatedController = new Contacts_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			      break;
@@ -182,7 +186,8 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 				 */
 				switch (relatedModuleName ){
 				case "Critere4D":
-					relatedController.registerEventsCritere4D();
+				case "Documents":
+					relatedController.registerEventsMultiDates();
 					break;
 				case "Contacts":
 					relatedController.registerEventsContacts();
@@ -203,7 +208,8 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
 			switch (relatedModuleName ){
 			  case "Critere4D":
-				return thisInstance.deleteRelatedListCritere4D_OnClick.call(this, thisInstance, e);
+		      case "Documents":
+				return thisInstance.deleteRelatedListMultiDates_OnClick.call(this, thisInstance, e);
 			  case "Contacts":
 				return thisInstance.deleteRelatedListContacts_OnClick.call(this, thisInstance, e);
 			  default:
@@ -273,6 +279,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 		// ED141008
 		var relatedModuleName = this.getRelatedModuleName(detailContentsHolder);
 		switch (relatedModuleName ){
+		  case "Documents":
 		  case "Critere4D":
 			// Critere4D add relation
 			detailContentsHolder.on('click', 'a.relationAdd', function(e){
@@ -289,9 +296,9 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 				    widgetHolder = false;
 				var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
 				var relatedController = new Contacts_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
-				relatedController.addRelationCritere4D([relatedRecordid]).then(function(response){
+				relatedController.addRelationMultiDates([relatedRecordid]).then(function(response){
 					relatedController.loadRelatedList().then(function(data){
-						thisInstance.registerRelatedCritere4DCntActions(true);
+						thisInstance.registerRelatedMultiDatesCntActions(true);
 					});
 				});
 			});
@@ -301,7 +308,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			//TODO relatedController n'est pas initialisé comme d'autres objects, il manque les propriétés, en particulier relatedModulename et parentRecordId
 			if(!relatedController.relatedModulename)
 				Vtiger_RelatedList_Js.prototype.init.call(relatedController, this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
-			relatedController.registerEventsCritere4D();
+			relatedController.registerEventsMultiDates();
 			break;
 		
 		  case "Contacts":
@@ -339,9 +346,9 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 	
 	
 	/**
-	 * Function to register Event for Critere4D
+	 * Function to register Event for Critere4D or Documents
 	 */
-	deleteRelatedListCritere4D_OnClick : function(thisInstance, e){
+	deleteRelatedListMultiDates_OnClick : function(thisInstance, e){
 		var element = jQuery(e.currentTarget);
 		var instance = Vtiger_Detail_Js.getInstance();
 		var key = instance.getDeleteMessageKey();
@@ -354,9 +361,9 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 				var selectedTabElement = thisInstance.getSelectedTab();
 				var relatedModuleName = thisInstance.getRelatedModuleName();
 				var relatedController = new Contacts_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
-				relatedController.deleteRelationCritere4D([relatedRecordid], [dateapplication]).then(function(response){
+				relatedController.deleteRelationMultiDates([relatedRecordid], [dateapplication]).then(function(response){
 					relatedController.loadRelatedList().then(function(data){
-						thisInstance.registerRelatedCritere4DCntActions(true);
+						thisInstance.registerRelatedMultiDatesCntActions(true);
 					});
 				});
 			},
@@ -369,7 +376,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 	 * Function to register related actions
 	 * init_fields for datepicker on navigation changes
 	 */
-	registerRelatedCritere4DCntActions : function(init_fields) {
+	registerRelatedMultiDatesCntActions : function(init_fields) {
 		this.registerEventForRelatedList();
 		if (init_fields) { /*ED141007*/
 			app.registerEventForDatePickerFields(this.detailViewContentHolder);

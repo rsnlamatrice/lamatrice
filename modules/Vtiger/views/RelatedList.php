@@ -123,7 +123,8 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		case "Contacts" :
 			switch($relatedModuleName){
 			  case "Critere4D":
-				$tpl = "RelatedListCritere4D.tpl";
+			  case "Documents":
+				$tpl = "RelatedListMultiDates.tpl";
 				break;
 			  case "Contacts" :
 				$tpl = "RelatedListContacts.tpl";

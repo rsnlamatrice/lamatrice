@@ -51,7 +51,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'dateapplication');
 			$field->set('column', strtolower( 'dateapplication' ));
-			$field->set('label', 'Date d\'application');
+			$field->set('label', 'Date d\'affectation');
 			$field->set('typeofdata', 'DATETIME');
 			$field->set('uitype', 6);
 			

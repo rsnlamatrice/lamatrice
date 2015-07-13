@@ -38,7 +38,15 @@
 							</a>
 						</span>
 						<span class="span3 textOverflowEllipsis">
-							{preg_replace('/^(\d{4})\D(\d{2})\D(\d{2}).*$/', '$3-$2-$1', $RELATED_RECORD->get('dateapplication'))}&nbsp;
+							{if is_string($RELATED_RECORD->get('dateapplication'))}
+								{preg_replace('/^(\d{4})\D(\d{2})\D(\d{2}).*$/', '$3-$2-$1', $RELATED_RECORD->get('dateapplication'))}
+							{elseif is_object($RELATED_RECORD->get('dateapplication'))}
+								{$RELATED_RECORD->get('dateapplication')->format('d/m/Y')}
+							{else is_array($RELATED_RECORD->get('dateapplication'))}
+								{foreach item=DATE from=$RELATED_RECORD->get('dateapplication')}
+									{$DATE->format('d/m/Y')}&nbsp;
+								{/foreach}
+							{/if}&nbsp;
 						</span>
 						<span class="span4 textOverflowEllipsis" id="DownloadableLink">
 							{if $DOWNLOAD_STATUS eq 1}

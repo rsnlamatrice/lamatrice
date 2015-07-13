@@ -13,12 +13,13 @@
 <div id="massEditContainer" class='modelContainer'>
 	<div class="modal-header contentsBackground">
 		<button type="button" class="close " data-dismiss="modal" aria-hidden="true">&times;</button>
-		<h3 id="massEditHeader">{if count($RELATED_ENTRIES) > 1}{vtranslate('LBL_ASSIGN_CRITERE4D_MULTI', $MODULE)}{else}{vtranslate('LBL_ASSIGN_CRITERE4D', $MODULE)}{/if}
+		<h3 id="massEditHeader">{if count($RELATED_ENTRIES) > 1}{vtranslate('LBL_ASSIGN_'|cat:$RELATED_MODULE|cat:'_MULTI', $MODULE)}{else}{vtranslate('LBL_ASSIGN_'|cat:$RELATED_MODULE, $MODULE)}{/if}
 			&nbsp;{vtranslate('LBL_TO', $MODULE)} {$ASSIGNABLE_COUNTER} {vtranslate($MODULE, $MODULE)}</h3>
 	</div>
 	<form class="form-horizontal" id="massEdit" name="MassEdit" method="post" action="index.php">
 		<input type="hidden" name="module" value="{$MODULE}" />
-		<input type="hidden" name="action" value="AssignCritere4D" />
+		<input type="hidden" name="relatedmodule" value="{$RELATED_MODULE}" />
+		<input type="hidden" name="action" value="AssignRelatedEntities" />
 		<input type="hidden" name="viewname" value="{$CVID}" />
 		<input type="hidden" name="selected_ids" value={ZEND_JSON::encode($SELECTED_IDS)}>
 		<input type="hidden" name="excluded_ids" value={ZEND_JSON::encode($EXCLUDED_IDS)}>

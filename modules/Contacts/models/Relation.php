@@ -86,12 +86,35 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'dateapplication');
 			$field->set('column', 'vtiger_critere4dcontrel:dateapplication');
-			$field->set('label', 'Date d\'application');
+			$field->set('label', 'Date d\'affectation');
 			/*ED140906 tests*/
 			$field->set('typeofdata', 'D~O');
 			$field->set('uitype', 6);
 			array_push($fields, $field);
 			break;
+		
+		case "Documents":
+			//$fieldNames = array('dateapplication', 'data');
+			//Added to support data
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'data');
+			$field->set('column', 'vtiger_senotesrel:data');
+			$field->set('label', 'Information');
+			$field->set('typeofdata', 'V~O');
+			$field->set('uitype', 21);
+			array_push($fields, $field);
+			    
+			//Added to support dateapplication
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'dateapplication');
+			$field->set('column', 'vtiger_senotesrel:dateapplication');
+			$field->set('label', 'Date d\'affectation');
+			/*ED140906 tests*/
+			$field->set('typeofdata', 'D~O');
+			$field->set('uitype', 6);
+			array_push($fields, $field);
+			break;
+		
 		case "Invoice":
 			    
 			//Added to support dateapplication
@@ -129,6 +152,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 	public function getModulesInfoForDetailView() {
 		return array(
 			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel'),
+			'Documents' => array('fieldName' => 'notesid', 'tableName' => 'vtiger_senotesrel'),
 			'Contacts' => array('fieldName' => 'relcontid', 'tableName' => 'vtiger_contactscontrel'),
 			//'Campaigns' => array('fieldName' => 'contactid', 'tableName' => 'vtiger_campaigncontrel'),
 			'Invoice' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_invoice'
@@ -179,25 +203,38 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 		}
 	}
 	
-	/* Suppression d'une relation Critere4D / Contact / Date */
+	/* Suppression d'une relation Critere4D ou Documents / Contact / Date */
 
-	public function deleteRelationCritere4D($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList = FALSE){
-		/*$sourceModule = $this->getParentModuleModel();
-		$sourceModuleName = $sourceModule->get('name');
-		$destinationModuleName = $this->getRelationModuleModel()->get('name');
-		$destinationModuleFocus = CRMEntity::getInstance($destinationModuleName);*/
-		$tableName = 'vtiger_critere4dcontrel';
-		$fieldName = 'contactid';
+	public function deleteRelationMultiDates($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList = FALSE){
 		$db = PearDatabase::getInstance();
-		$params = array();
-		$deleteQuery = "DELETE FROM $tableName
-			WHERE $fieldName = ?
-			AND critere4did = ?"
-			. ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?");
-		$params[] = $sourceRecordId;
-		$params[] = $relatedRecordId;
-		if($relatedRecordDateApplicationList !== FALSE )
-			$params[] = $relatedRecordDateApplicationList;
+		switch($this->getRelationModuleName()){
+		case 'Critere4D' :
+			$tableName = 'vtiger_critere4dcontrel';
+			$fieldName = 'contactid';
+			$params = array();
+			$deleteQuery = "DELETE FROM $tableName
+				WHERE $fieldName = ?
+				AND critere4did = ?"
+				. ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?");
+			$params[] = $sourceRecordId;
+			$params[] = $relatedRecordId;
+			if($relatedRecordDateApplicationList !== FALSE )
+				$params[] = $relatedRecordDateApplicationList;
+			break;
+		case 'Documents' :
+			$tableName = 'vtiger_senotesrel';
+			$fieldName = 'crmid';
+			$params = array();
+			$deleteQuery = "DELETE FROM $tableName
+				WHERE $fieldName = ?
+				AND notesid = ?"
+				. ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?");
+			$params[] = $sourceRecordId;
+			$params[] = $relatedRecordId;
+			if($relatedRecordDateApplicationList !== FALSE )
+				$params[] = $relatedRecordDateApplicationList;
+			break;
+		}
 		//var_dump($deleteQuery, $params);
 		if($db->pquery($deleteQuery, $params) === FALSE)
 			return false;
@@ -248,7 +285,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					'value' => valeur))
 	 */
 	public function updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|contreltype') {
-		//var_dump($sourceRecordId, $values, $fieldToUpdate);
+		var_dump($sourceRecordId, $values, $fieldToUpdate);
 		if ($sourceRecordId && $data) {
 			
 			$relatedModuleName = $this->getRelationModuleModel()->getName();
@@ -298,7 +335,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 						$params[] = $relatedRecordId;
 						$params[] = $datum['dateapplication'];
 					}
-					//var_dump($updateQuery, $params);
+					var_dump($updateQuery, $params);
 					if($db->pquery($updateQuery, $params) === FALSE)
 						return false;
 				}
