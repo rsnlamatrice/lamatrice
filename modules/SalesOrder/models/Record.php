@@ -19,4 +19,24 @@ class SalesOrder_Record_Model extends Inventory_Record_Model {
 		return "index.php?module=".$invoiceModuleModel->getName()."&view=".$invoiceModuleModel->getEditViewName()."&salesorder_id=".$this->getId();
 	}
 
+	
+	/**
+	 * ED150629
+	 * getPicklistValuesDetails
+	 */
+	public function getPicklistValuesDetails($fieldname){
+		switch($fieldname){
+			case 'sostatus'://status du document : dépend du type de document
+				return array(
+					'Created' => array( 'label' => 'Créé', 'icon' => 'ui-icon ui-icon-check' ),
+					'Approved' => array( 'label' => 'Validé', 'icon' => 'ui-icon ui-icon-check darkgreen' ),
+					'Delivered' => array( 'label' => 'Livré', 'icon' => 'ui-icon ui-icon-locked darkgreen' ),
+					'Archived' => array( 'label' => 'Archivé', 'icon' => 'ui-icon ui-icon-close blue' ),
+					'Cancelled' => array( 'label' => 'Annulé', 'icon' => 'ui-icon ui-icon-close darkred' ),
+				);
+				break;
+			default:
+				return parent::getPicklistValuesDetails($fieldname);
+		}
+	}
 }

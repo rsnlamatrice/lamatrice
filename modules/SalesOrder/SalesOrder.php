@@ -110,6 +110,9 @@ class SalesOrder extends CRMEntity {
 	// For workflows update field tasks is deleted all the lineitems.
 	var $isLineItemUpdate = true;
 	
+	//ED50713 : liste des sostatus qui permettent le calcul des quantités en demande
+	var $statusForQtyInDemand = array('Created', 'Approved', 'Delivered');
+	
 	/** Constructor Function for SalesOrder class
 	 *  This function creates an instance of LoggerManager class using getLogger method
 	 *  creates an instance for PearDatabase class and get values for column_fields array of SalesOrder class.
@@ -130,27 +133,34 @@ class SalesOrder extends CRMEntity {
 			$this->db->pquery($query1, array($qt_id));
 		}
 
+		//ED50713 requested productid
+		global $adb;
+		$requestProductIdsList = $requestQuantitiesList = array();
+		$totalNoOfProducts = $_REQUEST['totalProductCount'];
+		for($i=1; $i<=$totalNoOfProducts; $i++) {
+			$productId = $_REQUEST['hdnProductId'.$i];
+			$productIdsList[$productId] = $productId;
+		}
+		//Old products
+		$recordId = $this->id;
+		$result = $adb->pquery("SELECT productid FROM vtiger_inventoryproductrel WHERE id = ?", array($recordId));
+		$numOfRows = $adb->num_rows($result);
+		for ($i=0; $i<$numOfRows; $i++) {
+			$productId = $adb->query_result($result, $i, 'productid');
+			$productIdsList[$productId] = $productId;
+		}
+		
 		//in ajax save we should not call this function, because this will delete all the existing product values
 		if($_REQUEST['action'] != 'SalesOrderAjax' && $_REQUEST['ajxaction'] != 'DETAILVIEW'
 				&& $_REQUEST['action'] != 'MassEditSave' && $_REQUEST['action'] != 'ProcessDuplicates'
 				&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false) {
 			
-			//ED150708 remove qty in demand
-			global $adb;
-			$recordId = $this->id;
-			$sql = "UPDATE vtiger_products
-				JOIN vtiger_inventoryproductrel
-				ON vtiger_products.productid = vtiger_inventoryproductrel.productid
-				SET vtiger_products.qtyindemand = vtiger_products.qtyindemand - vtiger_inventoryproductrel.quantity
-				WHERE id = ?";
-			$result = $adb->pquery($sql, array($recordId));
-			if(!$result){
-				$adb->echoError('Erreur de mise à jour des quantités demandées');
-				die();
-			}
 			//Based on the total Number of rows we will save the product relationship with this entity
-			saveInventoryProductDetails($this, 'SalesOrder', false, '+');
+			saveInventoryProductDetails($this, 'SalesOrder');
 		}
+			
+		//ED150708 refreshes qty in demand
+		$this->refreshQtyInDemand($productIdsList);
 
 		// Update the currency id and the conversion rate for the sales order
 		$update_query = "update vtiger_salesorder set currency_id=?, conversion_rate=? where salesorderid=?";
@@ -158,6 +168,47 @@ class SalesOrder extends CRMEntity {
 		$this->db->pquery($update_query, $update_params);
 	}
 
+	/** ED150713
+	 * Recalcule les quantités demandées sur toutes les commandes client liées aux produits
+	 * TODO sub products
+	 */
+	function refreshQtyInDemand($productIdsList){
+		global $adb;
+		$recordId = $this->id;
+		$sql = "UPDATE vtiger_products
+			JOIN (
+				SELECT vtiger_inventoryproductrel.productid, SUM(vtiger_inventoryproductrel.quantity) AS quantity
+				FROM (
+					SELECT DISTINCT productid
+					FROM vtiger_inventoryproductrel
+					WHERE id = ?
+				) this_so_products
+				JOIN vtiger_inventoryproductrel
+					ON vtiger_inventoryproductrel.productid = this_so_products.productid
+				JOIN vtiger_salesorder
+					ON vtiger_salesorder.salesorderid = vtiger_inventoryproductrel.id
+				JOIN vtiger_crmentity
+					ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_salesorder.sostatus IN (" . generateQuestionMarks($this->statusForQtyInDemand) . ")
+				AND vtiger_inventoryproductrel.productid IN (" . generateQuestionMarks($productIdsList) . ")
+				GROUP BY vtiger_inventoryproductrel.productid
+			) _calculation_
+			ON vtiger_products.productid = _calculation_.productid
+			SET vtiger_products.qtyindemand = quantity
+		";
+		$params = array($recordId);
+		$params = array_merge($params, $this->statusForQtyInDemand);
+		$params = array_merge($params, $productIdsList);
+		$result = $adb->pquery($sql, $params);
+		if(!$result){
+			$adb->echoError('Erreur de mise à jour des quantités demandées');
+			echo "<pre>$sql</pre>";
+			var_dump($params);
+			die();
+		}
+	}
+	
 	/** Function to get activities associated with the Sales Order
 	 *  This function accepts the id as arguments and execute the MySQL query using the id
 	 *  and sends the query and the id as arguments to renderRelatedActivities() method
