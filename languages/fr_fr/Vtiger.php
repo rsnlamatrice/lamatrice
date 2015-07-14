@@ -760,6 +760,15 @@ $languageStrings = array(
 
 	'Events' => 'Evénements',
 	
+	'street'             => 'rue'     ,
+	'street2'             => 'Structure, n° appt, ...'     ,
+	'street3'             => 'Bât., rés., ...'          ,
+	'city'                 => 'Ville'                , 
+	'zip'                 => 'Code postal'         , 
+	'country'              => 'Pays'             , 
+	'pobox'               => 'Boîte postale'            , 
+	'state'                => 'Département'               , 
+	
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

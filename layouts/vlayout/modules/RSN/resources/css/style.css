@@ -318,3 +318,13 @@ a.qty_helper_plus, a.qty_helper_minus {
 #detailView .table tr:last-of-type th {
   border-bottom: 1px solid #d3d3d3 !important;
 }
+
+/* adresse SNA */
+button.address-sna-check {
+  margin-right: 28px;
+  border: none;
+  color: #666666;
+  height: 20px;
+  vertical-align: top;
+  font-size: 12px;
+}
