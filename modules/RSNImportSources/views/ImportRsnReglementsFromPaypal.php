@@ -35,7 +35,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return array - An array containing concerned module names.
 	 */
 	public function getImportModules() {
-		return array('Contacts', 'Invoice'/*, 'PurchaseOrder'*/, 'RsnReglements');
+		return array('Contacts', 'Invoice', 'RsnReglements'/*, 'PurchaseOrder'*/);
 	}
 
 	/**
@@ -102,6 +102,42 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * Factures des dons DR et DP
 	 */
 	function getInvoiceFields() {
+		return array(
+			//header
+			'sourceid',
+			'lastname',
+			'firstname',
+			'email',
+			'street',
+			'street2',
+			'street3',
+			'zip',
+			'city',
+			'state',
+			'country',
+			'subject',
+			'invoicedate',
+			'invoicetype',
+			//lines
+			'productcode',
+			'productid',
+			'article',
+			'isproduct',
+			'quantity',
+			'prix_unit_ht',
+			'taxrate',
+		);
+	}
+
+	
+
+	/**
+	 * Method to get the imported fields for the purchase order module.
+	 * @return array - the imported fields for the purchase order module.
+	 *
+	 * Factures de PayPal
+	 */
+	function getPurchaseOrderFields() {
 		return array(
 			//header
 			'sourceid',
@@ -624,6 +660,17 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	}
 
 	/**
+	 * Method that pre import a purchase order.
+	 *  It adone row in the temporary pre-import table by purchase order line.
+	 * @param $invoiceData : the data of the purchase order to import.
+	 */
+	function preImportPurchaseOrder($purchaseOrderData) {
+		$purchaseOrderValues = $this->getPurchaseOrderValues(null, $purchaseOrderData);
+		$purchaseOrder = new RSNImportSources_Preimport_Model($purchaseOrderValues, $this->user, 'PurchaseOrder');
+		$purchaseOrder->save();
+	}
+
+	/**
 	 * Method that retrieve a contact.
 	 * @param string $firstname : the firstname of the contact.
 	 * @param string $lastname : the lastname of the contact.
@@ -848,7 +895,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	}
 	/**
 	 * Method that pre import an RsnReglements.
-	 *  It adone row in the temporary pre-import table by invoice line.
+	 *  It adone row in the temporary pre-import table by line.
 	 * @param $reglementData : the data of the invoice to import.
 	 */
 	function preImportRsnReglement($reglementData) {
@@ -939,7 +986,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		    && $this->isDate($line[0]) //date
 		    && $line[5] == "Terminé"
 		    && self::str_to_float($line[7]) !== FALSE
-		    && self::str_to_float($line[7]) > 0
+		    && self::str_to_float($line[7]) > 0 //ignore les lignes avec un montant négatif
 		) {
 			return true;
 		}
@@ -1058,6 +1105,49 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			));
 
 		return $invoiceValues;
+	}
+
+	/**
+	 * Method that return the formated information of a purchase order found in the file.
+	 * @param $invoice : the purchase order data found in the file.
+	 * @return array : the formated data of the purchase order.
+	 */
+	function getPurchaseOrderValues($reglement, $purchaseOrderValues = FALSE) {
+		if(!$invoiceValues){
+			$date = $reglement['dateregl'];
+			$poType = 'invoice';
+			
+			$sourceId = $reglement['numpiece'];//transactionid
+				
+			$product = array(
+				'code' => 'DIVFOURN',
+				'name' => 'Service fournisseur',
+			);
+			$isProduct = false;
+	
+			$purchaseOrderValues = array(
+				'sourceid'		=> $sourceId,
+				'invoicetype'		=> $poType,
+				'subject'		=> $product['name'],
+				'invoicedate'		=> $date,
+			);
+		}
+		if($reglement){
+			foreach(array('lastname', 'email', 'street', 'street3', 'zip', 'city', 'state', 'country') as $fieldName)
+				$purchaseOrderValuesv[$fieldName] = $reglement[$fieldName];
+		}
+		if(isset($product) && $reglement)
+			$purchaseOrderValues = array_merge($invoiceValues, array(
+				'productcode'	=> $product['code'],
+				'productid'	=> $this->getProductId($product['code'], $isProduct),
+				'quantity'	=> 1,
+				'article'	=> $product['name'],
+				'prix_unit_ht'	=> $reglement['amount'],
+				'isproduct'	=> false,
+				'taxrate'	=> 0.0,
+			));
+
+		return $purchaseOrderValues;
 	}
 
 
