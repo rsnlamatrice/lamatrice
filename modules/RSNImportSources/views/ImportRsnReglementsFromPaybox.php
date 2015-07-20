@@ -9,6 +9,8 @@
 class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSources_ImportFromFile_View {
 
 	private $coupons = array();
+	
+	private $cancelledReglements = array();
 
 	/**
 	 * Method to get the source import label to display.
@@ -779,15 +781,20 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	function parseAndSaveFile(RSNImportSources_FileReader_Reader $fileReader) {
 		if ($this->checkCurrencies($fileReader)) {
 			$this->clearPreImportTable();
+			
+			$this->initCancelledReglements($fileReader);
 
 			if($fileReader->open()) {
 				if ($this->moveCursorToNextRsnReglement($fileReader)) {
 					$i = 0;
 					do {
 						$reglement = $this->getNextRsnReglement($fileReader);
-						if ($reglement != null) {
+						if ($reglement != null
+						&& $reglement['autorisation'] == 'Autorisation'){
 							$reglement = $this->getRsnReglementsValues($reglement);
 							if(!$this->checkInvoice($reglement)){
+								if(array_key_exists($reglement['numpiece'], $cancelledReglements))
+									continue;
 								$error = 'LBL_INVOICE_MISSING';
 								echo 'Facture ou Donateur web manquant.<br>Les importations "Donateurs Web" et "Boutique" ont-elles bien été effectuées ?';
 								break;
@@ -806,6 +813,35 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Référencement des écritures d'annulation
+	 * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
+	 * @return boolean - true if pre-import is ended successfully
+	 */
+	function initCancelledReglements(RSNImportSources_FileReader_Reader $fileReader) {
+		if($fileReader->open()) {
+			if ($this->moveCursorToNextRsnReglement($fileReader)) {
+				$i = 0;
+				do {
+					$reglement = $this->getNextRsnReglement($fileReader);
+					if ($reglement != null) {
+						$reglement = $this->getRsnReglementsValues($reglement);
+						if($reglement['autorisation'] != 'Autorisation'){
+							$cancelledReglements[$reglement['numpiece']] = $reglement;
+						}
+					}
+				} while ($reglement != null);
+
+			}
+
+			$fileReader->close(); 
+			return !isset($error);
+		} else {
+			//TODO: manage error
+			echo "not opened ...";
+		}
 	}
 	/**
 	 * Method that pre import an RsnReglements.
@@ -1073,6 +1109,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'dateregl'		=> $date,
 			'dateoperation'		=> $dateoperation,
 			'email'			=> $reglement[13],
+			'autorisation'		=> $reglement[14],
 			'amount'		=> self::str_to_float($reglement[17]) / 100,
 			'currency_id'		=> $currencyId,
 			'payment'		=> $reglement[23],

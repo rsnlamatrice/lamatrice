@@ -356,8 +356,6 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		$viewer->assign('MODULE', $module);
 		$viewer->assign('FIELDS', $fields);
 		
-		
-		
 		/*ED150626*/		
 		$viewId = $request->get('viewname');
 		$selectedIds = $request->get('selected_ids');
@@ -378,7 +376,6 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
 			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
 		}
-		
 		
 		$viewer->view('showDuplicateSearch.tpl', $module);
 	}

@@ -53,32 +53,64 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
 		}
 		
-		//ED150628
+		////ED150628
+		//$moduleModel = $this->getModule();
+		//if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
+		//	$massActionLink = array(
+		//		'linktype' => 'LISTVIEWMASSACTION',
+		//		'linklabel' => '---',
+		//		'linkurl' => '',
+		//		'linkicon' => ''
+		//	);
+		//	$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+		//
+		//	$massActionLink = array(
+		//		'linktype' => 'LISTVIEWMASSACTION',
+		//		'linklabel' => 'LBL_ASSIGN_CRITERE4D',
+		//		'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignCritere4D("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=assignCritere4D")',
+		//		'linkicon' => ''
+		//	);
+		//	$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+		//
+		//	$massActionLink = array(
+		//		'linktype' => 'LISTVIEWMASSACTION',
+		//		'linklabel' => 'LBL_UNASSIGN_CRITERE4D',
+		//		'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignCritere4D("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=unassignCritere4D")',
+		//		'linkicon' => ''
+		//	);
+		//	$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+		//}
+
+		//ED150713
 		$moduleModel = $this->getModule();
 		if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
-			$massActionLink = array(
-				'linktype' => 'LISTVIEWMASSACTION',
-				'linklabel' => '---',
-				'linkurl' => '',
-				'linkicon' => ''
-			);
-			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
-		
-			$massActionLink = array(
-				'linktype' => 'LISTVIEWMASSACTION',
-				'linklabel' => 'LBL_ASSIGN_CRITERE4D',
-				'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignCritere4D("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=assignCritere4D")',
-				'linkicon' => ''
-			);
-			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
-		
-			$massActionLink = array(
-				'linktype' => 'LISTVIEWMASSACTION',
-				'linklabel' => 'LBL_UNASSIGN_CRITERE4D',
-				'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignCritere4D("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=unassignCritere4D")',
-				'linkicon' => ''
-			);
-			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+			foreach(array('Critere4D', 'Documents') as $relatedModuleName){
+				$massActionLink = array(
+					'linktype' => 'LISTVIEWMASSACTION',
+					'linklabel' => '---',
+					'linkurl' => '',
+					'linkicon' => ''
+				);
+				$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+			
+				$massActionLink = array(
+					'linktype' => 'LISTVIEWMASSACTION',
+					'linklabel' => 'LBL_ASSIGN_' . $relatedModuleName,
+					'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignRelatedEntities("index.php?module='.$moduleModel->getName().'&view=MassActionAjax'
+						. '&mode=assignRelatedEntities&relatedmodule='.$relatedModuleName.'", "'.$relatedModuleName.'")',
+					'linkicon' => ''
+				);
+				$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+			
+				$massActionLink = array(
+					'linktype' => 'LISTVIEWMASSACTION',
+					'linklabel' => 'LBL_UNASSIGN_' . $relatedModuleName,
+					'linkurl' => 'javascript:Vtiger_List_Js.triggerAssignRelatedEntities("index.php?module='.$moduleModel->getName().'&view=MassActionAjax'
+						. '&mode=unassignRelatedEntities&relatedmodule='.$relatedModuleName.'", "'.$relatedModuleName.'")',
+					'linkicon' => ''
+				);
+				$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+			}
 		}
 
 		return $massActionLinks;

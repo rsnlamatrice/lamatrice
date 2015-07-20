@@ -92,11 +92,17 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 					$params[] = $datum['value'];
 					$params[] = $relatedRecordId;
 					$params[] = $sourceRecordId;
-					
-					//$params[] = $datum['dateapplication'];
+					if($datum['dateapplication']){
+						$updateQuery .= "
+							AND dateapplication = ?
+						";
+						$params[] = $datum['dateapplication'];
+					}
 					//var_dump($updateQuery, $params);
-					if($db->pquery($updateQuery, $params) === FALSE)
+					if($db->pquery($updateQuery, $params) === FALSE){
+						$db->echoError();
 						return false;
+					}
 				}
 				return true;
 			}

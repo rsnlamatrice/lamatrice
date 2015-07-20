@@ -228,6 +228,10 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	}
 
     public function isRoleBased() {
+		//ED150713 TODO REACTIVER !
+		//Plantage pour non-admin sur Invoice->typedossier
+		return false;
+		
         if($this->get('uitype') == '15' || $this->get('uitype') == '33' || ($this->get('uitype') == '55' && $this->getFieldName() == 'salutationtype')) {
             return true;
         }
@@ -252,7 +256,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 				$currentUser = Users_Record_Model::getCurrentUserModel();
 				if($this->isRoleBased() && !$currentUser->isAdminUser()) {
 				    $userModel = Users_Record_Model::getCurrentUserModel();
-				    $picklistValues = Vtiger_Util_Helper::getRoleBasedPicklistValues($this->getName(), $userModel->get('roleid'), $picklistvaluesdata);
+					$picklistValues = Vtiger_Util_Helper::getRoleBasedPicklistValues($this->getName(), $userModel->get('roleid'), $picklistvaluesdata);
 				}else{
 				    $picklistValues = Vtiger_Util_Helper::getPickListValues($this->getName(), $picklistvaluesdata);
 				}

@@ -52,3 +52,8 @@ $languageStrings = array(
         'LBL_DUPLICATE_AS_RECEIPT' => 'Dupliquer en Bon de réception',
         'LBL_DUPLICATE_AS_INVOICE' => 'Dupliquer en Facture fournisseur',
 );
+$jsLanguageStrings = array(
+        'JS_SUBJECT_AUTO_POTYPE_order' => 'Cmde fourn.',
+        'JS_SUBJECT_AUTO_POTYPE_receipt' => 'Bon récept.',
+        'JS_SUBJECT_AUTO_POTYPE_invoice' => 'Fact. fourn.',
+);

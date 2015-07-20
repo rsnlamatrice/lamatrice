@@ -54,7 +54,7 @@ class Critere4D_RelationListView_Model extends Vtiger_RelationListView_Model {
 	    $field = new Vtiger_Field_Model();
 	    $field->set('name', 'dateapplication');
 	    $field->set('column', strtolower( 'dateapplication' ));
-	    $field->set('label', 'Date d\'application');
+	    $field->set('label', 'Date d\'affectation');
 	    /*ED140906 tests*/
 	    $field->set('typeofdata', 'DATETIME');
 	    $field->set('uitype', 6);

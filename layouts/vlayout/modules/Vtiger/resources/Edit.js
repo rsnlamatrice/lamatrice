@@ -399,6 +399,52 @@ jQuery.Class("Vtiger_Edit_Js",{
 		});
 	},
 
+	/** ED150713
+	 * Function to register the SNA address check button click event
+	 */
+	registerEventSNAButtonClickEvent : function(container){
+		var thisInstance = this;
+		container.find('button.address-sna-check').on('click',function(e){
+			var values = thisInstance.getAddressBlockValuesForAddressCheck(jQuery(e.currentTarget).parents('.blockContainer:first'));
+			
+			var params = {
+				url : "index.php?module="+app.getModuleName()
+					+ "&view=AddressCheckAjax",
+				data : values
+			};
+			AppConnector.request(params).then(
+				function(data){
+					if (typeof data !== 'string') 
+						data = JSON.stringify(data);	
+					$('<div></div>')
+						.html(data)
+						.dialog({
+							title: 'Contrôle externe de l\'adresse',
+							width: 'auto',
+							height: 'auto',
+						});
+				},
+				function(error){
+					Vtiger_Helper_Js.showPnotify(error)
+				}
+			);
+			return false;
+		});
+	},
+	/** ED150713
+	 * Function to register the SNA button click event
+	 */
+	getAddressBlockValuesForAddressCheck : function($block){
+		var values = {};
+		$block.find('input[name]:visible').each(function(){
+			if (this.value
+			&& this.getAttribute('name').indexOf('npai') === -1
+			&& this.getAttribute('name').indexOf('format') === -1)
+				values['address_' + this.getAttribute('name')] = this.value;
+		});
+		return values;
+	},
+
 	/**
 	 * Function which will register basic events which will be used in quick create as well
 	 *

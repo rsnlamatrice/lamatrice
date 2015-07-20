@@ -147,7 +147,7 @@ $languageStrings = array(
 	'Rss'                          => 'RSS'                         , 
 	'Quotes'                       => 'Devis'                       , 
 	'PurchaseOrder'                => 'Documents Fournisseur'        , 
-	'SalesOrder'                   => 'Commande Client'             , 
+	'SalesOrder'                   => 'Dépôts-vente'             , 
 	'Invoice'                      => 'Facture'                     , 
 	'MailManager'                  => 'Mail Manager'                , 
 	'Activities'		        => 'Evénements'					,
@@ -615,7 +615,7 @@ $languageStrings = array(
 	//Realted tab strings
 	'Service Contracts' => 'Contrats de Service',
 	'Projects' => 'Projets',
-	'Sales Order' => 'Commande Client',
+	'Sales Order' => 'Dépôt-vente',
 	'Purchase Order' => 'Documents Fournisseur',
 	'List and Campaigns' => 'Liste et campagnes',
 	'Project Tasks' => 'Projet Tâches',
@@ -759,6 +759,15 @@ $languageStrings = array(
 	'LBL_SCINEVENTS' => 'Evénements',
 
 	'Events' => 'Evénements',
+	
+	'street'             => 'rue'     ,
+	'street2'             => 'Structure, n° appt, ...'     ,
+	'street3'             => 'Bât., rés., ...'          ,
+	'city'                 => 'Ville'                , 
+	'zip'                 => 'Code postal'         , 
+	'country'              => 'Pays'             , 
+	'pobox'               => 'Boîte postale'            , 
+	'state'                => 'Département'               , 
 	
 );
 $jsLanguageStrings = array(

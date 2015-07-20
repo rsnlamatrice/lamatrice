@@ -12,10 +12,10 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 
 	public function __construct() {
 		parent::__construct();
-		$this->exposeMethod('updateDateApplicationCritere4D');
-		$this->exposeMethod('updateRelDataCritere4D');
-		$this->exposeMethod('deleteRelationCritere4D');
-		$this->exposeMethod('addRelationCritere4D');
+		$this->exposeMethod('updateDateApplicationMultiDates');
+		$this->exposeMethod('updateRelDataMultiDates');
+		$this->exposeMethod('deleteRelationMultiDates');
+		$this->exposeMethod('addRelationMultiDates');
 		$this->exposeMethod('updateDateApplicationContacts');
 		$this->exposeMethod('updateRelDataContacts');
 		$this->exposeMethod('deleteRelationContacts');
@@ -37,7 +37,8 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 			return $this->addRelationContacts($request);
 			break;
 		 case 'Critere4D' :
-			return $this->addRelationCritere4D($request);
+		 case 'Documents' :
+			return $this->addRelationMultiDates($request);
 			break;
 		 default :
 			return parent::addRelation($request);
@@ -48,7 +49,7 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 	 * Function to update Relation DateApplication
 	 * @param Vtiger_Request $request
 	 */
-	public function updateDateApplicationCritere4D(Vtiger_Request $request) {
+	public function updateDateApplicationMultiDates(Vtiger_Request $request) {
 		$relatedModuleName = $request->get('relatedModule');
 		$relatedRecordId = $request->get('relatedRecord');
 		$fieldToUpdate = 'dateapplication';
@@ -84,8 +85,8 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 	 * Function to update Relation rel_data
 	 * @param Vtiger_Request $request
 	 */
-	public function updateRelDataCritere4D(Vtiger_Request $request) {
-		$relatedModuleName = 'Critere4D';//$request->get('relatedModule');
+	public function updateRelDataMultiDates(Vtiger_Request $request) {
+		$relatedModuleName = $request->get('relatedModule');
 		$relatedRecordId = $request->get('relatedRecord');
 		$fieldToUpdate = 'rel_data';
 		$new_value = $request->get($fieldToUpdate);
@@ -98,7 +99,8 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 			$relatedModuleModel = Vtiger_Module_Model::getInstance($relatedModuleName);
 			$relationModel = Vtiger_Relation_Model::getInstance($relatedModuleModel, $sourceModuleModel);
 			/*echo('sourceRecord=');
-			var_dump($request->get('sourceRecord'));*/
+			var_dump($request->get('sourceRecord'));
+			var_dump(get_class($relationModel));*/
 			$relationModel->updateRelatedField($relatedRecordId, 
 							   array($request->get('sourceRecord') => array(
 											     'dateapplication' => $dateapplication,
@@ -124,7 +126,7 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 	 *		related_record_list		json encoded of list of related record ids
 	 *		related_dateapplication_list		json encoded of list of related record dateapplication
 	 */
-	function deleteRelationCritere4D($request) {
+	function deleteRelationMultiDates($request) {
 		$sourceModule = $request->getModule();
 		$sourceRecordId = $request->get('src_record');
 
@@ -143,7 +145,7 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		
 		$i = 0;
 		foreach($relatedRecordIdList as $relatedRecordId) {
-			$response = $relationModel->deleteRelationCritere4D($sourceRecordId,$relatedRecordId, $relatedRecordDateApplicationList[$i]); //ED140917 3eme argument
+			$response = $relationModel->deleteRelationMultiDates($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList[$i]); //ED140917 3eme argument
 			$i++;
 		}
 		echo $response;
@@ -158,7 +160,7 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 	 *		related_record_list		json encoded of list of related record ids
 	 *		related_dateapplication_list		json encoded of list of related record dateapplication
 	 */
-	function addRelationCritere4D($request) {
+	function addRelationMultiDates($request) {
 		$sourceModule = $request->getModule();
 		$sourceRecordId = $request->get('src_record');
 
@@ -174,7 +176,7 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		
 		$i = 0;
 		foreach($relatedRecordIdList as $relatedRecordId) {
-			$response = $relationModel->addRelation($sourceRecordId,$relatedRecordId); //ED140917 3eme argument
+			$response = $relationModel->addRelation($sourceRecordId, $relatedRecordId); //ED140917 3eme argument
 			$i++;
 		}
 		echo $response;

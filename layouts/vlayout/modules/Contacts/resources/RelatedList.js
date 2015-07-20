@@ -10,10 +10,10 @@
 Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 	
 	
-	deleteRelationCritere4D : function(relatedIdList, relatedDateApplicationList) {
+	deleteRelationMultiDates : function(relatedIdList, relatedDateApplicationList) {
 		var aDeferred = jQuery.Deferred();
 		var params = {};
-		params['mode'] = "deleteRelationCritere4D";
+		params['mode'] = "deleteRelationMultiDates";
 		params['module'] = this.parentModuleName;
 		params['action'] = 'RelationAjax';
 
@@ -33,10 +33,10 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 		return aDeferred.promise();
 	},
 	
-	addRelationCritere4D : function(relatedIdList) {
+	addRelationMultiDates : function(relatedIdList) {
 		var aDeferred = jQuery.Deferred();
 		var params = {};
-		params['mode'] = "addRelationCritere4D";
+		params['mode'] = "addRelationMultiDates";
 		params['module'] = this.parentModuleName;
 		params['action'] = 'RelationAjax';
 
@@ -57,19 +57,19 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 	},
 	
 	/**
-	 * Function to jump to critere4d tab
+	 * Function to jump to critere4d or documents tab
 	 */
-	registerEventToNavigateToCritere4DTab : function(){
+	registerEventToNavigateToMultiDatesTab : function(){
 		var thisInstance = this;
-		jQuery('.widget-content.critere4d td').on('click',function(e){
+		jQuery('.widget-content.multidates td').on('click',function(e){
 			e.stopImmediatePropagation();
 		});
 	},
 	
 	/**
-	 * Function to edit related DateApplication for modules of critere4d
+	 * Function to edit related DateApplication for modules of critere4d or documents
 	 */
-	registerEventToEditCritere4DDateApplication : function(){
+	registerEventToEditMultiDatesDateApplication : function(){
 		var thisInstance = this;
 		jQuery('.dateapplication').on('click',function(e){
 			e.stopImmediatePropagation();
@@ -97,7 +97,7 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 				'module' : app.getModuleName(),
 				'action' : 'RelationAjax',
 				'sourceRecord' : thisInstance.parentRecordId,
-				'mode' : 'updateDateApplicationCritere4D'
+				'mode' : 'updateDateApplicationMultiDates'
 			}
 			AppConnector.request(params).then(
 				function(responseData){
@@ -132,7 +132,7 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 	/**
 	 * Function to edit l'information data qui associe le contact et le critËre ‡ la date d'application donnÈe
 	 */
-	registerEventToEditCritere4DInformation : function(){
+	registerEventToEditMultiDatesInformation : function(){
 		var thisInstance = this;
 		jQuery('.rel_data').on('click',function(e){
 			e.stopImmediatePropagation();
@@ -154,7 +154,7 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 				'module' : app.getModuleName(),
 				'action' : 'RelationAjax',
 				'sourceRecord' : thisInstance.parentRecordId,
-				'mode' : 'updateRelDataCritere4D'
+				'mode' : 'updateRelDataMultiDates'
 			}
 			AppConnector.request(params).then(
 				function(responseData){
@@ -179,10 +179,10 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 		});
 	},
 	
-	registerEventsCritere4D : function(){
-		this.registerEventToEditCritere4DDateApplication();
-		this.registerEventToEditCritere4DInformation();
-		this.registerEventToNavigateToCritere4DTab();
+	registerEventsMultiDates : function(){
+		this.registerEventToEditMultiDatesDateApplication();
+		this.registerEventToEditMultiDatesInformation();
+		this.registerEventToNavigateToMultiDatesTab();
 	},
 	
 	

@@ -72,11 +72,16 @@ $languageStrings = array(
 	
 	'Is Converted From Lead'        => 'Fiche provenant d\'un prospect',
 	
-	'LBL_ASSIGN_CRITERE4D'        	=> 'Affecter un critère',
-	'LBL_ASSIGN_CRITERE4D_MULTI'  	=> 'Affecter des critères',
-	'LBL_UNASSIGN_CRITERE4D'        => 'Supprimer un critère affecté',
-	'LBL_UNASSIGN_CRITERE4D_MULTI'  => 'Supprimer les affectations de critères',
-	'LBL_IN_RELATION_WITH'			=> 'en relation avec'
+	'LBL_ASSIGN_Critere4D'        	=> 'Affecter un critère',
+	'LBL_ASSIGN_Critere4D_MULTI'  	=> 'Affecter des critères',
+	'LBL_UNASSIGN_Critere4D'        => 'Supprimer un critère affecté',
+	'LBL_UNASSIGN_Critere4D_MULTI'  => 'Supprimer les affectations de critères',
+	'LBL_IN_RELATION_WITH'			=> 'en relation avec',
+	
+	'LBL_ASSIGN_Documents'        	=> 'Affecter un document',
+	'LBL_ASSIGN_Documents_MULTI'  	=> 'Affecter des documents',
+	'LBL_UNASSIGN_Documents'        => 'Supprimer un document affecté',
+	'LBL_UNASSIGN_Documents_MULTI'  => 'Supprimer les affectations de documents',
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 

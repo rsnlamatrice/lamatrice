@@ -71,9 +71,24 @@ Inventory_Edit_Js("PurchaseOrder_Edit_Js",{},{
 		
 		jQuery('input[name="vendor_id"]', container).on(Vtiger_Edit_Js.referenceSelectionEvent, function(e, data){
 			thisInstance.referenceSelectionEventHandler(data, container, !thisInstance.isEmptyAddress(container));
+			thisInstance.vendorSelectionEventHandler(data, container); //ED150716
 		});
 	},
     
+	/** ED150716
+	 * Vendor Selection Event Handler
+	 * Set subject
+	 * 
+	 */
+	vendorSelectionEventHandler : function(data,container){
+		var thisInstance = this
+		, $subject = container.find('input[name="subject"]:first')
+		, poType = container.find('input[name="potype"]:first').val()
+		, subject = app.vtranslate('JS_SUBJECT_AUTO_POTYPE_' + poType) + ' - ' + data.selectedName;
+		if ($subject.val() && $subject.attr('data-isauto') === undefined) 
+			return;
+		$subject.val(subject).attr('data-isauto', 1);
+	},
 	
 	registerEvents: function(){
 		this._super();

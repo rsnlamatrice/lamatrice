@@ -1927,6 +1927,14 @@ jQuery.Class("Vtiger_Detail_Js",{
 		})
 	},
 	
+	/** ED150713
+	 */
+	setBrowserTitle : function(){
+		var title = $('.detailViewTitle .recordLabel').text();
+		if (title)
+			document.title = title;
+	},
+	
 	registerEvents : function(){
 		var thisInstance = this;
 		//thisInstance.triggerDisplayTypeEvent();
@@ -1953,6 +1961,9 @@ jQuery.Class("Vtiger_Detail_Js",{
 			return;
 		}
 
+		//ED150713
+		thisInstance.setBrowserTitle();
+		
 		var detailContentsHolder = thisInstance.getContentHolder();
 		app.registerEventForDatePickerFields(detailContentsHolder);
 		//Attach time picker event to time fields

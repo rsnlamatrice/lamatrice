@@ -47,7 +47,7 @@ class Documents extends CRMEntity {
 				'Title'=>Array('notes'=>'title'),
 				'File Name'=>Array('notes'=>'filename'),
 				'Modified Time'=>Array('crmentity'=>'modifiedtime'),
-				'Assigned To' => Array('crmentity'=>'smownerid'),
+				//'Assigned To' => Array('crmentity'=>'smownerid'),
 				'Folder Name' => Array('attachmentsfolder'=>'folderid'),
 				'Folder Color' => Array('attachmentsfolder'=>'uicolor'),
 				);
@@ -55,7 +55,7 @@ class Documents extends CRMEntity {
 					'Title'=>'notes_title',
 					'File Name'=>'filename',
 					'Modified Time'=>'modifiedtime',
-					'Assigned To'=>'assigned_user_id',
+					//'Assigned To'=>'assigned_user_id',
 					'Folder Name' => 'folderid',
 					'Folder Color' => 'uicolor',
 				     );
@@ -63,15 +63,15 @@ class Documents extends CRMEntity {
 	var $search_fields = Array(
 					'Title' => Array('notes'=>'notes_title'),
 					'Folder Name' => Array('attachmentsfolder'=>'foldername'),
-					'File Name' => Array('notes'=>'filename'),
-					'Assigned To' => Array('crmentity'=>'smownerid'),
+					//'File Name' => Array('notes'=>'filename'),
+					//'Assigned To' => Array('crmentity'=>'smownerid'),
 		);
 
 	var $search_fields_name = Array(
 					'Title' => 'notes_title',
 					'Folder Name' => 'folderid',
-					'File Name' => 'filename',
-					'Assigned To' => 'assigned_user_id',
+					//'File Name' => 'filename',
+					//'Assigned To' => 'assigned_user_id',
 	);
 	var $list_link_field= 'notes_title';
 	var $old_filename = '';

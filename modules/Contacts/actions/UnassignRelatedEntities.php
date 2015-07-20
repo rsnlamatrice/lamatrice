@@ -3,7 +3,7 @@
  * ED150628
  *************************************************************************************/
 
-class Contacts_UnassignCritere4D_Action extends Vtiger_Mass_Action {
+class Contacts_UnassignRelatedEntities_Action extends Vtiger_Mass_Action {
 	
 	function checkPermission(Vtiger_Request $request) {
 		$moduleName = $request->getModule();

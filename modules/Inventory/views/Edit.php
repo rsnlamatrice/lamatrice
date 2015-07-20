@@ -94,7 +94,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 				if($sourceModule === 'Documents')//Coupon
 					$relatedProducts = $parentRecordModel->getRelatedProductsDetailsForInventoryModule($recordModel);
 			}
-			//ED150708 : 'coupon libre' par défaut
+			//ED150708 : 'coupon libre' par dÃ©faut
 			if($moduleName === 'Invoice'
 			&& !$recordModel->get('notesid')){
 				$recordModel->set('notesid', COUPON_LIBRE_ID);//in Documents.php
@@ -185,8 +185,10 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		if($moduleName === 'PurchaseOrder'){
 			if($request->get('potype') && (empty($record) || $request->get('isDuplicate'))){
 				$recordModel->set('potype', $request->get('potype'));
+				$recordModel->setDefaultStatus();
 			}
 			$fieldList['potype']->set('fieldvalue', $recordModel->get('potype'));
+			$fieldList['postatus']->set('fieldvalue', $recordModel->get('postatus'));
 			$viewer->assign('POTYPE_FIELD_MODEL', $fieldList['potype']);
 			
 			if($recordModel->get('potype') !== 'invoice'){

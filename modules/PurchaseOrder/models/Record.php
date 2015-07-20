@@ -47,6 +47,23 @@ class PurchaseOrder_Record_Model extends Inventory_Record_Model {
 			return $purchaseOrderStatus;
 	}
 	
+	function setDefaultStatus(){
+		switch($this->get('potype')){
+		case 'order':
+			$this->set('postatus', 'Created');
+			break;
+		case 'invoice':
+			$this->set('postatus', 'Created');
+			break;
+		case 'receipt':
+			$this->set('postatus', 'Created');
+			break;
+		default:
+			$this->set('postatus', 'Created');
+			break;
+		}
+	}
+	
 	/**
 	 * ED150629
 	 * getPicklistValuesDetails
@@ -59,7 +76,34 @@ class PurchaseOrder_Record_Model extends Inventory_Record_Model {
 					'receipt' => array( 'label' => 'Bon de réception', 'icon' => 'ui-icon potype receipt' ),
 					'invoice' => array( 'label' => 'Facture', 'icon' => 'ui-icon potype invoice' )
 				);
-			
+				break;
+			case 'postatus'://status du document : dépend du type de document
+				switch($this->get('potype')){
+				case 'order':
+				case 'invoice':
+					return array(
+						'Created' => array( 'label' => 'Créée', 'icon' => 'ui-icon ui-icon-check' ),
+						'Approved' => array( 'label' => 'Validée', 'icon' => 'ui-icon ui-icon-check green' ),
+						'Cancelled' => array( 'label' => 'Annulée', 'icon' => 'ui-icon ui-icon-close darkred' )
+					);
+					break;
+				case 'receipt':
+					return array(
+						'Created' => array( 'label' => 'Créé', 'icon' => 'ui-icon ui-icon-check' ),
+						'Received Shipment' => array( 'label' => 'Commande reçue', 'icon' => 'ui-icon ui-icon-locked darkgreen' ),
+						'Cancelled' => array( 'label' => 'Annulé', 'icon' => 'ui-icon ui-icon-close darkred' )
+					);
+					break;
+				default:
+					return array(
+						'Created' => array( 'label' => 'Créé-e', 'icon' => 'ui-icon ui-icon-check' ),
+						'Approved' => array( 'label' => 'Validé-e', 'icon' => 'ui-icon ui-icon-check green' ),
+						'Received Shipment' => array( 'label' => 'Commande reçue', 'icon' => 'ui-icon ui-icon-locked darkgreen' ),
+						'Cancelled' => array( 'label' => 'Annulé-e', 'icon' => 'ui-icon ui-icon-close darkred' )
+					);
+					break;
+				}
+				break;
 			default:
 				return parent::getPicklistValuesDetails($fieldname);
 		}
