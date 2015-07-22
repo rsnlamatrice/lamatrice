@@ -240,6 +240,18 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		$this->getModule()->saveRecord($this);
 	}
 
+	/** ED150721
+	 * Function to save the current Record Model
+	 * set global Bulk mode to true to skip handler
+	 */
+	public function saveInBulkMode() {
+		global $VTIGER_BULK_SAVE_MODE;
+		$previousBulkSaveMode = $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
+		$this->save();
+		$VTIGER_BULK_SAVE_MODE = $previousBulkSaveMode;
+	}
+
 	/**
 	 * Function to delete the current Record Model
 	 */
@@ -316,7 +328,22 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				$searchKey = substr($searchKey,1);
 			$params = array(trim($searchKey), trim($searchKey));
 		}
-		else {	/* requte gnrale sur le champ label */
+		//ED150720 : @ => email
+		elseif((!$module || $module == 'Contacts')
+		&& ($searchKey
+		    && (strpos($searchKey, '@') !== FALSE)
+		)){
+			$query = 'SELECT CONCAT(vtiger_crmentity.label, " (", vtiger_contactdetails.contact_no, ")") AS label
+				, vtiger_crmentity.crmid, vtiger_crmentity.setype, vtiger_crmentity.createdtime
+				FROM vtiger_crmentity
+				JOIN vtiger_contactdetails
+					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+				WHERE vtiger_contactdetails.email ' .
+					(strpos($searchKey, '%') !== FALSE ? ' LIKE CONCAT(\'%\', ?, \'%\')' : '= ?') .'
+				AND vtiger_crmentity.deleted = 0';
+			$params = array(trim($searchKey));
+		}
+		else {	/* requête générale sur le champ label */
 			$query = 'SELECT label, crmid, setype, createdtime
 				FROM vtiger_crmentity
 				WHERE label LIKE ?
@@ -333,6 +360,8 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		//$query .= ' ORDER BY createdtime DESC';
 
 		$result = $db->pquery($query, $params);
+		/*if(!$result)
+			$db->echoError();*/
 		$noOfRows = $db->num_rows($result);
 
 		$moduleModels = $matchingRecords = $leadIdsList = array();

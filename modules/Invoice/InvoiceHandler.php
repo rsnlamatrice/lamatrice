@@ -178,6 +178,12 @@ class RSNInvoiceHandler extends VTEventHandler {
 		global $log;
 		$log->debug("IN handleAfterSaveInvoiceAbonnementsEvent");
 		
+		//Contrôle si cette facture a déjà généré un abonnement
+		if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoice->getId())){
+			$log->debug("handleAfterSaveInvoiceAdhesionEvent, cette facture a déjà généré un abonnement");
+			return;
+		}
+		
 		$productModel = Vtiger_Module_Model::getInstance('Products');
 		$prochaineRevue = $productModel->getProchaineRevue();
 		if(!$prochaineRevue){
@@ -510,7 +516,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$log->debug("OUT handleAfterSaveInvoiceTotalEvent");
 	}
 	
-	//Ajoute une tâche d'alerte
+	//Ajoute une tâche d'alerte pour prévenir l'utilisateur
 	public function addRelatedTask($invoice, $message){
 		global $log;
 		

@@ -38,7 +38,7 @@ class RSNImportSources_Preimport_Model extends Vtiger_Base_Model {
 
         	$columnNames = array_keys($data);
 		$columnValues = array_values($data);
-		if(count($data) > 0) {	
+		if(count($data) > 0) {
 			$result = $db->pquery('INSERT INTO '.$tableName.' ('. implode(',',$columnNames).') VALUES ('. generateQuestionMarks($columnValues).')', array($columnValues));
 			if(!$result)
 				$db->echoError();

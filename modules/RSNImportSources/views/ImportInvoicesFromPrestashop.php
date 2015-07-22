@@ -264,7 +264,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 						$record->set('campaign_no', $campagne->getId());*/
 					
 					//$db->setDebug(true);
-					$record->save();
+					$record->saveInBulkMode();
 					$invoiceId = $record->getId();
 
 					if(!$invoiceId){
@@ -748,14 +748,6 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 				'isproduct'	=> $isProduct,
 				'taxrate'	=> self::str_to_float($product[8]),
             
-            /*1 RECEVOIR PAQUET($hDocref;$aCodeProduit;◊aTab)
-            2 RECEVOIR PAQUET($hDocref;$aNomProduit;◊aTab)
-            3 RECEVOIR PAQUET($hDocref;$aPrixUProduit;◊aTab)
-            4 RECEVOIR PAQUET($hDocref;$tInutilisé1;◊aTab)  `"1"
-            5 RECEVOIR PAQUET($hDocref;$aQuantitéProduit;◊aTab)
-            6 RECEVOIR PAQUET($hDocref;$tInutilisé2;◊aTab)  `"0"
-            7 RECEVOIR PAQUET($hDocref;$aCodeTVA;◊aTab)  `"0|12|3"
-            8 RECEVOIR PAQUET($hDocref;$aTauxTVA;◊aTab)  `<date> ?*/
 			)));
 		}
 

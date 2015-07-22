@@ -285,6 +285,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @param int $userId : the id of the user who made the import to undo.
 	 */
 	public function undoImport($userId) {
+		global $VTIGER_BULK_SAVE_MODE;
 		$user = Users_Record_Model::getInstanceById($userId, 'Users');
 		$previousBulkSaveMode = $VTIGER_BULK_SAVE_MODE;
 		$VTIGER_BULK_SAVE_MODE = false;

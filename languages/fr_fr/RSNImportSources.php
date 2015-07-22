@@ -95,6 +95,13 @@ $languageStrings = array(
 	'LBL_COGILOG' => 'Cogilog',
         'LBL_DONATEURSWEB' => 'Donateurs web',
         'LBL_DONATEURSWEB_4D' => 'Donateurs web depuis 4D',
+        
+        'LBL_DBTYPE' => 'Type de base',
+        'LBL_DBSERVER' => 'Serveur',
+        'LBL_DBPORT' => 'Port',
+        'LBL_DBNAME' => 'Nom de la base',
+        'LBL_DBUSER' => 'Utilisateur',
+        'LBL_DBPWD' => 'Mot de passe',
 	
 );
 

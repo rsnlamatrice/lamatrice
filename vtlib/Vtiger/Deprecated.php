@@ -497,6 +497,7 @@ class Vtiger_Deprecated {
 		global $root_directory;
 		// Set the base directory to compare with
 		$use_root_directory = $root_directory;
+
 		if (empty($use_root_directory)) {
 			$use_root_directory = realpath(dirname(__FILE__) . '/../../.');
 		}

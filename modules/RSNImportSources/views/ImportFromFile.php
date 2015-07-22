@@ -2,12 +2,26 @@
 
 class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View {
 
+	var $columnName_indexes = false;//tableau nom => index
+	
 	/**
 	 * Method to show the configuration template of the import for the first step.
 	 *  It display the select file template.
 	 * @param Vtiger_Request $request: the curent request.
 	 */
 	function showConfiguration(Vtiger_Request $request) {
+		$viewer = $this->initConfiguration($request);
+
+		return $viewer->view('ImportSelectFileStep.tpl', 'RSNImportSources');
+	}
+
+	/**
+	 * Method to initialize the configuration template of the import for the first step.
+	 *  It display the select file template.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @return viewer
+	 */
+	function initConfiguration(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE', $request->getModule());
 		$viewer->assign('SUPPORTED_FILE_TYPES', $this->getSupportedFileExtentions());//tmp function of import module !!!
@@ -17,8 +31,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 		$viewer->assign('IMPORT_ULPOAD_FILE_ENCODING', $this->getDefaultFileEncoding());
 		$viewer->assign('IMPORT_ULPOAD_FILE_DELIMITER', $this->getDefaultFileDelimiter());
 		$viewer->assign('IMPORT_UPLOAD_SIZE', $this->getImportUploadSize());
-
-		return $viewer->view('ImportSelectFileStep.tpl', 'RSNImportSources');
+		return $viewer;
 	}
 
 	/**
@@ -89,7 +102,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 
 	/**
 	 * Method to process to the first step (pre-importing data).
-	 *  It call the parseAndSave methode that must be implemented in the child class.
+	 *  It calls the parseAndSave methode that must be implemented in the child class.
 	 */
 	public function preImportData() {
 		if ($this->uploadFile()) {

@@ -510,7 +510,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 						$record->set('campaign_no', $campagne->getId());*/
 					
 					//$db->setDebug(true);
-					$record->save();
+					$record->saveInBulkMode();
 					$invoiceId = $record->getId();
 
 					if(!$invoiceId){

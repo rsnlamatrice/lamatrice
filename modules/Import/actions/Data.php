@@ -184,6 +184,8 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			return;
 		}
 
+		$moreQueries = array();//ED150722 more queries to execute after
+		
 		$fieldMapping = $this->fieldMapping;
 		$fieldColumnMapping = $moduleMeta->getFieldColumnMapping();
 
@@ -337,12 +339,26 @@ class Import_Data_Action extends Vtiger_Action_Controller {
                 }
                 $label = trim($label);
                 $adb->pquery('UPDATE vtiger_crmentity SET label=? WHERE crmid=?', array($label, $recordId));
+		
+				switch($this->module) {
+                   	case 'Contacts':
+						if(array_key_exists('contact_no', $fieldData) && !empty($fieldData['contact_no'])){
+							$moreQueries[] = array('sql'=>'UPDATE vtiger_contactdetails SET contact_no=CONCAT(\'C\', ?) WHERE contactid=?',
+											   'params'=> array($fieldData['contact_no'], $recordId));
+						}
+						break;
+                }     
             }
 
 			$this->importedRecordInfo[$rowId] = $entityInfo;
 			$this->updateImportStatus($rowId, $entityInfo);
 		}
 		unset($result);
+		
+		//ED150722
+		foreach($moreQueries as $item)
+			$adb->pquery($item['sql'], $item['params']);
+			
 		return true;
 	}
 

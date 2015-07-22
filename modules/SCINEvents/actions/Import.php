@@ -1,6 +1,7 @@
 <?php
 /*+***********************************************************************************
  * ED150707
+ * 
  ************************************************************************************ */
 
 require_once 'include/Webservices/Create.php';
@@ -38,21 +39,28 @@ class SCINEvents_Import_Action extends Vtiger_Action_Controller {
 		return true;
 	}
 	
+	// ?module=SCINEvents&action=Import&mode=runScheduledImport
 	public function runScheduledImport() {
-		global $current_user;
-		
-		$current_user = new Users();
+		global $current_user, $log;
+		$log->debug('IN runScheduledImport');
+		/*$current_user = new Users();
 		$current_user->id = ADMIN_USERID;
-		$current_user->retrieve_entity_info(ADMIN_USERID, 'Users');
+		$current_user->retrieve_entity_info(ADMIN_USERID, 'Users');*/
 		
 		$scheduledImports = SCINSources::getSources();
 		
+		$log->debug('$scheduledImports = ' . print_r($scheduledImports, true));
+		
 		foreach ($scheduledImports as $scheduledId => $importDataController) {
 			
+			$log->debug('$scheduledId = ' . print_r($scheduledId, true));
 			if(!$importDataController->initializeImport()) { continue; }
+			$log->debug('importData');
 			$importDataController->importData();
+			$log->debug('finishImport');
 			$importDataController->finishImport();
 		}
+		$log->debug('OUT runScheduledImport');
 	}
 }
 

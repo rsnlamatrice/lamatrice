@@ -80,11 +80,13 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	function selectImportSource(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->get('for_module');
+		$defaultSource = $request->get('defaultsource');
 
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$sources = RSNImportSources_Utils_Helper::getSourceList($moduleName);
 		$viewer->assign('SOURCES', $sources);
+		$viewer->assign('DEFAULT_SOURCE', $defaultSource);
 		$viewer->assign('ERROR_MESSAGE', $request->get('error_message'));
 
 		return $viewer->view('SelectImportSource.tpl', 'RSNImportSources');

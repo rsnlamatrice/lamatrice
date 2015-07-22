@@ -10,13 +10,22 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	static $supportedFileEncoding = array('UTF-8'=>'UTF-8', 'ISO-8859-1'=>'ISO-8859-1', 'macintosh'=> 'macintosh');
 	static $supportedDelimiters = array(','=>'LBL_COMMA', ';'=>'LBL_SEMICOLON', '	'=>'LBL_TAB');
 	static $supportedFileExtensions = array('csv','xml','json');
+	static $supportedDBTypes = array('postgresql','mysql','mysqli');
 
 	/**
-	 * Method to get the default suported file extentions.
-	 * @return array - the file extentions.
+	 * Method to get the default supported file extentions.
+	 * @return array - the file extensions.
 	 */
 	public function getSupportedFileExtensions() {
 		return self::$supportedFileExtensions;
+	}
+
+	/**
+	 * Method to get the default supported db types.
+	 * @return array - the db types.
+	 */
+	public function getSupportedDBTypes() {
+		return self::$supportedDBTypes;
 	}
 
 	/**
@@ -88,7 +97,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		if ($_FILES['import_file']['size'] > $uploadMaxSize) {
 			$request->set('error_message', vtranslate('LBL_IMPORT_ERROR_LARGE_FILE', 'Import').
-												 $uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
+			$uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
 			return false;
 		}
 		if(!is_writable($importDirectory)) {
@@ -326,5 +335,16 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 
 		return null;
+	}
+
+	//échappe les caractères spéciaux avant écriture du csv
+	public static function escapeValuesForCSV($row){
+		static $chars = ";\r\n\"";
+		foreach ($row as $index=>$value) {
+			if(strtok($value,$chars) !== $value){
+				$row[$index] = preg_replace('/([\r\n])/', " ", preg_replace('/([;"])/', '\\$1', $value));
+			}
+		}
+		return $row;
 	}
 }
