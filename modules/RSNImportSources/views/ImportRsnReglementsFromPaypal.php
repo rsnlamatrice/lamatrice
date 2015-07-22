@@ -255,7 +255,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					FROM vtiger_rsnreglements
 					JOIN vtiger_crmentity
 					    ON vtiger_rsnreglements.rsnreglementsid = vtiger_crmentity.crmid
-					WHERE numpiece = ? AND deleted = FALSE
+					WHERE numpiece = ?
+					AND deleted = FALSE
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
@@ -554,7 +555,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 						$record->set('campaign_no', $campagne->getId());*/
 					
 					//$db->setDebug(true);
-					$record->save();
+					$log->debug('ImportRsnReglementsFromPaypal.php importOneInvoice $record->save();');
+					$record->saveInBulkMode();
 					$invoiceId = $record->getId();
 
 					if(!$invoiceId){
@@ -613,7 +615,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 									    , $invoiceData[0]['invoicedate']
 									    , $invoiceId));
 					
-					$log->debug("" . basename(__FILE__) . " update imported invoice (id=" . $record->getId() . ", sourceId=$sourceId , total=$total, date=" . $invoiceData[0]['invoicedate']
+					$log->debug("" . basename(__FILE__) . " update imported invoice (id=" . $record->getId() . ", invoice_no=$sourceId , total=$total, date=" . $invoiceData[0]['invoicedate']
 						    . ", result=" . ($result ? " true" : "false"). " )");
 					if( ! $result)
 						$db->echoError();

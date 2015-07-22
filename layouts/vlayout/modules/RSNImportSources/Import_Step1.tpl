@@ -15,7 +15,9 @@
 						<option disabled selected></option>
 					{/if}
 					{foreach item=SOURCE from=$SOURCES}
-						<option value="{$SOURCE['classname']}">{'LBL_FROM'|@vtranslate:$MODULE} {$SOURCE['sourcename']|@vtranslate:$MODULE} ({$SOURCE['sourcetype']|@vtranslate:$MODULE})</option>
+						<option value="{$SOURCE['classname']}" {if $DEFAULT_SOURCE eq $SOURCE['classname']}selected="selected"{/if}>
+							{'LBL_FROM'|@vtranslate:$MODULE} {$SOURCE['sourcename']|@vtranslate:$MODULE} ({$SOURCE['sourcetype']|@vtranslate:$MODULE})
+						</option>
 					{/foreach}
 				</select>
 			{else}
