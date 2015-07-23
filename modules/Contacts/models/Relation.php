@@ -157,6 +157,8 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			//'Campaigns' => array('fieldName' => 'contactid', 'tableName' => 'vtiger_campaigncontrel'),
 			'Invoice' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_invoice'
 					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
+			'SalesOrder' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_salesorder'
+					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
 			'RSNAboRevues' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_rsnaborevues'
 					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
 		);

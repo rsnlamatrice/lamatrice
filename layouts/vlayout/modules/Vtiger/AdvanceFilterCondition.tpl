@@ -64,6 +64,8 @@
 				</optgroup>
 			{/foreach}
 			{* ED150212 - related modules views *}
+			{assign var=SELECTED_VIEW value=$CONDITION_INFO['columnname']}
+			{assign var=SELECTED_VIEW_ESC value=htmlentities($SELECTED_VIEW)}
 			{foreach key=RELATED_NAME item=RELATED_VIEWS from=$RELATED_MODELS_VIEWS}
 				<optgroup label='[{vtranslate($RELATED_NAME, $SOURCE_MODULE)}]'>
 				{* each view of module *}
@@ -74,10 +76,12 @@
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
 					{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
 					<option value="{$COLUMN_NAME}" data-fieldtype="VW" data-field-name="(exists)"
-						{if $COLUMN_NAME eq $CONDITION_INFO['columnname']}
+						{if $COLUMN_NAME eq $SELECTED_VIEW
+						|| $COLUMN_NAME eq $SELECTED_VIEW_ESC}
 							selected="selected"
 						{/if}
 						data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
+					{* translate *}
 					{assign var=COLUMN_NAME value="["|cat:vtranslate($RELATED_NAME, $SOURCE_MODULE)|cat:"] "|cat:vtranslate($VIEW_LABEL, $RELATED_NAME)}
 					>{$COLUMN_NAME}
 					</option>
