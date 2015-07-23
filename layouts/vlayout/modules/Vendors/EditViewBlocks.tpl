@@ -132,7 +132,10 @@
 								{assign var=FIELD_MODEL value=$FIELD_MODELTMP}	
 							</span>
 							<span class="subFieldLabel">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</span>
-							<span class="subFieldLabel" style="color: #88bbbb;">&gt;</span>
+							<span class="subFieldLabel" style="color: #88bbbb;">
+								<button class="address-sna-check ui-button" title="Contrôle externe de l'adresse">SNA</button>
+								&gt;&gt;
+							</span>
 						{else}
 							{vtranslate($FIELD_MODEL->get('label'), $MODULE)}
 						{/if}
