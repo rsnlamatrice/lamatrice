@@ -328,3 +328,19 @@ button.address-sna-check {
   vertical-align: top;
   font-size: 12px;
 }
+/* SNA form */
+.address-check-editor thead th {
+  background-color: #809fff;
+}
+.address-check-editor td {
+  padding: 2px 4px;
+}
+.address-check-editor .address-value {
+  margin-left: 8px;
+}
+.address-check-editor .submit-cell {
+  text-align: center;
+}
+.address-check-editor label input {
+  display: inline;
+}
