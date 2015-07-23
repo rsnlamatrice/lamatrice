@@ -201,7 +201,7 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 			&& strpos($key, 'country') === false){
 				$srcFieldName = substr($key, strlen('address_'));
 				$fieldName = substr($key, strlen('address_'.$namesRoot));
-				if($fieldName == 'zipcode' || $fieldName == 'code')
+				if($fieldName == 'zipcode' || $fieldName == 'code' || $fieldName == 'postalcode')
 					$fieldName = 'zip';
 				$mapping[$fieldName] = $srcFieldName;
 				$address[$fieldName] = $value;
@@ -310,12 +310,12 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 							);
 		
 		if($originalAddress['zip'] || $originalAddress['city']){
-			$fieldName = 'zip';
 			if(preg_match('/^(\w+\-)?(\d+)\s+(.+)$/', $newAddress[$nItem])){
 				$newAddress[$nItem + 1] = preg_replace('/^(\w+\-)?(\d+)\s+(.+)$/', '$3', $newAddress[$nItem]); //city
 				$newAddress[$nItem] = preg_replace('/^(\w+\-)?([ABab\d]+)\s+(.+)$/', '$1$2', $newAddress[$nItem]); //zip
 			}
 			
+			$fieldName = 'zip';
 			$fields[$fieldName] = array(
 									'original' => $originalAddress[$fieldName],
 									'new' => $newAddress[$nItem++],
@@ -329,7 +329,7 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 		}
 			
 		//var_dump($countOriginalItems, $countNewItems, $fields);
-		//									'status' => compareAddressFieldValues($fieldName, $originalAddress['name'],
+		
 		$score = false;
 		foreach($fields as $fieldName => $field){
 			if($field === null)
