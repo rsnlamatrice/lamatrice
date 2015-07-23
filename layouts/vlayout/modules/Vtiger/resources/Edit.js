@@ -405,26 +405,31 @@ jQuery.Class("Vtiger_Edit_Js",{
 	registerEventSNAButtonClickEvent : function(container){
 		var thisInstance = this;
 		container.find('button.address-sna-check').on('click',function(e){
-			var values = thisInstance.getAddressBlockValuesForAddressCheck(jQuery(e.currentTarget).parents('.blockContainer:first'));
+			var $sourceBlock = jQuery(e.currentTarget).parents('.blockContainer:first')
+			, values = thisInstance.getAddressBlockValuesForAddressCheck($sourceBlock);
 			
 			var params = {
 				url : "index.php?module="+app.getModuleName()
 					+ "&view=AddressCheckAjax",
 				data : values
 			};
+			var progressIndicatorElement = jQuery.progressIndicator({});
 			AppConnector.request(params).then(
 				function(data){
+					progressIndicatorElement.progressIndicator({'mode': 'hide'});
 					if (typeof data !== 'string') 
 						data = JSON.stringify(data);	
-					$('<div></div>')
+					$div = $('<div></div>')
 						.html(data)
 						.dialog({
 							title: 'Contrôle externe de l\'adresse',
 							width: 'auto',
 							height: 'auto',
 						});
+					thisInstance.registerAddressCheckFormEvents($div, $sourceBlock);
 				},
 				function(error){
+					progressIndicatorElement.progressIndicator({'mode': 'hide'});
 					Vtiger_Helper_Js.showPnotify(error)
 				}
 			);
@@ -443,6 +448,46 @@ jQuery.Class("Vtiger_Edit_Js",{
 				values['address_' + this.getAttribute('name')] = this.value;
 		});
 		return values;
+	},
+	/**
+	 * Function which will register basic events which will be used in quick create as well
+	 *
+	 */
+	registerAddressCheckFormEvents : function(container, $sourceBlock) {
+		var thisInstance = this
+		, $form = container.find('form:first');
+		$form
+			.find('input[type="radio"]')
+				.click(function(e){
+					var $radio = $(this)
+					, $tr = $radio.parents('tr:first')
+					, $fieldName = $radio.attr('name')
+					, newValue = $tr.find('.address-value.' + $radio.val() + '-value:first').text()
+					, $input = $tr.find('input.address-result:first')
+					;
+					$input.val(newValue)
+				})
+				.end()
+			.submit(function(e){
+				var $form = $(e.target);
+				thisInstance.setAddressBlockValuesFromAddressCheck($sourceBlock, $form);
+				
+				container.dialog('close');
+				return false;
+			})
+			.end()
+		;
+	},
+	
+	/** ED150713
+	 * Function to set the new address values
+	 */
+	setAddressBlockValuesFromAddressCheck : function($sourceBlock, $form){
+		$form.find('input.address-result[name]:visible').each(function(){
+			$('input[name="' + this.getAttribute('name') + '"]')
+				.val(this.value)
+				.change();
+		});
 	},
 
 	/**

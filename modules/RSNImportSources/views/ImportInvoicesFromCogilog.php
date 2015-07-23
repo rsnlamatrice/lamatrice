@@ -81,13 +81,18 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			LEFT JOIN "gtvacg00002" AS "codetauxtva"
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
-		/* Attention à ne pas importer une facture en cours de saisie */
-		$query .= ' WHERE facture.datepiece < CURRENT_DATE 
-		';
-		if($factMax)
-			$query .= ' AND ((facture.numero > '.$factMax.' AND facture.annee = '.$anneeMax.')
-			OR facture.annee > '.$anneeMax.')';
-			
+		if(FALSE)
+			$query .= ' WHERE facture.numero = 3661
+				AND annee = 2015
+			';
+		else {
+			/* Attention à ne pas importer une facture en cours de saisie */
+			$query .= ' WHERE facture.datepiece < CURRENT_DATE 
+			';
+			if($factMax)
+				$query .= ' AND ((facture.numero > '.$factMax.' AND facture.annee = '.$anneeMax.')
+				OR facture.annee > '.$anneeMax.')';
+		}
 		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
                     LIMIT ' . MAX_QUERY_ROWS;
 		//echo("<pre>$query</pre>");
@@ -857,21 +862,26 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 		$invoiceHeader['contact_no'] = $codeClient;
 		
+		//var_dump($this->columnName_indexes);
+		
 		foreach ($invoice['detail'] as $product) {
+			//var_dump($product);
 			$isProduct = null;
 			$product_name = '';
 			$taxrate = self::str_to_float($product[$this->columnName_indexes['tva_produit']])/100;
+			$qty = self::str_to_float($product[$this->columnName_indexes['quantite']]);
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
 				'productcode'	=> $product[$this->columnName_indexes['code_produit']],
 				'productid'	=> $this->getProductId($product[$this->columnName_indexes['code_produit']], $isProduct, $product_name),
-				'quantity'	=> self::str_to_float($product[$this->columnName_indexes['quantite']]),
+				'quantity'	=> $qty,
 				'article'	=> $product_name,
-				'prix_unit_ht'	=> self::str_to_float($product[$this->columnName_indexes['prixvente_produit']]) / (1 + $taxrate),
+				'prix_unit_ht'	=> self::str_to_float($product[$this->columnName_indexes['total_ligne_ht']]) / $qty /* / (1 + $taxrate) */,
 				'isproduct'	=> $isProduct,
 				'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['tva_produit']]),
             
 			)));
 		}
+		//var_dump($invoiceValues);
 		return $invoiceValues;
 	}
 }

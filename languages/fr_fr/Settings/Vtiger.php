@@ -200,9 +200,9 @@ $languageStrings = array(
 	'LBL_FOLDER' => 'Dossier',
 	'LBL_FOLDERS' => 'Dossiers',
         
-	'LBL_CONFIGRSN_EDITOR'          => 'Règles de gestion du Rézo',
-	'LBL_CONFIGRSN_FILE'            => 'config.RSN.inc.php',  
-	'LBL_CONFIGRSN_DESCRIPTION'     => 'Modifie les règles de gestion du Rézo',  
+	'LBL_CONFIGRSN_EDITOR'          => 'Règles de gestion du Réseau SdN',
+	'LBL_CONFIGRSN_FILE'            => 'config.RSN.inc.php',   
+	'LBL_CONFIGRSN_EDITOR_DESCRIPTION'     => 'Définition des règles de gestion du Réseau SdN',  
         
         'RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES' => 'Plusieurs taxes utilisables par produit et service',
         'RSN_PRODUCT_ALLOW_DUPLICATE' => 'Les produits et services peuvent être dupliqués',

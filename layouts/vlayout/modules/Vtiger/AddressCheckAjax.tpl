@@ -1,11 +1,6 @@
 {*<!--
 /*********************************************************************************
-  ** The contents of this file are subject to the vtiger CRM Public License Version 1.0
-   * ("License"); You may not use this file except in compliance with the License
-   * The Original Code is:  vtiger CRM Open Source
-   * The Initial Developer of the Original Code is vtiger.
-   * Portions created by vtiger are Copyright (C) vtiger.
-   * All Rights Reserved.
+  ** ED150700
   *
  ********************************************************************************/
 -->*}
@@ -15,8 +10,65 @@
 	<iframe width="800" height="400" src="{$IFRAME_SRC}"></iframe>
 {else}
 <div>
+	<form class="address-check-editor">
+	{* bouton prenant le focus hors écran, pour une question esthétique *}
+	<button style="position: absolute; left: -9999px;"></button>
 	<table>
-		<tr>
+		<thead>
+			<tr>
+				<th/>
+				<th>Adresse actuelle</th>
+				<th>Nouvelle proposition</th>
+				<th>A appliquer</th>
+				<th/>
+			</tr>
+		</thead>
+		{foreach key=FIELD_NAME item=FIELD_INFO from=$COMPARAISON}
+		<tr data-field="{$FIELD_NAME}">
+		{if $FIELD_NAME eq '_status_'}
+			<td></td>
+			<td></td>
+			<td></td>
+			<td class="submit-cell">
+				{if $FIELD_INFO['status'] neq 'equal'}
+					<button class="btn btn-success" type="submit"><strong>Mettre à jour</strong></button>
+				{/if}
+			</td>
+		{else}
+			<td>
+				<h4>{vtranslate($FIELD_NAME)}</h4>
+			</td>
+			<td><label>
+				{if $FIELD_INFO['status'] eq 'equal'}
+				=
+				{else}
+				<input type="radio" name="source_{$FIELD_NAME}" value="original" title="Garder la valeur originale"/>
+				{/if}
+				<span class="address-value original-value">{htmlentities($FIELD_INFO['original'])}</span>
+			</label>
+			</td>
+			<td><label>
+				{if $FIELD_INFO['status'] eq 'equal'}
+				=
+				{else}
+				<input type="radio" name="source_{$FIELD_NAME}" value="new" checked="checked" title="Mettre à jour avec la nouvelle valeur"/>
+				{/if}
+				<span class="address-value new-value">{htmlentities($FIELD_INFO['new'])}</span>
+			</label>
+			</td>
+			<td>
+				<input class="address-result" name="{$MAPPING[$FIELD_NAME]}" value="{htmlentities($FIELD_INFO['new'])}"/>
+				
+			</td>
+		{/if}
+		</tr>
+		{/foreach}
+	</table>
+	</form>
+	{*
+	<br><br><br>
+	<table>
+		</tr>
 			<td style="border: 1px solid gray">
 				<table>
 				{foreach key=FIELD_NAME item=VALUE from=$ORIGINAL_ADDRESS}
@@ -40,7 +92,7 @@
 				</table>
 			</td>
 		</tr>
-	</table>
+	</table>*}
 </div>
 {/if}
 {/strip}

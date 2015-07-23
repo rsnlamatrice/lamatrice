@@ -32,8 +32,10 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 			$viewer->assign('IFRAME_SRC', $tmp_url);
 		}
 		else{
+			$viewer->assign('MAPPING', $result['original']['_mapping_']);
 			$viewer->assign('ORIGINAL_ADDRESS', $result['original']);
 			$viewer->assign('NEW_ADDRESS', $result['new']);
+			$viewer->assign('COMPARAISON', $result['comparaison']);
 		}
 		$viewer->view('AddressCheckAjax.tpl', $moduleName);
 	}
@@ -125,11 +127,12 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 				'html' => $html
 			);
 		}
-		
+		$comparaison = $this->compareAddresses($originalAddress, $items);
 		$result = array(
-						'original' => $originalAddress,
-						'new' => $items,
-						);
+					'original' => $originalAddress,
+					'new' => $items,
+					'comparaison' => $comparaison,
+					);
 		return $result;
 	}
 	
@@ -160,14 +163,17 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 			'action' => 'controler',
 			'langue' => 'FR',
 			'fldRefClient' => '',
-			'fldDestinataire' => $address['name'],
-			'fldRemise' => $address['street2'],
-			'fldComplement' => $address['street3'],
+			'fldDestinataire' => remove_accent($address['name']),
+			'fldRemise' => remove_accent($address['street2']),
+			'fldComplement' => remove_accent($address['street3']),
 			'deptVoie' => '',
-			'fldVoie' => $address['street'],
-			'fldServicePostal' => $address['pobox'],
-			'fldLocalite' =>  trim($address['zip'] . ' ' .  $address['city']),
+			'fldVoie' => remove_accent($address['street']),
+			'fldServicePostal' => preg_replace('/^(BP)(\d+)/', '$1 $2', remove_accent($address['pobox'])),
+			'fldLocalite' =>  trim($address['zip'] . ' ' .  remove_accent($address['city'])),
 		);
+	}
+	private function escapeAddress($string){
+		return str_replace(array(), array(), $string);
 	}
 	
 	private function getAddressFromRequest(Vtiger_Request $request) {
@@ -191,7 +197,8 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 		foreach($request->getAll() as $key=>$value)
 			if(strpos($key, 'address_' . $namesRoot) === 0
 			&& strpos($key, 'npai') === false
-			&& strpos($key, 'format') === false){
+			&& strpos($key, 'format') === false
+			&& strpos($key, 'country') === false){
 				$srcFieldName = substr($key, strlen('address_'));
 				$fieldName = substr($key, strlen('address_'.$namesRoot));
 				if($fieldName == 'zipcode' || $fieldName == 'code')
@@ -200,18 +207,22 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 				$address[$fieldName] = $value;
 			}
 		
-		$address['name'] = trim((isset($address['firstname']) ? $address['firstname'] : '')
-								. ' '
-								. (isset($address['lastname']) ? $address['lastname'] : ''));
+		$address['name'] = trim(
+						  (isset($address['firstname']) ? $address['firstname'] : '')
+						. ' '
+						. (isset($address['lastname']) ? $address['lastname'] : ''));
 		if(!$address['name'])
 			unset($address['name']);
 		
-		$address['mapping'] = $mapping;
+		$address['_mapping_'] = $mapping;
 		//var_dump('$address : ', $address);
 		return $address;
 	}
 	
-	private function getCookie($cache = true){
+	/**
+	 * &param $cache = keep cookie value in $_SESSION. DOES NOT WORK, must be false
+	 */
+	private function getCookie($cache = false){
 		if($cache && isset($_SESSION['mascadia-jsessionid']))
 			return $_SESSION['mascadia-jsessionid'];
 		
@@ -221,7 +232,7 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 		$cookie = preg_replace('/^[\s\S]+Set-Cookie:([^;]+;)[\s\S]+$/', '$1', $data);
 		if(!$cookie) return;
 		$cookie = preg_replace('/^[\s\S]+JSESSIONID=([^;]+);$/', '$1', $cookie);
-		var_dump('cookie : ', $cookie);
+		//var_dump('cookie : ', $cookie);
 		$_SESSION['mascadia-jsessionid'] = $cookie;
 		return $cookie;
 	}
@@ -229,5 +240,117 @@ class Vtiger_AddressCheckAjax_View extends Vtiger_BasicAjax_View {
 	private function clearCookie(){
 		if(isset($_SESSION['mascadia-jsessionid']))
 			unset($_SESSION['mascadia-jsessionid']);
+	}
+	
+	public function compareAddresses($originalAddress, $newAddress){
+		$allFieldNames = array('name', 'street2', 'street3', 'street', 'pobox', 'zip', 'city');
+		$fields = array(); //array_combine($allFieldNames, explode(';', str_repeat(';', count($allFieldNames) - 1)));
+		$nItem = 0;
+		
+		$countOriginalItems = count($originalAddress) - 1; //-1 car '_mapping_'
+		$countNewItems = count($newAddress) + ($originalAddress['zip'] || $originalAddress['city'] ? 1 : 0); //combine zip et city
+		//var_dump($countOriginalItems, $countNewItems, $originalAddress, $newAddress);
+		$fieldName = 'name';
+		if($originalAddress[$fieldName])
+			$fields[$fieldName] = array(
+									'original' => $originalAddress[$fieldName],
+									'new' => $newAddress[$nItem++],
+							);
+			
+		$fieldName = 'street2';
+		if($originalAddress[$fieldName])
+			$fields[$fieldName] = array(
+									'original' => $originalAddress[$fieldName],
+									'new' => $newAddress[$nItem++],
+							);
+		elseif($countOriginalItems < $countNewItems){
+			//Un élément de plus
+			//Eventuellement, street3 découpé en 2, donc à décaler vers le haut
+			$countOriginalItems++;
+			$fields[$fieldName] = array(
+					'original' => '',
+					'new' => $newAddress[$nItem++],
+			);
+		}
+		$fieldName = 'street3';
+		if($originalAddress[$fieldName])
+			$fields[$fieldName] = array(
+									'original' => $originalAddress[$fieldName],
+									'new' => $newAddress[$nItem++],
+							);
+		elseif($countOriginalItems < $countNewItems){
+			//Un élément de plus
+			//Eventuellement, street découpé en 2, donc à décaler vers le haut
+			$countOriginalItems++;
+			$fields[$fieldName] = array(
+					'original' => '',
+					'new' => $newAddress[$nItem++],
+			);
+		}
+		$fieldName = 'street';
+		if($originalAddress[$fieldName])
+			$fields[$fieldName] = array(
+									'original' => $originalAddress[$fieldName],
+									'new' => $newAddress[$nItem++],
+							);
+		elseif($countOriginalItems < $countNewItems){
+			//Un élément de plus
+			//Eventuellement, street3 découpé en 2
+			$countOriginalItems++;
+			$fields[$fieldName] = array(
+					'original' => '',
+					'new' => $newAddress[$nItem++],
+			);
+		}
+		$fieldName = 'pobox';
+		if($originalAddress[$fieldName])
+			$fields[$fieldName] = array(
+									'original' => $originalAddress[$fieldName],
+									'new' => $newAddress[$nItem++],
+							);
+		
+		if($originalAddress['zip'] || $originalAddress['city']){
+			$fieldName = 'zip';
+			if(preg_match('/^(\w+\-)?(\d+)\s+(.+)$/', $newAddress[$nItem])){
+				$newAddress[$nItem + 1] = preg_replace('/^(\w+\-)?(\d+)\s+(.+)$/', '$3', $newAddress[$nItem]); //city
+				$newAddress[$nItem] = preg_replace('/^(\w+\-)?([ABab\d]+)\s+(.+)$/', '$1$2', $newAddress[$nItem]); //zip
+			}
+			
+			$fields[$fieldName] = array(
+									'original' => $originalAddress[$fieldName],
+									'new' => $newAddress[$nItem++],
+							);
+			
+			$fieldName = 'city';
+			$fields[$fieldName] = array(
+									'original' => $originalAddress[$fieldName],
+									'new' => $newAddress[$nItem++],
+							);
+		}
+			
+		//var_dump($countOriginalItems, $countNewItems, $fields);
+		//									'status' => compareAddressFieldValues($fieldName, $originalAddress['name'],
+		$score = false;
+		foreach($fields as $fieldName => $field){
+			if($field === null)
+				continue;
+			$status = $this->compareAddressFieldValues($fieldName, $originalAddress, $field['new']);
+			$fields[$fieldName]['status'] = $status;
+			if($status === 'different')
+				$score = 'different';
+			elseif($status !== 'equal' && $score !== 'different')
+				$score = $status;
+		}
+		$fields['_status_'] = $score;
+		//var_dump($fields);
+		return $fields;
+	}
+	
+	public function compareAddressFieldValues($fieldName, $originalAddress, $newValue){
+		if($originalAddress[$fieldName] == $newValue)
+			return 'equal';
+		if(trim(strtoupper(remove_accent($originalAddress[$fieldName]))) == trim(strtoupper(remove_accent($newValue))))
+			return 'update';
+		return 'different';
 	}
 }
