@@ -447,7 +447,12 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	function checkContact($invoice) {
 		$contactData = $this->getContactValues($invoice['invoiceInformations']);
 		
+		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
+			return true;
+		
 		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		
+		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
 		if(!$id){
 			$this->preImportContact($contactData);

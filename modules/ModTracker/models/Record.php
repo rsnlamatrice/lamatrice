@@ -33,7 +33,6 @@ class ModTracker_Record_Model extends Vtiger_Record_Model {
 
 		$listQuery = "SELECT * FROM vtiger_modtracker_basic WHERE crmid = ? ".
 						" ORDER BY changedon DESC LIMIT $startIndex, $pageLimit";
-
 		$result = $db->pquery($listQuery, array($parentRecordId));
 		$rows = $db->num_rows($result);
 

@@ -1,5 +1,6 @@
 /*+***********************************************************************************
- * ED150625
+ * ED150625 : affichage de la liste des produits au survol du premier produit
+ * TODO : en conflit avec le popup de base quand on survole une référence quelconque
   *************************************************************************************/
 
 Vtiger_List_Js("Inventory_List_Js",{
@@ -42,7 +43,7 @@ Vtiger_List_Js("Inventory_List_Js",{
 				});
 			}
 		}
-
+		
 		function showTooltip(el, data, title) {
 			el.popover({
 				title: 'Facture ' + title, 

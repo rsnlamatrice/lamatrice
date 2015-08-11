@@ -147,7 +147,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 				}
 			}
 			$this->set('subject', $subject);
-			$recordModel->set('typedossier', 'Facture de dépôt-vente');
+			$this->set('typedossier', 'Facture de dépôt-vente');
 		}
 		
 		return $recordModel;

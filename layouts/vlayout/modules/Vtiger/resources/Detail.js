@@ -838,6 +838,32 @@ jQuery.Class("Vtiger_Detail_Js",{
 			);
 		});
 	},
+	
+	/** ED150811
+	 * Function to register hover Event for invoices, vendors documents and sales orders related list to show product list as tooltip
+	 * Permet l'initialisation de RelatedList.js.registerEventForProductListToolTip
+	 */
+	registerEventForRelatedInvoiceList : function(){
+		var thisInstance = this;
+		var detailContentsHolder = this.getContentHolder();
+		// ED141008
+		var relatedModuleName = this.getRelatedModuleName(detailContentsHolder);
+		switch (relatedModuleName ){
+		  case "SalesOrder":
+		  case "Invoice":
+		  case "PurchaseOrder":
+			
+			var selectedTabElement = this.getSelectedTab();
+			var relatedController = new Vtiger_RelatedList_Js(this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+			//TODO relatedController n'est pas initialisé comme d'autres objects, il manque les propriétés, en particulier relatedModulename et parentRecordId
+			if(!relatedController.relatedModulename)
+				Vtiger_RelatedList_Js.prototype.init.call(relatedController, this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+			
+			break;
+		  default:
+			break;
+		}
+	},
 
 	registerBlockAnimationEvent : function(){
 		var detailContentsHolder = this.getContentHolder();
@@ -1873,7 +1899,10 @@ jQuery.Class("Vtiger_Detail_Js",{
 						thisInstance.loadWidgets();
 						thisInstance.registerSummaryViewContainerEvents(detailContentsHolder);
 					}
-
+					//ED150811 : premier chargement d'une liste
+					else
+					    thisInstance.registerEventForRelatedInvoiceList();
+		
 					// Let listeners know about page state change.
 					app.notifyPostAjaxReady();
 				},
@@ -1935,6 +1964,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 			document.title = title;
 	},
 	
+	//Appelée au chargement de la page entière. On peut être sur n'importe quelle vue (onglet), ce qui fait que l'initialisation des événements de RelatedList doit être faite aussi ailleurs. 
 	registerEvents : function(){
 		var thisInstance = this;
 		//thisInstance.triggerDisplayTypeEvent();
@@ -1946,6 +1976,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 		this.registerEmailFieldClickEvent();
 		this.registerEventForRelatedList();
 		this.registerEventForRelatedListPagination();
+		this.registerEventForRelatedInvoiceList();//ED150811
 		this.registerEventForDeletingRelatedRecord();
 		this.registerEventForAddingRelatedRecord();
 		this.registerEventForEmailsRelatedRecord();

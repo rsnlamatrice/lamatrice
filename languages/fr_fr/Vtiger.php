@@ -886,6 +886,10 @@ $jsLanguageStrings = array(
 	'JS_NO_RESULTS_FOUND' => 'Aucun resultat trouvé',
 	
 	'JS_RESET_FILTERS' => 'Effacer les filtres',
-	'JS_REFRESH' => 'Actualiser', 
-	'SINGLE_Vendors' => 'Fournisseur',
+	'JS_REFRESH' => 'Actualiser',
+        
+	'SINGLE_Vendors'                => 'Fournisseur',
+	'SINGLE_Invoice'                => 'Facture', 
+	'SINGLE_SalesOrder'             => 'Dépôt-vente',
+	'SINGLE_PurchaseOrder'          => 'Document Fournisseur',
 );

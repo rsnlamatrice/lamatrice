@@ -27,12 +27,16 @@ class SCINSourceEDF extends SCINSources {
 		return $this->scinInstallation->get(self::getPageCodeField());
 	}
 
-	//Retourne un tableau d'instance d'installations concernées
-	protected static function getInstances() {
+	/**
+	 * Retourne un tableau d'instance d'installations concernées
+	 * @param $installationUniqueId (optionel) : identifiant de la seule installation traitée
+	 */
+	protected static function getInstances($installationUniqueId = false) {
 		$scinInstallations = self::getInstallations(self::getPageCodeField());
 		$records = array();
 		foreach($scinInstallations as $id => $record){
-			if($record->get(self::getPageCodeField()))
+			if((!$installationUniqueId || $installationUniqueId == $id)
+			&& $record->get(self::getPageCodeField()))
 				$records[$id] = new self($record);
 		}
 		return $records;

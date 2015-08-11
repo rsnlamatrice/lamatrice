@@ -559,6 +559,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @return the id of the contact | null if the contact is not found.
 	 */
 	function getContactId($firstname, $lastname, $email) {
+		
+		if($this->checkPreImportInCache('Contacts', $firstname, $lastname, $email))
+			return $this->checkPreImportInCache('Contacts', $firstname, $lastname, $email);
+		
 		$query = "SELECT crmid
 			FROM vtiger_contactdetails
                         JOIN vtiger_crmentity
@@ -590,10 +594,56 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 						    , strtolower($email)));
 
 		if($db->num_rows($result)){
-			return $db->query_result($result, 0, 0);
+			$id = $db->query_result($result, 0, 0);
+			
+			$this->setPreImportInCache($id, 'Contacts', $firstname, $lastname, $email);
+		
+			return $id;
 		}
 
 		return null;
+	}
+	
+	
+
+	/**
+	 * Gestion du cache
+	 * Teste si les paramètres de la fonction ont déjà fait l'objet d'une recherche
+	 * @param $moduleName : module de la recherche
+	 * @param suivants : autant de paramètres qu'on veut. On construit un identifiant unique à partir de l'ensemble des valeurs
+	 */
+	var $preImportChecker_cache = array();
+	
+	/**
+	 * Teste si les paramètres de la fonction ont déjà fait l'objet d'une recherche
+	 * @param $moduleName : module de la recherche
+	 * @param suivants : autant de paramètres qu'on veut. On construit un identifiant unique à partir de l'ensemble des valeurs
+	 */
+	public function checkPreImportInCache($moduleName, $arg1, $arg2 = false){
+		$parameters = func_get_args();
+		$cacheKey = implode( '|#|', $parameters);
+		//var_dump('checkPreImportInCache', $cacheKey);
+		if(array_key_exists( $cacheKey, $this->preImportChecker_cache)){
+			return $this->preImportChecker_cache[$cacheKey];
+		}
+		return false;		
+	}
+	
+	/**
+	 * Complète le cache
+	 * @param $value : valeur à stocker
+	 * @param $moduleName : module de la recherche
+	 * @param suivants : autant de paramètres qu'on veut. On construit un identifiant unique à partir de l'ensemble des valeurs
+	 */
+	public function setPreImportInCache($value, $moduleName, $arg1, $arg2 = false){
+		$parameters = func_get_args();
+		$value = array_shift( $parameters);
+		$cacheKey = implode( '|#|', $parameters);
+		//var_dump('setPreImportInCache', $cacheKey);
+		if(!$value)
+			$value = true;
+		$this->preImportChecker_cache[$cacheKey] = $value;
+		return false;		
 	}
 }
 

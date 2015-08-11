@@ -113,7 +113,7 @@
         &nbsp;
     </div>
 </div>
-<div class="relatedContents contents-bottomscroll">
+<div class="relatedContents contents-bottomscroll" data-related-module="{$RELATED_MODULE->getName()}">
     <div class="bottomscroll-div">
 	{assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
         <table class="table table-bordered listViewEntriesTable">

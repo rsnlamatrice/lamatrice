@@ -1,7 +1,9 @@
 <?php
 
-
-//TODO : end the implementation of this import!
+/*
+ * Importation des donateurs Web depuis le fichier provenant du site en ligne.
+ * Permet de créer les contacts et de référencer les références de transactions.
+ */
 class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSources_ImportFromFile_View {
 
 	private $coupon = null;
@@ -334,15 +336,20 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 
 		return null;
 	}
-
+	
 	/**
 	 * Method that pre-import a contact if he does not exist in database.
 	 * @param $rsndonateursweb : the invoice data.
 	 */
 	function checkContact($rsndonateursweb) {
 		$contactData = $this->getContactValues($rsndonateursweb['donInformations']);
-		//TODO : cache
+		
+		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
+			return true;
+		
 		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		
+		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
 		if(!$id){
 			$this->preImportContact($contactData);

@@ -1,7 +1,9 @@
 <?php
 
 
-//TODO : end the implementation of this import!
+/* Phase de migration
+ * Importation des donateurs Web depuis le fichier provenant de 4D
+ */
 class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources_ImportRSNDonateursWebFromSite_View {
         
 	/**

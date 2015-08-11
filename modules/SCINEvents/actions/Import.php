@@ -35,19 +35,25 @@ class SCINEvents_Import_Action extends Vtiger_Action_Controller {
 	
 	public function process (Vtiger_Request $request){
 		if($request->get('mode'))
-			return $this->invokeExposedMethod($request->get('mode'));
+			return $this->invokeExposedMethod($request->get('mode'), $request);
 		return true;
 	}
 	
-	// ?module=SCINEvents&action=Import&mode=runScheduledImport
-	public function runScheduledImport() {
+	/**
+	 * @test : url : ?module=SCINEvents&action=Import&mode=runScheduledImport&installationId=0
+	 * @param Vtiger_Request $request (optional)
+	 */
+	public function runScheduledImport($request = false) {
 		global $current_user, $log;
 		$log->debug('IN runScheduledImport');
 		/*$current_user = new Users();
 		$current_user->id = ADMIN_USERID;
 		$current_user->retrieve_entity_info(ADMIN_USERID, 'Users');*/
 		
-		$scheduledImports = SCINSources::getSources();
+		if($request)
+			$installationUniqueId = $request->get('installationId');
+		
+		$scheduledImports = SCINSources::getSources($installationUniqueId);
 		
 		$log->debug('$scheduledImports = ' . print_r($scheduledImports, true));
 		
@@ -64,21 +70,27 @@ class SCINEvents_Import_Action extends Vtiger_Action_Controller {
 	}
 }
 
+// Sources d'import. Voir classes héritières.
 class SCINSources {
 
 	var $lastSCINEvent;
 
+	// abstract
 	public function __construct($scinInstallation) {
 		$this->scinInstallation = $scinInstallation;
 	}
 
-	//Retourne un tableau des sources x installations
-	public static function getSources() {
+	/**
+	 * Retourne un tableau des sources x installations
+	 * @param $installationUniqueId (optionel) : identifiant de la seule installation traitée
+	 */
+	public static function getSources($installationUniqueId = false) {
 		$sources = array();
-		$sources = array_merge($sources, SCINSourceEDF::getInstances());
+		$sources = array_merge($sources, SCINSourceEDF::getInstances($installationUniqueId));
+		//$sources = array_merge($sources, SCINSourceAREVA::getInstances($installationUniqueId));
+		//$sources = array_merge($sources, SCINSourceASN::getInstances($installationUniqueId));
 		return $sources;
 	}
-	
 	
 	//Retourne un tableau d'instance d'installations concernées
 	protected function getInstallations($pageCodeField = FALSE) {
@@ -157,7 +169,8 @@ class SCINSources {
 				)
 			)
 		); 
-		//$data = @file_get_contents ($url, 0, $ctx);
+		/*$data = @file_get_contents ($url, 0, $ctx);
+		echo '<pre>' . htmlentities($data) . '</pre>';*/
 		//$data = @file_get_contents ('c:\\temp\\edf.txt');
 		//$data = file_get_html('c:\\temp\\edf.txt');
 		$data = file_get_html($url);

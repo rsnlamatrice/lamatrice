@@ -29,6 +29,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		return this.parentRecordId;
 	},
 	
+	//ED150811 : cette fonction n'est pas appelée lors du premier chargement de liste
 	loadRelatedList : function(params){
 		var aDeferred = jQuery.Deferred();
 		var thisInstance = this;
@@ -58,6 +59,9 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 				aDeferred.resolve(responseData);
 				jQuery('input[name="currentPageNum"]', thisInstance.relatedContentContainer).val(completeParams.page);
 				thisInstance.updateRelatedCounter(); //ED150619
+				//ED150811
+				thisInstance.registerEventForProductListToolTip();
+				
 				// Let listeners know about page state change.
 				app.notifyPostAjaxReady();
 			},
@@ -740,7 +744,94 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		});
 		return urlParams;
 	},
-	/* end of ED header filters */
+	/* ED150000 : end of header filters */
+	
+	
+	/** ED150625 : affichage de la liste des produits de factures ou dépot-vente au survol 
+	 * Function to trigger tooltip feature.
+	 * copié depuis List.js
+	 */
+	registerEventForProductListToolTip : function() {
+		var thisInstance = this;
+		
+		var lastPopovers = [];
+
+		// Fetching reference fields often is not a good idea on a given page.
+		// The caching is done based on the URL so we can reuse.
+		var CACHE_ENABLED = true; // TODO - add cache timeout support.
+
+		function prepareAndShowTooltipView(e) {
+			hideAllTooltipViews();
+
+			var el = jQuery(e.target);
+			var url = document.location.href;
+			
+			var $tr = el.parents('tr:first')
+			,   recordId = $tr.data('id')
+			,   title = $tr.text().substring(0, 255);
+			
+			// Rewrite URL to retrieve Tooltip view.
+			url = url.replace('view=', 'xview=') + '&view=TooltipAjax';
+			url = url.replace('mode=', 'xmode=') + '&mode=ProductList';
+			url = url.replace('module=', 'xmodule=') + '&module=' + 'Invoice'/*thisInstance.relatedModulename*/;
+			url = url.replace('record=', 'xrecord=') + '&record=' + recordId;
+
+			var cachedView = CACHE_ENABLED ? jQuery('[data-url-cached="'+url+'"]') : null;
+			if (cachedView && cachedView.length) {
+				showTooltip(el, cachedView.html(), title);
+			} else {
+				AppConnector.request(url).then(function(data){
+					cachedView = jQuery('<div>').css({display:'none'}).attr('data-url-cached', url);
+					cachedView.html(data);
+					jQuery('body').append(cachedView);
+					showTooltip(el, data, title);
+				});
+			}
+		}
+		
+		function showTooltip(el, data, title) {
+			el.popover({
+				title: app.vtranslate('SINGLE_' + thisInstance.relatedModulename) + ' ' + title, 
+				trigger: 'manual',
+				content: data,
+				animation: false,
+				template: '<div class="popover popover-tooltip"><div class="arrow"></div><div class="popover-inner"><button name="vtTooltipClose" class="close" style="color:white;opacity:1;font-weight:lighter;position:relative;top:3px;right:3px;">x</button><h3 class="popover-title"></h3><div class="popover-content"><div></div></div></div></div>'
+			});
+			lastPopovers.push(el.popover('show'));
+			registerToolTipDestroy();
+		}
+
+		function hideAllTooltipViews() {
+			// Hide all previous popover
+			var lastPopover = lastPopovers.pop();
+			while (lastPopover) {
+				lastPopover.popover('hide');
+				lastPopover = lastPopovers.pop();
+			}
+		}
+
+		var invoiceRow = jQuery('tr.listViewEntries[data-id]');
+		invoiceRow.each(function(index, el){
+			jQuery(el).hoverIntent({
+				interval: 150,
+				sensitivity: 7,
+				timeout: 10,
+				over: prepareAndShowTooltipView,
+				out: hideAllTooltipViews
+			})
+				//remove reference original tooltip
+				.find('a[data-field-type]')
+					.removeAttr('data-field-type')
+			;
+		});
+
+		function registerToolTipDestroy() {
+			jQuery('button[name="vtTooltipClose"]').on('click', function(e){
+				var lastPopover = lastPopovers.pop();
+				lastPopover.popover('hide');
+			});
+		}
+	},
 	
 	init : function(parentId, parentModule, selectedRelatedTabElement, relatedModuleName){
 		this.selectedRelatedTabElement = selectedRelatedTabElement,
@@ -752,6 +843,8 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		this.relatedContentContainer = jQuery('div.contents',this.detailViewContainer);
 		//ED150704
 		this.registerEventForHeaderFilterChange();
+		//ED150811
+		this.registerEventForProductListToolTip();
 		
 		Vtiger_Helper_Js.showHorizontalTopScrollBar();
 	}

@@ -19,14 +19,16 @@
 						<li>
 							<div>
 								<span><strong>{$RECENT_ACTIVITY->getModifiedBy()->getName()}</strong> {vtranslate('LBL_CREATED', $MODULE_NAME)}</span>
-								<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($RECENT_ACTIVITY->getParent()->get('createdtime'))}">{Vtiger_Util_Helper::formatDateDiffInStrings($RECENT_ACTIVITY->getParent()->get('createdtime'))}</small></p></span>
+								<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($RECENT_ACTIVITY->getParent()->get('createdtime'))}">
+								{Vtiger_Util_Helper::formatDateDiffInStrings($RECENT_ACTIVITY->getParent()->get('createdtime'))}</small></p></span>
 							</div>
 						</li>
 					{else if $RECENT_ACTIVITY->isUpdate()}
 						<li>
 							<div>
 								<span><strong>{$RECENT_ACTIVITY->getModifiedBy()->getDisplayName()}</strong> {vtranslate('LBL_UPDATED', $MODULE_NAME)}</span>
-								<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($RECENT_ACTIVITY->getActivityTime())}">{Vtiger_Util_Helper::formatDateDiffInStrings($RECENT_ACTIVITY->getActivityTime())}</small></p></span>
+								<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($RECENT_ACTIVITY->getActivityTime())}">
+								{Vtiger_Util_Helper::formatDateDiffInStrings($RECENT_ACTIVITY->getActivityTime())}</small></p></span>
 							</div>
 
 							{foreach item=FIELDMODEL from=$RECENT_ACTIVITY->getFieldInstances()}
@@ -53,7 +55,10 @@
 									<span>{vtranslate($RELATED_RECORD->getModuleName(), $RELATED_RECORD->getModuleName())} {vtranslate('LBL_ADDED', $MODULE_NAME)}
 										<strong>{$RELATED_RECORD->getName()}</strong></span>
 									<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($RELATED_RECORD->get('createdtime'))}">
-										{Vtiger_Util_Helper::formatDateDiffInStrings($RELATED_RECORD->get('createdtime'))}</small></p></span>
+										{Vtiger_Util_Helper::formatDateDiffInStrings($URELATION->get('changedon'))}
+										{* ED150811 date de la relation plutôt que la date de création de l'enregistrement lié
+										Vtiger_Util_Helper::formatDateDiffInStrings($RELATED_RECORD->get('createdtime'))*}
+									</small></p></span>
 								{else}
 									<span>{vtranslate($URELATION->get('targetmodule'), $URELATION->get('targetmodule'))} {vtranslate('LBL_DELETED', $MODULE_NAME)} <strong></strong></span>
 									<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($URELATION->get('changedon'))}">
@@ -69,7 +74,10 @@
 								{if $RELATED_RECORD}
 									<span>{vtranslate($RELATED_RECORD->getModuleName(), $RELATED_RECORD->getModuleName())} {vtranslate('LBL_DELETED', $MODULE_NAME)} <strong>{$RELATED_RECORD->getName()}</strong></span>
 									<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($RELATED_RECORD->get('modifiedtime'))}">
-										{Vtiger_Util_Helper::formatDateDiffInStrings($RELATED_RECORD->get('modifiedtime'))}</small></p></span>
+										{Vtiger_Util_Helper::formatDateDiffInStrings($URELATION->get('changedon'))}
+										{* ED150811 date de la relation plutôt que la date de modification de l'enregistrement lié
+										Vtiger_Util_Helper::formatDateDiffInStrings($RELATED_RECORD->get('modifiedtime'))*}
+									</small></p></span>
 								{else}
 									<span>{vtranslate($URELATION->get('targetmodule'), $URELATION->get('targetmodule'))} {vtranslate('LBL_DELETED', $MODULE_NAME)} <strong></strong></span>
 									<span class="pull-right"><p class="muted"><small title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($URELATION->get('changedon'))}">

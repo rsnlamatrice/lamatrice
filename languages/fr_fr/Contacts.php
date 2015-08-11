@@ -82,6 +82,12 @@ $languageStrings = array(
 	'LBL_ASSIGN_Documents_MULTI'  	=> 'Affecter des documents',
 	'LBL_UNASSIGN_Documents'        => 'Supprimer un document affecté',
 	'LBL_UNASSIGN_Documents_MULTI'  => 'Supprimer les affectations de documents',
+        
+        'USE ADDRESS2 FOR REVUE'        => 'Spécifiquement pour la Revue',
+        'USE ADDRESS2 FOR RECU FISCAL'  => 'Spécifiquement pour le Reçu fiscal',
+        
+        'use_address2_for_revue'        => 'spécifiquement pour la Revue',
+        'use_address2_for_recu_fiscal'  => 'spécifiquement pour le Reçu fiscal',
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 

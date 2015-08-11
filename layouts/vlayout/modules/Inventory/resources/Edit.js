@@ -2268,39 +2268,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	},
 
-	/** ED150707
-	 * Copy from Detail.js
-	 */
-	registerBlockAnimationEvent : function(){
-		var detailContentsHolder = this.getForm();
-		detailContentsHolder.on('click','.blockToggle',function(e){
-			var currentTarget =  jQuery(e.currentTarget);
-			var blockId = currentTarget.data('id');
-			var closestBlock = currentTarget.closest('.blockContainer');
-			var bodyContents = closestBlock.find('tbody');
-			var data = currentTarget.data();
-			var module = app.getModuleName();
-			var hideHandler = function() {
-				bodyContents.hide('slow');
-				app.cacheSet(module+'.'+blockId, 0)
-			}
-			var showHandler = function() {
-				bodyContents.show();
-				app.cacheSet(module+'.'+blockId, 1)
-			}
-			var data = currentTarget.data();
-			if(data.mode == 'show'){
-				hideHandler();
-				currentTarget.hide();
-				closestBlock.find("[data-mode='hide']").show();
-			}else{
-				showHandler();
-				currentTarget.hide();
-				closestBlock.find("[data-mode='show']").show();
-			}
-		});
-
-	},
 	
 	/**
 	 * Function which will register all the events

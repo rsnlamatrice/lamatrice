@@ -173,10 +173,12 @@ class SalesOrder extends CRMEntity {
 	 * TODO sub products
 	 */
 	function refreshQtyInDemand($productIdsList){
-		global $adb;
+		global $adb, $log;
+		$log->debug("Entering refreshQtyInDemand(".print_r($productIdsList, true).") method ...");
 		$recordId = $this->id;
+		/* Mise à jour de vtiger_products.qtyindemand pour tous les produits en question, même sans salesorder liée (d'où le LEFT) */
 		$sql = "UPDATE vtiger_products
-			JOIN (
+			LEFT JOIN (
 				SELECT vtiger_inventoryproductrel.productid, SUM(vtiger_inventoryproductrel.quantity) AS quantity
 				FROM (
 					SELECT DISTINCT productid
@@ -195,18 +197,22 @@ class SalesOrder extends CRMEntity {
 				GROUP BY vtiger_inventoryproductrel.productid
 			) _calculation_
 			ON vtiger_products.productid = _calculation_.productid
-			SET vtiger_products.qtyindemand = quantity
+			SET vtiger_products.qtyindemand = IFNULL(quantity, 0)
+			WHERE vtiger_products.productid IN (" . generateQuestionMarks($productIdsList) . ")
 		";
 		$params = array($recordId);
 		$params = array_merge($params, $this->statusForQtyInDemand);
+		$params = array_merge($params, $productIdsList);
 		$params = array_merge($params, $productIdsList);
 		$result = $adb->pquery($sql, $params);
 		if(!$result){
 			$adb->echoError('Erreur de mise à jour des quantités demandées');
 			echo "<pre>$sql</pre>";
 			var_dump($params);
+			$log->debug("Exiting refreshQtyInDemand method : Erreur de mise à jour des quantités demandées");
 			die();
 		}
+		$log->debug("Exiting refreshQtyInDemand method ...");
 	}
 	
 	/** Function to get activities associated with the Sales Order

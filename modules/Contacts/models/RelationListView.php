@@ -138,6 +138,10 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$this->set('orderby', 'invoicedate');
 				$this->set('sortorder', 'DESC');
 				break;
+			 case "SalesOrder":
+				$this->set('orderby', 'createdtime');
+				$this->set('sortorder', 'DESC');
+				break;
 			 case "Campaigns":
 			 case "Contacts":
 			 case "Documents":
@@ -166,6 +170,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			switch($relatedModuleName){
 			  case "Invoice":
 			  case "RSNAboRevues":
+			 case "SalesOrder":
 				return $relatedRecordModelsList;
 			
 			  case "Critere4D":
@@ -230,7 +235,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				break;
 			
 			  default:
-				die(__FILE__ . ' getEntries : ' . $relatedModuleName . ' inconnu');
+				die(__FILE__ . ' getEntries : module ' . $relatedModuleName . ' non traité');
+				//break;
 			}
 			if($query){
 				array_push($relatedRecordIdsList, $contactId);

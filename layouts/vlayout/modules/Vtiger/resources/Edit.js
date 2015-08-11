@@ -489,6 +489,51 @@ jQuery.Class("Vtiger_Edit_Js",{
 				.change();
 		});
 	},
+	
+	/** ED150707
+	 * Copy from Detail.js
+	 */
+	registerBlockAnimationEvent : function(){
+		var detailContentsHolder = this.getForm();
+		detailContentsHolder.on('click','.blockToggle',function(e){
+			var currentTarget =  jQuery(e.currentTarget);
+			var blockId = currentTarget.data('id');
+			var closestBlock = currentTarget.closest('.blockContainer');
+			var bodyContents = closestBlock.find('tbody');
+			var data = currentTarget.data();
+			var module = app.getModuleName();
+			var hideHandler = function() {
+				bodyContents.hide('slow');
+				app.cacheSet(module+'.'+blockId, 0)
+			}
+			var showHandler = function() {
+				bodyContents.show();
+				app.cacheSet(module+'.'+blockId, 1)
+			}
+			var data = currentTarget.data();
+			if(data.mode == 'show'){
+				hideHandler();
+				currentTarget.hide();
+				closestBlock.find("[data-mode='hide']").show();
+			}else{
+				showHandler();
+				currentTarget.hide();
+				closestBlock.find("[data-mode='show']").show();
+			}
+		});
+
+		//cases à cocher dans la barre de titre du bloc et qui le déploiement du bloc si actif
+		//utilisé pour ContactEditView
+		detailContentsHolder.on('click','.blockToggler > :input[type="checkbox"]',function(e){
+			if (!e.currentTarget.checked) 
+				return;
+			var currentTarget =  jQuery(e.currentTarget);
+			var block = currentTarget.parents('.blockHeader:first');
+			var blockToggle = block.find("[data-mode='hide']:visible");
+			blockToggle.click();
+		});
+
+	},
 
 	/**
 	 * Function which will register basic events which will be used in quick create as well
