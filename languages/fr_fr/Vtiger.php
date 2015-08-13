@@ -767,7 +767,9 @@ $languageStrings = array(
 	'zip'                 => 'Code postal'         , 
 	'country'              => 'Pays'             , 
 	'pobox'               => 'Boîte postale'            , 
-	'state'                => 'Département'               , 
+	'state'                => 'Département'               ,
+        
+	'LBL_PRINT_RELATIONS'                => 'Imprimer', 
 	
 );
 $jsLanguageStrings = array(
@@ -892,4 +894,6 @@ $jsLanguageStrings = array(
 	'SINGLE_Invoice'                => 'Facture', 
 	'SINGLE_SalesOrder'             => 'Dépôt-vente',
 	'SINGLE_PurchaseOrder'          => 'Document Fournisseur',
+        
+        'JS_HELP'                       => 'Aide',
 );

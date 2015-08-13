@@ -168,7 +168,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
 			switch (relatedModuleName ){
 			case "Critere4D":
-		    case "Documents":
+			case "Documents":
 			case "Contacts":
 				var relatedController = new Contacts_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			      break;

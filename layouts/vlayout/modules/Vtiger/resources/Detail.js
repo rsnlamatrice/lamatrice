@@ -326,6 +326,10 @@ jQuery.Class("Vtiger_Detail_Js",{
 				jQuery('.commentcontent').autosize();
 				thisInstance.getForm().validationEngine();
 				jQuery('.pageNumbers',detailContentsHolder).tooltip();
+				
+				//ED150811
+				thisInstance.registerEventForRelatedInvoiceList();
+				
 				aDeferred.resolve(responseData);
 			},
 			function(){
@@ -941,6 +945,30 @@ jQuery.Class("Vtiger_Detail_Js",{
 
 			var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			relatedController.addRelatedRecord(element);
+		});
+	},
+
+	/** ED150811
+	 * Function to register event for printing related list for module
+	 */
+	registerEventForPrintingRelatedList : function(){
+		var thisInstance = this;
+		var detailContentsHolder = this.getContentHolder();
+		detailContentsHolder.on('click','[name="printButton"]',function(e){
+			var element = jQuery(e.currentTarget);
+			var selectedTabElement = thisInstance.getSelectedTab();
+			var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
+			if (widgetHolder.length === 0) 
+			    widgetHolder = false;
+			var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
+			var quickCreateNode = jQuery('#quickCreateModules').find('[data-name="'+ relatedModuleName +'"]');
+			if(quickCreateNode.length <= 0) {
+			    window.location.href = element.data('url');
+			    return;
+			}
+
+			var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+			relatedController.printRelatedList(element);
 		});
 	},
 
@@ -1979,6 +2007,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 		this.registerEventForRelatedInvoiceList();//ED150811
 		this.registerEventForDeletingRelatedRecord();
 		this.registerEventForAddingRelatedRecord();
+		this.registerEventForPrintingRelatedList();
 		this.registerEventForEmailsRelatedRecord();
 		this.registerEventForAddingEmailFromRelatedList();
 		this.registerPostTagCloudWidgetLoad();

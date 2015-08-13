@@ -93,10 +93,17 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 	 */
 	function getQuery() {
 		$listQuery = parent::getQuery();
-		if(strpos($listQuery, 'vtiger_inventoryproductrel') !== FALSE){
+		if(stripos($listQuery, 'JOIN vtiger_inventoryproductrel') !== FALSE){
+			//TODO Fait ramer les requêtes
+			//$table = 'SELECT * FROM vtiger_inventoryproductrel WHERE (vtiger_inventoryproductrel.sequence_no IS NULL OR vtiger_inventoryproductrel.sequence_no = 1)';
+			//$listQuery = preg_replace('/(RIGHT|FULL|INNER|(?<!LEFT))\sJOIN vtiger_inventoryproductrel/i', ' LEFT JOIN ('.$table.') vtiger_inventoryproductrel ', $listQuery);
+			//Jointure externe
 			$listQuery = preg_replace('/(RIGHT|FULL|INNER|(?<!LEFT))\sJOIN vtiger_inventoryproductrel/i', ' LEFT JOIN vtiger_inventoryproductrel ', $listQuery);
-			$listQuery = str_replace(' WHERE ', ' WHERE (vtiger_inventoryproductrel.sequence_no IS NULL OR vtiger_inventoryproductrel.sequence_no = 1) AND ', $listQuery);
+			//Limitation à la seule 1ère ligne de chaque facture
+			$listQuery .= ' AND (vtiger_inventoryproductrel.sequence_no IS NULL OR vtiger_inventoryproductrel.sequence_no = 1)';
 		}
+		//var_dump($listQuery);
+		//print_r("<pre>$listQuery</pre>");
 		// add currency_id if total is queried
 		if(strpos($listQuery, 'vtiger_invoice.total') !== FALSE
 		&& strpos($listQuery, 'vtiger_invoice.currency_id') === FALSE){

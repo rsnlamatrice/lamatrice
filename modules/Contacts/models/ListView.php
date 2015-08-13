@@ -116,6 +116,40 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		return $massActionLinks;
 	}
 
+
+	/*
+	 * Function to give advance links of a module
+	 *	@RETURN array of advanced links
+	 */
+	public function getAdvancedLinks(){
+		$advancedLinks = parent::getAdvancedLinks();
+		
+		//ED150813 Saisie des NPAI et affectation de critères
+		$moduleModel = $this->getModule();
+		$createPermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'EditView');
+		if($createPermission) {
+			//NPAI et critères
+			$advancedLink = array(
+				'linktype' => 'LISTVIEW',
+				'linklabel' => '---',
+				'linkurl' => '',
+				'linkicon' => ''
+			);
+			$advancedLinks[] = $advancedLink;
+		
+			$advancedLink = array(
+				'linktype' => 'LISTVIEW',
+				'linklabel' => 'NPAI et critères',
+				'linkurl' => $moduleModel->getInputNPAICriteresUrl(),
+				'linkicon' => ''
+			);
+			$advancedLinks[] = $advancedLink;
+		
+		}
+
+		return $advancedLinks;
+	}
+
 	/**
 	 * Function to get the list of listview links for the module
 	 * @param <Array> $linkParams

@@ -116,9 +116,10 @@ jQuery.Class("Vtiger_List_Js",{
 				for (var id in data) {
 					ids.push(id);
 				}
-				if (ids && ids.length > 0)
+				if (ids && ids.length > 0){
 					massActionUrl += '&related_ids=' + ids.join(',');
 					Vtiger_List_Js.triggerMassAction(massActionUrl, Vtiger_List_Js.postAssignCritere4DEdit);
+				}
 			});
 		} else {
 			listInstance.noRecordSelectedAlert();
@@ -2171,6 +2172,13 @@ jQuery.Class("Vtiger_List_Js",{
 						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
 						.click(function(){
 							$(this).parents('th:first').nextAll('th').find(':input:visible').val('');
+							return false;
+						})
+					)
+					.append($('<a href class="icon-question-sign" title="'+app.vtranslate('JS_HELP')+'"></a>')
+						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
+						.click(function(){
+							Vtiger_Helper_Js.showFAQRecord('FAQ4'); //TODO transposer le code faq_no dans un ficher de config js
 							return false;
 						})
 					)

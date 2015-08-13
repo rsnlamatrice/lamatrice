@@ -261,6 +261,15 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	}
 
 	/**
+	 * ED150811
+	 * Function to get the PrintRelationView Component Name
+	 * @return string
+	 */
+	public function getPrintRelationViewName(){
+		return 'PrintRelation';
+	}
+
+	/**
 	 * Function to get the DuplicateView Component Name
 	 * @return string
 	 */
@@ -332,6 +341,15 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 */
 	public function getDeleteRelationUrl() {
 		return 'index.php?module='.$this->get('name').'&view='.$this->getDeleteRelationViewName();
+	}
+
+	/**
+	 * Function to get the url for the Print Record Relation list view of the module
+	 * @return <String> - url
+	 * ED150811
+	 */
+	public function getPrintRelationUrl() {
+		return 'index.php?module='.$this->get('name').'&view='.$this->getPrintRelationViewName();
 	}
 
 	/**

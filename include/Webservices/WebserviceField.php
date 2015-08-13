@@ -325,7 +325,6 @@ class WebserviceField{
 				self::$fieldTypeMapping[$resultrow['uitype']] = $resultrow;
 			}
 		}
-		
 		if(isset(WebserviceField::$fieldTypeMapping[$this->getUIType()])){
 			if(WebserviceField::$fieldTypeMapping[$this->getUIType()] === false){
 				return null;

@@ -10,111 +10,28 @@
 ********************************************************************************/
 -->*}
 {strip}
-    <div class="relatedContainer">
-        <input type="hidden" name="currentPageNum" value="{$PAGING->getCurrentPage()}" />
-        <input type="hidden" name="relatedModuleName" class="relatedModuleName" value="{$RELATED_MODULE->get('name')}" />
-        <input type="hidden" value="{$ORDER_BY}" id="orderBy">
-        <input type="hidden" value="{$SORT_ORDER}" id="sortOrder">
-        <input type="hidden" value="{$RELATED_ENTIRES_COUNT}" id="noOfEntries">
-        <input type='hidden' value="{$PAGING->getPageLimit()}" id='pageLimit'>
-        <input type='hidden' value="{$TOTAL_ENTRIES}" id='totalCount'>
-        <div class="relatedHeader ">
-            <div class="btn-toolbar row-fluid">
-                <div class="span8">
 
-                    {foreach item=RELATED_LINK from=$RELATED_LIST_LINKS['LISTVIEWBASIC']}
-                        <div class="btn-group">
-                            {assign var=IS_SELECT_BUTTON value={$RELATED_LINK->get('_selectRelation')}}
-                            {assign var=IS_DELETE_BUTTON value={$RELATED_LINK->get('_deleteRelation')}}
-                            {assign var=IS_PRINT_BUTTON value={$RELATED_LINK->get('_printRelation')}}
-			    <button type="button" class="btn addButton
-                            {if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
-			    {if $IS_SELECT_BUTTON eq true} data-moduleName={$RELATED_LINK->get('_module')->get('name')} {/if}
-			    {if ($RELATED_LINK->isPageLoadLink())}
-				{if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
-				data-url="{$RELATED_LINK->getUrl()}"
-			    {/if}
-			    {if $IS_DELETE_BUTTON eq true} name="deleteButton"
-			    {elseif $IS_PRINT_BUTTON eq true} name="printButton"
-			    {elseif $IS_SELECT_BUTTON neq true} name="addButton"
-			    {/if}>
-			    {if $RELATED_LINK->get('linkicon')}
-				<i class="{$RELATED_LINK->get('linkicon')} icon-white"></i>
-			    {elseif $IS_DELETE_BUTTON eq true}
-				<i class="icon-minus icon-white"></i>
-			    {elseif $IS_SELECT_BUTTON eq false}
-				<i class="icon-plus icon-white"></i>
-			    {/if}
-			    &nbsp;<strong>{$RELATED_LINK->getLabel()}</strong></button>
-			</div>
-			{if $IS_SELECT_BUTTON neq true && $IS_DELETE_BUTTON neq true && $IS_PRINT_BUTTON neq true}
-			    {assign var=HAS_ADD_BUTTON value=true}
-			{/if}
-		    {/foreach}
-		    {* ORGINAL
-		    {foreach item=RELATED_LINK from=$RELATED_LIST_LINKS['LISTVIEWBASIC']}
-                        <div class="btn-group">
-                            {assign var=IS_SELECT_BUTTON value={$RELATED_LINK->get('_selectRelation')}}
-                            <button type="button" class="btn addButton
-                            {if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
-			    {if $IS_SELECT_BUTTON eq true} data-moduleName={$RELATED_LINK->get('_module')->get('name')} {/if}
-			    {if ($RELATED_LINK->isPageLoadLink())}
-				{if $RELATION_FIELD} data-name="{$RELATION_FIELD->getName()}" {/if}
-				data-url="{$RELATED_LINK->getUrl()}"
-			    {/if}
-			    {if $IS_SELECT_BUTTON neq true}name="addButton"{/if}>
-			    {if $IS_SELECT_BUTTON eq false}<i class="icon-plus icon-white"></i>{/if}
-			    &nbsp;<strong>{$RELATED_LINK->getLabel()}</strong></button>
-			</div>
-		    {/foreach}*}
-&nbsp;
-</div>
-<div class="span4">
-    <span class="row-fluid">
-        <span class="span7 pushDown">
-            <span class="pull-right pageNumbers alignTop" data-placement="bottom" data-original-title="" style="margin-top: -5px">
-            {*ED140907 if !empty($RELATED_RECORDS)} {$PAGING->getRecordStartRange()} {vtranslate('LBL_to', $RELATED_MODULE->get('name'))} {$PAGING->getRecordEndRange()}{/if*}
-	    {if !empty($RELATED_RECORDS)}
-		{assign var=START_RANGE value=$PAGING->getRecordStartRange()}
-		{if $START_RANGE gt 1}
-		    {$START_RANGE}&nbsp;{vtranslate('LBL_to', $RELATED_MODULE->get('name'))}&nbsp;
-		{/if}
-		{$PAGING->getRecordEndRange()}
-	    {/if}
-        </span>
-    </span>
-    <span class="span5 pull-right">
-        <span class="btn-group pull-right">
-            <button class="btn" id="relatedListPreviousPageButton" {if !$PAGING->isPrevPageExists()} disabled {/if} type="button"><span class="icon-chevron-left"></span></button>
-            <button class="btn dropdown-toggle" type="button" id="relatedListPageJump" data-toggle="dropdown" {if $PAGE_COUNT eq 1} disabled {/if}>
-                <i class="vtGlyph vticon-pageJump" title="{vtranslate('LBL_LISTVIEW_PAGE_JUMP',$moduleName)}"></i>
-            </button>
-            <ul class="listViewBasicAction dropdown-menu" id="relatedListPageJumpDropDown">
-                <li>
-                    <span class="row-fluid">
-                        <span class="span3"><span class="pull-right">{vtranslate('LBL_PAGE',$moduleName)}</span></span>
-                        <span class="span4">
-                            <input type="text" id="pageToJump" class="listViewPagingInput" value="{$PAGING->getCurrentPage()}"/>
-                        </span>
-                        <span class="span2 textAlignCenter">
-                            {vtranslate('LBL_OF',$moduleName)}
-                        </span>
-                        <span class="span2" id="totalPageCount">{$PAGE_COUNT}</span>
-                    </span>
-                </li>
-            </ul>
-            <button class="btn" id="relatedListNextPageButton" {if (!$PAGING->isNextPageExists()) or ($PAGE_COUNT eq 1)} disabled {/if} type="button"><span class="icon-chevron-right"></span></button>
-        </span>
-    </span>
-</span>
-</div>
-</div>
-</div>
-<div class="contents-topscroll">
-    <div class="topscroll-div">
-        &nbsp;
-    </div>
-</div>
+{include file="Header.tpl"|vtemplate_path:$MODULE}
+<title>Dépôt-vente de {$PARENT_RECORD->getName()} ({$PARENT_RECORD->get('contact_no')})</title>
+<style>
+    td[data-field-type="numeric"], td[data-field-type="currency"]{
+	text-align: right;
+    }
+    .ui-icon {
+	display: inline-block;
+    }
+</style>
+    <h1>Dépôt-vente de {$PARENT_RECORD->getName()} <small>({$PARENT_RECORD->get('contact_no')})</small></h1>
+    <button class="btn noprint"
+	style="position: absolute; right: 3em; top: 0.5em;
+	    background-color: #a26d1f;
+	    background-image: -moz-linear-gradient(center top , #a26d1f, #a26d1f);
+	    background-repeat: repeat-x;
+	    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	    color: #ffffff;
+	    text-shadow: none;"
+	onclick="window.history.back(); return false;">retour</button>
+    <div class="relatedContainer">
 <div class="relatedContents contents-bottomscroll" data-related-module="{$RELATED_MODULE->getName()}">
     <div class="bottomscroll-div">
 	{assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
@@ -182,12 +99,17 @@
 				    {assign var=PICKLIST_CLASS value=false}
 			    {/if}
 			    <label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
-			    {if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>
-			    {else}
-				&nbsp;{$PICKLIST_LABEL}
-			    {/if}</label>
+				{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
+				{$PICKLIST_LABEL}
+			    </label>
+			    
+			{*elseif ($RELATED_HEADERNAME eq '_details')}
+			    <table><tr><td>
+			    {str_replace("\t", '<td>', implode('<tr><td>', $RELATED_RECORD->get($RELATED_HEADERNAME)))}
+			    </table>*}
 			    
 			{else}{*ED140907*}
+
 			    {$RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME, false, $UNKNOWN_FIELD_RETURNS_VALUE)}
 			{/if}
 			{if $HEADER_FIELD@last}
@@ -216,4 +138,13 @@
     </div>
 </div>
 </div>
+
+<script>
+    $(document.body).ready(function(){
+	window.print();
+    });
+</script>
+
+
+</body></html>
 {/strip}
