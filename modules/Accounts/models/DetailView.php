@@ -127,7 +127,7 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 	 *
 	 * Ajout des blocks Widgets
 	 * La table _Links ne semble pas tre utilise pour initialiser le tableau
-	 * ncessite l'existence des fichiers Vtiger/%RelatedModule%SummaryWidgetContents.tpl (tout attach)
+	 * nécessite l'existence des fichiers Vtiger/%RelatedModule%SummaryWidgetContents.tpl (tout attach)
 	 */
 	public function getWidgets() {
 		

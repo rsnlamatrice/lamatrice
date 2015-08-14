@@ -972,6 +972,30 @@ jQuery.Class("Vtiger_Detail_Js",{
 		});
 	},
 
+	/** ED150811
+	 * Function to register event for importing related list for module
+	 */
+	registerEventForImportingRelatedList : function(){
+		var thisInstance = this;
+		var detailContentsHolder = this.getContentHolder();
+		detailContentsHolder.on('click','[name="importButton"]',function(e){
+			var element = jQuery(e.currentTarget);
+			var selectedTabElement = thisInstance.getSelectedTab();
+			var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
+			if (widgetHolder.length === 0) 
+			    widgetHolder = false;
+			var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
+			var quickCreateNode = jQuery('#quickCreateModules').find('[data-name="'+ relatedModuleName +'"]');
+			if(quickCreateNode.length <= 0) {
+			    window.location.href = element.data('url');
+			    return;
+			}
+
+			var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+			relatedController.importRelatedList(element);
+		});
+	},
+
 	/**
 	 * Function to register event for deleting related record for module
 	 * ED150124
@@ -2008,6 +2032,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 		this.registerEventForDeletingRelatedRecord();
 		this.registerEventForAddingRelatedRecord();
 		this.registerEventForPrintingRelatedList();
+		this.registerEventForImportingRelatedList();
 		this.registerEventForEmailsRelatedRecord();
 		this.registerEventForAddingEmailFromRelatedList();
 		this.registerPostTagCloudWidgetLoad();

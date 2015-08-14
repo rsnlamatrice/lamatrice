@@ -123,6 +123,26 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		return $printViewUrl;
 	}
 
+	/* ED150814 */
+	public function getImportRelationUrl(){
+		$relationModel = $this->getRelationModel();
+		$relatedModule = $relationModel->getRelationModuleModel();
+		$parentRecordModule = $this->getParentRecordModel();
+		$parentModule = $parentRecordModule->getModule();
+
+		$importViewUrl = $parentModule->getImportRelationUrl().
+							'&relatedModule='.$relatedModule->get('name').
+							'&record='.$parentRecordModule->getId().
+							'&relationOperation=true';
+							
+		//To keep the reference fieldname and record value in the url if it is direct relation
+		if($relationModel->isDirectRelation()) {
+			$relationField = $relationModel->getRelationField();
+			$importViewUrl .='&'.$relationField->getName().'='.$parentRecordModule->getId();
+		}
+		return $importViewUrl;
+	}
+
 	public function getCreateTaskRecordUrl(){
 		$relationModel = $this->getRelationModel();
 		$relatedModel = $relationModel->getRelationModuleModel();
@@ -157,12 +177,17 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$deleteLinksModel->set('_deleteRelation',true)->set('_module',$relationModel->getRelationModuleModel());
 		}
 
+		$importLinks = $this->getImportRelationLinks();
+		foreach($importLinks as $importLinksModel) {
+			$importLinksModel->set('_importRelation',true)->set('_module',$relationModel->getRelationModuleModel());
+		}
+
 		$printLinks = $this->getPrintRelationLinks();
 		foreach($printLinks as $printLinksModel) {
 			$printLinksModel->set('_printRelation',true)->set('_module',$relationModel->getRelationModuleModel());
 		}
 		$addLinks = $this->getAddRelationLinks();
-		$links = array_merge($printLinks, $selectLinks, $addLinks, $deleteLinks);
+		$links = array_merge($printLinks, $selectLinks, $importLinks, $addLinks, $deleteLinks);
 		$relatedLink = array();
 		$relatedLink['LISTVIEWBASIC'] = $links;
 		return $relatedLink;
@@ -288,6 +313,33 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$printLinkModel[] = Vtiger_Link_Model::getInstanceFromValues($printLink);
 		}
 		return $printLinkModel;
+	}
+
+	/* ED150814 */
+	public function getImportRelationLinks() {
+		$relationModel = $this->getRelationModel();
+		$importLinkModel = array();
+		
+		if(!$relationModel->isSelectActionSupported()) {
+			return $importLinkModel;
+		}
+
+		$relatedModel = $relationModel->getRelationModuleModel();
+
+		$importLinkList = array(
+			array(
+				'linktype' => 'LISTVIEWBASIC',
+				'linklabel' => vtranslate('LBL_IMPORT', $relationModel->getParentModuleModel()->getName()) . ' ' . vtranslate($relatedModel->getName()),
+				'linkurl' => $this->getImportRelationUrl(),
+				'linkicon' => '',
+			)
+		);
+
+
+		foreach($importLinkList as $importLink) {
+			$importLinkModel[] = Vtiger_Link_Model::getInstanceFromValues($importLink);
+		}
+		return $importLinkModel;
 	}
 
 	public function getEntries($pagingModel) {
