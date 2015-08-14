@@ -332,7 +332,8 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			//Parcourt les champs
 			foreach($thisFields as $fieldName => $field){
 				// Champ commençant par "mailing"
-				if(strpos($fieldName, 'mailing') === 0){
+				if(strpos($fieldName, 'mailing') === 0
+				|| strpos($fieldName, 'rsnnpai') === 0){
 					if($fieldName == 'mailingzip')
 						$account_field = 'bill_code';
 					else
@@ -373,7 +374,8 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			//Parcourt les champs
 			foreach($thisFields as $fieldName => $field){
 				// Champ commençant par "mailing"
-				if(strpos($fieldName, 'mailing') === 0){
+				if(strpos($fieldName, 'mailing') === 0
+				|| strpos($fieldName, 'rsnnpai') === 0){
 					if(html_entity_decode($contact->get($fieldName)) != html_entity_decode($this->get($fieldName))){
 						$contact->set($fieldName, $this->get($fieldName));
 						$has_changed = true;
@@ -471,5 +473,26 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			$adb->pquery($query, array( $this->getId(), $this->get('account_id') ));
 		}
 		return $this;
+	}
+	
+	/** ED150814
+	* Affectation de critère au contact
+	*/	
+	function assignRelatedCritere4D($critereId, $dateApplication, $relData) {
+		
+		$params = array();
+		$query = 'INSERT INTO `vtiger_critere4dcontrel` (`critere4did`, `contactid`, `dateapplication`, `data`)
+			VALUES(?, ?, ?, ?)';
+		$params[] = $critereId;
+		$params[] = $this->getId();
+		$params[] = DateTimeField::convertToDBFormat($dateApplication);
+		$params[] = $relData;
+		
+		$query .= '
+		ON DUPLICATE KEY UPDATE data = ?';
+		$params[] = $relData;
+		
+		global $adb;
+		return $adb->pquery($query, $params);
 	}
 }

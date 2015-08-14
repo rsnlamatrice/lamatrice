@@ -40,7 +40,7 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 	/** ED150813
 	 * Function to register events
 	 */
-	registerAddColumnEvent : function(container){
+	registerAddCritereColumnEvent : function(container){
 		var thisInstance = this;
 		$('table > thead .add-critere').on('click', function(e){
 			e.preventDefault();
@@ -55,7 +55,7 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 					var uniqClass = 'critere-id' + critereId
 					, critere = data[critereId].name;
 					
-					if ($table.find('input[name="critereid"][value="' + critereId + '"]:first').length) {
+					if ($table.find('input[name="critereid[]"][value="' + critereId + '"]:first').length) {
 						var params = {
 							text: "Vous avez déjà ajouté ce critère " + critere,
 							type: 'error'
@@ -67,29 +67,38 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 					$models
 						.each(function(){
 							var $model = $(this)
-							, recordId = this.tagName == 'TD' ? $model.parents('tr:first').find('input[name="contactid"]').val() : true
+							, contactId = this.tagName == 'TD'
+								? $model.parents('tr:first').is('.row-model')
+								|| $model.parents('tr:first').find('input[name="contactid[]"]').val()
+								: true
 							, $clone = $model.clone()
 								.addClass(uniqClass)
 								.attr('data-critere', critere)
+								.attr('data-critereid', critereId)
 								.removeClass('hide')
 								.removeClass('critere-model')
 								.insertBefore($model)
-								.find('input[name="critereid"]:first')
+								.find('input[name="critereid[]"]:first')
 									.val(critereId)
 									.end()
 							;
-							if(!recordId)
+							if(!contactId)
 								$clone.empty();
 						})
 					;
 					$table.find('th.' + uniqClass)
 						.attr('data-critere', critere)
 						.removeClass('critere-model')
-						.html(critere)
+						.html($('<label style="display:inline"/>')
+							.append($('<input type="checkbox"/>')
+								.click(thisInstance.triggerColumnHeaderCheckEvent)
+							)
+							.append('&nbsp;<span>'+critere+'<span>')
+						)
 						.append($('<a href="" class="remove-column" style="margin-left: 1em;" title="Supprimer la colonne"><span class="icon-trash"></span></a>')
 							.click(thisInstance.triggerRemoveColumnEvent)
 						)
-						.find('input[name="critereid"]:first')
+						.find('input[name="critereid[]"]:first')
 							.val(critereId)
 							.end();
 				}
@@ -98,9 +107,36 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		});
 	},
 
-	//lorsqu'on ajoute une ligne ou une colonne
-	initCritereInputCells : function(){
+	//Clic sur en-tête de colonne : coche toutes les lignes
+	triggerColumnHeaderCheckEvent : function(e){
+		//La touche Control bloque la propagation du checked
+		if (e.ctrlKey)
+			return;
 		
+		var $this = $(e.target)
+		, $th = $(e.target).parents('th:first')
+		, $table = $th.parents('table:first')
+		, critereId = $th.data('critereid')
+		, checked = e.target.checked;
+		
+		//each contact
+		$table.find('tbody input[name="contactid[]"]').each(function(){
+			if (!this.value)
+				return;
+			var $tr = $(this).parents('tr:first')
+			, contactData = {
+				contactid : this.value
+			};
+			if ($tr.is('.save-done, .row-model'))
+				return;
+			var $critere = $tr.find('input[type="hidden"][name="critereid[]"][value="' + critereId + '"]')
+			, $checkbox = $critere.parents('td:first').find('input[type="checkbox"][name="save-critere[]"]')
+			;
+			if($checkbox.length){
+				$checkbox.get(0).checked = checked;
+				$checkbox.change();
+			}
+		});
 	},
 	
 	/* ED150628 : sélection d'enregistrements
@@ -192,7 +228,8 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 				if (!contact) 
 					return;
 				
-				if ($table && $table.find('input[name="contactid"][value="' + contact.record_id + '"]').length) {
+				//Teste si existe déjà
+				if ($table && $table.find('input[name="contactid[]"][value="' + contact.record_id + '"]').length) {
 					contact.record_id = "";
 				}
 				callback.call(thisInstance, contact);
@@ -219,18 +256,42 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		$newRow
 			.removeClass('hide')
 			.removeClass('row-model')
-			.find('input.contact_no:first')
-				.val(contact_details.contact_no)
-				.after('<span>'+contact_details.contact_no+'</span>')
-				.end()
-			.find('input[name="contactid"]:first')
+			.find('input[name="contactid[]"]:first')
 				.val(contact_details.record_id)
 				.end()
 			.find('td.contact-details:first')
-				.html('<pre>' + details + '</pre>')
+				.append('<pre>' + details + '</pre>')
 				.end()
 		;
-		this.initNPAICell($newRow.find('td.critere[data-critere="NPAI"]:first'), contact_details)
+		this.initNPAICell($newRow.find('td.critere-NPAI:first'), contact_details);
+		this.initCritereCells($newRow);
+	},
+	
+	//lorsqu'on ajoute une ligne
+	initCritereCells : function($newRow){
+		var $table = $newRow.parents('table:first')
+		, $critereHeaders = $table.find('thead th.critere:not(.critere-model)')
+		, contactId = $newRow.find('input[name="contactid[]"]').val()
+		;
+		$critereHeaders.each(function(){
+			var $th = $(this)
+			, critereId = $th.data('critereid')
+			, checked = $th.find('input[type="checkbox"]:checked').length > 0;
+			//Contact inconnu : effacement de la cellule
+			if (!contactId) {
+				$newRow.find('input[type="hidden"][name="critereid[]"][value="' + critereId + '"]').parents('td:first').empty();
+				return;	
+			}
+			if (!checked)
+				return;
+			var $critere = $newRow.find('input[type="hidden"][name="critereid[]"][value="' + critereId + '"]')
+			, $checkbox = $critere.parents('td:first').find('input[type="checkbox"][name="save-critere[]"]')
+			;
+			if($checkbox.length){
+				$checkbox.get(0).checked = checked;
+				$checkbox.change();
+			}
+		});
 	},
 	
 	initNPAICell : function($cell, contact_details){
@@ -238,17 +299,19 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 			return;
 		var uniqKey = contact_details.record_id;
 		
-		var npai_original = parseInt(contact_details.rsnnpai)
-		, new_npai = npai_original > 2 ? npai_original : npai_original + 1
+		var cur_npai = parseInt(contact_details.rsnnpai)
+		, new_npai = cur_npai > 2 ? cur_npai : cur_npai + 1
 		, counter = 0
 		, radios = '<div class="buttonset ui-buttonset">';
-		for(npai = 1; npai <= 3; npai++){
+		for(npai = 0; npai <= 3; npai++){
 			var NPAI_value = this.NPAI_values[''+npai];
-			radios += '<label><input type="radio" name="rsnnpai_' + uniqKey + '" value="' + npai + '"';
-			if (npai == new_npai) {
+			radios += '<label';
+			if (npai == cur_npai) 
+				radios += ' style="font-style: italic;"';
+			radios += '><input type="radio" name="rsnnpai_' + uniqKey + '" value="' + npai + '"';
+			if (npai == new_npai) 
 				radios += ' checked="checked"';
-				first = false;
-			}
+			
 			radios += '/>'
 				+ '<span class="' + NPAI_value.icon + '"></span>'
 				+ NPAI_value.label + '</label>'
@@ -265,7 +328,7 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 	//click sur le lien "+ commentaire"
 	triggerShowNPAIComment : function(e){
 		var $this = $(e.currentTarget)
-		, recordId = $this.parents('tr:first').find('input[name="contactid"]').val()
+		, recordId = $this.parents('tr:first').find('input[name="contactid[]"]').val()
 		, comment = $this.attr('data-rsnnpaicomment')
 		, $input = $('<textarea/>')
 			.attr('name', 'rsnnpaicomment_' + recordId)
@@ -331,9 +394,8 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 				+ contact_details.contact_no + " déjà saisi plus haut</u></b>";
 		
 		else
-			details = "<b><u>"
-				+ '<span class="icon-exclamation-sign"></span>&nbsp;'
-				+ contact_details.contact_no + " inconnu</u></b>";
+			details = '<span class="icon-exclamation-sign"></span>&nbsp;'
+				+ "<b><u>" + contact_details.contact_no + " inconnu</u></b>";
 		return details;
 	},
 	
@@ -348,6 +410,7 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 	
 	/**
 	 * Function to register recordpresave event
+	 * Envoie les données par Ajax
 	 */
 	registerRecordPreSaveEvent : function(form){
 		var thisInstance = this;
@@ -355,19 +418,98 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 			form = this.getForm();
 		}
 
-		form.on(Vtiger_Edit_Js.recordPreSave, function(e, data) {
-			var result = thisInstance.checkForPortalUser(form);
-			if(!result){
-				e.preventDefault();
-			}
+		//form.on(Vtiger_Edit_Js.recordPreSave, function(e, data) {
+		form.on('click', 'button[type="submit"]', function(e){
+			
+			e.preventDefault();
+			var element = jQuery(e.currentTarget);
+			element.progressIndicator({});
+			
+			var params = thisInstance.getSaveData(form);
+			
+			AppConnector.request(params).then(
+				function(data) {
+					element.progressIndicator({'mode': 'hide'});
+					if(data.result){
+						Vtiger_Helper_Js.showPnotify('Ok, c\'est enregistré');
+						thisInstance.postSaveData(form);
+						//$('<pre></pre>').html(JSON.stringify(data.result)).dialog({width: 'auto', height: 'auto'});
+					}else{
+						Vtiger_Helper_Js.showMessage(data);
+					}
+				}
+			);
+			
 		})
+	},
+	
+	/** data to submit
+	 */
+	getSaveData : function(form){
+		var data = {
+			module : form.find('input[name="module"]').val()
+			, mode : form.find('input[name="mode"]').val()
+			, action : form.find('input[name="action"]').val()
+			, contacts : {}
+		}
+		, $criteres = form.find('thead th.critere[data-critere]');
+		//each contact
+		form.find('tbody input[name="contactid[]"]').each(function(){
+			if (!this.value)
+				return;
+			var $tr = $(this).parents('tr:first')
+			, contactData = {
+				contactid : this.value
+			};
+			if ($tr.is('.save-done, .row-model'))
+				return;
+			
+			//NPAI
+			var $npai = $tr.find('td.critere-NPAI[data-critere="NPAI"]');
+			if ($npai.length) {
+				contactData['NPAI'] = {
+					value : $npai.find('input[type="radio"]:checked:first').val()
+					, comment : $npai.find('textarea:first').val()
+				}
+			}
+			//Autres critères
+			$criteres.each(function(){
+				var $this = $(this)
+				, critereId = $this.data('critereid')
+				, $cell = $tr.find('input[name="critereid[]"][value="' + critereId + '"]:first').parents('td:first')
+				, $checkbox = $cell.find('input[type="checkbox"][name="save-critere[]"]:checked:first');
+				if ($checkbox.length) {
+					contactData[critereId] = {
+						critereid : critereId
+						, date : $cell.find('input[name="critere-dateapplication[]"]:first').val()
+						, data : $cell.find('input[name="critere-reldata[]"]:first').val()
+					}
+				}
+			});
+			
+			data.contacts[contactData.contactid] = contactData;
+			
+		});
+		
+		return data;
+	},
+	
+	postSaveData : function(form){
+		//each contact
+		form.find('tbody input[name="contactid[]"]').each(function(){
+			var $tr = $(this).parents('tr:first');
+			if ($tr.is('.save-done, .row-model'))
+				return;
+			
+			$tr.addClass('save-done');
+		});
 	},
 	
 	registerEvents : function(container){
 		this._super(container);
 		this.registerRecordPreSaveEvent(container);
 		this.registerRemoveColumnEvent(container);
-		this.registerAddColumnEvent(container);
+		this.registerAddCritereColumnEvent(container);
 		this.registerContactInputEvent(container);
 	}
 })
