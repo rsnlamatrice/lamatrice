@@ -694,7 +694,13 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 */
 	function checkContact($invoice, $reglement) {
 		$contactData = $this->getContactValues($invoice, $reglement);
+		
+		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
+			return true;
+		
 		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		
+		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
 		if(!$id){
 			$this->preImportContact($contactData);

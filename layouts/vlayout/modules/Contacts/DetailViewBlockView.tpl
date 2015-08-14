@@ -7,7 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
 *
-affichage du dŽtail d'un contact
+affichage du détail d'un contact
  ********************************************************************************/
  
  ED141010 : add RECORD_MODEL=$RECORD
@@ -42,6 +42,18 @@ affichage du dŽtail d'un contact
 							{assign var=COUNTER value=$COUNTER + 1}
 						{/foreach}
 					</div>
+				
+				{* ED150810 *}
+				{elseif $BLOCK_LABEL_KEY eq 'Adresse secondaire'}
+					<label style="margin-left: 4em; display: inline-block; color: white;">
+					{assign var=FIELD_NAME value='use_address2_for_revue'}
+					&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
+					</label>
+					
+					<label style="margin-left: 2em; display: inline-block; color: white;">
+					{assign var=FIELD_NAME value='use_address2_for_recu_fiscal'}
+					&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
+					</label>
 				{/if}
 			</th>
 		</tr>

@@ -152,7 +152,13 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 	public function getModulesInfoForDetailView() {
 		return array(
 			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel'),
-			'Documents' => array('fieldName' => 'notesid', 'tableName' => 'vtiger_senotesrel'),
+			'Documents' => array('fieldName' => 'notesid', 'tableName' => 'vtiger_senotesrel'
+					   , 'sourceFieldName' => 'vtiger_contactdetails.contactid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_senotesrel.crmid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_senotesrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'notesid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'notesid'),
+			
 			'Contacts' => array('fieldName' => 'relcontid', 'tableName' => 'vtiger_contactscontrel'),
 			//'Campaigns' => array('fieldName' => 'contactid', 'tableName' => 'vtiger_campaigncontrel'),
 			'Invoice' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_invoice'

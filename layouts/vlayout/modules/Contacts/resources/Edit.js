@@ -456,5 +456,6 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		this.registerEventOnAccountReferenceStatusChanging(container);
 		this.registerEventForSynchronizeGroupNameMailingStreet2(container);
 		this.registerEventSNAButtonClickEvent(container);
+		this.registerBlockAnimationEvent(); /*ED150707*/
 	}
 })

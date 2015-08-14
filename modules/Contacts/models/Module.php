@@ -468,4 +468,12 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		return $this->summaryFields;
 	}
 	
+
+	/** ED150813
+	 * Function to get the url for saisie des NPAI et critère
+	 * @return <String> - url
+	 */
+	public function getInputNPAICriteresUrl() {
+		return 'index.php?module='.$this->get('name').'&view=InputNPAICriteres';
+	}
 }

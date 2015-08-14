@@ -767,7 +767,9 @@ $languageStrings = array(
 	'zip'                 => 'Code postal'         , 
 	'country'              => 'Pays'             , 
 	'pobox'               => 'Boîte postale'            , 
-	'state'                => 'Département'               , 
+	'state'                => 'Département'               ,
+        
+	'LBL_PRINT_RELATIONS'                => 'Imprimer', 
 	
 );
 $jsLanguageStrings = array(
@@ -886,6 +888,12 @@ $jsLanguageStrings = array(
 	'JS_NO_RESULTS_FOUND' => 'Aucun resultat trouvé',
 	
 	'JS_RESET_FILTERS' => 'Effacer les filtres',
-	'JS_REFRESH' => 'Actualiser', 
-	'SINGLE_Vendors' => 'Fournisseur',
+	'JS_REFRESH' => 'Actualiser',
+        
+	'SINGLE_Vendors'                => 'Fournisseur',
+	'SINGLE_Invoice'                => 'Facture', 
+	'SINGLE_SalesOrder'             => 'Dépôt-vente',
+	'SINGLE_PurchaseOrder'          => 'Document Fournisseur',
+        
+        'JS_HELP'                       => 'Aide',
 );

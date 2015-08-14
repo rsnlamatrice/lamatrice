@@ -79,7 +79,7 @@ class Emails_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->assign('IS_EDITABLE', $relationModel->isEditable());
 		$viewer->assign('IS_DELETABLE', $relationModel->isDeletable());
-        $viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
+		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->assign('VIEW', $request->get('view'));
 
 		return $viewer->view('EmailRelatedList.tpl', $moduleName, 'true');

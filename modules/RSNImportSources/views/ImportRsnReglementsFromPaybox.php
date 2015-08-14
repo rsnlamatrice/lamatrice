@@ -137,6 +137,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'dateregl',
 			'dateoperation',
 			'email',
+			'autorisation',
 			'amount',
 			'currency_id',
 			'payment',
@@ -708,7 +709,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				var_dump('$query : ', $query, $queryParams);
 				var_dump('$reglement : ', $reglement);
 				var_dump('$invoiceData : ', $invoiceData);
-				echo '<pre>Erreur : La facture Boutique est introuvable pour la référence "'.$invoiceData['sourceid'].'"</pre>';
+				echo '<pre>Erreur : La facture Boutique est introuvable pour la référence "'.$invoiceData['sourceid'].'" ('.$reglement['email'].', '.$reglement['dateoperation'].')</pre>';
 				return false;
 			}
 			$donateurWeb = $this->getDonateurWeb($reglement);
@@ -718,7 +719,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				var_dump('$reglement : ', $reglement);
 				var_dump('$invoiceData : ', $invoiceData);
 				//echo_callstack();
-				echo '<pre>Erreur : L\'enregistrement Donateur Web est introuvable pour la référence "'.$invoiceData['sourceid'].'"</pre>';
+				echo '<pre>Erreur : L\'enregistrement Donateur Web est introuvable pour la référence "'.$invoiceData['sourceid'].'" ('.$reglement['email'].', '.$reglement['dateoperation'].')</pre>';
 				return false;
 			}
 			$this->preImportInvoice($invoiceData, $donateurWeb);
@@ -789,17 +790,18 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 					$i = 0;
 					do {
 						$reglement = $this->getNextRsnReglement($fileReader);
-						if ($reglement != null
-						&& $reglement['autorisation'] == 'Autorisation'){
+						if ($reglement != null){
 							$reglement = $this->getRsnReglementsValues($reglement);
-							if(!$this->checkInvoice($reglement)){
-								if(array_key_exists($reglement['numpiece'], $cancelledReglements))
-									continue;
-								$error = 'LBL_INVOICE_MISSING';
-								echo 'Facture ou Donateur web manquant.<br>Les importations "Donateurs Web" et "Boutique" ont-elles bien été effectuées ?';
-								break;
+							if( $reglement['autorisation'] == 'Autorisation'){
+								if(!$this->checkInvoice($reglement)){
+									if(array_key_exists($reglement['numpiece'], $cancelledReglements))
+										continue;
+									$error = 'LBL_INVOICE_MISSING';
+									echo 'Facture ou Donateur web manquant.<br>Les importations "Donateurs Web" et "Boutique" ont-elles bien été effectuées ?';
+									break;
+								}
+								$this->preImportRsnReglement($reglement);
 							}
-							$this->preImportRsnReglement($reglement);
 						}
 					} while ($reglement != null);
 
@@ -956,7 +958,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		) {
 			return true;
 		}
-
 		return false;
 	}
 
@@ -969,7 +970,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		do {
 			$cursorPosition = $fileReader->getCurentCursorPosition();
 			$nextLine = $fileReader->readNextDataLine($fileReader);
-
 			if ($nextLine == false) {
 				return false;
 			}

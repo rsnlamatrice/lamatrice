@@ -253,6 +253,62 @@ jQuery.Class("Vtiger_Helper_Js",{
 		bottomScroll.scroll(function(){
 			topScroll.scrollLeft(bottomScroll.scrollLeft());
 		});
-	}
+	},
+	
+	/* ED150813
+	 * Function to show faq record as toolbox 
+	 */
+	showFAQRecord : function(faq_no) {
+		var data = {
+			module : 'Faq',
+			record : faq_no,
+		};
+		this.getRecordDetails(data).then(
+			function(data){
+				var response = data['result'];
+				
+				$('<pre></pre>')
+					.html(response.data.faq_answer)
+					.dialog({
+						width: 'auto',
+						height: 'auto',
+						title: response.data.question,
+					})
+			},
+			function(error, err){
+
+			});
+	},
+
+	/** ED150813 copied from Edit.js
+	 * Function which will give you all details of the selected record
+	 * @params - an Array of values like {'record' : recordId, 'source_module' : searchModule, 'selectedName' : selectedRecordName}
+	 */
+	getRecordDetails : function(params) {
+		if (!(typeof params === 'object')) 
+			params = { 'record' : params };
+		
+		var aDeferred = jQuery.Deferred()
+		, moduleName = params['module'] ? params['module'] : app.getModuleName()
+		, sourceModule = params['source_module'] ? params['source_module'] : moduleName;
+		var url = "index.php?module="+moduleName
+			+ "&action=GetData&record="+params['record']
+			+ "&source_module="+sourceModule
+			+ (params['related_data'] ? "&related_data="+params['related_data'] : '')
+			;
+		AppConnector.request(url).then(
+			function(data){
+				if(data['success']) {
+					aDeferred.resolve(data);
+				} else {
+					aDeferred.reject(data['message']);
+				}
+			},
+			function(error){
+				aDeferred.reject();
+			}
+		)
+		return aDeferred.promise();
+	},
 
 },{});

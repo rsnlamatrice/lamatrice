@@ -103,6 +103,26 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		return $deleteViewUrl;
 	}
 
+	/* ED150811 */
+	public function getPrintRelationUrl(){
+		$relationModel = $this->getRelationModel();
+		$relatedModule = $relationModel->getRelationModuleModel();
+		$parentRecordModule = $this->getParentRecordModel();
+		$parentModule = $parentRecordModule->getModule();
+
+		$printViewUrl = $parentModule->getPrintRelationUrl().
+							'&relatedModule='.$relatedModule->get('name').
+							'&record='.$parentRecordModule->getId().
+							'&relationOperation=true';
+
+		//To keep the reference fieldname and record value in the url if it is direct relation
+		if($relationModel->isDirectRelation()) {
+			$relationField = $relationModel->getRelationField();
+			$printViewUrl .='&'.$relationField->getName().'='.$parentRecordModule->getId();
+		}
+		return $printViewUrl;
+	}
+
 	public function getCreateTaskRecordUrl(){
 		$relationModel = $this->getRelationModel();
 		$relatedModel = $relationModel->getRelationModuleModel();
@@ -122,8 +142,8 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 
 	public function getLinks(){
 		$relationModel = $this->getRelationModel();
-		 /*ED141016*/
-		 if($relationModel == null) return null;
+		/*ED141016*/
+		if($relationModel == null) return null;
 		
 		$actions = $relationModel->getActions();
 		
@@ -136,9 +156,13 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		foreach($deleteLinks as $deleteLinksModel) {
 			$deleteLinksModel->set('_deleteRelation',true)->set('_module',$relationModel->getRelationModuleModel());
 		}
-		
+
+		$printLinks = $this->getPrintRelationLinks();
+		foreach($printLinks as $printLinksModel) {
+			$printLinksModel->set('_printRelation',true)->set('_module',$relationModel->getRelationModuleModel());
+		}
 		$addLinks = $this->getAddRelationLinks();
-		$links = array_merge($selectLinks, $addLinks, $deleteLinks);
+		$links = array_merge($printLinks, $selectLinks, $addLinks, $deleteLinks);
 		$relatedLink = array();
 		$relatedLink['LISTVIEWBASIC'] = $links;
 		return $relatedLink;
@@ -236,6 +260,34 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$addLinkModel[] = Vtiger_Link_Model::getInstanceFromValues($addLink);
 		}
 		return $addLinkModel;
+	}
+
+
+	/* ED150811 */
+	public function getPrintRelationLinks() {
+		$relationModel = $this->getRelationModel();
+		$printLinkModel = array();
+		
+		if(!$relationModel->isPrintActionSupported()) {
+			return $printLinkModel;
+		}
+
+		$relatedModel = $relationModel->getRelationModuleModel();
+
+		$printLinkList = array(
+			array(
+				'linktype' => 'LISTVIEWBASIC',
+				'linklabel' => vtranslate('LBL_PRINT_RELATIONS', $relationModel->getParentModuleModel()->getName()),
+				'linkurl' => $this->getPrintRelationUrl(),
+				'linkicon' => 'icon-print',
+			)
+		);
+
+
+		foreach($printLinkList as $printLink) {
+			$printLinkModel[] = Vtiger_Link_Model::getInstanceFromValues($printLink);
+		}
+		return $printLinkModel;
 	}
 
 	public function getEntries($pagingModel) {
@@ -441,7 +493,8 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		
 		if(strpos($query,'vtiger_attachmentsfolder'))
 			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
-		//var_dump(get_class($relationModel), $query);
+		//var_dump(get_class($relationModel));
+		//print_r("<pre>$query</pre>");
 		return $query;
 	}
 
@@ -475,7 +528,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$splitCount = count($split);
 			$relationQuery = 'SELECT count(*) AS count ';
 			for ($i=1; $i<$splitCount; $i++) {
-				$relationQuery = $relationQuery. ' FROM ' .$split[$i];
+				$relationQuery .= ' FROM ' .$split[$i];
 			}
 		}
 		$result = $db->pquery($relationQuery, array());

@@ -99,6 +99,10 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$this->set('orderby', 'invoicedate');
 				$this->set('sortorder', 'DESC');
 				break;
+			 case "SalesOrder":
+				$this->set('orderby', 'createdtime');
+				$this->set('sortorder', 'DESC');
+				break;
 			 case "Campaigns":
 			 case "Documents":
 			 case "Critere4D":

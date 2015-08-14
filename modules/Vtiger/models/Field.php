@@ -154,6 +154,12 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			case '9' :
 				$fieldDataType = 'percentage';
 				break;
+			
+			//ED150812
+			case '7' :
+				$fieldDataType = 'numeric';
+				break;
+			
 			case '28' :
 				$fieldDataType = 'documentsFileUpload';
 				break;

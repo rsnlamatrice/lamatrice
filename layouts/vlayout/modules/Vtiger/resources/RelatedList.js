@@ -29,6 +29,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		return this.parentRecordId;
 	},
 	
+	//ED150811 : cette fonction n'est pas appelée lors du premier chargement de liste
 	loadRelatedList : function(params){
 		var aDeferred = jQuery.Deferred();
 		var thisInstance = this;
@@ -58,6 +59,9 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 				aDeferred.resolve(responseData);
 				jQuery('input[name="currentPageNum"]', thisInstance.relatedContentContainer).val(completeParams.page);
 				thisInstance.updateRelatedCounter(); //ED150619
+				//ED150811
+				thisInstance.registerEventForProductListToolTip();
+				
 				// Let listeners know about page state change.
 				app.notifyPostAjaxReady();
 			},
@@ -421,7 +425,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 				})
 		}
 		
-		//If url contains params then seperate them and make them as relatedParams
+		//If url contains params then separate them and make them as relatedParams
 		if(typeof fullFormUrl != 'undefined' && fullFormUrl.indexOf('?')!== -1) {
 			var urlSplit = fullFormUrl.split('?');
 			var queryString = urlSplit[1];
@@ -510,7 +514,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 				})
 		}
 		
-		//If url contains params then seperate them and make them as relatedParams
+		//If url contains params then separate them and make them as relatedParams
 		if(typeof fullFormUrl != 'undefined' && fullFormUrl.indexOf('?')!== -1) {
 			var urlSplit = fullFormUrl.split('?');
 			var queryString = urlSplit[1];
@@ -533,6 +537,98 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		var dialogFormNode = jQuery('#dialogForm_then_refresh');//.find('[data-name="'+ referenceModuleName +'"]');
 		if(dialogFormNode.length <= 0) {
 			Vtiger_Helper_Js.showPnotify(app.vtranslate('JS_NO_CREATE_OR_NOT_QUICK_CREATE_ENABLED'))
+		}
+		dialogFormNode.trigger('click',dialogFormParams);
+		return aDeferred.promise();
+	},
+	
+	/** ED150811
+	 * Function to show a printable related list for the module
+	 */
+	printRelatedList : function(element){
+		var aDeferred = jQuery.Deferred();
+		var thisInstance = this;
+		var referenceModuleName = this.relatedModulename;
+		var parentId = this.getParentId();
+		var parentModule = this.parentModuleName;
+		var dialogFormParams = {};
+		var relatedParams = {};
+		var relatedField = element.data('name');
+		var fullFormUrl = element.data('url');
+		relatedParams[relatedField] = parentId;
+		var eliminatedKeys = new Array();//'view', 'module', 'mode', 'action');
+		
+		var preDialogFormSave = function(data){
+
+			var index,queryParam,queryParamComponents;
+			
+			//To handle switch to task tab when click on add task from related list of activities
+			//As this is leading to events tab intially even clicked on add task
+			if(typeof fullFormUrl != 'undefined' && fullFormUrl.indexOf('?')!== -1) {
+				var urlSplit = fullFormUrl.split('?');
+				var queryString = urlSplit[1];
+				var queryParameters = queryString.split('&');
+				for(index=0; index<queryParameters.length; index++) {
+					queryParam = queryParameters[index];
+					queryParamComponents = queryParam.split('=');
+					if(queryParamComponents[0] == 'mode' && queryParamComponents[1] == 'Calendar'){
+						data.find('a[data-tab-name="Task"]').trigger('click');
+					}
+				}
+			}
+			jQuery('<input type="hidden" name="sourceModule" value="'+parentModule+'" />').appendTo(data);
+			jQuery('<input type="hidden" name="sourceRecord" value="'+parentId+'" />').appendTo(data);
+			jQuery('<input type="hidden" name="relationOperation" value="true" />').appendTo(data);
+			
+			jQuery('<h3>Impression de la liste</h3>').appendTo(data);
+			
+			if(typeof relatedField != "undefined"){
+				var field = data.find('[name="'+relatedField+'"]');
+				//If their is no element with the relatedField name,we are adding hidden element with
+				//name as relatedField name,for saving of record with relation to parent record
+				if(field.length == 0){
+					jQuery('<input type="hidden" name="'+relatedField+'" value="'+parentId+'" />').appendTo(data);
+				}
+			}
+			for(index=0; index<queryParameters.length; index++) {
+				queryParam = queryParameters[index];
+				queryParamComponents = queryParam.split('=');
+				if(jQuery.inArray(queryParamComponents[0], eliminatedKeys) == '-1' && data.find('[name="'+queryParamComponents[0]+'"]').length == 0) {
+					jQuery('<input type="hidden" name="'+queryParamComponents[0]+'" value="'+queryParamComponents[1]+'" />').appendTo(data);
+				}
+			}
+
+		}
+		var postDialogFormSave  = function(data) {
+			thisInstance.loadRelatedList().then(
+				function(data){
+					aDeferred.resolve(data);
+				})
+		}
+		
+		//If url contains params then separate them and make them as relatedParams
+		if(typeof fullFormUrl != 'undefined' && fullFormUrl.indexOf('?')!== -1) {
+			var urlSplit = fullFormUrl.split('?');
+			var queryString = urlSplit[1];
+			var queryParameters = queryString.split('&');
+			for(var index=0; index<queryParameters.length; index++) {
+				var queryParam = queryParameters[index];
+				var queryParamComponents = queryParam.split('=');
+				if(jQuery.inArray(queryParamComponents[0], eliminatedKeys) == '-1') {
+					relatedParams[queryParamComponents[0]] = queryParamComponents[1];
+				}
+			}
+		}
+		
+		relatedParams['tab_label'] = this.selectedRelatedTabElement.data('label-key');
+		
+		dialogFormParams['data'] = relatedParams;
+		dialogFormParams['callbackFunction'] = postDialogFormSave;
+		dialogFormParams['callbackPostShown'] = preDialogFormSave;
+		dialogFormParams['noCache'] = true;
+		var dialogFormNode = jQuery('#dialogForm_then_refresh');//.find('[data-name="'+ referenceModuleName +'"]');
+		if(dialogFormNode.length <= 0) {
+			Vtiger_Helper_Js.showPnotify('Fonction indisponible')
 		}
 		dialogFormNode.trigger('click',dialogFormParams);
 		return aDeferred.promise();
@@ -740,7 +836,102 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		});
 		return urlParams;
 	},
-	/* end of ED header filters */
+	/* ED150000 : end of header filters */
+	
+	
+	/** ED150625 : affichage de la liste des produits de factures ou dépot-vente au survol 
+	 * Function to trigger tooltip feature.
+	 * copié depuis List.js
+	 */
+	registerEventForProductListToolTip : function() {
+		var thisInstance = this;
+		switch(thisInstance.relatedModulename){
+		  case "SalesOrder":
+		  case "Invoice":
+		  case "PurchaseOrder":
+			break;
+		  default:
+			return;
+		}
+		
+		var lastPopovers = [];
+
+		// Fetching reference fields often is not a good idea on a given page.
+		// The caching is done based on the URL so we can reuse.
+		var CACHE_ENABLED = true; // TODO - add cache timeout support.
+
+		function prepareAndShowTooltipView(e) {
+			hideAllTooltipViews();
+
+			var el = jQuery(e.target);
+			var url = document.location.href;
+			
+			var $tr = el.parents('tr:first')
+			,   recordId = $tr.data('id')
+			,   title = $tr.text().substring(0, 255);
+			
+			// Rewrite URL to retrieve Tooltip view.
+			url = url.replace('view=', 'xview=') + '&view=TooltipAjax';
+			url = url.replace('mode=', 'xmode=') + '&mode=ProductList';
+			url = url.replace('module=', 'xmodule=') + '&module=' + 'Invoice'/*thisInstance.relatedModulename*/;
+			url = url.replace('record=', 'xrecord=') + '&record=' + recordId;
+
+			var cachedView = CACHE_ENABLED ? jQuery('[data-url-cached="'+url+'"]') : null;
+			if (cachedView && cachedView.length) {
+				showTooltip(el, cachedView.html(), title);
+			} else {
+				AppConnector.request(url).then(function(data){
+					cachedView = jQuery('<div>').css({display:'none'}).attr('data-url-cached', url);
+					cachedView.html(data);
+					jQuery('body').append(cachedView);
+					showTooltip(el, data, title);
+				});
+			}
+		}
+		
+		function showTooltip(el, data, title) {
+			el.popover({
+				title: app.vtranslate('SINGLE_' + thisInstance.relatedModulename) + ' ' + title, 
+				trigger: 'manual',
+				content: data,
+				animation: false,
+				template: '<div class="popover popover-tooltip"><div class="arrow"></div><div class="popover-inner"><button name="vtTooltipClose" class="close" style="color:white;opacity:1;font-weight:lighter;position:relative;top:3px;right:3px;">x</button><h3 class="popover-title"></h3><div class="popover-content"><div></div></div></div></div>'
+			});
+			lastPopovers.push(el.popover('show'));
+			registerToolTipDestroy();
+		}
+
+		function hideAllTooltipViews() {
+			// Hide all previous popover
+			var lastPopover = lastPopovers.pop();
+			while (lastPopover) {
+				lastPopover.popover('hide');
+				lastPopover = lastPopovers.pop();
+			}
+		}
+
+		var invoiceRow = jQuery('tr.listViewEntries[data-id]');
+		invoiceRow.each(function(index, el){
+			jQuery(el).hoverIntent({
+				interval: 150,
+				sensitivity: 7,
+				timeout: 10,
+				over: prepareAndShowTooltipView,
+				out: hideAllTooltipViews
+			})
+				//remove reference original tooltip
+				.find('a[data-field-type]')
+					.removeAttr('data-field-type')
+			;
+		});
+
+		function registerToolTipDestroy() {
+			jQuery('button[name="vtTooltipClose"]').on('click', function(e){
+				var lastPopover = lastPopovers.pop();
+				lastPopover.popover('hide');
+			});
+		}
+	},
 	
 	init : function(parentId, parentModule, selectedRelatedTabElement, relatedModuleName){
 		this.selectedRelatedTabElement = selectedRelatedTabElement,
@@ -752,6 +943,8 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		this.relatedContentContainer = jQuery('div.contents',this.detailViewContainer);
 		//ED150704
 		this.registerEventForHeaderFilterChange();
+		//ED150811
+		this.registerEventForProductListToolTip();
 		
 		Vtiger_Helper_Js.showHorizontalTopScrollBar();
 	}

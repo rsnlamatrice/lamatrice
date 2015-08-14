@@ -55,10 +55,39 @@
 		</div>
 		{foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE name="EditViewBlockLevelLoop"}
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
+			{assign var=IS_HIDDEN value=(($BLOCK_LABEL eq 'Adresse secondaire' && !$RECORD_MODEL->get('use_address2_for_revue') && !$RECORD_MODEL->get('use_address2_for_recu_fiscal'))
+			 || $BLOCK_LABEL eq 'LBL_CUSTOM_INFORMATION' || $BLOCK_LABEL eq 'LBL_IMAGE_INFORMATION'
+			 || ($BLOCK_LABEL eq 'Groupe, Structure' && $RECORD_MODEL->get('isgroup') neq 1))}
+			
 			<table class="table table-bordered blockContainer showInlineTable {if $BLOCK_LABEL eq "LBL_ADDRESS_INFORMATION"}current-address{/if}">
-			<tr>
-				<th class="blockHeader" colspan="4">{vtranslate($BLOCK_LABEL, $MODULE)}</th>
-			</tr>
+			<thead><tr>
+				<th class="blockHeader" colspan="4">
+					{if $IS_HIDDEN}
+						<img class="cursorPointer alignMiddle blockToggle {if !($IS_HIDDEN)} hide {/if} "  src="{vimage_path('arrowRight.png')}" data-mode="hide"}>
+						<img class="cursorPointer alignMiddle blockToggle {if ($IS_HIDDEN)} hide {/if}"  src="{vimage_path('arrowDown.png')}" data-mode="show"}>
+						&nbsp;&nbsp;
+					{/if}
+					{vtranslate($BLOCK_LABEL, $MODULE)}
+					{if $BLOCK_LABEL eq 'Adresse secondaire'}
+						<label class="blockToggler" style="margin-left: 4em; display: inline-block; color: white;">
+						{assign var=FIELD_NAME value='use_address2_for_revue'}
+						{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+						{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+						{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+						&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
+						</label>
+						
+						<label class="blockToggler" style="margin-left: 2em; display: inline-block; color: white;">
+						{assign var=FIELD_NAME value='use_address2_for_recu_fiscal'}
+						{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+						{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+						{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+						&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
+						</label>
+					{/if}
+			</th>
+			</tr></thead>
+			<tbody {if $IS_HIDDEN} class="hide" {/if}>
 			<tr>
 			{assign var=COUNTER value=0}
 			{foreach key=FIELD_NAME item=FIELD_MODEL from=$BLOCK_FIELDS name=blockfields}
@@ -75,7 +104,9 @@
 				|| $FIELD_NAME eq 'otherpobox'
 				|| $FIELD_NAME eq 'mailingcountry'
 				|| $FIELD_NAME eq 'othercountry'
-				|| $FIELD_NAME eq 'rsnnpaicomment'}
+				|| $FIELD_NAME eq 'rsnnpaicomment'
+				|| $FIELD_NAME eq 'use_address2_for_revue'
+				|| $FIELD_NAME eq 'use_address2_for_recu_fiscal'}
 					{continue}
 				{/if}
 				
@@ -299,11 +330,9 @@
 				{if $BLOCK_FIELDS|@count eq 1 and $FIELD_MODEL->get('uitype') neq "19" and $FIELD_MODEL->get('uitype') neq "20" and $FIELD_MODEL->get('uitype') neq "30" and $FIELD_MODEL->get('name') neq "recurringtype"}
 					<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td>
 				{/if}
-				{if $MODULE eq 'Events' && $BLOCK_LABEL eq 'LBL_EVENT_INFORMATION' && $smarty.foreach.blockfields.last }
-					{include file=vtemplate_path('uitypes/FollowUp.tpl',$MODULE) COUNTER=$COUNTER}
-				{/if}
 			{/foreach}
 			</tr>
+			</tbody>
 			</table>
 			<br>
 		{/foreach}

@@ -502,7 +502,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				return array(
 					'0' => array( 'label' => 'Ok', 'icon' => 'ui-icon ui-icon-check green' ),
 					'1' => array( 'label' => 'Supposée', 'icon' => 'ui-icon ui-icon-check darkgreen' ),
-					'2' => array( 'label' => 'A confirmer', 'icon' => 'ui-icon ui-icon-close orange' ),
+					'2' => array( 'label' => 'Confirmée', 'icon' => 'ui-icon ui-icon-close orange' ),
 					'3' => array( 'label' => 'Définitive', 'icon' => 'ui-icon ui-icon-close darkred' ),
 				);
 	

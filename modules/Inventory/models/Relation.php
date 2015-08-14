@@ -26,7 +26,25 @@ class Inventory_Relation_Model extends Vtiger_Relation_Model {
 					   , 'relationTableName' => 'vtiger_crmentityrel' // FROM %s JOIN %sub
 					   , 'relatedFieldName' => 'rsnreglementsid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
 					   , 'relatedSourceFieldName' => 'crmid'),
+			
+			'Products' => array('fieldName' => 'productid', 'tableName' => 'vtiger_inventoryproductrel'
+									 
+					   , 'sourceFieldName' => 'vtiger_invoice.invoiceid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_inventoryproductrel.id' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_inventoryproductrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'productid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'productid'),
+			
+			'Services' => array('fieldName' => 'productid', 'tableName' => 'vtiger_inventoryproductrel'
+									 
+					   , 'sourceFieldName' => 'vtiger_invoice.invoiceid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_inventoryproductrel.id' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_inventoryproductrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'serviceid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'productid'),
 		);
 	}
-
+	
+	public static function getAllRelations($parentModuleModel, $selected = true, $onlyActive = true) {
+	}
 }
