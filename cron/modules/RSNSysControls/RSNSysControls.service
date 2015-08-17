@@ -1,0 +1,14 @@
+<?php
+/*+***********************************************************************************
+ * ED150817
+ *************************************************************************************/
+
+require_once   'includes/Loader.php';
+require_once   'includes/runtime/Controller.php';
+require_once   'includes/runtime/BaseModel.php';
+require_once   'includes/runtime/Globals.php';
+
+RSNSysControls_Data_Action::runScheduledSysControls();
+
+
+?>

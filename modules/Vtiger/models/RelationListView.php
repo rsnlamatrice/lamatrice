@@ -31,6 +31,16 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		return $this->parentRecordModel;
 	}
 
+	//ED150817
+	public function getRelatedModuleModel() {
+		$relationModel = $this->getRelationModel();
+		if($relationModel)
+			return $this->getRelationModel()->getRelationModuleModel();
+		
+		$relationModuleName = $this->get('relationModuleName');
+		return Vtiger_Module_model::getInstance($relationModuleName);
+	}
+
 	public function getCreateViewUrl(){
 		$relationModel = $this->getRelationModel();
 		$relatedModel = $relationModel->getRelationModuleModel();
@@ -456,8 +466,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 	}
 
 	public function getHeaders() {
-		$relationModel = $this->getRelationModel();
-		$relatedModuleModel = $relationModel->getRelationModuleModel();
+		$relatedModuleModel = $this->getRelatedModuleModel();//ED150817
 
 		$summaryFieldsList = $relatedModuleModel->getSummaryViewFieldsList();
 		$headerFields = array();
@@ -564,6 +573,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 
 		$relationModel = Vtiger_Relation_Model::getInstance($parentModuleModel, $relationModuleModel, $label);
 		$instance->setRelationModel($relationModel)->setParentRecordModel($parentRecordModel);
+		$instance->set('relationModuleName', $relationModuleName);//ED150817
 		return $instance;
 	}
 

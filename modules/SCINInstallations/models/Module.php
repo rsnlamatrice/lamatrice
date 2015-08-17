@@ -10,6 +10,14 @@
 
 class SCINInstallations_Module_Model extends Vtiger_Module_Model{
 
+	/**
+	 * Function to check whether the entity has an quick create menu
+	 * @return <Boolean> true/false
+	 * ED141024
+	 */
+	public function isQuickCreateMenuVisible() {
+		return false ;
+	}
 	
 	/** ED150619
 	 * Function to get relation query for particular module with function name

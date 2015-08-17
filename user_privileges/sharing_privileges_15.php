@@ -2,7 +2,7 @@
 
 
 //This is the sharing access privilege file
-$defaultOrgSharingPermission=array('2'=>2,'4'=>2,'6'=>2,'7'=>2,'9'=>3,'13'=>2,'16'=>3,'20'=>2,'21'=>2,'22'=>2,'23'=>2,'26'=>2,'8'=>2,'14'=>2,'34'=>2,'35'=>2,'37'=>2,'41'=>2,'42'=>2,'43'=>2,'44'=>2,'46'=>2,'18'=>2,'50'=>2,'51'=>2,'52'=>2,'53'=>2,'54'=>2,'55'=>2,'1'=>2,'3'=>2,'10'=>2,'15'=>2,'19'=>2,'24'=>2,'25'=>2,'27'=>2,'28'=>2,'29'=>2,'30'=>2,'31'=>2,'32'=>2,'33'=>2,'36'=>2,'38'=>2,'39'=>2,'40'=>2,'45'=>2,'47'=>2,'48'=>2,'49'=>2,'56'=>2,'57'=>2,'58'=>2,'59'=>2,'60'=>2,'61'=>2,'62'=>2,'63'=>2,'64'=>2,'65'=>2,'66'=>2,'67'=>2,'68'=>2,'69'=>2,'70'=>2,'71'=>2,'72'=>2,);
+$defaultOrgSharingPermission=array('2'=>2,'4'=>2,'6'=>2,'7'=>2,'9'=>3,'13'=>2,'16'=>3,'20'=>2,'21'=>2,'22'=>2,'23'=>2,'26'=>2,'8'=>2,'14'=>2,'34'=>2,'35'=>2,'37'=>2,'41'=>2,'42'=>2,'43'=>2,'44'=>2,'46'=>2,'18'=>2,'50'=>2,'51'=>2,'52'=>2,'53'=>2,'54'=>2,'55'=>2,'1'=>2,'3'=>2,'10'=>2,'15'=>2,'19'=>2,'24'=>2,'25'=>2,'27'=>2,'28'=>2,'29'=>2,'30'=>2,'31'=>2,'32'=>2,'33'=>2,'36'=>2,'38'=>2,'39'=>2,'40'=>2,'45'=>2,'47'=>2,'48'=>2,'49'=>2,'56'=>2,'57'=>2,'58'=>2,'59'=>2,'60'=>2,'61'=>2,'62'=>2,'63'=>2,'64'=>2,'65'=>2,'66'=>2,'67'=>2,'68'=>2,'69'=>2,'70'=>2,'71'=>2,'72'=>2,'73'=>2,);
 
 $related_module_share=array(2=>array(6,),13=>array(6,),20=>array(6,2,),22=>array(6,2,20,),23=>array(6,22,),);
 
@@ -114,22 +114,6 @@ $ModComments_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $ModComments_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
-$ProjectMilestone_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$ProjectMilestone_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$ProjectTask_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$ProjectTask_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$Project_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$Project_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$SMSNotifier_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$SMSNotifier_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
 $Critere4D_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $Critere4D_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
@@ -217,5 +201,9 @@ $SCINInstallations_share_write_permission=array('ROLE'=>array(),'GROUP'=>array()
 $SCINEvents_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $SCINEvents_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNSysControls_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNSysControls_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 ?>

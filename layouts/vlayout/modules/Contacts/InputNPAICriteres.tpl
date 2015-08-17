@@ -6,16 +6,16 @@
 -->*}
 {strip}
 <style>
-	tr.save-done td {
+	#EditView tr.save-done td {
 		opacity: 0.6;
 	}
-	tr.save-done td.actions {
+	#EditView tr.save-done td.actions {
 		opacity: 1;
 	}
-	.buttonset label {
+	#EditView .buttonset label {
 	    margin-bottom: 0;
 	}
-	.buttonset {
+	#EditView .buttonset {
 	    margin-bottom: 5px;
 	}
 </style>
@@ -60,7 +60,7 @@
 		</tbody>
 		<tfoot>
 		<tr class="inputs">
-			<td colspan="3"><input class="contact_no" value="CID202396"/></td>
+			<td colspan="3"><input class="contact_no" value=""/></td>
 		</tr>
 		</tbody>
 	</table>
