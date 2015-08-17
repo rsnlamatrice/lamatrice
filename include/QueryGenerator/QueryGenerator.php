@@ -529,7 +529,6 @@ class QueryGenerator {
 		foreach ($this->fields as $field) {
 			$sql = $this->getSQLColumn($field);
 			$columns[] = $sql;
-
 			//To merge date and time fields
 			if($this->meta->getEntityName() == 'Calendar' && ($field == 'date_start' || $field == 'due_date' || $field == 'taskstatus' || $field == 'eventstatus')) {
 				if($field=='date_start') {

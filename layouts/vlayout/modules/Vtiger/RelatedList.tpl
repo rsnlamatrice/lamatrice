@@ -27,6 +27,7 @@
                             {assign var=IS_SELECT_BUTTON value={$RELATED_LINK->get('_selectRelation')}}
                             {assign var=IS_DELETE_BUTTON value={$RELATED_LINK->get('_deleteRelation')}}
                             {assign var=IS_PRINT_BUTTON value={$RELATED_LINK->get('_printRelation')}}
+                            {assign var=IS_IMPORT_BUTTON value={$RELATED_LINK->get('_importRelation')}}
 			    <button type="button" class="btn addButton
                             {if $IS_SELECT_BUTTON eq true} selectRelation {/if} "
 			    {if $IS_SELECT_BUTTON eq true} data-moduleName={$RELATED_LINK->get('_module')->get('name')} {/if}
@@ -36,6 +37,7 @@
 			    {/if}
 			    {if $IS_DELETE_BUTTON eq true} name="deleteButton"
 			    {elseif $IS_PRINT_BUTTON eq true} name="printButton"
+			    {elseif $IS_IMPORT_BUTTON eq true} name="importButton"
 			    {elseif $IS_SELECT_BUTTON neq true} name="addButton"
 			    {/if}>
 			    {if $RELATED_LINK->get('linkicon')}

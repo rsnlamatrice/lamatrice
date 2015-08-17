@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnsyscontrols</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnsyscontrols` (
+  `rsnsyscontrolsid` int(11) NOT NULL DEFAULT '0',
+    `title` VARCHAR(128) DEFAULT NULL,
+    `query` TEXT DEFAULT NULL,
+    `enabled` VARCHAR(5) DEFAULT NULL,
+    `postprocess` VARCHAR(128) DEFAULT NULL,
+    `testperiod` INT(11) DEFAULT NULL,
+    `lasttest` TIMESTAMP NULL DEFAULT NULL,
+    `syscontrol_no` VARCHAR(32) DEFAULT NULL,
+    `relatedmodule` VARCHAR(128) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    PRIMARY KEY (`rsnsyscontrolsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnsyscontrolscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnsyscontrolscf` (
+  `rsnsyscontrolsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnsyscontrolsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

@@ -770,6 +770,7 @@ $languageStrings = array(
 	'state'                => 'Département'               ,
         
 	'LBL_PRINT_RELATIONS'                => 'Imprimer', 
+	'CronTasks'                => 'Tâches planifiées', 
 	
 );
 $jsLanguageStrings = array(

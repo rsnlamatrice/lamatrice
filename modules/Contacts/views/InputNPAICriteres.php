@@ -11,7 +11,7 @@ class Contacts_InputNPAICriteres_View extends Vtiger_Edit_View {
 		$moduleName = $request->getModule();
 		
 		$viewer = $this->getViewer($request);
-		
+		$viewer->assign('MODULE', $moduleName);
 		$viewer->view('InputNPAICriteres.tpl', $moduleName);
 	}
 

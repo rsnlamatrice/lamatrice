@@ -206,4 +206,8 @@ $SCINEvents_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $SCINEvents_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$RSNSysControls_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNSysControls_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 ?>

@@ -542,7 +542,14 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		return aDeferred.promise();
 	},
 	
-	/** ED150811
+	/** ED150814
+	 * Function to import related list for the module
+	 */
+	importRelatedList : function(element){
+		window.location.href = element.data('url');
+	},	
+	
+	/** ED150811 pas sûr que ce soit utilisé
 	 * Function to show a printable related list for the module
 	 */
 	printRelatedList : function(element){

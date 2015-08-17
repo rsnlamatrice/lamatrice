@@ -30,7 +30,7 @@
 			<td></td>
 			<td></td>
 			<td class="submit-cell">
-				{if $FIELD_INFO['status'] neq 'equal'}
+				{if (is_string($FIELD_INFO) && $FIELD_INFO neq 'equal') || ($FIELD_INFO['status'] neq 'equal')}
 					<button class="btn btn-success" type="submit"><strong>Mettre à jour</strong></button>
 				{/if}
 			</td>

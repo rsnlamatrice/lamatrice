@@ -270,6 +270,15 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	}
 
 	/**
+	 * ED150814
+	 * Function to get the ImportRelationView Component Name
+	 * @return string
+	 */
+	public function getImportRelationViewName(){
+		return 'ImportRelation';
+	}
+
+	/**
 	 * Function to get the DuplicateView Component Name
 	 * @return string
 	 */
@@ -350,6 +359,15 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 */
 	public function getPrintRelationUrl() {
 		return 'index.php?module='.$this->get('name').'&view='.$this->getPrintRelationViewName();
+	}
+
+	/**
+	 * Function to get the url for the Import Record Relation list view of the module
+	 * @return <String> - url
+	 * ED150811
+	 */
+	public function getImportRelationUrl() {
+		return 'index.php?module='.$this->get('name').'&view='.$this->getImportRelationViewName();
 	}
 
 	/**
