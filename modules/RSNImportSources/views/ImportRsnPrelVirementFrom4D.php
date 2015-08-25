@@ -113,7 +113,6 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 					
 		global $log;
 		
-		//TODO check sizeof $rsnprelvirementsata
 		$prelevement = $this->getPrelevement($rsnprelvirementsData);
 		if ($prelevement != null) {
 			$sourceId = $rsnprelvirementsData[0]['separum'];
