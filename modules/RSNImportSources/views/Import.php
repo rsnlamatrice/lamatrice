@@ -5,6 +5,8 @@ define('ASSIGNEDTO_ALL', '7');
 define('CURRENCY_ID', 1);
 define('CONVERSION_RATE', 1);
 
+define('IMPORTCHECKER_CACHE_MAX', 1024);
+
 class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 	var $request;
@@ -561,6 +563,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @return string - formated date.
 	 */
 	function getMySQLDate($string) {
+		if($string == '00/00/00')
+			return '1999-12-31';
 		$dateArray = preg_split('/[-\/]/', $string);
 		return ($dateArray[2].length > 2 ? '' : '20').$dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
 	}
@@ -697,6 +701,9 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		//var_dump('setPreImportInCache', $cacheKey);
 		if(!$value)
 			$value = true;
+		
+		if(count($this->preImportChecker_cache) > IMPORTCHECKER_CACHE_MAX)
+			array_splice($this->preImportChecker_cache, 0, IMPORTCHECKER_CACHE_MAX / 2);
 		$this->preImportChecker_cache[$cacheKey] = $value;
 		return false;		
 	}
