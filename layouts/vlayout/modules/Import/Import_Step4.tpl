@@ -13,7 +13,7 @@
 <table width="100%" cellspacing="0" cellpadding="2" class="importContents padding1per">
 	<tr>
 		<td>
-			<strong>{'LBL_IMPORT_STEP_4'|@vtranslate:$MODULE}:</strong>
+			<strong style="white-space: nowrap;">{'LBL_IMPORT_STEP_4'|@vtranslate:$MODULE}:</strong>
 		</td>
 		<td>
 			<span class="big">{'LBL_IMPORT_STEP_4_DESCRIPTION'|@vtranslate:$MODULE}</span>

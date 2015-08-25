@@ -9,9 +9,10 @@ REM # All Rights Reserved.
 REM #
 REM # ********************************************************************************
 
-set VTIGERCRM_ROOTDIR="C:\Program Files\vtigercrm5\apache\htdocs\vtigerCRM"
-set PHP_EXE="C:\Program Files\vtigercrm5\php\php.exe"
+set VTIGERCRM_ROOTDIR="D:\Wamp\www\lamatrice"
+set PHP_EXE="D:\Wamp\bin\php\php5.5.12\php.exe"
 
+d:
 cd /D %VTIGERCRM_ROOTDIR%
 
 %PHP_EXE% -f vtigercron.php 

@@ -544,13 +544,36 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	static function str_to_float($str){
 		if(!is_string($str))
 			return $str;
-		if(is_nan($str[0]))//TODO ".50"
-			return false;
-		return (float)str_replace(',', '.', $str);
+		try {
+			if(!is_numeric($str[0]))//TODO ".50"
+				return false;
+			return (float)str_replace(',', '.', $str);
+		}
+		catch(Exception $ex){
+			var_dump($ex, $str);
+			die("str_to_float");
+		}
 	}
 	
+	/** ABSTRACT
+	 * Method that returns a formatted date for mysql (Y-m-d).
+	 * @param string $string : the string to format.
+	 * @return string - formated date.
+	 */
+	function getMySQLDate($string) {
+		$dateArray = preg_split('/[-\/]/', $string);
+		return ($dateArray[2].length > 2 ? '' : '20').$dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
+	}
 	
-
+	/**
+	 * Method that returns a DateTime object
+	 * @param string $string : the string to format.
+	 * @return string - formated date.
+	 */
+	function getDateTime($string) {
+		return new DateTime($this->getMySQLDate($string));
+	}
+	
 	/**
 	 * Method that retrieve a contact id.
 	 * @param string $firstname : the firstname of the contact.
@@ -597,6 +620,38 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			$id = $db->query_result($result, 0, 0);
 			
 			$this->setPreImportInCache($id, 'Contacts', $firstname, $lastname, $email);
+		
+			return $id;
+		}
+
+		return null;
+	}
+		/**
+	 * Method that retrieve a contact id.
+	 * @param string $ref4D : the reference in 4D
+	 * @return the id of the contact | null if the contact is not found.
+	 */
+	function getContactIdFromRef4D($ref4D) {
+		
+		if($this->checkPreImportInCache('Contacts', '4d', $ref4D))
+			return $this->checkPreImportInCache('Contacts', '4d', $ref4D);
+		
+		$query = "SELECT crmid
+			FROM vtiger_contactdetails
+                        JOIN vtiger_crmentity
+                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			WHERE deleted = FALSE
+			AND contact_no IN ( CONCAT('C', ?), CONCAT('CID', ?))
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+				
+		$result = $db->pquery($query, array($ref4D, $ref4D));
+
+		if($db->num_rows($result)){
+			$id = $db->query_result($result, 0, 0);
+			
+			$this->setPreImportInCache($id, 'Contacts', '4d', $ref4D);
 		
 			return $id;
 		}
