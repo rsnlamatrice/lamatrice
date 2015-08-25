@@ -70,7 +70,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		return array(
 			'reffiche',
 			'nom',
-			'numerocompte',
+			'numcompte',
 			'codebanque',
 			'codeguichet',
 			'cle',
