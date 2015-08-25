@@ -403,7 +403,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			if($totalRecords > ($importStatusCount['IMPORTED'] + $importStatusCount['FAILED'])) {
 				$importEnded = false;
 				if($importInfo['status'] == Import_Queue_Action::$IMPORT_STATUS_SCHEDULED) {
-					self::showScheduledStatus($importInfo);
+					self::showScheduledStatus($importInfo, $importStatusCount);
 					continue;
 				}
 				self::showCurrentStatus($importInfo, $importStatusCount, $continueImport);
@@ -448,10 +448,21 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * Method called by the showImportStatus method.
 	 */
 	public static function showResult($importInfo, $importStatusCount) {
+		$viewer = new Vtiger_Viewer();
+        self::prepareShowResult($importInfo, $importStatusCount, $viewer);
+
+		$viewer->view('ImportResult.tpl', 'RSNImportSources');
+	}
+	
+	/**
+	 * Method called by the showImportStatus method.
+	 */
+	public static function prepareShowResult($importInfo, $importStatusCount, $viewer = false) {
 		$moduleName = $importInfo['module'];
 		$ownerId = $importInfo['user_id'];
-		$viewer = new Vtiger_Viewer();
-        
+		if(!$viewer)
+			$viewer = new Vtiger_Viewer();
+		
 		$viewer->assign('SKIPPED_RECORDS',$skippedRecords);
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
@@ -459,19 +470,23 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('IMPORT_RESULT', $importStatusCount);
 		$viewer->assign('INVENTORY_MODULES', getInventoryModules());
 		$viewer->assign('MERGE_ENABLED', $importInfo['merge_type']);
-
-		$viewer->view('ImportResult.tpl', 'RSNImportSources');
 	}
 
 	/**
 	 * Method called by the showImportStatus method.
 	 */
-	public static function showScheduledStatus($importInfo) {
+	public static function showScheduledStatus($importInfo, $importStatusCount = false) {
 		// TODO: $importInfo['module'] should be the current main module !!
 		$moduleName = $importInfo['module'];
 		$importId = $importInfo['id'];
 
 		$viewer = new Vtiger_Viewer();
+		
+		if($importStatusCount){
+			self::prepareShowResult($importInfo, $importStatusCount, $viewer);
+			$viewer->assign('RESULT_DETAILS', true);
+		}			
+		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('IMPORT_ID', $importId);

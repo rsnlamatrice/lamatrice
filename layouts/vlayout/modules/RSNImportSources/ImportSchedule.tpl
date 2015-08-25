@@ -17,6 +17,13 @@ manage cancel button using importclassname
 		</td>
 	</tr>
 	{/if}
+	{if $RESULT_DETAILS}
+	<tr>
+		<td class="style1" align="left" colspan="2">
+			{include file="ImportResultDetails.tpl"|@vtemplate_path:$MODULE}
+		</td>
+	</tr>
+	{/if}
 	<tr>
 		<td colspan="2" valign="top">
 			<table cellpadding="10" cellspacing="0" align="center" class="dvtSelectedCell thickBorder importContents">
