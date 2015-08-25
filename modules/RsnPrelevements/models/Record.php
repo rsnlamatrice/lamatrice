@@ -39,4 +39,32 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 		return $name;
 	}
 
+	/**
+	 * Génère un enregistrement RsnPrelVirement
+	 */
+	public function createPrelVirement($dateVir){
+		$recordModel = Vtiger_Record_Model::getCleanInstance('RsnPrelVirement');
+		$recordModel->set('rsnprelevementsid', $this->getId());
+		$recordModel->set('is_first', !$this->get('dejapreleve') ? 1 : 0);
+		$recordModel->set('dateexport', $dateVir->format('d-m-Y'));
+		$recordModel->set('montant', decimalFormat($this->get('montant')));
+		$recordModel->set('rsnprelvirstatus', 'Ok');
+		$recordModel->save();
+		return $recordModel;
+	}
+	
+	/**
+	 * Retourne le label de la périodicité, sans le n° d ela période et en minuscule
+	 */
+	public function getPeriodiciteLabel(){
+		return strtolower(preg_replace('/^(.*)\d+$/', '$1', $this->get('periodicite')));
+	}
+	
+	/**
+	 * Retourne la date de début de ce prélèvement
+	 */
+	public function getDateDebut(){
+		$date = new DateTime($this->get('sepadatesignature'));
+		return $date->format('d/m/Y');
+	}
 }
