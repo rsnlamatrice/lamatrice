@@ -18,13 +18,21 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 		return false ;
 	}
 
-	function getGenererPrelVirementsUrl(){
-		return 'index.php?module='.$this->getName() .'&view=GenererPrelVirements';
+	function getGenererPrelVirementsUrl($dateVir = false){
+		if($dateVir)
+			$dateVir = $this->getNextDateToGenerateVirnts($dateVir);
+		return 'index.php?module='.$this->getName() .'&view=GenererPrelVirements'
+			. ($dateVir ? '&date_virements=' . $dateVir->format('d-m-Y') : '');
 	}
 
 	function getDownloadPrelVirementsUrl($dateVir = false){
 		$dateVir = $this->getNextDateToGenerateVirnts($dateVir);
 		return 'index.php?module='.$this->getName() .'&action=Download&date_virements=' . $dateVir->format('d-m-Y');
+	}
+
+	function getPrintRemerciementsUrl($dateVir = false){
+		$dateVir = $this->getNextDateToGenerateVirnts($dateVir);
+		return 'index.php?module='.$this->getName() .'&view=PrintRemerciements&date_virements=' . $dateVir->format('d-m-Y');
 	}
 	
 	/**

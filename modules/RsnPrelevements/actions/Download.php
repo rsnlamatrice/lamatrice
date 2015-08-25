@@ -16,8 +16,19 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		
 		$msgVirements = $request->get('msg_virements');
+		
 		$recur_first = $request->get('recur_first');
 		$dateVir = $moduleModel->getNextDateToGenerateVirnts($request->get('date_virements'));
+		
+		if(!$msgVirements){
+			$loadUrl = $moduleModel->getGenererPrelVirementsUrl($dateVir);
+			echo '<html><body>
+				<code style="border: 1px solid red; color: red;">Le message aux donateurs est vide !</code>
+				<br><br><a href="' . $loadUrl . '">Retour</a>
+				</body></html>
+			';
+			return;
+		}
 		
 		$prelVirements = $moduleModel->getExistingPrelVirements( $dateVir, $recur_first );
 		
@@ -30,10 +41,10 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		}
 
 		$xml = $this->initXML($dateVir, $recur_first);
-		$this->writerSEPAHeader($xml, $dateVir, $recur_first, $msgVirements, $nbVirnts, $sumMontants );
+		$this->writerSEPAHeader($xml, $dateVir, $recur_first, $nbVirnts, $sumMontants );
 		
 		foreach($prelVirements as $prelVirnt){
-			$this->writeXmlPrelVirement($xml, $prelVirnt);
+			$this->writeXmlPrelVirement($xml, $prelVirnt, $msgVirements, $moduleModel);
 		}
 		
 		$this->closeXml($xml);
@@ -72,7 +83,7 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		$xml->flush();
 	}
 		
-	function writerSEPAHeader($xml, $dateVir, $recur_first, $msgVirements, $nbVirnts, $sumMontants ){
+	function writerSEPAHeader($xml, $dateVir, $recur_first, $nbVirnts, $sumMontants ){
 		include('config.RSN.inc.php');
 		
 		$today = new DateTime();
@@ -248,31 +259,79 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		
 		
 	}
-	function writeXmlPrelVirement($xml, $prelVirnt) {
+	function writeXmlPrelVirement($xml, $prelVirnt, $msgVirements, $moduleModel) {
+		
+		$dateVir = $moduleModel->getNextDateToGenerateVirnts($prelVirnt->get('dateexport') );
+		$rsnPrelevement = $prelVirnt->getRsnPrelevement();
 		
 		//$tTexte:="<DrctDbtTxInf>"  `+Caractere(Retour chariot )
 		$xml->startElement('DrctDbtTxInf');
 		
-		$xml->text(print_r($prelVirnt, true));
 	
-/*		$tTexte:=$tTexte+"<PmtId><EndToEndId>"+[Prélèvements]SEPArum+"-"+Chaine(Annee de(dDatePrlv);"0000")+Chaine(Mois de(dDatePrlv);"00")+"</EndToEndId></PmtId>"  `+Caractere(Retour chariot )
-		$tTexte:=$tTexte+"<InstdAmt Ccy="+Caractere(Guillemets )+"EUR"+Caractere(Guillemets )+">"+Remplacer chaine(Chaine([Prélèvements]Montant);",";".")+"</InstdAmt>"  `+Caractere(Retour chariot )
+		//$tTexte:=$tTexte+"<PmtId><EndToEndId>"+[Prélèvements]SEPArum+"-"+Chaine(Annee de(dDatePrlv);"0000")+Chaine(Mois de(dDatePrlv);"00")+"</EndToEndId></PmtId>"  `+Caractere(Retour chariot )
+		$xml->startElement('PmtId');
+		$xml->startElement('EndToEndId');
+		$xml->text($rsnPrelevement->get('separum') . '-' . $dateVir->format('Y') . str_pad($dateVir->format('m'), '0', 2));
+		$xml->endElement();//EndToEndId
+		$xml->endElement();//PmtId
 		
-		$tTexte:=$tTexte+"<DrctDbtTx><MndtRltdInf>"  `+Caractere(Retour chariot )
-		$tTexte:=$tTexte+"<MndtId>"+[Prélèvements]SEPArum+"</MndtId><DtOfSgntr>"+g_uti_DateToDateMysql ([Prélèvements]SEPAdateSignature)+"</DtOfSgntr>"  `+Caractere(Retour chariot )
-		$tTexte:=$tTexte+"</MndtRltdInf></DrctDbtTx>"  `+Caractere(Retour chariot )
+		//$tTexte:=$tTexte+"<InstdAmt Ccy="+Caractere(Guillemets )+"EUR"+Caractere(Guillemets )+">"+Remplacer chaine(Chaine([Prélèvements]Montant);",";".")+"</InstdAmt>"  `+Caractere(Retour chariot )
+		$xml->startElement('InstdAmt');
+		$xml->writeAttribute('Ccy', 'EUR');
+		$xml->text(decimalFormat($prelVirnt->get('montant')));
+		$xml->endElement();//InstdAmt
 		
-		$tTexte:=$tTexte+"<DbtrAgt><FinInstnId><BIC>"+[Prélèvements]SEPAbic+"</BIC></FinInstnId></DbtrAgt>"  `+Caractere(Retour chariot )
+		//$tTexte:=$tTexte+"<DrctDbtTx><MndtRltdInf>"  `+Caractere(Retour chariot )
+		$xml->startElement('DrctDbtTx');
+		$xml->startElement('MndtRltdInf');
+		//$tTexte:=$tTexte+"<MndtId>"+[Prélèvements]SEPArum+"</MndtId><DtOfSgntr>"+g_uti_DateToDateMysql ([Prélèvements]SEPAdateSignature)+"</DtOfSgntr>"  `+Caractere(Retour chariot )
+		$xml->startElement('MndtId');
+		$xml->text($rsnPrelevement->get('separum'));
+		$xml->endElement();//MndtId
+		$xml->startElement('DtOfSgntr');
+		$xml->text(getValidDBInsertDateValue($rsnPrelevement->get('sepadatesignature')));
+		$xml->endElement();//DtOfSgntr
+		//$tTexte:=$tTexte+"</MndtRltdInf></DrctDbtTx>"  `+Caractere(Retour chariot )
+		$xml->endElement();//MndtRltdInf
+		$xml->endElement();//DrctDbtTx
 		
-		$tTexte:=$tTexte+"<Dbtr><Nm>"+[Prélèvements]Nom+"</Nm></Dbtr>"  `+Caractere(Retour chariot )
-		$tTexte:=$tTexte+"<DbtrAcct><Id><IBAN>"+[Prélèvements]SEPAibanPays+[Prélèvements]SEPAibanClé+[Prélèvements]SEPAibanBBAN+"</IBAN></Id></DbtrAcct>"  `+Caractere(Retour chariot )
-		Si (Faux)  `$aTypeSepa="Nouveau")
-			$tTexte:=$tTexte+"<RmtInf><Ustrd>soutien au Reseau Sortir du Nucleaire : </Ustrd></RmtInf>"  `+Caractere(Retour chariot )"
-		Sinon 
-			$tTexte:=$tTexte+"<RmtInf><Ustrd>Sortir du nucleaire - "+aMsgPrlv+"</Ustrd></RmtInf>"  `+Caractere(Retour chariot )"
-		Fin de si
-*/		
+		//$tTexte:=$tTexte+"<DbtrAgt><FinInstnId><BIC>"+[Prélèvements]SEPAbic+"</BIC></FinInstnId></DbtrAgt>"  `+Caractere(Retour chariot )
+		$xml->startElement('DbtrAgt');
+		$xml->startElement('FinInstnId');
+		$xml->startElement('BIC');
+		$xml->text($rsnPrelevement->get('sepabic'));
+		$xml->endElement();//BIC
+		$xml->endElement();//FinInstnId
+		$xml->endElement();//DbtrAgt
+		
+		//$tTexte:=$tTexte+"<Dbtr><Nm>"+[Prélèvements]Nom+"</Nm></Dbtr>"  `+Caractere(Retour chariot )
+		$xml->startElement('Dbtr');
+		$xml->startElement('Nm');
+		$xml->text($rsnPrelevement->get('nom'));
+		$xml->endElement();
+		$xml->endElement();
+		
+		//$tTexte:=$tTexte+"<DbtrAcct><Id><IBAN>"+[Prélèvements]SEPAibanPays+[Prélèvements]SEPAibanClé+[Prélèvements]SEPAibanBBAN+"</IBAN></Id></DbtrAcct>"  `+Caractere(Retour chariot )
+		$xml->startElement('DbtrAcct');
+		$xml->startElement('Id');
+		$xml->startElement('IBAN');
+		$xml->text($rsnPrelevement->get('sepaibanpays') . $rsnPrelevement->get('sepaibancle') . $rsnPrelevement->get('sepaibanbban'));
+		$xml->endElement();
+		$xml->endElement();
+		$xml->endElement();
+		//Si (Faux)  `$aTypeSepa="Nouveau")
+		//	$tTexte:=$tTexte+"<RmtInf><Ustrd>soutien au Reseau Sortir du Nucleaire : </Ustrd></RmtInf>"  `+Caractere(Retour chariot )"
+		//Sinon 
+		//	$tTexte:=$tTexte+"<RmtInf><Ustrd>Sortir du nucleaire - "+aMsgPrlv+"</Ustrd></RmtInf>"  `+Caractere(Retour chariot )"
+		//Fin de si
+		$xml->startElement('RmtInf');
+		$xml->startElement('Ustrd');
+		$xml->text('Sortir du nucleaire - ' . $msgVirements);
+		$xml->endElement();
+		$xml->endElement();
+		
 		//$tTexte:=$tTexte+"</DrctDbtTxInf>"  `+Caractere(Retour chariot )
 		$xml->endElement();//DrctDbtTxInf
 	}
+	
 }

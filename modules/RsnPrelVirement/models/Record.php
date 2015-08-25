@@ -22,4 +22,21 @@ class RsnPrelVirement_Record_Model extends Vtiger_Record_Model {
 		return $name;
 	}
 
+	var $RsnPrelevement;
+	public function getRsnPrelevement(){
+		if(!$this->RsnPrelevement || $this->RsnPrelevement->get('rsnprelevementsid') != $this->get('rsnprelevementsid')){
+			$this->RsnPrelevement = Vtiger_Record_Model::getInstanceById($this->get('rsnprelevementsid'), 'RsnPrelevements');
+		}
+		return $this->RsnPrelevement;
+	}
+
+	var $Contact;
+	public function getContact(){
+		$rsnPrelevement = $this->getRsnPrelevement();
+		if(!$this->Contact || $this->Contact->get('accountid') != $rsnPrelevement->get('accountid')){
+			$account = Vtiger_Record_Model::getInstanceById($rsnPrelevement->get('accountid'), 'Accounts');
+			$this->Contact = $account->getRelatedMainContact();
+		}
+		return $this->Contact;
+	}
 }

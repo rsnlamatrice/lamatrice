@@ -35,6 +35,9 @@ class RsnPrelevements_GenererPrelVirements_View extends Vtiger_Index_View {
 		$loadUrl = $moduleModel->getDownloadPrelVirementsUrl($dateVir);
 		$viewer->assign('DOWNLOAD_URL', $loadUrl);
 		
+		$loadUrl = $moduleModel->getPrintRemerciementsUrl($dateVir);
+		$viewer->assign('PRINT_FIRSTS_URL', $loadUrl);
+		
 		$viewer->view('GenererPrelVirements.tpl', $moduleName);
 	}
 	

@@ -52,7 +52,7 @@
 		</td>
 		<td class="fieldValue medium">
 		<div class="row-fluid"><span class="span10">
-			<input name="msg_virements" value="{$MSG_VIREMENTS}" onchange="this.value = this.value.toUpperCase();"/>
+			<input id="msg_virements" name="msg_virements" value="{$MSG_VIREMENTS}" onchange="this.value = this.value.toUpperCase();"/>
 		</span></div>
 		</td>
 	</tr>
@@ -65,9 +65,21 @@
 					<h4>{if $RECUR_FIRST eq 'FIRST'}Premiers prélèvements (FIRST)
 					{else}Prélèvements suivants (RECUR)
 					{/if}
-						<a href="{$DOWNLOAD_URL}&recur_first={$RECUR_FIRST}" style="padding-left: 2em;">
+						<a href="{$DOWNLOAD_URL}&recur_first={$RECUR_FIRST}" style="padding-left: 2em;"
+						 onclick="var msg=$('#msg_virements').val();
+						 if(!msg){
+							alert('Le message aux donateurs est vide !');
+							return false;
+						 }
+						 this.href = this.href.replace(/\&msg_virements\=[^\&]*/, '') + '&msg_virements=' + encodeURIComponent(msg);
+						 ">
 							<strong><i class="icon-download" style="vertical-align: middle; margin-right: 4px;"></i>Télécharger</strong>
 						</a>
+							{if $RECUR_FIRST eq 'FIRST'}
+							<a href="{$PRINT_FIRSTS_URL}" style="padding-left: 2em;">
+								<strong><i class="icon-print" style="vertical-align: middle; margin-right: 4px;"></i>Imprimer les lettres de remerciements</strong>
+							</a>
+						{/if}
 					</h4>
 					&nbsp;<b>{$ITEM['nombre']}</b> prélèvement{if $ITEM['nombre']>1}s{/if}
 					&nbsp;pour un montant total de <b>{$ITEM['montant']} &euro;</b>
