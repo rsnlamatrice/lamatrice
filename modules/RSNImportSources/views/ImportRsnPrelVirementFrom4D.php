@@ -85,9 +85,13 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRsnPrelVirement($importDataController) {
+		$config = new RSNImportSources_Config_Model();
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnPrelVirement');
-		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
+		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '
+			. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE
+			. ' ORDER BY id'
+			. ' LIMIT 0, ' . $config->get('importBatchLimit');
 
 		$result = $adb->query($sql);
 		$numberOfRecords = $adb->num_rows($result);
@@ -95,10 +99,16 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		if ($numberOfRecords <= 0) {
 			return;
 		}
-
+		$perfStartTime = new DateTime();
+		$prev_perfPC = 0;
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
-			
-			echo "\nimport $i/$numberOfRecords ( ".(int)($i/$numberOfRecords * 100)." %) ";
+			$perfPC = (int)($i/$numberOfRecords * 100);
+			if($prev_perfPC != $perfPC){
+				$perfNow = new DateTime();
+				$perfElapsed = date_diff($perfStartTime, $perfNow)->format('%H:%i:%S');
+				echo "\n import $i/$numberOfRecords ( $perfPC %, $perfElapsed ) ";
+				$prev_perfPC = $perfPC;
+			}
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelVirement(array($row), $importDataController);
 		}
