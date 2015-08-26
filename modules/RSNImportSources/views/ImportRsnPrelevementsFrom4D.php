@@ -330,7 +330,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 */
 	function isDate($string) {
 		//TODO do not put this function here ?
-		return preg_match("/^[0-3][0-9][-\/][0-1][0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
+		return preg_match("/^[0-3]?[0-9][-\/][0-1]?[0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
 	}
 	/**
 	 * Method that returns a formatted date for mysql (Y-m-d).

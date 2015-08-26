@@ -273,9 +273,10 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		$result = $db->pquery($query, array($rsnprelvirementsData[0]['dateexport'], $sourceId));
 
 		if($db->num_rows($result)){
-			var_dump("Déjà existant", $rsnprelvirementsValues);
+			var_dump("Preimport RsnPrelVirement", $rsnprelvirementsValues);
 			return true;
-		}		
+		}
+		
 		$rsnprelvirements = new RSNImportSources_Preimport_Model($rsnprelvirementsValues, $this->user, 'RsnPrelVirement');
 		$rsnprelvirements->save();
 	}
@@ -369,7 +370,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 */
 	function isDate($string) {
 		//TODO do not put this function here ?
-		return preg_match("/^[0-3][0-9][-\/][0-1][0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
+		return preg_match("/^[0-3]?[0-9][-\/][0-1]?[0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
 	}
 	/**
 	 * Method that returns a formatted date for mysql (Y-m-d).
