@@ -210,13 +210,13 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					}
 					
 					$record->set('mode','edit');
-					$query = "UPDATE vtiger_rsnprelevements
-						JOIN vtiger_crmentity
+					$query = "UPDATE vtiger_crmentity
+						JOIN vtiger_rsnprelevements
 							ON vtiger_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
 						SET smownerid = ?
 						, modifiedtime = ?
 						, createdtime = ?
-						WHERE rsnprelevementsid = ?
+						WHERE vtiger_crmentity.crmid = ?
 					";
 					$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 									    , $rsnprelevementsData[0]['datedernmodif']
@@ -394,7 +394,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 
 				if (!$this->isClientInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
-						array_push($rsnprelevements['detail'], $nextLine);
+						//impossible ici array_push($rsnprelevements['detail'], $nextLine);
 					}
 				} else {
 					break;
