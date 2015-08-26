@@ -20,7 +20,9 @@ manage cancel button using importclassname
 			{'LBL_IMPORT'|@vtranslate:$MODULE} {$FOR_MODULE|@vtranslate:$FOR_MODULE} -
 			<span class="redColor">{if $IMPORT_STATUS eq Import_Queue_Action::$IMPORT_STATUS_HALTED}
 					{'LBL_HALTED'|@vtranslate:$MODULE} !!!
-					<button style="margin-left: 4em;" disabled="disabled" titgle="A Faire : setStatus({$IMPORT_ID}, RUNNING = 1)" onclick="return false;">reprendre</button>
+					
+					<button class="btn" name="continue" style="margin-left: 2em;"
+						onclick="location.href='index.php?for_module={$FOR_MODULE}&module=RSNImportSources&view=Index&mode=continueHaltedImport&importId={$IMPORT_ID}'"><strong>{'LBL_REACTIVATE'|@vtranslate:$MODULE}</strong></button>
 				{else}
 					{'LBL_RUNNING'|@vtranslate:$MODULE} ...
 				{/if}</span>

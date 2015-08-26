@@ -150,7 +150,7 @@ class Import_Queue_Action extends Vtiger_Action_Controller {
 
 	static function updateStatus($importId, $status) {
 		$db = PearDatabase::getInstance();
-		$db->pquery('UPDATE ' . self::$importQueueTable . ' SET status=? WHERE importid=?', array($status, $importId));
+		$result = $db->pquery('UPDATE ' . self::$importQueueTable . ' SET status=? WHERE importid=?', array($status, $importId));
 	}
 
 }
