@@ -113,10 +113,17 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		if ($numberOfRecords <= 0) {
 			return;
 		}
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = true;
+		}
 
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelevements(array($row), $importDataController);
+		}
+		
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
 		}
 	}
 

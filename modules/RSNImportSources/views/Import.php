@@ -670,12 +670,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		if($this->checkPreImportInCache('Contacts', '4d', $ref4D))
 			return $this->checkPreImportInCache('Contacts', '4d', $ref4D);
 		
-		$query = "SELECT crmid
+		$query = "SELECT vtiger_crmentity.crmid
 			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND contact_no IN ( CONCAT('C', ?), CONCAT('CID', ?))
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_contactdetails.contact_no IN ( CONCAT('C', ?), CONCAT('CID', ?))
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();

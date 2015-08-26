@@ -120,7 +120,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		/*var_dump("\n\n\n\n\n\n\n\n\nnumberOfRecords\n\n\n\n\n\n\n\n\n\n\n", $numberOfRecords, $config->get('importBatchLimit')
 				, '$this->getNumberOfRecords()', $this->getNumberOfRecords());*/
 		if($numberOfRecords == $config->get('importBatchLimit')){
-			//$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
+			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
 		}
 	}
 

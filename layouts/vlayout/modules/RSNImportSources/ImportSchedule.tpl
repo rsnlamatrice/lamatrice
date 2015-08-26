@@ -12,7 +12,7 @@ manage cancel button using importclassname
  */
 jQuery(document).ready(function() {
 	setTimeout(function() {
-		jQuery('button[name="ok"]:last').click();
+		jQuery('button[name="ok"]:visible:first').click();
 		}, 1 * 60 * 1000);
 });
 </script>
