@@ -739,10 +739,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	}
 
 	
-	public function updateStatus($status) {
-		if($this->scheduledId){
+	public function updateStatus($status, $importId = false) {
+		if(!$importId)
+			$importId = $this->scheduledId;
+		if($importId){
 			//var_dump('updateStatus',$this->scheduledId, $status);
-			RSNImportSources_Queue_Action::updateStatus($this->scheduledId, $status);
+			RSNImportSources_Queue_Action::updateStatus($importId, $status);
 		}
 		else{
 			//echo_callstack();
