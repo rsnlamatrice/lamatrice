@@ -109,7 +109,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			if($prev_perfPC != $perfPC){
 				$perfNow = new DateTime();
 				$perfElapsed = date_diff($perfStartTime, $perfNow)->format('%H:%i:%S');
-				echo "\n import $i/$numberOfRecords ( $perfPC %, $perfElapsed ) ";
+				echo "\n import $i/$numberOfRecords ( $perfPC %, $perfElapsed, ".memory_get_usage()." ) ";
 				$prev_perfPC = $perfPC;
 			}
 			$row = $adb->raw_query_result_rowdata($result, $i);
