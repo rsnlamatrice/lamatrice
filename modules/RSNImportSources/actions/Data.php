@@ -10,9 +10,11 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 	 * Method to ended an import.
 	 *  It unlock the module for new import and remove the concerned import of the table.
 	 */
-	public function finishImport() {
+	public function finishImport($remove = true) {
 		RSNImportSources_Lock_Action::unLock($this->user, $this->module);
-		RSNImportSources_Queue_Action::remove($this->id);
+		if($remove){
+			RSNImportSources_Queue_Action::remove($this->id);
+		}
 	}
 
 	/**
@@ -46,30 +48,34 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 			$className = $importDataController->get('importSource');//tmp getImport source
 			$importClass = RSNImportSources_Utils_Helper::getClassFromName($className);
 			$importController = new $importClass($request, $current_user);
+			$importController->scheduledId = $scheduledId;
 			$importController->doImport($importDataController, $module);//tmp get module name !!
-			$importStatusCount = $importDataController->getImportStatusCount();
-
-			// tmp mail
-			/*$emailSubject = 'vtiger CRM - Scheduled Import Report for '.$importDataController->module;
-            vimport('~~/modules/Import/ui/Viewer.php');
-			$viewer = new Import_UI_Viewer();
-			$viewer->assign('FOR_MODULE', $importDataController->module);
-            $viewer->assign('INVENTORY_MODULES', getInventoryModules());
-			$viewer->assign('IMPORT_RESULT', $importStatusCount);
-			$importResult = $viewer->fetch('Import_Result_Details.tpl');
-			$importResult = str_replace('align="center"', '', $importResult);
-			$emailData = 'vtiger CRM has just completed your import process. <br/><br/>' .
-							$importResult . '<br/><br/>'.
-							'We recommend you to login to the CRM and check few records to confirm that the import has been successful.';
-
-			$userName = getFullNameFromArray('Users', $importDataController->user->column_fields);
-			$userEmail = $importDataController->user->email1;
-			$vtigerMailer->to = array( array($userEmail, $userName));
-			$vtigerMailer->Subject = $emailSubject;
-			$vtigerMailer->Body    = $emailData;
-			$vtigerMailer->Send();*/
-
-			$importDataController->finishImport();//tmp how to check the import result without mail ???
+			
+			/*if(!$importController->keepScheduledImport){
+				$importStatusCount = $importDataController->getImportStatusCount();
+	
+				// tmp mail
+				$emailSubject = 'vtiger CRM - Scheduled Import Report for '.$importDataController->module;
+				vimport('~~/modules/Import/ui/Viewer.php');
+				$viewer = new Import_UI_Viewer();
+				$viewer->assign('FOR_MODULE', $importDataController->module);
+				$viewer->assign('INVENTORY_MODULES', getInventoryModules());
+				$viewer->assign('IMPORT_RESULT', $importStatusCount);
+				$importResult = $viewer->fetch('Import_Result_Details.tpl');
+				$importResult = str_replace('align="center"', '', $importResult);
+				$emailData = 'vtiger CRM has just completed your import process. <br/><br/>' .
+								$importResult . '<br/><br/>'.
+								'We recommend you to login to the CRM and check few records to confirm that the import has been successful.';
+	
+				$userName = getFullNameFromArray('Users', $importDataController->user->column_fields);
+				$userEmail = $importDataController->user->email1;
+				$vtigerMailer->to = array( array($userEmail, $userName));
+				$vtigerMailer->Subject = $emailSubject;
+				$vtigerMailer->Body    = $emailData;
+				$vtigerMailer->Send();
+			}*/
+			
+			$importDataController->finishImport(!$importController->keepScheduledImport);//tmp how to check the import result without mail ???
 		}
 		//tmp mail
 		//Vtiger_Mailer::dispatchQueue(null);
