@@ -181,6 +181,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	function displayDataPreview() {
 		$viewer = $this->getViewer($this->request);
 		$moduleName = $this->request->get('for_module');
+		
+		//ED150826 Show rows count
+		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords());
+		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('PREVIEW_DATA', $this->getPreviewData());
