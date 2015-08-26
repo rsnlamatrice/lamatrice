@@ -271,9 +271,11 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		$sourceId = $rsnprelvirementsData[0]['separum'];
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, array($rsnprelvirementsData[0]['dateexport'], $sourceId));
-		if($db->num_rows($result))
+
+		if($db->num_rows($result)){
+			var_dump("Déjà existant", $rsnprelvirementsValues);
 			return true;
-		
+		}		
 		$rsnprelvirements = new RSNImportSources_Preimport_Model($rsnprelvirementsValues, $this->user, 'RsnPrelVirement');
 		$rsnprelvirements->save();
 	}
