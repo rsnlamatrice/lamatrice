@@ -11,6 +11,9 @@
 
 class Vtiger_Import_View extends Vtiger_Index_View {
 
+	/*ED150826*/
+	var $scheduledId;
+	
 	function __construct() {
 		parent::__construct();
 		$this->exposeMethod('continueImport');
@@ -277,5 +280,11 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 			}
 		}
 		Import_Utils_Helper::clearUserImportInfo($user, $moduleName);
+	}
+
+	/* ED150826 compatibilité avec RSNImportSources_Import_View */
+	public function updateStatus($status) {
+		if($this->scheduledId)
+			Import_Queue_Action::updateStatus($this->scheduledId, $status);
 	}
 }

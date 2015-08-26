@@ -99,6 +99,9 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		if ($numberOfRecords <= 0) {
 			return;
 		}
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = true;
+		}
 		$perfStartTime = new DateTime();
 		$prev_perfPC = 0;
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
@@ -111,6 +114,13 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			}
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelVirement(array($row), $importDataController);
+		}
+		
+		//ED150826 : d'autres données sont disponibles, empêche la suppression de l'import programmé
+		/*var_dump("\n\n\n\n\n\n\n\n\nnumberOfRecords\n\n\n\n\n\n\n\n\n\n\n", $numberOfRecords, $config->get('importBatchLimit')
+				, '$this->getNumberOfRecords()', $this->getNumberOfRecords());*/
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			//$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
 		}
 	}
 

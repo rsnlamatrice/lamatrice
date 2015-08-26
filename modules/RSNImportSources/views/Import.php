@@ -11,6 +11,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 	var $request;
 	var $user;
+	/*ED150826*/
+	var $scheduledId;
 
 	public function  __construct($request = FALSE, $user = FALSE) {
 		parent::__construct();
@@ -256,12 +258,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @param string $module: the module name
 	 */
 	public function doImport($importDataController, $module) {
+		$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_RUNNING);
+		
 		$methode = "import" . ucfirst($module);
 		if (method_exists($this, $methode)) {
 			$this->$methode($importDataController);
 		} else {
 			$importDataController->importData();
 		}
+		$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
 	}
 
 	/**
@@ -725,6 +730,18 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			array_splice($this->preImportChecker_cache, 0, IMPORTCHECKER_CACHE_MAX / 2);
 		$this->preImportChecker_cache[$cacheKey] = $value;
 		return false;		
+	}
+
+	
+	public function updateStatus($status) {
+		if($this->scheduledId){
+			//var_dump('updateStatus',$this->scheduledId, $status);
+			RSNImportSources_Queue_Action::updateStatus($this->scheduledId, $status);
+		}
+		else{
+			//echo_callstack();
+			//var_dump('updateStatus NO scheduledId ', $status);
+		}
 	}
 }
 
