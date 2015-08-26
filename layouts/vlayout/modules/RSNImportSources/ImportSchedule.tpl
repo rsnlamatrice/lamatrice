@@ -4,6 +4,16 @@
 manage cancel button using importclassname
  ********************************************************************************/
 -->*}
+{literal}
+<script type="text/javascript">
+jQuery(document).ready(function() {
+	setTimeout(function() {
+		jQuery('button[name="ok"]:last').click();
+		}, 5 * 60 * 1000);
+});
+</script>
+{/literal}
+
 <table style="width:80%;margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="searchUIBasic well">
 	<tr>
 		<td class="font-x-large" align="left" colspan="2">

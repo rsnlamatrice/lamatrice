@@ -33,7 +33,7 @@ jQuery(document).ready(function() {
 	<table style="width:80%;margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="searchUIBasic well">
 		<tr>
 			<td class="font-x-large" align="left" colspan="2">
-				{'LBL_IMPORT'|@vtranslate:$MODULE} {$FOR_MODULE|@vtranslate:$FOR_MODULE} -
+				{'LBL_IMPORT'|@vtranslate:$MODULE} {$FOR_MODULE|@vtranslate:$FOR_MODULE}&nbsp;-&nbsp;
 			<span class="redColor">
 				{if $IMPORT_STATUS eq Import_Queue_Action::$IMPORT_STATUS_HALTED}
 					{'LBL_HALTED'|@vtranslate:$MODULE} !!!
