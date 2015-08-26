@@ -26,6 +26,7 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 		$this->exposeMethod('clearCorruptedData');
 		$this->exposeMethod('cancelImport');
 		$this->exposeMethod('checkImportStatus');
+		$this->exposeMethod('continueHaltedImport');
 	}
 
 	function checkPermission(Vtiger_Request $request) {
@@ -239,6 +240,19 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 				Import_Main_View::showResult($importInfo, $importStatusCount);
 			}
 		}
+	}
+
+	/** ED150826
+	 * Method to reset halted import to scheduled status and display the status of the import.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function continueHaltedImport(Vtiger_Request $request) {
+		$importId = $request->get('import_id');
+		if ($importId) {			
+			Import_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+		}
+		$request->set('mode', 'checkImportStatus');
+		$this->checkImportStatus($request);
 	}
 
 	function checkImportStatus(Vtiger_Request $request) {

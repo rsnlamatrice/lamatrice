@@ -7,7 +7,7 @@ manage cancel button using importclassname
 <table style="width:80%;margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="searchUIBasic well">
 	<tr>
 		<td class="font-x-large" align="left" colspan="2">
-			<strong>{'LBL_IMPORT_SCHEDULED'|@vtranslate:$MODULE} {$FOR_MODULE|@vtranslate:$FOR_MODULE}</strong>
+			<strong>{$FOR_MODULE|@vtranslate:$FOR_MODULE} - {'LBL_IMPORT_SCHEDULED'|@vtranslate:$MODULE}</strong>
 		</td>
 	</tr>
 	{if $ERROR_MESSAGE neq ''}
