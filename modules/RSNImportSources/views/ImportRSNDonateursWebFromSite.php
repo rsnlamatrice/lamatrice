@@ -246,12 +246,12 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 					}
 					
 					$record->set('mode','edit');
-					$query = "UPDATE vtiger_rsndonateursweb
-						JOIN vtiger_crmentity
+					$query = "UPDATE vtiger_crmentity
+						JOIN vtiger_rsndonateursweb
 							ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
 						SET smownerid = ?
 						"/*, createdtime = ?*/."
-						WHERE rsndonateurswebid = ?
+						WHERE vtiger_crmentity.crmid = ?
 					";
 					$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 									    /*, $rsndonateurswebData[0]['datedon']*/

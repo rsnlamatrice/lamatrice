@@ -434,7 +434,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 
 				if (!$this->isClientInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
-						array_push($rsnprelvirements['detail'], $nextLine);
+						//impossible ici array_push($rsnprelvirements['detail'], $nextLine);
 					}
 				} else {
 					break;
