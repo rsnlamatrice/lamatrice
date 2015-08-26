@@ -577,7 +577,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		if(!is_string($str))
 			return $str;
 		try {
-			if(!is_numeric($str[0]))//TODO ".50"
+			if(!is_numeric($str[0]) && $str[0] != '-' && $str[0] != '+')//TODO ".50"
 				return false;
 			return (float)str_replace(',', '.', $str);
 		}

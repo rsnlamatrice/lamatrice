@@ -6,6 +6,10 @@ manage cancel button using importclassname
 -->*}
 {literal}
 <script type="text/javascript">
+/* rafraichissement périodique
+ * cf ImportStatus.tpl
+ * TODO : lorsque l'import est fini, il faudrait afficher les résultats. En l'état, on obtient la création d'un nouvel import.
+ */
 jQuery(document).ready(function() {
 	setTimeout(function() {
 		jQuery('button[name="ok"]:last').click();
