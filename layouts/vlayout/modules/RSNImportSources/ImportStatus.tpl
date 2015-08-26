@@ -18,7 +18,12 @@ manage cancel button using importclassname
 	<tr>
 		<td class="font-x-large" align="left" colspan="2">
 			{'LBL_IMPORT'|@vtranslate:$MODULE} {$FOR_MODULE|@vtranslate:$FOR_MODULE} -
-			<span class="redColor">{'LBL_RUNNING'|@vtranslate:$MODULE} ... </span>
+			<span class="redColor">{if $IMPORT_STATUS eq Import_Queue_Action::$IMPORT_STATUS_HALTED}
+					{'LBL_HALTED'|@vtranslate:$MODULE} !!!
+					<button style="margin-left: 4em;" disabled="disabled" titgle="A Faire : setStatus({$IMPORT_ID}, RUNNING = 1)" onclick="return false;">reprendre</button>
+				{else}
+					{'LBL_RUNNING'|@vtranslate:$MODULE} ...
+				{/if}</span>
 		</td>
 	</tr>
 	{if $ERROR_MESSAGE neq ''}
