@@ -68,6 +68,7 @@ $languageStrings = array(
 	'LBL_OK_BUTTON_LABEL'          => 'Ok',
 	'LBL_IMPORT_SCHEDULED'         => 'Import programmé'           , 
 	'LBL_RUNNING'                  => 'En cours'                    , 
+	'LBL_HALTED'                  => 'Suspendu'                    , 
 	'LBL_CANCEL_IMPORT'            => 'Annuler Import'              , 
 	'LBL_ERROR'                    => 'Erreur'                      ,
 	'LBL_CLEAR_DATA'               => 'Effacer les données', 

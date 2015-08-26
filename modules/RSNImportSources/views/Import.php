@@ -259,14 +259,19 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 */
 	public function doImport($importDataController, $module) {
 		$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_RUNNING);
-		
-		$methode = "import" . ucfirst($module);
-		if (method_exists($this, $methode)) {
-			$this->$methode($importDataController);
-		} else {
-			$importDataController->importData();
+		try{
+			$methode = "import" . ucfirst($module);
+			if (method_exists($this, $methode)) {
+				$this->$methode($importDataController);
+			} else {
+				$importDataController->importData();
+			}
+			$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
 		}
-		$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+		catch(Exception $ex){
+			$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_HALTED);
+			throw ($ex);
+		}
 	}
 
 	/**
@@ -447,6 +452,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('IMPORT_ID', $importId);
 		$viewer->assign('IMPORT_RESULT', $importStatusCount);
+		$viewer->assign('IMPORT_STATUS', $importInfo['status']);
 		$viewer->assign('INVENTORY_MODULES', getInventoryModules());
 		$viewer->assign('CONTINUE_IMPORT', $continueImport);
 
