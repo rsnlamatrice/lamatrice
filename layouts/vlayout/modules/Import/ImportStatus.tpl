@@ -34,7 +34,15 @@ jQuery(document).ready(function() {
 		<tr>
 			<td class="font-x-large" align="left" colspan="2">
 				{'LBL_IMPORT'|@vtranslate:$MODULE} {$FOR_MODULE|@vtranslate:$FOR_MODULE} -
-				<span class="redColor">{'LBL_RUNNING'|@vtranslate:$MODULE} ... </span>
+			<span class="redColor">
+				{if $IMPORT_STATUS eq Import_Queue_Action::$IMPORT_STATUS_HALTED}
+					{'LBL_HALTED'|@vtranslate:$MODULE} !!!
+					
+					<button class="btn" name="continue" style="margin-left: 2em;"
+						onclick="location.href='index.php?for_module={$FOR_MODULE}&module={$MODULE}&view=Index&mode=continueHaltedImport&importId={$IMPORT_ID}'"><strong>{'LBL_REACTIVATE'|@vtranslate:$MODULE}</strong></button>
+				{else}
+					{'LBL_RUNNING'|@vtranslate:$MODULE} ...
+				{/if}</span>
 			</td>
 		</tr>
 		{if $ERROR_MESSAGE neq ''}

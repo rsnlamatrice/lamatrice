@@ -223,7 +223,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 * @param Vtiger_Request $request: the curent request.
 	 */
 	function continueHaltedImport(Vtiger_Request $request) {
-		$importId = $request->get('importId');
+		$importId = $request->get('import_id');
 		if ($importId) {			
 			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
 		}
