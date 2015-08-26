@@ -215,18 +215,18 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				}
 				
 				$record->set('mode','edit');
-				$query = "UPDATE vtiger_rsnprelvirement
-					JOIN vtiger_crmentity
+				$query = "UPDATE vtiger_crmentity
+					JOIN vtiger_rsnprelvirement
 						ON vtiger_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
 					SET smownerid = ?
 					, createdtime = ?
-					WHERE rsnprelvirementid = ?
+					WHERE crmid = ?
 				";
 				$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 									, $rsnprelvirementsData[0]['dateexport']
 									, $rsnprelvirementsId));
 				
-				$log->debug("" . basename(__FILE__) . " update imported rsnprelvirement (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsnprelvirementsData[0]['datecreation']
+				$log->debug("" . basename(__FILE__) . " update imported rsnprelvirement (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsnprelvirementsData[0]['dateexport']
 						. ", result=" . ($result ? " true" : "false"). " )");
 				if( ! $result)
 					$db->echoError();
