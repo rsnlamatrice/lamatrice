@@ -31,6 +31,13 @@
 					</td>
 				</tr>
 			{/foreach}
+			{if $IMPORTABLE_ROWS_COUNT}
+				<tr>
+					<td class="style1" align="left" colspan="2">
+						Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}
+					</td>
+				</tr>
+			{/if}
 			<tr>
 				<!-- tmp add next button !! -->
 				<!-- tmp add call manu if problem !! -->
