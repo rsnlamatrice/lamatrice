@@ -315,6 +315,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			return false;
 		}
 		
+		$separum = $rsnprelvirementsData[0]['separum'];
 		//TODO : cache
 		$query = "SELECT crmid
 			FROM vtiger_rsnprelevements
@@ -322,17 +323,27 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				ON vtiger_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
 			WHERE vtiger_crmentity.deleted = 0
 			AND accountid = ?
-			AND separum = ?
+		";
+		$params = array($account->getId());
+		if(strlen($separum) > 12){
+			$query .= "
+				AND separum = ?
+			";
+			$params[] = $separum;
+		}
+		$query .= "
 			AND montant = ?
 			AND DATE(vtiger_crmentity.createdtime) <= ?
+			ORDER BY etat ASC
 			LIMIT 1
 		";
-		$sourceId = $rsnprelvirementsData[0]['separum'];
-		$params = array($account->getId(), $sourceId, $rsnprelvirementsData[0]['montant'], $rsnprelvirementsData[0]['dateexport']);
+		$params[] = $rsnprelvirementsData[0]['montant'];
+		$params[] = $rsnprelvirementsData[0]['dateexport']);
+		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
 		if(!$db->num_rows($result)){
-			var_dump("Impossible de trouver le prélèvement. SEPARUM = $sourceId. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
+			var_dump("Impossible de trouver le prélèvement. SEPARUM = $separum. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
 			return false;
 		}
 		

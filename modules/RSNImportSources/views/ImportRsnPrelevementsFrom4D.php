@@ -103,6 +103,8 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRsnPrelevements($importDataController) {
+		$config = new RSNImportSources_Config_Model();
+		
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnPrelevements');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
