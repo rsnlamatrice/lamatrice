@@ -70,10 +70,10 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		return array(
 			'reffiche',
 			'nom',
-			'numerocompte',
+			'numcompte',
 			'codebanque',
 			'codeguichet',
-			'cle',
+			'clerib',
 			'montant',
 			'periodicite',
 			'msg',
@@ -113,10 +113,17 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		if ($numberOfRecords <= 0) {
 			return;
 		}
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = true;
+		}
 
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelevements(array($row), $importDataController);
+		}
+		
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
 		}
 	}
 
@@ -210,13 +217,13 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					}
 					
 					$record->set('mode','edit');
-					$query = "UPDATE vtiger_rsnprelevements
-						JOIN vtiger_crmentity
+					$query = "UPDATE vtiger_crmentity
+						JOIN vtiger_rsnprelevements
 							ON vtiger_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
 						SET smownerid = ?
 						, modifiedtime = ?
 						, createdtime = ?
-						WHERE rsnprelevementsid = ?
+						WHERE vtiger_crmentity.crmid = ?
 					";
 					$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 									    , $rsnprelevementsData[0]['datedernmodif']
@@ -330,7 +337,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 */
 	function isDate($string) {
 		//TODO do not put this function here ?
-		return preg_match("/^[0-3][0-9][-\/][0-1][0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
+		return preg_match("/^[0-3]?[0-9][-\/][0-1]?[0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
 	}
 	/**
 	 * Method that returns a formatted date for mysql (Y-m-d).
@@ -394,7 +401,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 
 				if (!$this->isClientInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
-						array_push($rsnprelevements['detail'], $nextLine);
+						//impossible ici array_push($rsnprelevements['detail'], $nextLine);
 					}
 				} else {
 					break;
@@ -423,10 +430,10 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		$rsnprelevementsHeader = array(
 			'reffiche'	=> $rsnprelevements['prlvInformations'][0],
 			'nom'	=> $rsnprelevements['prlvInformations'][1],
-			'numerocompte'	=> $rsnprelevements['prlvInformations'][2],
+			'numcompte'	=> $rsnprelevements['prlvInformations'][2],
 			'codebanque'	=> $rsnprelevements['prlvInformations'][3],
 			'codeguichet'	=> $rsnprelevements['prlvInformations'][4],
-			'cle'	=> $rsnprelevements['prlvInformations'][5],
+			'clerib'	=> $rsnprelevements['prlvInformations'][5],
 			'montant'	=> self::str_to_float($rsnprelevements['prlvInformations'][6]),
 			'periodicite'	=> $this->getPeriodiciteFrom4D($rsnprelevements['prlvInformations'][7], $this->getMySQLDate($rsnprelevements['prlvInformations'][11])),
 			'msg'	=> $rsnprelevements['prlvInformations'][8],

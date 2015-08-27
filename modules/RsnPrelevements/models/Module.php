@@ -125,9 +125,9 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 		//Périodicités acceptables
 		$periodicites = array(
 				      'Mensuel',
-				      'Bimestriel ' . ($mois % 2 + 1),
-				      'Trimestriel ' . floor(($mois - 1) / 3 + 1),
-				      'Semestriel ' . floor(($mois - 1) / 6 + 1),
+				      'Bimestriel ' . (($mois - 1) % 2 + 1),
+				      'Trimestriel ' . (($mois - 1) % 3 + 1),
+				      'Semestriel ' . (($mois - 1) % 6 + 1),
 				      'Annuel ' . $mois,
 				);
 		return $periodicites;

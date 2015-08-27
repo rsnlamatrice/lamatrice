@@ -85,9 +85,13 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRsnPrelVirement($importDataController) {
+		$config = new RSNImportSources_Config_Model();
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnPrelVirement');
-		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
+		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '
+			. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE
+			. ' ORDER BY id'
+			. ' LIMIT 0, ' . $config->get('importBatchLimit');
 
 		$result = $adb->query($sql);
 		$numberOfRecords = $adb->num_rows($result);
@@ -95,12 +99,28 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		if ($numberOfRecords <= 0) {
 			return;
 		}
-
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = true;
+		}
+		$perfStartTime = new DateTime();
+		$prev_perfPC = 0;
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
-			
-			echo "\nimport $i/$numberOfRecords ( ".(int)($i/$numberOfRecords * 100)." %) ";
+			$perfPC = (int)($i/$numberOfRecords * 100);
+			if($prev_perfPC != $perfPC){
+				$perfNow = new DateTime();
+				$perfElapsed = date_diff($perfStartTime, $perfNow)->format('%H:%i:%S');
+				echo "\n import $i/$numberOfRecords ( $perfPC %, $perfElapsed, ".memory_get_usage()." ) ";
+				$prev_perfPC = $perfPC;
+			}
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelVirement(array($row), $importDataController);
+		}
+		
+		//ED150826 : d'autres données sont disponibles, empêche la suppression de l'import programmé
+		/*var_dump("\n\n\n\n\n\n\n\n\nnumberOfRecords\n\n\n\n\n\n\n\n\n\n\n", $numberOfRecords, $config->get('importBatchLimit')
+				, '$this->getNumberOfRecords()', $this->getNumberOfRecords());*/
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
 		}
 	}
 
@@ -113,7 +133,6 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 					
 		global $log;
 		
-		//TODO check sizeof $rsnprelvirementsata
 		$prelevement = $this->getPrelevement($rsnprelvirementsData);
 		if ($prelevement != null) {
 			$sourceId = $rsnprelvirementsData[0]['separum'];
@@ -216,18 +235,18 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				}
 				
 				$record->set('mode','edit');
-				$query = "UPDATE vtiger_rsnprelvirement
-					JOIN vtiger_crmentity
+				$query = "UPDATE vtiger_crmentity
+					JOIN vtiger_rsnprelvirement
 						ON vtiger_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
 					SET smownerid = ?
 					, createdtime = ?
-					WHERE rsnprelvirementid = ?
+					WHERE crmid = ?
 				";
 				$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 									, $rsnprelvirementsData[0]['dateexport']
 									, $rsnprelvirementsId));
 				
-				$log->debug("" . basename(__FILE__) . " update imported rsnprelvirement (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsnprelvirementsData[0]['datecreation']
+				$log->debug("" . basename(__FILE__) . " update imported rsnprelvirement (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsnprelvirementsData[0]['dateexport']
 						. ", result=" . ($result ? " true" : "false"). " )");
 				if( ! $result)
 					$db->echoError();
@@ -272,8 +291,11 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		$sourceId = $rsnprelvirementsData[0]['separum'];
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, array($rsnprelvirementsData[0]['dateexport'], $sourceId));
-		if($db->num_rows($result))
+
+		if($db->num_rows($result)){
+			var_dump("Preimport RsnPrelVirement", $rsnprelvirementsValues);
 			return true;
+		}
 		
 		$rsnprelvirements = new RSNImportSources_Preimport_Model($rsnprelvirementsValues, $this->user, 'RsnPrelVirement');
 		$rsnprelvirements->save();
@@ -368,7 +390,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 */
 	function isDate($string) {
 		//TODO do not put this function here ?
-		return preg_match("/^[0-3][0-9][-\/][0-1][0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
+		return preg_match("/^[0-3]?[0-9][-\/][0-1]?[0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
 	}
 	/**
 	 * Method that returns a formatted date for mysql (Y-m-d).
@@ -432,7 +454,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 
 				if (!$this->isClientInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
-						array_push($rsnprelvirements['detail'], $nextLine);
+						//impossible ici array_push($rsnprelvirements['detail'], $nextLine);
 					}
 				} else {
 					break;

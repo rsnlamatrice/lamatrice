@@ -14,6 +14,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		$this->exposeMethod('deleteMap');
 		$this->exposeMethod('clearCorruptedData');
 		$this->exposeMethod('cancelImport');
+		$this->exposeMethod('continueHaltedImport');
 	}
 
 	/**
@@ -215,6 +216,19 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		}
 
 		RSNImportSources_Import_View::showImportStatus($importInfos, $user, $forModule);
+	}
+
+	/** ED150826
+	 * Method to reset halted import to scheduled status and display the status of the import.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function continueHaltedImport(Vtiger_Request $request) {
+		$importId = $request->get('import_id');
+		if ($importId) {			
+			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+		}
+		$request->set('mode', false);
+		$this->checkImportStatus($request);
 	}
 
 	/**

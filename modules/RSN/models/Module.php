@@ -76,7 +76,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			$quickLink = array(
 				'linktype' => 'SIDEBARLINK',
 				'linklabel' => $sub['label'],
-				'linkurl' => $this->getOutilsViewUrl($sub['sub'], @$sub['params']),
+				'linkurl' => $this->getOutilsViewUrl($sub['sub'], @$sub['params'], @$sub['view']),
 				'linkicon' => '',
 			);
 			if(isset($sub['children'])){
@@ -85,7 +85,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 					$children[] = array(
 						'linktype' => 'SIDEBARLINK',
 						'linklabel' => $childQuickLink['label'],
-						'linkurl' => $this->getOutilsViewUrl($childQuickLink['sub'], @$childQuickLink['params']),
+						'linkurl' => $this->getOutilsViewUrl($childQuickLink['sub'], @$childQuickLink['params'], @$childQuickLink['view']),
 						'linkicon' => '',
 					);
 				}
@@ -162,11 +162,13 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 	 *  Function returns the url for Outils view
 	 * @return <String>
 	 */
-	public function getOutilsViewUrl($sub = 'List', $params = FALSE) {
+	public function getOutilsViewUrl($sub = 'List', $params = FALSE, $view = FALSE) {
 		if(is_array($params))
 			foreach($params as $key=>$value)
 				$sub .= "&$key=$value";
-		return 'index.php?module='.$this->get('name').'&view=Outils&sub=' . $sub;
+		if(!$view)
+			$view = 'Outils';
+		return 'index.php?module=' . $this->get('name') . '&view='. $view . '&sub=' . $sub;
 	}
 
 	
@@ -224,11 +226,13 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			)
 		;
 		
-		$list[] = array(
-				'sub' => 'Purge',
-				'label' => 'Grande purge'
-			)
-		;
+		if(date('Y') == '2015')
+			$list[] = array(
+					'view' => 'GrandePurge',
+					'sub' => 'Purge',
+					'label' => 'Grande purge'
+				)
+			;
 		
 		$list[] = array(
 				'sub' => 'EditCustomView',

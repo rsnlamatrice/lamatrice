@@ -114,7 +114,14 @@ function vtws_getUserWebservicesGroups($tabId,$user){
 	return vtws_getWebserviceGroupFromGroups($groups);
 }
 
+/**
+ *
+ * format {$typeId}x{$elementId}
+ * ED150826 : if "{$typeId}x" is missing, returns array(0, $elementid) instead of array($elementid)
+ */
 function vtws_getIdComponents($elementid){
+	if(strpos($elementid, 'x') === false)
+		return array(0, $elementid);
 	return explode("x",$elementid);
 }
 

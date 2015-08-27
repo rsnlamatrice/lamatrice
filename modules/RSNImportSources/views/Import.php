@@ -5,10 +5,14 @@ define('ASSIGNEDTO_ALL', '7');
 define('CURRENCY_ID', 1);
 define('CONVERSION_RATE', 1);
 
+define('IMPORTCHECKER_CACHE_MAX', 1024);
+
 class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 	var $request;
 	var $user;
+	/*ED150826*/
+	var $scheduledId;
 
 	public function  __construct($request = FALSE, $user = FALSE) {
 		parent::__construct();
@@ -179,6 +183,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	function displayDataPreview() {
 		$viewer = $this->getViewer($this->request);
 		$moduleName = $this->request->get('for_module');
+		
+		//ED150826 Show rows count
+		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords());
+		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('PREVIEW_DATA', $this->getPreviewData());
@@ -250,11 +258,19 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @param string $module: the module name
 	 */
 	public function doImport($importDataController, $module) {
-		$methode = "import" . ucfirst($module);
-		if (method_exists($this, $methode)) {
-			$this->$methode($importDataController);
-		} else {
-			$importDataController->importData();
+		$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_RUNNING);
+		try{
+			$methode = "import" . ucfirst($module);
+			if (method_exists($this, $methode)) {
+				$this->$methode($importDataController);
+			} else {
+				$importDataController->importData();
+			}
+			$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+		}
+		catch(Exception $ex){
+			$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_HALTED);
+			throw ($ex);
 		}
 	}
 
@@ -401,7 +417,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			if($totalRecords > ($importStatusCount['IMPORTED'] + $importStatusCount['FAILED'])) {
 				$importEnded = false;
 				if($importInfo['status'] == Import_Queue_Action::$IMPORT_STATUS_SCHEDULED) {
-					self::showScheduledStatus($importInfo);
+					self::showScheduledStatus($importInfo, $importStatusCount);
 					continue;
 				}
 				self::showCurrentStatus($importInfo, $importStatusCount, $continueImport);
@@ -436,6 +452,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('IMPORT_ID', $importId);
 		$viewer->assign('IMPORT_RESULT', $importStatusCount);
+		$viewer->assign('IMPORT_STATUS', $importInfo['status']);
 		$viewer->assign('INVENTORY_MODULES', getInventoryModules());
 		$viewer->assign('CONTINUE_IMPORT', $continueImport);
 
@@ -446,10 +463,21 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * Method called by the showImportStatus method.
 	 */
 	public static function showResult($importInfo, $importStatusCount) {
+		$viewer = new Vtiger_Viewer();
+        self::prepareShowResult($importInfo, $importStatusCount, $viewer);
+
+		$viewer->view('ImportResult.tpl', 'RSNImportSources');
+	}
+	
+	/**
+	 * Method called by the showImportStatus method.
+	 */
+	public static function prepareShowResult($importInfo, $importStatusCount, $viewer = false) {
 		$moduleName = $importInfo['module'];
 		$ownerId = $importInfo['user_id'];
-		$viewer = new Vtiger_Viewer();
-        
+		if(!$viewer)
+			$viewer = new Vtiger_Viewer();
+		
 		$viewer->assign('SKIPPED_RECORDS',$skippedRecords);
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
@@ -457,19 +485,23 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('IMPORT_RESULT', $importStatusCount);
 		$viewer->assign('INVENTORY_MODULES', getInventoryModules());
 		$viewer->assign('MERGE_ENABLED', $importInfo['merge_type']);
-
-		$viewer->view('ImportResult.tpl', 'RSNImportSources');
 	}
 
 	/**
 	 * Method called by the showImportStatus method.
 	 */
-	public static function showScheduledStatus($importInfo) {
+	public static function showScheduledStatus($importInfo, $importStatusCount = false) {
 		// TODO: $importInfo['module'] should be the current main module !!
 		$moduleName = $importInfo['module'];
 		$importId = $importInfo['id'];
 
 		$viewer = new Vtiger_Viewer();
+		
+		if($importStatusCount){
+			self::prepareShowResult($importInfo, $importStatusCount, $viewer);
+			$viewer->assign('RESULT_DETAILS', true);
+		}			
+		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('IMPORT_ID', $importId);
@@ -545,7 +577,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		if(!is_string($str))
 			return $str;
 		try {
-			if(!is_numeric($str[0]))//TODO ".50"
+			if(!is_numeric($str[0]) && $str[0] != '-' && $str[0] != '+')//TODO ".50"
 				return false;
 			return (float)str_replace(',', '.', $str);
 		}
@@ -561,6 +593,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @return string - formated date.
 	 */
 	function getMySQLDate($string) {
+		if($string == '00/00/00')
+			return '1999-12-31';
 		$dateArray = preg_split('/[-\/]/', $string);
 		return ($dateArray[2].length > 2 ? '' : '20').$dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
 	}
@@ -636,12 +670,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		if($this->checkPreImportInCache('Contacts', '4d', $ref4D))
 			return $this->checkPreImportInCache('Contacts', '4d', $ref4D);
 		
-		$query = "SELECT crmid
+		$query = "SELECT vtiger_crmentity.crmid
 			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND contact_no IN ( CONCAT('C', ?), CONCAT('CID', ?))
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_contactdetails.contact_no IN ( CONCAT('C', ?), CONCAT('CID', ?))
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
@@ -697,8 +731,25 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		//var_dump('setPreImportInCache', $cacheKey);
 		if(!$value)
 			$value = true;
+		
+		if(count($this->preImportChecker_cache) > IMPORTCHECKER_CACHE_MAX)
+			array_splice($this->preImportChecker_cache, 0, IMPORTCHECKER_CACHE_MAX / 2);
 		$this->preImportChecker_cache[$cacheKey] = $value;
 		return false;		
+	}
+
+	
+	public function updateStatus($status, $importId = false) {
+		if(!$importId)
+			$importId = $this->scheduledId;
+		if($importId){
+			//var_dump('updateStatus',$this->scheduledId, $status);
+			RSNImportSources_Queue_Action::updateStatus($importId, $status);
+		}
+		else{
+			//echo_callstack();
+			//var_dump('updateStatus NO scheduledId ', $status);
+		}
 	}
 }
 

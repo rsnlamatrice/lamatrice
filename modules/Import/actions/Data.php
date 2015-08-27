@@ -8,6 +8,8 @@
  * All Rights Reserved.
  ************************************************************************************ */
 
+ini_set("memory_limit","512M");//ED150826
+
 require_once 'include/Webservices/Create.php';
 require_once 'include/Webservices/Update.php';
 require_once 'include/Webservices/Delete.php';
@@ -31,6 +33,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 	var $importedRecordInfo = array();
     protected $allPicklistValues = array();
 	var $batchImport = true;
+	var $keepScheduledImport = false;
 
 	static $IMPORT_RECORD_NONE = 0;
 	static $IMPORT_RECORD_CREATED = 1;
@@ -139,7 +142,8 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 
 	public function finishImport() {
 		Import_Lock_Action::unLock($this->user, $this->module);
-		Import_Queue_Action::remove($this->id);
+		if(!$this->keepScheduledImport)
+			Import_Queue_Action::remove($this->id);
 	}
 
 	public function updateModuleSequenceNumber() {
@@ -613,28 +617,30 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			if(!$importDataController->initializeImport()) { continue; }
 			$importDataController->importData();
 
-			$importStatusCount = $importDataController->getImportStatusCount();
-
-			$emailSubject = 'vtiger CRM - Scheduled Import Report for '.$importDataController->module;
-            vimport('~~/modules/Import/ui/Viewer.php');
-			$viewer = new Import_UI_Viewer();
-			$viewer->assign('FOR_MODULE', $importDataController->module);
-            $viewer->assign('INVENTORY_MODULES', getInventoryModules());
-			$viewer->assign('IMPORT_RESULT', $importStatusCount);
-			$importResult = $viewer->fetch('Import_Result_Details.tpl');
-			$importResult = str_replace('align="center"', '', $importResult);
-			$emailData = 'vtiger CRM has just completed your import process. <br/><br/>' .
-							$importResult . '<br/><br/>'.
-							'We recommend you to login to the CRM and check few records to confirm that the import has been successful.';
-
-			$userName = getFullNameFromArray('Users', $importDataController->user->column_fields);
-			$userEmail = $importDataController->user->email1;
-			$vtigerMailer->to = array( array($userEmail, $userName));
-			$vtigerMailer->Subject = $emailSubject;
-			$vtigerMailer->Body    = $emailData;
-			$vtigerMailer->Send();
-
-			$importDataController->finishImport();
+			if(!$importController->keepScheduledImport){
+				$importStatusCount = $importDataController->getImportStatusCount();
+	
+				$emailSubject = 'vtiger CRM - Scheduled Import Report for '.$importDataController->module;
+				vimport('~~/modules/Import/ui/Viewer.php');
+				$viewer = new Import_UI_Viewer();
+				$viewer->assign('FOR_MODULE', $importDataController->module);
+				$viewer->assign('INVENTORY_MODULES', getInventoryModules());
+				$viewer->assign('IMPORT_RESULT', $importStatusCount);
+				$importResult = $viewer->fetch('Import_Result_Details.tpl');
+				$importResult = str_replace('align="center"', '', $importResult);
+				$emailData = 'vtiger CRM has just completed your import process. <br/><br/>' .
+								$importResult . '<br/><br/>'.
+								'We recommend you to login to the CRM and check few records to confirm that the import has been successful.';
+	
+				$userName = getFullNameFromArray('Users', $importDataController->user->column_fields);
+				$userEmail = $importDataController->user->email1;
+				$vtigerMailer->to = array( array($userEmail, $userName));
+				$vtigerMailer->Subject = $emailSubject;
+				$vtigerMailer->Body    = $emailData;
+				$vtigerMailer->Send();
+			}
+			
+			$importDataController->finishImport(!$importController->keepScheduledImport);
 		}
 		Vtiger_Mailer::dispatchQueue(null);
 	}
