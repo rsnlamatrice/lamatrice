@@ -143,13 +143,15 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				FROM vtiger_rsnprelvirement
 				JOIN vtiger_crmentity
 					ON vtiger_rsnprelvirement.rsnprelvirementid = vtiger_crmentity.crmid
-				WHERE dateexport = ?
+				WHERE vtiger_crmentity.deleted = FALSE
+				AND dateexport = ?
 				AND separum = ?
-				AND deleted = FALSE
+				AND rsnprelevementsid = ?
 				LIMIT 1
 			";
+			$params = array($datePvt, $sourceId, $prelevement->getId());
 			$db = PearDatabase::getInstance();
-			$result = $db->pquery($query, array($datePvt, $sourceId));
+			$result = $db->pquery($query, $params);
 			if($db->num_rows($result)){
 				//already imported !!
 				$row = $db->fetch_row($result, 0); 
@@ -278,24 +280,24 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	function preImportRsnPrelVirement($rsnprelvirementsData) {
 		
 		$rsnprelvirementsValues = $this->getRsnPrelVirementValues($rsnprelvirementsData);
-		//TODO : cache
-		$query = "SELECT 1
-			FROM vtiger_rsnprelvirement
-			JOIN vtiger_crmentity
-				ON vtiger_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
-			WHERE vtiger_crmentity.deleted = 0
-			AND dateexport = ?
-			AND separum = ?
-			LIMIT 1
-		";
-		$sourceId = $rsnprelvirementsData[0]['separum'];
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($rsnprelvirementsData[0]['dateexport'], $sourceId));
 
-		if($db->num_rows($result)){
-			var_dump("Preimport RsnPrelVirement", $rsnprelvirementsValues);
-			return true;
-		}
+		////TODO : cache
+		//$query = "SELECT 1
+		//	FROM vtiger_rsnprelvirement
+		//	JOIN vtiger_crmentity
+		//		ON vtiger_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
+		//	WHERE vtiger_crmentity.deleted = 0
+		//	AND dateexport = ?
+		//	AND separum = ?
+		//	LIMIT 1
+		//";
+		//$sourceId = $rsnprelvirementsData[0]['separum'];
+		//$db = PearDatabase::getInstance();
+		//$result = $db->pquery($query, array($rsnprelvirementsData[0]['dateexport'], $sourceId));
+		//if($db->num_rows($result)){
+		//	var_dump("Preimport RsnPrelVirement", $rsnprelvirementsValues);
+		//	return true;
+		//}
 		
 		$rsnprelvirements = new RSNImportSources_Preimport_Model($rsnprelvirementsValues, $this->user, 'RsnPrelVirement');
 		$rsnprelvirements->save();
@@ -322,11 +324,14 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			WHERE vtiger_crmentity.deleted = 0
 			AND accountid = ?
 			AND separum = ?
+			AND montant = ?
+			AND DATE(vtiger_crmentity.createdtime) <= ?
 			LIMIT 1
 		";
 		$sourceId = $rsnprelvirementsData[0]['separum'];
+		$params = array($account->getId(), $sourceId, $rsnprelvirementsData[0]['montant'], $rsnprelvirementsData[0]['dateexport']);
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($account->getId(), $sourceId));
+		$result = $db->pquery($query, $params);
 		if(!$db->num_rows($result)){
 			var_dump("Impossible de trouver le prélèvement. SEPARUM = $sourceId. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
 			return false;
@@ -346,6 +351,10 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($ref4d) {
+		if(is_array($ref4d)){
+			//$ref4d is $rsnprelvirementsData
+			$ref4d = $ref4d[0]['reffiche'];
+		}
 		$id = $this->getContactIdFromRef4D($ref4d);
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');

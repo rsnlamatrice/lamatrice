@@ -103,6 +103,8 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRsnPrelevements($importDataController) {
+		$config = new RSNImportSources_Config_Model();
+
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnPrelevements');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
@@ -137,7 +139,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		global $log;
 		
 		//TODO check sizeof $rsnprelevementsata
-		$contact = $this->getContact($rsnprelevementsData[0]['reffiche']);
+		$contact = $this->getContact($rsnprelevementsData);
 		if ($contact != null) {
 			$account = $contact->getAccountRecordModel();
 
@@ -149,11 +151,13 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					FROM vtiger_rsnprelevements
 					JOIN vtiger_crmentity
 					    ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_crmentity.crmid
-					WHERE separum = ? AND deleted = FALSE
+					WHERE separum = ?
+					AND accountid = ?
+					AND deleted = FALSE
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
-				$result = $db->pquery($query, array($sourceId));
+				$result = $db->pquery($query, array($sourceId, $account->getId()));
 				if($db->num_rows($result)){
 					//already imported !!
 					$row = $db->fetch_row($result, 0); 
@@ -266,21 +270,21 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	function preImportRsnPrelevements($rsnprelevementsData) {
 		
 		$rsnprelevementsValues = $this->getRsnPrelevementsValues($rsnprelevementsData);
-		//TODO : cache
-		$query = "SELECT 1
-			FROM vtiger_rsnprelevements
-			JOIN vtiger_crmentity
-				ON vtiger_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
-			WHERE vtiger_crmentity.deleted = 0
-			AND separum = ?
-			LIMIT 1
-		";
-		$sourceId = $rsnprelevementsData[0]['separum'];
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($sourceId));//$rsnprelevementsData[0]['subject']
-		if($db->num_rows($result))
-			return true;
-		
+		////TODO : cache
+		//$query = "SELECT 1
+		//	FROM vtiger_rsnprelevements
+		//	JOIN vtiger_crmentity
+		//		ON vtiger_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
+		//	WHERE vtiger_crmentity.deleted = 0
+		//	AND separum = ?
+		//	LIMIT 1
+		//";
+		//$sourceId = $rsnprelevementsData[0]['separum'];
+		//$db = PearDatabase::getInstance();
+		//$result = $db->pquery($query, array($sourceId));//$rsnprelevementsData[0]['subject']
+		//if($db->num_rows($result))
+		//	return true;
+		//
 		$rsnprelevements = new RSNImportSources_Preimport_Model($rsnprelevementsValues, $this->user, 'RsnPrelevements');
 		$rsnprelevements->save();
 	}
@@ -293,6 +297,10 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($ref4d) {
+		if(is_array($ref4d)){
+			//$ref4d is $rsnprelvirementsData
+			$ref4d = $ref4d[0]['reffiche'];
+		}
 		$id = $this->getContactIdFromRef4D($ref4d);
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
