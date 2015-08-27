@@ -1463,10 +1463,15 @@ class Vtiger_Module_Model extends Vtiger_Module {
 
 		switch($relatedModule->getName()){
 		 case 'Calendar':
+		 case 'Emails':
 			//MySQL ne tolère la duplication de nom de champ (ici 'status') dans une sous-requête, alors qu'il le tolère en requête principale
 			$relationQuery = str_replace('vtiger_crmentity.*, vtiger_activity.*'
 				,'vtiger_crmentity.crmid, vtiger_crmentity.smownerid, vtiger_crmentity.setype, vtiger_activity.*'
 				,$relationQuery);
+			break;
+		}
+		switch($relatedModule->getName()){
+		 case 'Calendar':
 			$relationQuery = preg_replace('/(vtiger_activity\.\*,.*)vtiger_recurringevents.recurringtype,/'
 				,'$1'
 				,$relationQuery);
