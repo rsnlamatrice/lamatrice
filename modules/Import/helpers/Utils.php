@@ -206,6 +206,9 @@ class Import_Utils_Helper {
 			return false;
 		}
 
+		//ED150827
+		$request->set('import_file_name', $_FILES['import_file']['name']);
+		
 		$fileCopied = move_uploaded_file($_FILES['import_file']['tmp_name'], $temporaryFileName);
 		if(!$fileCopied) {
 			$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));

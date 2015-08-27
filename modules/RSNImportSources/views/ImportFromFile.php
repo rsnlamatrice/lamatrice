@@ -90,6 +90,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * Method to upload the file in the temporary location.
 	 */
 	function uploadFile() {
+		
 		return RSNImportSources_Utils_Helper::validateFileUpload($this->request);
 	}
 
@@ -99,7 +100,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	public function deleteFile() {
 		@unlink($this->getFilePath());
 	}
-
+	
 	/**
 	 * Method to process to the first step (pre-importing data).
 	 *  It calls the parseAndSave methode that must be implemented in the child class.
@@ -109,6 +110,10 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 		
 			$fileReader = RSNImportSources_Utils_Helper::getFileReader($this->request, $this->user);
 			if ($fileReader != null) {
+				
+				//ED150827
+				$this->updateLastImportField();
+				
 				$returnValue = $this->parseAndSaveFile($fileReader);
 				$this->deleteFile();
 				return $returnValue;
