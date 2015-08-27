@@ -338,7 +338,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			LIMIT 1
 		";
 		$params[] = $rsnprelvirementsData[0]['montant'];
-		$params[] = $rsnprelvirementsData[0]['dateexport']);
+		$params[] = $rsnprelvirementsData[0]['dateexport'];
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
