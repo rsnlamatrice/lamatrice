@@ -14,7 +14,7 @@
 	<tr> 
 		<td width="8%">
 			<input type="checkbox" class="font-x-small" id="auto_merge" name="auto_merge" onclick="ImportJs.toogleMergeConfiguration();" />
-			<strong>{'LBL_IMPORT_STEP_3'|@vtranslate:$MODULE}:</strong>
+			<strong style="white-space: nowrap;">{'LBL_IMPORT_STEP_3'|@vtranslate:$MODULE}:</strong>
 		</td>
 		<td>
 			<span class="big">{'LBL_IMPORT_STEP_3_DESCRIPTION'|@vtranslate:$MODULE}</span>

@@ -745,6 +745,10 @@ class Vtiger_Module_Model extends Vtiger_Module {
 					Vtiger_Cache::set('module', $moduleObject->name, $instance);
 				}
             }
+			else {
+				echo('<code>Vtiger_Module_Model::getInstance(), module manquant : "' . print_r($value, true) . '"</code>');
+				echo_callstack();
+			}
         }
 		return $instance;
 	}

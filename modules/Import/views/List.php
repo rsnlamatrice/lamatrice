@@ -8,7 +8,7 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-class Import_List_View extends Vtiger_Popup_View{
+class Import_List_View extends Vtiger_Popup_View {
 	protected $listViewEntries = false;
 	protected $listViewHeaders = false;
 
@@ -22,8 +22,12 @@ class Import_List_View extends Vtiger_Popup_View{
 		if(!empty($mode)){
 		    $this->invokeExposedMethod($mode,$request);
 		} else{
-		    $this->initializeListViewContents($request, $viewer);
 		    $moduleName = $request->get('for_module');
+			if(!$moduleName){
+				parent::process($request);
+				return;
+			}
+		    $this->initializeListViewContents($request, $viewer);
 		
 		    $companyDetails = Vtiger_CompanyDetails_Model::getInstanceById();
 		    $companyLogo = $companyDetails->getLogo();
@@ -38,6 +42,10 @@ class Import_List_View extends Vtiger_Popup_View{
 	 */
 	public function initializeListViewContents(Vtiger_Request $request, Vtiger_Viewer $viewer) {
 		$moduleName = $request->get('for_module');
+		if(!$moduleName){
+			parent::initializeListViewContents($request, $viewer);
+			return;
+		}
 		$cvId = $request->get('viewname');
 		$pageNumber = $request->get('page');
 		$orderBy = $request->get('orderby');
