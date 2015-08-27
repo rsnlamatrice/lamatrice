@@ -102,19 +102,13 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		if($numberOfRecords == $config->get('importBatchLimit')){
 			$this->keepScheduledImport = true;
 		}
-		$perfStartTime = new DateTime();
-		$prev_perfPC = 0;
+		$perf = new ImportPerformance($numberOfRecords);
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
-			$perfPC = (int)($i/$numberOfRecords * 100);
-			if($prev_perfPC != $perfPC){
-				$perfNow = new DateTime();
-				$perfElapsed = date_diff($perfStartTime, $perfNow)->format('%H:%i:%S');
-				echo "\n import $i/$numberOfRecords ( $perfPC %, $perfElapsed, ".memory_get_usage()." ) ";
-				$prev_perfPC = $perfPC;
-			}
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelVirement(array($row), $importDataController);
+			$perf->tick();
 		}
+		$perf->terminate();
 		
 		//ED150826 : d'autres données sont disponibles, empêche la suppression de l'import programmé
 		/*var_dump("\n\n\n\n\n\n\n\n\nnumberOfRecords\n\n\n\n\n\n\n\n\n\n\n", $numberOfRecords, $config->get('importBatchLimit')

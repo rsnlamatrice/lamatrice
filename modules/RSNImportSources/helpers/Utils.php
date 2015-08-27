@@ -91,6 +91,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));
 			return false;
 		}
+		
 		if(!is_uploaded_file($_FILES['import_file']['tmp_name'])) {
 			$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
 			return false;
@@ -104,6 +105,9 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$request->set('error_message', vtranslate('LBL_IMPORT_DIRECTORY_NOT_WRITABLE', 'Import'));
 			return false;
 		}
+
+		//ED150827
+		$request->set('import_file_name', $_FILES['import_file']['name']);
 
 		$fileCopied = move_uploaded_file($_FILES['import_file']['tmp_name'], $temporaryFileName);
 		if(!$fileCopied) {
@@ -346,5 +350,45 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			}
 		}
 		return $row;
+	}
+}
+
+class ImportPerformance {
+	var $startTime;
+	var $maxItems = 0;
+	var $prevPercent = 0;
+	var $tickCounter = 0;
+	
+	public function __construct($maxItems = 0){
+		$this->maxItems = $maxItems;
+		$this->startTime = new DateTime();
+	}
+	
+	public function tick(){
+		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
+		if($this->prevPercent != $perfPC){
+			$perfNow = new DateTime();
+			$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%S');
+			echo "\n import $this->tickCounter/$this->maxItems "
+				."( $perfPC %, $perfElapsed, "
+				. self::getMemoryUsage()
+				." ) ";
+			$this->prevPercent = $perfPC;
+		}
+		$this->tickCounter++;
+	}
+	public function terminate(){
+		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
+		$perfNow = new DateTime();
+		$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%S');
+		echo "\n IMPORT TERMINATED $this->tickCounter/$this->maxItems "
+			."( $perfPC %, $perfElapsed, "
+			. self::getMemoryUsage()
+			." ) ";
+	}
+	static function getMemoryUsage(){
+		$size = memory_get_usage();
+		$unit=array('b','kb','mb','gb','tb','pb');
+		return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
 	}
 }
