@@ -292,7 +292,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		}
 
 		$importInfos = RSNImportSources_Queue_Action::getUserCurrentImportInfos($this->user);
-		RSNImportSources_Import_View::showImportStatus($importInfos, $this->user, $this->request->get("for_module"), $this);
+		RSNImportSources_Import_View::showImportStatus($importInfos, $this->user, $this->request->get("for_module"));
 	}
 
 	/**
@@ -388,18 +388,21 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @param $user : the user.
 	 * @param string $module : the main import module name.
 	 */
-	public static function showImportStatus($importInfos, $user, $moduleName = "", $importController = false) {
+	public static function showImportStatus($importInfos, $user, $moduleName = "") {
 		if($importInfos == null || sizeof($importInfos) == 0) {
 			RSNImportSources_Utils_Helper::showErrorPage(vtranslate('ERR_IMPORT_INTERRUPTED', 'RSNImportSources'));
 			exit;
 		}
-
+			
 		$viewer = new Vtiger_Viewer();
+		
+		/* ED150827 */
+		$importController = self::getRecordModelByClassName($moduleName, $importInfos[0]['importsourceclass']);
+		$viewer->assign('IMPORT_RECORD_MODEL', $importController);
+		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('IMPORT_SOURCE', $importInfos[0]['importsourceclass']);
-		if($importController)
-			$viewer->assign('IMPORT_RECORD_MODEL', $importController->getRecordModel());
 		$viewer->view('ImportHeader.tpl', 'RSNImportSources');
 		$importEnded = true;
 
@@ -761,6 +764,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			return $this->checkPreImportInCache($moduleName, 'getRecordModel');
 		
 		$className = $this->request->get('ImportSource');
+		$recordModel = self::getRecordModelByClassName($moduleName, $className);
+		if($recordModel)
+			$this->setPreImportInCache($recordModel, $moduleName, 'getRecordModel');
+	}
+	
+	public static function getRecordModelByClassName($moduleName, $className){
 		global $adb;
 		$query = 'SELECT vtiger_crmentity.crmid
 			FROM vtiger_crmentity
@@ -784,10 +793,9 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		if(!$id)
 			return false;
 		$recordModel = Vtiger_Record_Model::getInstanceById($id, 'RSNImportSources');
-		$this->setPreImportInCache($recordModel, $moduleName, 'getRecordModel');
 		return $recordModel;
 	}
-
+	
 	//ED150827
 	public function updateLastImportField(){
 		$fileName = $this->request->get('import_file_name');
