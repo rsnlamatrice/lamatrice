@@ -807,7 +807,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				return false;
 			}
 			$recordModel->set('mode', 'edit');
-			$recordModel->set('lastimport', $fileName . ' (' . date('d/m/Y H:n:s') . ')');
+			$recordModel->set('lastimport', $fileName . ' (' . date('d/m/Y H:i:s') . ')');
 			$recordModel->save();
 			//echo 'updateLastImportField : lastimport = '. $fileName . ' (' . date('d/m/Y') . ')';
 		}

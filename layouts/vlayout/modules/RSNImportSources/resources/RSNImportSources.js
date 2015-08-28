@@ -66,8 +66,20 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 				RSNImportSourcesJs.handleNeededFileDelimiterChange(e);
 			});
 		},
+		
+		//Les sources disposent d'une description dans leur balise option
+		showSelectedSourceDescription: function(view){
+			var descr = $('#SelectSourceDropdown option=[value="' + view + '"][title]').attr('title')
+			, $descr = $('#data-import-selected-description').html(descr)
+			;
+			if (!descr || descr == '<br>')
+				$descr.hide();
+			else
+				$descr.show();
+		},
 
 		loadSourceConfiguration: function(view) {
+			this.showSelectedSourceDescription(view);
 			var data = {
 				module: app.getModuleName(),
 				for_module: RSNImportSourcesJs.getForModuleName(),
