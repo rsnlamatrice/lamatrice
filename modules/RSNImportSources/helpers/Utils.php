@@ -214,11 +214,12 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$return_values = array();
 
 		$query = 	'SELECT vtiger_crmentity.crmid/*, tab.name*/, ris.class, ris.title
-				FROM vtiger_rsnimportsources ris
-				JOIN vtiger_crmentity ON ris.rsnimportsourcesid = vtiger_crmentity.crmid
-				/*JOIN vtiger_tab tab ON ris.tabid = tab.tabid*/
-				WHERE ris.disabled = FALSE
-				AND vtiger_crmentity.deleted = FALSE';
+				, ris.description, ris.lastimport
+			FROM vtiger_rsnimportsources ris
+			JOIN vtiger_crmentity ON ris.rsnimportsourcesid = vtiger_crmentity.crmid
+			/*JOIN vtiger_tab tab ON ris.tabid = tab.tabid*/
+			WHERE ris.disabled = FALSE
+			AND vtiger_crmentity.deleted = FALSE';
 
 		$params = array();
 		//if ($moduleName) {
@@ -238,6 +239,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				module 		=> $moduleName, //$db->query_result($result, $i, 'name'),
 				classname 	=> $db->query_result($result, $i, 'class'),
 				sourcename 	=> $db->query_result($result, $i, 'title'),//$class::getSource(),
+				description 	=> $db->query_result($result, $i, 'description'),
+				lastimport 	=> $db->query_result($result, $i, 'lastimport'),
 				sourcetype 	=> $class::getSourceType()
 			));
 		}
