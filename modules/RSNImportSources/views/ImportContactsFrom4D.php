@@ -192,6 +192,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			$this->importOneContacts(array($row), $importDataController);
 			$perf->tick();
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$keepScheduledImport = true;
 				$size = memory_get_usage();
 				$unit=array('B','KB','MB','GB','TB','PB');
 				echo '<pre>
@@ -202,7 +203,9 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		}
 		$perf->terminate();
 		
-		if($numberOfRecords == $config->get('importBatchLimit')){
+		if(isset($keepScheduledImport))
+			$this->keepScheduledImport = $keepScheduledImport;
+		elseif($numberOfRecords == $config->get('importBatchLimit')){
 			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
 		}
 	}
