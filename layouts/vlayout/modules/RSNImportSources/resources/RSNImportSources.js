@@ -125,10 +125,18 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			
 			return true;
 		},
+		
+		/* ED150829
+		 * Mode de définition du fichier à traiter : upload ou localpath (chemin sur le serveur)
+		 */
+		getFileSrcMode : function(){
+			return $('input[type="radio"][name="import_file_src_mode"]:checked').val();
+		},
 
 		validateFilePath: function() { // tmp !!!!
-			var importFile = jQuery('#import_file');
-			var filePath = importFile.val();
+			var fileSrcMode = this.getFileSrcMode()
+			, importFile = fileSrcMode == 'localpath' ? jQuery('#import_file_localpath') : jQuery('#import_file')
+			, filePath = importFile.val();
 			if(jQuery.trim(filePath) == '') {
 				var errorMessage = app.vtranslate('JS_IMPORT_FILE_CAN_NOT_BE_EMPTY');
 				var params = {
@@ -142,7 +150,8 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			if(!RSNImportSourcesJs.validateFileType("import_file", "curent_file_type", "file_type")) {
 				return false;
 			}
-			if(!RSNImportSourcesJs.validateUploadFileSize("import_file")) {
+			if(fileSrcMode == 'upload'
+			&& !RSNImportSourcesJs.validateUploadFileSize("import_file")) {
 				return false;
 			}
 			return true;
