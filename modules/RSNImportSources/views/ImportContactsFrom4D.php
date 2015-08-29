@@ -97,7 +97,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			'remarque' => 'description',
 			'associationcourt' => 'grpnomllong',
 			'datecreation' => '',//updated post creation
-			'conventionnef' => '',//0 ou 1. contacttype += 'Convention NEF'
+			'conventionnef' => '',//0 ou 1. accounttype += 'Convention NEF'
 			'datemodification' => '',//updated post creation. TODO ? MAX(datemodifadresse, datemodification)
 			'presse' => '',//type de contact += 'Média'
 			'p_militante' => '',//type de contact += 'Militant'
@@ -140,7 +140,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			'top_rnvp' => '',
 			'pasderelancefinanciereweb' => 'donotappeldonweb',
 			'vtiger' => '',
-			'partenaire' => '',//si vrai contacttype += 'Partenaire'
+			'partenaire' => '',//si vrai accounttype += 'Partenaire'
 			'partenairedate' => 'datepartenariat',//à mettre dans partenairedescription si ! partenaire 
 			'signatairedate' => 'datesigncharte',
 		);
@@ -293,7 +293,19 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				$this->createInitialModComment($record, $contactsData);
 					
 				//Abonnement à la revue (peut générer le compte du contact)
-				$this->importRSNAboRevuesForContact($record, $contactsData);
+				$rsnAboRevue = $this->importRSNAboRevuesForContact($record, $contactsData);
+				//type de contact [ancien] Abonné
+				if($rsnAboRevue
+				&& $rsnAboRevue->get('rsnabotype') != TYPEABONNE_NEPASABONNER){
+					$record->set('mode', 'edit');
+					$contactType = $record->get('accounttype');
+					$addType = $rsnAboRevue->get('isabonne') ? 'Abonné' : 'Ancien abonné';
+					if($contactType)
+						$record->set('accounttype', $contactType . ' |##| ' . $addType);
+					else
+						$record->set('accounttype', $addType);
+					$record->save();
+				}
 				
 				//Relations 
 			}
@@ -337,7 +349,6 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			}
 			$record->set($fieldName, $value);
 		}
-		var_dump($record->get($fieldName) == $record->get('mailingstreet2'));
 		if($record->get($fieldName) == $record->get('mailingstreet2'))
 			$record->set('mailingstreet2', '');
 		
@@ -411,6 +422,33 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			$result = RSNImportSources_Utils_Helper::checkPickListValue('Contacts', $fieldName, 'rsnregion', $record->get($fieldName));
 		}
 		
+		$fieldName = 'accounttype';
+		$contactType = '';
+		//'signataire' => 'signcharte',
+		if($contactsData[0]['signataire'])
+			$contactType .= ($contactType ? ' |##| ' : '') . 'Signataire';
+		//'presse' => '',//type de contact += 'Média'
+		if($contactsData[0]['presse'])
+			$contactType .= ($contactType ? ' |##| ' : '') . 'Média';
+		//'p_militante' => '',//type de contact += 'Militant'
+		if($contactsData[0]['p_militante'])
+			$contactType .= ($contactType ? ' |##| ' : '') . 'Militant';
+		//'depotvente' => '',//type de contact += 'Dépôt-vente'
+		if($contactsData[0]['depotvente'])
+			$contactType .= ($contactType ? ' |##| ' : '') . 'Dépôt-vente';
+		//'conventionnef' => '',//0 ou 1. accounttype += 'Convention NEF'
+		if($contactsData[0]['conventionnef'])
+			$contactType .= ($contactType ? ' |##| ' : '') . 'Convention NEF';
+		//'partenaire' => '',//si vrai accounttype += 'Partenaire'
+		if($contactsData[0]['partenaire'])
+			$contactType .= ($contactType ? ' |##| ' : '') . 'Partenaire';
+		//set
+		if($contactType){
+			$record->set($fieldName, $contactType);
+		}
+			
+			
+		// copie depuis tout en haut
 		//
 		//'nom' => 'lastname', 
 		//'prenom' => 'firstname', 
@@ -429,7 +467,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		//'remarque' => 'description',
 		//'associationcourt' => 'grpnomllong',
 		//'datecreation' => '',//updated post creation
-		//'conventionnef' => '',//0 ou 1. contacttype += 'Convention NEF'
+		//'conventionnef' => '',//0 ou 1. accounttype += 'Convention NEF'
 		//'datemodification' => '',//updated post creation. TODO ? MAX(datemodifadresse, datemodification)
 		//'presse' => '',//type de contact += 'Média'
 		//'p_militante' => '',//type de contact += 'Militant'
@@ -472,7 +510,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		//'top_rnvp' => '',
 		//'pasderelancefinanciereweb' => 'donotappeldonweb',
 		//'vtiger' => '',
-		//'partenaire' => '',//si vrai contacttype += 'Partenaire'
+		//'partenaire' => '',//si vrai accounttype += 'Partenaire'
 		//'partenairedate' => 'datepartenariat',//à mettre dans partenairedescription si ! partenaire 
 		//'signatairedate' => 'datesigncharte',
 		//
@@ -524,6 +562,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			//Abonnement de Non abonnement
 			return $this->createRSNAboRevue($contact, $contactsData, TYPEABONNE_NEPASABONNER, false, $prevDateFin);
 		}
+		return $aboRevue;
 	}
 	
 	/**
