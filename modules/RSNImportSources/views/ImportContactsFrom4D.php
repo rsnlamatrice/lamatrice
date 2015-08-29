@@ -587,9 +587,10 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 *  It adds one row in the temporary pre-import table by invoice line.
 	 * @param $contactsData : the data of the invoice to import.
 	 */
-	function preImportContacts($contactsData) {
+	function preImportContact($contactsData) {
+		
 		$contactsValues = $this->getContactsValues($contactsData);
-
+		
 		////TODO : cache
 		//$query = "SELECT 1
 		//	FROM vtiger_contactdetails
@@ -638,12 +639,12 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		$this->clearPreImportTable();
 		
 		if($fileReader->open()) {
-			if ($this->moveCursorToNextContacts($fileReader)) {
+			if ($this->moveCursorToNextContact($fileReader)) {
 				$i = 0;
 				do {
-					$contacts = $this->getNextContacts($fileReader);
-					if ($contacts != null) {
-						$this->preImportContacts($contacts);
+					$contact = $this->getNextContact($fileReader);
+					if ($contact != null) {
+						$this->preImportContact($contact);
 					}
 				} while ($contacts != null);
 
@@ -685,7 +686,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a contact information line.
 	 */
-	function isClientInformationLine($line) {
+	function isRecordHeaderInformationLine($line) {
 		if (sizeof($line) > 0 && is_numeric($line[12]) && $this->isDate($line[16])) {
 			return true;
 		}
@@ -698,7 +699,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
 	 * @return boolean - false if error or if no invoice found.
 	 */
-	function moveCursorToNextContacts(RSNImportSources_FileReader_Reader $fileReader) {
+	function moveCursorToNextContact(RSNImportSources_FileReader_Reader $fileReader) {
 		do {
 			$cursorPosition = $fileReader->getCurentCursorPosition();
 			$nextLine = $fileReader->readNextDataLine($fileReader);
@@ -707,7 +708,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				return false;
 			}
 
-		} while(!$this->isClientInformationLine($nextLine));
+		} while(!$this->isRecordHeaderInformationLine($nextLine));
 
 		$fileReader->moveCursorTo($cursorPosition);
 
@@ -719,19 +720,19 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
 	 * @return the invoice information | null if no invoice found.
 	 */
-	function getNextContacts(RSNImportSources_FileReader_Reader $fileReader) {
+	function getNextContact(RSNImportSources_FileReader_Reader $fileReader) {
 		$nextLine = $fileReader->readNextDataLine($fileReader);
 		if ($nextLine != false) {
-			$contacts = array(
-				'prlvInformations' => $nextLine,
+			$contact = array(
+				'header' => $nextLine,
 				'detail' => array());
 			do {
 				$cursorPosition = $fileReader->getCurentCursorPosition();
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
-				if (!$this->isClientInformationLine($nextLine)) {
+				if (!$this->isRecordHeaderInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
-						//impossible ici array_push($contacts['detail'], $nextLine);
+						//impossible ici array_push($contact['detail'], $nextLine);
 					}
 				} else {
 					break;
@@ -742,8 +743,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			if ($nextLine != false) {
 				$fileReader->moveCursorTo($cursorPosition);
 			}
-
-			return $contacts;
+			return $contact;
 		}
 
 		return null;
@@ -759,15 +759,15 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		$fields = $this->getContactsFields();
 		
 		// contrôle l'égalité des tailles de tableaux
-		if(count($fields) != count($contacts['prlvInformations'])){
-
-			if(count($fields) > count($contacts['prlvInformations']))
-				$contacts['prlvInformations'] = array_merge($contacts['prlvInformations'], array_fill (0, count($fields) - count($contacts['prlvInformations']), null));
+		if(count($fields) != count($contacts['header'])){
+			
+			if(count($fields) > count($contacts['header']))
+				$contacts['header'] = array_merge($contacts['header'], array_fill (0, count($fields) - count($contacts['header']), null));
 			else
-				$contacts['prlvInformations'] = array_slice($contacts['prlvInformations'], 0, count($fields));
+				$contacts['header'] = array_slice($contacts['header'], 0, count($fields));
 		}
 		//tableau associatif dans l'ordre fourni
-		$contactsHeader = array_combine($this->getContactsFields(), $contacts['prlvInformations']);
+		$contactsHeader = array_combine($this->getContactsFields(), $contacts['header']);
 		
 		//Parse dates
 		foreach($this->getContactsDateFields() as $fieldName)

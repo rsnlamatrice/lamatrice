@@ -710,7 +710,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a client information line.
 	 */
-	function isClientInformationLine($line) {
+	function isRecordHeaderInformationLine($line) {
 		if (sizeof($line) > 0 && $line[$this->columnName_indexes['_header_']] && $this->isDate($line[$this->columnName_indexes['datepiece']])) {
 			return true;
 		}
@@ -732,7 +732,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				return false;
 			}
 
-		} while(!$this->isClientInformationLine($nextLine));
+		} while(!$this->isRecordHeaderInformationLine($nextLine));
 
 		$fileReader->moveCursorTo($cursorPosition);
 
@@ -754,7 +754,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				$cursorPosition = $fileReader->getCurentCursorPosition();
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
-				if (!$this->isClientInformationLine($nextLine)) {
+				if (!$this->isRecordHeaderInformationLine($nextLine)) {
 					if ($this->isDate($nextLine[$this->columnName_indexes['datepiece']])) {
 						array_push($invoice['detail'], $nextLine);
 					}

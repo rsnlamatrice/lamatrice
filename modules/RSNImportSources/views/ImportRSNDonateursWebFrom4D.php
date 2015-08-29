@@ -28,7 +28,7 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a client information line.
 	 */
-	function isClientInformationLine($line) {
+	function isRecordHeaderInformationLine($line) {
 		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[14])) {
 			return true;
 		}

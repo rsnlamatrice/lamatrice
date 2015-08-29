@@ -611,7 +611,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a client information line.
 	 */
-	function isClientInformationLine($line) {
+	function isRecordHeaderInformationLine($line) {
 		if (sizeof($line) > 0 && $line[0] != "" && $this->isDate($line[0])) {
 			return true;
 		}
@@ -633,7 +633,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 				return false;
 			}
 
-		} while(!$this->isClientInformationLine($nextLine));
+		} while(!$this->isRecordHeaderInformationLine($nextLine));
 
 		$fileReader->moveCursorTo($cursorPosition);
 
@@ -655,7 +655,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 				$cursorPosition = $fileReader->getCurentCursorPosition();
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
-				if (!$this->isClientInformationLine($nextLine)) {
+				if (!$this->isRecordHeaderInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
 						array_push($invoice['detail'], $nextLine);
 					}
