@@ -17,7 +17,7 @@
 -->*}
 {strip}
 {* champs Ne pas... *}
-{assign var=DONOT_FIELDS value=array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb')}
+{assign var=DONOT_FIELDS value=array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb', 'donototherdocuments')}
 {* ED150515 : account_id needed for 'reference' changing confirmation *}
 <input type=hidden name="account_id" data-value='{$RECORD->get('account_id')}' />
 	
@@ -28,14 +28,18 @@
 		&& $FIELD_NAME neq 'createdtime'
 		&& $FIELD_NAME neq 'mailingcountry'
 		&& $FIELD_NAME neq 'mailingzip'
+		
 		&& $FIELD_NAME neq 'donotcall'
 		&& $FIELD_NAME neq 'donotprospect'
 		&& $FIELD_NAME neq 'donotrelanceadh'
 		&& $FIELD_NAME neq 'donotappeldoncourrier'
 		&& $FIELD_NAME neq 'donotrelanceabo'
 		&& $FIELD_NAME neq 'donotappeldonweb'
+		&& $FIELD_NAME neq 'donototherdocuments'
+		
 		&& $FIELD_NAME neq 'phone'
 		&& ($FIELD_NAME neq 'reference' || $RECORD->get($FIELD_NAME))
+		&& $FIELD_NAME neq 'rsnnpai'
 		}
 			<tr class="summaryViewEntries">
 				<td class="fieldLabel" style="width:30%"><label class="muted">
@@ -45,6 +49,24 @@
 					Email, téléphone
 				{elseif $FIELD_NAME == 'reference'}
 					&nbsp;
+				{elseif $FIELD_NAME == 'mailingcity'}
+					Adresse
+					{* status NPAI *}
+					{if $RECORD->get('rsnnpai') !== ''}
+						{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
+						{assign var=FIELD_NAME_TMP value=$FIELD_NAME}
+						{assign var=FIELD_NAME value='rsnnpai'}
+						{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+						{if !$FIELD_MODEL}{$FIELD_NAME} n'existe pas !{/if}
+						<span class="pull-right" style="padding-right:4px;">
+							{if $RECORD->get('rsnnpai') neq '0'}
+								<span style="margin-left:19px;">NPAI</span>
+							{/if}
+							{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+						</span>
+						{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
+						{assign var=FIELD_NAME value=$FIELD_NAME_TMP}	
+					{/if}
 				{else}
 					{vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}
 				{/if}</label></td>
@@ -67,17 +89,41 @@
 								{/foreach}
 								<div class="inline-children">
 								{if (($DO_COUNTER > 0) && ($DONOT_COUNTER eq 0)) }
+									{* affiche "si, on peut tout faire" *}
 									{assign var=DONNOT_ALLTHESAME value=$RECORD->getPicklistValuesDetails('(all the same)')}
+									{* bug si vide *}
+									{if $FIELD_MODEL->get('fieldvalue') === ''}
+										{* cherche le 1er item *}
+										{foreach item=DONNOT_ALLTHESAME_ITEM key=DONNOT_ALLTHESAME_KEY from=$DONNOT_ALLTHESAME}
+											{assign var=TMP value=$FIELD_MODEL->set('fieldvalue', $DONNOT_ALLTHESAME_KEY)}
+											{break}
+										{/foreach}
+									{/if}
 									{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD LABELS=$DONNOT_ALLTHESAME}
 								{elseif (($DONOT_COUNTER > 0) && ($DO_COUNTER eq 0)) }
-									{assign var=DONNOT_ALLTHESAME value=$RECORD->getPicklistValuesDetails('(all the same)')}
-									{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD LABELS=$DONNOT_ALLTHESAME}
+									{* affiche "on ne peut rien faire" *}
+									{*assign var=DONNOT_ALLTHESAME value=$RECORD->getPicklistValuesDetails('(all the same)')}
+									{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD LABELS=$DONNOT_ALLTHESAME*}
+									{* affiche "reçu fiscal seul" *}
+									{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
+									{assign var=FIELD_NAME_TMP value=$FIELD_NAME}
+									{assign var=FIELD_NAME value='donototherdocuments'}
+									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+									{if !$FIELD_MODEL}{$FIELD_NAME} n'existe pas !{/if}
+									{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+									{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
+									{assign var=FIELD_NAME value=$FIELD_NAME_TMP}	
 								{else}
+									{* affiche les labels "ne pas" *}
 									{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
 									{foreach item=DONOT_FIELD from=$DONOT_FIELDS}
 										{if $RECORD->get($DONOT_FIELD)}
 											{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$DONOT_FIELD]}
-											{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+											{if FIELD_MODEL === null}
+												{$DONOT_FIELD} inconnu (need UPDATE `vtiger_field` SET `summaryfield` = '1' WHERE `vtiger_field`.`fieldid` = ??{$DONOT_FIELD};)
+											{else}
+												{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+											{/if}
 										{/if}
 									{/foreach}
 									{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
@@ -85,6 +131,9 @@
 								</div>
 							{* concaténation de cp + ville + pays *}
 							{elseif $FIELD_NAME eq 'mailingcity'}
+								{if $RECORD->get('mailingstreet')}
+									{$RECORD->getDisplayValue('mailingstreet')}&nbsp;-&nbsp;
+								{/if}
 								{$RECORD->getDisplayValue('mailingzip')}&nbsp;
 								
 								{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}

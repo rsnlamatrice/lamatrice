@@ -150,7 +150,11 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			case 'isgroup':
 				return array(
 					'0' => array( 'label' => 'Particulier', 'icon' => 'icon-rsn-small-contact' ),
-					'1' => array( 'label' => 'Structure', 'icon' => 'icon-rsn-small-collectif' )
+					'1' => array( 'label' => 'Association', 'icon' => 'icon-rsn-small-collectif' ),
+					'2' => array( 'label' => 'Entreprise', 'icon' => 'icon-rsn-small-collectif' ),
+					'3' => array( 'label' => 'Orga. public', 'icon' => 'icon-rsn-small-collectif' ),
+					'4' => array( 'label' => 'Parti politique', 'icon' => 'icon-rsn-small-collectif' ),
+					'5' => array( 'label' => 'Autre structure', 'icon' => 'icon-rsn-small-collectif' ),
 				);
 			case 'reference':
 				return array(
@@ -200,6 +204,16 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 					'0' => array( 'label' => 'non', 'icon' => 'ui-icon ui-icon-close' ),
 					'1' => array( 'label' => 'signataire', 'icon' => 'ui-icon ui-icon-check darkgreen' )
 				);
+			
+			case 'donototherdocuments':
+				// champ issu de 4D : typeabonnee == 'Reçu fiscal seul (1)'
+				// types de document que nous pouvons envoyé à ce contact
+				//
+				return array(
+					'' => array( 'label' => 'aucun', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
+					'Reçu fiscal seul' => array( 'label' => 'Reçu fiscal seul', 'icon' => 'ui-icon ui-icon-locked darkred' )
+				);
+			
 			case '(all the same)':
 				return array(
 					'0' => array( 'label' => 'si, on peut tout faire', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
@@ -208,6 +222,19 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			default:
 				return parent::getPicklistValuesDetails($fieldname);
 		}
+	}
+	
+	/** ED150828 for abstract
+	* getPicklistValues called on HeaderFilter context
+	*/
+	public function getPicklistValuesDetailsForHeaderFilter($fieldname){
+		if($fieldname == 'isgroup'){
+			$valuesData = $this->getPicklistValuesDetails($fieldname);
+			$valuesData['<>0'] = array( 'label' => '(toutes struct.)', 'icon' => 'icon-rsn-small-collectif' );
+			return $valuesData;
+		}
+		else
+			return $this->getPicklistValuesDetails($fieldname);
 	}
 	
 	/**
@@ -219,7 +246,10 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			case 'isgroup':
 				return array(
 					'0' => array( 'label' => '', 'icon' => 'icon-rsn-small-contact' ),
-					'1' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' )
+					'1' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
+					'2' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
+					'3' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
+					'4' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
 				);
 			case 'donotcall':
 				return array(

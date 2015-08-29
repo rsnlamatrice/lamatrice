@@ -116,7 +116,7 @@ affichage du détail d'un contact
 						{else}
 							{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 							
-							{if $FIELD_NAME eq 'lastname' && $RECORD->get('isgroup') eq '1'}
+							{if $FIELD_NAME eq 'lastname' && $RECORD->get('isgroup') neq '0'}
 							       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD->get('mailingstreet2'))}</span>
 						       {/if}
 						{/if}

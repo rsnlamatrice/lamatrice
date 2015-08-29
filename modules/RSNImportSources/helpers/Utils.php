@@ -1,5 +1,7 @@
 <?php
 
+require_once('modules/RSNImportSources/helpers/Performance.php');
+
 class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 
 	static $AUTO_MERGE_NONE = 0;
@@ -136,12 +138,17 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
             $fieldObject = $moduleFields[$fieldName];
             if (is_object($fieldObject)) {
             	$columnsListQuery .= RSNImportSources_Utils_Helper::getDBColumnType($fieldObject, $fieldTypes);
-            } else {
-            	$columnsListQuery .= ','.$fieldName.' varchar(250)';
+            } elseif($fieldName == 'remarque' || $fieldName == 'description') {
+            	$columnsListQuery .= ','.$fieldName.' TEXT';
+			}
+			else {
+            	$columnsListQuery .= ','.$fieldName.' varchar(255)';
             }
 		}
 		$createTableQuery = 'CREATE TABLE '. $tableName . ' ('.$columnsListQuery.') ENGINE=MyISAM ';
-		$db->query($createTableQuery);
+		$result = $db->query($createTableQuery);
+		if(!$result)
+			$db->echoError();
 		return true;
 	}
 
@@ -213,7 +220,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$db = PearDatabase::getInstance();
 		$return_values = array();
 
-		$query = 	'SELECT vtiger_crmentity.crmid/*, tab.name*/, ris.class, ris.title
+		$query = 'SELECT vtiger_crmentity.crmid/*, tab.name*/, ris.class, ris.title
 				, ris.description, ris.lastimport
 			FROM vtiger_rsnimportsources ris
 			JOIN vtiger_crmentity ON ris.rsnimportsourcesid = vtiger_crmentity.crmid
@@ -353,45 +360,5 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			}
 		}
 		return $row;
-	}
-}
-
-class ImportPerformance {
-	var $startTime;
-	var $maxItems = 0;
-	var $prevPercent = 0;
-	var $tickCounter = 0;
-	
-	public function __construct($maxItems = 0){
-		$this->maxItems = $maxItems;
-		$this->startTime = new DateTime();
-	}
-	
-	public function tick(){
-		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
-		if($this->prevPercent != $perfPC){
-			$perfNow = new DateTime();
-			$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%S');
-			echo "\n import $this->tickCounter/$this->maxItems "
-				."( $perfPC %, $perfElapsed, "
-				. self::getMemoryUsage()
-				." ) ";
-			$this->prevPercent = $perfPC;
-		}
-		$this->tickCounter++;
-	}
-	public function terminate(){
-		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
-		$perfNow = new DateTime();
-		$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%S');
-		echo "\n IMPORT TERMINATED $this->tickCounter/$this->maxItems "
-			."( $perfPC %, $perfElapsed, "
-			. self::getMemoryUsage()
-			." ) ";
-	}
-	static function getMemoryUsage(){
-		$size = memory_get_usage();
-		$unit=array('b','kb','mb','gb','tb','pb');
-		return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
 	}
 }

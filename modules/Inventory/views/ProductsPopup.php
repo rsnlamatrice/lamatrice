@@ -48,6 +48,7 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		$sourceRecord = $request->get('src_record');
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		//$searchInput = $request->get('search_input');
 		$currencyId = $request->get('currency_id');
 
 		//To handle special operation when selecting record from Popup
@@ -85,6 +86,7 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		if((!empty($searchKey)) && (!empty($searchValue))) {
 			$listViewModel->set('search_key', $searchKey);
 			$listViewModel->set('search_value', $searchValue);
+			//$listViewModel->set('search_input', $searchInput);
 		}
 
 		if(!$this->listViewHeaders) {
@@ -122,6 +124,8 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 
 		$viewer->assign('SEARCH_KEY', $searchKey);
 		$viewer->assign('SEARCH_VALUE', $searchValue);
+		//$viewer->assign('SEARCH_INPUT', $searchInput);
+		//? operator ?
 
 		$viewer->assign('ORDER_BY',$orderBy);
 		$viewer->assign('SORT_ORDER',$sortOrder);

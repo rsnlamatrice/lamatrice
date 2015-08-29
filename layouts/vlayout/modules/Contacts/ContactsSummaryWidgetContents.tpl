@@ -20,7 +20,7 @@
 					<div class="row-fluid">
 						<div class="span6 textOverflowEllipsis">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('lastname')}">
-								{if $RELATED_RECORD->get('isgroup') neq '1'}
+								{if $RELATED_RECORD->get('isgroup') eq '0'}
 								    <span class="icon-rsn-small-contact"></span>
 								{else}<span class="icon-rsn-small-collectif"></span>
 								{/if}&nbsp;{$RELATED_RECORD->getName()}
