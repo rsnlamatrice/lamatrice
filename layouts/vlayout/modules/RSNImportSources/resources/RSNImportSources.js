@@ -75,7 +75,15 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			if (!descr || descr == '<br>')
 				$descr.hide();
 			else
-				$descr.show();
+				$descr
+					.show()
+					.append($('<span class="pull-right"/>')
+						.append($('<a href="#">?</a>')
+							.click(function(e){
+							})
+						)
+					)
+				;
 		},
 
 		loadSourceConfiguration: function(view) {

@@ -5,7 +5,7 @@
 		<td>&nbsp;</td>
 	</tr>
 	<tr>
-		<td colspan="2" data-import-upload-size="{$IMPORT_UPLOAD_SIZE}" style="padding-left: 1em;"> 
+		<td colspan="3" data-import-upload-size="{$IMPORT_UPLOAD_SIZE}" style="padding-left: 1em;"> 
 			<input type="hidden" class="validateconfiguration" value="validateFile" />
 			<input type="hidden" class="onLoad" value="registerFileConfigurationEvent" />
 			<input type="hidden" id="curent_file_type" name="type" value="csv" />
@@ -18,7 +18,8 @@
 				<input type="text" name="import_file_localpath" id="import_file_localpath"
 					title="Chemin d'un fichier d&eacute;j&agrave; pr&eacute;sent sur le serveur"
 					value="/home/emmanuel/transferts/Adresse-1-mini.csv"
-					onchange="if(this.value) $('#import_file_mode_localpath').get(0).checked = true;" />
+					onchange="if(this.value) $('#import_file_mode_localpath').get(0).checked = true;"
+					style="width: 90%;"/>
 			<!-- input type="hidden" name="userfile_hidden" value=""/ -->
 		</td>
 	</tr>

@@ -38,9 +38,15 @@ jQuery(document).ready(function() {
 					{'LBL_HALTED'|@vtranslate:$MODULE} !!!
 					
 					<button class="btn" name="continue" style="margin-left: 2em;"
+						id="continueHaltedImport"
 						onclick="location.href='index.php?for_module={$FOR_MODULE}&module=RSNImportSources&view=Index&mode=continueHaltedImport&import_id={$IMPORT_ID}'"><strong>{'LBL_REACTIVATE'|@vtranslate:$MODULE}</strong></button>
 				{else}
-					{'LBL_RUNNING'|@vtranslate:$MODULE} ...
+					<a href="index.php?for_module={$FOR_MODULE}&module=RSNImportSources&view=Index&mode=continueHaltedImport&import_id={$IMPORT_ID}"
+						onclick="return confirm('Retour &agrave; l\'&eacute;tat de programmation horaire.
+												\r&Ecirc;tes vous s&ucirc;r que le traitement n\'est pas en cours ?
+												\rLes cons&eacute;quences pourraient &ecirc;tre graves (doublons &agrave; gogo).');"
+						style="color: red; vertical-align: top;"
+					>{'LBL_RUNNING'|@vtranslate:$MODULE} ...</a>
 				{/if}</span>
 		</td>
 	</tr>
