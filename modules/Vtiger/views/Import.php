@@ -100,11 +100,22 @@ class Vtiger_Import_View extends Vtiger_Index_View {
 		$viewer->assign('AVAILABLE_FIELDS', $moduleMeta->getMergableFields());
 		$viewer->assign('ENTITY_FIELDS', $moduleMeta->getEntityFields());
 		$viewer->assign('ERROR_MESSAGE', $request->get('error_message'));
-		$viewer->assign('IMPORT_UPLOAD_SIZE', '3145728');
+		$viewer->assign('IMPORT_UPLOAD_SIZE', $this->getImportUploadSize());
 
 		return $viewer->view('ImportBasicStep.tpl', 'Import');
 	}
 
+
+	/** ED150829
+	 * Method to get the max upload file size for an import.
+	 * @return string - the max upload file size.
+	 */
+	public function getImportUploadSize() {
+		global $upload_maxsize;
+		return $upload_maxsize;
+		//ED150829 return '3145728';
+	}
+	
 	function uploadAndParse(Vtiger_Request $request) {
 
 		if(Import_Utils_Helper::validateFileUpload($request)) {
