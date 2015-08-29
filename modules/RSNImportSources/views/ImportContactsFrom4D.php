@@ -646,7 +646,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 					if ($contact != null) {
 						$this->preImportContact($contact);
 					}
-				} while ($contacts != null);
+				} while ($contact != null);
 
 			}
 
@@ -759,21 +759,21 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		
 		// contrôle l'égalité des tailles de tableaux
 		if(count($fields) != count($contacts['header'])){
-			
 			if(count($fields) > count($contacts['header']))
 				$contacts['header'] = array_merge($contacts['header'], array_fill (0, count($fields) - count($contacts['header']), null));
 			else
 				$contacts['header'] = array_slice($contacts['header'], 0, count($fields));
 		}
 		//tableau associatif dans l'ordre fourni
-		$contactsHeader = array_combine($this->getContactsFields(), $contacts['header']);
+		$contactsHeader = array_combine($fields, $contacts['header']);
 		
 		//Parse dates
 		foreach($this->getContactsDateFields() as $fieldName)
 			$contactsHeader[$fieldName] = $this->getMySQLDate($contactsHeader[$fieldName]);
 		
 		$fieldName = 'remarque';
-		$contactsHeader[$fieldName] = str_replace("\\r", "\r", $contactsHeader[$fieldName]);
+		if($contactsHeader[$fieldName])
+			$contactsHeader[$fieldName] = str_replace("\\r", "\r", $contactsHeader[$fieldName]);
 		
 		return $contactsHeader;
 	}
