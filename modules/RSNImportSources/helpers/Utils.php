@@ -381,4 +381,73 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		return $row;
 	}
+	
+	static $checkPickListValueCache;
+	public static function checkPickListValue($moduleName, $fieldName, $pickListName, $fieldValue, $createIfMissing = true){
+		if(!$fieldValue)
+			return true;
+		
+		if(self::$checkPickListValueCache && array_key_exists("$moduleName:$fieldName:$fieldValue", self::$checkPickListValueCache))
+			return true;
+		
+		if(!self::$checkPickListValueCache)
+			self::$checkPickListValueCache = array();
+		
+		global $adb;
+		$query = "SELECT 1
+			FROM `vtiger_$pickListName`
+			WHERE `$pickListName` = ?
+			LIMIT 1";
+		$result = $adb->pquery($query, array($fieldValue));
+		if(!$result){
+			//$adb->echoError("checkPickListValue : $query");
+			return false; //bad table name ?
+		}
+		if($adb->getRowCount($result))
+			$exists = true;
+		elseif($createIfMissing
+		&& self::checkPickListTableSequence($moduleName, $pickListName)){
+			
+			//TODO notify administrator
+			
+			$exists = self::addPickListValues($moduleName, $fieldName, $fieldValue);
+		}
+		else
+			$exists = false;
+		self::$checkPickListValueCache["$moduleName:$pickListName:$fieldValue"] = $exists;
+		return $exists;
+	}
+	
+	public static function addPickListValues($moduleName, $fieldName, $fieldValue){
+		$moduleModel = Settings_Picklist_Module_Model::getInstance($moduleName);
+		$fieldModel = Settings_Picklist_Field_Model::getInstance($fieldName, $moduleModel);
+		//var_dump('getPickListName', $fieldName, $fieldModel->getPickListName());
+		$rolesSelected = array();
+		if($fieldModel->isRoleBased()) {
+			$userSelectedRoles = $request->get('rolesSelected',array());
+			//selected all roles option
+			if(in_array('all',$userSelectedRoles)) {
+				$roleRecordList = Settings_Roles_Record_Model::getAll();
+				foreach($roleRecordList as $roleRecord) {
+					$rolesSelected[] = $roleRecord->getId();
+				}
+			}else{
+				$rolesSelected = $userSelectedRoles;
+			}
+		}
+		return $moduleModel->addPickListValues($fieldModel, $fieldValue, $rolesSelected);
+			
+	}
+	
+	public static function checkPickListTableSequence($moduleName, $pickListName){
+		global $adb;
+		$query = "UPDATE `vtiger_".$pickListName."_seq`
+			SET id = (SELECT MAX(`".$pickListName."id`) FROM `vtiger_$pickListName`)";
+		$result = $adb->query($query);
+		if(!$result){
+			//$adb->echoError("checkPickListTable : $query");
+			return false; //bad table name ?
+		}
+		return !!$result; 
+	}
 }

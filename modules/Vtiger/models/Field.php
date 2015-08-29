@@ -64,6 +64,13 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		return $this->name;
 	}
 
+	/* ED150829 overridable
+	 * Nom du picklist correspond au champ
+	*/
+	public function getPickListName() {
+		return $this->getName();
+	}
+
 	/**
 	 * Function to retrieve full data
 	 * @return <array>

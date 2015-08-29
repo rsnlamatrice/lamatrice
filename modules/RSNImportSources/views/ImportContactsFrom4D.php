@@ -193,11 +193,12 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			$perf->tick();
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
 				$keepScheduledImport = true;
-				$size = memory_get_usage();
-				$unit=array('B','KB','MB','GB','TB','PB');
-				echo '<pre>
-					Dépassement mémoire : '.@round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i]
-					.'</pre>';
+				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
+				echo '
+<pre>
+	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
+</pre>
+';
 				break;
 			}
 		}
@@ -288,14 +289,14 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 					. ", result=" . ($result ? " true" : "false"). " )");
 			if( ! $result)
 				$db->echoError();
+			else {
+				$this->createInitialModComment($record, $contactsData);
+					
+				//Abonnement à la revue (peut générer le compte du contact)
+				$this->importRSNAboRevuesForContact($record, $contactsData);
 				
-			$this->createInitialModComment($record, $contactsData);
-				
-			//Abonnement à la revue (peut générer le compte du contact)
-			$this->importRSNAboRevuesForContact($record, $contactsData);
-			
-			//Relations 
-			
+				//Relations 
+			}
 			return $record;
 		}
 
@@ -384,15 +385,30 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				$record->set($fieldsMapping[$fieldName], $value->format('Y-m-d'));
 		}
 		
-		$fieldName = 'rsnnpaicomment';
+		$fieldName = 'rsnnpaicomment';//on y a stocké la date de dernière modif du NPAI
 		if($record->get($fieldName)){//is date
 			$dateTime = new DateTime($record->get($fieldName));
 			$record->set($fieldName, $dateTime->format('d/m/Y'));
 		}
 		
-		//'typedegroupe' => 'rsngrptypes',
 		//TODO Check exist in picklist known values -> generic function to insert new value
+		//'typedegroupe' => 'rsngrptypes',
+		$fieldName = 'rsngrptypes';
+		if($record->get($fieldName))
+			RSNImportSources_Utils_Helper::checkPickListValue('Contacts', $fieldName, $fieldName, $record->get($fieldName));
 		
+		//'origine' => 'leadsource',//TODO translate
+		$fieldName = 'leadsource';
+		if($record->get($fieldName))
+			RSNImportSources_Utils_Helper::checkPickListValue('Contacts', $fieldName, $fieldName, $record->get($fieldName));
+		
+		//'departement' => 'mailingstate',
+		$fieldName = 'mailingstate';
+		if($record->get($fieldName)){
+			//2 chiffres pour le département
+			$record->set($fieldName, str_pad($record->get($fieldName), 2, "0", STR_PAD_LEFT));
+			$result = RSNImportSources_Utils_Helper::checkPickListValue('Contacts', $fieldName, 'rsnregion', $record->get($fieldName));
+		}
 		
 		//
 		//'nom' => 'lastname', 

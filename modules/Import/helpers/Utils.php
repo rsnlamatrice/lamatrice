@@ -275,7 +275,7 @@ class Import_Utils_Helper {
 	/** ED150829
 	 * Teste si l'utilisation mémoire s'approche du plantage
 	 */
-	static function isMemoryUsageToHigh($percentMax = 80){
+	static function isMemoryUsageToHigh($percentMax = 90){
 		if(!self::$php_memory_limit)
 			self::getPhpMermoryLimit();
 		
