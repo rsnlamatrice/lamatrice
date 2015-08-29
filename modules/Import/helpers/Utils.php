@@ -271,9 +271,23 @@ class Import_Utils_Helper {
 		}
 	}
 	
-	static $memory_limit;
-	static function isMemoryUsageToHigh(){
-		if(!self::$memory_limit){
+	static $php_memory_limit;
+	/** ED150829
+	 * Teste si l'utilisation mémoire s'approche du plantage
+	 */
+	static function isMemoryUsageToHigh($percentMax = 80){
+		if(!self::$php_memory_limit)
+			self::getPhpMermoryLimit();
+		
+		if($percentMax > 1)
+			$percentMax /= 100;
+		return memory_get_usage() > self::$php_memory_limit * $percentMax;
+	}
+	/** ED150829
+	 * Retourne la limite d'utilisation mémoire paramétrée dans php
+	 */
+	static function getPhpMermoryLimit(){
+		if(!self::$php_memory_limit){
 			function return_bytes($val) {
 				$val = trim($val);
 				$last = strtolower($val[strlen($val)-1]);
@@ -290,9 +304,8 @@ class Import_Utils_Helper {
 				return $val;
 			}
 			
-			self::$memory_limit = return_bytes(ini_get('memory_limit'));
+			self::$php_memory_limit = return_bytes(ini_get('memory_limit'));
 		}
-		
-		return memory_get_usage() > self::$memory_limit * 0.8;
+		return self::$php_memory_limit;
 	}
 }
