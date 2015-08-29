@@ -27,7 +27,7 @@ class RSNImportSources_Utils_Performance {
 	public function terminate(){
 		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
 		$perfNow = new DateTime();
-		$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%S');
+		$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%s');
 		echo "\n Importation terminée pour $this->tickCounter/$this->maxItems "
 			."( $perfPC %, $perfElapsed, "
 			.", memoire : ". self::getMemoryUsage()

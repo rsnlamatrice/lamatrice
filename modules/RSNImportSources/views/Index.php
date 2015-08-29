@@ -118,6 +118,9 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 * @param Vtiger_Request $request: the curent request.
 	 */
 	function preImport(Vtiger_Request $request) {
+		
+		set_time_limit(5 * 60);
+		
 		$importController = $this->getImportController($request);
 
 		if ($importController->preImportData($request)) {
