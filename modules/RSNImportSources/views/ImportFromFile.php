@@ -66,7 +66,9 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * @return string - the max upload file size.
 	 */
 	public function getImportUploadSize() {
-		return '3145728';
+		global $upload_maxsize;
+		return $upload_maxsize;
+		//return '3145728';
 	}
 
 	/**

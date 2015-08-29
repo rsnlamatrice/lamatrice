@@ -6,7 +6,7 @@
 	</tr>
 	<tr>
 		<td>&nbsp;</td>
-		<td data-import-upload-size="{$IMPORT_UPLOAD_SIZE}">
+		<td data-import-upload-size="{$IMPORT_UPLOAD_SIZE}"> 
 			<input type="hidden" class="validateconfiguration" value="validateFile" />
 			<input type="hidden" class="onLoad" value="registerFileConfigurationEvent" />
 			<input type="hidden" id="curent_file_type" name="type" value="csv" />
