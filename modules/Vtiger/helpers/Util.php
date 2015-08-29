@@ -249,6 +249,11 @@ class Vtiger_Util_Helper {
 	 * @return the new field name.
 	 */
 	public static function getRelatedFieldName($fieldName) {
+		/* ED150829 jamais utilisé ?
+		 * cf Vtiger_Field_Model->getPickListName()
+		 * cf Settings_Picklist_Field_Model->getPickListName()
+		 */
+		
     	/* ED150102
 		 * redirection exceptionnel de champ vers une table commune
 		 * TODO : extraire cette config

@@ -337,6 +337,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			}
 			$record->set($fieldName, $value);
 		}
+		var_dump($record->get($fieldName) == $record->get('mailingstreet2'));
 		if($record->get($fieldName) == $record->get('mailingstreet2'))
 			$record->set('mailingstreet2', '');
 		
@@ -368,7 +369,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				else
 					$value = 'CN1';
 			}
-			elseif($record->get('grpnomllong')){
+			elseif($record->get('grpnomllong') && $record->get('grpnomllong') != $record->get('lastname')){
 				$record->set('mailingstreet2', $record->get('grpnomllong'));
 				$value = 'CN1';
 			}

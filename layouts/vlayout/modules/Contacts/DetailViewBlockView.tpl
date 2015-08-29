@@ -60,6 +60,7 @@ affichage du détail d'un contact
 		</thead>
 		 <tbody {if $IS_HIDDEN} class="hide" {/if}>
 		{assign var=COUNTER value=0}
+		{assign var=BLOC_HAS_DESCRIPTION_ROW value=false}
 		<tr>
 		{foreach item=FIELD_MODEL key=FIELD_NAME from=$FIELD_MODEL_LIST}
 			{if !$FIELD_MODEL->isViewableInDetailView()}
@@ -85,6 +86,7 @@ affichage du détail d'un contact
 				{assign var=COUNTER value=$COUNTER+1}
 			{else}
 				{if $FIELD_MODEL->get('uitype') eq "20" or (($FIELD_MODEL->get('uitype') eq "19") && ($FIELD_NAME neq "rsnnpaicomment"))}{* ED150122 : commentaire sur NPAI affichŽ plus petit *}
+					{assign var=BLOC_HAS_DESCRIPTION_ROW value=true}
 					{if $COUNTER eq '1'}
 						<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td></tr><tr>
 						{assign var=COUNTER value=0}
@@ -104,7 +106,8 @@ affichage du détail d'un contact
 						{/if}
 					 </label>
 				 </td>
-				 <td class="fieldValue {$WIDTHTYPE}" id="{$MODULE}_detailView_fieldValue_{$FIELD_MODEL->getName()}" {if ($FIELD_MODEL->get('uitype') eq "19") && ($FIELD_NAME neq "rsnnpaicomment") or $FIELD_MODEL->get('uitype') eq '20'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
+				 <td class="fieldValue {$WIDTHTYPE}" id="{$MODULE}_detailView_fieldValue_{$FIELD_MODEL->getName()}"
+						{if ($FIELD_MODEL->get('uitype') eq "19") && ($FIELD_NAME neq "rsnnpaicomment") or $FIELD_MODEL->get('uitype') eq '20'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
 					 <span class="value" data-field-type="{$FIELD_MODEL->getFieldDataType()}">
 						{if $BLOCK_DO_NOT && $FIELD_MODEL->get('uitype') == '56' }{* ED141005 *}
 						{include file=vtemplate_path('uitypes/Boolean.tpl',$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
@@ -132,7 +135,7 @@ affichage du détail d'un contact
 						 </span>
 					 {/if}
 					{*rsnnpaicomment*}
-					{if $FIELD_NAME eq 'rsnnXXXpai'}
+					{*if $FIELD_NAME eq 'rsnnXXXpai'}
 					<div class="pull-right">
 						{assign var=FIELD_NAMETMP value=$FIELD_NAME}
 						{assign var=FIELD_MODELTMP value=$FIELD_MODEL}
@@ -151,12 +154,17 @@ affichage du détail d'un contact
 						</span>
 						{/if}
 					</div>
-					{/if}
+					{/if*}
 				 </td>
 			 {/if}
 
 		{if $FIELD_MODEL_LIST|@count eq 1 and (($FIELD_MODEL->get('uitype') neq "19") || ($FIELD_NAME eq "rsnnpaicomment")) and $FIELD_MODEL->get('uitype') neq "20" and $FIELD_MODEL->get('uitype') neq "30" and $FIELD_MODEL->get('name') neq "recurringtype" and $FIELD_MODEL->get('uitype') neq "69" and $FIELD_MODEL->get('uitype') neq "105"}
 			<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td>
+		{elseif $BLOC_HAS_DESCRIPTION_ROW && count($FIELD_MODEL_LIST) == 1}
+			{* ligne vide avec 4 cellules pour que le commentaire s'aligne à gauche
+			 * mais c'est moche, une ligne vide. TODO.
+			 *}
+			<tr><td></td><td></td><td></td><td></td></tr>
 		{/if}
 		{/foreach}
 		</tr>
