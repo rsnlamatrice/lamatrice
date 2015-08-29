@@ -588,8 +588,8 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @param $contactsData : the data of the invoice to import.
 	 */
 	function preImportContacts($contactsData) {
-		
 		$contactsValues = $this->getContactsValues($contactsData);
+
 		////TODO : cache
 		//$query = "SELECT 1
 		//	FROM vtiger_contactdetails
@@ -755,15 +755,17 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @return array : the formated data of the invoice.
 	 */
 	function getContactsValues($contacts) {
+
 		$fields = $this->getContactsFields();
 		
 		// contrôle l'égalité des tailles de tableaux
-		if(count($fields) != count($contacts['prlvInformations']))
+		if(count($fields) != count($contacts['prlvInformations'])){
+
 			if(count($fields) > count($contacts['prlvInformations']))
 				$contacts['prlvInformations'] = array_merge($contacts['prlvInformations'], array_fill (0, count($fields) - count($contacts['prlvInformations']), null));
 			else
-				$contacts['prlvInformations'] = array_slice($contacts['prlvInformations'], 0, count($contacts['prlvInformations']) - count($fields));
-		
+				$contacts['prlvInformations'] = array_slice($contacts['prlvInformations'], 0, count($fields));
+		}
 		//tableau associatif dans l'ordre fourni
 		$contactsHeader = array_combine($this->getContactsFields(), $contacts['prlvInformations']);
 		
