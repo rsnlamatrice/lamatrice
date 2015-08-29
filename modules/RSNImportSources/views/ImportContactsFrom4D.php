@@ -192,6 +192,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			$this->importOneContacts(array($row), $importDataController);
 			$perf->tick();
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$this->skipNextScheduledImports = true;
 				$keepScheduledImport = true;
 				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
 				echo '

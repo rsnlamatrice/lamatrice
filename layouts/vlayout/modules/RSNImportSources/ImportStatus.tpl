@@ -15,7 +15,7 @@ manage cancel button using importclassname
 jQuery(document).ready(function() {
 	setTimeout(function() {
 		jQuery('button[name="ok"]:visible:first').click();
-		}, 1 * 60 * 1000);
+		}, 2 * 60 * 1000);
 });
 </script>
 {/literal}
@@ -63,7 +63,8 @@ jQuery(document).ready(function() {
 				<tr>
 					<td>{'LBL_TOTAL_RECORDS_IMPORTED'|@vtranslate:$MODULE}</td>
 					<td width="10%">:</td>
-					<td width="30%">{$IMPORT_RESULT.IMPORTED} / {$IMPORT_RESULT.TOTAL}</td>
+					<td width="30%"><b>{$IMPORT_RESULT.IMPORTED} / {$IMPORT_RESULT.TOTAL}</b>
+						<br><i>soit {(int)($IMPORT_RESULT.IMPORTED / $IMPORT_RESULT.TOTAL * 100)}&nbsp;%</i></td>
 				</tr>
 				<tr>
 					<td colspan="3">

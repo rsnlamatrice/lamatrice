@@ -300,7 +300,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @param $rsndonateurswebData : the data of the invoice to import.
 	 */
 	function preImportRSNDonateursWeb($rsndonateurswebData) {
-		
 		$rsndonateurswebValues = $this->getRSNDonateursWebValues($rsndonateurswebData);
 		//TODO : cache
 		$query = "SELECT 1
@@ -343,12 +342,10 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 */
 	function checkContact($rsndonateursweb) {
 		$contactData = $this->getContactValues($rsndonateursweb['donInformations']);
-		
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
 		
 		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
-		
 		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
 		if(!$id){
@@ -366,7 +363,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		
 		if($fileReader->open()) {
 			if ($this->moveCursorToNextRSNDonateursWeb($fileReader)) {
-				$i = 0;
 				do {
 					$rsndonateursweb = $this->getNextRSNDonateursWeb($fileReader);
 					if ($rsndonateursweb != null) {

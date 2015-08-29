@@ -8,7 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************ */
 
-ini_set("memory_limit","512M");//ED150826
+ini_set("memory_limit","1G");//ED150826
 
 require_once 'include/Webservices/Create.php';
 require_once 'include/Webservices/Update.php';
@@ -34,6 +34,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
     protected $allPicklistValues = array();
 	var $batchImport = true;
 	var $keepScheduledImport = false;
+	var $skipNextScheduledImports = false;
 
 	static $IMPORT_RECORD_NONE = 0;
 	static $IMPORT_RECORD_CREATED = 1;
@@ -639,6 +640,9 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 				$vtigerMailer->Body    = $emailData;
 				$vtigerMailer->Send();
 			}
+			
+			if($importController->$skipNextScheduledImports)
+				break;
 			
 			$importDataController->finishImport(!$importController->keepScheduledImport);
 		}
