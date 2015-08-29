@@ -44,7 +44,7 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 			}
 			if($checkLastTestTime){
 				$sysControl	->set('mode', 'edit')
-						->set('lasttest', date('Y-m-d H:n:s'))
+						->set('lasttest', date('Y-m-d H:i:s'))
 						->save();
 			}
 		}

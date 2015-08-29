@@ -319,12 +319,14 @@ class Vtiger_Util_Helper {
 						$query .= ', `' . $column . '`';
 		$query .= ' FROM vtiger_'.$fieldName.' order by sortorderid';
 		$result = $db->pquery($query, array());
-	        $values = array();
-	        $num_rows = $db->num_rows($result);
-	        for($i=0; $i<$num_rows; $i++) {
-				//Need to decode the picklist values twice which are saved from old ui
-	            $values[] = decode_html(decode_html($db->query_result($result,$i,$fieldName)));
-	        }
+		
+		$values = array();
+		$num_rows = $db->num_rows($result);
+		for($i=0; $i<$num_rows; $i++) {
+			//Need to decode the picklist values twice which are saved from old ui
+			$values[] = decode_html(decode_html($db->query_result($result,$i,$fieldName)));
+		}
+		
 		if(is_array($uiColumns)){
 			for($i=0; $i<$num_rows; $i++) {
 				$data = array();

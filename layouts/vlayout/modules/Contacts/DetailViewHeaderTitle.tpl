@@ -37,7 +37,7 @@
 			{/foreach}
 			{assign var=NAME_FIELD value='contact_no'}
 			<span class="{$NAME_FIELD}"><small>-&nbsp;{$RECORD->get($NAME_FIELD)}</small></span>
-			{if $RECORD->get('isgroup') eq '1'}
+			{if $RECORD->get('isgroup') neq '0'}
 			       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD->get('mailingstreet2'))}</span>
 		       {/if}
 			</h4>

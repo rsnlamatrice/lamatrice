@@ -102,7 +102,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		if($numberOfRecords == $config->get('importBatchLimit')){
 			$this->keepScheduledImport = true;
 		}
-		$perf = new ImportPerformance($numberOfRecords);
+		$perf = new RSNImportSources_Utils_Performance($numberOfRecords);
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelVirement(array($row), $importDataController);
@@ -186,10 +186,12 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 					$comments = 'Dans 4D, la périodicité était ' . $oldPeriodicite . ', maintenant c\'est '.$prelevement->get('periodicite').'.';
 				}
 				
-				$oldRUM = $record->get('separum');
-				if($prelevement->get('separum') != $oldRUM){
-					if($comments) $comments .= "\r\n";
-					$comments .= 'Dans 4D, la RUM était ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
+				if(strlen($prelevement->get('separum')) > 3){
+					$oldRUM = $record->get('separum');
+					if($prelevement->get('separum') != $oldRUM){
+						if($comments) $comments .= "\r\n";
+						$comments .= 'Dans 4D, la RUM était ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
+					}
 				}
 				
 				if($comments){

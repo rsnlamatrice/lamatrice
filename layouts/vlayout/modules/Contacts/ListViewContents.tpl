@@ -111,7 +111,7 @@
 		</thead>
 		{foreach item=LISTVIEW_ENTRY from=$LISTVIEW_ENTRIES name=listview}
 		<tr class="listViewEntries" data-id='{$LISTVIEW_ENTRY->getId()}' data-recordUrl='{$LISTVIEW_ENTRY->getDetailViewUrl()}' id="{$MODULE}_listView_row_{$smarty.foreach.listview.index+1}">
-			{assign var=IS_GROUP value=($LISTVIEW_ENTRY->getRawDataFieldValue('isgroup') eq '1') || strpos($LISTVIEW_ENTRY->getRawDataFieldValue('isgroup'), 'data-value="1"')}{* TODO boolean *}
+			{assign var=IS_GROUP value=($LISTVIEW_ENTRY->getRawDataFieldValue('isgroup') neq '0') || strpos($LISTVIEW_ENTRY->getRawDataFieldValue('isgroup'), 'data-value="1"')}{* TODO boolean *}
 			<td  width="3%" class="{$WIDTHTYPE}">
 				<input type="checkbox" value="{$LISTVIEW_ENTRY->getId()}" class="listViewEntriesCheckBox"/>
 			</td>

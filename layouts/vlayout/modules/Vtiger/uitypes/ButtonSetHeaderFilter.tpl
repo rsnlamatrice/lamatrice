@@ -12,7 +12,7 @@
 {if !isset($INPUT_CLASS)}
     {assign var="INPUT_CLASS" value='input-small'}
 {/if}
-{assign var=PICKLIST_VALUES value=$FIELD_MODEL->getPicklistValues()}
+{*assign var=PICKLIST_VALUES value=$FIELD_MODEL->getPicklistValues()*}
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
 {assign var="FIELD_VALUE_LIST" value=explode(' |##| ',$FIELD_MODEL->get('fieldvalue'))}{*sic*}
 {if !$RECORD_MODEL}
@@ -20,7 +20,7 @@
 	{elseif $RECORD}{assign var=RECORD_MODEL value=$RECORD}
 	{else !$RECORD_MODEL}RECORD_MODEL manquant{/if}
 {/if}
-{assign var=PICKLIST_LABELS value=$RECORD_MODEL->getPicklistValuesDetails($FIELD_MODEL->getFieldName())}
+{assign var=PICKLIST_LABELS value=$RECORD_MODEL->getPicklistValuesDetailsForHeaderFilter($FIELD_MODEL->getFieldName())}
 <select id="{$MODULE}_{$smarty.request.view}_headerFilter_fieldName_{$FIELD_MODEL->get('name')}"
         class="{$INPUT_CLASS}" 
         data-field-type="{$FIELD_MODEL->getFieldDataType()}"

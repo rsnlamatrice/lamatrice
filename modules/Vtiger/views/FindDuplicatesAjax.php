@@ -29,10 +29,12 @@ class Vtiger_FindDuplicatesAjax_View extends Vtiger_FindDuplicates_View {
 
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$searchInput = $request->get('search_input');
 
 		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 		$listViewModel->set('search_key', $searchKey);
 		$listViewModel->set('search_value', $searchValue);
+		$listViewModel->set('search_input', $searchInput);
 		$listViewModel->set('operator', $request->get('operator'));
 
 		$count = $listViewModel->getListViewCount();

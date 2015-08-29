@@ -194,11 +194,13 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
 		if($customViewModel) {
             $searchKey = $request->get('search_key');
             $searchValue = $request->get('search_value');
+			$searchInput = $this->get('search_input');
             $operator = $request->get('operator');
             if(!empty($operator)) {
                 $customViewModel->set('operator', $operator);
                 $customViewModel->set('search_key', $searchKey);
                 $customViewModel->set('search_value', $searchValue);
+                $customViewModel->set('search_input', $searchInput);
             }
 			return $customViewModel->getRecordIds($excludedIds);
 		}

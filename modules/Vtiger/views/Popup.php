@@ -90,6 +90,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		$sourceRecord = $request->get('src_record');
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$searchInput = $request->get('search_input');
 		$searchOperator = $request->get('operator');
 		$currencyId = $request->get('currency_id');
 
@@ -128,6 +129,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		if((!empty($searchKey)) && (!empty($searchValue)))  {
 			$listViewModel->set('search_key', $searchKey);
 			$listViewModel->set('search_value', $searchValue);
+			$listViewModel->set('search_input', $searchInput);
 			$listViewModel->set('operator', $searchOperator);//ED150628
 		}
 		
@@ -140,6 +142,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		if(!empty($request->get('src_search_key')))  {
 			$listViewModel->set('src_search_key', $request->get('src_search_key'));
 			$listViewModel->set('src_search_value', $request->get('src_search_value'));
+			$listViewModel->set('src_search_input', $request->get('src_search_input'));
 			$listViewModel->set('src_operator', $request->get('src_operator'));
 		}
 
@@ -173,6 +176,8 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 
 		$viewer->assign('SEARCH_KEY', $searchKey);
 		$viewer->assign('SEARCH_VALUE', $searchValue);
+		$viewer->assign('SEARCH_INPUT', $searchInput);
+		$viewer->assign('SEARCH_OPERATOR', $searchOperator);
 
 		$viewer->assign('ORDER_BY',$orderBy);
 		$viewer->assign('SORT_ORDER',$sortOrder);

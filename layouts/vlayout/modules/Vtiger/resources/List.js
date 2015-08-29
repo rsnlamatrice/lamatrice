@@ -2155,37 +2155,7 @@ jQuery.Class("Vtiger_List_Js",{
 	registerEventForHeaderFilterChange : function() {
 		var thisInstance = this;
 		var listViewPageDiv = this.getListViewContentContainer();
-		listViewPageDiv.on('hover','.listViewHeaders.filters', function(e){
-			var $th = $(this).children('th:first')
-			, $actions = $th.children('.actionImages');
-			if ($actions.length === 0) {
-				$('<span class="actionImages"></span>')
-					.append($('<a href class="icon-refresh" title="'+app.vtranslate('JS_REFRESH')+'"></a>')
-						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
-						.click(function(){
-							//TODO do not use url parameters that contains search_key and search_value
-							$(this).parents('tr:first').find(':input:visible:first').change();//TODO function
-							return false;
-						})
-					)
-					.append($('<a href class="icon-remove-sign" title="'+app.vtranslate('JS_RESET_FILTERS')+'"></a>')
-						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
-						.click(function(){
-							$(this).parents('th:first').nextAll('th').find(':input:visible').val('');
-							return false;
-						})
-					)
-					.append($('<a href class="icon-question-sign" title="'+app.vtranslate('JS_HELP')+'"></a>')
-						.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
-						.click(function(){
-							Vtiger_Helper_Js.showFAQRecord('FAQ4'); //TODO transposer le code faq_no dans un ficher de config js
-							return false;
-						})
-					)
-					.appendTo($th)
-				;
-			}
-		});
+		listViewPageDiv.on('hover','.listViewHeaders.filters', thisInstance.onHeaderFilterHOverEvent);
 		listViewPageDiv.on('change','.listViewHeaders.filters :input',function(e) {
 			
 			var cvId = thisInstance.getCurrentCvId();
@@ -2193,6 +2163,7 @@ jQuery.Class("Vtiger_List_Js",{
 				"viewname" : cvId,
 				"search_key" : [],
 				"search_value" : [],
+				"search_input" : [],
 				"operator" : [],
 				"page"	:	1
 			});
@@ -2212,6 +2183,40 @@ jQuery.Class("Vtiger_List_Js",{
 			);
 		});
 	},
+		/* ED150412
+	 * Function to add header filter toolbox
+	 */
+	onHeaderFilterHOverEvent : function(e){
+		var $th = $(this).children('th:first')
+		, $actions = $th.children('.actionImages');
+		if ($actions.length === 0) {
+			$('<span class="actionImages"></span>')
+				.append($('<a href class="icon-refresh" title="'+app.vtranslate('JS_REFRESH')+'"></a>')
+					.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
+					.click(function(){
+						//TODO do not use url parameters that contains search_key and search_value
+						$(this).parents('tr:first').find(':input:visible:first').change();//TODO function
+						return false;
+					})
+				)
+				.append($('<a href class="icon-remove-sign" title="'+app.vtranslate('JS_RESET_FILTERS')+'"></a>')
+					.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
+					.click(function(){
+						$(this).parents('th:first').nextAll('th').find(':input:visible').val('');
+						return false;
+					})
+				)
+				.append($('<a href class="icon-question-sign" title="'+app.vtranslate('JS_HELP')+'"></a>')
+					.css({ float: 'right', 'opacity': '0.7', 'margin-right': '4px'})
+					.click(function(){
+						Vtiger_Helper_Js.showFAQRecord('FAQ4'); //TODO transposer le code faq_no dans un ficher de config js
+						return false;
+					})
+				)
+				.appendTo($th)
+			;
+		}
+	},
 	
 	/* ED150412
 	 * Function to register change in header filter inputs
@@ -2221,7 +2226,8 @@ jQuery.Class("Vtiger_List_Js",{
 		jQuery(e.currentTarget).parents('.listViewHeaders.filters:first').find(':input[data-field-name]').each(function(){
 			var $input = jQuery(this)
 			//, $th = $input.parents('th:first')
-			, searchValue = $input.val()//TODO Checkbox : On click event + e.currentTarget.checked
+			, searchInput = $input.val()//TODO Checkbox : On click event + e.currentTarget.checked
+			, searchValue = searchInput
 			if (searchValue == ''
 			|| ($input[0].tagName == 'SELECT') && searchValue == ' ')
 				return;
@@ -2232,10 +2238,12 @@ jQuery.Class("Vtiger_List_Js",{
 				operator = $input.attr('data-operator');
 			}
 			//ED150605 : select text is translated value
-			else if($input[0].tagName != 'SELECT') {
+			else if(operator
+			&& (operator[1].trim() //--> La liste Contacts.IsGroup fournit un filtre '<>0'
+			|| $input[0].tagName != 'SELECT')
+			) {  
 				searchValue = operator[2];
-				if (operator != null)
-					operator = operator[1].trim().toUpperCase();
+				operator = operator[1].trim().toUpperCase();
 			}
 			if (operator != null) {
 				//see include\QueryGenerator\QueryGenerator.php : line 1051
@@ -2300,6 +2308,7 @@ jQuery.Class("Vtiger_List_Js",{
 				}
 			urlParams.search_key.push(searchKey);
 			urlParams.search_value.push(searchValue);
+			urlParams.search_input.push(searchInput);
 			urlParams.operator.push(operator);
 		});
 		return urlParams;

@@ -50,11 +50,13 @@ class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$searchInput = $request->get('search_input');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
 			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
 			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
 			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
+			$viewer->assign('SEARCH_INPUT',is_array($searchInput) ? htmlspecialchars(json_encode($searchInput)) : $searchInput);
 		}
 		
 		$viewer->assign('ASSIGNABLE_COUNTER', $idsCounter);
@@ -106,11 +108,13 @@ class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$searchInput = $request->get('search_input');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
 			$viewer->assign('OPERATOR',is_array($operator) ? htmlspecialchars(json_encode($operator)) : $operator);
 			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
 			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
+			$viewer->assign('SEARCH_INPUT',is_array($searchInput) ? htmlspecialchars(json_encode($searchInput)) : $searchInput);
 		}
 		
 		$viewer->assign('UNASSIGNABLE_COUNTER', $idsCounter);

@@ -160,12 +160,20 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		$moduleName = $this->get('name');
 		$focus = CRMEntity::getInstance($moduleName);
 		$fields = $focus->column_fields;
+		if(!$fields) {
+			var_dump($moduleName, $recordModel);
+			echo_callstack();
+			die("<center>saveRecord : Aucun champ !</center>");
+		}
 		foreach($fields as $fieldName => $fieldValue) {
 			$fieldValue = $recordModel->get($fieldName);
 			//echo '<pre>'; var_dump($fieldName, $fieldValue);echo '</pre>'; 
 			if(is_array($fieldValue)){
 				$focus->column_fields[$fieldName] = $fieldValue;
 			}else if($fieldValue !== null) {
+				if(is_object($fieldValue))
+					if(is_a($fieldValue, 'DateTime'))
+						$fieldValue = $fieldValue->format('Y-m-d H:i:s');
 				$focus->column_fields[$fieldName] = decode_html($fieldValue);
 			}
 		}
