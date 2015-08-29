@@ -289,6 +289,9 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			if(!$isImportScheduled) {
 				$this->triggerImport($module);
 			}
+			//ED150829
+			if($this->skipNextScheduledImports)
+				break;
 		}
 
 		$importInfos = RSNImportSources_Queue_Action::getUserCurrentImportInfos($this->user);

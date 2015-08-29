@@ -107,6 +107,17 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelVirement(array($row), $importDataController);
 			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$this->skipNextScheduledImports = true;
+				$keepScheduledImport = true;
+				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
+				echo '
+<pre>
+	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
+</pre>
+';
+				break;
+			}
 		}
 		$perf->terminate();
 		

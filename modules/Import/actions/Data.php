@@ -34,6 +34,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
     protected $allPicklistValues = array();
 	var $batchImport = true;
 	var $keepScheduledImport = false;
+	var $skipNextScheduledImports = false;
 
 	static $IMPORT_RECORD_NONE = 0;
 	static $IMPORT_RECORD_CREATED = 1;
@@ -639,6 +640,9 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 				$vtigerMailer->Body    = $emailData;
 				$vtigerMailer->Send();
 			}
+			
+			if($importController->$skipNextScheduledImports)
+				break;
 			
 			$importDataController->finishImport(!$importController->keepScheduledImport);
 		}
