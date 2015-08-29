@@ -11,6 +11,9 @@
 
 class Settings_Picklist_Field_Model extends Vtiger_Field_Model {
 
+	//ED150829
+	var $pickListName;
+
     public function isEditable() {
         $nonEditablePickListValues = array( 'campaignrelstatus', 'duration_minutes','email_flag','hdnTaxType',
                         'payment_duration','recurringtype','recurring_frequency','visibility');
@@ -89,7 +92,21 @@ class Settings_Picklist_Field_Model extends Vtiger_Field_Model {
 		foreach($objectProperties as $properName=>$propertyValue) {
 			$fieldModel->$properName = $propertyValue;
 		}
+		/* ED150829 */
+		if(!$fieldModel->pickListName){
+			//var_dump('$fieldModel->pickListName', get_class($fieldObj), $fieldObj->getPickListName());
+			$fieldModel->pickListName = $fieldObj->getPickListName();
+		}
 		return $fieldModel;
+	}
+	
+	/* ED150829
+	 * Nom du picklist correspond au champ
+	*/
+	public function getPickListName() {
+		if(!$this->pickListName)
+			return parent::getPickListName();
+		return $this->pickListName;
 	}
 
 	/**

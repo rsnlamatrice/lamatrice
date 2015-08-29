@@ -680,12 +680,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			JOIN vtiger_crmentity
 				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 			WHERE vtiger_crmentity.deleted = 0
-			AND vtiger_contactdetails.contact_no IN ( CONCAT('C', ?), CONCAT('CID', ?))
+			AND vtiger_contactdetails.contact_no = CONCAT('C', ?)
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
 				
-		$result = $db->pquery($query, array($ref4D, $ref4D));
+		$result = $db->pquery($query, array($ref4D));
 
 		if($db->num_rows($result)){
 			$id = $db->query_result($result, 0, 0);

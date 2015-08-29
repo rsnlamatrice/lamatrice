@@ -76,5 +76,7 @@ $languageStrings = array(
 	'Overwrite'                       => 'Ecraser'              , 
 	'Merge'                       => 'Fusionner'              , 
 	'comma'                       => 'Virgule'              , 
-	'semicolon'                       => 'Point-virgule'              , 	
+	'semicolon'                       => 'Point-virgule'              ,
+	
+	'LBL_MEMORY_IS_OVER'		=> 'Dépassement de mémoire',
 );
