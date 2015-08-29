@@ -25,7 +25,7 @@
 						{/if}
 					{/foreach}
 				</select>
-				<pre id="data-import-selected-description" {if $DEFAULT_DESCRIPTION eq htmlentities('<br>')}style="display: none;"{/if}>{$DEFAULT_DESCRIPTION}</pre>
+				<pre id="data-import-selected-description" {if !$DEFAULT_DESCRIPTION || $DEFAULT_DESCRIPTION eq htmlentities('<br>')}style="display: none;"{/if}>{$DEFAULT_DESCRIPTION}</pre>
 			{else}
 				<strong>{'LBL_NO_DATA_SOURCE'|@vtranslate:$MODULE}</stron>
 			{/if}

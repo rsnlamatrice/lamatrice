@@ -270,4 +270,29 @@ class Import_Utils_Helper {
 				return 'Unknown upload error';
 		}
 	}
+	
+	static $memory_limit;
+	static function isMemoryUsageToHigh(){
+		if(!self::$memory_limit){
+			function return_bytes($val) {
+				$val = trim($val);
+				$last = strtolower($val[strlen($val)-1]);
+				switch($last) {
+					// The 'G' modifier is available since PHP 5.1.0
+					case 'g':
+						$val *= 1024;
+					case 'm':
+						$val *= 1024;
+					case 'k':
+						$val *= 1024;
+				}
+			
+				return $val;
+			}
+			
+			self::$memory_limit = return_bytes(ini_get('memory_limit'));
+		}
+		
+		return memory_get_usage() > self::$memory_limit * 0.8;
+	}
 }

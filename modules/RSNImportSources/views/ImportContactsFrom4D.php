@@ -191,6 +191,14 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneContacts(array($row), $importDataController);
 			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$size = memory_get_usage();
+				$unit=array('B','KB','MB','GB','TB','PB');
+				echo '<pre>
+					Dépassement mémoire : '.@round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i]
+					.'</pre>';
+				break;
+			}
 		}
 		$perf->terminate();
 		
