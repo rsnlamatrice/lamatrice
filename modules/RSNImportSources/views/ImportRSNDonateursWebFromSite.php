@@ -301,20 +301,20 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 */
 	function preImportRSNDonateursWeb($rsndonateurswebData) {
 		$rsndonateurswebValues = $this->getRSNDonateursWebValues($rsndonateurswebData);
-		//TODO : cache
-		$query = "SELECT 1
-			FROM vtiger_rsndonateursweb
-			JOIN vtiger_crmentity
-				ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
-			WHERE vtiger_crmentity.deleted = 0
-			AND externalid = ?
-			LIMIT 1
-		";
-		$sourceId = $rsndonateurswebData[0]['externalid'];
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($sourceId));//$rsndonateurswebData[0]['subject']
-		if($db->num_rows($result))
-			return true;
+		////TODO : cache
+		//$query = "SELECT 1
+		//	FROM vtiger_rsndonateursweb
+		//	JOIN vtiger_crmentity
+		//		ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
+		//	WHERE vtiger_crmentity.deleted = 0
+		//	AND externalid = ?
+		//	LIMIT 1
+		//";
+		//$sourceId = $rsndonateurswebData[0]['externalid'];
+		//$db = PearDatabase::getInstance();
+		//$result = $db->pquery($query, array($sourceId));//$rsndonateurswebData[0]['subject']
+		//if($db->num_rows($result))
+		//	return true;
 		
 		$rsndonateursweb = new RSNImportSources_Preimport_Model($rsndonateurswebValues, $this->user, 'RSNDonateursWeb');
 		$rsndonateursweb->save();
@@ -341,6 +341,10 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @param $rsndonateursweb : the invoice data.
 	 */
 	function checkContact($rsndonateursweb) {
+		
+		if(!in_array('Contacts', $this->getImportModules()))
+			return;
+		
 		$contactData = $this->getContactValues($rsndonateursweb['donInformations']);
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
