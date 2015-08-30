@@ -13,6 +13,7 @@ class RSNImportSources_ImportRSNDonateursWebLienRefFrom4D_View extends RSNImport
 	 * @return array - An array containing concerned module names.
 	 */
 	public function getImportModules() {
+		//La désactivation de l'import de contact fait qu'on ne voit pas ImportStatus depuis for_module=Contacts
 		return array(/*'Contacts', */'RSNDonateursWeb');
 	}
 	
