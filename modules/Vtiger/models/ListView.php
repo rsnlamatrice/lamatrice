@@ -175,7 +175,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 			if(isset($listViewHeaders[$fieldName])
 			&&  !($search_texts[$i] == '' && $operators[$i] == 'e')){
 				$listViewHeaders[$fieldName]->set('fieldvalue', $search_texts[$i]);
-				if(!$search_inputs)
+				if(!$search_inputs)//sinon double l'opérateur
 					$listViewHeaders[$fieldName]->set('filterOperator', $operators[$i]);
 			}
 		}

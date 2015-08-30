@@ -52,9 +52,10 @@ class Import_Utils_Helper {
 		return $import_dir;
 	}
 
-	public static function getImportFilePath($user, $moduleName) {
+	public static function getImportFilePath($user, $moduleName, $nFile = 0) {
 		$importDirectory = self::getImportDirectory();
-		return $importDirectory. "IMPORT_".$user->id."_".$moduleName;
+		return $importDirectory. "IMPORT_".$user->id."_".$moduleName
+			. ($nFile ? '['.str_pad($nFile, 2, '0', STR_PAD_LEFT).']' : '');
 	}
 
 
@@ -191,21 +192,55 @@ class Import_Utils_Helper {
 		if($request->get('import_file_src_mode') == 'localpath'){
 	
 			//ED150827
-			$srcFile = $request->get('import_file_localpath');
-			if(!file_exists($srcFile)) {
-				$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
-				return false;
+			$srcFiles = explode(';', $request->get('import_file_localpath'));
+			for($nFile = 0; $nFile < count($srcFiles); $nFile++){
+				$srcFile = trim($srcFiles[$nFile]);
+				if(!file_exists($srcFile)) {
+					$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+					return false;
+				}
 			}
-			$request->set('import_file_name', $srcFile);
-			copy($srcFile, $temporaryFileName);
-			$fileCopied = $temporaryFileName;
-			if(!file_exists($fileCopied)) {
-				$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
-				return false;
+			
+			$request->set('import_file_name', $request->get('import_file_localpath'));
+			
+			for($nFile = 0; $nFile < count($srcFiles); $nFile++){
+				$srcFile = trim($srcFiles[$nFile]);
+				if($nFile > 0)
+					$temporaryFileName = self::getImportFilePath($current_user, $request->get("for_module"), $nFile);
+				copy($srcFile, $temporaryFileName);
+				$fileCopied = $temporaryFileName;
+				if(!file_exists($fileCopied)) {
+					$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import') . ' : ' . $fileCopied);
+					return false;
+				}
 			}
+	
+			////ED150827
+			//$srcFile = $request->get('import_file_localpath');
+			//if(!file_exists($srcFile)) {
+			//	$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+			//	return false;
+			//}
+			//$request->set('import_file_name', $srcFile);
+			//copy($srcFile, $temporaryFileName);
+			//$fileCopied = $temporaryFileName;
+			//if(!file_exists($fileCopied)) {
+			//	$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
+			//	return false;
+			//}
 			
 		}
 		else {
+			
+			/* ED150830 TODO fichiers multiples : chaque propriété de $files devient un tableau
+			 * cf RSNImportSources/helpers/Utils.php
+			 */ 
+			$files = $_FILES['import_file'];
+			//multiple ou pas ?
+			if(is_array($files['tmp_name'])){
+				throw new Exception('Les fichiers multiples ne sont pas gérés. cf RSNImportSources/helpers/Utils.php');
+			}
+			
 			if($_FILES['import_file']['error']) {
 				$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));
 				return false;
@@ -223,7 +258,7 @@ class Import_Utils_Helper {
 				$request->set('error_message', vtranslate('LBL_IMPORT_DIRECTORY_NOT_WRITABLE', 'Import'));
 				return false;
 			}
-	
+			
 			//ED150827
 			$request->set('import_file_name', $_FILES['import_file']['name']);
 			
