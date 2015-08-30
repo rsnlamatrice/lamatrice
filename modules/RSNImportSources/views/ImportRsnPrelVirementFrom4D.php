@@ -428,7 +428,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,
 			'RsnPrelVirement',
-			'ref4d',
+			'reffiche',
 			'_contactid',
 			/*$changeStatus*/ false
 		);
