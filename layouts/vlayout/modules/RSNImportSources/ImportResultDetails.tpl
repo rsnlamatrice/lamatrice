@@ -3,7 +3,10 @@
 		<td>{'LBL_TOTAL_RECORDS_IMPORTED'|@vtranslate:$MODULE}</td>
 		<td width="10%">:</td>
 		<td width="30%"><b>{$IMPORT_RESULT.IMPORTED} / {$IMPORT_RESULT.TOTAL}</b>
-			&nbsp;&nbsp;<i>soit {(int)($IMPORT_RESULT.IMPORTED / $IMPORT_RESULT.TOTAL * 100)}&nbsp;%</i></td>
+			{if $IMPORT_RESULT.TOTAL}
+				&nbsp;&nbsp;<i>soit {(int)($IMPORT_RESULT.IMPORTED / $IMPORT_RESULT.TOTAL * 100)}&nbsp;%</i>
+			{/if}
+		</td>
 	</tr>
 	<tr>
 		<td>{'LBL_NUMBER_OF_RECORDS_CREATED'|@vtranslate:$MODULE}</td>
