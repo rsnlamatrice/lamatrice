@@ -97,43 +97,70 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		if($request->get('import_file_src_mode') == 'localpath'){
 	
 			//ED150827
-			$srcFile = $request->get('import_file_localpath');
-			if(!file_exists($srcFile)) {
-				$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
-				return false;
+			$srcFiles = explode(';', $request->get('import_file_localpath'));
+			for($nFile = 0; $nFile < count($srcFiles); $nFile++){
+				$srcFile = trim($srcFiles[$nFile]);
+				if(!file_exists($srcFile)) {
+					$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+					return false;
+				}
 			}
-			$request->set('import_file_name', $srcFile);
-			copy($srcFile, $temporaryFileName);
-			$fileCopied = $temporaryFileName;
-			if(!file_exists($fileCopied)) {
-				$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
-				return false;
+			
+			$request->set('import_file_name', $request->get('import_file_localpath'));
+			
+			for($nFile = 0; $nFile < count($srcFiles); $nFile++){
+				$srcFile = trim($srcFiles[$nFile]);
+				if($nFile > 0)
+					$temporaryFileName = self::getImportFilePath($current_user, $request->get("for_module"), $nFile);
+				copy($srcFile, $temporaryFileName);
+				$fileCopied = $temporaryFileName;
+				if(!file_exists($fileCopied)) {
+					$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import') . ' : ' . $fileCopied);
+					return false;
+				}
 			}
 		}
 		else {
 
-			if($_FILES['import_file']['error']) {
-				$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));
-				return false;
+			//ED150830 fichiers multiples : chaque propriété de $files devient un tableau
+			$files = $_FILES['import_file'];
+			//multiple ou pas ?
+			if(!is_array($files['tmp_name'])){
+				foreach($files as $prop=>$value)
+					$files[$prop] = array($value);
 			}
+			$nbFiles = count($files['tmp_name']);
 			
-			if(!is_uploaded_file($_FILES['import_file']['tmp_name'])) {
-				$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
-				return false;
-			}
-			if ($_FILES['import_file']['size'] > $uploadMaxSize) {
-				$request->set('error_message', vtranslate('LBL_IMPORT_ERROR_LARGE_FILE', 'Import').
-				$uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
-				return false;
+			for($nFile = 0; $nFile < $nbFiles; $nFile++){
+				if($files['error'][$nFile]) {
+					$request->set('error_message', self::fileUploadErrorMessage($files['error'][$nFile]));
+					return false;
+				}
+			
+				if(!is_uploaded_file($files['tmp_name'][$nFile])) {
+					$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+					return false;
+				}
+				if ($files['size'][$nFile] > $uploadMaxSize) {
+					$request->set('error_message', vtranslate('LBL_IMPORT_ERROR_LARGE_FILE', 'Import').
+					$uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
+					return false;
+				}
 			}
 
 			//ED150827
-			$request->set('import_file_name', $_FILES['import_file']['name']);
+			$request->set('import_file_name', implode(', ', $files['name']));
 	
-			$fileCopied = move_uploaded_file($_FILES['import_file']['tmp_name'], $temporaryFileName);
-			if(!$fileCopied) {
-				$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
-				return false;
+			for($nFile = 0; $nFile < $nbFiles; $nFile++){
+				$temporaryFileName = self::getImportFilePath($current_user, $request->get("for_module"), $nFile );
+				$fileCopied = move_uploaded_file($files['tmp_name'][$nFile], $temporaryFileName);
+				if(!$fileCopied) {
+					$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import').' : '.$files['name'][$nFile] . ' -> ' . $temporaryFileName);
+					return false;
+				}
+				//Suppression du fichier du prochain index
+				if(file_exists($temporaryFileName . "-". ($nFile+1)))
+					unlink($temporaryFileName . "-". ($nFile+1));
 			}
 		}
 

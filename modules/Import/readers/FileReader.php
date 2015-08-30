@@ -48,8 +48,9 @@ class Import_FileReader_Reader {
 		return null;
 	}
 
-	public function getFilePath() {
-		return Import_Utils_Helper::getImportFilePath($this->user, $this->request->get('module'));
+	// ED150830 TODO : in this module, manage multiple file as RSNImportSources_FileReader_Reader
+	public function getFilePath($nFile = 0) {
+		return Import_Utils_Helper::getImportFilePath($this->user, $this->request->get('module'), $nFile);
 	}
 
 	public function getFileHandler() {
