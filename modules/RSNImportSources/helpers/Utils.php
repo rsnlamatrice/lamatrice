@@ -479,7 +479,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	}
 	
 	
-
+	/** METHODES POUR POST-PREIMPORT **/
+	
 	/**
 	 * Méthode qui affecte le contactid pour tous ceux qu'on trouve d'après leur Ref4D
 	 */
@@ -495,7 +496,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		/* Affecte la réf du contact d'après la ref 4D */
 		$query = "UPDATE $tableName
 			JOIN vtiger_contactdetails
-				ON vtiger_contactdetails.contact_no = CONCAT('C', `$tableName`.`$ref4dFieldName`)
+				ON vtiger_contactdetails.ref4d = `$tableName`.`$ref4dFieldName`
 			JOIN vtiger_crmentity
 				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 		";
@@ -528,7 +529,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		/* Affecte la réf du contact d'après la ref 4D */
 		$query = "UPDATE $tableName
 			JOIN vtiger_contactdetails
-				ON vtiger_contactdetails.contact_no = CONCAT('C', `$tableName`.`$ref4dFieldName`)
+				ON vtiger_contactdetails.ref4d = `$tableName`.`$ref4dFieldName`
 			JOIN vtiger_crmentity
 				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 		";
