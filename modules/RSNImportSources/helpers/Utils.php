@@ -527,6 +527,10 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		
 		/* Affecte la réf du contact d'après la ref 4D */
 		$query = "UPDATE $tableName
+			JOIN vtiger_contactdetails
+				ON vtiger_contactdetails.contact_no = CONCAT('C', `$tableName`.`$ref4dFieldName`)
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 		";
 		$query .= " SET ";
 		if($updateContactIdField){
@@ -534,13 +538,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		$query .= "`$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED;
 		$query .= "
-			WHERE CONCAT('C', `$tableName`.`$ref4dFieldName`) IN (
-				SELECT vtiger_contactdetails.contact_no
-				FROM vtiger_contactdetails
-				JOIN vtiger_crmentity
-					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-				WHERE vtiger_crmentity.deleted = 0
-			)
+			WHERE vtiger_crmentity.deleted = 0
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
 		$result = $db->query($query);
