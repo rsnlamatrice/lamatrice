@@ -302,6 +302,12 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		$record->set($fieldName, $value);
 		
 		
+		$fieldName = 'emailaddressorigin';
+		$value = $this->getEmailOrigine($record->get($fieldName));
+		RSNImportSources_Utils_Helper::checkPickListValue('ContactEmails', $fieldName, $fieldName, $value);
+		$record->set($fieldName, $value);
+		
+		
 		$fieldName = 'rsnmediadocuments';
 		RSNImportSources_Utils_Helper::checkPickListValue('ContactEmails', $fieldName, $fieldName, 'Liste régionale');
 		RSNImportSources_Utils_Helper::checkPickListValue('ContactEmails', $fieldName, $fieldName, 'Lettre boutique');
@@ -517,5 +523,24 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 			$contactemailsHeader[$fieldName] = $this->getMySQLDate($contactemailsHeader[$fieldName]);
 		
 		return $contactemailsHeader;
+	}
+	
+	function getEmailOrigine($origine){
+		switch($origine){
+			case 'PRINCIPAL' :
+				return 'Principale';
+			case 'PETITION' :
+				return 'Pétition';
+			case 'BOUTIQUE' :
+				return 'Boutique';
+			case 'PAYPAL' :
+				return 'Paypal';
+			case 'PAYBOX' :
+				return 'Paybox';
+			case 'Donateur w' :
+				return 'Donateur web';
+			default :
+				return $origine;
+		}
 	}
 }
