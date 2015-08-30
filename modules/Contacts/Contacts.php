@@ -1131,7 +1131,10 @@ class Contacts extends CRMEntity {
 						JOIN vtiger_contactdetails
 							ON vtiger_contactemails.contactid = vtiger_contactdetails.contactid
 						JOIN vtiger_contactdetails AS contact_ref
-							ON contact_ref.accountid = vtiger_contactdetails.accountid
+							ON (contact_ref.accountid <> 0 AND contact_ref.accountid = vtiger_contactdetails.accountid)
+							OR (contact_ref.accountid = 0
+								 AND contact_ref.contactid = vtiger_contactemails.contactid
+								  AND contact_ref.email <> vtiger_contactemails.email)
 						WHERE contact_ref.contactid=".$id."
 						UNION "/* add current address from contactaddress */."
 						SELECT vtiger_contactdetails.contactid,
