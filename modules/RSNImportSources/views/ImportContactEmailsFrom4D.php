@@ -83,6 +83,12 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 			'date_modification' => ''
 		);
 	}
+	
+	function getContactEmailsDateFields(){
+		return array(
+			'date_creation', 'date_modification'
+		);
+	}
 	/**
 	 * Method to get the imported fields for the contact emails module.
 	 * @return array - the imported fields for the contact emails module.
@@ -497,6 +503,10 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		}
 		//tableau associatif dans l'ordre fourni
 		$contactemailsHeader = array_combine($fields, $contactemails['header']);
+		
+		//Parse dates
+		foreach($this->getContactEmailsDateFields() as $fieldName)
+			$contactemailsHeader[$fieldName] = $this->getMySQLDate($contactemailsHeader[$fieldName]);
 		
 		return $contactemailsHeader;
 	}
