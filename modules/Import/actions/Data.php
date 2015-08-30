@@ -160,8 +160,13 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			$entityIdComponents = vtws_getIdComponents($entityInfo['id']);
 			$recordId = $entityIdComponents[1];
 		}
-		$adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=?, recordid=? WHERE id=?',
+		$result = $adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=?, recordid=? WHERE id=?',
 				array($entityInfo['status'], $recordId, $entryId));
+		if(!$result){
+			$adb->echoError();
+			//permet l'interruption d'un import si la table est supprimée
+			die('Erreur dans ' . __FILE__ . '->updateImportStatus()');
+		}
 	}
 
 	public function createRecords() {
