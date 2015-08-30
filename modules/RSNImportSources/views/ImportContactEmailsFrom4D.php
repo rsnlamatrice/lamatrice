@@ -539,6 +539,8 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 				return 'Paybox';
 			case 'Donateur w' :
 				return 'Donateur web';
+			case 'ERREUR IMP' :
+				return '(Erreur imp 4D)';
 			default :
 				return $origine;
 		}
