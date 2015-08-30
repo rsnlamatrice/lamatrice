@@ -1128,7 +1128,7 @@ class Contacts extends CRMEntity {
 							vtiger_contactemails.rsnmediadocuments,
 							vtiger_contactemails.rsnmediadocumentsdonot,
 							vtiger_contactemails.comments,
-							IF(vtiger_contactemails.contactemailsorigine = 'Principal', 1, 0) AS is_current_address
+							IF(vtiger_contactemails.emailaddressorigin = 'Principal', 1, 0) AS is_current_address
 						FROM vtiger_contactemails
 						JOIN vtiger_contactdetails
 							ON vtiger_contactemails.contactid = vtiger_contactdetails.contactid
