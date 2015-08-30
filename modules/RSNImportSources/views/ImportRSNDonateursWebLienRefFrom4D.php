@@ -79,8 +79,9 @@ class RSNImportSources_ImportRSNDonateursWebLienRefFrom4D_View extends RSNImport
 					
 		global $log;
 		
-		//TODO check sizeof $rsndonateurswebata
-		$contactId = $this->getContactIdFromRef4D($rsndonateurswebData[0]['ref4d']);
+		$contactId = $rsndonateurswebData[0]['_contactid'];
+		if(false && $contactId) //'[Migration] post pre import
+			$contactId = $this->getContactIdFromRef4D($rsndonateurswebData[0]['ref4d']);
 		if ($contactId) {
 			$sourceId = $rsndonateurswebData[0]['externalid'];
 	
@@ -182,6 +183,28 @@ class RSNImportSources_ImportRSNDonateursWebLienRefFrom4D_View extends RSNImport
 			'isvalid'		=> $rsndonateursweb['donInformations'][3],
 		);
 		return $rsndonateurswebHeader;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		// Pré-identifie les contacts
+		
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+			$this->user,
+			'RSNDonateursWeb',
+			'ref4d',
+			'_contactid',
+			/*$changeStatus*/ false
+		);
+	
+		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
+			$this->user,
+			'RSNDonateursWeb',
+			'_contactid'
+		);
 	}
 	
 }

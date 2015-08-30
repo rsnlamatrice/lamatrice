@@ -477,4 +477,96 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		return !!$result; 
 	}
+	
+	
+
+	/**
+	 * Méthode qui affecte le contactid pour tous ceux qu'on trouve d'après leur Ref4D
+	 */
+	public static function setPreImportDataContactIdByRef4D($user, $moduleName, $ref4dFieldName, $contactIdField, $changeStatus = true) {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
+		
+		if($changeStatus === true)
+			$changeStatus = RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED;
+			
+		// Pré-identifie les contacts
+		
+		/* Affecte la réf du contact d'après la ref 4D */
+		$query = "UPDATE $tableName
+			JOIN vtiger_contactdetails
+				ON vtiger_contactdetails.contact_no = CONCAT('C', `$tableName`.`$ref4dFieldName`)
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+		";
+		
+		$query .= " SET `$tableName`.`$contactIdField` = vtiger_crmentity.crmid";
+		
+		if($changeStatus !== false)
+			$query .= ", `$tableName`.status = ".$changeStatus;
+			
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->query($query);
+		if(!$result)
+			$db->echoError($query);
+			
+		return !!$result;
+	}
+
+	/**
+	 * Méthode qui court-circuite tous les contacts qui existent déjà d'après leur Ref4D
+	 */
+	public static function skipPreImportDataForExistingContactsByRef4D($user, $moduleName, $ref4dFieldName, $updateContactIdField = false) {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
+		
+		// Pré-identifie les contacts
+		
+		/* Affecte la réf du contact d'après la ref 4D */
+		$query = "UPDATE $tableName
+			JOIN vtiger_contactdetails
+				ON vtiger_contactdetails.contact_no = CONCAT('C', `$tableName`.`$ref4dFieldName`)
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+		";
+		$query .= " SET ";
+		if($updateContactIdField){
+			$query .= "`$tableName`.`$updateContactIdField` = vtiger_crmentity.crmid, ";
+		}
+		$query .= "`$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED;
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->query($query);
+		if(!$result)
+			$db->echoError($query);
+			
+		return !!$result;
+	}
+	
+	/**
+	 * Méthode qui court-circuite tout enregistrement des contacts qui n'existent pas d'après leur Ref4D
+	 * `$contactIdField` IS NULL OR `$contactIdField` = ''
+	 */
+	public static function skipPreImportDataForMissingContactsByRef4D($user, $moduleName, $contactIdField) {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
+		
+		/* Le contact n'existe pas, on skippe */
+		
+		$query = "UPDATE $tableName
+			SET status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED."
+			WHERE status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND `$contactIdField` IS NULL OR `$contactIdField` = ''
+		";
+		$result = $db->query($query);
+		if(!$result)
+			$db->echoError($query);
+			
+		return !!$result;
+	}
 }

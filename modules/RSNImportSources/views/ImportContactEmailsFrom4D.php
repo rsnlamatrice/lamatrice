@@ -88,7 +88,10 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 			'origine' => 'emailaddressorigin',
 			'email' => 'email',
 			'date_creation' => '',
-			'date_modification' => ''
+			'date_modification' => '',
+			
+			/* post pré-import */
+			'_contactid' => '',
 		);
 	}
 	
@@ -163,7 +166,13 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		global $log;
 		
 		//TODO check sizeof $contactemailsata
-		$contactId = $this->getContactIdFromRef4D($contactemailsData[0]['ref4d']);
+		$sourceId = $contactemailsData[0]['ref4d'];
+		$contactId = $contactemailsData[0]['_contactid']; // initialisé dans le postPreImportData
+		if(!$contactId){
+			//Contrôle des doublons dans la source
+			if(false) // parce que [Migration]
+				$contactId = $this->getContactIdFromRef4D($sourceId);
+		}
 		if ($contactId) {
 			$sourceId = $contactemailsData[0]['email'];
 	
@@ -408,6 +417,28 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 			echo "not opened ...";
 		}
 		return false;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		// Pré-identifie les contacts
+		
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+			$this->user,
+			'ContactEmails',
+			'ref4d',
+			'_contactid',
+			/*$changeStatus*/ false
+		);
+	
+		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
+			$this->user,
+			'ContactEmails',
+			'_contactid'
+		);
 	}
         
 	/**
