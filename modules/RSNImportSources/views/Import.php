@@ -824,6 +824,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			//echo 'updateLastImportField : lastimport = '. $fileName . ' (' . date('d/m/Y') . ')';
 		}
 	}
+	
 }
 
 ?>
