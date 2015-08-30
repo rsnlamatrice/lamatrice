@@ -66,8 +66,28 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 				RSNImportSourcesJs.handleNeededFileDelimiterChange(e);
 			});
 		},
+		
+		//Les sources disposent d'une description dans leur balise option
+		showSelectedSourceDescription: function(view){
+			var descr = $('#SelectSourceDropdown option=[value="' + view + '"][title]').attr('title')
+			, $descr = $('#data-import-selected-description').html(descr)
+			;
+			if (!descr || descr == '<br>')
+				$descr.hide();
+			else
+				$descr
+					.show()
+					.append($('<span class="pull-right"/>')
+						.append($('<a href="#">?</a>')
+							.click(function(e){
+							})
+						)
+					)
+				;
+		},
 
 		loadSourceConfiguration: function(view) {
+			this.showSelectedSourceDescription(view);
 			var data = {
 				module: app.getModuleName(),
 				for_module: RSNImportSourcesJs.getForModuleName(),
@@ -113,10 +133,18 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			
 			return true;
 		},
+		
+		/* ED150829
+		 * Mode de définition du fichier à traiter : upload ou localpath (chemin sur le serveur)
+		 */
+		getFileSrcMode : function(){
+			return $('input[type="radio"][name="import_file_src_mode"]:checked').val();
+		},
 
 		validateFilePath: function() { // tmp !!!!
-			var importFile = jQuery('#import_file');
-			var filePath = importFile.val();
+			var fileSrcMode = this.getFileSrcMode()
+			, importFile = fileSrcMode == 'localpath' ? jQuery('#import_file_localpath') : jQuery('#import_file')
+			, filePath = importFile.val();
 			if(jQuery.trim(filePath) == '') {
 				var errorMessage = app.vtranslate('JS_IMPORT_FILE_CAN_NOT_BE_EMPTY');
 				var params = {
@@ -130,7 +158,8 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			if(!RSNImportSourcesJs.validateFileType("import_file", "curent_file_type", "file_type")) {
 				return false;
 			}
-			if(!RSNImportSourcesJs.validateUploadFileSize("import_file")) {
+			if(fileSrcMode == 'upload'
+			&& !RSNImportSourcesJs.validateUploadFileSize("import_file")) {
 				return false;
 			}
 			return true;

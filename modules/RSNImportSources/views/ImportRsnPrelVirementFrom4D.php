@@ -102,19 +102,24 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		if($numberOfRecords == $config->get('importBatchLimit')){
 			$this->keepScheduledImport = true;
 		}
-		$perfStartTime = new DateTime();
-		$prev_perfPC = 0;
+		$perf = new RSNImportSources_Utils_Performance($numberOfRecords);
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
-			$perfPC = (int)($i/$numberOfRecords * 100);
-			if($prev_perfPC != $perfPC){
-				$perfNow = new DateTime();
-				$perfElapsed = date_diff($perfStartTime, $perfNow)->format('%H:%i:%S');
-				echo "\n import $i/$numberOfRecords ( $perfPC %, $perfElapsed, ".memory_get_usage()." ) ";
-				$prev_perfPC = $perfPC;
-			}
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneRsnPrelVirement(array($row), $importDataController);
+			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$this->skipNextScheduledImports = true;
+				$keepScheduledImport = true;
+				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
+				echo '
+<pre>
+	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
+</pre>
+';
+				break;
+			}
 		}
+		$perf->terminate();
 		
 		//ED150826 : d'autres données sont disponibles, empêche la suppression de l'import programmé
 		/*var_dump("\n\n\n\n\n\n\n\n\nnumberOfRecords\n\n\n\n\n\n\n\n\n\n\n", $numberOfRecords, $config->get('importBatchLimit')
@@ -143,13 +148,15 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				FROM vtiger_rsnprelvirement
 				JOIN vtiger_crmentity
 					ON vtiger_rsnprelvirement.rsnprelvirementid = vtiger_crmentity.crmid
-				WHERE dateexport = ?
+				WHERE vtiger_crmentity.deleted = FALSE
+				AND dateexport = ?
 				AND separum = ?
-				AND deleted = FALSE
+				AND rsnprelevementsid = ?
 				LIMIT 1
 			";
+			$params = array($datePvt, $sourceId, $prelevement->getId());
 			$db = PearDatabase::getInstance();
-			$result = $db->pquery($query, array($datePvt, $sourceId));
+			$result = $db->pquery($query, $params);
 			if($db->num_rows($result)){
 				//already imported !!
 				$row = $db->fetch_row($result, 0); 
@@ -190,10 +197,12 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 					$comments = 'Dans 4D, la périodicité était ' . $oldPeriodicite . ', maintenant c\'est '.$prelevement->get('periodicite').'.';
 				}
 				
-				$oldRUM = $record->get('separum');
-				if($prelevement->get('separum') != $oldRUM){
-					if($comments) $comments .= "\r\n";
-					$comments .= 'Dans 4D, la RUM était ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
+				if(strlen($prelevement->get('separum')) > 3){
+					$oldRUM = $record->get('separum');
+					if($prelevement->get('separum') != $oldRUM){
+						if($comments) $comments .= "\r\n";
+						$comments .= 'Dans 4D, la RUM était ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
+					}
 				}
 				
 				if($comments){
@@ -278,24 +287,24 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	function preImportRsnPrelVirement($rsnprelvirementsData) {
 		
 		$rsnprelvirementsValues = $this->getRsnPrelVirementValues($rsnprelvirementsData);
-		//TODO : cache
-		$query = "SELECT 1
-			FROM vtiger_rsnprelvirement
-			JOIN vtiger_crmentity
-				ON vtiger_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
-			WHERE vtiger_crmentity.deleted = 0
-			AND dateexport = ?
-			AND separum = ?
-			LIMIT 1
-		";
-		$sourceId = $rsnprelvirementsData[0]['separum'];
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($rsnprelvirementsData[0]['dateexport'], $sourceId));
 
-		if($db->num_rows($result)){
-			var_dump("Preimport RsnPrelVirement", $rsnprelvirementsValues);
-			return true;
-		}
+		////TODO : cache
+		//$query = "SELECT 1
+		//	FROM vtiger_rsnprelvirement
+		//	JOIN vtiger_crmentity
+		//		ON vtiger_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
+		//	WHERE vtiger_crmentity.deleted = 0
+		//	AND dateexport = ?
+		//	AND separum = ?
+		//	LIMIT 1
+		//";
+		//$sourceId = $rsnprelvirementsData[0]['separum'];
+		//$db = PearDatabase::getInstance();
+		//$result = $db->pquery($query, array($rsnprelvirementsData[0]['dateexport'], $sourceId));
+		//if($db->num_rows($result)){
+		//	var_dump("Preimport RsnPrelVirement", $rsnprelvirementsValues);
+		//	return true;
+		//}
 		
 		$rsnprelvirements = new RSNImportSources_Preimport_Model($rsnprelvirementsValues, $this->user, 'RsnPrelVirement');
 		$rsnprelvirements->save();
@@ -314,6 +323,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			return false;
 		}
 		
+		$separum = $rsnprelvirementsData[0]['separum'];
 		//TODO : cache
 		$query = "SELECT crmid
 			FROM vtiger_rsnprelevements
@@ -321,14 +331,27 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				ON vtiger_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
 			WHERE vtiger_crmentity.deleted = 0
 			AND accountid = ?
-			AND separum = ?
+		";
+		$params = array($account->getId());
+		if(strlen($separum) > 12){
+			$query .= "
+				AND separum = ?
+			";
+			$params[] = $separum;
+		}
+		$query .= "
+			AND montant = ?
+			AND DATE(vtiger_crmentity.createdtime) <= ?
+			ORDER BY etat ASC
 			LIMIT 1
 		";
-		$sourceId = $rsnprelvirementsData[0]['separum'];
+		$params[] = $rsnprelvirementsData[0]['montant'];
+		$params[] = $rsnprelvirementsData[0]['dateexport'];
+		
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($account->getId(), $sourceId));
+		$result = $db->pquery($query, $params);
 		if(!$db->num_rows($result)){
-			var_dump("Impossible de trouver le prélèvement. SEPARUM = $sourceId. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
+			var_dump("Impossible de trouver le prélèvement. SEPARUM = $separum. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
 			return false;
 		}
 		
@@ -346,6 +369,10 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($ref4d) {
+		if(is_array($ref4d)){
+			//$ref4d is $rsnprelvirementsData
+			$ref4d = $ref4d[0]['reffiche'];
+		}
 		$id = $this->getContactIdFromRef4D($ref4d);
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
@@ -408,7 +435,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a client information line.
 	 */
-	function isClientInformationLine($line) {
+	function isRecordHeaderInformationLine($line) {
 		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[6])) {
 			return true;
 		}
@@ -430,7 +457,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				return false;
 			}
 
-		} while(!$this->isClientInformationLine($nextLine));
+		} while(!$this->isRecordHeaderInformationLine($nextLine));
 
 		$fileReader->moveCursorTo($cursorPosition);
 
@@ -452,7 +479,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				$cursorPosition = $fileReader->getCurentCursorPosition();
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
-				if (!$this->isClientInformationLine($nextLine)) {
+				if (!$this->isRecordHeaderInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
 						//impossible ici array_push($rsnprelvirements['detail'], $nextLine);
 					}

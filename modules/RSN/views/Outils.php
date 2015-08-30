@@ -92,7 +92,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			break;
 		
 		case 'TestsED' :
-			$this->addRelatedTask();
+			$this->testContactDescriptionLength();
 			break;
 		
 		case 'PicklistValuesTransfer' :
@@ -110,6 +110,45 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		}
 		
 		$VTIGER_BULK_SAVE_MODE = $previousBulkSaveMode;
+	}
+	
+	/**
+	 * 
+	 */
+	function testContactDescriptionLength(){
+		$record = Vtiger_Record_Model::getInstanceById(483353,'Contacts');
+		$record->set('mode', 'edit');
+		
+		$text = str_repeat("8", 1000);
+		
+		$record->set('description', $text);
+		
+		$record->save();
+		
+		$record = Vtiger_Record_Model::getInstanceById(483353,'Contacts');
+		var_dump($record->get('description'), strlen($record->get('description')));
+	}
+	
+	/**
+	 * Crée un commentaire avec les données initiales de 4D
+	 */
+	function createInitialModComment($contactsData){
+		$currentUserModel = Users_Record_Model::getCurrentUserModel();
+		
+		$record = Vtiger_Record_Model::getCleanInstance('ModComments');
+		$record->set('mode', 'create');
+		
+		$text = 'Données 4D : ' . json_encode($contactsData, JSON_PRETTY_PRINT);
+		
+		$record->set('commentcontent', $text);
+		$record->set('related_to', 483353);
+		
+		$record->set('assigned_user_id', ASSIGNEDTO_ALL);
+		$record->set('userid', $currentUserModel->getId());
+		
+		$record->save();
+		
+		return $record;
 	}
 	
 	private function process_ImportCogilog_Factures($request, $sub, $viewer){

@@ -11,8 +11,8 @@
 $languageStrings = array(
 	'ContactEmails' => 'Adresses emails',
 	'SINGLE_ContactEmails' => 'Adresse email',
-	'LBL_BLOCK_GENERAL_INFORMATION' => '',
-	'LBL_BLOCK_SYSTEM_INFORMATION' => '',
+	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
+	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations du système',
 	'LBL_EMAIL' => 'Email',
 	'LBL_EMAILADDRESSORIGIN' => 'Origine',
 	'LBL_EMAILADDRESSORIGIN_INFO' => 'Origine de l\'adresse email',

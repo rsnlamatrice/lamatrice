@@ -214,8 +214,8 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 					/* un sous-tableau
 					*/
 					$searchKey[$i] = array('lastname', null, array('mailingstreet2', null, 'isgroup'));
-					$searchValue[$i] = array( $searchValue[$i], null, array($searchValue[$i], null, '1'));
-					$operators[$i] = array( $operators[$i], 'OR', array($operators[$i], 'AND', 'e'));
+					$searchValue[$i] = array( $searchValue[$i], null, array($searchValue[$i], null, '0'));
+					$operators[$i] = array( $operators[$i], 'OR', array($operators[$i], 'AND', 'k'));
 					$this->set('search_key', $searchKey);
 					$this->set('search_value', $searchValue);
 					$this->set('operator', $operators);

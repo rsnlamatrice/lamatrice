@@ -64,6 +64,13 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		return $this->name;
 	}
 
+	/* ED150829 overridable
+	 * Nom du picklist correspond au champ
+	*/
+	public function getPickListName() {
+		return $this->getName();
+	}
+
 	/**
 	 * Function to retrieve full data
 	 * @return <array>
@@ -1216,7 +1223,20 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 */
 	public function getFilterOperatorDisplayValue(){
 		//see include\QueryGenerator\QueryGenerator.php, line 1054
-		switch($this->filterOperator){
+		if(!$this->filterOperator)
+			return '';
+		$filterOperator = self::getOperatorFromOperatorCode($this->filterOperator);
+		//var_dump($this->get('fieldvalue'), $this->filterOperator, $filterOperator, strlen($filterOperator));
+		//si fieldvalue commence déjà par l'opérateur, on annule 
+		if($this->get('fieldvalue')
+		&& strcasecmp(substr($this->get('fieldvalue'), 0, strlen($filterOperator)), $filterOperator) === 0){
+			return '';
+		}
+		return $filterOperator;
+	}
+	
+	public static function getOperatorFromOperatorCode($filterOperator){
+		switch($filterOperator){
 			case 'e': return '=';
 			case 'n': return '<>';
 			case 's': return '';

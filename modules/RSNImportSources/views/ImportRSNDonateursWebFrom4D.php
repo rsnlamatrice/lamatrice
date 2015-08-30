@@ -5,7 +5,25 @@
  * Importation des donateurs Web depuis le fichier provenant de 4D
  */
 class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources_ImportRSNDonateursWebFromSite_View {
-        
+    
+
+	/**
+	 * Method to get the modules that are concerned by the import.
+	 * @return array - An array containing concerned module names.
+	 */
+	public function getImportModules() {
+		//La désactivation de l'import de contact fait qu'on ne voit pas ImportStatus depuis for_module=Contacts
+		return array(/*'Contacts', */'RSNDonateursWeb');
+	}
+
+	/**
+	 * Method to get the modules that are concerned by the import.
+	 * @return array - An array containing concerned module names.
+	 */
+	public function getLockModules() {
+		return array_merge($this->getImportModules(), array('ContactEmails'));
+	}
+	
 	/**
 	 * Method to get the source import label to display.
 	 * @return string - The label.
@@ -28,12 +46,116 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a client information line.
 	 */
-	function isClientInformationLine($line) {
+	function isRecordHeaderInformationLine($line) {
 		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[14])) {
 			return true;
 		}
 
 		return false;
+	}
+	
+	
+
+	/**
+	 * Method to process to the import of a one donateur.
+	 * @param $rsndonateurswebData : the data of the donateur to import
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importOneRSNDonateursWeb($rsndonateurswebData, $importDataController) {
+					
+		global $log;
+		
+		$sourceId = $rsndonateurswebData[0]['externalid'];
+
+		//test sur externalid == $sourceId
+		$query = "SELECT crmid, vtiger_rsndonateursweb.contactid
+			FROM vtiger_rsndonateursweb
+			JOIN vtiger_crmentity
+				ON vtiger_rsndonateursweb.rsndonateurswebid = vtiger_crmentity.crmid
+			WHERE externalid = ? AND deleted = FALSE
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, array($sourceId));
+		if($db->num_rows($result) == 0){
+			//Missing
+			foreach ($rsndonateurswebData as $rsndonateurswebLine) {
+				$entityInfo = array(
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+				);
+				
+				//TODO update all with array
+				$importDataController->updateImportStatus($rsndonateurswebLine[id], $entityInfo);
+			}
+		}
+		else {
+			$row = $db->fetch_row($result, 0);
+			$rsndonateurswebId = $row['crmid'];
+			$entryId = $this->getEntryId("RSNDonateursWeb", $rsndonateurswebId);
+			$contactId = $row['contactid'];
+			
+			$record = Vtiger_Record_Model::getInstanceById($rsndonateurswebId, 'RSNDonateursWeb');
+			$record->set('mode', 'edit');
+			foreach($rsndonateurswebData[0] as $fieldName => $value)
+				if(!is_numeric($fieldName) && $fieldName != 'id')
+					$record->set($fieldName, $value);
+			
+			$fieldName = 'amount';
+			$value = str_replace('.', ',', $rsndonateurswebData[0][$fieldName]);
+			$record->set($fieldName, $value);
+			
+			//$db->setDebug(true);
+			$record->save();
+
+			if(!$rsndonateurswebId){
+				//TODO: manage error
+				echo "<pre><code>Impossible d'enregistrer le nouvel RSNDonateursWeb</code></pre>";
+				foreach ($rsndonateurswebData as $rsndonateurswebLine) {
+					$entityInfo = array(
+						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+					);
+					
+					//TODO update all with array
+					$importDataController->updateImportStatus($rsndonateurswebLine[id], $entityInfo);
+				}
+
+				return false;
+			}
+			
+			
+			$entryId = $this->getEntryId("RSNDonateursWeb", $rsndonateurswebId);
+			foreach ($rsndonateurswebData as $rsndonateurswebLine) {
+				$entityInfo = array(
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_UPDATED,
+					'id'		=> $entryId
+				);
+				$importDataController->updateImportStatus($rsndonateurswebLine[id], $entityInfo);
+			}
+			
+			$record->set('mode','edit');
+			$query = "UPDATE vtiger_crmentity
+				JOIN vtiger_rsndonateursweb
+					ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
+				SET smownerid = ?
+				, createdtime = ?
+				WHERE vtiger_crmentity.crmid = ?
+			";
+			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
+								, $rsndonateurswebData[0]['date']
+								, $rsndonateurswebId));
+			
+			$log->debug("" . basename(__FILE__) . " update imported rsndonateursweb (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsndonateurswebData[0]['datedon']
+					. ", result=" . ($result ? " true" : "false"). " )");
+			if( ! $result)
+				$db->echoError();
+				
+				
+			
+			return $record;
+		}
+		
+
+		return true;
 	}
 	
 	/**
@@ -150,5 +272,4 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 			$rsndonateurswebHeader['isvalid'] = 0;
 		return $rsndonateurswebHeader;
 	}
-	
 }

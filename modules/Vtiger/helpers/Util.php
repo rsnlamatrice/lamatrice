@@ -249,6 +249,11 @@ class Vtiger_Util_Helper {
 	 * @return the new field name.
 	 */
 	public static function getRelatedFieldName($fieldName) {
+		/* ED150829 jamais utilisé ?
+		 * cf Vtiger_Field_Model->getPickListName()
+		 * cf Settings_Picklist_Field_Model->getPickListName()
+		 */
+		
     	/* ED150102
 		 * redirection exceptionnel de champ vers une table commune
 		 * TODO : extraire cette config
@@ -281,8 +286,10 @@ class Vtiger_Util_Helper {
 		 	break;
 		 case 'mailingzip':
 		 	$fieldName = 'rsnzipcode';
+		 	break;
 		 case 'rsnmoderegl':
 		 	$fieldName = 'receivedmoderegl';
+		 	break;
 		 default:
 			break;
 		}
@@ -319,12 +326,14 @@ class Vtiger_Util_Helper {
 						$query .= ', `' . $column . '`';
 		$query .= ' FROM vtiger_'.$fieldName.' order by sortorderid';
 		$result = $db->pquery($query, array());
-	        $values = array();
-	        $num_rows = $db->num_rows($result);
-	        for($i=0; $i<$num_rows; $i++) {
-				//Need to decode the picklist values twice which are saved from old ui
-	            $values[] = decode_html(decode_html($db->query_result($result,$i,$fieldName)));
-	        }
+		
+		$values = array();
+		$num_rows = $db->num_rows($result);
+		for($i=0; $i<$num_rows; $i++) {
+			//Need to decode the picklist values twice which are saved from old ui
+			$values[] = decode_html(decode_html($db->query_result($result,$i,$fieldName)));
+		}
+		
 		if(is_array($uiColumns)){
 			for($i=0; $i<$num_rows; $i++) {
 				$data = array();

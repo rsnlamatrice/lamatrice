@@ -300,22 +300,21 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @param $rsndonateurswebData : the data of the invoice to import.
 	 */
 	function preImportRSNDonateursWeb($rsndonateurswebData) {
-		
 		$rsndonateurswebValues = $this->getRSNDonateursWebValues($rsndonateurswebData);
-		//TODO : cache
-		$query = "SELECT 1
-			FROM vtiger_rsndonateursweb
-			JOIN vtiger_crmentity
-				ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
-			WHERE vtiger_crmentity.deleted = 0
-			AND externalid = ?
-			LIMIT 1
-		";
-		$sourceId = $rsndonateurswebData[0]['externalid'];
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($sourceId));//$rsndonateurswebData[0]['subject']
-		if($db->num_rows($result))
-			return true;
+		////TODO : cache
+		//$query = "SELECT 1
+		//	FROM vtiger_rsndonateursweb
+		//	JOIN vtiger_crmentity
+		//		ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
+		//	WHERE vtiger_crmentity.deleted = 0
+		//	AND externalid = ?
+		//	LIMIT 1
+		//";
+		//$sourceId = $rsndonateurswebData[0]['externalid'];
+		//$db = PearDatabase::getInstance();
+		//$result = $db->pquery($query, array($sourceId));//$rsndonateurswebData[0]['subject']
+		//if($db->num_rows($result))
+		//	return true;
 		
 		$rsndonateursweb = new RSNImportSources_Preimport_Model($rsndonateurswebValues, $this->user, 'RSNDonateursWeb');
 		$rsndonateursweb->save();
@@ -342,13 +341,15 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @param $rsndonateursweb : the invoice data.
 	 */
 	function checkContact($rsndonateursweb) {
-		$contactData = $this->getContactValues($rsndonateursweb['donInformations']);
 		
+		if(!in_array('Contacts', $this->getImportModules()))
+			return;
+		
+		$contactData = $this->getContactValues($rsndonateursweb['donInformations']);
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
 		
 		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
-		
 		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
 		if(!$id){
@@ -366,7 +367,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		
 		if($fileReader->open()) {
 			if ($this->moveCursorToNextRSNDonateursWeb($fileReader)) {
-				$i = 0;
 				do {
 					$rsndonateursweb = $this->getNextRSNDonateursWeb($fileReader);
 					if ($rsndonateursweb != null) {
@@ -422,7 +422,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a client information line.
 	 */
-	function isClientInformationLine($line) {
+	function isRecordHeaderInformationLine($line) {
 		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[11])) {
 			return true;
 		}
@@ -444,7 +444,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 				return false;
 			}
 
-		} while(!$this->isClientInformationLine($nextLine));
+		} while(!$this->isRecordHeaderInformationLine($nextLine));
 
 		$fileReader->moveCursorTo($cursorPosition);
 
@@ -466,7 +466,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 				$cursorPosition = $fileReader->getCurentCursorPosition();
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
-				if (!$this->isClientInformationLine($nextLine)) {
+				if (!$this->isRecordHeaderInformationLine($nextLine)) {
 					if ($nextLine[1] != null && $nextLine[1] != '') {
 						array_push($rsndonateursweb['detail'], $nextLine);
 					}

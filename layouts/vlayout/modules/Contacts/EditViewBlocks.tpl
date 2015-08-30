@@ -41,7 +41,7 @@
 			<h3 class="span8 textOverflowEllipsis" title="{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} {$RECORD_STRUCTURE_MODEL->getRecordName()}">
 				{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} - {$RECORD_STRUCTURE_MODEL->getRecordName()}
 			
-				{if $RECORD_MODEL->get('isgroup') eq '1' && $RECORD_MODEL->get('mailingstreet2')}
+				{if $RECORD_MODEL->get('isgroup') neq '0' && $RECORD_MODEL->get('mailingstreet2')}
 				       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD_MODEL->get('mailingstreet2'))}</span>
 			       {/if}
 			</h3>
@@ -57,7 +57,7 @@
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
 			{assign var=IS_HIDDEN value=(($BLOCK_LABEL eq 'Adresse secondaire' && !$RECORD_MODEL->get('use_address2_for_revue') && !$RECORD_MODEL->get('use_address2_for_recu_fiscal'))
 			 || $BLOCK_LABEL eq 'LBL_CUSTOM_INFORMATION' || $BLOCK_LABEL eq 'LBL_IMAGE_INFORMATION'
-			 || ($BLOCK_LABEL eq 'Groupe, Structure' && $RECORD_MODEL->get('isgroup') neq 1))}
+			 || ($BLOCK_LABEL eq 'Groupe, Structure' && $RECORD_MODEL->get('isgroup') neq '0'))}
 			
 			<table class="table table-bordered blockContainer showInlineTable {if $BLOCK_LABEL eq "LBL_ADDRESS_INFORMATION"}current-address{/if}">
 			<thead><tr>
@@ -296,7 +296,7 @@
 							
 							{*isgroup : add duplicate mailingstreet2 *}
 							{if $FIELD_NAME eq 'isgroup'}
-								<div class="mailingstreet2-synchronize-holder {if !$RECORD_MODEL->get('isgroup')}hide{/if}"
+								<div class="mailingstreet2-synchronize-holder {if $RECORD_MODEL->get('isgroup') eq '0'}hide{/if}"
 								 title="Nom apparaissant en 2ème ligne d'adresse">
 									{* isgroup_mailingstreet2 *}
 									{assign var=TITLE value='Structure ou chez'}

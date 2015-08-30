@@ -520,7 +520,8 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 	protected function initListViewHeadersFilters($listViewHeaders) {
 		
 		$search_fields = $this->get('search_key');
-		$search_texts = $this->get('search_value');
+		$search_inputs = $this->get('search_input');
+		$search_texts = $search_inputs ? $search_inputs : $this->get('search_value');
 		$operators = $this->get('operator');
 		//ED150414 may be array of fields, then values and operators are also arrays
 		if(!is_array($search_fields))

@@ -14,7 +14,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	/*ED150826*/
 	var $scheduledId;
 
-	public function  __construct($request = FALSE, $user = FALSE) {
+	public function __construct($request = FALSE, $user = FALSE) {
 		parent::__construct();
 		$this->request = $request;
 		$this->user = $user;
@@ -68,6 +68,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 */
 	function getImportModules() {
 		return array($this->request->get('for_module'));
+	}
+
+	/**
+	 * Method to get the modules that are concerned by the import.
+	 * Used to lock any other import in other modules than the one where data will be insterted
+	 * @return array - An array containing concerned module names.
+	 */
+	public function getLockModules() {
+		return $this->getImportModules();
 	}
 
 	/**
@@ -289,6 +298,9 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			if(!$isImportScheduled) {
 				$this->triggerImport($module);
 			}
+			//ED150829
+			if($this->skipNextScheduledImports)
+				break;
 		}
 
 		$importInfos = RSNImportSources_Queue_Action::getUserCurrentImportInfos($this->user);
@@ -393,8 +405,13 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			RSNImportSources_Utils_Helper::showErrorPage(vtranslate('ERR_IMPORT_INTERRUPTED', 'RSNImportSources'));
 			exit;
 		}
-
+			
 		$viewer = new Vtiger_Viewer();
+		
+		/* ED150827 */
+		$importController = self::getRecordModelByClassName($moduleName, $importInfos[0]['importsourceclass']);
+		$viewer->assign('IMPORT_RECORD_MODEL', $importController);
+		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
 		$viewer->assign('IMPORT_SOURCE', $importInfos[0]['importsourceclass']);
@@ -675,12 +692,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			JOIN vtiger_crmentity
 				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 			WHERE vtiger_crmentity.deleted = 0
-			AND vtiger_contactdetails.contact_no IN ( CONCAT('C', ?), CONCAT('CID', ?))
+			AND vtiger_contactdetails.contact_no = CONCAT('C', ?)
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
 				
-		$result = $db->pquery($query, array($ref4D, $ref4D));
+		$result = $db->pquery($query, array($ref4D));
 
 		if($db->num_rows($result)){
 			$id = $db->query_result($result, 0, 0);
@@ -749,6 +766,62 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		else{
 			//echo_callstack();
 			//var_dump('updateStatus NO scheduledId ', $status);
+		}
+	}
+	
+	//ED150827
+	public function getRecordModel(){
+		$moduleName = $this->request->get('for_module');
+		$className = $this->request->get('ImportSource');
+		if($this->checkPreImportInCache($moduleName, 'getRecordModel', $className))
+			return $this->checkPreImportInCache($moduleName, 'getRecordModel', $className);
+		
+		$recordModel = self::getRecordModelByClassName($moduleName, $className);
+		if($recordModel)
+			$this->setPreImportInCache($recordModel, $moduleName, 'getRecordModel', $className);
+		return $recordModel;
+	}
+	
+	public static function getRecordModelByClassName($moduleName, $className){
+		global $adb;
+		$query = 'SELECT vtiger_crmentity.crmid
+			FROM vtiger_crmentity
+			JOIN vtiger_rsnimportsources
+				ON vtiger_crmentity.crmid = vtiger_rsnimportsources.rsnimportsourcesid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_rsnimportsources.`class` = ?
+			AND vtiger_rsnimportsources.disabled = 0
+			'/*AND (vtiger_rsnimportsources.`modules` LIKE CONCAT(\'%\', ?, \'%\') pblm de traduction, ou de changement de traduction
+				OR vtiger_rsnimportsources.`modules` LIKE CONCAT(\'%\', ?, \'%\'))
+			*/.' LIMIT 1';
+		$result = $adb->pquery($query, array($className/*, vtranslate($moduleName, $moduleName), $moduleName*/));
+		if(!$result){
+			$adb->echoError($query);
+			return false;
+		}
+		$id = $adb->query_result($result, 0);
+		/*var_dump($query, array($className, vtranslate($moduleName, $moduleName), $moduleName));
+		var_dump($moduleName, $id);
+		var_dump($query, array($className, $moduleName));*/
+		if(!$id)
+			return false;
+		$recordModel = Vtiger_Record_Model::getInstanceById($id, 'RSNImportSources');
+		return $recordModel;
+	}
+	
+	//ED150827
+	public function updateLastImportField(){
+		$fileName = $this->request->get('import_file_name');
+		if($fileName){
+			$recordModel = $this->getRecordModel();
+			if(!$recordModel){
+				echo 'updateLastImportField : $recordModel non defini';
+				return false;
+			}
+			$recordModel->set('mode', 'edit');
+			$recordModel->set('lastimport', $fileName . ' (' . date('d/m/Y H:i:s') . ')');
+			$recordModel->save();
+			//echo 'updateLastImportField : lastimport = '. $fileName . ' (' . date('d/m/Y') . ')';
 		}
 	}
 }

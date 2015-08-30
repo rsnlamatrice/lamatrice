@@ -64,6 +64,7 @@ class Documents_List_View extends Vtiger_List_View {
 
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$searchInput = $request->get('search_input');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
 			$listViewModel->set('operator', $operator);
@@ -73,6 +74,7 @@ class Documents_List_View extends Vtiger_List_View {
 		if(!empty($searchKey) && !empty($searchValue)) {
 			$listViewModel->set('search_key', $searchKey);
 			$listViewModel->set('search_value', $searchValue);
+			$listViewModel->set('search_input', $searchInput);
 		}
         
 		$listViewModel->set('folder_id',$request->get('folder_id'));

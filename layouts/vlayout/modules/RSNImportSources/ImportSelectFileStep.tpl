@@ -5,13 +5,21 @@
 		<td>&nbsp;</td>
 	</tr>
 	<tr>
-		<td>&nbsp;</td>
-		<td data-import-upload-size="{$IMPORT_UPLOAD_SIZE}">
+		<td colspan="3" data-import-upload-size="{$IMPORT_UPLOAD_SIZE}" style="padding-left: 1em;"> 
 			<input type="hidden" class="validateconfiguration" value="validateFile" />
 			<input type="hidden" class="onLoad" value="registerFileConfigurationEvent" />
 			<input type="hidden" id="curent_file_type" name="type" value="csv" />
 			<input type="hidden" name="is_scheduled" value="1" />
-			<input type="file" name="import_file" id="import_file" />
+			<input type="radio"  id="import_file_mode_upload" name="import_file_src_mode" value="upload" checked="checked"/>&nbsp;
+				<input type="file" name="import_file" id="import_file" 
+					onchange="if(this.value) $('#import_file_mode_upload').get(0).checked = true;"/>
+			<br>
+			<input type="radio" id="import_file_mode_localpath" name="import_file_src_mode" value="localpath"/>&nbsp;
+				<input type="text" name="import_file_localpath" id="import_file_localpath"
+					title="Chemin d'un fichier d&eacute;j&agrave; pr&eacute;sent sur le serveur"
+					value="/home/emmanuel/transferts/Adresse-1-mini.csv"
+					onchange="if(this.value) $('#import_file_mode_localpath').get(0).checked = true;"
+					style="width: 90%;"/>
 			<!-- input type="hidden" name="userfile_hidden" value=""/ -->
 		</td>
 	</tr>

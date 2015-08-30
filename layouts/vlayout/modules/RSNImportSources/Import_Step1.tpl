@@ -10,16 +10,22 @@
 		<td>&nbsp;</td>
 		<td data-import-upload-size="{$IMPORT_UPLOAD_SIZE}">
 			{if sizeof($SOURCES) gt 0}
-				<select id="SelectSourceDropdown" name="ImportSource">
+				<select id="SelectSourceDropdown" name="ImportSource" style="width: 420px;">
 					{if sizeof($SOURCES) gt 1}
 						<option disabled selected></option>
 					{/if}
 					{foreach item=SOURCE from=$SOURCES}
-						<option value="{$SOURCE['classname']}" {if $DEFAULT_SOURCE eq $SOURCE['classname']}selected="selected"{/if}>
+						{assign var=DESCRIPTION value=htmlentities($SOURCE['description']|cat:'<br>'|cat:$SOURCE['lastimport'])}
+						<option value="{$SOURCE['classname']}" {if $DEFAULT_SOURCE eq $SOURCE['classname']}selected="selected"{/if}
+							title="{$DESCRIPTION}">
 							{'LBL_FROM'|@vtranslate:$MODULE} {$SOURCE['sourcename']|@vtranslate:$MODULE} ({$SOURCE['sourcetype']|@vtranslate:$MODULE})
 						</option>
+						{if $DEFAULT_SOURCE eq $SOURCE['classname']}
+							{assign var=DEFAULT_DESCRIPTION value=$DESCRIPTION}
+						{/if}
 					{/foreach}
 				</select>
+				<pre id="data-import-selected-description" {if !$DEFAULT_DESCRIPTION || $DEFAULT_DESCRIPTION eq htmlentities('<br>')}style="display: none;"{/if}>{$DEFAULT_DESCRIPTION}</pre>
 			{else}
 				<strong>{'LBL_NO_DATA_SOURCE'|@vtranslate:$MODULE}</stron>
 			{/if}

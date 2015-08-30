@@ -71,7 +71,9 @@ class CRMEntity {
 			}
 		}
 		if(!$anyValue) {
-			die("<center>" .getTranslatedString('LBL_MANDATORY_FIELD_MISSING')."</center>");
+			var_dump($columnFields);
+			echo_callstack();
+			die("<center>" .getTranslatedString('LBL_MANDATORY_FIELD_MISSING')." Aucune valeur pour ".count($columnFields)." champ(s)</center>");
 		}
 
 		$this->db->println("TRANS saveentity starts $module, id = $fileid");
@@ -756,7 +758,7 @@ echo "</pre>//saveentity\r\n";
 
 /*echo('<pre><br/><br/><br/></pre>');echo('<br/>');
 echo($sql); 
-echo($params);*/
+var_dump($params);*/
 			$result = $adb->pquery($sql, $params);
 
 			if (!$result || $adb->num_rows($result) < 1) {

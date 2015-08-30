@@ -187,30 +187,53 @@ class Import_Utils_Helper {
 		$uploadMaxSize = self::getMaxUploadSize();
 		$importDirectory = self::getImportDirectory();
 		$temporaryFileName = self::getImportFilePath($current_user, $request->get("module"));
-
-		if($_FILES['import_file']['error']) {
-			$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));
-			return false;
+		
+		if($request->get('import_file_src_mode') == 'localpath'){
+	
+			//ED150827
+			$srcFile = $request->get('import_file_localpath');
+			if(!file_exists($srcFile)) {
+				$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+				return false;
+			}
+			$request->set('import_file_name', $srcFile);
+			copy($srcFile, $temporaryFileName);
+			$fileCopied = $temporaryFileName;
+			if(!file_exists($fileCopied)) {
+				$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
+				return false;
+			}
+			
 		}
-		if(!is_uploaded_file($_FILES['import_file']['tmp_name'])) {
-			$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
-			return false;
+		else {
+			if($_FILES['import_file']['error']) {
+				$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));
+				return false;
+			}
+			if(!is_uploaded_file($_FILES['import_file']['tmp_name'])) {
+				$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+				return false;
+			}
+			if ($_FILES['import_file']['size'] > $uploadMaxSize) {
+				$request->set('error_message', vtranslate('LBL_IMPORT_ERROR_LARGE_FILE', 'Import').
+													 $uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
+				return false;
+			}
+			if(!is_writable($importDirectory)) {
+				$request->set('error_message', vtranslate('LBL_IMPORT_DIRECTORY_NOT_WRITABLE', 'Import'));
+				return false;
+			}
+	
+			//ED150827
+			$request->set('import_file_name', $_FILES['import_file']['name']);
+			
+			$fileCopied = move_uploaded_file($_FILES['import_file']['tmp_name'], $temporaryFileName);
+			if(!$fileCopied) {
+				$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
+				return false;
+			}
 		}
-		if ($_FILES['import_file']['size'] > $uploadMaxSize) {
-			$request->set('error_message', vtranslate('LBL_IMPORT_ERROR_LARGE_FILE', 'Import').
-												 $uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
-			return false;
-		}
-		if(!is_writable($importDirectory)) {
-			$request->set('error_message', vtranslate('LBL_IMPORT_DIRECTORY_NOT_WRITABLE', 'Import'));
-			return false;
-		}
-
-		$fileCopied = move_uploaded_file($_FILES['import_file']['tmp_name'], $temporaryFileName);
-		if(!$fileCopied) {
-			$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
-			return false;
-		}
+		
 		$fileReader = Import_Utils_Helper::getFileReader($request, $current_user);
 
 		if($fileReader == null) {
@@ -246,5 +269,43 @@ class Import_Utils_Helper {
 			default:
 				return 'Unknown upload error';
 		}
+	}
+	
+	static $php_memory_limit;
+	/** ED150829
+	 * Teste si l'utilisation mémoire s'approche du plantage
+	 */
+	static function isMemoryUsageToHigh($percentMax = 90){
+		if(!self::$php_memory_limit)
+			self::getPhpMermoryLimit();
+		
+		if($percentMax > 1)
+			$percentMax /= 100;
+		return memory_get_usage() > self::$php_memory_limit * $percentMax;
+	}
+	/** ED150829
+	 * Retourne la limite d'utilisation mémoire paramétrée dans php
+	 */
+	static function getPhpMermoryLimit(){
+		if(!self::$php_memory_limit){
+			function return_bytes($val) {
+				$val = trim($val);
+				$last = strtolower($val[strlen($val)-1]);
+				switch($last) {
+					// The 'G' modifier is available since PHP 5.1.0
+					case 'g':
+						$val *= 1024;
+					case 'm':
+						$val *= 1024;
+					case 'k':
+						$val *= 1024;
+				}
+			
+				return $val;
+			}
+			
+			self::$php_memory_limit = return_bytes(ini_get('memory_limit'));
+		}
+		return self::$php_memory_limit;
 	}
 }

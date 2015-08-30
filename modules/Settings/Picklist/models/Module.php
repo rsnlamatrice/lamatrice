@@ -29,53 +29,53 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
     }
 
     public function addPickListValues($fieldModel, $newValue, $rolesSelected = array()) {
-        $db = PearDatabase::getInstance();
-        $pickListFieldName = $fieldModel->getName();
-        $id = $db->getUniqueID("vtiger_$pickListFieldName");
-        vimport('~~/include/ComboUtil.php');
-        $picklist_valueid = getUniquePicklistID();
-	$tableName = 'vtiger_'.$pickListFieldName;
-	$maxSeqQuery = 'SELECT max(sortorderid) as maxsequence FROM '.$tableName;
-	$result = $db->pquery($maxSeqQuery, array());
-	$sequence = $db->query_result($result,0,'maxsequence');
+		$db = PearDatabase::getInstance();
+		$pickListFieldName = $fieldModel->getPickListName();//ED150829 getPickListName instead of getName
+		$id = $db->getUniqueID("vtiger_$pickListFieldName");
+		vimport('~~/include/ComboUtil.php');
+		$picklist_valueid = getUniquePicklistID();
+		$tableName = 'vtiger_'.$pickListFieldName;
+		$maxSeqQuery = 'SELECT max(sortorderid) as maxsequence FROM '.$tableName;
+		$result = $db->pquery($maxSeqQuery, array());
+		$sequence = $db->query_result($result,0,'maxsequence');
 
-	/* ED141128
-	 * depuis l'ajout des colonnes uicolor et uiicon, il faut retrouver la liste des colonnes
-	*/
-	$columns = $db->getColumnNames($tableName);
-	
-        $params = array($id, $newValue);
-	foreach($columns as $column)
-	switch($column){
-	    case 'picklist_valueid':
-		$params[] = $picklist_valueid;
-		break;
-	    case 'sortorderid':
-		$params[] = ++$sequence;
-		break;
-	    case 'presence':
-		$params[] = 1;
-		break;
-	    case 'uicolor':
-	    case 'uiicon':
-		$params[] = null;
-		break;
-	}
-	if($fieldModel->isRoleBased()) {
-	    $columns = implode(', ', array_slice($columns, 0, 5));
-            $sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?,?)';
-            $result = $db->pquery($sql, array_slice($params, 0, 5));//array($id, $newValue, 1, $picklist_valueid,++$sequence)
-        }else{
-            $columns = implode(', ', array_slice($columns, 0, 4));
-            $sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?)';
-            $result = $db->pquery($sql, array_slice($params, 0, 4));//array($id, $newValue, ++$sequence, 1)
-        }
-	if(!$result){
-	    echo("<br>ERREUR DANS addPickListValues (" . __FILE__ .")");
-	    $db->echoError();
-	    var_dump(array($id, $newValue, $picklist_valueid, $sequence, 1), $result);
-	    die($sql);
-	}
+		/* ED141128
+		 * depuis l'ajout des colonnes uicolor et uiicon, il faut retrouver la liste des colonnes
+		*/
+		$columns = $db->getColumnNames($tableName);
+		
+			$params = array($id, $newValue);
+		foreach($columns as $column)
+		switch($column){
+			case 'picklist_valueid':
+			$params[] = $picklist_valueid;
+			break;
+			case 'sortorderid':
+			$params[] = ++$sequence;
+			break;
+			case 'presence':
+			$params[] = 1;
+			break;
+			case 'uicolor':
+			case 'uiicon':
+			$params[] = null;
+			break;
+		}
+		if($fieldModel->isRoleBased()) {
+			$columns = implode(', ', array_slice($columns, 0, 5));
+			$sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?,?)';
+			$result = $db->pquery($sql, array_slice($params, 0, 5));//array($id, $newValue, 1, $picklist_valueid,++$sequence)
+		}else{
+			$columns = implode(', ', array_slice($columns, 0, 4));
+			$sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?)';
+			$result = $db->pquery($sql, array_slice($params, 0, 4));//array($id, $newValue, ++$sequence, 1)
+		}
+		if(!$result){
+			echo("<br>ERREUR DANS addPickListValues (" . __FILE__ .")");
+			$db->echoError();
+			var_dump(array($id, $newValue, $picklist_valueid, $sequence, 1), $result);
+			die($sql);
+		}
         if($fieldModel->isRoleBased() && !empty($rolesSelected)) {
             $sql = "select picklistid from vtiger_picklist where name=?";
             $result = $db->pquery($sql, array($pickListFieldName));

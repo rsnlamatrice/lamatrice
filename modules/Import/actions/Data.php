@@ -8,7 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************ */
 
-ini_set("memory_limit","512M");//ED150826
+ini_set("memory_limit","1G");//ED150826
 
 require_once 'include/Webservices/Create.php';
 require_once 'include/Webservices/Update.php';
@@ -34,6 +34,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
     protected $allPicklistValues = array();
 	var $batchImport = true;
 	var $keepScheduledImport = false;
+	var $skipNextScheduledImports = false;
 
 	static $IMPORT_RECORD_NONE = 0;
 	static $IMPORT_RECORD_CREATED = 1;
@@ -159,8 +160,13 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			$entityIdComponents = vtws_getIdComponents($entityInfo['id']);
 			$recordId = $entityIdComponents[1];
 		}
-		$adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=?, recordid=? WHERE id=?',
+		$result = $adb->pquery('UPDATE ' . Import_Utils_Helper::getDbTableName($this->user, $this->module) . ' SET status=?, recordid=? WHERE id=?',
 				array($entityInfo['status'], $recordId, $entryId));
+		if(!$result){
+			$adb->echoError();
+			//permet l'interruption d'un import si la table est supprimée
+			die('Erreur dans ' . __FILE__ . '->updateImportStatus()');
+		}
 	}
 
 	public function createRecords() {
@@ -639,6 +645,9 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 				$vtigerMailer->Body    = $emailData;
 				$vtigerMailer->Send();
 			}
+			
+			if($importController->$skipNextScheduledImports)
+				break;
 			
 			$importDataController->finishImport(!$importController->keepScheduledImport);
 		}

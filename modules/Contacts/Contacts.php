@@ -1047,7 +1047,9 @@ class Contacts extends CRMEntity {
 						JOIN vtiger_contactdetails
 							ON vtiger_contactaddresses.contactid = vtiger_contactdetails.contactid
 						JOIN vtiger_contactdetails AS contact_ref
-							ON contact_ref.accountid = vtiger_contactdetails.accountid
+							ON (contact_ref.accountid <> 0 AND contact_ref.accountid = vtiger_contactdetails.accountid)
+							OR (contact_ref.accountid = 0
+								AND contact_ref.contactid = vtiger_contactaddresses.contactid)
 						WHERE contact_ref.contactid=".$id."
 						UNION "/* add current address from contactaddress */."
 						SELECT vtiger_contactaddress.contactaddressid,
@@ -1126,12 +1128,14 @@ class Contacts extends CRMEntity {
 							vtiger_contactemails.rsnmediadocuments,
 							vtiger_contactemails.rsnmediadocumentsdonot,
 							vtiger_contactemails.comments,
-							0 AS is_current_address
+							IF(vtiger_contactemails.emailaddressorigin = 'Principal', 1, 0) AS is_current_address
 						FROM vtiger_contactemails
 						JOIN vtiger_contactdetails
 							ON vtiger_contactemails.contactid = vtiger_contactdetails.contactid
 						JOIN vtiger_contactdetails AS contact_ref
-							ON contact_ref.accountid = vtiger_contactdetails.accountid
+							ON (contact_ref.accountid <> 0 AND contact_ref.accountid = vtiger_contactdetails.accountid)
+							OR (contact_ref.accountid = 0
+								AND contact_ref.contactid = vtiger_contactemails.contactid)
 						WHERE contact_ref.contactid=".$id."
 						UNION "/* add current address from contactaddress */."
 						SELECT vtiger_contactdetails.contactid,
@@ -1142,7 +1146,7 @@ class Contacts extends CRMEntity {
 							NULL,
 							NULL,
 							NULL,
-							1 AS is_current_address
+							999 AS is_current_address
 						FROM vtiger_contactdetails
 						WHERE vtiger_contactdetails.contactid=".$id."
 						AND NOT vtiger_contactdetails.email IS NULL

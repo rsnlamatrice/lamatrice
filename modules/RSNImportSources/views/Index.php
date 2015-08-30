@@ -118,6 +118,9 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 * @param Vtiger_Request $request: the curent request.
 	 */
 	function preImport(Vtiger_Request $request) {
+		
+		set_time_limit(5 * 60);
+		
 		$importController = $this->getImportController($request);
 
 		if ($importController->preImportData($request)) {
@@ -233,14 +236,20 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 
 	/**
 	 * Method to check if there is no import currently running or cortrupted data in the temporary import table.
-	 *  It display the right template ifthere is currupted data or locked table.
+	 *  It display the right template ifthere is corrupted data or locked table.
 	 *  If there is no probleme, it clear the informations of the last import.
 	 * @param Vtiger_Request $request: the curent request.
+	 *
+	 * TODO : il faudrait que les imports en cours apparaissent si le for_module est lié à n'importe quel RSNImportSources d'après vtiger_rsnimportsources.modules, càd si l'import apparait dans la liste de sélection.
+	 * Pour l'instant, on ne se base que sur la queue et une table d'import de ce module.
+	 * Or, un import disponible depuis Contacts peut ne faire d'importe que dans une autre table, $importController->getImportModules()
+	 * 	il faudrait pouvoir utiliser $importController->getLockModules()
 	 */
 	function checkImportStatus(Vtiger_Request $request) {
 		$forModule = $request->get('for_module');
 		$user = Users_Record_Model::getCurrentUserModel();
 		$mode = $request->getMode();
+		//teste si une table d'importation existe pour ce module
 		$importSource = RSNImportSources_Queue_Action::getImportClassName($forModule, $user);
 
 		if ($importSource) {

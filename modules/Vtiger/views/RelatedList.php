@@ -50,6 +50,7 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		//ED150701
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$searchInput = $request->get('search_input');
 		$operator = $request->get('operator');
 			
 		if(!empty($operator)) {
@@ -61,6 +62,7 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		if(!empty($searchKey) && (!empty($searchValue) || ($searchValue == '0'))) {
 			$relationListView->set('search_key', $searchKey);
 			$relationListView->set('search_value', $searchValue);
+			$relationListView->set('search_input', $searchInput);
 		}
 		
 		$models = $relationListView->getEntries($pagingModel);

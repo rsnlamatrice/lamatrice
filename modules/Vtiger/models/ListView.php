@@ -160,7 +160,8 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 	protected function initListViewHeadersFilters($listViewHeaders) {
 		
 		$search_fields = $this->get('search_key');
-		$search_texts = $this->get('search_value');
+		$search_inputs = $this->get('search_input');
+		$search_texts = $search_inputs ? $search_inputs : $this->get('search_value');
 		$operators = $this->get('operator');
 		//ED150414 may be array of fields, then values and operators are also arrays
 		if(!is_array($search_fields))
@@ -174,7 +175,8 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 			if(isset($listViewHeaders[$fieldName])
 			&&  !($search_texts[$i] == '' && $operators[$i] == 'e')){
 				$listViewHeaders[$fieldName]->set('fieldvalue', $search_texts[$i]);
-				$listViewHeaders[$fieldName]->set('filterOperator', $operators[$i]);
+				if(!$search_inputs)
+					$listViewHeaders[$fieldName]->set('filterOperator', $operators[$i]);
 			}
 		}
 		return $listViewHeaders;
@@ -591,11 +593,13 @@ var_dump($listResult);*/
 		if($customViewModel) {
 			$searchKey = $this->get($parameter_prefix.'search_key');
 			$searchValue = $this->get($parameter_prefix.'search_value');
+			$searchInput = $this->get($parameter_prefix.'search_input');
 			$operator = $this->get($parameter_prefix.'operator');
 			if(!empty($operator)) {
 			    $customViewModel->set('operator', $operator);
 			    $customViewModel->set('search_key', $searchKey);
 			    $customViewModel->set('search_value', $searchValue);
+			    $customViewModel->set('search_input', $searchInput);
 			}
 			return $customViewModel;
 		}

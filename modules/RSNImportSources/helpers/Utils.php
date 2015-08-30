@@ -1,5 +1,7 @@
 <?php
 
+require_once('modules/RSNImportSources/helpers/Performance.php');
+
 class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 
 	static $AUTO_MERGE_NONE = 0;
@@ -86,29 +88,53 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$uploadMaxSize = self::getMaxUploadSize();
 		$importDirectory = self::getImportDirectory();
 		$temporaryFileName = self::getImportFilePath($current_user, $request->get("for_module"));
-
-		if($_FILES['import_file']['error']) {
-			$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));
-			return false;
-		}
-		if(!is_uploaded_file($_FILES['import_file']['tmp_name'])) {
-			$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
-			return false;
-		}
-		if ($_FILES['import_file']['size'] > $uploadMaxSize) {
-			$request->set('error_message', vtranslate('LBL_IMPORT_ERROR_LARGE_FILE', 'Import').
-			$uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
-			return false;
-		}
+		
 		if(!is_writable($importDirectory)) {
 			$request->set('error_message', vtranslate('LBL_IMPORT_DIRECTORY_NOT_WRITABLE', 'Import'));
 			return false;
 		}
+		
+		if($request->get('import_file_src_mode') == 'localpath'){
+	
+			//ED150827
+			$srcFile = $request->get('import_file_localpath');
+			if(!file_exists($srcFile)) {
+				$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+				return false;
+			}
+			$request->set('import_file_name', $srcFile);
+			copy($srcFile, $temporaryFileName);
+			$fileCopied = $temporaryFileName;
+			if(!file_exists($fileCopied)) {
+				$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
+				return false;
+			}
+		}
+		else {
 
-		$fileCopied = move_uploaded_file($_FILES['import_file']['tmp_name'], $temporaryFileName);
-		if(!$fileCopied) {
-			$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
-			return false;
+			if($_FILES['import_file']['error']) {
+				$request->set('error_message', self::fileUploadErrorMessage($_FILES['import_file']['error']));
+				return false;
+			}
+			
+			if(!is_uploaded_file($_FILES['import_file']['tmp_name'])) {
+				$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
+				return false;
+			}
+			if ($_FILES['import_file']['size'] > $uploadMaxSize) {
+				$request->set('error_message', vtranslate('LBL_IMPORT_ERROR_LARGE_FILE', 'Import').
+				$uploadMaxSize.' '.vtranslate('LBL_IMPORT_CHANGE_UPLOAD_SIZE', 'Import'));
+				return false;
+			}
+
+			//ED150827
+			$request->set('import_file_name', $_FILES['import_file']['name']);
+	
+			$fileCopied = move_uploaded_file($_FILES['import_file']['tmp_name'], $temporaryFileName);
+			if(!$fileCopied) {
+				$request->set('error_message', vtranslate('LBL_IMPORT_FILE_COPY_FAILED', 'Import'));
+				return false;
+			}
 		}
 
 		return true;
@@ -132,12 +158,17 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
             $fieldObject = $moduleFields[$fieldName];
             if (is_object($fieldObject)) {
             	$columnsListQuery .= RSNImportSources_Utils_Helper::getDBColumnType($fieldObject, $fieldTypes);
-            } else {
-            	$columnsListQuery .= ','.$fieldName.' varchar(250)';
+            } elseif($fieldName == 'remarque' || $fieldName == 'description') {
+            	$columnsListQuery .= ','.$fieldName.' TEXT';
+			}
+			else {
+            	$columnsListQuery .= ','.$fieldName.' varchar(255)';
             }
 		}
 		$createTableQuery = 'CREATE TABLE '. $tableName . ' ('.$columnsListQuery.') ENGINE=MyISAM ';
-		$db->query($createTableQuery);
+		$result = $db->query($createTableQuery);
+		if(!$result)
+			$db->echoError();
 		return true;
 	}
 
@@ -209,19 +240,20 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$db = PearDatabase::getInstance();
 		$return_values = array();
 
-		$query = 	'SELECT vtiger_crmentity.crmid/*, tab.name*/, ris.class, ris.title
-				FROM vtiger_rsnimportsources ris
-				JOIN vtiger_crmentity ON ris.rsnimportsourcesid = vtiger_crmentity.crmid
-				/*JOIN vtiger_tab tab ON ris.tabid = tab.tabid*/
-				WHERE ris.disabled = FALSE
-				AND vtiger_crmentity.deleted = FALSE';
+		$query = 'SELECT vtiger_crmentity.crmid/*, tab.name*/, ris.class, ris.title
+				, ris.description, ris.lastimport
+			FROM vtiger_rsnimportsources ris
+			JOIN vtiger_crmentity ON ris.rsnimportsourcesid = vtiger_crmentity.crmid
+			/*JOIN vtiger_tab tab ON ris.tabid = tab.tabid*/
+			WHERE ris.disabled = FALSE
+			AND vtiger_crmentity.deleted = FALSE';
 
 		$params = array();
 		//if ($moduleName) {
 			$query .= ' AND (ris.modules LIKE CONCAT(\'%\', ?, \'%\')';
 			$query .= ' OR ris.modules LIKE CONCAT(\'%\', ?, \'%\'))';
 			$params[] = $moduleName;
-			$params[] = vtranslate($moduleName);
+			$params[] = vtranslate($moduleName, $moduleName);
 		//}
 		$query .= ' ORDER BY sortorderid';
 		$result = $db->pquery($query, $params);
@@ -234,6 +266,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				module 		=> $moduleName, //$db->query_result($result, $i, 'name'),
 				classname 	=> $db->query_result($result, $i, 'class'),
 				sourcename 	=> $db->query_result($result, $i, 'title'),//$class::getSource(),
+				description 	=> $db->query_result($result, $i, 'description'),
+				lastimport 	=> $db->query_result($result, $i, 'lastimport'),
 				sourcetype 	=> $class::getSourceType()
 			));
 		}
@@ -346,5 +380,74 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			}
 		}
 		return $row;
+	}
+	
+	static $checkPickListValueCache;
+	public static function checkPickListValue($moduleName, $fieldName, $pickListName, $fieldValue, $createIfMissing = true){
+		if(!$fieldValue)
+			return true;
+		
+		if(self::$checkPickListValueCache && array_key_exists("$moduleName:$fieldName:$fieldValue", self::$checkPickListValueCache))
+			return true;
+		
+		if(!self::$checkPickListValueCache)
+			self::$checkPickListValueCache = array();
+		
+		global $adb;
+		$query = "SELECT 1
+			FROM `vtiger_$pickListName`
+			WHERE `$pickListName` = ?
+			LIMIT 1";
+		$result = $adb->pquery($query, array($fieldValue));
+		if(!$result){
+			//$adb->echoError("checkPickListValue : $query");
+			return false; //bad table name ?
+		}
+		if($adb->getRowCount($result))
+			$exists = true;
+		elseif($createIfMissing
+		&& self::checkPickListTableSequence($moduleName, $pickListName)){
+			
+			//TODO notify administrator
+			
+			$exists = self::addPickListValues($moduleName, $fieldName, $fieldValue);
+		}
+		else
+			$exists = false;
+		self::$checkPickListValueCache["$moduleName:$pickListName:$fieldValue"] = $exists;
+		return $exists;
+	}
+	
+	public static function addPickListValues($moduleName, $fieldName, $fieldValue){
+		$moduleModel = Settings_Picklist_Module_Model::getInstance($moduleName);
+		$fieldModel = Settings_Picklist_Field_Model::getInstance($fieldName, $moduleModel);
+		//var_dump('getPickListName', $fieldName, $fieldModel->getPickListName());
+		$rolesSelected = array();
+		if($fieldModel->isRoleBased()) {
+			$userSelectedRoles = $request->get('rolesSelected',array());
+			//selected all roles option
+			if(in_array('all',$userSelectedRoles)) {
+				$roleRecordList = Settings_Roles_Record_Model::getAll();
+				foreach($roleRecordList as $roleRecord) {
+					$rolesSelected[] = $roleRecord->getId();
+				}
+			}else{
+				$rolesSelected = $userSelectedRoles;
+			}
+		}
+		return $moduleModel->addPickListValues($fieldModel, $fieldValue, $rolesSelected);
+			
+	}
+	
+	public static function checkPickListTableSequence($moduleName, $pickListName){
+		global $adb;
+		$query = "UPDATE `vtiger_".$pickListName."_seq`
+			SET id = (SELECT MAX(`".$pickListName."id`) FROM `vtiger_$pickListName`)";
+		$result = $adb->query($query);
+		if(!$result){
+			//$adb->echoError("checkPickListTable : $query");
+			return false; //bad table name ?
+		}
+		return !!$result; 
 	}
 }

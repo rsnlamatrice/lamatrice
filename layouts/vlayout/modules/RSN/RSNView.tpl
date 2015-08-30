@@ -12,6 +12,7 @@
 
 {strip}
 <div class="relatedContainer listViewPageDiv margin4px"><h3>Bo&icirc;te &agrave; outils</h3>
+    <h4><code>Attention, zone dangereuse réservée aux développeurs (qui ne pourront s'en prendre qu'à eux-même)</code></h4>
     &nbsp;
 </div>
 {/strip}

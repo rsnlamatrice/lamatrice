@@ -26,7 +26,7 @@ class ModCommentsCore extends CRMEntity {
 	 * Mandatory for Saving, Include tables related to this module.
 	 */
 	var $tab_name = Array('vtiger_crmentity', 'vtiger_modcomments', 'vtiger_modcommentscf');
-
+	
 	/**
 	 * Mandatory for Saving, Include tablename and tablekey columnname here.
 	 */
@@ -94,7 +94,11 @@ class ModCommentsCore extends CRMEntity {
 
 	function __construct() {
 		global $log, $currentModule;
-		$this->column_fields = getColumnFields($currentModule);
+		/* ED150828 replace $currentModule par $moduleName
+		 * je ne comprends pas le sens d'utiliser global $currentModule
+		 */
+		$moduleName = 'ModComments';
+		$this->column_fields = getColumnFields($moduleName);
 		$this->db = PearDatabase::getInstance();
 		$this->log = $log;
 	}
