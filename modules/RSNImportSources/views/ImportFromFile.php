@@ -84,8 +84,8 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * Method to get temporary file path.
 	 * @return string - the file path.
 	 */
-	public function getFilePath() {
-		return RSNImportSources_Utils_Helper::getImportFilePath($this->user, $this->request->get('for_module'));
+	public function getFilePath($nFile = 0) {
+		return RSNImportSources_Utils_Helper::getImportFilePath($this->user, $this->request->get('for_module'), $nFile);
 	}
 
 	/**
@@ -100,7 +100,9 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * Method to delete temporary file.
 	 */
 	public function deleteFile() {
-		@unlink($this->getFilePath());
+		$nFile = 0;
+		while(file_exists($this->getFilePath($nFile)))
+			@unlink($this->getFilePath($nFile++));
 	}
 	
 	/**
