@@ -278,8 +278,15 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		
 		$fieldName = 'comments';
 		if($contactemailsData[0]['erreur']){
-			$record->set($fieldName, 'Erreur');
+			$value = '4D indique Erreur';
 		}
+		else
+			$value = '';
+		if($contactemailsData[0]['date_modification'] != $contactemailsData[0]['date_creation'])
+		$value = '4D - modifié le ' . $contactemailsData[0]['date_modification'] . "\r"
+			. $value;
+		$record->set($fieldName, $value);
+		
 		
 		$fieldName = 'rsnmediadocuments';
 		RSNImportSources_Utils_Helper::checkPickListValue('ContactEmails', $fieldName, $fieldName, 'Liste régionale');
@@ -492,24 +499,5 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		$contactemailsHeader = array_combine($fields, $contactemails['header']);
 		
 		return $contactemailsHeader;
-	}
-	
-	function getPeriodiciteFrom4D($period4D, $dateCreation){
-		switch($period4D){
-			case '0':
-				return 'Mensuel';
-			case '1':
-				return 'Trimestriel 1';
-			case '2':
-				return 'Trimestriel 2';
-			case '3':
-				return 'Trimestriel 3';
-			case '4':
-				return 'Annuel 1';//TODO en fonction de l'historique existant
-			case '5':
-				return 'Semestriel 1';//TODO en fonction de l'historique existant
-			default:
-				return $period4D;
-		}
 	}
 }
