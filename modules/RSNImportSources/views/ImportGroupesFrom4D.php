@@ -86,6 +86,9 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 			'contactweb' => '',//toujours vide
 			'nomlongdugroupe' => '',//grpnomlong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomlong
 			'cacheradhesion' => '',// rsnwebhide .= 'Adhésion'
+			
+			/* post pré import */
+			'_contactid',
 		);
 	}
 	
@@ -161,7 +164,11 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 		global $log;
 		
 		$sourceId = $contactsData[0]['reffiche'];
-		$contactId = $this->getContactIdFromRef4D($sourceId);
+		$contactId = $contactsData[0]['_contactid'];
+		
+		if(false && !$contactId) //[Migration] see postParse
+			$contactId = $this->getContactIdFromRef4D($sourceId);
+			
 		if($contactId){
 			$record = Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
 			$modifiedtime = $record->get('modifiedtime');
@@ -364,11 +371,17 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($ref4d) {
+		$id = false;
 		if(is_array($ref4d)){
-			//$ref4d is $rsnprelvirementsData
-			$ref4d = $ref4d[0]['reffiche'];
+			if($ref4d[0]['_contactid'])
+				$id = $this->getContactIdFromRef4D($ref4d);
+			else{
+				//$ref4d is $rsnprelvirementsData
+				$ref4d = $ref4d[0]['reffiche'];
+			}
 		}
-		$id = $this->getContactIdFromRef4D($ref4d);
+		if(!$id)
+			$id = $this->getContactIdFromRef4D($ref4d);
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
@@ -403,6 +416,28 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 			echo "not opened ...";
 		}
 		return false;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		// Pré-identifie les contacts
+		
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+			$this->user,
+			'Contacts',
+			'reffiche',
+			'_contactid',
+			/*$changeStatus*/ false
+		);
+	
+		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
+			$this->user,
+			'Contacts',
+			'_contactid'
+		);
 	}
         
 	/**

@@ -77,6 +77,9 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			'dateexport',
 			'iban',
 			'bic',
+			
+			/* post pré import */
+			'_contactid',
 		);
 	}
 
@@ -310,8 +313,14 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	}
 
 	function getPrelevement($rsnprelvirementsData){
-		$ref4d = $rsnprelvirementsData[0]['reffiche'];
-		$contact = $this->getContact($ref4d);
+		$contactId = $rsnprelvirementsData[0]['_contactid'];
+		if(!$contactId){
+			$ref4d = $rsnprelvirementsData[0]['reffiche'];
+			$contactId = $this->getContactIdFromRef4D($ref4d);
+		}
+		if($contactId)
+			$contactId = Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
+			
 		if(!$contact){
 			var_dump("Impossible de trouver le contact du prélèvement. RefFiche4D = ", $rsnprelvirementsData[0]['reffiche']);
 			return false;
@@ -408,6 +417,29 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		}
 		return false;
 	}
+	
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		// Pré-identifie les contacts
+		
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+			$this->user,
+			'RsnPrelVirement',
+			'ref4d',
+			'_contactid',
+			/*$changeStatus*/ false
+		);
+	
+		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
+			$this->user,
+			'RsnPrelVirement',
+			'_contactid'
+		);
+	}
+
         
 	/**
 	 * Method that check if a string is a formatted date (DD/MM/YYYY).

@@ -143,6 +143,9 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			'partenaire' => '',//si vrai accounttype += 'Partenaire'
 			'partenairedate' => 'datepartenariat',//à mettre dans partenairedescription si ! partenaire 
 			'signatairedate' => 'datesigncharte',
+			
+			//champ supplémentaire
+			'_contactid' => '', //Massively updated after preImport
 		);
 			//donotcourrierag, rsnwebhide dans import Groupe ?
 	}
@@ -222,7 +225,12 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		global $log;
 		
 		$sourceId = $contactsData[0]['reffiche'];
-		$entryId = $this->getContactIdFromRef4D($sourceId);
+		$entryId = $contactsData[0]['_contactid']; // initialisé dans le postPreImportData
+		if(!$entryId){
+			//Contrôle des doublons dans la source
+			if(false) // parce que [Migration]
+				$entryId = $this->getContactIdFromRef4D($sourceId);
+		}
 		if($entryId){
 			//already imported !!
 			foreach ($contactsData as $contactsLine) {
@@ -659,21 +667,6 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		
 		$contactsValues = $this->getContactsValues($contactsData);
 		
-		////TODO : cache
-		//$query = "SELECT 1
-		//	FROM vtiger_contactdetails
-		//	JOIN vtiger_crmentity
-		//		ON vtiger_crmentity.crmid = vtiger_contactdetails.contactsid
-		//	WHERE vtiger_crmentity.deleted = 0
-		//	AND reffiche = ?
-		//	LIMIT 1
-		//";
-		//$sourceId = $contactsData[0]['reffiche'];
-		//$db = PearDatabase::getInstance();
-		//$result = $db->pquery($query, array($sourceId));//$contactsData[0]['subject']
-		//if($db->num_rows($result))
-		//	return true;
-		//
 		$contacts = new RSNImportSources_Preimport_Model($contactsValues, $this->user, 'Contacts');
 		$contacts->save();
 	}
@@ -725,6 +718,21 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			echo "not opened ...";
 		}
 		return false;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		// Pré-identifie les contacts
+		
+		return RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+			$this->user,
+			'Contacts',
+			'reffiche',
+			'_contactid'
+		);
 	}
         
 	/**

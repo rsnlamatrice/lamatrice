@@ -119,6 +119,8 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 				$this->updateLastImportField();
 				
 				$returnValue = $this->parseAndSaveFile($fileReader);
+				if($returnValue)
+					$this->postPreImportData();
 				$this->deleteFile();
 				return $returnValue;
 			} else {
@@ -137,6 +139,14 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
 	 */
 	function parseAndSaveFile(RSNImportSources_FileReader_Reader $fileReader) {
+		return false;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
 		return false;
 	}
 }
