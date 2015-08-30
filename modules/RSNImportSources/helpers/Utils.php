@@ -253,7 +253,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$query .= ' AND (ris.modules LIKE CONCAT(\'%\', ?, \'%\')';
 			$query .= ' OR ris.modules LIKE CONCAT(\'%\', ?, \'%\'))';
 			$params[] = $moduleName;
-			$params[] = vtranslate($moduleName);
+			$params[] = vtranslate($moduleName, $moduleName);
 		//}
 		$query .= ' ORDER BY sortorderid';
 		$result = $db->pquery($query, $params);
