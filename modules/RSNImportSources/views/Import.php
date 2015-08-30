@@ -71,6 +71,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	}
 
 	/**
+	 * Method to get the modules that are concerned by the import.
+	 * Used to lock any other import in other modules than the one where data will be insterted
+	 * @return array - An array containing concerned module names.
+	 */
+	public function getLockModules() {
+		return $this->getImportModules();
+	}
+
+	/**
 	 * Method to get the main module for this import.
 	 * @return string - the name of the main import module.
 	 */
