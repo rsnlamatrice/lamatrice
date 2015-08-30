@@ -199,6 +199,7 @@
 			{if $HEADER_FIELD@last}
 			    </td><td nowrap class="{$WIDTHTYPE}">
 				<div class="pull-right actions">
+				{if !$IS_MAIN_ADDRESS}
 				    <span class="actionImages">
                                         {if $IS_EDITABLE && $HAS_ADD_BUTTON}{*ED150207*}
                                             {assign var=VIEW_URL value=$RELATED_RECORD->getDuplicateRecordUrl()}
@@ -219,6 +220,7 @@
 					    <a class="relatedRecordDelete"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
 					{/if}
 				    </span>
+				{/if}
 				</div>
 			    </td>
 			{/if}
