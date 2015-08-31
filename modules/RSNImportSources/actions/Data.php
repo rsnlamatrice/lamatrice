@@ -34,7 +34,11 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 	//TODO email or log when schedule import is running and ended !!
 		global $current_user;
 		
-		$scheduledPreImports = self::getScheduledPreImport();
+		$importControllers = self::getScheduledPreImport();
+		
+		foreach ($importControllers as $importId => $importDataController) {
+			//var_dump($importDataController);
+		}
 	}
 	
 	/**
@@ -169,11 +173,12 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 	public static function getScheduledPreImport() {
 
 		$moduleModel = Vtiger_Module_Model::getInstance('RSNImportSources');
-		$scheduledImports = $moduleModel->getPreImportRecords(true);
-		foreach($scheduledImports as $importId => $importInfo) {
-			var_dump($importInfo);
+		$recordModels = $moduleModel->getPreImportRecords(true);
+		$importControllers = array();
+		foreach($recordModels as $importId => $importInfo) {
+			$importController[$importId] = $importInfo->getImportController();
 		}
-		return $scheduledImports;
+		return $importController;
 	}
 
 	/**

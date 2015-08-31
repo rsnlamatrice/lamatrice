@@ -32,4 +32,27 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 		if($id)
 			return self::getInstanceById($id, 'RSNImportSources');
 	}
+	
+	
+	/**
+	 * Method to get an instance of the import controller. It use the ImportSource parameter to retrive the name of the import class.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @return Import - An instance of the import controller, or null.
+	 */
+	function getImportController() {
+		$request = new Vtiger_Request();
+		$request->set('ImportSource', $this->get('class'));
+		
+		$className = $request->get('ImportSource');
+		if ($className) {
+			$importClass = RSNImportSources_Utils_Helper::getClassFromName($className);
+			$user = Users_Record_Model::getCurrentUserModel();
+			$importController = new $importClass($request, $user);
+			if($importController)
+				$importController->set('recordModel', $this);
+			return $importController;
+		}
+
+		return null;
+	}
 }
