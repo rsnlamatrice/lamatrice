@@ -532,22 +532,22 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		return null;
 	}
 	
-//	/**
-//	 * Method that retrieve a contact.
-//	 * @param string $firstname : the firstname of the contact.
-//	 * @param string $lastname : the lastname of the contact.
-//	 * @param string $email : the mail of the contact.
-//	 * @return the row data of the contact | null if the contact is not found.
-//	 */
-//	function getContact($contact_no) {
-//		$id = $this->getContactId($contact_no);
-//		if($id){
-//			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
-//		}
-//
-//		return null;
-//	}
-//
+	/**
+	 * Method that retrieve a contact.
+	 * @param string $firstname : the firstname of the contact.
+	 * @param string $lastname : the lastname of the contact.
+	 * @param string $email : the mail of the contact.
+	 * @return the row data of the contact | null if the contact is not found.
+	 */
+	function getContact($contact_no) {
+		$id = $this->getContactId($contact_no);
+		if($id){
+			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
+		}
+
+		return null;
+	}
+
 //	/**
 //	 * Method that retrieve a contact id.
 //	 * @param string $contact_no : the contact number
