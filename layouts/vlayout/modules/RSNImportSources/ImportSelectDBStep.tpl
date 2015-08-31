@@ -26,6 +26,13 @@
 		<td>&nbsp;</td>
 		<td colspan="2">
 			<table>
+				<tr id="db_max_query_rows_container">
+					
+					<td><span>{'LBL_MAX_QUERY_ROWS'|@vtranslate:$MODULE}</span></td>
+					<td>
+						<input name="db_max_query_rows" id="db_max_query_rows" value="{$IMPORT_ULPOAD_MAX_QUERY_ROWS}"/>
+					</td>
+				</tr>
 				<tr id="file_type_container">
 					
 					<td><span>{'LBL_FILE_TYPE'|@vtranslate:$MODULE}</span></td>

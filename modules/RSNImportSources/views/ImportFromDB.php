@@ -4,7 +4,8 @@ define('MAX_QUERY_ROWS', 3000); //DEBUG
 
 class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile_View {
 
-	
+	private var $maxQueryRows = MAX_QUERY_ROWS;
+		
 	/**
 	 * Method to show the configuration template of the import for the first step.
 	 *  It display the select db template.
@@ -30,9 +31,29 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 		$viewer->assign('IMPORT_ULPOAD_DB_PORT', $this->getDefaultDBPort());
 		$viewer->assign('IMPORT_ULPOAD_DB_NAME', $this->getDefaultDBName());
 		$viewer->assign('IMPORT_ULPOAD_DB_USER', $this->getDefaultDBUser());
+		$viewer->assign('IMPORT_ULPOAD_MAX_QUERY_ROWS', $this->getDefaultMaxQueryRows());
 		$viewer->assign('IMPORT_ULPOAD_DB_PWD', '');
 		$viewer->assign('IMPORT_ULPOAD_DB_CX', str_replace($this->getDefaultDBPwd(), '***', $this->getDBConnexionString()));
 		return $viewer;
+	}
+
+
+	/**
+	 * Method to default max query rows for this import.
+	 *  This method should be overload in the child class.
+	 * @return string - the default db port.
+	 */
+	public function getDefaultMaxQueryRows() {
+		return MAX_QUERY_ROWS;
+	}
+	
+	/**
+	 * Method to max query rows for this import.
+	 *  This method should be overload in the child class.
+	 * @return string - the default db port.
+	 */
+	public function getMaxQueryRows() {
+		return $this->request && $this->request->get('db_max_query_rows') ? $this->request->get('db_max_query_rows') : $this->getDefaultMaxQueryRows();
 	}
 
 	/**
@@ -144,7 +165,7 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 	}
 
 	/**
-	 * Method to upload the file in the temporary location.
+	 * Method to transfer DBRows to file in the temporary location.
 	 */
 	function uploadFile() {
 		$dbRows = $this->getDBRows();
