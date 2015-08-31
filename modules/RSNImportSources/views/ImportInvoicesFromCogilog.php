@@ -115,6 +115,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				if(!$rows)
 					break;
 				echo("\t+ " . count($rows));
+				
+				$this->setQueryLimitStart($this->getQueryLimitStart() + count($rows));
+				
 				$allRows = array_merge($allRows, $rows);
 				$i = count($allRows);
 			}
