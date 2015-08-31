@@ -1,7 +1,7 @@
 <?php
 
 //abstract for cogilog db / postgresql
-class RSNImportSources_ImportFromCogilog_View extends RSNImportSources_ImportFromDB_View {
+class RSNImportSources_ImportFromDBCogilog_View extends RSNImportSources_ImportFromDB_View {
 
 	var $cogilog_config;
 	
@@ -101,7 +101,9 @@ class RSNImportSources_ImportFromCogilog_View extends RSNImportSources_ImportFro
 		
 		$line = false;
 		$nLine = 0;
-		while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {//ED150722 attention, entre PGSQL_ASSOC et PGSQL_NUM j'ai constaté un écart d'une colonne
+		//ED150722 TODO PGSQL_ASSOC uniquement pour la 1ere ligne, sinon PGSQL_NUM
+		//	attention, entre PGSQL_ASSOC et PGSQL_NUM j'ai constaté un écart d'une colonne, à confirmer
+		while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
 			//var_dump($line);
 			if($nLine++ === 0){
 				$this->columnName_indexes = array_keys($line);

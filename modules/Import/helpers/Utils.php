@@ -9,6 +9,9 @@
  * All Rights Reserved.
  * *********************************************************************************** */
 
+//ED150826 both for preImport and import
+ini_set("memory_limit","1G");
+
 class Import_Utils_Helper {
 
 	static $AUTO_MERGE_NONE = 0;
