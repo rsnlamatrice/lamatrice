@@ -1,5 +1,7 @@
 <?php
 
+ini_set("memory_limit","1G");//ED150826
+
 define('ASSIGNEDTO_ALL', '7');
 
 define('CURRENCY_ID', 1);
