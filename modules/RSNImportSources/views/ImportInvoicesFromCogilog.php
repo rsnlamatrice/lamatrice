@@ -508,25 +508,23 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	}
 
 	/**
-	 * Method that retrieve a contact id.
-	 * @param string $contact_no : the contact number
-	 * @return the id of the contact | null if the contact is not found.
+	 * Method that retrieve a contact.
+	 * @param string $ref4d : ref4d ou data array
+	 * @return the row data of the contact | null if the contact is not found.
 	 */
-	function getContactId($contact_no) {
-		$query = "SELECT crmid
-			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND contact_no = CONCAT('C', ?)
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		
-		$result = $db->pquery($query, array($contact_no));
-
-		if($db->num_rows($result)){
-			return $db->query_result($result, 0, 0);
+	function getContactId($ref4d) {
+		$id = false;
+		if(is_array($ref4d)){ //$ref4d is $rsnprelvirementsData
+			if($ref4d[0]['_contactid'])
+				$id = $ref4d[0]['_contactid'];
+			else{
+				$ref4d = $ref4d[0]['reffiche'];
+			}
+		}
+		if(!$id)
+			$id = $this->getContactIdFromRef4D($ref4d);
+		if($id){
+			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
 
 		return null;
@@ -534,9 +532,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	
 	/**
 	 * Method that retrieve a contact.
-	 * @param string $firstname : the firstname of the contact.
-	 * @param string $lastname : the lastname of the contact.
-	 * @param string $email : the mail of the contact.
+	 * @param string $ref4d : ref4d ou data array
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($contact_no) {
