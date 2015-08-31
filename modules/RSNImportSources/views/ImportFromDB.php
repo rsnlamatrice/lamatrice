@@ -53,7 +53,26 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 	public function getMaxQueryRows() {
 		return $this->request && $this->request->get('db_max_query_rows') ? $this->request->get('db_max_query_rows') : $this->getDefaultMaxQueryRows();
 	}
-
+	
+	private $queryStartLimit = 0;
+	/**
+	 * Method to get the query start limit for this import.
+	 *  This method should be overload in the child class.
+	 * @return string - the queryLimitStart.
+	 */
+	public function getQueryLimitStart() {
+		return $queryStartLimit;
+	}
+	/**
+	 * Method to set the query start limit for this import.
+	 *  This method should be overload in the child class.
+	 * @return string - this.
+	 */
+	public function setQueryLimitStart($value) {
+		$this->queryStartLimit = $value;
+		return $this;
+	}
+	
 	/**
 	 * Method to default db type for this import.
 	 *  This method should be overload in the child class.
