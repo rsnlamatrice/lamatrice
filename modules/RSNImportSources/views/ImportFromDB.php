@@ -1,6 +1,6 @@
 <?php
 
-define('MAX_QUERY_ROWS', 5000); //DEBUG
+define('MAX_QUERY_ROWS', 2500); //DEBUG
 
 class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile_View {
 
