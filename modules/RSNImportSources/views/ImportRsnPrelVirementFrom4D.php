@@ -320,7 +320,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			$contactId = $this->getContactIdFromRef4D($ref4d);
 		}
 		if($contactId)
-			$contactId = Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
+			$contact = Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
 			
 		if(!$contact){
 			var_dump("Impossible de trouver le contact du prélèvement.", $rsnprelvirementsData[0]);
