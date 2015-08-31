@@ -412,12 +412,14 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		$limitQuery = $query .' LIMIT '.$startIndex.','.($pageLimit+1); /* ED140907 + 1 instead of two db query */
 		//echo "<pre>".__FILE__." : $query</pre>";
 		//echo_callstack();
-		$result = $db->pquery($limitQuery, array());
+		$result = $db->query($limitQuery);
 		//ED150704
 		if(!$result){
-			echo "<pre>".__FILE__." : $query</pre>";
-			echo_callstack();
 			echo "<code>Désolé, la formulation de la recherche provoque une erreur.</code>";
+			echo "<pre>".__FILE__."
+				crmid = ".$this->getParentRecordModel()->getId()."
+				SQL = $query</pre>";
+			echo_callstack();
 			return array();
 		}
 		$relatedRecordList = array();
