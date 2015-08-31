@@ -255,7 +255,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			}
 		} else {
 			$log->debug("" . basename(__FILE__) . " error importing rsnprelevements (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsnprelevementsData[0]['datecreation']
-						. ", result=Contact inconnu";
+						. ", result=Contact inconnu");
 			foreach ($rsnprelevementsData as $rsnprelevementsLine) {//TODO: remove duplicated code
 				$entityInfo = array(
 					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
