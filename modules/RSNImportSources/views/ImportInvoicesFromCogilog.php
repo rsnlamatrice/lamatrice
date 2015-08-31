@@ -2,6 +2,8 @@
 
 require_once ('modules/RSNImportSources/views/ImportFromCogilog.php');
 
+// ED150831 : TODO importer quand même les factures sans contact connu car il y a les décédés qui peuvent avoir disparu de 4D
+
 class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_ImportFromCogilog_View {
 
 	/**
@@ -17,7 +19,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * @return array - An array containing concerned module names.
 	 */
 	public function getImportModules() {
-		return array('Contacts', 'Invoice');
+		return array(/*'Contacts', */'Invoice');
 	}
 
 	/**
@@ -136,29 +138,29 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		
 	}
 	
-	/**
-	 * Method to get the imported fields for the contact module.
-	 * @return array - the imported fields for the contact module.
-	 */
-	public function getContactsFields() {
-		return array(
-			'contact_no',
-			'lastname',
-			'firstname',
-			'email',
-			'mailingstreet',
-			'mailingstreet2',
-			'mailingstreet3',
-			'mailingpobox',
-			'mailingzip',
-			'mailingcity',
-			'mailingcountry',
-			'phone',
-			'mobile',
-			'accounttype',
-			'leadsource',
-		);
-	}
+	///**
+	// * Method to get the imported fields for the contact module.
+	// * @return array - the imported fields for the contact module.
+	// */
+	//public function getContactsFields() {
+	//	return array(
+	//		'reffiche',
+	//		'lastname',
+	//		'firstname',
+	//		'email',
+	//		'mailingstreet',
+	//		'mailingstreet2',
+	//		'mailingstreet3',
+	//		'mailingpobox',
+	//		'mailingzip',
+	//		'mailingcity',
+	//		'mailingcountry',
+	//		'phone',
+	//		'mobile',
+	//		'accounttype',
+	//		'leadsource',
+	//	);
+	//}
 
 	/**
 	 * Method to get the imported fields for the invoice module.
@@ -168,7 +170,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		return array(
 			//header
 			'sourceid',
-			'contact_no',
+			'reffiche',
 			'lastname',
 			'firstname',
 			'email',
@@ -189,6 +191,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'quantity',
 			'prix_unit_ht',
 			'taxrate',
+			
+			/* post pré-import */
+			'_contactid',
 		);
 	}
 
@@ -278,7 +283,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		global $log;
 		
 		//TODO check sizeof $invoiceata
-		$contact = $this->getContact($invoiceData[0]['contact_no']);
+		$contact = $this->getContact($invoiceData);
 		if ($contact != null) {
 			$account = $contact->getAccountRecordModel();
 
@@ -503,22 +508,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	}
 
 	/**
-	 * Method that retrieve a contact.
-	 * @param string $firstname : the firstname of the contact.
-	 * @param string $lastname : the lastname of the contact.
-	 * @param string $email : the mail of the contact.
-	 * @return the row data of the contact | null if the contact is not found.
-	 */
-	function getContact($contact_no) {
-		$id = $this->getContactId($contact_no);
-		if($id){
-			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
-		}
-
-		return null;
-	}
-
-	/**
 	 * Method that retrieve a contact id.
 	 * @param string $contact_no : the contact number
 	 * @return the id of the contact | null if the contact is not found.
@@ -542,19 +531,60 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 
 		return null;
 	}
+	
 	/**
-	 * Method that pre-import a contact if he does not exist in database.
-	 * @param $invoice : the invoice data.
+	 * Method that retrieve a contact.
+	 * @param string $firstname : the firstname of the contact.
+	 * @param string $lastname : the lastname of the contact.
+	 * @param string $email : the mail of the contact.
+	 * @return the row data of the contact | null if the contact is not found.
 	 */
-	function checkContact($invoice) {
-		$contactData = $this->getContactValues($invoice['invoiceInformations']);
-		
-		$id = $this->getContactId($contactData['contact_no']);
-		
-		if(!$id){
-			$this->preImportContact($contactData);
+	function getContact($contact_no) {
+		$id = $this->getContactId($contact_no);
+		if($id){
+			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
+
+		return null;
 	}
+
+//	/**
+//	 * Method that retrieve a contact id.
+//	 * @param string $contact_no : the contact number
+//	 * @return the id of the contact | null if the contact is not found.
+//	 */
+//	function getContactId($contact_no) {
+//		$query = "SELECT crmid
+//			FROM vtiger_contactdetails
+//                        JOIN vtiger_crmentity
+//                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+//			WHERE deleted = FALSE
+//			AND contact_no = CONCAT('C', ?)
+//			LIMIT 1
+//		";
+//		$db = PearDatabase::getInstance();
+//		
+//		$result = $db->pquery($query, array($contact_no));
+//
+//		if($db->num_rows($result)){
+//			return $db->query_result($result, 0, 0);
+//		}
+//
+//		return null;
+//	}
+//	/**
+//	 * Method that pre-import a contact if he does not exist in database.
+//	 * @param $invoice : the invoice data.
+//	 */
+//	function checkContact($invoice) {
+//		$contactData = $this->getContactValues($invoice['invoiceInformations']);
+//		
+//		$id = $this->getContactId($contactData['reffiche']);
+//		
+//		if(!$id){
+//			$this->preImportContact($contactData);
+//		}
+//	}
 
 	/**
 	 * Method that check if a product is already in the specified array.
@@ -635,7 +665,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					do {
 						$invoice = $this->getNextInvoice($fileReader);
 						if ($invoice != null) {
-							$this->checkContact($invoice);
+							//$this->checkContact($invoice);
 							$this->preImportInvoice($invoice);
 						}
 					} while ($invoice != null);
@@ -781,7 +811,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 */
 	function getContactValues($invoiceInformations) {
 		$contactMapping = array(
-			'contact_no' 		=> $invoiceInformations[$this->columnName_indexes['codeclient']],
+			'reffiche' 		=> $invoiceInformations[$this->columnName_indexes['codeclient']],
 			'lastname'		=> $invoiceInformations[$this->columnName_indexes['nomclient']],
 			'firstname'		=> '',
 			'email'			=> $invoiceInformations[$this->columnName_indexes['email']],
@@ -797,13 +827,13 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'accounttype'		=> 'Boutique',
 			'leadsource'		=> 'BOUTIQUE',
 			);
-		$codeClient = preg_replace('/^0+/', '', $contactMapping['contact_no']);
+		$codeClient = preg_replace('/^0+/', '', $contactMapping['reffiche']);
 		$regexp = '/^0*'.$codeClient.'\s(.+)\/(\w+-)?\d+\*.*$/';
 		if(preg_match($regexp, $contactMapping['lastname'])){
 			$nomClient = preg_replace($regexp,'$1', $contactMapping['lastname']);
 			$contactMapping['lastname'] = $nomClient;
 		}
-		$contactMapping['contact_no'] = $codeClient;
+		$contactMapping['reffiche'] = $codeClient;
 		return $contactMapping;
 	}
 
@@ -840,7 +870,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$date = $this->getMySQLDate($invoiceInformations[$this->columnName_indexes['datepiece']]);
 		$invoiceHeader = array(
 			'sourceid'		=> 'COG' . substr($date, 2, 2) . str_pad ($invoiceInformations[$this->columnName_indexes['numero']], 5, '0', STR_PAD_LEFT),
-			'contact_no' 		=> $invoiceInformations[$this->columnName_indexes['codeclient']],
+			'reffiche' 		=> $invoiceInformations[$this->columnName_indexes['codeclient']],
 			'lastname'		=> $invoiceInformations[$this->columnName_indexes['nomclient']],
 			'firstname'		=> '',
 			'email'			=> $invoiceInformations[$this->columnName_indexes['email']],
@@ -854,13 +884,13 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'subject'		=> $invoiceInformations[$this->columnName_indexes['nomclient']].' / '. $invoiceInformations[$this->columnName_indexes['datepiece']],
 			'invoicedate'		=> $date,
 		);
-		$codeClient = preg_replace('/^0+/', '', $invoiceHeader['contact_no']);
+		$codeClient = preg_replace('/^0+/', '', $invoiceHeader['reffiche']);
 		$regexp = '/^0*'.$codeClient.'\s(.+)\/(\w+-)?\d+\*.*$/';
 		if(preg_match($regexp, $invoiceHeader['lastname'])){
 			$nomClient = preg_replace($regexp,'$1', $invoiceHeader['lastname']);
 			$invoiceHeader['lastname'] = $nomClient;
 		}
-		$invoiceHeader['contact_no'] = $codeClient;
+		$invoiceHeader['reffiche'] = $codeClient;
 		
 		//var_dump($this->columnName_indexes);
 		
@@ -883,5 +913,27 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 		//var_dump($invoiceValues);
 		return $invoiceValues;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		// Pré-identifie les contacts
+		
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+			$this->user,
+			'Invoice',
+			'reffiche',
+			'_contactid',
+			/*$changeStatus*/ false
+		);
+	
+		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
+			$this->user,
+			'Invoice',
+			'_contactid'
+		);
 	}
 }
