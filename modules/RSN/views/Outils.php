@@ -116,7 +116,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$account = Vtiger_Record_Model::getInstanceById(484208,'Accounts');
+		$account = Vtiger_Record_Model::getInstanceById(942377,'Accounts');
 		var_dump($account->getRSNAboRevues());
 	}
 	
