@@ -67,6 +67,9 @@ class RSNImportSources_ImportRSNDonateursWebLienRefFrom4D_View extends RSNImport
 			'externalid',
 			'actif',
 			'isvalid',
+			
+			/* pre-import */
+			'_contactid',
 		);
 	}
 
