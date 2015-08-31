@@ -565,7 +565,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$query = "UPDATE $tableName
 			SET status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED."
 			WHERE status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
-			AND `$contactIdField` IS NULL OR `$contactIdField` = ''
+			AND (`$contactIdField` IS NULL OR `$contactIdField` = '')
 		";
 		$result = $db->query($query);
 		if(!$result)

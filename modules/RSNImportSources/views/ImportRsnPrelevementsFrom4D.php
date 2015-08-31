@@ -142,12 +142,12 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		global $log;
 		
 		//TODO check sizeof $rsnprelevementsata
+		$sourceId = $rsnprelevementsData[0]['separum'];
 		$contact = $this->getContact($rsnprelevementsData);
 		if ($contact != null) {
 			$account = $contact->getAccountRecordModel();
 
 			if ($account != null) {
-				$sourceId = $rsnprelevementsData[0]['separum'];
 		
 				//test sur separum == $sourceId
 				$query = "SELECT crmid
@@ -248,9 +248,14 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 				}
 			} else {
 				//TODO: manage error
+				$log->debug("" . basename(__FILE__) . " error importing rsnprelevements (sourceId=$sourceId , date=" . $rsnprelevementsData[0]['datecreation']
+						    . ", result=Compte inconnu pour ContactId=".$contact->getId());
+					
 				echo "<pre><code>Unable to find Account</code></pre>";
 			}
 		} else {
+			$log->debug("" . basename(__FILE__) . " error importing rsnprelevements (sourceId=$sourceId , date=" . $rsnprelevementsData[0]['datecreation']
+						. ", result=Contact inconnu");
 			foreach ($rsnprelevementsData as $rsnprelevementsLine) {//TODO: remove duplicated code
 				$entityInfo = array(
 					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
@@ -301,11 +306,10 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 */
 	function getContact($ref4d) {
 		$id = false;
-		if(is_array($ref4d)){
+		if(is_array($ref4d)){ //$ref4d is $rsnprelvirementsData
 			if($ref4d[0]['_contactid'])
-				$id = $this->getContactIdFromRef4D($ref4d);
+				$id = $ref4d[0]['_contactid'];
 			else{
-				//$ref4d is $rsnprelvirementsData
 				$ref4d = $ref4d[0]['reffiche'];
 			}
 		}
