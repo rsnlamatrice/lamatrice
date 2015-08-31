@@ -73,7 +73,7 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 		$result = $db->pquery($limitQuery, array());
 		//ED150704
 		if(!$result){
-			echo "<code>Désolé, la formulation de la recherche provoque une erreur.</code>";
+			echo "<code>RSNSysControls : Désolé, la formulation de la recherche provoque une erreur.</code>";
 			$db->echoError();
 			echo "<pre>".__FILE__." : $limitQuery</pre>";
 			return array();

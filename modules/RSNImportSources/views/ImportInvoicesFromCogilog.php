@@ -96,7 +96,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				OR facture.annee > '.$anneeMax.')';
 		}
 		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
-                    LIMIT ' . MAX_QUERY_ROWS;
+                    LIMIT ' . $this->getMaxQueryRows();
 		//echo("<pre>$query</pre>");
 		return $query;
 	}
@@ -413,38 +413,14 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 						
 						
 					//raise trigger instead of ->save() whose need invoice rows
-					
+					/* ED150831 Migration : is bulk mode
 					$log->debug("BEFORE " . basename(__FILE__) . " raise event handler(" . $record->getId() . ", " . $record->get('mode') . " )");
 					//raise event handler
 					$record->triggerEvent('vtiger.entity.aftersave');
 					$log->debug("AFTER " . basename(__FILE__) . " raise event handler");
+					*/
 					
-					////This field is not manage by save()
-					//$query = "UPDATE vtiger_invoice
-					//	JOIN vtiger_crmentity
-					//		ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
-					//	SET smownerid = ?
-					//	WHERE invoiceid = ?
-					//";// TODO: invoice_no = ?, total = ?
-					//$result = $db->pquery($query, array(ASSIGNEDTO_ALL, $invoiceId));
-					//
-					//if( ! $result)
-					//	$db->echoError();
-					//
-					//$entryId = $this->getEntryId("Invoice", $invoiceId);
-					//$sequence = 0;
-					//
-					//foreach ($invoiceData as $invoiceLine) {
-					//	$this->importInvoiceLine($record, $invoiceLine, ++$sequence);
-					//	$entityInfo = array(
-					//		'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
-					//		'id'		=> $entryId
-					//	);
-					//	
-					//	$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
-					//}
-					//
-					return $record;//tmp 
+					return $record; 
 				}
 			} else {
 				//TODO: manage error
@@ -508,35 +484,28 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	}
 
 	/**
-	 * Method that retrieve a contact id.
-	 * @param string $contact_no : the contact number
-	 * @return the id of the contact | null if the contact is not found.
+	 * Method that retrieve a contact.
+	 * @param string $ref4d : ref4d ou data array
+	 * @return the row data of the contact | null if the contact is not found.
 	 */
-	function getContactId($contact_no) {
-		$query = "SELECT crmid
-			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND contact_no = CONCAT('C', ?)
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		
-		$result = $db->pquery($query, array($contact_no));
-
-		if($db->num_rows($result)){
-			return $db->query_result($result, 0, 0);
+	function getContactId($ref4d) {
+		$id = false;
+		if(is_array($ref4d)){ //$ref4d is $rsnprelvirementsData
+			if($ref4d[0]['_contactid'])
+				$id = $ref4d[0]['_contactid'];
+			else{
+				$ref4d = $ref4d[0]['reffiche'];
+			}
 		}
+		if(!$id)
+			$id = $this->getContactIdFromRef4D($ref4d);
 
-		return null;
+		return $id;
 	}
 	
 	/**
 	 * Method that retrieve a contact.
-	 * @param string $firstname : the firstname of the contact.
-	 * @param string $lastname : the lastname of the contact.
-	 * @param string $email : the mail of the contact.
+	 * @param string $ref4d : ref4d ou data array
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($contact_no) {
