@@ -416,10 +416,10 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		//ED150704
 		if(!$result){
 			echo "<code>Désolé, la formulation de la recherche provoque une erreur.</code>";
-			echo "<pre>".__FILE__."
+			/*echo "<pre>".__FILE__."
 				crmid = ".$this->getParentRecordModel()->getId()."
 				SQL = $query</pre>";
-			echo_callstack();
+			echo_callstack();*/
 			return array();
 		}
 		$relatedRecordList = array();
