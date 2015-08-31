@@ -61,7 +61,7 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 	 * @return string - the queryLimitStart.
 	 */
 	public function getQueryLimitStart() {
-		return $queryStartLimit;
+		return $this->queryStartLimit;
 	}
 	/**
 	 * Method to set the query start limit for this import.
