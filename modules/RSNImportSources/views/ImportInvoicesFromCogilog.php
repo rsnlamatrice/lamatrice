@@ -1,10 +1,10 @@
 <?php
 
-require_once ('modules/RSNImportSources/views/ImportFromCogilog.php');
+require_once ('modules/RSNImportSources/views/ImportFromDBCogilog.php');
 
 // ED150831 : TODO importer quand même les factures sans contact connu car il y a les décédés qui peuvent avoir disparu de 4D
 
-class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_ImportFromCogilog_View {
+class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_ImportFromDBCogilog_View {
 
 	/**
 	 * Method to get the source import label to display.
@@ -106,29 +106,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * Method to get db data.
 	 */
 	function getDBRows() {
-		
-		/* if($this->getMaxQueryRows() > MAX_QUERY_ROWS){
-			$allRows = array();
-			for($i = 0; $i < $this->getMaxQueryRows();){
-				echo("\rgetDBRows $i");
-				$rows = parent::getDBRows();
-				if(!$rows)
-					break;
-				echo("\t+ " . count($rows));
-				
-				$this->setQueryLimitStart($this->getQueryLimitStart() + count($rows));
-				
-				$allRows = array_merge($allRows, $rows);
-				$i = count($allRows);
-			}
-			$rows = $allRows;
-		}
-		else */
-			$rows = parent::getDBRows();
+		$rows = parent::getDBRows();
 		if(!$rows)
 			return $rows;
-
-		echo("\rgetDBRows TOTAL ". count($rows));
 				
 		//Identifie les lignes qui sont les en-têtes de factures ou les lignes suivantes de produits
 		$fieldName = '_header_';
