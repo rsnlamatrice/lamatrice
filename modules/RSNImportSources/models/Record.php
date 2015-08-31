@@ -49,7 +49,7 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 			$user = Users_Record_Model::getCurrentUserModel();
 			$importController = new $importClass($request, $user);
 			if($importController)
-				$importController->set('recordModel', $this);
+				$importController->recordModel = $this;
 			return $importController;
 		}
 
