@@ -107,7 +107,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 */
 	function getDBRows() {
 		
-		if($this->getMaxQueryRows() > MAX_QUERY_ROWS){
+		/* if($this->getMaxQueryRows() > MAX_QUERY_ROWS){
 			$allRows = array();
 			for($i = 0; $i < $this->getMaxQueryRows();){
 				echo("\rgetDBRows $i");
@@ -123,7 +123,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			}
 			$rows = $allRows;
 		}
-		else 
+		else */
 			$rows = parent::getDBRows();
 		if(!$rows)
 			return $rows;
@@ -152,7 +152,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$line++;
 		}
 		//Supprime la dernière facture car potentiellement toutes les lignes ne sont pas fournies à cause du LIMIT
-		if(count($new_rows) == $this->getQueryMaxRows()){
+		if(count($new_rows) == $this->getMaxQueryRows()){
 			$new_rows = array_slice($new_rows, 0, $previous_row);
 		}
 		return $new_rows;
