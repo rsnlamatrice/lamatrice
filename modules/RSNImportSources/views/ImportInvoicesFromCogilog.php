@@ -413,38 +413,14 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 						
 						
 					//raise trigger instead of ->save() whose need invoice rows
-					
+					/* ED150831 Migration : is bulk mode
 					$log->debug("BEFORE " . basename(__FILE__) . " raise event handler(" . $record->getId() . ", " . $record->get('mode') . " )");
 					//raise event handler
 					$record->triggerEvent('vtiger.entity.aftersave');
 					$log->debug("AFTER " . basename(__FILE__) . " raise event handler");
+					*/
 					
-					////This field is not manage by save()
-					//$query = "UPDATE vtiger_invoice
-					//	JOIN vtiger_crmentity
-					//		ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
-					//	SET smownerid = ?
-					//	WHERE invoiceid = ?
-					//";// TODO: invoice_no = ?, total = ?
-					//$result = $db->pquery($query, array(ASSIGNEDTO_ALL, $invoiceId));
-					//
-					//if( ! $result)
-					//	$db->echoError();
-					//
-					//$entryId = $this->getEntryId("Invoice", $invoiceId);
-					//$sequence = 0;
-					//
-					//foreach ($invoiceData as $invoiceLine) {
-					//	$this->importInvoiceLine($record, $invoiceLine, ++$sequence);
-					//	$entityInfo = array(
-					//		'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
-					//		'id'		=> $entryId
-					//	);
-					//	
-					//	$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
-					//}
-					//
-					return $record;//tmp 
+					return $record; 
 				}
 			} else {
 				//TODO: manage error
