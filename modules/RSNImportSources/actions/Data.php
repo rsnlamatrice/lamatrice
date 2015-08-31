@@ -28,13 +28,22 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 
 	/**
 	 * Method called by the cron when there is scheduled import.
+	 *  It process to the import of all scheduled pre import.
+	 */
+	public static function runScheduledPreImport() {
+	//TODO email or log when schedule import is running and ended !!
+		global $current_user;
+		
+		$scheduledPreImports = self::getScheduledPreImport();
+	}
+	
+	/**
+	 * Method called by the cron when there is scheduled import.
 	 *  It process to the import of all scheduled import.
 	 */
 	public static function runScheduledImport() {
 	//TODO email or log when schedule import is running and ended !!
 		global $current_user;
-		
-		$scheduledPreImports = self::getScheduledPreImport();
 		
 		$scheduledImports = self::getScheduledImport();
 		$vtigerMailer = new Vtiger_Mailer();
@@ -159,7 +168,7 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 	 */
 	public static function getScheduledPreImport() {
 
-		$moduleModel = Vtiger_Module_Model::getInstance($this->module);
+		$moduleModel = Vtiger_Module_Model::getInstance('RSNImportSources');
 		$scheduledImports = $moduleModel->getPreImportRecords(true);
 		foreach($scheduledImports as $importId => $importInfo) {
 			var_dump($importInfo);

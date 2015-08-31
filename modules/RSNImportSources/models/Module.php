@@ -40,7 +40,7 @@ class RSNImportSources_Module_Model extends Vtiger_Module_Model {
 		$query = 'SELECT *
 			FROM vtiger_rsnimportsources
 			JOIN vtiger_crmentity
-				ON vtiger_rsnimportsources. = vtiger_crmentity.crmid
+				ON vtiger_rsnimportsources.rsnimportsourcesid = vtiger_crmentity.crmid
 			JOIN vtiger_rsnimportsourcescf
 				ON vtiger_rsnimportsources.rsnimportsourcesid = vtiger_rsnimportsourcescf.rsnimportsourcesid
 			WHERE vtiger_crmentity.deleted = 0
@@ -49,14 +49,14 @@ class RSNImportSources_Module_Model extends Vtiger_Module_Model {
 		if($whereItsTimeToAutoRun){
 			$query .= '
 				AND (autolasttime IS NULL
-					OR autolasttime < DATE_ADD(NOW, `autoperiod` MINUTE)
+					OR autolasttime < DATE_SUB(NOW(), INTERVAL `autoperiod` MINUTE)
 				)
 			';
 		}
 		$query .= '
 			ORDER BY autolasttime ASC
 			LIMIT ' . $limit;
-		$params = array($this->getName(), $limit);
+		$params = array($limit);
 		$result = $db->pquery($query, $params);
 		if(!$result){
 			var_dump($query, $params);
