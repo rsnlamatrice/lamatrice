@@ -373,10 +373,10 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 	function getContact($ref4d) {
 		$id = false;
 		if(is_array($ref4d)){
+			//$ref4d is $rsnprelvirementsData
 			if($ref4d[0]['_contactid'])
-				$id = $this->getContactIdFromRef4D($ref4d);
+				$id = $ref4d[0]['_contactid'];
 			else{
-				//$ref4d is $rsnprelvirementsData
 				$ref4d = $ref4d[0]['reffiche'];
 			}
 		}

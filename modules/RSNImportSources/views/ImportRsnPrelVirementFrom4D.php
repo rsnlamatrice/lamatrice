@@ -377,11 +377,17 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($ref4d) {
+		$id = false;
 		if(is_array($ref4d)){
 			//$ref4d is $rsnprelvirementsData
-			$ref4d = $ref4d[0]['reffiche'];
+			if($ref4d[0]['_contactid'])
+				$id = $ref4d[0]['_contactid'];
+			else{
+				$ref4d = $ref4d[0]['reffiche'];
+			}
 		}
-		$id = $this->getContactIdFromRef4D($ref4d);
+		if(!$id)
+			$id = $this->getContactIdFromRef4D($ref4d);
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
