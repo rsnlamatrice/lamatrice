@@ -96,7 +96,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				OR facture.annee > '.$anneeMax.')';
 		}
 		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
-                    LIMIT ' . MAX_QUERY_ROWS;
+                    LIMIT ' . $this->getMaxQueryRows();
 		//echo("<pre>$query</pre>");
 		return $query;
 	}

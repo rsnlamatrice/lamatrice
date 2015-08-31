@@ -37,6 +37,7 @@ $languageStrings = array(
 	'LBL_ADVANCED_FILE_CONFIGURATION' => 'Configuration avancée',
 	'LBL_FILE_TYPE'                => 'Type de fichier'             , 
 	'LBL_CHARACTER_ENCODING'       => 'Encodage des caractères'    , 
+	'LBL_MAX_QUERY_ROWS'                => 'Nbre maximum de lignes'                  , 
 	'LBL_DELIMITER'                => 'Délimiteur'                  , 
 	'LBL_HAS_HEADER'               => 'Contient une ligne d\'entêtes',
 	'LBL_IMPORT_NEEDED_FILE_DELIMITER' => 'délimité par des',
