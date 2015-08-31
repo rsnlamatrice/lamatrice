@@ -101,7 +101,11 @@ class Import_FileReader_Reader {
             $columnsListQuery .= $this->getDBColumnType($fieldObject, $fieldTypes);
 		}
 		$createTableQuery = 'CREATE TABLE '. $tableName . ' ('.$columnsListQuery.') ENGINE=MyISAM ';
-		$db->query($createTableQuery);
+		$result = $db->query($createTableQuery);
+		if(!$result){
+			$db->echoError($createTableQuery);
+			die();
+		}
 		return true;
 	}
 

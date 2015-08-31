@@ -88,7 +88,7 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 			'cacheradhesion' => '',// rsnwebhide .= 'Adhésion'
 			
 			/* post pré import */
-			'_contactid',
+			'_contactid' => '',
 		);
 	}
 	
