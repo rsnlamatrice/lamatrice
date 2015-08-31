@@ -96,7 +96,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				OR facture.annee > '.$anneeMax.')';
 		}
 		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
-                    LIMIT ' . $this->getMaxQueryRows();
+                    OFFSET ' . $this->getQueryLimitStart().'
+					LIMIT  ' . $this->getMaxQueryRows() ;
 		//echo("<pre>$query</pre>");
 		return $query;
 	}
@@ -105,10 +106,30 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * Method to get db data.
 	 */
 	function getDBRows() {
-		$rows = parent::getDBRows();
+		
+		/* if($this->getMaxQueryRows() > MAX_QUERY_ROWS){
+			$allRows = array();
+			for($i = 0; $i < $this->getMaxQueryRows();){
+				echo("\rgetDBRows $i");
+				$rows = parent::getDBRows();
+				if(!$rows)
+					break;
+				echo("\t+ " . count($rows));
+				
+				$this->setQueryLimitStart($this->getQueryLimitStart() + count($rows));
+				
+				$allRows = array_merge($allRows, $rows);
+				$i = count($allRows);
+			}
+			$rows = $allRows;
+		}
+		else */
+			$rows = parent::getDBRows();
 		if(!$rows)
 			return $rows;
 
+		echo("\rgetDBRows TOTAL ". count($rows));
+				
 		//Identifie les lignes qui sont les en-têtes de factures ou les lignes suivantes de produits
 		$fieldName = '_header_';
 		$this->columnName_indexes[$fieldName] = count($this->columnName_indexes);
@@ -131,7 +152,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$line++;
 		}
 		//Supprime la dernière facture car potentiellement toutes les lignes ne sont pas fournies à cause du LIMIT
-		if(count($new_rows) == MAX_QUERY_ROWS){
+		if(count($new_rows) == $this->getMaxQueryRows()){
 			$new_rows = array_slice($new_rows, 0, $previous_row);
 		}
 		return $new_rows;
