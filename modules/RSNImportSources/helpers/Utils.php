@@ -181,7 +181,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
         $moduleFields = $moduleModel->getFields();
         $columnsListQuery = 'id INT PRIMARY KEY AUTO_INCREMENT, status INT DEFAULT 0, recordid INT';
 		$fieldTypes = RSNImportSources_Utils_Helper::getModuleFieldDBColumnType($moduleModel);
-		foreach($fields as $fieldName) {
+		foreach($fields as $fieldIndex => $fieldName) {
             $fieldObject = $moduleFields[$fieldName];
             if (is_object($fieldObject)) {
             	$columnsListQuery .= RSNImportSources_Utils_Helper::getDBColumnType($fieldObject, $fieldTypes);
@@ -194,8 +194,11 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		$createTableQuery = 'CREATE TABLE '. $tableName . ' ('.$columnsListQuery.') ENGINE=MyISAM ';
 		$result = $db->query($createTableQuery);
-		if(!$result)
-			$db->echoError();
+		if(!$result){
+			$db->echoError($createTableQuery);
+			echo_callstack();
+			die('Impossible de creer la table temporaire');
+		}
 		return true;
 	}
 
