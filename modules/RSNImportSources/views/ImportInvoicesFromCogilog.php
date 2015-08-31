@@ -523,11 +523,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 		if(!$id)
 			$id = $this->getContactIdFromRef4D($ref4d);
-		if($id){
-			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
-		}
 
-		return null;
+		return $id;
 	}
 	
 	/**
