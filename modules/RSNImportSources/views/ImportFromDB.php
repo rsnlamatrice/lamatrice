@@ -4,8 +4,6 @@ define('MAX_QUERY_ROWS', 3000); //DEBUG
 
 class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile_View {
 
-	private var $maxQueryRows = MAX_QUERY_ROWS;
-		
 	/**
 	 * Method to show the configuration template of the import for the first step.
 	 *  It display the select db template.
