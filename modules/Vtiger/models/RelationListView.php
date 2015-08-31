@@ -415,6 +415,8 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		$result = $db->pquery($limitQuery, array());
 		//ED150704
 		if(!$result){
+			echo "<pre>".__FILE__." : $query</pre>";
+			echo_callstack();
 			echo "<code>Désolé, la formulation de la recherche provoque une erreur.</code>";
 			return array();
 		}
