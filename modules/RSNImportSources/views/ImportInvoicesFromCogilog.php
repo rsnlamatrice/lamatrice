@@ -97,7 +97,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
                     OFFSET ' . $this->getQueryLimitStart().'
-					LIMIT  ' . min(MAX_QUERY_ROWS, $this->getMaxQueryRows()) ;
+					LIMIT  ' . $this->getMaxQueryRows() ;
 		//echo("<pre>$query</pre>");
 		return $query;
 	}
