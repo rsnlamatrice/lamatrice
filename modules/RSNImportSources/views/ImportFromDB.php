@@ -188,6 +188,10 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 		$dbRows = $this->getDBRows();
 		if(!$dbRows)
 			return false;
+		
+		//Valeur mis à jour dans le champ lastimport de la table, pour affichage et historique immédiat
+		$this->request->set('import_file_name', $this->getDefaultDBServer().':'.$this->getDefaultDBName());
+		
 		$importDirectory = RSNImportSources_Utils_Helper::getImportDirectory();
 		$current_user = Users_Record_Model::getCurrentUserModel();
 		$temporaryFileName = RSNImportSources_Utils_Helper::getImportFilePath($current_user, $this->request->get("for_module"));

@@ -36,12 +36,12 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 	
 	/**
 	 * Method to get an instance of the import controller. It use the ImportSource parameter to retrive the name of the import class.
-	 * @param Vtiger_Request $request: the curent request.
+	 * Vtiger_Request $request est initialisé sur la base des données du champ autosourcedata
 	 * @return Import - An instance of the import controller, or null.
 	 */
 	function getImportController() {
-		$request = new Vtiger_Request();
-		$request->set('ImportSource', $this->get('class'));
+		
+		$request = $this->getRequest();
 		
 		$className = $request->get('ImportSource');
 		if ($className) {
@@ -54,5 +54,22 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 		}
 
 		return null;
+	}
+	
+	/* Retourne un object Vtiger_Request initialisé sur la base des données du champ autosourcedata */
+	function getRequest(){
+		//Conversion
+		$params = array();
+		$params_src = array();
+		preg_match_all('/(^|[\r\n])\s*(?<param>\w+)\s*=\s*(?<value>[^()\r\n]*)/', $this->get('autosourcedata'), $params_src);
+		//var_dump($params_src);
+		for($i = 0; $i < count($params_src); $i++)
+			if($params_src['param'][$i]
+			&& strpos($params_src['param'][$i][0], ';/') === false)
+				$params[$params_src['param'][$i]] = $params_src['value'][$i];
+				
+		if(!array_key_exists('ImportSource', $params))
+			$params['ImportSource'] = $this->get('class');
+		return new Vtiger_Request($params, $params, false);
 	}
 }
