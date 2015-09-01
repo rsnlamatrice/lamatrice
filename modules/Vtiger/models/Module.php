@@ -1447,7 +1447,9 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				//TODO BUG : UNION is broken
 				$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
 				if(count($newQuery) === 1){
-					var_dump($query);
+					var_dump($result, $query);
+					var_dump($recordId, $functionName, $relatedModule);
+					echo_callstack();
 					die("Error : FROM is missing in \r\t$query");
 				}
 				if(strpos($query, 'vtiger_crmentity') !== false){ //TODO ce qui n'est pas normal : on devrait toujours tester .deleted = 0
