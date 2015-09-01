@@ -130,8 +130,9 @@ class Documents_Record_Model extends Vtiger_Record_Model {
 		
 		$relatedModuleName = 'Campaigns';
 		$relationListView = Vtiger_RelationListView_Model::getInstance($this, $relatedModuleName, '');
+		/* no use
 		$relationListView->set('orderby', 'createdtime');
-		$relationListView->set('sortorder', 'desc');
+		$relationListView->set('sortorder', 'desc');*/
 		return $relationListView->getEntries($pagingModel);
 	}
 	
