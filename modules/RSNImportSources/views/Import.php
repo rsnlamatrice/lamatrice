@@ -431,6 +431,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 			
 			$importStatusCount = $importDataController->getImportStatusCount();
+			
 			$totalRecords = $importStatusCount['TOTAL'];
 
 			if($totalRecords > ($importStatusCount['IMPORTED'] + $importStatusCount['FAILED'])) {

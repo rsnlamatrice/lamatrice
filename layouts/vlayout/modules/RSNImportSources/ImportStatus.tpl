@@ -93,6 +93,14 @@ jQuery(document).ready(function() {
 								<td width="10%">:</td>
 								<td width="10%">{$IMPORT_RESULT.MERGED}</td>
 							</tr>
+							<tr>
+								<td>{'LBL_TOTAL_RECORDS_FAILED'|@vtranslate:$MODULE}</td>
+								<td width="10%">:</td>
+								<td width="10%">{if $IMPORT_RESULT.FAILED}<span style="color: red;">{$IMPORT_RESULT.FAILED}</span>{else}0{/if} / {$IMPORT_RESULT.TOTAL}
+								{if $IMPORT_RESULT['FAILED'] neq '0'}
+									&nbsp;&nbsp;<a class="cursorPointer" onclick="return window.open('index.php?module={$MODULE}&view=List&mode=getImportDetails&type=failed&start=1&foruser={$OWNER_ID}&for_module={$FOR_MODULE}','failed','width=700,height=650,resizable=no,scrollbars=yes,top=150,left=200');">{'LBL_DETAILS'|@vtranslate:$MODULE}</a><!-- TMP Link -->
+								{/if}
+							</tr>
 							{/if}
 						</table>
 					</td>
