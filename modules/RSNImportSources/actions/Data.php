@@ -37,7 +37,13 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 		$importControllers = self::getScheduledPreImport();
 		
 		foreach ($importControllers as $importId => $importDataController) {
-			//var_dump($importDataController);
+			
+			$importDataController->preImportData();
+			
+			$importDataController->recordModel->set('mode', 'edit');
+			$importDataController->recordModel->set('autolasttime', date('Y-m-d H:i:s'));
+			$importDataController->recordModel->set('autolastresult', 'Ok');
+			$importDataController->recordModel->save();
 		}
 	}
 	
@@ -175,10 +181,10 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 		$moduleModel = Vtiger_Module_Model::getInstance('RSNImportSources');
 		$recordModels = $moduleModel->getPreImportRecords(true);
 		$importControllers = array();
-		foreach($recordModels as $importId => $importInfo) {
-			$importController[$importId] = $importInfo->getImportController();
+		foreach($recordModels as $crmId => $recordModel) {
+			$importControllers[$crmId] = $recordModel->getImportController();
 		}
-		return $importController;
+		return $importControllers;
 	}
 
 	/**
