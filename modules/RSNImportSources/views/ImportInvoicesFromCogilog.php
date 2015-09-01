@@ -355,7 +355,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
 					if($coupon){
 						$record->set('notesid', $coupon->getId());
-						$campagne = self::getCampagne($invoiceData[0], $coupon);
+						$campagne = $this->getCampaign($invoiceData[0], $coupon);
 						if($campagne)
 							$record->set('campaign_no', $campagne->getId());
 						
@@ -705,7 +705,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	
 	/* campagne d'après code affaire / Coupon
 	 */
-	private static function getCampagne($srcRow, $coupon){
+	private function getCampaign($srcRow, $coupon){
 		
 		$campaign = $this->checkPreImportInCache("Campagne", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 		if($campaign)
