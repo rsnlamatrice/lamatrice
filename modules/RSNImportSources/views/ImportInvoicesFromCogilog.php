@@ -656,6 +656,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	/* coupon d'après code affaire d'un document de type Coupon
 	 */
 	private function getCoupon($codeAffaire){
+		if(!$codeAffaire)
+			return false;
 		$couponId = $this->checkPreImportInCache("Coupon", 'codeAffaire', $codeAffaire);
 		if($couponId === 'false')
 			return false;
@@ -677,6 +679,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
 		if(!$result)
 			$db->echoError();
+		var_dump($query, array($codeAffaire, COUPON_FOLDERID));
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
 			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
