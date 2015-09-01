@@ -100,7 +100,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$srcFiles = explode(';', $request->get('import_file_localpath'));
 			for($nFile = 0; $nFile < count($srcFiles); $nFile++){
 				$srcFile = trim($srcFiles[$nFile]);
-				if(!file_exists($srcFile)) {
+				if($srcFile && !file_exists($srcFile)) {
 					$request->set('error_message', vtranslate('LBL_FILE_UPLOAD_FAILED', 'Import'));
 					return false;
 				}

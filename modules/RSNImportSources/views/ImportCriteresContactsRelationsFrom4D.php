@@ -156,7 +156,6 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		
 		$critere4dId = $critere4dsData[0]['_critere4did'];
 		$contactId = $critere4dsData[0]['_contactid'];
-		$dateApplication = $critere4dsData[0]['dateapplication'];
 		
 		//Le post-préImport fait déjà le ménage */
 		/*//test sur nom == $sourceId
@@ -198,6 +197,9 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			return false;
 		}
 		else {
+			$dateApplication = $critere4dsData[0]['dateapplication'];
+			if(!$dateApplication)
+				$dateApplication = '2000-01-01';
 			
 			if($critere4dsData[0]['datecomplementaire'])
 				$relData = $critere4dsData[0]['datecomplementaire'];
