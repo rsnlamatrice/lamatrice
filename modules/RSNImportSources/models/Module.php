@@ -37,10 +37,13 @@ class RSNImportSources_Module_Model extends Vtiger_Module_Model {
 	public function getPreImportRecords($whereItsTimeToAutoRun = false, $limit=999) {
 		$db = PearDatabase::getInstance();
 
-		$query = 'SELECT vtiger_crmentity.*, 
-				vtiger_rsnimportsources.`rsnimportsourcesid`, vtiger_rsnimportsources.`disabled`, vtiger_rsnimportsources.`class`, vtiger_rsnimportsources.`sortorderid`
-				, vtiger_rsnimportsources.`modules` AS `rsnimportsourcesmodules`, vtiger_rsnimportsources.`title`
-				, vtiger_rsnimportsources.`lastimport`, vtiger_rsnimportsources.`autoenabled`, vtiger_rsnimportsources.`autoperiod`, vtiger_rsnimportsources.`autosourcedata`, vtiger_rsnimportsources.`autolasttime`, vtiger_rsnimportsources.`autolastresult`
+		$query = 'SELECT vtiger_crmentity.*
+				, vtiger_rsnimportsources.`modules` AS `rsnimportsourcesmodules` '/*nécessité de mettre les fieldName à la place des columnName*/.'
+				, vtiger_rsnimportsources.*
+				, vtiger_rsnimportsourcescf.*
+				/*, vtiger_rsnimportsources.`rsnimportsourcesid`, vtiger_rsnimportsources.`disabled`, vtiger_rsnimportsources.`class`, vtiger_rsnimportsources.`sortorderid`
+				, vtiger_rsnimportsources.`title`
+				, vtiger_rsnimportsources.`lastimport`, vtiger_rsnimportsources.`autoenabled`, vtiger_rsnimportsources.`autoperiod`, vtiger_rsnimportsources.`autosourcedata`, vtiger_rsnimportsources.`autolasttime`, vtiger_rsnimportsources.`autolastresult`*/
 			FROM vtiger_rsnimportsources
 			JOIN vtiger_crmentity
 				ON vtiger_rsnimportsources.rsnimportsourcesid = vtiger_crmentity.crmid
