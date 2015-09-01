@@ -11,8 +11,14 @@
 /**
  * Start the cron services configured.
  */
+
+/* ED150901
+Cette ligne permet de charger la function GetRelatedList du Webservices à la place de celui par défaut qui ne permet pas de faire des get_related_list */
+require_once("include/Webservices/Relation.php");
+
 include_once 'vtlib/Vtiger/Cron.php';
 require_once 'config.inc.php';
+
 require_once('modules/Emails/mail.php');
 
 if (file_exists('config_override.php')) {
