@@ -1443,6 +1443,16 @@ function getInventoryFieldsForExport($tableName) {
 	$sql .= $tableName.'.taxtype AS "Tax Type", '.$tableName.'.discount_amount AS "Discount Amount", ';
 	$sql .= $tableName.'.discount_percent AS "Discount Percent", '.$tableName.'.s_h_amount AS "S&H Amount", ';
 	$sql .= 'vtiger_currency_info.currency_name as "Currency" ';
+	
+	//ED150901
+	/* c'est pas ici que ça se passe
+	$sql .= ', vtiger_inventoryproductrel.lineitem_id as "N° de ligne"';
+	$sql .= ', IFNULL(vtiger_products.productcode, vtiger_service.productcode) as "Product code" ';
+	$sql .= ', IFNULL(vtiger_products.productcategory, vtiger_service.servicecategory) as "Product category" ';
+	$sql .= ', IFNULL(vtiger_products.rsnsectionanal, vtiger_service.rsnsectionanal) as "Section analytique" ';
+	$sql .= ', vtiger_inventoryproductrel.quantity';
+	$sql .= ', vtiger_inventoryproductrel.listprice';
+	*/
 
 	return $sql;
 }
