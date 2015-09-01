@@ -208,11 +208,12 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 				$relData .= $critere4dsData[0]['champcomplementaire'];
 			}
 			
-			$params = array($critere4dId, $contactId, $dateApplication, $relData);
 			$db = PearDatabase::getInstance();
 			$query = "INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication, data)
 					VALUES(?, ?, ?, ?)
+					ON DUPLICATE UPDATE data = ?
 			";
+			$params = array($critere4dId, $contactId, $dateApplication, $relData, $relData);
 			$result = $db->pquery($query, $params);
 			
 			if(!$result){
