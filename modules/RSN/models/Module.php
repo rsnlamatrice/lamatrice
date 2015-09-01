@@ -195,10 +195,10 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 				'label' => 'Importation Cogilog',
 				
 				'children' => array(
-					array(
+					/*array(
 						'sub' => 'ImportCogilog/Factures',
 						'label' => 'Factures'
-					),
+					),*/
 					array(
 						'sub' => 'ImportCogilog/Affaires',
 						'label' => 'Affaires vers coupons'
@@ -215,13 +215,13 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 						'sub' => 'ImportCogilog/Clients',
 						'label' => 'Clients',
 					),
-					array(
+					/*array(
 						'sub' => 'DataRowsTable',
 						'label' => 'Une table',
 						'params' => array(
 							'tablename' => 'gclien00002',
 						)
-					),
+					),*/
 				)
 			)
 		;

@@ -110,6 +110,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			
 			for($nFile = 0; $nFile < count($srcFiles); $nFile++){
 				$srcFile = trim($srcFiles[$nFile]);
+				if(!$srcFile)
+					continue;
 				if($nFile > 0)
 					$temporaryFileName = self::getImportFilePath($current_user, $request->get("for_module"), $nFile);
 				copy($srcFile, $temporaryFileName);

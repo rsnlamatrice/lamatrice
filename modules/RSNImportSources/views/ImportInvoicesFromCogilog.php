@@ -11,7 +11,17 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * @return string - The label.
 	 */
 	public function getSource() {
-		return 'LBL_COGILOG';
+		return 'LBL_COGILOG_INVOICES';
+	}
+
+
+	/**
+	 * Method to default max query rows for this import.
+	 *  This method should be overload in the child class.
+	 * @return string - the default db port.
+	 */
+	public function getDefaultMaxQueryRows() {
+		return 30000;
 	}
 
 	/**
@@ -183,6 +193,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'city',
 			'country',
 			'subject',
+			'affaire_code',
 			'invoicedate',
 			//lines
 			'productcode',
@@ -192,6 +203,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'quantity',
 			'prix_unit_ht',
 			'taxrate',
+			
 			
 			/* post pré-import */
 			'_contactid',
@@ -334,19 +346,20 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('invoicestatus', 'Approuvée');//TODO
+					$record->set('invoicestatus', 'Paid');//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
 		                    
 				    
-					$coupon = $this->getCoupon($invoiceData[0]);
-					if($coupon != null)
+					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
+					if($coupon){
 						$record->set('notesid', $coupon->getId());
-					/*$campagne = self::findCampagne($srcRow, $coupon);
-					if($campagne)
-						$record->set('campaign_no', $campagne->getId());*/
-					
+						$campagne = self::getCampagne($invoiceData[0], $coupon);
+						if($campagne)
+							$record->set('campaign_no', $campagne->getId());
+						
+					}
 					//$db->setDebug(true);
 					$record->saveInBulkMode();
 					$invoiceId = $record->getId();
@@ -652,36 +665,83 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		return false;
 	}
 
-	/**
-	 * Method that return the coupon for prestashop source.
-	 *  It cache the value in the $this->coupon attribute.
-	 * @return the coupon.
+	
+	/* coupon d'après code affaire d'un document de type Coupon
 	 */
-	private function getCoupon(){
-		if ($this->coupon == null) {
-			$codeAffaire='BOUTIQUE';
+	private function getCoupon($codeAffaire){
+		if(!$codeAffaire)
+			return false;
+		$couponId = $this->checkPreImportInCache("Coupon", 'codeAffaire', $codeAffaire);
+		if($couponId === 'false')
+			return false;
+		if(is_numeric($couponId))
+			return Vtiger_Record_Model::getInstanceById($couponId, 'Documents');;
+		
+		$query = "SELECT vtiger_crmentity.crmid
+			FROM vtiger_notes
+			JOIN vtiger_notescf
+				ON vtiger_notescf.notesid = vtiger_notes.notesid
+			JOIN vtiger_crmentity
+				ON vtiger_notes.notesid = vtiger_crmentity.crmid
+			WHERE codeaffaire = ?
+			AND folderid  =?
+			AND vtiger_crmentity.deleted = 0
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
+		if(!$result)
+			$db->echoError();
+		if($db->num_rows($result)){
+			$row = $db->fetch_row($result, 0);
+			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
+		}
+		else
+			$coupon = false;
+		$this->setPreImportInCache($coupon ? $coupon->getId() : 'false', "Coupon", 'codeAffaire', $codeAffaire);
+		return $coupon;
+	}
+	
+	
+	/* campagne d'après code affaire / Coupon
+	 */
+	private static function getCampagne($srcRow, $coupon){
+		
+		$campaign = $this->checkPreImportInCache("Campagne", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
+		if($campaign)
+			return $campaign === 'false' ? null : $campaign;
+		
+		if(!is_object($coupon)){
+			
+			$codeAffaire=$srcRow['affaire_code'];
 			$query = "SELECT vtiger_crmentity.crmid
-				FROM vtiger_notes
-				JOIN vtiger_notescf
-                    ON vtiger_notescf.notesid = vtiger_notes.notesid
-                JOIN vtiger_crmentity
-                    ON vtiger_notes.notesid = vtiger_crmentity.crmid
+				FROM vtiger_campaignscf
+				JOIN vtiger_crmentity
+				    ON vtiger_campaignscf.campaignid = vtiger_crmentity.crmid
 				WHERE codeaffaire = ?
-				AND folderid = ?
 				AND vtiger_crmentity.deleted = 0
 				LIMIT 1
 			";
 			$db = PearDatabase::getInstance();
-			$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
+			$result = $db->pquery($query, array($codeAffaire));
 			if(!$result)
 				$db->echoError();
 			if($db->num_rows($result)){
 				$row = $db->fetch_row($result, 0);
-				$this->coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
+				$campaign = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Campaigns');
+				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', '' , 'codeAffaire', $srcRow['affaire_code']);
+				return $campaign;
 			}
+			return;
 		}
-
-		return $this->coupon;
+		$campaigns = $coupon->getRelatedCampaigns();
+		if(count($campaigns) == 1)
+			foreach($campaigns as $campaign){		
+				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
+				return $campaign;
+			}
+		
+		$this->setPreImportInCache('false', "Campagne", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 	}
         
 	/**
@@ -853,6 +913,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'country' 	=> $invoiceInformations[$this->columnName_indexes['pays']],
 			'subject'		=> $invoiceInformations[$this->columnName_indexes['nomclient']].' / '. $invoiceInformations[$this->columnName_indexes['datepiece']],
 			'invoicedate'		=> $date,
+			'affaire_code' 	=> $invoiceInformations[$this->columnName_indexes['affaire_code']],
+			
 		);
 		$codeClient = preg_replace('/^0+/', '', $invoiceHeader['reffiche']);
 		$regexp = '/^0*'.$codeClient.'\s(.+)\/(\w+-)?\d+\*.*$/';

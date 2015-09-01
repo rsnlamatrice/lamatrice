@@ -431,6 +431,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 			
 			$importStatusCount = $importDataController->getImportStatusCount();
+			
 			$totalRecords = $importStatusCount['TOTAL'];
 
 			if($totalRecords > ($importStatusCount['IMPORTED'] + $importStatusCount['FAILED'])) {
@@ -754,7 +755,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		if(count($this->preImportChecker_cache) > IMPORTCHECKER_CACHE_MAX)
 			array_splice($this->preImportChecker_cache, 0, IMPORTCHECKER_CACHE_MAX / 2);
 		$this->preImportChecker_cache[$cacheKey] = $value;
-		return false;		
+		return true;
 	}
 
 	
