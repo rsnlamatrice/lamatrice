@@ -353,12 +353,13 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		                    
 				    
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
-					if($coupon)
+					if($coupon){
 						$record->set('notesid', $coupon->getId());
-					/*$campagne = self::findCampagne($srcRow, $coupon);
-					if($campagne)
-						$record->set('campaign_no', $campagne->getId());*/
-					
+						$campagne = self::getCampagne($invoiceData[0], $coupon);
+						if($campagne)
+							$record->set('campaign_no', $campagne->getId());
+						
+					}
 					//$db->setDebug(true);
 					$record->saveInBulkMode();
 					$invoiceId = $record->getId();
@@ -699,6 +700,48 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$coupon = false;
 		$this->setPreImportInCache($coupon ? $coupon->getId() : 'false', "Coupon", 'codeAffaire', $codeAffaire);
 		return $coupon;
+	}
+	
+	
+	/* campagne d'après code affaire / Coupon
+	 */
+	private static function getCampagne($srcRow, $coupon){
+		
+		$campaign = $this->checkPreImportInCache("Campagne", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
+		if($campaign)
+			return $campaign === 'false' ? null : $campaign;
+		
+		if(!is_object($coupon)){
+			
+			$codeAffaire=$srcRow['affaire_code'];
+			$query = "SELECT vtiger_crmentity.crmid
+				FROM vtiger_campaignscf
+				JOIN vtiger_crmentity
+				    ON vtiger_campaignscf.campaignid = vtiger_crmentity.crmid
+				WHERE codeaffaire = ?
+				AND vtiger_crmentity.deleted = 0
+				LIMIT 1
+			";
+			$db = PearDatabase::getInstance();
+			$result = $db->pquery($query, array($codeAffaire));
+			if(!$result)
+				$db->echoError();
+			if($db->num_rows($result)){
+				$row = $db->fetch_row($result, 0);
+				$campaign = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Campaigns');
+				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', '' , 'codeAffaire', $srcRow['affaire_code']);
+				return $campaign;
+			}
+			return;
+		}
+		$campaigns = $coupon->getRelatedCampaigns();
+		if(count($campaigns) == 1)
+			foreach($campaigns as $campaign){		
+				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
+				return $campaign;
+			}
+		
+		$this->setPreImportInCache('false', "Campagne", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 	}
         
 	/**
