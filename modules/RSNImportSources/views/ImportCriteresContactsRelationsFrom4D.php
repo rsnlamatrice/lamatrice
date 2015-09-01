@@ -307,12 +307,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			'_contactid',
 			/*$changeStatus*/ false
 		);
-	
-		RSNImportSources_Utils_Helper::skipPreImportDataForExistingContactsByRef4D(
-			$this->user,
-			'Critere4D',
-			'_contactid'
-		);
+		
 		// Pré-identifie les criteres
 		
 		self::setPreImportDataCritere4DIdByNom(
@@ -323,10 +318,9 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			/*$changeStatus*/ false
 		);
 	
-		self::skipPreImportDataForExistingCritere4DByNom(
+		self::failPreImportDataForNonExistingCritere4DOrContact(
 			$this->user,
 			'Critere4D',
-			'_critere4did'
 		);
 		
 		
@@ -371,30 +365,20 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	}
 
 	/**
-	 * Méthode qui court-circuite tous les contacts qui existent déjà d'après leur Ref4D
+	 * Méthode qui court-circuite tous enregistrements pour lesquels on ne connait pas le critère ou le contact
 	 */
-	public static function skipPreImportDataForExistingCritere4DByNom($user, $moduleName, $nomFieldName, $updateCritere4DIdField = false) {
+	public static function failPreImportDataForNonExistingCritere4DOrContact($user, $moduleName) {
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
 		
-		// Pré-identifie les contacts
-		
-		/* Affecte la réf du contact d'après la ref 4D */
+		/* Met en échec les enregistrements pour lesquels on ne connait pas le critère ou le contact */
 		$query = "UPDATE $tableName
-			JOIN vtiger_critere4d
-				ON vtiger_critere4d.nom = `$tableName`.`$nomFieldName`
-			JOIN vtiger_crmentity
-				ON vtiger_critere4d.critere4did = vtiger_crmentity.crmid
 		";
 		$query .= " SET ";
-		if($updateCritere4DIdField){
-			$query .= "`$tableName`.`$updateCritere4DIdField` = vtiger_crmentity.crmid, ";
-		}
-		$query .= "`$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED;
+		$query .= "`$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED;
 		$query .= "
-			WHERE vtiger_crmentity.deleted = 0
-			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
-			AND `$tableName`._contactid IS NOT NULL
+			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND (`$tableName`._contactid IS NULL OR `$tableName`._critere4did IS NULL)
 		";
 		$result = $db->query($query);
 		if(!$result)
