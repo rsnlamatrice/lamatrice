@@ -419,7 +419,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			/*echo "<pre>".__FILE__."
 				crmid = ".$this->getParentRecordModel()->getId()."
 				SQL = $limitQuery</pre>";*/
-			db->echoError($limitQuery);
+			$db->echoError($limitQuery);
 			echo_callstack();
 			return array();
 		}
