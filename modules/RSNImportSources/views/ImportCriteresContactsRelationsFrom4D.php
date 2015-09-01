@@ -405,8 +405,10 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	 * @return string - formated date.
 	 */
 	function getMySQLDate($string) {
-		if(!$string || $string === '00/00/00')
+		if(!$string)
 			return null;
+		if($string === '00/00/00')
+			return '2000-01-01';
 		$dateArray = preg_split('/[-\/]/', $string);
 		return '20'.$dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
 	}
