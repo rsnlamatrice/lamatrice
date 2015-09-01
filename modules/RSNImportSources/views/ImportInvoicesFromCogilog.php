@@ -745,7 +745,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
 				return $campaign;
 			}
-		var_dump('setPreImportInCache', 'false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
+		var_dump('setPreImportInCache', 'false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']
+				 , count($campaigns));
 		$this->setPreImportInCache('false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 	}
         
