@@ -320,7 +320,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	
 		self::failPreImportDataForNonExistingCritere4DOrContact(
 			$this->user,
-			'Critere4D',
+			'Critere4D'
 		);
 		
 		
