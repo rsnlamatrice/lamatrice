@@ -8,9 +8,9 @@ manage cancel button using importclassname
 
 {literal}
 <script type="text/javascript">
-/* rafraichissement périodique
+/* rafraichissement pÃ©riodique
  * cf ImportSchedule.tpl
- * TODO : lorsque l'import est fini, il faudrait afficher les résultats. En l'état, on obtient la création d'un nouvel import.
+ * TODO : lorsque l'import est fini, il faudrait afficher les rÃ©sultats. En l'Ã©tat, on obtient la crÃ©ation d'un nouvel import.
  */
 jQuery(document).ready(function() {
 	setTimeout(function() {
