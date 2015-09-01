@@ -38,6 +38,8 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 		
 		foreach ($importControllers as $importId => $importDataController) {
 			
+			//TODO ? Tester si des données existent déjà en pré-import
+			
 			$importDataController->preImportData();
 			
 			$importDataController->recordModel->set('mode', 'edit');
