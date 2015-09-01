@@ -183,6 +183,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'city',
 			'country',
 			'subject',
+			'affaire_code',
 			'invoicedate',
 			//lines
 			'productcode',
@@ -192,6 +193,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'quantity',
 			'prix_unit_ht',
 			'taxrate',
+			
 			
 			/* post pré-import */
 			'_contactid',
@@ -684,6 +686,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$row = $db->fetch_row($result, 0);
 			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
 		}
+		else
+			$coupon = false;
 		$this->setPreImportInCache($coupon ? $coupon->getId() : 'false', "Coupon", 'codeAffaire', $codeAffaire);
 		return $coupon;
 	}
@@ -857,6 +861,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'country' 	=> $invoiceInformations[$this->columnName_indexes['pays']],
 			'subject'		=> $invoiceInformations[$this->columnName_indexes['nomclient']].' / '. $invoiceInformations[$this->columnName_indexes['datepiece']],
 			'invoicedate'		=> $date,
+			'affaire_code' 	=> $invoiceInformations[$this->columnName_indexes['affaire_code']],
+			
 		);
 		$codeClient = preg_replace('/^0+/', '', $invoiceHeader['reffiche']);
 		$regexp = '/^0*'.$codeClient.'\s(.+)\/(\w+-)?\d+\*.*$/';
