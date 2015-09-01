@@ -1,0 +1,44 @@
+
+
+- Générer les fichiers 4D
+
+- Purger la Matrice
+	- TODO Finir le module. A vérifier si toutes les tables sont bien vides.
+	
+- Importer les données
+	- Fichiers Adresse[-*].csv
+	- TODO AdressesSupprimées
+	- TODO Historique des adresses
+	- Fichier Groupe.csv
+	- Fichiers Emails[-*].csv
+	- TODO Emails_liste 4D
+	- Fichier LienRef4DdonateursWeb.csv ( Liens des Donateurs Web )
+	- Fichier InscriptionDonateurWeb.csv
+	- TODO LienRef4DCommandeBoutique 4D
+	- TODO Banques 4D
+	- TODO Agences bancaires 4D
+	- TODO ConventionNef 4D
+	- TODO Histo_DonNef 4D
+	- TODO Dons_Adr 4D
+	- TODO Prélèvements_HistoRejets 4D
+	- TODO LiensAdresses
+	- Fichier Prélèvements.csv
+	- Fichiers Prélèvements_HistoDétail[-*].csv ( Ordres de virement )
+	- Fichier Critères.csv ( Critères de contacts )
+	- TODO Fichiers Critères_Adr[-*].csv ( Relation entre Critères et contacts )
+	- TODO Cogilog Produits
+	- Cogilog Factures
+		- TODO Affectation de la campagne
+		- TODO Purge les factures ne comportant qu'un service PMOB
+	- TODO LigneFactureCogilog 4D
+	- TODO Cogilog Fournisseurs
+	- TODO Cogilog Documents Fournisseurs
+	- TODO Cogilog Dépôts-Vente (Commandes Client)
+	- TODO Courriers 4D
+	- TODO Reçus 4D
+	- TODO Députés 4D
+	- TODO Historique 4D
+	- TODO ModèlesCourrier 4D
+
+
+- Supprimer le champ contactdetails.ref4d et les triggers liés
