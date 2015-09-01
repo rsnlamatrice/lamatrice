@@ -707,13 +707,18 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 */
 	private function getCampaign($srcRow, $coupon){
 		
-		$campaign = $this->checkPreImportInCache("Campagne", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
+		$campaign = $this->checkPreImportInCache("Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 		if($campaign)
 			return $campaign === 'false' ? null : $campaign;
 		
 		if(!is_object($coupon)){
 			
 			$codeAffaire=$srcRow['affaire_code'];
+			if(!$codeAffaire){
+				$this->setPreImportInCache('false', "Campaigns", 'Coupon', '' , 'codeAffaire', '');
+				return false;
+			}
+			
 			$query = "SELECT vtiger_crmentity.crmid
 				FROM vtiger_campaignscf
 				JOIN vtiger_crmentity
@@ -729,7 +734,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			if($db->num_rows($result)){
 				$row = $db->fetch_row($result, 0);
 				$campaign = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Campaigns');
-				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', '' , 'codeAffaire', $srcRow['affaire_code']);
+				$this->setPreImportInCache($campaign, "Campaigns", 'Coupon', '' , 'codeAffaire', $srcRow['affaire_code']);
 				return $campaign;
 			}
 			return;
@@ -740,8 +745,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
 				return $campaign;
 			}
-		
-		$this->setPreImportInCache('false', "Campagne", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
+		var_dump('setPreImportInCache', 'false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
+		$this->setPreImportInCache('false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 	}
         
 	/**
