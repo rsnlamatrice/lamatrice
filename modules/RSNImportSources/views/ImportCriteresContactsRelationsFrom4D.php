@@ -185,13 +185,14 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		}
 		*/
 		
-		if(!$contactId || !$critere4Id){
-			foreach ($rsnprelvirementsData as $rsnprelvirementsLine) {//TODO: remove duplicated code
+		if(!$contactId || !$critere4dId){
+			//var_dump("One is null", $contactId, $critere4dId, $critere4dsData);
+			foreach ($critere4dsData as $critere4dsLine) {
 				$entityInfo = array(
 					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
 				);
 				
-				$importDataController->updateImportStatus($rsnprelvirementsLine[id], $entityInfo);
+				$importDataController->updateImportStatus($critere4dsLine[id], $entityInfo);
 			}
 
 			return false;
@@ -378,7 +379,8 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		$query .= "`$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED;
 		$query .= "
 			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
-			AND (`$tableName`._contactid IS NULL OR `$tableName`._critere4did IS NULL)
+			AND (`$tableName`._contactid IS NULL OR `$tableName`._contactid = ''
+				OR `$tableName`._critere4did IS NULL OR `$tableName`._critere4did = '' )
 		";
 		$result = $db->query($query);
 		if(!$result)
