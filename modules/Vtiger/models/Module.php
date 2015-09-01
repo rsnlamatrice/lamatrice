@@ -1448,7 +1448,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
 				if(count($newQuery) === 1){
 					var_dump($result, $query);
-					var_dump($recordId, $functionName, $relatedModule);
+					var_dump($recordId, $functionName, $relatedModuleName);
 					echo_callstack();
 					die("Error : FROM is missing in \r\t$query");
 				}
