@@ -39,9 +39,10 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		/* factures déjà importés */
 		$query = "SELECT MAX(CAST(SUBSTR(invoice_no,4) AS UNSIGNED)) AS codefacture_max
 			FROM vtiger_invoice
-                        JOIN vtiger_crmentity
-                            ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
-			WHERE invoice_no LIKE 'COG%'
+			JOIN vtiger_crmentity
+				ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND invoice_no LIKE 'COG%'
 			AND vtiger_crmentity.deleted = 0
 		";
 		$db = PearDatabase::getInstance();
