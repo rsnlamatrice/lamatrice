@@ -183,8 +183,20 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 				$importDataController->updateImportStatus($critere4dsLine[id], $entityInfo);
 			}
 		}
-		else {*/
-		if(true){
+		*/
+		
+		if(!$contactId || !$critere4Id){
+			foreach ($rsnprelvirementsData as $rsnprelvirementsLine) {//TODO: remove duplicated code
+				$entityInfo = array(
+					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+				);
+				
+				$importDataController->updateImportStatus($rsnprelvirementsLine[id], $entityInfo);
+			}
+
+			return false;
+		}
+		else {
 			
 			if($critere4dsData[0]['datecomplementaire'])
 				$relData = $critere4dsData[0]['datecomplementaire'];
@@ -349,6 +361,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		$query .= "
 			WHERE vtiger_crmentity.deleted = 0
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND `$tableName`._contactid IS NOT NULL
 		";
 		$result = $db->query($query);
 		if(!$result)
@@ -381,6 +394,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		$query .= "
 			WHERE vtiger_crmentity.deleted = 0
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND `$tableName`._contactid IS NOT NULL
 		";
 		$result = $db->query($query);
 		if(!$result)
