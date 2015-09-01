@@ -211,7 +211,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			$db = PearDatabase::getInstance();
 			$query = "INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication, data)
 					VALUES(?, ?, ?, ?)
-					ON DUPLICATE UPDATE data = ?
+					ON DUPLICATE KEY UPDATE data = ?
 			";
 			$params = array($critere4dId, $contactId, $dateApplication, $relData, $relData);
 			$result = $db->pquery($query, $params);
