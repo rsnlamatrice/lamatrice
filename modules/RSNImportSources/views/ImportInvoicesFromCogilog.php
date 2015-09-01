@@ -340,7 +340,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					$record->set('hdnTaxType', 'individual');
 		                    
 				    
-					$coupon = $this->getCoupon($invoiceData[0]);
+					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
 					if($coupon != null)
 						$record->set('notesid', $coupon->getId());
 					/*$campagne = self::findCampagne($srcRow, $coupon);
@@ -652,36 +652,35 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		return false;
 	}
 
-	/**
-	 * Method that return the coupon for prestashop source.
-	 *  It cache the value in the $this->coupon attribute.
-	 * @return the coupon.
+	
+	/* coupon d'après code affaire d'un document de type Coupon
 	 */
-	private function getCoupon(){
-		if ($this->coupon == null) {
-			$codeAffaire='BOUTIQUE';
-			$query = "SELECT vtiger_crmentity.crmid
-				FROM vtiger_notes
-				JOIN vtiger_notescf
-                    ON vtiger_notescf.notesid = vtiger_notes.notesid
-                JOIN vtiger_crmentity
-                    ON vtiger_notes.notesid = vtiger_crmentity.crmid
-				WHERE codeaffaire = ?
-				AND folderid = ?
-				AND vtiger_crmentity.deleted = 0
-				LIMIT 1
-			";
-			$db = PearDatabase::getInstance();
-			$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
-			if(!$result)
-				$db->echoError();
-			if($db->num_rows($result)){
-				$row = $db->fetch_row($result, 0);
-				$this->coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
-			}
+	private function getCoupon($codeAffaire){
+		$coupon = $this->checkPreImportInCache("Coupon", 'codeAffaire', $codeAffaire);
+		if($coupon)
+			return $coupon;
+		
+		$query = "SELECT vtiger_crmentity.crmid
+			FROM vtiger_notes
+			JOIN vtiger_notescf
+				ON vtiger_notescf.notesid = vtiger_notes.notesid
+			JOIN vtiger_crmentity
+				ON vtiger_notes.notesid = vtiger_crmentity.crmid
+			WHERE codeaffaire = ?
+			AND folderid  =?
+			AND vtiger_crmentity.deleted = 0
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
+		if(!$result)
+			$db->echoError();
+		if($db->num_rows($result)){
+			$row = $db->fetch_row($result, 0);
+			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
 		}
-
-		return $this->coupon;
+		$this->setPreImportInCache($coupon, "Coupon", 'codeAffaire', $codeAffaire);
+		return $coupon;
 	}
         
 	/**

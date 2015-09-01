@@ -3,6 +3,8 @@
  * Les factures imporées depuis Cogilog ont un code de facture (invoice_no) commençant par COG et suivi du n° de facture Cogilog
  *
  *
+ *	ABANDONNE AU PROFIT DU RSNImportSources
+ *
  */
 
 define('ASSIGNEDTO_ALL', '7');

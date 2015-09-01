@@ -25,8 +25,9 @@
 	- Fichier Prélèvements.csv
 	- Fichiers Prélèvements_HistoDétail[-*].csv ( Ordres de virement )
 	- Fichier Critères.csv ( Critères de contacts )
-	- TODO Fichiers Critères_Adr[-*].csv ( Relation entre Critères et contacts )
-	- TODO Cogilog Produits
+	- Fichiers Critères_Adr[-*].csv ( Relation entre Critères et contacts )
+	- Cogilog Produits (depuis module La Matrice)
+	- TODO Faut il faire Cogilog Clients (depuis module La Matrice) ? et est ce que c'est déboggué ?
 	- Cogilog Factures
 		- TODO Affectation de la campagne
 		- TODO Purge les factures ne comportant qu'un service PMOB
