@@ -11,7 +11,17 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * @return string - The label.
 	 */
 	public function getSource() {
-		return 'LBL_COGILOG';
+		return 'LBL_COGILOG_INVOICES';
+	}
+
+
+	/**
+	 * Method to default max query rows for this import.
+	 *  This method should be overload in the child class.
+	 * @return string - the default db port.
+	 */
+	public function getDefaultMaxQueryRows() {
+		return 30000;
 	}
 
 	/**
