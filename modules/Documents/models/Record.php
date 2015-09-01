@@ -124,7 +124,7 @@ class Documents_Record_Model extends Vtiger_Record_Model {
 	}
 
 
-	function getRelatedCampaigns(){
+	function getRelatedCampaigns($codeAffaire = false){
 		$pagingModel = new Vtiger_Paging_Model();
 		$pagingModel->set('page', 1);
 		
@@ -133,6 +133,10 @@ class Documents_Record_Model extends Vtiger_Record_Model {
 		/* no use
 		$relationListView->set('orderby', 'createdtime');
 		$relationListView->set('sortorder', 'desc');*/
+		if($codeAffaire){ //TODO non testé
+			$relationListView->set('searchkey', 'code_affaire');
+			$relationListView->set('searchvalue', $codeAffaire);
+		}
 		return $relationListView->getEntries($pagingModel);
 	}
 	

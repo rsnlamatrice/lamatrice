@@ -739,14 +739,29 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			}
 			return;
 		}
+		//Campagnes liées au coupon
 		$campaigns = $coupon->getRelatedCampaigns();
-		if(count($campaigns) == 1)
+		
+		//Pas de campagne, on cherche sans le coupon
+		if(count($campaigns) === 0)
+			return $this->getCampaign($srcRow, null);
+		
+		//Cherche celui qui aurait le même ode affaire
+		foreach($campaigns as $campaign){
+			if($srcRow['affaire_code'] == $campaign->get('affaire_code')){
+				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
+				return $campaign;
+			}
+		}
+		
+		//si il n'y en a qu'un, on prend celui-ci
+		if(count($campaigns) === 1)
 			foreach($campaigns as $campaign){		
 				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
 				return $campaign;
 			}
-		var_dump('setPreImportInCache', 'false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']
-				 , count($campaigns));
+			
+		var_dump('Plusieurs campagnes correspondent au coupon', "Campaigns".', Coupon',$coupon->getId() .", 'codeAffaire' = ". $srcRow['affaire_code']);
 		$this->setPreImportInCache('false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 	}
         
