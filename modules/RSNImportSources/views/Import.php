@@ -13,6 +13,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	var $user;
 	/*ED150826*/
 	var $scheduledId;
+	/*ED150831*/
+	var $recordModel;
 
 	public function __construct($request = FALSE, $user = FALSE) {
 		parent::__construct();
