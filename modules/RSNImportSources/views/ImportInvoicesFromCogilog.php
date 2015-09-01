@@ -341,7 +341,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		                    
 				    
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
-					if($coupon != null)
+					if($coupon)
 						$record->set('notesid', $coupon->getId());
 					/*$campagne = self::findCampagne($srcRow, $coupon);
 					if($campagne)
@@ -656,9 +656,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	/* coupon d'après code affaire d'un document de type Coupon
 	 */
 	private function getCoupon($codeAffaire){
-		$coupon = $this->checkPreImportInCache("Coupon", 'codeAffaire', $codeAffaire);
-		if($coupon)
-			return $coupon;
+		$couponId = $this->checkPreImportInCache("Coupon", 'codeAffaire', $codeAffaire);
+		if($couponId)
+			return Vtiger_Record_Model::getInstanceById($couponId, 'Documents');;
 		
 		$query = "SELECT vtiger_crmentity.crmid
 			FROM vtiger_notes
@@ -679,7 +679,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$row = $db->fetch_row($result, 0);
 			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
 		}
-		$this->setPreImportInCache($coupon, "Coupon", 'codeAffaire', $codeAffaire);
+		$this->setPreImportInCache($coupon->getId(), "Coupon", 'codeAffaire', $codeAffaire);
 		return $coupon;
 	}
         
