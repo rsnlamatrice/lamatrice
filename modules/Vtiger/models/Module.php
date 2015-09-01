@@ -1440,16 +1440,17 @@ class Vtiger_Module_Model extends Vtiger_Module {
 			//TODO bug UNION makes ORDER BY error
 			//Solution : see modules/Contacts/Contacts.php->get_ContactAdresses()
 			//if(!preg_match('/\sUNION\s+SELECT\s/i', $query)){//TODO UNION for root query
+			if(strpos($query, 'vtiger_crmentity') !== false){ //TODO ce qui n'est pas normal : on devrait toujours tester .deleted = 0
 				$currentUser = Users_Record_Model::getCurrentUserModel();
 				$queryGenerator = new QueryGenerator($relatedModuleName, $currentUser);
-				$queryGenerator->setFields($relatedListFields);
+				$queryGenerator->setFields($relatedListFields);;
 				$selectColumnSql = $queryGenerator->getSelectClauseColumnSQL();
 				//TODO BUG : UNION is broken
 				$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
 				$selectColumnSql = 'SELECT vtiger_crmentity.crmid,'.$selectColumnSql;
 				$newQuery[0] = $selectColumnSql.' '; /* ED141012 */
 				$query = implode(' FROM ', $newQuery);
-			//}
+			}
 		}
 		if ($nonAdminQuery) {
 			$query = appendFromClauseToQuery($query, $nonAdminQuery);

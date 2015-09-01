@@ -116,7 +116,8 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$record = Vtiger_Record_Model::getInstanceById(306198, 'RSNImportSources');
+		$coupon = Vtiger_Record_Model::getInstanceById(203718, 'Documents');
+		var_dump($coupon->getRelatedCampaigns());
 	}
 	
 	
