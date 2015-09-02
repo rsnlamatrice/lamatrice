@@ -1446,8 +1446,13 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				$selectColumnSql = $queryGenerator->getSelectClauseColumnSQL();
 				//TODO BUG : UNION is broken
 				$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
-				if(count($newQuery) === 1)
-					die("Error : FROM is missing in \r\t$query");
+				if(count($newQuery) === 1){
+					var_dump('$result',$result);
+					var_dump($recordId, $functionName, $relatedModuleName);
+					var_dump('$query', $query);
+					echo_callstack();
+					die("Error in getRelationQuery : FROM is missing");
+				}
 				if(strpos($query, 'vtiger_crmentity') !== false){ //TODO ce qui n'est pas normal : on devrait toujours tester .deleted = 0
 					$selectColumnSql = 'SELECT vtiger_crmentity.crmid,'.$selectColumnSql;
 				}
