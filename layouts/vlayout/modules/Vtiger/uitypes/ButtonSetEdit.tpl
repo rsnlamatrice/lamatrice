@@ -30,19 +30,19 @@
 {assign var=UID value=uniqid('btnset')}
 <div id="{$UID}" class="buttonset {if $OCCUPY_COMPLETE_WIDTH} row-fluid {/if}">
     {*if $FIELD_MODEL->isEmptyPicklistOptionAllowed()}<option value="">{vtranslate('LBL_SELECT_OPTION','Vtiger')}</option>{/if*}
-    {foreach item=PICKLIST_ITEM key=PICKLIST_KEY from=$PICKLIST_LABELS}
-	{if is_array($PICKLIST_ITEM)}
-	    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
-	    {if isset($PICKLIST_ITEM['class'])}
-		{assign var=PICKLIST_CLASS value=$PICKLIST_ITEM['class']}
-	    {else}
-		{assign var=PICKLIST_CLASS value=''}
-	    {/if}
-	    {assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
-	    {assign var=PICKLIST_TITLE value=$FIELD_LABEL|cat:' '|cat:$PICKLIST_ITEM['title']}
-	{else}
-	    {assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
-	{/if}
+	{foreach item=PICKLIST_ITEM key=PICKLIST_KEY from=$PICKLIST_LABELS}
+		{if is_array($PICKLIST_ITEM)}
+			{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
+			{if isset($PICKLIST_ITEM['class'])}
+			{assign var=PICKLIST_CLASS value=$PICKLIST_ITEM['class']}
+			{else}
+			{assign var=PICKLIST_CLASS value=''}
+			{/if}
+			{assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
+			{assign var=PICKLIST_TITLE value=$FIELD_LABEL|cat:' '|cat:$PICKLIST_ITEM['title']}
+		{else}
+			{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
+		{/if}
         <input type="radio" 
                 name="{$FIELD_NAME}"
                 id="{$UID}{$PICKLIST_KEY}" 

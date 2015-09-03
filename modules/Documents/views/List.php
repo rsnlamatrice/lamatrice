@@ -12,19 +12,30 @@ class Documents_List_View extends Vtiger_List_View {
 	function __construct() {
 		parent::__construct();
 	}
-	
+	/*
 	function preProcess (Vtiger_Request $request) {
 		$viewer = $this->getViewer ($request);
 		$moduleName = $request->getModule();
-
 		$documentModuleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$defaultCustomFilter = $documentModuleModel->getDefaultCustomFilter();
 		$folderList = Documents_Module_Model::getAllFolders();
-
 		$viewer->assign('DEFAULT_CUSTOM_FILTER_ID', $defaultCustomFilter);
 		$viewer->assign('FOLDERS', $folderList);
 
 		parent::preProcess($request);
+	}*/
+	
+	/* ED150903 dans includes/main/WebUI.php function triggerPreProcess() conditionne le preProcess à !isAjax
+	* Maintenant, on a besoin des folders dans tous les cas
+	*/
+	function initViewerFolders (Vtiger_Request $request) {
+		$viewer = $this->getViewer ($request);
+		$moduleName = $request->getModule();
+		$documentModuleModel = Vtiger_Module_Model::getInstance($moduleName);
+		$defaultCustomFilter = $documentModuleModel->getDefaultCustomFilter();
+		$folderList = Documents_Module_Model::getAllFolders();
+		$viewer->assign('DEFAULT_CUSTOM_FILTER_ID', $defaultCustomFilter);
+		$viewer->assign('FOLDERS', $folderList);
 	}
     
     
@@ -32,6 +43,12 @@ class Documents_List_View extends Vtiger_List_View {
 	 * Function to initialize the required data in smarty to display the List View Contents
 	 */
 	public function initializeListViewContents(Vtiger_Request $request, Vtiger_Viewer $viewer) {
+		
+		/* ED150903 on a toujours besoin d'une liste de folders... enfin, presque.*/
+		if(!$request->isAjax()
+		|| !$request->get('folder_value'))
+			$this->initViewerFolders($request);
+		
 		$moduleName = $request->getModule();
 		$cvId = $request->get('viewname');
 		$pageNumber = $request->get('page');
@@ -62,6 +79,9 @@ class Documents_List_View extends Vtiger_List_View {
 			$listViewModel->set('sortorder',$sortOrder);
 		}
 
+		/*echo '<br><br><br><br><br>IIC IC ICICIC';
+		var_dump($request);*/
+		
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
 		$searchInput = $request->get('search_input');
@@ -90,6 +110,22 @@ class Documents_List_View extends Vtiger_List_View {
 		}
 		$noOfEntries = count($this->listViewEntries);
 
+		//ED150903 Définit la valeur du filtre "alaphabet" et celui du coupon
+		if(!empty($operator)) {
+			$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+			$moduleAlphabetSearchField = 'notes_title';
+			$moduleAlphabetSearchFieldModel = $this->listViewHeaders[$moduleAlphabetSearchField];
+			if($moduleAlphabetSearchFieldModel){
+				//var_dump('$moduleAlphabetSearchFieldModel', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
+				$viewer->assign('ALPHABET_SORTING_VALUE', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
+			}
+			$folderSearchField = $this->listViewHeaders['folderid'];
+			if($folderSearchField){
+				//var_dump('$folderSearchField', $folderSearchField->get('fieldvalue'));
+				$viewer->assign('FOLDER_SEARCH_VALUE', to_html($folderSearchField->get('fieldvalue')));
+			}
+		}
+		
 		$viewer->assign('VIEWID', $cvId);
 		$viewer->assign('MODULE', $moduleName);
 

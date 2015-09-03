@@ -170,6 +170,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 			$search_texts = array($search_texts);
 		if(!is_array($operators))
 			$operators = array($operators);
+			
 		for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++){
 			$fieldName = $search_fields[$i];
 			if(isset($listViewHeaders[$fieldName])

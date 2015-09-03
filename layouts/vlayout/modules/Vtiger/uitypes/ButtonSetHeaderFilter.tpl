@@ -12,8 +12,7 @@
 {if !isset($INPUT_CLASS)}
     {assign var="INPUT_CLASS" value='input-small'}
 {/if}
-{*assign var=PICKLIST_VALUES value=$FIELD_MODEL->getPicklistValues()*}
-{assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
+{*assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()*}
 {assign var="FIELD_VALUE_LIST" value=explode(' |##| ',$FIELD_MODEL->get('fieldvalue'))}{*sic*}
 {if !$RECORD_MODEL}
 	{if $RELATED_RECORD}{assign var=RECORD_MODEL value=$RELATED_RECORD}

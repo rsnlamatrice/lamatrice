@@ -65,6 +65,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$this->viewName = $request->get('viewname');
+
 		$this->initializeListViewContents($request, $viewer);
 		$viewer->assign('VIEW', $request->get('view'));
 		$viewer->assign('MODULE_MODEL', $moduleModel);
@@ -166,6 +167,17 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		
 		if(!$this->listViewHeaders){
 			$this->listViewHeaders = $listViewModel->getListViewHeaders();
+		}
+		
+		//ED150903 Définit la valeur du filtre "alaphabet"
+		if(!empty($operator)) {
+			$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+			$moduleAlphabetSearchField = $moduleModel->getAlphabetSearchField();
+			$moduleAlphabetSearchFieldModel = $this->listViewHeaders[$moduleAlphabetSearchField];
+			if($moduleAlphabetSearchFieldModel){
+				//var_dump('$moduleAlphabetSearchFieldModel', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
+				$viewer->assign('ALPHABET_SORTING_VALUE', to_html($moduleAlphabetSearchFieldModel->get('fieldvalue')));//to_html pour les accents
+			}
 		}
 		
 		if(!$this->listViewEntries){
