@@ -84,7 +84,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 				$imagePath = null;
 				if($this->get('isgroup')){
 					$imageName = 'Collectif';
-					$rsnClass = 'collectif';
+					$rsnClass = 'isgroup'.$this->get('isgroup');
 				}
 				else {
 					$imageName = 'Individuel';
@@ -150,11 +150,11 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			case 'isgroup':
 				return array(
 					'0' => array( 'label' => 'Particulier', 'icon' => 'icon-rsn-small-contact' ),
-					'1' => array( 'label' => 'Association', 'icon' => 'icon-rsn-small-collectif' ),
-					'2' => array( 'label' => 'Entreprise', 'icon' => 'icon-rsn-small-collectif' ),
-					'3' => array( 'label' => 'Orga. public', 'icon' => 'icon-rsn-small-collectif' ),
-					'4' => array( 'label' => 'Parti politique', 'icon' => 'icon-rsn-small-collectif' ),
-					'5' => array( 'label' => 'Autre structure', 'icon' => 'icon-rsn-small-collectif' ),
+					'1' => array( 'label' => 'Association', 'icon' => 'icon-rsn-small-isgroup1' ),
+					'2' => array( 'label' => 'Entreprise', 'icon' => 'icon-rsn-small-isgroup2' ),
+					'3' => array( 'label' => 'Orga. public', 'icon' => 'icon-rsn-small-isgroup3' ),
+					'4' => array( 'label' => 'Parti politique', 'icon' => 'icon-rsn-small-isgroup4' ),
+					'5' => array( 'label' => 'Autre structure', 'icon' => 'icon-rsn-small-isgroup5' ),
 				);
 			case 'reference':
 				return array(
@@ -246,10 +246,11 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			case 'isgroup':
 				return array(
 					'0' => array( 'label' => '', 'icon' => 'icon-rsn-small-contact' ),
-					'1' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
-					'2' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
-					'3' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
-					'4' => array( 'label' => '', 'icon' => 'icon-rsn-small-collectif' ),
+					'1' => array( 'label' => '', 'icon' => 'icon-rsn-small-isgroup1' ),
+					'2' => array( 'label' => '', 'icon' => 'icon-rsn-small-isgroup2' ),
+					'3' => array( 'label' => '', 'icon' => 'icon-rsn-small-isgroup3' ),
+					'4' => array( 'label' => '', 'icon' => 'icon-rsn-small-isgroup4' ),
+					'5' => array( 'label' => '', 'icon' => 'icon-rsn-small-isgroup5' ),
 				);
 			case 'donotcall':
 				return array(

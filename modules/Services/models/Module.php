@@ -42,4 +42,11 @@ class Services_Module_Model extends Products_Module_Model {
 			return $overRideQuery;
 		}
 	}
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'servicecategory,servicename'; 
+	}
 }

@@ -151,4 +151,11 @@ class Products_Module_Model extends Vtiger_Module_Model {
 		}
 		return parent::isPermitted($actionName);
 	}
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'productcategory,productname'; //TODO invoicestatus ne fonctionne pas
+	}
 }

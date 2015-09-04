@@ -476,4 +476,11 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	public function getInputNPAICriteresUrl() {
 		return 'index.php?module='.$this->get('name').'&view=InputNPAICriteres';
 	}
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'isgroup,lastname';//accounttype trop d'éléments
+	}
 }

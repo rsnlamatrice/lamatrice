@@ -1954,16 +1954,40 @@ jQuery.Class("Vtiger_List_Js",{
 		var thisInstance = this;
 		var listViewPageDiv = this.getListViewContentContainer();
 		listViewPageDiv.on('click','.alphabetSearch',function(e) {
-			var alphabet = jQuery(e.currentTarget).find('a').text();
+			var $target = jQuery(e.currentTarget);
+			var $alphabet = $target.find('a');
+			var alphabet = $alphabet.attr('data-searchvalue') ? $alphabet.attr('data-searchvalue') : $target.find('a').text();
 			var cvId = thisInstance.getCurrentCvId();
-			var AlphabetSearchKey = thisInstance.getAlphabetSearchField();
-			var urlParams = {
+			/* ED150903 defined search key in one ancestor */
+			var specificSearchKey = $target.parents('.alphabetSorting[data-searchkey]').attr('data-searchkey');
+			var AlphabetSearchKey = specificSearchKey ? specificSearchKey : thisInstance.getAlphabetSearchField();
+			
+			//ED150903 this search complete header filters
+			var urlParams = thisInstance.getHeadersFiltersUrlParams(e, {
 				"viewname" : cvId,
-				"search_key" : AlphabetSearchKey,
-				"search_value" : alphabet,
-				"operator" : 's',
-				"page"	: 1
+				"search_key" : [],
+				"search_value" : [],
+				"search_input" : [],
+				"operator" : [],
+				"page"	:	1
+			});
+			var addKey = true;
+			for(i = 0; i < urlParams.search_key.length; i++)
+				if(urlParams.search_key[i] == AlphabetSearchKey){
+					addKey = false;
+					urlParams.search_key[i] = AlphabetSearchKey;
+					urlParams.search_value[i] = alphabet;
+					urlParams.search_input[i] = alphabet;
+					urlParams.operator[i] = 's';
+					break;
+				}
+			if (addKey) {
+				urlParams.search_key.push( AlphabetSearchKey );
+				urlParams.search_value.push( alphabet );
+				urlParams.search_input.push( alphabet );
+				urlParams.operator.push( 's' );
 			}
+			
 			jQuery('#recordsCount').val('');
 			//To Set the page number as first page
 			jQuery('#pageNumber').val('1');
@@ -2222,8 +2246,11 @@ jQuery.Class("Vtiger_List_Js",{
 	 * Function to register change in header filter inputs
 	 */
 	getHeadersFiltersUrlParams : function(e, urlParams) {
+		var $filtersRow = jQuery(e.currentTarget).parents('.listViewHeaders.filters:first');
+		if ($filtersRow.length === 0)
+			$filtersRow = jQuery(e.currentTarget).parents('.listViewPageDiv').find('.listViewHeaders.filters:first');
 		
-		jQuery(e.currentTarget).parents('.listViewHeaders.filters:first').find(':input[data-field-name]').each(function(){
+		$filtersRow.find(':input[data-field-name]').each(function(){
 			var $input = jQuery(this)
 			//, $th = $input.parents('th:first')
 			, searchInput = $input.val()//TODO Checkbox : On click event + e.currentTarget.checked

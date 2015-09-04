@@ -113,7 +113,7 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	 * Function to get Alphabet Search Field 
 	 */
 	public function getAlphabetSearchField(){
-		return 'notes_title';
+		return 'folderid,notes_title';
 	}
 	
 	/**

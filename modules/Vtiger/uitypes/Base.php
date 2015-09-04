@@ -108,4 +108,12 @@ class Vtiger_Base_UIType extends Vtiger_Base_Model {
 	public function getHeaderFilterTemplateName() {
 		return 'uitypes/StringHeaderFilter.tpl';
 	}
+
+	/** ED150903
+	 * Function to get the "alphabet" filter input template name for the current UI Type Object
+	 * @return <String> - Template Name
+	 */
+	public function getAlphabetTemplateName() {
+		return 'uitypes/StringAlphabet.tpl';
+	}
 }

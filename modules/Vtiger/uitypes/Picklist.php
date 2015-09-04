@@ -35,4 +35,11 @@ class Vtiger_Picklist_UIType extends Vtiger_Base_UIType {
 		return Vtiger_Language_Handler::getTranslatedString($value, $this->get('field')->getModuleName());
 	}
 
+	/** ED150903
+	 * Function to get the "alphabet" filter input template name for the current UI Type Object
+	 * @return <String> - Template Name
+	 */
+	public function getAlphabetTemplateName() {
+		return 'uitypes/PicklistAlphabet.tpl';
+	}
 }
