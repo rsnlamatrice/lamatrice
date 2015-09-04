@@ -2,15 +2,23 @@
 /*********************************************************************************
    * ED150903
    * Default "alphabet" search
+   * Required : ALPHABET_FIELD
+   * Optional : ALPHABETS
  ********************************************************************************/
 *}
 {strip}
+{if !$ALPHABET_FIELD}
+	<code>ALPHABET_FIELD is required</code>
+{/if}
+{assign var=ALPHABET_VALUE value=$ALPHABET_FIELD->get('fieldvalue')}
+{if !$ALPHABETS}
+	{assign var=ALPHABETS value=vtranslate('LBL_ALPHABETS', 'Vtiger')}
+{/if}
+{if is_string($ALPHABETS)}
+	{assign var=ALPHABETS value=','|explode:$ALPHABETS}
+{/if}
 
-{assign var=ALPHABET_VALUE value=$LISTVIEW_HEADER->get('fieldvalue')}
-{assign var=ALPHABETS_LABEL value=vtranslate('LBL_ALPHABETS', 'Vtiger')}
-{assign var=ALPHABETS value=','|explode:$ALPHABETS_LABEL}
-
-<div class="alphabetSorting noprint" data-searchkey="{$LISTVIEW_HEADER->getName()}">
+<div class="alphabetSorting noprint" data-searchkey="{$ALPHABET_FIELD->getName()}">
 	<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
 		<tbody>
 			<tr>

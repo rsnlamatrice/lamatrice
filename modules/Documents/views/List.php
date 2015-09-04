@@ -112,13 +112,6 @@ class Documents_List_View extends Vtiger_List_View {
 
 		//ED150903 Définit la valeur du filtre "alaphabet" et celui du coupon
 		if(!empty($operator)) {
-			$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
-			$moduleAlphabetSearchField = 'notes_title';
-			$moduleAlphabetSearchFieldModel = $this->listViewHeaders[$moduleAlphabetSearchField];
-			if($moduleAlphabetSearchFieldModel){
-				//var_dump('$moduleAlphabetSearchFieldModel', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
-				$viewer->assign('ALPHABET_SORTING_VALUE', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
-			}
 			$folderSearchField = $this->listViewHeaders['folderid'];
 			if($folderSearchField){
 				//var_dump('$folderSearchField', $folderSearchField->get('fieldvalue'));

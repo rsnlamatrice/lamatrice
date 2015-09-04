@@ -58,7 +58,7 @@ class Users_Module_Model extends Vtiger_Module_Model {
 	 * @return <String> columnname
 	 */
 	public function getAlphabetSearchField(){
-		return 'last_name';
+		return 'last_name';//roleid,
 	}
 
 	/**
@@ -259,5 +259,4 @@ class Users_Module_Model extends Vtiger_Module_Model {
 	   }
 	   return $languages_list;
    }
-
 }

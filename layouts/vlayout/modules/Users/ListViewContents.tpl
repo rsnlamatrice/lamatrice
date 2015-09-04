@@ -27,20 +27,10 @@
 <input type='hidden' value="{$PAGING_MODEL->getPageLimit()}" id='pageLimit'>
 <input type="hidden" value="{$LISTVIEW_ENTIRES_COUNT}" id="noOfEntries">
 
-{assign var = ALPHABETS_LABEL value = vtranslate('LBL_ALPHABETS', 'Vtiger')}
-{assign var = ALPHABETS value = ','|explode:$ALPHABETS_LABEL}
+{*TODO foreach item=ALPHABET_FIELD from=$ALPHABET_FIELDS}
+	{include file=vtemplate_path($ALPHABET_FIELD->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
+{/foreach*}
 
-<div class="alphabetSorting">
-	<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
-		<tbody>
-			<tr>
-			{foreach item=ALPHABET from=$ALPHABETS}
-				<td class="alphabetSearch textAlignCenter cursorPointer {if $ALPHABET_VALUE eq $ALPHABET} highlightBackgroundColor {/if}" style="padding : 0px !important"><a id="{$ALPHABET}" href="#">{$ALPHABET}</a></td>
-			{/foreach}
-			</tr>
-		</tbody>
-	</table>
-</div>
 <div class="listViewEntriesDiv" style='overflow-x:auto;'>
 	<input type="hidden" value="{$ORDER_BY}" id="orderBy">
 	<input type="hidden" value="{$SORT_ORDER}" id="sortOrder">

@@ -26,5 +26,12 @@ class Faq_Module_Model extends Vtiger_Module_Model {
 	public function isSummaryViewSupported() {
 		return false;
 	}
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'faqcategories,question';
+	}
 }
 ?>

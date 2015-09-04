@@ -120,11 +120,13 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		    $queryGenerator->addCondition($folderKey,$folderValue,'e'); //ED141018 Ici bug vtiger_attachmentsfolderfolderid		    
 		}
 
-
+		//echo "<br><br><br><br>".__FILE__;
+		
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
 		if(!empty($searchKey)) {
+			//var_dump(array('search_field' => $searchKey, 'search_text' => array_map(mb_detect_encoding, $searchValue), 'operator' => $operator));
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
 		$orderBy = $this->getForSql('orderby');

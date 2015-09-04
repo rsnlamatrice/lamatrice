@@ -20,44 +20,19 @@
 <input type="hidden" id="requestSearchKey" value= "{$PAGING_MODEL->getRequestSearchField()}" />{* ED150412 *}
 <input type="hidden" id="Operator" value="{$OPERATOR}" />
 <input type="hidden" id="alphabetValue" value="{$ALPHABET_VALUE}" />
-<input type="hidden" id="alphabetSorting" value="{if $ALPHABET_SORTING_VALUE}{$ALPHABET_SORTING_VALUE}{else}{$ALPHABET_VALUE}{/if}" />
 <input type="hidden" id="totalCount" value="{$LISTVIEW_COUNT}" />
 <input type='hidden' value="{$PAGE_NUMBER}" id='pageNumber'>
 <input type='hidden' value="{$PAGING_MODEL->getPageLimit()}" id='pageLimit'>
 <input type="hidden" value="{$LISTVIEW_ENTIRES_COUNT}" id="noOfEntries">
-{if $MODULE neq 'RsnDons'}
-{assign var = ALPHABETS_LABEL value = vtranslate('LBL_ALPHABETS', 'Vtiger')}
-{assign var = ALPHABETS value = ','|explode:$ALPHABETS_LABEL}
 
 {* ED150903 *}
 {if !$FOLDER_NAME || !$FOLDERS}
-<div class="alphabetSorting noprint folderSorting" style="height: auto;" data-searchkey="folderid">
-	<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed; font-size: 11px;">
-		<tbody>
-			<tr>
-			{foreach item=FOLDER from=$FOLDERS}
-				<td class="alphabetSearch textAlignCenter cursorPointer {if $FOLDER_SEARCH_VALUE eq $FOLDER->getName()} fontBold highlightBackgroundColor {/if}"
-					style="padding : 0px !important;
-					{if $FOLDER->get('uicolor')}
-						{if $FOLDER_SEARCH_VALUE eq $FOLDER->getName()}
-							border: 4px inset {$FOLDER->get('uicolor')};
-						{else}
-							border: 3px solid {$FOLDER->get('uicolor')};
-						{/if}
-					{/if}">
-					<a href="#">{vtranslate($FOLDER->getName(), $MODULE)}</a>
-				</td>
-			{/foreach}
-			</tr>
-		</tbody>
-	</table>
-</div>
+	{include file=vtemplate_path("FoldersAlphabet.tpl",$MODULE)}
 {/if}
 
-
-{assign var=LISTVIEW_HEADER value=$LISTVIEW_HEADERS['notes_title']}
-{if $LISTVIEW_HEADER}
-	{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
+{assign var=ALPHABET_FIELD value=$LISTVIEW_HEADERS['notes_title']}
+{if $ALPHABET_FIELD}
+	{include file=vtemplate_path($ALPHABET_FIELD->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
 {/if}
 
 <div id="selectAllMsgDiv" class="alert-block msgDiv noprint">
@@ -71,7 +46,7 @@
 		&nbsp;
 	 </div>
 </div>
-{/if}
+
 <div class="listViewEntriesDiv contents-bottomscroll">
 	<div class="bottomscroll-div">
 	<input type="hidden" value="{$ORDER_BY}" id="orderBy">

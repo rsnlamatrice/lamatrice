@@ -170,7 +170,6 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 			$search_texts = array($search_texts);
 		if(!is_array($operators))
 			$operators = array($operators);
-			
 		for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++){
 			$fieldName = $search_fields[$i];
 			if(isset($listViewHeaders[$fieldName])
@@ -198,10 +197,13 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		$queryGenerator = $this->get('query_generator');
 		$listViewContoller = $this->get('listview_controller');
 
+		//echo "<br><br><br><br>".__FILE__;
+		
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
 		if(!empty($searchKey)) {
+			//var_dump(array('search_field' => $searchKey, 'search_text' => array_map(mb_detect_encoding, $searchValue), 'operator' => $operator));
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
 		$orderBy = $this->getForSql('orderby');
@@ -604,5 +606,22 @@ var_dump($listResult);*/
 			}
 			return $customViewModel;
 		}
+	}
+	
+	/** ED150904
+	 * Function to get the alphabet fields
+	 * @return <Array> - List of Vtiger_Field_Model instances
+	 */
+	public function getAlphabetFields($listViewHeaders) {
+		$headerFieldModels = array();
+		$moduleAlphabetFields = explode(',', $this->getModule()->getAlphabetSearchField());
+		foreach($moduleAlphabetFields as $fieldName) {
+			if(!array_key_exists($fieldName, $listViewHeaders))
+				continue;
+			$fieldModel = $listViewHeaders[$fieldName];
+			if($fieldModel)
+				$headerFieldModels[$fieldName] = $fieldModel;
+		}
+		return $headerFieldModels;
 	}
 }

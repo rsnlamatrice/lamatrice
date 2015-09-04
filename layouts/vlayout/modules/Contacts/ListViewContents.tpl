@@ -28,19 +28,10 @@
 <input type='hidden' value="{$PAGE_NUMBER}" id='pageNumber'>
 <input type='hidden' value="{$PAGING_MODEL->getPageLimit()}" id='pageLimit'>
 <input type="hidden" value="{$LISTVIEW_ENTIRES_COUNT}" id="noOfEntries">
-{if $MODULE neq 'RsnDons'}
-{assign var = ALPHABETS_LABEL value = vtranslate('LBL_ALPHABETS', 'Vtiger')}
-{assign var = ALPHABETS value = ','|explode:$ALPHABETS_LABEL}
 
-{assign var=LISTVIEW_HEADER value=$LISTVIEW_HEADERS['isgroup']}
-{if $LISTVIEW_HEADER}
-	{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
-{/if}
-
-{assign var=LISTVIEW_HEADER value=$LISTVIEW_HEADERS['lastname']}
-{if $LISTVIEW_HEADER}
-	{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
-{/if}
+{foreach item=ALPHABET_FIELD from=$ALPHABET_FIELDS}
+	{include file=vtemplate_path($ALPHABET_FIELD->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
+{/foreach}
 
 <div id="selectAllMsgDiv" class="alert-block msgDiv noprint">
 	<strong><a id="selectAllMsg">{vtranslate('LBL_SELECT_ALL',$MODULE)}&nbsp;{vtranslate($MODULE ,$MODULE)}&nbsp;(<span id="totalRecordsCount"></span>)</a></strong>
@@ -53,7 +44,7 @@
 		&nbsp;
 	 </div>
 </div>
-{/if}
+
 <div class="listViewEntriesDiv contents-bottomscroll">
 	<div class="bottomscroll-div">
 	<input type="hidden" value="{$ORDER_BY}" id="orderBy">
@@ -116,63 +107,61 @@
 				<input type="checkbox" value="{$LISTVIEW_ENTRY->getId()}" class="listViewEntriesCheckBox"/>
 			</td>
 			{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
-			{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
-			{if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
-				{continue}
-			{/if}
-			{assign var=IS_GROUP_FIELD value=$LISTVIEW_HEADERNAME == "isgroup"}
-			<td class="listViewEntryValue {if !$IS_GROUP_FIELD}{$WIDTHTYPE}{/if}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap>
-				{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
-					<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-					{*ED150526*}
-					{if $LISTVIEW_HEADERNAME == 'lastname' && $IS_GROUP && $LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
-						&nbsp;-&nbsp;{$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
-					{/if}</a>
-				{else if $LISTVIEW_HEADER->get('uitype') eq '72'}
-					{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
-					{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
-						{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
-					{else}
-						{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-					{/if}
-				{else if $IS_GROUP_FIELD}
-					{if $IS_GROUP}
-						<span class="icon-rsn-small-collectif"></span>
-					{else}
-						<span class="icon-rsn-small-contact"></span>
-					{/if}
-				{* ED150412 *}
-				{else if $LISTVIEW_HEADERNAME == 'createdtime'}
-					{substr($LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME),0,10)}
-					{if $LISTVIEW_ENTRY->get('modifiedtime')
-					&& substr($LISTVIEW_ENTRY->get('createdtime'),0,10) neq substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
-						<br>{substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
-					{/if}
-				{else if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME}
-				
-				{else}
-					{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
-					{*ED150527 refreshing listview does not set isNameField to lastname field *}
-					{if $LISTVIEW_HEADERNAME == 'lastname' && $IS_GROUP && $LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
-						&nbsp;-&nbsp;{$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
-					{/if}
+				{assign var=LISTVIEW_HEADERNAME value=$LISTVIEW_HEADER->get('name')}
+				{if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
+					{continue}
 				{/if}
+				{assign var=IS_GROUP_FIELD value=$LISTVIEW_HEADERNAME == "isgroup"}
+				<td class="listViewEntryValue {if !$IS_GROUP_FIELD}{$WIDTHTYPE}{/if}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap>
+					{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
+						<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						{*ED150526*}
+						{if $LISTVIEW_HEADERNAME == 'lastname' && $IS_GROUP && $LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+							&nbsp;-&nbsp;{$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+						{/if}</a>
+					{else if $LISTVIEW_HEADER->get('uitype') eq '72'}
+						{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
+						{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
+							{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
+						{else}
+							{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						{/if}
+					{else if $IS_GROUP_FIELD}
+						<div style="overflow: hidden; color: transparent;">{* hides text *}
+							{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						</div>
+					{* ED150412 *}
+					{else if $LISTVIEW_HEADERNAME == 'createdtime'}
+						{substr($LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME),0,10)}
+						{if $LISTVIEW_ENTRY->get('modifiedtime')
+						&& substr($LISTVIEW_ENTRY->get('createdtime'),0,10) neq substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+							<br>{substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
+						{/if}
+					{else if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME}
 					
-				{if $LISTVIEW_HEADER@last}
-				</td><td nowrap class="{$WIDTHTYPE}">
-				<div class="actions pull-right">
-					<span class="actionImages">
-						<a href="{$LISTVIEW_ENTRY->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
-						{if $IS_MODULE_EDITABLE}
-							<a href='{$LISTVIEW_ENTRY->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>&nbsp;
+					{else}
+						{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						{*ED150527 refreshing listview does not set isNameField to lastname field *}
+						{if $LISTVIEW_HEADERNAME == 'lastname' && $IS_GROUP && $LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
+							&nbsp;-&nbsp;{$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
 						{/if}
-						{if $IS_MODULE_DELETABLE}
-							<a class="deleteRecordButton"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
-						{/if}
-					</span>
-				</div></td>
-				{/if}
-			</td>
+					{/if}
+						
+					{if $LISTVIEW_HEADER@last}
+					</td><td nowrap class="{$WIDTHTYPE}">
+					<div class="actions pull-right">
+						<span class="actionImages">
+							<a href="{$LISTVIEW_ENTRY->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
+							{if $IS_MODULE_EDITABLE}
+								<a href='{$LISTVIEW_ENTRY->getEditViewUrl()}'><i title="{vtranslate('LBL_EDIT', $MODULE)}" class="icon-pencil alignMiddle"></i></a>&nbsp;
+							{/if}
+							{if $IS_MODULE_DELETABLE}
+								<a class="deleteRecordButton"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
+							{/if}
+						</span>
+					</div></td>
+					{/if}
+				</td>
 			{/foreach}
 		</tr>
 		{/foreach}

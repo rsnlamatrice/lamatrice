@@ -8,15 +8,11 @@
 {if !$MODULE_MODEL}
 	MODULE_MODEL manquant
 {/if}
-{assign var=FIELD_MODEL value=$LISTVIEW_HEADER}
-{if !isset($INPUT_CLASS)}
-    {assign var="INPUT_CLASS" value='input-small'}
-{/if}
-{*assign var="*" value=$FIELD_MODEL->getValidator()*}
+{assign var=FIELD_MODEL value=$ALPHABET_FIELD}
 {assign var=SELECTED_VALUE value=$FIELD_MODEL->get('fieldvalue')}
 		
 <div class="alphabetSorting noprint" {*ED150903*}data-searchkey="{$FIELD_MODEL->getFieldName()}">
-<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
+<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed;">
 	<tbody>
 		<tr>
 		{assign var=PICKLIST_LABELS value=$MODULE_MODEL->getPicklistValuesDetailsForHeaderFilter($FIELD_MODEL->getFieldName())}
@@ -50,7 +46,7 @@
 						{/if}
 					{/if}">
 					<a href="#" data-searchvalue="{$PICKLIST_KEY}">
-						<label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
+						<label class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
 						{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
 						{$PICKLIST_LABEL}</label>
 					</a>

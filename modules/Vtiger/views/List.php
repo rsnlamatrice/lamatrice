@@ -169,16 +169,21 @@ class Vtiger_List_View extends Vtiger_Index_View {
 			$this->listViewHeaders = $listViewModel->getListViewHeaders();
 		}
 		
-		//ED150903 Définit la valeur du filtre "alaphabet"
-		if(!empty($operator)) {
-			$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
-			$moduleAlphabetSearchField = $moduleModel->getAlphabetSearchField();
-			$moduleAlphabetSearchFieldModel = $this->listViewHeaders[$moduleAlphabetSearchField];
-			if($moduleAlphabetSearchFieldModel){
-				//var_dump('$moduleAlphabetSearchFieldModel', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
-				$viewer->assign('ALPHABET_SORTING_VALUE', to_html($moduleAlphabetSearchFieldModel->get('fieldvalue')));//to_html pour les accents
-			}
-		}
+		//ED150904
+		$alphabetFields = $listViewModel->getAlphabetFields($this->listViewHeaders);
+		
+		////ED150903 Définit la valeur du filtre "alaphabet"
+		//if(!empty($operator)) {
+		//	$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		//	$moduleAlphabetSearchField = $moduleModel->getAlphabetSearchField();
+		//	$moduleAlphabetSearchFieldModel = $this->listViewHeaders[$moduleAlphabetSearchField];
+		//	if($moduleAlphabetSearchFieldModel){
+		//		//var_dump('$moduleAlphabetSearchFieldModel', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
+		//		$viewer->assign('ALPHABET_SORTING_VALUE', to_html($moduleAlphabetSearchFieldModel->get('fieldvalue')));//to_html pour les accents
+		//	}
+		//}
+		//
+		
 		
 		if(!$this->listViewEntries){
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
@@ -206,6 +211,8 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$viewer->assign('LISTVIEW_ENTIRES_COUNT',$noOfEntries);
 		$viewer->assign('LISTVIEW_HEADERS', $this->listViewHeaders);
 		$viewer->assign('LISTVIEW_ENTRIES', $this->listViewEntries);
+		/*ED150904*/
+		$viewer->assign('ALPHABET_FIELDS', $alphabetFields);
 		
 		if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			if(!$this->listViewCount){
