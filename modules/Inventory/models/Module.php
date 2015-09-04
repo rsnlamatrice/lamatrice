@@ -145,4 +145,12 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 		
 		return parent::saveRecord($recordModel);
 	}
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'account_id'; //TODO invoicestatus ne fonctionne pas
+	}
+	
 }

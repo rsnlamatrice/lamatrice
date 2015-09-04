@@ -1198,6 +1198,13 @@ class QueryGenerator {
 		return ($type == 'string' || $type == 'text' || $type == 'email' || $type == 'reference');
 	}
 
+	/** ED150904
+	 * picklist, multipicklist and buttonSet
+	 */
+	private function isEnumerableType($type) {
+		return ($type == 'picklist' || $type == 'multipicklist' || $type == 'buttonSet');
+	}
+
 	private function isDateType($type) {
 		return ($type == 'date' || $type == 'datetime');
 	}
@@ -1274,7 +1281,6 @@ class QueryGenerator {
 	}
 
 	public function addUserSearchConditions($input) {
-		
 		global $log,$default_charset;
 		if($input['searchtype']=='advance') {
 
@@ -1426,11 +1432,15 @@ class QueryGenerator {
 		if(isset($search_text) && $search_text!="") {
 			// search other characters like "|, ?, ?" by jagi
 			$value = $search_text;
-			$stringConvert = function_exists(iconv) ? @iconv("UTF-8",$default_charset,$value)
-					: $value;
-			if($stringConvert !== FALSE //ED150605 ne rien faire en cas d'erreur de traduction
-			&& !$this->isStringType($type)) {
-				$value=trim($stringConvert);
+			if(!$this->isStringType($type)
+			&& !$this->isEnumerableType($type) //ED150904
+			) {
+				//var_dump($fieldName, $type, $value, $this->isStringType($type));
+				$stringConvert = function_exists(iconv) ? @iconv("UTF-8",$default_charset,$value)
+						: $value;
+				if($stringConvert !== FALSE) { //ED150605 ne rien faire en cas d'erreur de traduction
+				   $value=trim($stringConvert);
+				}
 			}
 
 			switch($type){

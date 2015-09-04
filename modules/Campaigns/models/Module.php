@@ -132,4 +132,11 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 		$headerFields[$field->get('name')] = $field;
 		return $headerFields;
 	}
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'campaigntype,campaignname'; 
+	}
 }

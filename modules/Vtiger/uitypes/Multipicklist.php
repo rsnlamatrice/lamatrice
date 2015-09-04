@@ -24,6 +24,14 @@ class Vtiger_Multipicklist_UIType extends Vtiger_Base_UIType {
 	public function getHeaderFilterTemplateName() {
 		return 'uitypes/MultiPicklistHeaderFilter.tpl';
 	}
+
+	/** ED150903
+	 * Function to get the "alphabet" filter input template name for the current UI Type Object
+	 * @return <String> - Template Name
+	 */
+	public function getAlphabetTemplateName() {
+		return 'uitypes/PicklistAlphabet.tpl';
+	}
 	
 	/**
 	 * Function to get the Display Value, for the current field type with given DB Insert Value

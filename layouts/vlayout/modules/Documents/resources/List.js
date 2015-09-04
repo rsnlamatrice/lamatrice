@@ -70,7 +70,7 @@ Vtiger_List_Js("Documents_List_Js", {
 				"excluded_ids" : excludedIds,
 				"viewname" : cvId
 			};
-            
+            //ED150903 TODO PAS SUR QUE CA FONCTIONNE VRAIMENT
             var searchValue = listInstance.getAlphabetSearchValue();
 
             if(searchValue.length > 0) {

@@ -89,6 +89,9 @@ class Users_List_View extends Settings_Vtiger_List_View {
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
 		}
 		$noOfEntries = count($this->listViewEntries);
+		
+		//ED150904
+		//TODO $alphabetFields = $listViewModel->getAlphabetFields($this->listViewHeaders);
 
 		$viewer->assign('MODULE', $moduleName);
 
@@ -112,7 +115,9 @@ class Users_List_View extends Settings_Vtiger_List_View {
 		$viewer->assign('LISTVIEW_ENTIRES_COUNT',$noOfEntries);
 		$viewer->assign('LISTVIEW_HEADERS', $this->listViewHeaders);
 		$viewer->assign('LISTVIEW_ENTRIES', $this->listViewEntries);
-
+		/*ED150904*/
+		//$viewer->assign('ALPHABET_FIELDS', $alphabetFields);
+		
 		if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			if(!$this->listViewCount){
 				$this->listViewCount = $listViewModel->getListViewCount();

@@ -41,7 +41,6 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 			//TODO ? Tester si des données existent déjà en pré-import
 			
 			$importDataController->preImportData();
-			
 			$importDataController->recordModel->set('mode', 'edit');
 			$importDataController->recordModel->set('autolasttime', date('Y-m-d H:i:s'));
 			$importDataController->recordModel->set('autolastresult', 'Ok');

@@ -21,7 +21,7 @@
         <option value=" "></option>
         <option value="">(tous)</option>
         {foreach key=PICKLIST_VALUE item=PICKLIST_LABEL from=$PICKLIST_VALUES}
-            <option value="{Vtiger_Util_Helper::toSafeHTML($PICKLIST_VALUE)}"
+            <option value="{$PICKLIST_VALUE}"
                 {if in_array(Vtiger_Util_Helper::toSafeHTML($PICKLIST_VALUE), $FIELD_VALUE_LIST) || in_array($PICKLIST_VALUE, $FIELD_VALUE_LIST)} selected {/if}>{Vtiger_Util_Helper::toSafeHTML($PICKLIST_LABEL)}
             </option>
         {/foreach}
