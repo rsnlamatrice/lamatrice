@@ -781,14 +781,18 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	
 	//ED150827
 	public function getRecordModel(){
+		if($this->recordModel)
+			return $this->recordModel;
 		$moduleName = $this->request->get('for_module');
 		$className = $this->request->get('ImportSource');
 		if($this->checkPreImportInCache($moduleName, 'getRecordModel', $className))
 			return $this->checkPreImportInCache($moduleName, 'getRecordModel', $className);
 		
 		$recordModel = self::getRecordModelByClassName($moduleName, $className);
-		if($recordModel)
+		if($recordModel){
+			$this->recordModel = $recordModel;
 			$this->setPreImportInCache($recordModel, $moduleName, 'getRecordModel', $className);
+		}
 		return $recordModel;
 	}
 	
