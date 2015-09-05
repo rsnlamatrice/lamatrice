@@ -233,8 +233,7 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 	function getDBRows() {
 		return false;
 	}
-	
-	
+		
 	/** Prépare les données pour un pré-import automatique
 	 *
 	 */
