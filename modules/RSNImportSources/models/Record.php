@@ -60,14 +60,17 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 	function getRequest(){
 		//Conversion
 		$params = array();
-		$params_src = array();
-		preg_match_all('/(^|[\r\n])\s*(?<param>\w+)\s*=\s*(?<value>[^()\r\n]*)/', $this->get('autosourcedata'), $params_src);
-		//var_dump($params_src);
-		for($i = 0; $i < count($params_src); $i++)
-			if($params_src['param'][$i]
-			&& strpos($params_src['param'][$i][0], ';/') === false)
-				$params[$params_src['param'][$i]] = $params_src['value'][$i];
-				
+		
+		if($this->get('autoenabled') && $this->get('autosourcedata')){
+			$params_src = array();
+			preg_match_all('/(^|[\r\n])\s*(?<param>\w+)\s*=\s*(?<value>[^()\r\n]*)/', $this->get('autosourcedata'), $params_src);
+			//var_dump($params_src);
+			for($i = 0; $i < count($params_src); $i++)
+				if($params_src['param'][$i]
+				&& strpos($params_src['param'][$i][0], ';/') === false)
+					$params[$params_src['param'][$i]] = $params_src['value'][$i];
+		}
+		
 		if(!array_key_exists('ImportSource', $params))
 			$params['ImportSource'] = $this->get('class');
 		return new Vtiger_Request($params, $params, false);

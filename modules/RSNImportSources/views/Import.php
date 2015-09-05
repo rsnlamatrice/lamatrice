@@ -238,8 +238,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * Method to add a import in the import queue table for a specific module.
 	 * @param string $module : the module name.
 	 */
-	public function queueDataImport($module) {
-		RSNImportSources_Queue_Action::add($this->request, $this->user, $module, $this->getMappingFor($module));
+	public function queueDataImport($module = false) {
+		if(!$module){
+			foreach($this->getImportModules() as $module)
+				$this->queueDataImport($module);
+		}
+		else {
+			$this->request->set('is_scheduled', true);
+			RSNImportSources_Queue_Action::add($this->request, $this->user, $module, $this->getMappingFor($module));
+		}
 	}
 
 	/**
@@ -730,7 +737,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 */
 	public function checkPreImportInCache($moduleName, $arg1, $arg2 = false){
 		$parameters = func_get_args();
-		$cacheKey = implode( '|#|', $parameters);
+		$cacheKey = implode( "\tC:", $parameters);
 		//var_dump('checkPreImportInCache', $cacheKey);
 		if(array_key_exists( $cacheKey, $this->preImportChecker_cache)){
 			return $this->preImportChecker_cache[$cacheKey];
@@ -747,7 +754,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	public function setPreImportInCache($value, $moduleName, $arg1, $arg2 = false){
 		$parameters = func_get_args();
 		$value = array_shift( $parameters);
-		$cacheKey = implode( '|#|', $parameters);
+		$cacheKey = implode( "\tC:", $parameters);
 		//var_dump('setPreImportInCache', $cacheKey);
 		if(!$value)
 			$value = true;
@@ -827,7 +834,59 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			//echo 'updateLastImportField : lastimport = '. $fileName . ' (' . date('d/m/Y') . ')';
 		}
 	}
+
+	/**
+	 * Teste si un import est disponible pour un pre-import automatique. La contrainte est qu'aucun utilisateur n'est un import en cours sur une des tables
+	 * If there is no probleme, it clear the informations of the last import.
+	 * @param Vtiger_Request $request : the curent request.
+	 * @param $clearUserImportInfo : remove old tables. Default is false.
+	 * @return true is no data is waiting for import
+	 * 
+	 * TODO : il faudrait que les imports en cours apparaissent si le for_module est lié à n'importe quel RSNImportSources d'après vtiger_rsnimportsources.modules, càd si l'import apparait dans la liste de sélection.
+	 * Pour l'instant, on ne se base que sur la queue et une table d'import de ce module.
+	 * Or, un import disponible depuis Contacts peut ne faire d'importe que dans une autre table, $importController->getImportModules()
+	 * 	il faudrait pouvoir utiliser $importController->getLockModules()
+	 */
+	function isAutoPreImportAvailable($clearUserImportInfo = false) {
+		$modules = $this->getImportModules();
+		foreach($modules as $moduleName) {
+			if(RSNImportSources_Utils_Helper::isModuleImportBlocked($moduleName)) {
+				return false;
+			}
+		}
+		if($clearUserImportInfo){
+			$user = Users_Record_Model::getCurrentUserModel();
+			foreach($modules as $moduleName) {
+				RSNImportSources_Utils_Helper::clearUserImportInfo($user, $moduleName);
+			}
+		}
+		return true;
+
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		return false;
+	}
 	
+	/** Prépare les données pour un pré-import automatique
+	 *
+	 */
+	function prepareAutoPreImportData(){
+		$this->request->set('auto_preimport', true);
+		if(!$this->request->get('for_module'))
+			$this->request->set('for_module', $this->getImportModules()[0]);
+		return true;
+	}
+	/** Méthode appelée après un pré-import automatique
+	 *
+	 */
+	function postAutoPreImportData(){
+		$this->request->set('auto_preimport', 'done');
+	}
 }
 
 ?>
