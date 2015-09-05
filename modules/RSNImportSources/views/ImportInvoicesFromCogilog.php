@@ -146,6 +146,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		if(count($new_rows) == $this->getMaxQueryRows()){
 			$new_rows = array_slice($new_rows, 0, $previous_row);
 		}
+		echo "Nouvelles factures de Cogilog à importer : " . count($new_rows);
 		return $new_rows;
 		
 	}
@@ -231,6 +232,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
 		$invoiceData = array($row);
 
+		$perf = new RSNImportSources_Utils_Performance($numberOfRecords);
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$invoiceSubject = $row['subject'];
@@ -242,9 +244,24 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				$invoiceData = array($row);
 				$previousInvoiceSubjet = $invoiceSubject;
 			}
+			
+			//perf
+			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$this->skipNextScheduledImports = true;
+				$keepScheduledImport = true;
+				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
+				echo '
+<pre>
+	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
+</pre>
+';
+				break;
+			}
 		}
+		$perf->terminate();
 
-		$this->importOneInvoice($invoiceData, $importDataController);
+		//ED150905 SIC ! $this->importOneInvoice($invoiceData, $importDataController);
 	}
 
 	/**

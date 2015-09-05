@@ -869,7 +869,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 *  This method must be overload in the child class.
 	 */
 	function postPreImportData() {
-		return false;
+		return true;
 	}
 	
 	/** Prépare les données pour un pré-import automatique
