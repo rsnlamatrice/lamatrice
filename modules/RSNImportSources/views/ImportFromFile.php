@@ -168,8 +168,12 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 					&& !(strcasecmp(pathinfo($fileName, PATHINFO_EXTENSION), $legalExtension) !== 0)
 					&& !(file_exists($fileName . ".done"))
 					&& !(file_exists($fileName . ".error"))
-					)
+					){
 						$files[] = $fileName;
+						
+						/* Un seul fichier à la fois */
+						break;
+					}
 				}
 			}
 			catch(Exception $ex){
