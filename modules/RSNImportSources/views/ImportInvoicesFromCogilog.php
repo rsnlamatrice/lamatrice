@@ -669,11 +669,15 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 							//$this->checkContact($invoice);
 							$this->preImportInvoice($invoice);
 						}
+						$i++;
 					} while ($invoice != null);
 
 				}
 
-				$fileReader->close(); 
+				$fileReader->close();
+				
+				var_dump('preImportInvoice count : ', $i);
+
 				return true;
 			} else {
 				//TODO: manage error
@@ -813,7 +817,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		if (sizeof($line) > 0 && $line[$this->columnName_indexes['_header_']] && $this->isDate($line[$this->columnName_indexes['datepiece']])) {
 			return true;
 		}
-
 		return false;
 	}
 
