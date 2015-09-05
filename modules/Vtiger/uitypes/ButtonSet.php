@@ -28,4 +28,12 @@ class Vtiger_ButtonSet_UIType extends Vtiger_Base_UIType {
 		return 'uitypes/ButtonSetHeaderFilter.tpl';
 	}
 	
+
+	/** ED150903
+	 * Function to get the "alphabet" filter input template name for the current UI Type Object
+	 * @return <String> - Template Name
+	 */
+	public function getAlphabetTemplateName() {
+		return 'uitypes/ButtonSetAlphabet.tpl';
+	}
 }

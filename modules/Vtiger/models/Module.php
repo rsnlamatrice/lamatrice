@@ -1447,9 +1447,12 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				//TODO BUG : UNION is broken
 				$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
 				if(count($newQuery) === 1){
-					var_dump('$result',$result);
+					/* ED150901 vu un bugg en import par cron
+					 * il manquait le require_once("include/Webservices/Relation.php"); que j'ai mis dans vtigercron.php
+					 */
+					/*var_dump('$result',$result);
+					var_dump('$query', $query);*/
 					var_dump($recordId, $functionName, $relatedModuleName);
-					var_dump('$query', $query);
 					echo_callstack();
 					die("Error in getRelationQuery : FROM is missing");
 				}
@@ -1637,5 +1640,12 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	public function getListViewPicklistValues($fieldname){
 		$recordModel = Vtiger_Record_Model::getCleanInstance($this->getName());
 		return $recordModel->getListViewPicklistValues($fieldname); // la définition s'effectue, historiquement parlant, dans le Record_Model
+	}
+	
+	/** ED150828 for abstract
+	* getPicklistValues called on HeaderFilter context
+	*/
+	public function getPicklistValuesDetailsForHeaderFilter($fieldname){
+		return $this->getPicklistValuesDetails($fieldname);
 	}
 }

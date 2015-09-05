@@ -16,6 +16,7 @@
 <input type="hidden" id="previousPageExist" value="{$PAGING_MODEL->isPrevPageExists()}" />
 <input type="hidden" id="nextPageExist" value="{$PAGING_MODEL->isNextPageExists()}" />
 <input type="hidden" id="alphabetSearchKey" value= "{$MODULE_MODEL->getAlphabetSearchField()}" />
+<input type="hidden" id="alphabetSearchKeys" value= "{','|explode:$alphabetSearchKey}" />
 <input type="hidden" id="requestSearchKey" value= "{$PAGING_MODEL->getRequestSearchField()}" />{* ED150412 *}
 <input type="hidden" id="Operator" value="{$OPERATOR}" />
 <input type="hidden" id="alphabetValue" value="{$ALPHABET_VALUE}" />
@@ -23,21 +24,17 @@
 <input type='hidden' value="{$PAGE_NUMBER}" id='pageNumber'>
 <input type='hidden' value="{$PAGING_MODEL->getPageLimit()}" id='pageLimit'>
 <input type="hidden" value="{$LISTVIEW_ENTIRES_COUNT}" id="noOfEntries">
-{if $MODULE neq 'RsnDons'}
-{assign var = ALPHABETS_LABEL value = vtranslate('LBL_ALPHABETS', 'Vtiger')}
-{assign var = ALPHABETS value = ','|explode:$ALPHABETS_LABEL}
 
-<div class="alphabetSorting noprint">
-	<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
-		<tbody>
-			<tr>
-			{foreach item=ALPHABET from=$ALPHABETS}
-				<td class="alphabetSearch textAlignCenter cursorPointer {if $ALPHABET_VALUE eq $ALPHABET} highlightBackgroundColor {/if}" style="padding : 0px !important"><a id="{$ALPHABET}" href="#">{$ALPHABET}</a></td>
-			{/foreach}
-			</tr>
-		</tbody>
-	</table>
-</div>
+{* ED150903 *}
+{if !$FOLDER_NAME || !$FOLDERS}
+	{include file=vtemplate_path("FoldersAlphabet.tpl",$MODULE)}
+{/if}
+
+{assign var=ALPHABET_FIELD value=$LISTVIEW_HEADERS['notes_title']}
+{if $ALPHABET_FIELD}
+	{include file=vtemplate_path($ALPHABET_FIELD->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
+{/if}
+
 <div id="selectAllMsgDiv" class="alert-block msgDiv noprint">
 	<strong><a id="selectAllMsg">{vtranslate('LBL_SELECT_ALL',$MODULE)}&nbsp;{vtranslate($MODULE ,$MODULE)}&nbsp;(<span id="totalRecordsCount"></span>)</a></strong>
 </div>
@@ -49,7 +46,7 @@
 		&nbsp;
 	 </div>
 </div>
-{/if}
+
 <div class="listViewEntriesDiv contents-bottomscroll">
 	<div class="bottomscroll-div">
 	<input type="hidden" value="{$ORDER_BY}" id="orderBy">
