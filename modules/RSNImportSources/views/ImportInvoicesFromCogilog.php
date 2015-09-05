@@ -133,7 +133,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$line = 0;
 		foreach($rows as $row){
 			if($row[$id_column] == $previous_id)
-				$row[] = false;//_header_
+				$row[] = false;//!_header_
 			else {
 				$row[] = true;//_header_
 				$previous_id = $row[$id_column];
@@ -143,7 +143,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$line++;
 		}
 		//Supprime la dernière facture car potentiellement toutes les lignes ne sont pas fournies à cause du LIMIT
-		if(count($new_rows) == $this->getMaxQueryRows()){
+		if($previous_row > 0
+		&& count($new_rows) >= max($this->getMaxQueryRows() - 200, $this->getMaxQueryRows() * 0.8)){ //en espérant qu'il n'y a pas de dernière facture de 201 lignes...
+			//$skipped_rows = array_slice($new_rows, $previous_row);
 			$new_rows = array_slice($new_rows, 0, $previous_row);
 		}
 		if(count($new_rows))
@@ -259,9 +261,12 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				break;
 			}
 		}
+
+		//dernière facture
+		$this->importOneInvoice($invoiceData, $importDataController);
+
 		$perf->terminate();
 
-		//ED150905 SIC ! $this->importOneInvoice($invoiceData, $importDataController);
 	}
 
 	/**
