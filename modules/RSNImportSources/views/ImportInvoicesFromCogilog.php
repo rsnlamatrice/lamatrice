@@ -146,9 +146,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		if(count($new_rows) == $this->getMaxQueryRows()){
 			$new_rows = array_slice($new_rows, 0, $previous_row);
 		}
-		echo "Nouvelles factures de Cogilog à importer : " . count($new_rows);
+		if(count($new_rows))
+			echo "\rNouvelles factures de Cogilog à importer : " . count($new_rows);
 		return $new_rows;
-		
 	}
 	
 	///**
