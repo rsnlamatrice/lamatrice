@@ -12,6 +12,7 @@ class RSNImportSources_Utils_Performance {
 	}
 	
 	public function tick(){
+		$this->tickCounter++;
 		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
 		if($this->prevPercent != $perfPC){
 			$perfNow = new DateTime();
@@ -22,7 +23,6 @@ class RSNImportSources_Utils_Performance {
 				." ) ";
 			$this->prevPercent = $perfPC;
 		}
-		$this->tickCounter++;
 	}
 	public function terminate(){
 		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
