@@ -247,6 +247,10 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 		if(!$this->request->get('db_max_query_rows'))
 			$this->request->set('db_max_query_rows', $this->getDefaultMaxQueryRows());
 			
+		$legalExtension = $this->getDefaultFileType();
+		$this->request->set('file_type', $legalExtension);
+		$this->request->set('file_encoding', $this->getDefaultFileEncoding());
+		$this->request->set('delimiter', $this->getDefaultFileDelimiter());
 		return true;
 	}
 		

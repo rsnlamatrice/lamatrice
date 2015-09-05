@@ -671,12 +671,10 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 						}
 						$i++;
 					} while ($invoice != null);
-
 				}
-
 				$fileReader->close();
 				
-				var_dump('preImportInvoice count : ', $i);
+				echo('preImportInvoice count : ' . print_r($i, true));
 
 				return true;
 			} else {
@@ -684,6 +682,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				echo "not opened ...";
 			}
 		}
+		else
+				echo "Des produits manquants empêchent l'importation des factures.";
+		
 		return false;
 	}
 
