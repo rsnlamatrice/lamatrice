@@ -161,7 +161,12 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 		foreach( explode(';',$this->recordModel->get('autosourcedata')) as $path){
 			try {
 				$pathFiles = glob($path, GLOB_MARK | GLOB_ERR);
-				asort($pathFiles);
+				//Tri par nom
+				asort($files);
+				/*//Tri par date
+				usort($files, function($a, $b) {
+					return filemtime($a) < filemtime($b);
+				});*/
 				//var_dump(__FILE__, 'prepareAutoPreImportData $pathFiles', $pathFiles);
 				foreach($pathFiles as $fileName){
 					// Contrôle qu'on a bien un .csv qui n'est pas déjà été traité

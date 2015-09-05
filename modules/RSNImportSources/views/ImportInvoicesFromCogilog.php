@@ -374,7 +374,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
 		                    
-				    
+				    $record->set('sent2compta', $invoiceData[0]['invoicedate']);
+					
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
 					if($coupon){
 						$record->set('notesid', $coupon->getId());
