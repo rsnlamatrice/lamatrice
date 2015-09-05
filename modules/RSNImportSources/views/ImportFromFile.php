@@ -123,6 +123,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 				$this->deleteFile();
 				return $returnValue;
 			} else {
+				var_dump('error_message', vtranslate('LBL_INVALID_FILE', 'Import'));
 				$this->request->set('error_message', vtranslate('LBL_INVALID_FILE', 'Import'));
 				$this->deleteFile();
 				return false;
