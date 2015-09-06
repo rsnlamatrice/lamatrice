@@ -75,6 +75,11 @@
 								{/if}
 							</div>
 						</li>
+						{if vglobal('dev_title')}
+						<li class="tabs">
+							<a>{vglobal('dev_title')}</a>
+						</li>
+						{/if}
 					</ul>
 				</div>
 				<div class="span3" id="headerLinks">
