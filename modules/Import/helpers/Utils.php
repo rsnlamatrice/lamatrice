@@ -10,7 +10,7 @@
  * *********************************************************************************** */
 
 //ED150826 both for preImport and import
-ini_set("memory_limit","1G");
+ini_set("memory_limit","8G");
 
 class Import_Utils_Helper {
 
