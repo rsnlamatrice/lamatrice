@@ -134,7 +134,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 *  This method can be overload in the child class.
 	 * @return array - the pre-imported values group by module.
 	 */
-	public function getPreviewData() {
+	public function getPreviewData($offset = 0, $limit = 12) {
 		$adb = PearDatabase::getInstance();
 		$importModules = $this->getImportModules();
 		$previewData = array();
@@ -142,7 +142,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		foreach($importModules as $module) {
 			$previewData[$module] = array();
 			$fields = $this->getFieldsFor($module);
-
+			$fields[] = 'status';
 			$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, $module);
 			$sql = 'SELECT ';
 
@@ -155,7 +155,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 
 			// TODO: do not hardcode display limit ?
-			$sql .= ' FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' LIMIT 12';
+			$sql .= '
+				FROM ' . $tableName . '
+				/*WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '*/
+				LIMIT '.$offset.', '.$limit;
 			$result = $adb->query($sql);
 			$numberOfRecords = $adb->num_rows($result);
 
@@ -174,14 +177,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 	/**
 	 * Method to get the number of pre-imported records.
+	 * @param $status filter. False === all. Import_Data_Action::$IMPORT_RECORD_NONE === 0.
 	 * @return int - the number of pre-imported records.
 	 */
-	function getNumberOfRecords() {
+	function getNumberOfRecords($status = 0) {
 		$numberOfRecords = 0;
 		$importModules = $this->getImportModules();
 
 		foreach($importModules as $module) {
-			$numberOfRecords += RSNImportSources_Utils_Helper::getNumberOfRecords($this->user, $module);
+			$numberOfRecords += RSNImportSources_Utils_Helper::getNumberOfRecords($this->user, $module, $status);
 		}
 
 		return $numberOfRecords;
@@ -196,14 +200,28 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$moduleName = $this->request->get('for_module');
 		
 		//ED150826 Show rows count
-		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords());
+		$viewer->assign('SOURCE_ROWS_COUNT', $this->getNumberOfRecords(false));
+		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords(Import_Data_Action::$IMPORT_RECORD_NONE));
+		
+		//ED150906 get more data
+		$offset = $this->request->get('page_offset');
+		if(!$offset) $offset = 0;
+		$limit = $this->request->get('page_limit');
+		if(!$limit) $limit = min(100, max($offset, 12));
 		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
-		$viewer->assign('PREVIEW_DATA', $this->getPreviewData());
+		$viewer->assign('PREVIEW_DATA', $this->getPreviewData($offset, $limit));
 		$viewer->assign('IMPORT_SOURCE', $this->request->get('ImportSource'));
 		$viewer->assign('ERROR_MESSAGE', $this->request->get('error_message'));
 
+		//ED150906 get more data
+		$viewer->assign('ROW_OFFSET', $offset);
+		$thisModule = Vtiger_Module_Model::getInstance($this->request->getModule());
+		$offset += $limit;
+		$limit = min(100, max($offset, 12));
+		$viewer->assign('MORE_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, $offset, $limit));
+						
 		return $viewer->view('ImportPreview.tpl', 'RSNImportSources');
 	}
 
@@ -238,8 +256,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * Method to add a import in the import queue table for a specific module.
 	 * @param string $module : the module name.
 	 */
-	public function queueDataImport($module) {
-		RSNImportSources_Queue_Action::add($this->request, $this->user, $module, $this->getMappingFor($module));
+	public function queueDataImport($module = false) {
+		if(!$module){
+			foreach($this->getImportModules() as $module)
+				$this->queueDataImport($module);
+		}
+		else {
+			$this->request->set('is_scheduled', true);
+			RSNImportSources_Queue_Action::add($this->request, $this->user, $module, $this->getMappingFor($module));
+		}
 	}
 
 	/**
@@ -730,7 +755,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 */
 	public function checkPreImportInCache($moduleName, $arg1, $arg2 = false){
 		$parameters = func_get_args();
-		$cacheKey = implode( '|#|', $parameters);
+		$cacheKey = implode( "\tC:", $parameters);
 		//var_dump('checkPreImportInCache', $cacheKey);
 		if(array_key_exists( $cacheKey, $this->preImportChecker_cache)){
 			return $this->preImportChecker_cache[$cacheKey];
@@ -747,7 +772,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	public function setPreImportInCache($value, $moduleName, $arg1, $arg2 = false){
 		$parameters = func_get_args();
 		$value = array_shift( $parameters);
-		$cacheKey = implode( '|#|', $parameters);
+		$cacheKey = implode( "\tC:", $parameters);
 		//var_dump('setPreImportInCache', $cacheKey);
 		if(!$value)
 			$value = true;
@@ -774,14 +799,18 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	
 	//ED150827
 	public function getRecordModel(){
+		if($this->recordModel)
+			return $this->recordModel;
 		$moduleName = $this->request->get('for_module');
 		$className = $this->request->get('ImportSource');
 		if($this->checkPreImportInCache($moduleName, 'getRecordModel', $className))
 			return $this->checkPreImportInCache($moduleName, 'getRecordModel', $className);
 		
 		$recordModel = self::getRecordModelByClassName($moduleName, $className);
-		if($recordModel)
+		if($recordModel){
+			$this->recordModel = $recordModel;
 			$this->setPreImportInCache($recordModel, $moduleName, 'getRecordModel', $className);
+		}
 		return $recordModel;
 	}
 	
@@ -827,7 +856,59 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			//echo 'updateLastImportField : lastimport = '. $fileName . ' (' . date('d/m/Y') . ')';
 		}
 	}
+
+	/**
+	 * Teste si un import est disponible pour un pre-import automatique. La contrainte est qu'aucun utilisateur n'est un import en cours sur une des tables
+	 * If there is no probleme, it clear the informations of the last import.
+	 * @param Vtiger_Request $request : the curent request.
+	 * @param $clearUserImportInfo : remove old tables. Default is false.
+	 * @return true is no data is waiting for import
+	 * 
+	 * TODO : il faudrait que les imports en cours apparaissent si le for_module est lié à n'importe quel RSNImportSources d'après vtiger_rsnimportsources.modules, càd si l'import apparait dans la liste de sélection.
+	 * Pour l'instant, on ne se base que sur la queue et une table d'import de ce module.
+	 * Or, un import disponible depuis Contacts peut ne faire d'importe que dans une autre table, $importController->getImportModules()
+	 * 	il faudrait pouvoir utiliser $importController->getLockModules()
+	 */
+	function isAutoPreImportAvailable($clearUserImportInfo = false) {
+		$modules = $this->getImportModules();
+		foreach($modules as $moduleName) {
+			if(RSNImportSources_Utils_Helper::isModuleImportBlocked($moduleName)) {
+				return false;
+			}
+		}
+		if($clearUserImportInfo){
+			$user = Users_Record_Model::getCurrentUserModel();
+			foreach($modules as $moduleName) {
+				RSNImportSources_Utils_Helper::clearUserImportInfo($user, $moduleName);
+			}
+		}
+		return true;
+
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		return true;
+	}
 	
+	/** Prépare les données pour un pré-import automatique
+	 *
+	 */
+	function prepareAutoPreImportData(){
+		$this->request->set('auto_preimport', true);
+		if(!$this->request->get('for_module'))
+			$this->request->set('for_module', $this->getImportModules()[0]);
+		return true;
+	}
+	/** Méthode appelée après un pré-import automatique
+	 *
+	 */
+	function postAutoPreImportData(){
+		$this->request->set('auto_preimport', 'done');
+	}
 }
 
 ?>

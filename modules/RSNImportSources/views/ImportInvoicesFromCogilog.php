@@ -133,7 +133,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$line = 0;
 		foreach($rows as $row){
 			if($row[$id_column] == $previous_id)
-				$row[] = false;//_header_
+				$row[] = false;//!_header_
 			else {
 				$row[] = true;//_header_
 				$previous_id = $row[$id_column];
@@ -143,11 +143,14 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$line++;
 		}
 		//Supprime la dernière facture car potentiellement toutes les lignes ne sont pas fournies à cause du LIMIT
-		if(count($new_rows) == $this->getMaxQueryRows()){
+		if($previous_row > 0
+		&& count($new_rows) >= max($this->getMaxQueryRows() - 200, $this->getMaxQueryRows() * 0.8)){ //en espérant qu'il n'y a pas de dernière facture de 201 lignes...
+			//$skipped_rows = array_slice($new_rows, $previous_row);
 			$new_rows = array_slice($new_rows, 0, $previous_row);
 		}
+		if(count($new_rows))
+			echo "\rNouvelles factures de Cogilog à importer : " . count($new_rows);
 		return $new_rows;
-		
 	}
 	
 	///**
@@ -231,6 +234,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
 		$invoiceData = array($row);
 
+		$perf = new RSNImportSources_Utils_Performance($numberOfRecords);
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$invoiceSubject = $row['subject'];
@@ -242,9 +246,27 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				$invoiceData = array($row);
 				$previousInvoiceSubjet = $invoiceSubject;
 			}
+			
+			//perf
+			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$this->skipNextScheduledImports = true;
+				$keepScheduledImport = true;
+				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
+				echo '
+<pre>
+	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
+</pre>
+';
+				break;
+			}
 		}
 
+		//dernière facture
 		$this->importOneInvoice($invoiceData, $importDataController);
+
+		$perf->terminate();
+
 	}
 
 	/**
@@ -352,7 +374,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
 		                    
-				    
+				    $record->set('sent2compta', $invoiceData[0]['invoicedate']);
+					
+					//Coupon et campagne
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
 					if($coupon){
 						$record->set('notesid', $coupon->getId());
@@ -361,6 +385,11 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 							$record->set('campaign_no', $campagne->getId());
 						
 					}
+					//Coupon introuvable dans la Matrice
+					//TODO log 
+					elseif($invoiceData[0]['affaire_code'])
+						$record->set('description', 'Code affaire : ' + $invoiceData[0]['affaire_code']);
+						
 					//$db->setDebug(true);
 					$record->saveInBulkMode();
 					$invoiceId = $record->getId();
@@ -652,17 +681,22 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 							//$this->checkContact($invoice);
 							$this->preImportInvoice($invoice);
 						}
+						$i++;
 					} while ($invoice != null);
-
 				}
+				$fileReader->close();
+				
+				echo('preImportInvoice count : ' . print_r($i, true));
 
-				$fileReader->close(); 
 				return true;
 			} else {
 				//TODO: manage error
 				echo "not opened ...";
 			}
 		}
+		else
+				echo "Des produits manquants empêchent l'importation des factures.";
+		
 		return false;
 	}
 
@@ -796,7 +830,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		if (sizeof($line) > 0 && $line[$this->columnName_indexes['_header_']] && $this->isDate($line[$this->columnName_indexes['datepiece']])) {
 			return true;
 		}
-
 		return false;
 	}
 

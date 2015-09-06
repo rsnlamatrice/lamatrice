@@ -89,10 +89,17 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	}
 
 	/**
+	 * Method to get the maximum files number to preImport in an automatic context.
+	 * @return integer - the maximum files number to preImport in an automatic context.
+	 */
+	public function getDefaultAutoFilesMax(){
+		return 1;
+	}
+	
+	/**
 	 * Method to upload the file in the temporary location.
 	 */
 	function uploadFile() {
-		
 		return RSNImportSources_Utils_Helper::validateFileUpload($this->request);
 	}
 
@@ -124,6 +131,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 				$this->deleteFile();
 				return $returnValue;
 			} else {
+				var_dump('error_message', vtranslate('LBL_INVALID_FILE', 'Import'));
 				$this->request->set('error_message', vtranslate('LBL_INVALID_FILE', 'Import'));
 				$this->deleteFile();
 				return false;
@@ -141,12 +149,84 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	function parseAndSaveFile(RSNImportSources_FileReader_Reader $fileReader) {
 		return false;
 	}
-
-	/**
-	 * Method called after the file is processed.
-	 *  This method must be overload in the child class.
+		
+	/** Prépare les données pour un pré-import automatique
+	 *
 	 */
-	function postPreImportData() {
-		return false;
+	function prepareAutoPreImportData(){
+		parent::prepareAutoPreImportData();
+	
+		$legalExtension = $this->getDefaultFileType();
+		$this->request->set('file_type', $legalExtension);
+		$this->request->set('file_encoding', $this->getDefaultFileEncoding());
+		$this->request->set('delimiter', $this->getDefaultFileDelimiter());
+		$this->request->set('auto_files_max', $this->getDefaultAutoFilesMax());
+		
+		if(!$this->recordModel->get('autoenabled')
+		|| !$this->recordModel->get('autosourcedata'))
+			return false;
+		
+		$autoFilesMax = $this->getDefaultAutoFilesMax();
+		
+		$files = array();
+		foreach( explode(';',$this->recordModel->get('autosourcedata')) as $path){
+			try {
+				$pathFiles = glob($path, GLOB_MARK | GLOB_ERR);
+				//Tri par nom
+				asort($files);
+				/*//Tri par date
+				usort($files, function($a, $b) {
+					return filemtime($a) < filemtime($b);
+				});*/
+				//var_dump(__FILE__, 'prepareAutoPreImportData $pathFiles', $pathFiles);
+				foreach($pathFiles as $fileName){
+					// Contrôle qu'on a bien un .csv qui n'est pas déjà été traité
+					if(!($fileName[strlen($fileName)-1] === '/' || $fileName[strlen($fileName)-1] === '\\')
+					&& !(strcasecmp(pathinfo($fileName, PATHINFO_EXTENSION), $legalExtension) !== 0)
+					&& !(file_exists($fileName . ".done"))
+					&& !(file_exists($fileName . ".error"))
+					){
+						$files[] = $fileName;
+						
+						/* Un seul fichier à la fois */
+						if(count($files) >= $autoFilesMax)
+							break;
+					}
+				}
+			}
+			catch(Exception $ex){
+				echo "
+<pre>Erreur dans prepareAutoPreImportData
+	$ex->getMessage()
+	$ex->getTraceAsString()
+</pre>
+";
+				return false;
+			}
+		}
+		if(!$files)
+			return false;
+		$this->request->set('import_file_src_mode', 'localpath');
+		$this->request->set('import_file_localpath', implode(';', $files));
+		return true;
+	}
+		
+	/** Méthode appelée après un pré-import automatique
+	 *
+	 */
+	function postAutoPreImportData(){
+		parent::postAutoPreImportData();
+	
+		$this->request->set('delimiter', $this->getDefaultFileDelimiter());
+		
+		if(!$this->recordModel->get('autoenabled')
+		|| !$this->recordModel->get('autosourcedata'))
+			return false;
+		
+		$files = explode(';', $this->request->get('import_file_localpath'));
+		foreach( $files as $fileName){
+			file_put_contents($fileName . '.done', date('Y-m-d H:i:s'));
+		}
+		return true;
 	}
 }

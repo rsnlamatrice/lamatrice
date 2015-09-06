@@ -233,4 +233,35 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 	function getDBRows() {
 		return false;
 	}
+<<<<<<< HEAD
 }
+=======
+		
+	/** Prépare les données pour un pré-import automatique
+	 *
+	 */
+	function prepareAutoPreImportData(){
+		$this->request->set('auto_preimport', true);
+		if(!$this->request->get('for_module'))
+			$this->request->set('for_module', $this->getImportModules()[0]);
+		
+		//TODO Initialiser les paramètres comme si on venait du formulaire web
+		
+		if(!$this->request->get('db_max_query_rows'))
+			$this->request->set('db_max_query_rows', $this->getDefaultMaxQueryRows());
+			
+		$legalExtension = $this->getDefaultFileType();
+		$this->request->set('file_type', $legalExtension);
+		$this->request->set('file_encoding', $this->getDefaultFileEncoding());
+		$this->request->set('delimiter', $this->getDefaultFileDelimiter());
+		return true;
+	}
+		
+	/** Méthode appelée après un pré-import automatique
+	 *
+	 */
+	function postAutoPreImportData(){
+		$this->request->set('auto_preimport', 'done');
+	}
+}
+>>>>>>> 50979d9d13613447b247696603e8c02fe63d4c19

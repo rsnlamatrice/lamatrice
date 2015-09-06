@@ -87,7 +87,9 @@ class Import_Utils_Helper {
 		$userImportTablePrefix = $configReader->get('userImportTablePrefix');
 
         $tableName = $userImportTablePrefix;
-        if(method_exists($user, 'getId')){
+        if(is_string($user)){//ED150905
+            $tableName .= $user;
+        } elseif(method_exists($user, 'getId')){
             $tableName .= $user->getId();
         } else {
             $tableName .= $user->id;
@@ -134,8 +136,30 @@ class Import_Utils_Helper {
 		$tableName = self::getDbTableName($user, $moduleName);
 
 		if(Vtiger_Utils::CheckTable($tableName)) {
-			$result = $adb->query('SELECT 1 FROM '.$tableName.' WHERE status = '.  Import_Data_Action::$IMPORT_RECORD_NONE);
+			$result = $adb->query('SELECT 1 FROM '.$tableName.' WHERE status = '.  Import_Data_Action::$IMPORT_RECORD_NONE . ' LIMIT 1');
 			if($adb->num_rows($result) > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/* ED150905
+	 * Contrôle si un module est verrouillé par un import, quelque soit l'utilisateur
+	*/
+	public static function isModuleImportBlocked($moduleName) {
+		$db = PearDatabase::getInstance();
+		$tableNamePattern = self::getDbTableName('%', $moduleName);
+		$query = 'SHOW TABLES LIKE \''.$tableNamePattern.'\'';
+		
+		$result = $db->query($query);
+
+		$noOfRecords = $db->num_rows($result);
+		for($i=0; $i<$noOfRecords; $i++) {
+			$tableName = $db->query_result($result, $i, 0);
+			$query = 'SELECT 1 FROM `'.$tableName.'` WHERE status = '.  Import_Data_Action::$IMPORT_RECORD_NONE . ' LIMIT 1';
+			$result = $db->query($query);
+			if($db->num_rows($result) > 0) {
 				return true;
 			}
 		}

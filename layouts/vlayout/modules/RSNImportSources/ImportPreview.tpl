@@ -1,4 +1,12 @@
 {strip}
+{* Import_Data_Action::
+$IMPORT_RECORD_NONE = 0;
+$IMPORT_RECORD_CREATED = 1;
+$IMPORT_RECORD_SKIPPED = 2;
+$IMPORT_RECORD_UPDATED = 3;
+$IMPORT_RECORD_MERGED = 4;
+$IMPORT_RECORD_FAILED = 5;*}
+{assign var=ROW_STATUS_COLORS value=array('inherit', 'green', 'yellow', 'green', 'green', '#FFC0A0')}
 <div class="marginLeftZero" style="overflow: scroll;width:95%;">
 	{if sizeof($PREVIEW_DATA) gt 0}
 		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="searchUIBasic well">
@@ -12,18 +20,25 @@
 					<td valign="top">
 						{if sizeof($MODULE_DATA) gt 0}
 							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents">
-								<tr>
-									{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
-											<td class="redColor">{$FIELD_NAME}</td><!-- tmp translation !! -->
-									{/foreach}
-								</tr>
-								{foreach item=ROW from=$MODULE_DATA}
-									<tr>
+								{if $ROW_OFFSET === 0}
+									<thead><tr>
+										<th></th>
+										{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
+											<th class="redColor">{$FIELD_NAME}</th>
+										{/foreach}
+									</tr></thead>
+								{/if}
+								<tbody>
+								{foreach item=ROW key=ROW_INDEX from=$MODULE_DATA}
+									{assign var=ROW_OFFSET value=$ROW_OFFSET + 1}
+									<tr style="background-color: {$ROW_STATUS_COLORS[$ROW['status']]};">
+										<th style="color: gray;">{$ROW_OFFSET}</th>
 										{foreach key=FIELD_NAME item=VALUE from=$ROW}
 											<td>{$VALUE}</td>
 										{/foreach}
 									</tr>
 								{/foreach}
+								</tbody>
 							</table>
 						{else}
 							<span class="big font-x-large">{'LBL_NO_DATA'|@vtranslate:$MODULE}:</span>
@@ -31,23 +46,28 @@
 					</td>
 				</tr>
 			{/foreach}
-			{if $IMPORTABLE_ROWS_COUNT}
+			<tfoot>
+				{if $IMPORTABLE_ROWS_COUNT}
+					<tr>
+						<td class="style1" align="left" colspan="2">
+							Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}{if true || $SOURCE_ROWS_COUNT neq $IMPORTABLE_ROWS_COUNT}&nbsp;/&nbsp;{$SOURCE_ROWS_COUNT}{/if}
+							{if $ROW_OFFSET < $SOURCE_ROWS_COUNT}
+								<a class="getMorePreviewData" href="{$MORE_DATA_URL}" style="margin-left: 2em">voir plus de lignes</a>
+							{/if}		
+						</td>
+					</tr>
+				{/if}
 				<tr>
-					<td class="style1" align="left" colspan="2">
-						Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}
-					</td>
+					<!-- tmp add next button !! -->
+					<!-- tmp add call manu if problem !! -->
+					<!-- tmp replace the return button by a cancel button !! -->
+					<!--<td align="right">
+						
+					<button name="cancel" class="delete btn btn-danger"
+						onclick="location.href='index.php?module=RSNImportSources&view=Index&for_module={$FOR_MODULE}'"><strong>{'LBL_RETURN'|@vtranslate:$MODULE}</strong></button>
+					</td>-->
 				</tr>
-			{/if}
-			<tr>
-				<!-- tmp add next button !! -->
-				<!-- tmp add call manu if problem !! -->
-				<!-- tmp replace the return button by a cancel button !! -->
-				<!--<td align="right">
-					
-				<button name="cancel" class="delete btn btn-danger"
-					onclick="location.href='index.php?module=RSNImportSources&view=Index&for_module={$FOR_MODULE}'"><strong>{'LBL_RETURN'|@vtranslate:$MODULE}</strong></button>
-				</td>-->
-			</tr>
+			</tfoot>
 		</table>
 		<div style="padding-left: 4em;">
 			<form onsubmit="" action="index.php" enctype="multipart/form-data" method="POST" name="selectImportSource">

@@ -29,16 +29,17 @@
     <table class="table table-bordered blockContainer lineItemTable" id="lineItemTab">
         <tr>
             <th><span class="inventoryLineItemHeader">{vtranslate('LBL_ITEM_DETAILS', $MODULE)}</span></th>
-	    {* ED1506022 remise type *}
-            <th>{assign var=FIELD_MODEL value=$RECORD->getField('accountdiscounttype')}
-		{if $FIELD_MODEL}
-		    <a id="inventory_accountdiscounttype_setter">{vtranslate('LBL_ACCOUNT_DISCOUNT_TYPE')}</a>
-		    <div id="inventory_accountdiscounttype_holder">
-			{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE)}
-		    </div>
-		{/if}
-	    </th>
+			{* ED1506022 remise type *}
+				<th>{assign var=FIELD_MODEL value=$RECORD->getField('accountdiscounttype')}
+			{if $FIELD_MODEL}
+				<a id="inventory_accountdiscounttype_setter">{vtranslate('LBL_ACCOUNT_DISCOUNT_TYPE')}</a>
+				<div id="inventory_accountdiscounttype_holder">
+				{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE)}
+				</div>
+			{/if}
+			</th>
             <td colspan="1" class="chznDropDown">
+			{if ! $SHOW_ITEMS_HEADER_DETAILS}<div class="hide">{* ED150906 hide *}{/if}
                 <b>{$APP.LBL_CURRENCY}</b>&nbsp;&nbsp;
                 {assign var=SELECTED_CURRENCY value=$CURRENCINFO}
 				{* Lookup the currency information if not yet set - create mode *}
@@ -67,8 +68,10 @@
                 <input type="hidden" value="{$SELECTED_CURRENCY.currency_id}" id="prev_selected_currency_id" />
                 <!-- TODO : To get default currency in even better way than depending on first element -->
                 <input type="hidden" id="default_currency_id" value="{$CURRENCIES.0.curid}" />
+			{if ! $SHOW_ITEMS_HEADER_DETAILS}</div>{/if}
             </td>
             <td colspan="3" class="chznDropDown">
+			{if ! $SHOW_ITEMS_HEADER_DETAILS}<div class="hide">{* ED150906 hide *}{/if}
                 <div class="pull-right">
                     <div class="inventoryLineItemHeader">
                         <span class="alignTop">{vtranslate('LBL_TAX_MODE', $MODULE)}</span>
@@ -78,6 +81,7 @@
                         <OPTION value="group" {if $IS_GROUP_TAX_TYPE}selected{/if}>{vtranslate('LBL_GROUP', $MODULE)}</OPTION>
                     </select>
                 </div>
+			{if ! $SHOW_ITEMS_HEADER_DETAILS}</div>{/if}
             </td>
         </tr>
         <tr>

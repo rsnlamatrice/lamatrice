@@ -32,6 +32,25 @@
 				{if $RECORD->get('sent2compta')}
 					<br><span style="color: red;">{vtranslate('LBL_ALREADY_SENT_2_COMPTA')}</span>
 				{/if}
+				
+				{assign var=CODE_AFFAIRE value=""}
+				{if $RECORD->getCampaign()}
+					{assign var=CODE_AFFAIRE value=$RECORD->getCampaign()->get('codeaffaire')}
+					{if $CODE_AFFAIRE || ! $RECORD->getCoupon()}
+						{assign var=NAME_FIELD value='campaign_no'}
+						{assign var=RELATED_NAME value=$RECORD->getDisplayValue($NAME_FIELD)}
+					{/if}
+				{/if}
+				{if !$CODE_AFFAIRE && $RECORD->getCoupon()}
+					{assign var=CODE_AFFAIRE value=$RECORD->getCoupon()->get('codeaffaire')}
+					{assign var=NAME_FIELD value='notesid'}
+					{assign var=RELATED_NAME value=$RECORD->getDisplayValue($NAME_FIELD)}
+				{/if}
+				{if $CODE_AFFAIRE}
+					<br><span title="Code affaire">{$CODE_AFFAIRE}</span>&nbsp;-&nbsp;{$RELATED_NAME}
+				{elseif $RELATED_NAME}
+					<br>{$RELATED_NAME}
+				{/if}
 			</span>
 		</span>
 	</span>

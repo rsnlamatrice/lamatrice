@@ -24,9 +24,9 @@
 							    {$RELATED_RECORD->getDisplayValue('nom')}
 						    </a>
 					    </div>
-					    <div class="span3 textOverflowEllipsis">
+					    <div class="span5 textOverflowEllipsis">
 						    <a href="{$RELATED_RECORD->getDetailViewUrl()}">
-							    {*TODO ne s'affiche pas *}{$RELATED_RECORD->getDisplayValue('typesmedia')}
+							    {$RELATED_RECORD->getDisplayValue('rsntypesmedia')}
 						    </a>
 					    </div>
 					</div>

@@ -40,12 +40,27 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 			
 			//TODO ? Tester si des données existent déjà en pré-import
 			
-			$importDataController->preImportData();
+			if($importDataController->isAutoPreImportAvailable(true)){
+				if($importDataController->prepareAutoPreImportData()){
+					$importDataController->preImportData();
+			
+					//Si des données sont présentes, avec un status==0, on crée une queue
+					if(!$importDataController->isAutoPreImportAvailable()){
+						$importDataController->queueDataImport();
+					}
+					//else var_dump(__FILE__, 'POST preImportData => ! isAutoPreImportAvailable');
+					$importDataController->postAutoPreImportData();
+				}
+				//else var_dump(__FILE__, '! prepareAutoPreImportData');
+			}
+			//else var_dump(__FILE__, '! isAutoPreImportAvailable');
+			
 			$importDataController->recordModel->set('mode', 'edit');
 			$importDataController->recordModel->set('autolasttime', date('Y-m-d H:i:s'));
 			$importDataController->recordModel->set('autolastresult', 'Ok');
 			$importDataController->recordModel->save();
 		}
+		return true;
 	}
 	
 	/**
@@ -199,6 +214,9 @@ class RSNImportSources_Data_Action extends Import_Data_Action {
 		}
 		return null;
 	}
+	
+	
+	
 }
 
 ?>
