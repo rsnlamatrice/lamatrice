@@ -5,7 +5,7 @@
  ********************************************************************************/
 -->*}
 {strip}
-
+{if $FOLDERS}
 <div class="alphabetSorting noprint folderSorting" style="height: auto;" data-searchkey="folderid">
 	<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed; font-size: 11px; border-spacing: 1px;">
 		<tbody>
@@ -27,5 +27,5 @@
 		</tbody>
 	</table>
 </div>
-
+{/if}
 {/strip}

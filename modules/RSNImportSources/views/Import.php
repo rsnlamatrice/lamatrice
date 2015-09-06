@@ -134,7 +134,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 *  This method can be overload in the child class.
 	 * @return array - the pre-imported values group by module.
 	 */
-	public function getPreviewData() {
+	public function getPreviewData($offset = 0, $limit = 12) {
 		$adb = PearDatabase::getInstance();
 		$importModules = $this->getImportModules();
 		$previewData = array();
@@ -142,7 +142,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		foreach($importModules as $module) {
 			$previewData[$module] = array();
 			$fields = $this->getFieldsFor($module);
-
+			$fields[] = 'status';
 			$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, $module);
 			$sql = 'SELECT ';
 
@@ -155,7 +155,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 
 			// TODO: do not hardcode display limit ?
-			$sql .= ' FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' LIMIT 12';
+			$sql .= '
+				FROM ' . $tableName . '
+				/*WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '*/
+				LIMIT '.$offset.', '.$limit;
 			$result = $adb->query($sql);
 			$numberOfRecords = $adb->num_rows($result);
 
@@ -174,14 +177,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 	/**
 	 * Method to get the number of pre-imported records.
+	 * @param $status filter. False === all. Import_Data_Action::$IMPORT_RECORD_NONE === 0.
 	 * @return int - the number of pre-imported records.
 	 */
-	function getNumberOfRecords() {
+	function getNumberOfRecords($status = 0) {
 		$numberOfRecords = 0;
 		$importModules = $this->getImportModules();
 
 		foreach($importModules as $module) {
-			$numberOfRecords += RSNImportSources_Utils_Helper::getNumberOfRecords($this->user, $module);
+			$numberOfRecords += RSNImportSources_Utils_Helper::getNumberOfRecords($this->user, $module, $status);
 		}
 
 		return $numberOfRecords;
@@ -196,14 +200,28 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$moduleName = $this->request->get('for_module');
 		
 		//ED150826 Show rows count
-		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords());
+		$viewer->assign('SOURCE_ROWS_COUNT', $this->getNumberOfRecords(false));
+		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords(Import_Data_Action::$IMPORT_RECORD_NONE));
+		
+		//ED150906 get more data
+		$offset = $this->request->get('page_offset');
+		if(!$offset) $offset = 0;
+		$limit = $this->request->get('page_limit');
+		if(!$limit) $limit = min(100, max($offset, 12));
 		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
-		$viewer->assign('PREVIEW_DATA', $this->getPreviewData());
+		$viewer->assign('PREVIEW_DATA', $this->getPreviewData($offset, $limit));
 		$viewer->assign('IMPORT_SOURCE', $this->request->get('ImportSource'));
 		$viewer->assign('ERROR_MESSAGE', $this->request->get('error_message'));
 
+		//ED150906 get more data
+		$viewer->assign('ROW_OFFSET', $offset);
+		$thisModule = Vtiger_Module_Model::getInstance($this->request->getModule());
+		$offset += $limit;
+		$limit = min(100, max($offset, 12));
+		$viewer->assign('MORE_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, $offset, $limit));
+						
 		return $viewer->view('ImportPreview.tpl', 'RSNImportSources');
 	}
 

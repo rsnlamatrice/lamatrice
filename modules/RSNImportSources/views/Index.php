@@ -15,6 +15,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		$this->exposeMethod('clearCorruptedData');
 		$this->exposeMethod('cancelImport');
 		$this->exposeMethod('continueHaltedImport');
+		$this->exposeMethod('getPreviewData');
 	}
 
 	/**
@@ -129,6 +130,17 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 			$this->selectImportSource($request);
 		}
 	}
+
+	/** ED150906
+	 * get more preview data
+	 */
+	function getPreviewData(Vtiger_Request $request) {
+		
+		$importController = $this->getImportController($request);
+
+		$importController->displayDataPreview();
+	}
+
 
 	/**
 	 * Method to process the third step of the import (the import step).

@@ -38,16 +38,18 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 			$status = self::$IMPORT_STATUS_NONE;
 		}
 
-		$db->pquery('INSERT INTO ' . self::$importQueueTable . ' VALUES(?,?,?,?,?,?,?,?,?)',
+		$result = $db->pquery('INSERT INTO ' . self::$importQueueTable . ' VALUES(?,?,?,?,?,?,?,?,?)',
 				array($db->getUniqueID(self::$importQueueTable),
 						$user->id,
 						getTabid($module),
 						$request->get('ImportSource'),
 						Zend_Json::encode((object) $fieldMapping),
-						Zend_Json::encode((object) $defaultValues),// tmp usefull ??
-						$request->get('merge_type'),
+						Zend_Json::encode((object) $defaultValues),
+						$request->get('merge_type') === '' ? 0 : $request->get('merge_type'),
 						Zend_Json::encode($request->get('merge_fields')),
 						$status));
+		if(!$result)
+			$db->echoError('RSNImportSources_Queue_Action::add()');
 	}
 
 	/** 
