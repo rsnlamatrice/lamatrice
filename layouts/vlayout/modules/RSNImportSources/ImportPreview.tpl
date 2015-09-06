@@ -1,10 +1,11 @@
 {strip}
-	static $IMPORT_RECORD_NONE = 0;
-	static $IMPORT_RECORD_CREATED = 1;
-	static $IMPORT_RECORD_SKIPPED = 2;
-	static $IMPORT_RECORD_UPDATED = 3;
-	static $IMPORT_RECORD_MERGED = 4;
-	static $IMPORT_RECORD_FAILED = 5;
+{* Import_Data_Action::
+$IMPORT_RECORD_NONE = 0;
+$IMPORT_RECORD_CREATED = 1;
+$IMPORT_RECORD_SKIPPED = 2;
+$IMPORT_RECORD_UPDATED = 3;
+$IMPORT_RECORD_MERGED = 4;
+$IMPORT_RECORD_FAILED = 5;*}
 {assign var=ROW_STATUS_COLORS value=array('inherit', 'green', 'yellow', 'green', 'green', '#FFC0A0')}
 <div class="marginLeftZero" style="overflow: scroll;width:95%;">
 	{if sizeof($PREVIEW_DATA) gt 0}
@@ -49,8 +50,8 @@
 				{if $IMPORTABLE_ROWS_COUNT}
 					<tr>
 						<td class="style1" align="left" colspan="2">
-							Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}
-							{if $ROW_OFFSET < $IMPORTABLE_ROWS_COUNT}
+							Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}{if true || $SOURCE_ROWS_COUNT neq $IMPORTABLE_ROWS_COUNT}&nbsp;/&nbsp;{$SOURCE_ROWS_COUNT}{/if}
+							{if $ROW_OFFSET < $SOURCE_ROWS_COUNT}
 								<a class="getMorePreviewData" href="{$MORE_DATA_URL}" style="margin-left: 2em">voir plus de lignes</a>
 							{/if}		
 						</td>

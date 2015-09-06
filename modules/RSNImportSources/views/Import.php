@@ -177,10 +177,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 	/**
 	 * Method to get the number of pre-imported records.
-	 * @param $status required. False === all
+	 * @param $status filter. False === all. Import_Data_Action::$IMPORT_RECORD_NONE === 0.
 	 * @return int - the number of pre-imported records.
 	 */
-	function getNumberOfRecords($status = false) {
+	function getNumberOfRecords($status = 0) {
 		$numberOfRecords = 0;
 		$importModules = $this->getImportModules();
 
@@ -200,7 +200,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$moduleName = $this->request->get('for_module');
 		
 		//ED150826 Show rows count
-		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords(false));
+		$viewer->assign('SOURCE_ROWS_COUNT', $this->getNumberOfRecords(false));
+		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords(Import_Data_Action::$IMPORT_RECORD_NONE));
 		
 		//ED150906 get more data
 		$offset = $this->request->get('page_offset');

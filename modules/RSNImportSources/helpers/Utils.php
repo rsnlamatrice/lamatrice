@@ -372,19 +372,18 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	 * Method to get the number of record preimported for a specific module and a specific user.
 	 * @param  $user : the name of the concerned user.
 	 * @param  string $moduleName : the name of the concerned module.
-	 * @param $status : record status checked. False means all.
+	 * @param $status : record status checked. False means all. Import_Data_Action::$IMPORT_RECORD_NONE === 0.
 	 * @return int - the number of record.
 	 */
-	public static function getNumberOfRecords($user, $moduleName, $status = false) {
+	public static function getNumberOfRecords($user, $moduleName, $status = 0) {
 		$tableName = self::getDbTableName($user, $moduleName);
 		$db = PearDatabase::getInstance();
 
 		$query = 	'SELECT COUNT(*) FROM ' . $tableName;
 		if($status !== false)
-			' WHERE status = ' . $status;
+			$query .= ' WHERE status = ' . $status;
 
 		$result = $db->pquery($query, array());
-
 		return $db->query_result($result, 0, 0);
 	}
 
