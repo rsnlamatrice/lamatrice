@@ -260,7 +260,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 	 * Function to get listView count
 	 * @param Vtiger_Request $request
 	 */
-	function getListViewCount(Vtiger_Request $request){
+	function getListViewCount(Vtiger_Request $request, &$calculatedTotals = false){
 		$moduleName = $request->getModule();
 		$cvId = $request->get('viewname');
 		if(empty($cvId)) {
@@ -275,7 +275,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$listViewModel->set('search_value', $searchValue);
 		$listViewModel->set('operator', $request->get('operator'));
 
-		$count = $listViewModel->getListViewCount();
+		$count = $listViewModel->getListViewCount($calculatedTotals);
 
 		return $count;
 	}

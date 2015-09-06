@@ -474,4 +474,18 @@ class Vtiger_Cache  {
 	    $value = $this->getCreator($id);
 	    return $value !== false;
     }
+	
+	/** ED150906
+	 * Retourne un Record Model éventuellement stocké en cache
+	 **/
+	public function getRecordModel($moduleName, $fielName, $crmid){
+		if($crmid){
+			$recordModel = Vtiger_Cache::get('Record_Model', $moduleName.':'.$crmid);
+			if($recordModel && $recordModel->getId() == $crmid)
+				return $recordModel;
+			$recordModel = Vtiger_Record_Model::getInstanceById($crmid, $moduleName);
+			Vtiger_Cache::set('Record_Model', $moduleName.':'.$crmid, $recordModel);
+			return $recordModel;
+		}
+	}
 }

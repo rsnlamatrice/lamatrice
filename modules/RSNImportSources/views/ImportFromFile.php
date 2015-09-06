@@ -89,6 +89,14 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	}
 
 	/**
+	 * Method to get the maximum files number to preImport in an automatic context.
+	 * @return integer - the maximum files number to preImport in an automatic context.
+	 */
+	public function getDefaultAutoFilesMax(){
+		return 1;
+	}
+	
+	/**
 	 * Method to upload the file in the temporary location.
 	 */
 	function uploadFile() {
@@ -152,10 +160,13 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 		$this->request->set('file_type', $legalExtension);
 		$this->request->set('file_encoding', $this->getDefaultFileEncoding());
 		$this->request->set('delimiter', $this->getDefaultFileDelimiter());
+		$this->request->set('auto_files_max', $this->getDefaultAutoFilesMax());
 		
 		if(!$this->recordModel->get('autoenabled')
 		|| !$this->recordModel->get('autosourcedata'))
 			return false;
+		
+		$autoFilesMax = $this->getDefaultAutoFilesMax();
 		
 		$files = array();
 		foreach( explode(';',$this->recordModel->get('autosourcedata')) as $path){
@@ -178,7 +189,8 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 						$files[] = $fileName;
 						
 						/* Un seul fichier à la fois */
-						break;
+						if(count($files) >= $autoFilesMax)
+							break;
 					}
 				}
 			}

@@ -376,6 +376,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		                    
 				    $record->set('sent2compta', $invoiceData[0]['invoicedate']);
 					
+					//Coupon et campagne
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
 					if($coupon){
 						$record->set('notesid', $coupon->getId());
@@ -384,6 +385,11 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 							$record->set('campaign_no', $campagne->getId());
 						
 					}
+					//Coupon introuvable dans la Matrice
+					//TODO log 
+					elseif($invoiceData[0]['affaire_code'])
+						$record->set('description', 'Code affaire : ' + $invoiceData[0]['affaire_code']);
+						
 					//$db->setDebug(true);
 					$record->saveInBulkMode();
 					$invoiceId = $record->getId();

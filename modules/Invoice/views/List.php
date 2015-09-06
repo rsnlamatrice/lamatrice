@@ -8,6 +8,5 @@
  * All Rights Reserved.
  *************************************************************************************/
 class Invoice_List_View extends Inventory_List_View {
-	
 }
 ?>

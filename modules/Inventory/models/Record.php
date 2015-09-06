@@ -321,4 +321,18 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			$this->set('balance', $this->get('hdnGrandTotal') - $this->get('paid'));
 		return $this->get('balance');
 	}
+	
+	/* ED150906
+	 * @return : Campaigns_Record_Model
+	*/
+	public function getCampaign(){
+		return Vtiger_Cache::getRecordModel('Campaigns', 'campaign_no', $this->get('campaign_no'));
+	}
+	
+	/* ED150906
+	 * @return : Documents_Record_Model
+	*/
+	public function getCoupon(){
+		return Vtiger_Cache::getRecordModel('Documents', 'notesid', $this->get('notesid'));
+	}
 }
