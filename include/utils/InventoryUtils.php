@@ -765,13 +765,18 @@ function getInventoryTaxType($module, $id)
 
 	$log->debug("Entering into function getInventoryTaxType($module, $id).");
 
-	$inv_table_array = Array('PurchaseOrder'=>'vtiger_purchaseorder','SalesOrder'=>'vtiger_salesorder','Quotes'=>'vtiger_quotes','Invoice'=>'vtiger_invoice');
-	$inv_id_array = Array('PurchaseOrder'=>'purchaseorderid','SalesOrder'=>'salesorderid','Quotes'=>'quoteid','Invoice'=>'invoiceid');
-
-	$res = $adb->pquery("select taxtype from $inv_table_array[$module] where $inv_id_array[$module]=?", array($id));
-
-	$taxtype = $adb->query_result($res,0,'taxtype');
-
+	//ED150906 : manage cache
+	$taxtype = Vtiger_Cache::get("getInventoryTaxType", "($module, $id)");
+	if(!$taxtype){
+		$inv_table_array = Array('PurchaseOrder'=>'vtiger_purchaseorder','SalesOrder'=>'vtiger_salesorder','Quotes'=>'vtiger_quotes','Invoice'=>'vtiger_invoice');
+		$inv_id_array = Array('PurchaseOrder'=>'purchaseorderid','SalesOrder'=>'salesorderid','Quotes'=>'quoteid','Invoice'=>'invoiceid');
+	
+		$res = $adb->pquery("select taxtype from $inv_table_array[$module] where $inv_id_array[$module]=?", array($id));
+	
+		$taxtype = $adb->query_result($res,0,'taxtype');
+		
+		Vtiger_Cache::set("getInventoryTaxType", "($module, $id)", $taxtype);
+	}
 	$log->debug("Exit from function getInventoryTaxType($module, $id).");
 
 	return $taxtype;

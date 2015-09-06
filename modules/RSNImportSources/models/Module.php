@@ -27,7 +27,17 @@ class RSNImportSources_Module_Model extends Vtiger_Module_Model {
 		return $this->getListViewUrl();
 	}
 	
-	
+	/**
+	 * Url pour obtenir plus de lignes de prévisualisation du pré-import
+	 */
+	public function getPreviewDataViewUrl($importSource, $module, $offset = 0, $limit = 12){
+		return 'index.php?module='.$this->get('name')
+			.'&view=Index&mode=getPreviewData'
+			.'&for_module='.$module
+			.'&ImportSource='.$importSource
+			.'&page_offset='.$offset.'&page_limit='.$limit
+		;
+	}
 
 	/**
 	 * Function to get the list of recently visisted records

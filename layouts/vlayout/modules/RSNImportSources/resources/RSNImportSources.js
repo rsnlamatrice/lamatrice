@@ -5,9 +5,39 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
     RSNImportSourcesJs = {
 
     	registerEvent: function() {
-    		RSNImportSourcesJs.registerSelectSourceEvent();
-    		RSNImportSourcesJs.registerBasicNextButtonEvent();
+    		this.registerSelectSourceEvent();
+    		this.registerBasicNextButtonEvent();
+			this.registerGetMorePreviewDataEvent();
     	},
+
+		/** ED150906
+		 * Get More Preview Data
+		 */
+    	registerGetMorePreviewDataEvent: function() {
+			jQuery('body').on('click', '.getMorePreviewData', function(e){
+				e.preventDefault();
+				
+				var url = this.href
+				, $thisElement = $(this)
+				, $destTablePage = $thisElement.parents('table:first')
+				, $destTableData = $destTablePage.find('table.importContents:first');
+				AppConnector.request(url).then(
+					function(data){
+						var $data = $(data)
+						, $trs = $data.find('table.importContents > tbody > tr')
+						, $tfootRows = $data.find('table.searchUIBasic > tfoot > tr')
+						;
+						$destTableData.children('tbody').append($trs);//append rows
+						$destTablePage.children('tfoot').html($tfootRows);//replace table foot for next link
+						
+					},
+					function(error){
+					}
+				);
+				
+				return false;
+			});
+		},
 
     	registerSelectSourceEvent: function() {
 			jQuery('#SelectSourceDropdown').on('change', function(e){

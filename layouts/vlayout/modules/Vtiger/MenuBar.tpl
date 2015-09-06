@@ -75,10 +75,10 @@
 								{/if}
 							</div>
 						</li>
-						{if vglobal('dev_title')}
-						<li class="tabs">
-							<a>{vglobal('dev_title')}</a>
-						</li>
+						{if vglobal('dev_title')}{* ED150906 *}
+							<li class="tabs" style="margin-left: 2em; font-size: smaller;">
+								<a>{vglobal('dev_title')}</a>
+							</li>
 						{/if}
 					</ul>
 				</div>
