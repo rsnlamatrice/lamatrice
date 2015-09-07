@@ -115,7 +115,7 @@ Vtiger_List_Js("Documents_List_Js", {
 					}
 					app.showModalWindow(data,callBackFunction);
 				}
-			)
+			);
 		} else{
 			listInstance.noRecordSelectedAlert();
 		}

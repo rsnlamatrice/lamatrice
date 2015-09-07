@@ -10,6 +10,24 @@
 
 class Critere4D_Record_Model extends Vtiger_Record_Model {
 	
+
+	/**
+	 * Funtion to get TransormAsNewDocument Url
+	 * @return <String>
+	 */
+	public function getTransformAsNewDocumentUrl() {
+		return 'index.php?module='.$this->getModuleName().'&action=ToDocumentAjax&record='.$this->getId().'&mode=tranformAsNewDocument';
+
+	}
+	/**
+	 * Funtion to get TransormAsNewDocument Url
+	 * @return <String>
+	 */
+	public function getTransferToDocumentUrl() {
+		return 'index.php?module='.$this->getModuleName().'&action=ToDocumentAjax&record='.$this->getId().'&mode=tranferToDocument';
+
+	}
+	
 	/**
 	 * Function to get selected ids list of related module for send email
 	 * @param <String> $relatedModuleName

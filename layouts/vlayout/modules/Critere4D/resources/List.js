@@ -7,7 +7,138 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-Vtiger_List_Js("Critere4D_List_Js",{},{
+Vtiger_List_Js("Critere4D_List_Js",{
+		triggerTransformAsNewDocument : function(massActionUrl){
+			var thisInstance = this,
+				listInstance = Vtiger_List_Js.getInstance();
+			var validationResult = listInstance.checkListRecordSelected();
+			if(validationResult != true){
+				
+				var postData = {
+					"selected_ids": [0],
+					"viewname" : 0,
+					"title": app.vtranslate('JS_TRANSFORM_AS_NEW_DOCUMENT'),
+				};
+				var params = {
+					"url": "index.php?module=Documents&view=MoveDocuments",//Select folder
+					"data" : postData
+				};
+				AppConnector.request(params).then(
+					function(data) {
+						var callBackFunction = function(data){
+							thisInstance.registrerSelectFolderSubmit(massActionUrl);
+						}
+						app.showModalWindow(data,callBackFunction);
+					}
+				);
+				
+			} else {
+				listInstance.noRecordSelectedAlert();
+			}
+		},
+		
+		registrerSelectFolderSubmit : function(massActionUrl){
+			var thisInstance = this;
+			jQuery('#moveDocuments').on('submit',function(e){
+				var formData = jQuery(e.currentTarget).serializeFormData();
+				thisInstance.triggerTransformAsNewDocumentAction( massActionUrl, formData['folderid']);
+				return false;
+			});
+		},
+		
+		triggerTransformAsNewDocumentAction : function(massActionUrl, folderId, callBackFunction){
+			
+			var listInstance = Vtiger_List_Js.getInstance();
+			
+			// Compute selected ids, excluded ids values, along with cvid value and pass as url parameters
+			
+			var pageNumber = jQuery('#pageNumber').val();
+			var cvId = listInstance.getCurrentCvId();
+			var selectedIds = listInstance.readSelectedIds(true);
+			var excludedIds = listInstance.readExcludedIds(true);
+			
+			var postData = {
+				'page' : pageNumber,
+				'viewname' : cvId,
+				'selected_ids' : selectedIds,
+				'excluded_ids' : excludedIds,
+				'folderId' : folderId,
+			}
+	
+			var searchValue = listInstance.getAlphabetSearchValue();
+		
+			if((typeof searchValue != "undefined") && (searchValue.length > 0)) {
+				postData['search_key'] = listInstance.getRequestSearchField();
+				postData['search_value'] = searchValue;
+				postData['operator'] = listInstance.getSearchOperator();
+			}
+				
+			var actionParams = {
+				"type":"POST",
+				"url":massActionUrl,
+				"dataType":"html",
+				"data" : postData
+			};
+	
+			var loadingMessage = jQuery('.listViewLoadingMsg').text();
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : loadingMessage,
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			
+			AppConnector.request(actionParams).then(
+				function(data) {
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
+					if (typeof data === 'string' && /^\{[\s\S]*\}$/.test(data))
+						data = eval('('+data+')');
+					if(data && data.success) {
+						app.hideModalWindow();
+						var  params = {
+							title : app.vtranslate('JS_TRANSFORM_AS_NEW_DOCUMENT'),
+							text : data.message,
+							delay: '2000',
+							type: 'success'
+						}
+						Vtiger_Helper_Js.showPnotify(params);
+						
+						listInstance.getListViewContentContainer()
+							.find('tr.listViewHeaders.filters')
+								.hover()
+								.find('.actionImages .icon-refresh')
+									.click()
+						;
+					}
+					else {
+						var  params = {
+							title : app.vtranslate('JS_OPERATION_DENIED'),
+							text : typeof data === 'string' ? data : data.message,
+							delay: '2000',
+							type: 'error'
+						}
+						Vtiger_Helper_Js.showPnotify(params);
+					}
+				},
+				function(error,err){
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
+					var  params = {
+						title : app.vtranslate('JS_OPERATION_DENIED'),
+						text : err,
+						delay: '2000',
+						type: 'error'
+					}
+					Vtiger_Helper_Js.showPnotify(params);
+	
+				}
+			);
+		},
+	},{
 	
 	readSelectedIds : function(decode){
 		var view = jQuery('#view').val();

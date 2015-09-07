@@ -38,6 +38,9 @@ class Documents_MoveDocuments_View extends Vtiger_Index_View {
 			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
 		}
 
+		//ED150907
+		$viewer->assign('TITLE',$request->get('title'));
+		
 		$viewer->view('MoveDocuments.tpl', $moduleName);
 	}
 }

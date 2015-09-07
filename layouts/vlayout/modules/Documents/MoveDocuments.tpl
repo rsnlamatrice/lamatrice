@@ -10,10 +10,13 @@
  ********************************************************************************/
 -->*}
 {strip}
+{if ! $TITLE}
+	{assign var=TITLE value=vtranslate('LBL_MOVE', $MODULE)|cat:' '|cat:vtranslate($MODULE, $MODULE)}
+{/if}
 	<div class="modelContainer">
 		<div class="modal-header">
 			<button data-dismiss="modal" class="close" type="button" title="{vtranslate('LBL_CLOSE')}">x</button>
-			<h3>{vtranslate('LBL_MOVE', $MODULE)} {vtranslate($MODULE, $MODULE)}</h3>
+			<h3>{$TITLE}</h3>
 		</div>
 		<form class="form-horizontal contentsBackground" id="moveDocuments" method="post" action="index.php">
 			<input type="hidden" name="module" value="{$MODULE}" />
