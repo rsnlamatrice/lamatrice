@@ -10,7 +10,15 @@
 
 class Critere4D_Module_Model extends Vtiger_Module_Model {
 
-		
+	/**
+	 * Funtion to get TransormAsNewDocument Url
+	 * @return <String>
+	 */
+	public function getTransformAsNewDocumentUrl() {
+		return 'index.php?module='.$this->getName().'&action=ToDocumentAjax&mode=tranformAsNewDocument';
+
+	}
+	
 	/**
 	 * Function to get list view query for popup window
 	 * @param <String> $sourceModule Parent module
@@ -62,5 +70,14 @@ class Critere4D_Module_Model extends Vtiger_Module_Model {
 			}
 			return $overRideQuery;
 		}
+	}
+	
+	
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'categorie,nom';
 	}
 }

@@ -507,4 +507,33 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		return $critere4DHeader;
 	}
 	
+	/** Traitements spéciaux de migration
+	 *
+	 */
+	function specialCases($critereName, $contact){
+		switch($critereName){
+			case 'courrier_électroniqu':
+				//Coche
+				//	Ne pas envoyer d'email (emailoptout) : si, on peut
+				//	Pas d appel à don Courrier (donotappeldoncourrier) : Ne pas
+				$contact->set('mode', 'edit');
+				$contact->set('emailoptout', false);
+				$contact->set('donotappeldoncourrier', true);
+				//save
+				$contact->save();
+				break;
+			case 'Reçu fiscal spécial':
+				//réflechir pour 2 adresses différente (postale et fiscale)
+				//set use_address2_for_recu_fiscal
+				$contact->set('mode', 'edit');
+				$contact->set('use_address2_for_recu_fiscal', true);
+				//check adresse 2 ou alerte admin
+				//save
+				$contact->save();
+				break;
+			default:
+				break;
+		}
+	}
+	
 }
