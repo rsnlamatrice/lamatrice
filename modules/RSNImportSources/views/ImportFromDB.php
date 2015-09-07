@@ -233,9 +233,6 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 	function getDBRows() {
 		return false;
 	}
-<<<<<<< HEAD
-}
-=======
 		
 	/** Prépare les données pour un pré-import automatique
 	 *
@@ -264,4 +261,3 @@ class RSNImportSources_ImportFromDB_View extends RSNImportSources_ImportFromFile
 		$this->request->set('auto_preimport', 'done');
 	}
 }
->>>>>>> 50979d9d13613447b247696603e8c02fe63d4c19
