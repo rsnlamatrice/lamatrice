@@ -162,7 +162,6 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 	},
 
 	getPopupParams : function(){
-		var parameters = {};
 		var parameters = {
 			'module' : this.relatedModulename,
 			'src_module' : this.parentModuleName,

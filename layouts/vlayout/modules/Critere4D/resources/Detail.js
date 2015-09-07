@@ -239,6 +239,155 @@ Vtiger_Detail_Js("Critere4D_Detail_Js",{},{
 		});
 	},
 	
+	registerEventTransformAsNewDocument : function(){
+		var thisInstance = this;
+		$('body').on('click','#Critere4D_detailView_moreAction_LBL_TRANSFORM_AS_NEW_DOCUMENT',function(e){
+			var url = $(this).children('[href]').attr('href');
+			e.stopImmediatePropagation();
+
+			var postData = {
+				"selected_ids": [thisInstance.getRecordId()],
+				"viewname" : 0,
+				"title": app.vtranslate('JS_TRANSFORM_AS_NEW_DOCUMENT'),
+			};
+			var params = {
+				"url": "index.php?module=Documents&view=MoveDocuments",//Select folder
+				"data" : postData
+			};
+			AppConnector.request(params).then(
+				function(data) {
+					var callBackFunction = function(data){
+						thisInstance.registrerSelectFolderSubmit(url);
+					}
+					app.showModalWindow(data,callBackFunction);
+				}
+			);
+			
+			return false;
+		});
+	},
+	
+	registrerSelectFolderSubmit : function(saveUrl){
+		var thisInstance = this;
+		jQuery('#moveDocuments').on('submit',function(e){
+			var formData = jQuery(e.currentTarget).serializeFormData();
+			var params = {
+				url: saveUrl,
+				data: {
+					folderId: formData['folderid'],
+				}
+			};
+				
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : app.vtranslate('JS_TRANSFORM_AS_NEW_DOCUMENT'),
+				'position' : 'html'
+			});
+			
+			AppConnector.request(params).then(
+				function(data) {
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
+					if(data && data.success){
+						var result = data.result;
+						app.hideModalWindow();
+						var  params = {
+							title : app.vtranslate('JS_TRANSFORM_AS_NEW_DOCUMENT'),
+							text : result.message,
+							delay: '2000',
+							type: 'success'
+						}
+						Vtiger_Helper_Js.showPnotify(params);
+						if(result.href)
+							document.location.href = result.href;
+					} else {
+						var  params = {
+							title : app.vtranslate('JS_OPERATION_DENIED'),
+							text : result.message,
+							delay: '2000',
+							type: 'error'
+						}
+						Vtiger_Helper_Js.showPnotify(params);
+					}
+				}
+				, function(error, err){
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
+				}
+			);
+			e.preventDefault();
+		});
+		
+	},
+	
+	registerEventTransferToDocument : function(){
+		var thisInstance = this;
+		$('body').on('click','#Critere4D_detailView_moreAction_LBL_TRANSFER_TO_DOCUMENT',function(e){
+			var url = $(this).children('[href]').attr('href');
+			e.stopImmediatePropagation();
+
+			thisInstance.showSelectDocumentPopup(url);
+			
+			return false;
+		});
+	},
+	
+	showSelectDocumentPopup : function(saveUrl){
+		var thisInstance = this;
+		var params = {
+			'module' : 'Documents',
+			'src_module' : app.getModuleName(),
+			'src_record' : thisInstance.getRecordId(),
+			'multi_select' : false
+		}
+		var popupInstance = Vtiger_Popup_Js.getInstance();
+		popupInstance.show(params, function(responseString){
+			var responseData = JSON.parse(responseString);
+			var relatedIdList = Object.keys(responseData);
+			var params = {
+				url: saveUrl,
+				data: {
+					documentId: relatedIdList[0],
+				}
+			};
+			
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'message' : app.vtranslate('JS_TRANSFER_TO_DOCUMENT'),
+				'position' : 'html'
+			});
+			AppConnector.request(params).then(
+				function(data) {
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
+					if(data && data.success){
+						var result = data.result;
+						app.hideModalWindow();
+						var  params = {
+							title : app.vtranslate('JS_TRANSFER_TO_DOCUMENT'),
+							text : result.message,
+							delay: '2000',
+							type: 'success'
+						}
+						Vtiger_Helper_Js.showPnotify(params);
+						if(result.href)
+							document.location.href = result.href;
+					} else {
+						var  params = {
+							title : app.vtranslate('JS_OPERATION_DENIED'),
+							text : result.message,
+							delay: '2000',
+							type: 'error'
+						}
+						Vtiger_Helper_Js.showPnotify(params);
+					}
+				}
+			);
+		});
+	},
+	
+	
 	/**
 	 * Function to register related list events
 	 */
@@ -255,5 +404,8 @@ Vtiger_Detail_Js("Critere4D_Detail_Js",{},{
 		//Calling registerevents of critere4ds list to handle checkboxs click of related records
 		var listInstance = Vtiger_List_Js.getInstance();
 		listInstance.registerEvents();
+		//ED150907
+		this.registerEventTransformAsNewDocument();
+		this.registerEventTransferToDocument();
 	}
 })

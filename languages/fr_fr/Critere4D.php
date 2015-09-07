@@ -28,6 +28,16 @@ $languageStrings = array(
 	'LBL__COUNTER_' => 'Affectations',
 	'LBL_DATEAPPLICATION' => 'Date d\'application',
 	'LBL_DELETE_RELATIONS' => 'Supprimer les affectations',
+	'LBL_TRANSFORM_AS_NEW_DOCUMENT' => 'Transformer en nouveau document',
+	'LBL_TRANSFORM_AS_NEW_DOCUMENTS' => 'Transformer en nouveaux documents',
+	'LBL_TRANSFER_TO_DOCUMENT' => 'Tranférer vers un document',
+);
+
+$jsLanguageStrings = array(
+	'JS_TRANSFORM_AS_NEW_DOCUMENT' => 'Transformer en nouveau document',
+	'JS_TRANSFORM_AS_NEW_DOCUMENTS' => 'Transformer en nouveaux documents',
+	'JS_TRANSFER_TO_DOCUMENT' => 'Tranférer vers un document',
+	'JS_OPERATION_DENIED' => 'Opération refusée'
 );
 
 ?>
