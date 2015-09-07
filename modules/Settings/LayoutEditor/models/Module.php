@@ -138,17 +138,27 @@ class Settings_LayoutEditor_Module_Model extends Vtiger_Module_Model {
             throw new Exception(vtranslate('LBL_WRONG_FIELD_TYPE', 'Settings::LayoutEditor'), 513);
         }
 
-        $max_fieldid = $db->getUniqueID("vtiger_field");
-		$columnName = 'cf_'.$max_fieldid;
-		$custfld_fieldid = $max_fieldid;
+		//ED150907
+		if($params['withAdvancedOption']){
+			$columnName = $params['fieldName'];
+			$tableName = $params['fieldTable'];
+		}
+		
+		if(!$columnName){//ED150907
+			$max_fieldid = $db->getUniqueID("vtiger_field");
+			$columnName = 'cf_'.$max_fieldid;
+			$custfld_fieldid = $max_fieldid;
+		}
         $moduleName = $this->getName();
 
-        $focus = CRMEntity::getInstance($moduleName);
-        if (isset($focus->customFieldTable)) {
-            $tableName=$focus->customFieldTable[0];
-        } else {
-            $tableName= 'vtiger_'.strtolower($moduleName).'cf';
-        }
+		if(!$tableName){//ED150907
+			$focus = CRMEntity::getInstance($moduleName);
+			if (isset($focus->customFieldTable)) {
+				$tableName=$focus->customFieldTable[0];
+			} else {
+				$tableName= 'vtiger_'.strtolower($moduleName).'cf';
+			}
+		}
 
         $details = $this->getTypeDetailsForAddField($fieldType, $params);
         $uitype = $details['uitype'];

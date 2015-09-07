@@ -651,6 +651,39 @@
                     </label>
                 </div>
             </div>
+            {* ED150907 *}
+            <div class="control-group advancedOptions-toggler">
+                <span class="control-label">
+                    &nbsp;
+                </span>
+                <div class="controls">
+                    <label class="checkbox">
+                        <input type="checkbox" class="checkbox" name="withAdvancedOption" >&nbsp;{vtranslate('LBL_ADVANCED_OPTIONS',$QUALIFIED_MODULE)}
+                    </label>
+                </div>
+            </div>
+            <div class="control-group advancedOptions fieldName hide">
+                <span class="control-label">
+                    &nbsp;{vtranslate('LBL_COLUMN_NAME',$QUALIFIED_MODULE)}
+                </span>
+                <div class="controls">
+                    <input name="fieldName" placeholder="(auto)"/>
+                </div>
+            </div>
+            <div class="control-group advancedOptions fieldTable hide">
+                <span class="control-label">
+                    &nbsp;{vtranslate('LBL_ALTER_TABLE_NAME',$QUALIFIED_MODULE)}
+                </span>
+                <div class="controls">
+                    <span class="row-fluid">
+                        <select class="fieldTypesList span7" name="fieldTable">
+                        {foreach item=TABLE_NAME from=$TABLE_NAMES}
+                            <option value="{$TABLE_NAME}">{$TABLE_NAME}</option>
+                        {/foreach}
+                        </select>
+                    </span>
+                </div>
+            </div>
         </div>
         {include file='ModalFooter.tpl'|@vtemplate_path:'Vtiger'}
     </form>

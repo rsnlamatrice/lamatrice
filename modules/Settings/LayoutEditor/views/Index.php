@@ -37,7 +37,15 @@ class Settings_LayoutEditor_Index_View extends Settings_Vtiger_Index_View {
 		$moduleModel = Settings_LayoutEditor_Module_Model::getInstanceByName($sourceModule);
 		$fieldModels = $moduleModel->getFields();
 		$blockModels = $moduleModel->getBlocks();
-
+		
+		//ED150907 Allow creating field with specified column name and table
+		$focus = CRMEntity::getInstance($moduleModel->getName());
+		$customFieldTable = array();
+		$customFieldTable[$focus->customFieldTable[0]] = $focus->customFieldTable[0];
+		$tableNames = array_combine($focus->tab_name, $focus->tab_name);
+		if($tableNames['vtiger_crmentity'])
+			unset($tableNames['vtiger_crmentity']);
+		$tableNames = array_merge($customFieldTable, $tableNames);
 
 		$blockIdFieldMap = array();
 		$inactiveFields = array();
@@ -53,6 +61,7 @@ class Settings_LayoutEditor_Index_View extends Settings_Vtiger_Index_View {
 			$blockModel->setFields($fieldModelList);
 		}
 
+		
 		$qualifiedModule = $request->getModule(false);
 
 		$viewer = $this->getViewer($request);
@@ -64,6 +73,7 @@ class Settings_LayoutEditor_Index_View extends Settings_Vtiger_Index_View {
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->assign('QUALIFIED_MODULE', $qualifiedModule);
 		$viewer->assign('IN_ACTIVE_FIELDS', $inactiveFields);
+		$viewer->assign('TABLE_NAMES', $tableNames);//ED150907
 		$viewer->view('Index.tpl',$qualifiedModule);
 	}
 

@@ -200,8 +200,13 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		return $viewer->view($tpl, $moduleName, 'true');
 	}
 	
-	//Change la valeur du prix unitaire pour afficher le prix TTC
+	/** ED150000
+	 * Change la valeur du prix unitaire pour afficher le prix TTC
+	 */
 	function addVAT_to_UnitPrice(&$records){
+		if(!$records)
+			return;
+		
 		global $adb;
 		$productIds = array_keys($records);
 		
