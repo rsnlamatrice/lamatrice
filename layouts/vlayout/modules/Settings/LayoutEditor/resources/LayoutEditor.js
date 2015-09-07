@@ -449,7 +449,10 @@ jQuery.Class('Settings_LayoutEditor_Js', {
 				app.showSelect2ElementView(form.find('[name="pickListValues"]'), select2params);
 
 				thisInstance.registerFieldTypeChangeEvent(form);
-
+		
+				//ED50907
+				thisInstance.registerNewFieldAdvancedOptionsEvent(form);
+		
 				var params = app.getvalidationEngineOptions(true);
 				params.onValidationComplete = function(form, valid){
 					if(valid) {
@@ -616,6 +619,19 @@ jQuery.Class('Settings_LayoutEditor_Js', {
                 var pickListOption = form.find('.picklistOption');
 				pickListOption.removeClass('hide');
             }
+		})
+	},
+
+	/** ED150907
+	 * Function to register click event for advanced options while adding custom field
+	 */
+	registerNewFieldAdvancedOptionsEvent : function(form) {
+		var thisInstance = this;
+
+		//register the change event for field types
+		form.find('[name="withAdvancedOption"]').on('click', function(e) {
+			var currentTarget = jQuery(e.currentTarget);
+			currentTarget.parents('.control-group:first').nextAll('.control-group.advancedOptions').toggle();
 		})
 	},
 

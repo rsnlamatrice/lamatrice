@@ -26,7 +26,11 @@ class Settings_LayoutEditor_Field_Action extends Settings_Vtiger_Index_Action {
         $moduleModel = Settings_LayoutEditor_Module_Model::getInstanceByName($moduleName);
         $response = new Vtiger_Response();
         try{
-
+			//ED150907
+			if(!$request->get('withAdvancedOption')){
+				$request->get('fieldName', false);
+				$request->set('fieldTable', false);
+			}
             $fieldModel = $moduleModel->addField($type,$blockId,$request->getAll());
             $fieldInfo = $fieldModel->getFieldInfo();
             $responseData = array_merge(array('id'=>$fieldModel->getId(), 'blockid'=>$blockId, 'customField'=>$fieldModel->isCustomField()),$fieldInfo);

@@ -65,7 +65,12 @@ $languageStrings = array(
 	'Checkbox' 					   => 'Case à cocher',
 	'TextArea' 					   => 'Zone de texte',
 	'Skype'						   => 'Skype',
-	'Time'						   => 'Heure',	
+	'Time'						   => 'Heure',
+	
+	//ED150907
+	'LBL_ADVANCED_OPTIONS'		=> 'Options avancées',
+	'LBL_ALTER_TABLE_NAME'		=> 'Table à modifier',
+	'LBL_COLUMN_NAME'			=> 'Nom de la colonne'
 );
 
 $jsLanguageStrings = array(
