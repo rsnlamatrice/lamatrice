@@ -52,6 +52,8 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 		var ignoreEmpty = jQuery('#ignoreEmpty').val();
 		var url = 'module='+moduleName+'&view=FindDuplicates&fields='+fields+'&ignoreEmpty='+ignoreEmpty;
 
+		//ED150910 TODO ajouter viewname, search_key, selected_ids, ...
+			
 		jQuery('#listViewNextPageButton').on('click',function() {
 			var pageLimit = jQuery('#pageLimit').val();
 			var noOfEntries = jQuery('#noOfEntries').val();
@@ -264,6 +266,9 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 				"view": "FindDuplicatesAjax", "mode": "getRecordsCount",
 				"fields": fields, "ignoreEmpty":ignoreEmpty
 			}
+			
+			//ED150910 TODO ajouter viewname, search_key, selected_ids, ...
+			
 			AppConnector.request(postData).then(
 				function(data) {
 					var response = JSON.parse(data);

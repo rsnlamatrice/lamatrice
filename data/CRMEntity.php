@@ -81,8 +81,8 @@ class CRMEntity {
 
 
 		foreach ($this->tab_name as $table_name) {
-/*
-echo "\r\nsaveentity<pre>";
+
+/*echo "\r\nsaveentity<pre>";
 var_dump($table_name);
 var_dump($fileid);
 echo "</pre>//saveentity\r\n";
@@ -93,7 +93,7 @@ echo "</pre>//saveentity\r\n";
 				$this->insertIntoEntityTable($table_name, $module, $fileid);
 			}
 		}
-		
+
 		//Calling the Module specific save code
 		$this->save_module($module);
 
@@ -396,6 +396,11 @@ echo "</pre>//saveentity\r\n";
 
 		if (!isset($_privatecache[$cachekey])) {
 			$result = $adb->pquery($sql, $params);
+			//ED150910
+			if(!$result){
+				$adb->echoError("DEBUG Erreur dans CRMEntity->insertIntoEntityTable($table_name, $module)");
+				
+			}
 			$noofrows = $adb->num_rows($result);
 
 			if (CRMEntity::isBulkSaveMode()) {
@@ -532,7 +537,7 @@ echo "</pre>//saveentity\r\n";
 			if($fldvalue == '(null)')
 				$fldvalue = null;
 			elseif ($fldvalue == '')
-				if ($uitype == 402) {
+				if ($uitype == 10 || $uitype == 402) {
 					$fldvalue = null;
 				}
 				else {
@@ -2668,15 +2673,21 @@ var_dump($params);*/
 			ModTracker::unLinkRelation($module, $crmid, $with_module, $with_crmid);
 		}
 	}
+	
 	/**
 	 * Function which will give the basic query to find duplicates
 	 * @param <String> $module
 	 * @param <String> $tableColumns
 	 * @param <String> $selectedColumns
 	 * @param <Boolean> $ignoreEmpty
+	 * ED150910
+	 * @param <String> $source_query : Query instead of "from $tableName"
+	 * @param <String> $among_query : Query instead of "in $tableName"
 	 * @return string
+	 * ED150910 : vtiger_users_last_import seams to be useless
 	 */
-    function getQueryForDuplicates($module, $tableColumns, $selectedColumns = '', $ignoreEmpty = false) {
+    function getQueryForDuplicates($module, $tableColumns, $selectedColumns = '', $ignoreEmpty = false
+										   , $source_query = false, $among_query = false) {
 		if(is_array($tableColumns)) {
 			$tableColumnsString = implode(',', $tableColumns);
 		}
@@ -2712,15 +2723,39 @@ var_dump($params);*/
 			}
 		}
 
+		if($source_query){
+			if($source_query == $among_query){
+				$fromClause .= " INNER JOIN ($source_query) AS t_source
+					ON t_source." . $this->table_index . " = vtiger_crmentity.crmid";
+			}
+			elseif($among_query){
+				$fromClause .= " INNER JOIN (
+						SELECT * FROM ($source_query) t_source
+						UNION
+						SELECT * FROM ($among_query) t_among
+					) AS t_allref
+					ON t_allref." . $this->table_index . " = vtiger_crmentity.crmid";
+			}
+			else {
+				$fromClause .= " INNER JOIN ($source_query) AS t_source
+					ON t_source." . $this->table_index . " = vtiger_crmentity.crmid";
+			}
+		}
+		
         if (isset($selectedColumns) && trim($selectedColumns) != '') {
-            $sub_query = "SELECT $selectedColumns FROM $this->table_name AS t " .
-                    " INNER JOIN vtiger_crmentity AS crm ON crm.crmid = t." . $this->table_index;
-            // Consider custom table join as well.
-            if (isset($this->customFieldTable)) {
-                $sub_query .= " LEFT JOIN " . $this->customFieldTable[0] . " tcf ON tcf." . $this->customFieldTable[1] . " = t.$this->table_index";
-            }
-            $sub_query .= " WHERE crm.deleted=0 GROUP BY $selectedColumns HAVING COUNT(*)>1";
-        } else {
+			$sub_query = "SELECT $selectedColumns FROM $this->table_name AS t " .
+					" INNER JOIN vtiger_crmentity AS crm ON crm.crmid = t." . $this->table_index;
+			if($source_query){
+				$sub_query .= " INNER JOIN ($source_query) AS t_source
+					ON t_source." . $this->table_index . " = vtiger_crmentity.crmid";
+			}
+			// Consider custom table join as well.
+			if (isset($this->customFieldTable)) {
+				$sub_query .= " LEFT JOIN " . $this->customFieldTable[0] . " tcf ON tcf." . $this->customFieldTable[1] . " = t.$this->table_index";
+			}
+			$sub_query .= " WHERE crm.deleted=0 GROUP BY $selectedColumns HAVING COUNT(*)>1";
+		}
+		else{
             $sub_query = "SELECT $tableColumnsString $fromClause $whereClause GROUP BY $tableColumnsString HAVING COUNT(*)>1";
         }
 
@@ -2730,10 +2765,10 @@ var_dump($params);*/
 			$duplicateCheckClause .= " ifnull($tableColumn,'null') = ifnull(temp.$tableInfo[1],'null')";
 			if (count($tableColumns) != $i++) $duplicateCheckClause .= " AND ";
 		}
-
         $query = $selectClause . $fromClause .
-                " LEFT JOIN vtiger_users_last_import ON vtiger_users_last_import.bean_id=" . $this->table_name . "." . $this->table_index .
-                " INNER JOIN (" . $sub_query . ") AS temp ON " . $duplicateCheckClause .
+                //ED150910 useless " LEFT JOIN vtiger_users_last_import ON vtiger_users_last_import.bean_id=" . $this->table_name . "." . $this->table_index .
+                " INNER JOIN (" . $sub_query . ") AS temp
+					ON " . $duplicateCheckClause .
                 $whereClause .
                 " ORDER BY $tableColumnsString," . $this->table_name . "." . $this->table_index . " ASC";
         return $query;

@@ -51,8 +51,24 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
         $pageLimit = $paging->getPageLimit();
 		$ignoreEmpty = $this->get('ignoreEmpty');
 
+		//ED150910
+		$source_query = $this->get('source_query');//selected ids
+		$among_query = $this->get('among_query');//among selected ids
+		
+		/*echo('<pre>');
+		echo('source_query : '. $source_query);
+		echo('</pre>');
+		echo('<pre>');
+		echo('among_query : '. $among_query);
+		echo('</pre>');*/
+			
         $focus = CRMEntity::getInstance($module);
-        $query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty);
+        $query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
+/*echo(__FILE__);
+echo('<pre>');
+echo($query);
+echo('</pre>');
+die(__FILE__);*/
 
 		$query .= " LIMIT $startIndex, ". ($pageLimit+1);
 		$result = $db->pquery($query, array());
@@ -128,7 +144,12 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			}
 			$focus = CRMEntity::getInstance($module);
 			$ignoreEmpty = $this->get('ignoreEmpty');
-			$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty);
+
+			//ED150910
+			$source_query = $this->get('source_query');//selected ids
+			$among_query = $this->get('among_query');//among selected ids
+			
+			$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
 
 			$position = stripos($query, 'from');
 			if ($position) {

@@ -770,7 +770,9 @@ $languageStrings = array(
 	'state'                => 'Département'               ,
         
 	'LBL_PRINT_RELATIONS'                => 'Imprimer', 
-	'CronTasks'                => 'Tâches planifiées', 
+	'CronTasks'                => 'Tâches planifiées',
+	
+	'Record Id'                => 'Identifiant', 
 	
 );
 $jsLanguageStrings = array(
@@ -896,5 +898,6 @@ $jsLanguageStrings = array(
 	'SINGLE_SalesOrder'             => 'Dépôt-vente',
 	'SINGLE_PurchaseOrder'          => 'Document Fournisseur',
         
-        'JS_HELP'                       => 'Aide',
+    'JS_HELP'                       => 'Aide',
+	'JS_SELECT_RECORDS_TO_MERGE_FROM_SAME_GROUP' => 'Veuillez sélectionner dans un même groupe les enregistrements à fusionner'
 );
