@@ -2691,7 +2691,9 @@ var_dump($params);*/
 		if(is_array($tableColumns)) {
 			$tableColumnsString = implode(',', $tableColumns);
 		}
-        $selectClause = "SELECT " . $this->table_name . "." . $this->table_index . " AS recordid," . $tableColumnsString;
+        $selectClause = "SELECT " . $this->table_name . "." . $this->table_index . " AS recordid,"
+			. 'vtiger_crmentity.label AS record_label, '//ED150910
+			. $tableColumnsString;
 
         // Select Custom Field Table Columns if present
         if (isset($this->customFieldTable))

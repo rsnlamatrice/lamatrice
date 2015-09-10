@@ -60,23 +60,23 @@
 					</td>
 					{assign var=sameRowValues value=true}
 					{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
-					{if $LISTVIEW_HEADER->get('name') eq 'recordid'}
-						<td nowrap style='border-bottom:1px solid #DDD;'>
-							<a href="{$MODULE_MODEL->getDetailViewUrl($RECORD.recordid)}">{$RECORD[$LISTVIEW_HEADER->get('name')]}</a>
-						</td>
-					{else}
-						<td nowrap style='border-bottom:1px solid #DDD;'>
-							{$LISTVIEW_HEADER->getDisplayValue($RECORD[$LISTVIEW_HEADER->get('column')], $RECORD.recordid)}
-						</td>
-					{/if}
+						{if $LISTVIEW_HEADER->get('name') eq 'recordid'}
+							<td nowrap style='border-bottom:1px solid #DDD;'>
+								<a href="{$MODULE_MODEL->getDetailViewUrl($RECORD.recordid)}">{$RECORD['record_label']} #{$RECORD[$LISTVIEW_HEADER->get('name')]}</a>
+							</td>
+						{else}
+							<td nowrap style='border-bottom:1px solid #DDD;'>
+								{$LISTVIEW_HEADER->getDisplayValue($RECORD[$LISTVIEW_HEADER->get('column')], $RECORD.recordid)}
+							</td>
+						{/if}
 					{/foreach}
 					<td style='border-bottom:1px solid #DDD;'>
 						<input type="checkbox" data-id='{$RECORD.recordid}' name="mergeRecord" data-group="{$GROUP_NAME}"/>
 					</td>
 					{if $recordCount eq 0}
-					<td align='center' rowspan="{$groupCount}" style="border-left:1px solid #DDD;border-bottom:1px solid #DDD;vertical-align: middle;text-align: center">
-						<input type="button" value="{vtranslate('LBL_MERGE', $MODULE)}" name="merge" class="btn btn-success" data-group="{$GROUP_NAME}">
-					</td>
+						<td align='center' rowspan="{$groupCount}" style="border-left:1px solid #DDD;border-bottom:1px solid #DDD;vertical-align: middle;text-align: center">
+							<input type="button" value="{vtranslate('LBL_MERGE', $MODULE)}" name="merge" class="btn btn-success" data-group="{$GROUP_NAME}">
+						</td>
 					{/if}
 					{assign var=recordCount value=$recordCount+1}
 				</tr>

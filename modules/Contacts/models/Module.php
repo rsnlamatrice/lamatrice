@@ -9,6 +9,19 @@
  * ************************************************************************************/
 
 class Contacts_Module_Model extends Vtiger_Module_Model {
+
+	/** ED150910
+	 * Function that returns all fields usable for merging
+	 */
+	public function getMergeableFields(){
+		$fields = parent::getMergeableFields();
+		//gestion spécifique
+		unset($fields['account_id']);
+		unset($fields['reference']);
+		
+		return $fields;
+	}
+	
 	/**
 	 * Function to get the Quick Links for the module
 	 * @param <Array> $linkParams
