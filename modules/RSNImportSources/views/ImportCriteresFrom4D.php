@@ -270,7 +270,9 @@ class RSNImportSources_ImportCriteresFrom4D_View extends RSNImportSources_Import
 		
 		//'categorieducritere' => 'categorie',
 		$fieldName = 'categorie';
-		if($record->get($fieldName))
+		if(!$record->get($fieldName))//critère par défaut : Divers
+			$record->set($fieldName, 'Divers');
+		elseif(!$record->get($fieldName))
 			RSNImportSources_Utils_Helper::checkPickListValue('Critere4D', $fieldName, $fieldName, $record->get($fieldName));
 		
 			
