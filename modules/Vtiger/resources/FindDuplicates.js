@@ -119,7 +119,10 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{},{
 					return false;
 				}
 				var popupInstance = Vtiger_Popup_Js.getInstance();
-				var url = 'module='+app.getModuleName()+'&view=MergeRecord&records='+records;
+				//ED150910
+				var view = element.data('view') ? element.data('view') : 'MergeRecord'
+				, url = 'module='+app.getModuleName()+'&view='+view+'&records='+records;
+					
 				thisInstance.popupWindowInstance = popupInstance.show(url, '', '', '', function(params){
 					thisInstance.mergeRecordPopupCallback();
 				});

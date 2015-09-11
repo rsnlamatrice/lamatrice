@@ -88,6 +88,9 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 		$dataModelInstance->set('ignoreEmpty', $ignoreEmptyValue);
 
 		if(!$this->listViewEntries) {
+			$dataModelInstance->set('source_query', $this->getFromQuery($request));
+			$dataModelInstance->set('among_query', $this->getAmongQuery($request));
+			
 			$this->listViewEntries = $dataModelInstance->getListViewEntries($pagingModel);
 		}
 
@@ -131,6 +134,10 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 		$duplicateSearchFields = $request->get('fields');
 		$dataModelInstance = Vtiger_FindDuplicate_Model::getInstance($moduleName);
 		$dataModelInstance->set('fields', $duplicateSearchFields);
+		//ED150910
+		$dataModelInstance->set('source_query', $this->getFromQuery($request));
+		$dataModelInstance->set('among_query', $this->getAmongQuery($request));
+		
 		$count = $dataModelInstance->getRecordCount();
 
 		$result = array();
@@ -149,7 +156,7 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 	 * @return <String> export query
 	 */
 	function getFromQuery(Vtiger_Request $request) {
-		return getRecordSelectionQuery($request, 'From');
+		return $this->getRecordSelectionQuery($request, 'From');
 	}
 	
 	/** ED150626
@@ -158,7 +165,7 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 	 * @return <String> export query
 	 */
 	function getAmongQuery(Vtiger_Request $request) {
-		return getRecordSelectionQuery($request, 'Among');
+		return $this->getRecordSelectionQuery($request, 'Among');
 	}
 	
 	/** ED150626
@@ -168,14 +175,20 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 	 */
 	private function getRecordSelectionQuery(Vtiger_Request $request, $params_prefix) {
 		$currentUser = Users_Record_Model::getCurrentUserModel();
-		$mode = $request->getMode();
+		$mode = $request->get($params_prefix === 'Among' ? 'among_ids' : 'source_ids');
 		$cvId = $request->get('viewname');
-		$moduleName = $request->get('source_module');
+		$moduleName = $request->get('module');
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
 		$queryGenerator = new QueryGenerator($moduleName, $currentUser);
-		$queryGenerator->initForCustomViewById($cvId);
-		$fieldInstances = $this->moduleFieldInstances;
-
+		
+		if($mode == $params_prefix.'AllDB'){
+			$queryGenerator->initForAllCustomView();
+		}
+		else
+			$queryGenerator->initForCustomViewById($cvId);
+		/*$fieldInstances = $moduleModel->getFields();
+		
         $accessiblePresenceValue = array(0,2);
 		foreach($fieldInstances as $field) {
             // Check added as querygenerator is not checking this for admin users
@@ -184,49 +197,100 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
                 $fields[] = $field->getName();
             }
         }
-		$queryGenerator->setFields($fields);
+		$queryGenerator->setFields($fields);*/
+		$queryGenerator->setFields(array('id'));
+		
+		if($mode != $params_prefix.'SelectedRecords'
+		&& $mode != $params_prefix.'AllDB'){
+			$searchKey = $request->get('search_key');
+			$searchValue = $request->get('search_value');
+			$operator = $request->get('operator');
+			if(!empty($operator)) {
+				$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
+			}
+		}
+		
 		$query = $queryGenerator->getQuery();
 
+		//Inventory
 		if(in_array($moduleName, getInventoryModules())){
 			$query = $this->moduleInstance->getFindDuplicateFromQuery($this->focus, $query);
 		}
 
 		$this->accessibleFields = $queryGenerator->getFields();
 
+		//source_ids=FromSelectedRecords&among_ids=AmongAllData
 		switch($mode) {
-			case $params_prefix.'AllData' :	return $query;
-									break;
+			case $params_prefix.'AllDB' :
+				return $query;
+				break;
 
-			case $params_prefix.'CurrentPage' :	$pagingModel = new Vtiger_Paging_Model();
-										$limit = $pagingModel->getPageLimit();
+			case $params_prefix.'AllView' :
+				return $query;
+				break;
 
-										$currentPage = $request->get('page');
-										if(empty($currentPage)) $currentPage = 1;
+			case $params_prefix.'CurrentPage' :
+				$pagingModel = new Vtiger_Paging_Model();
+				$limit = $pagingModel->getPageLimit();
 
-										$currentPageStart = ($currentPage - 1) * $limit;
-										if ($currentPageStart < 0) $currentPageStart = 0;
-										$query .= ' LIMIT '.$currentPageStart.','.$limit;
+				$currentPage = $request->get('page');
+				if(empty($currentPage)) $currentPage = 1;
 
-										return $query;
-										break;
+				$currentPageStart = ($currentPage - 1) * $limit;
+				if ($currentPageStart < 0) $currentPageStart = 0;
+				$query .= ' LIMIT '.$currentPageStart.','.$limit;
 
-			case $params_prefix.'SelectedRecords' :	$idList = $this->getRecordsListFromRequest($request);
-											$baseTable = $this->moduleInstance->get('basetable');
-											$baseTableColumnId = $this->moduleInstance->get('basetableid');
-											if(!empty($idList)) {
-												if(!empty($baseTable) && !empty($baseTableColumnId)) {
-													$idList = implode(',' , $idList);
-													$query .= ' AND '.$baseTable.'.'.$baseTableColumnId.' IN ('.$idList.')';
-												}
-											} else {
-												$query .= ' AND '.$baseTable.'.'.$baseTableColumnId.' NOT IN ('.implode(',',$request->get('excluded_ids')).')';
-											}
-											return $query;
-											break;
+				return $query;
+
+			case $params_prefix.'SelectedRecords' :
+				$idList = $this->getRecordsListFromRequest($request);
+				$baseTable = $moduleModel->get('basetable');
+				$baseTableColumnId = $moduleModel->get('basetableid');
+				if(!empty($idList)) {
+					if(!empty($baseTable) && !empty($baseTableColumnId)) {
+						$idList = implode(',' , $idList);
+						$query .= ' AND '.$baseTable.'.'.$baseTableColumnId.' IN ('.$idList.')';
+					}
+				} else {
+					$query .= ' AND '.$baseTable.'.'.$baseTableColumnId.' NOT IN ('.implode(',',$request->get('excluded_ids')).')';
+				}
+				return $query;
 
 
-			default :	return $query;
-						break;
+			default :
+				return $query;
+		}
+	}
+	
+	
+
+	/** ED150910 copied from views/MassActionAjax.php
+	 * Function returns the record Ids selected in the current filter
+	 * @param Vtiger_Request $request
+	 * @return integer
+	 */
+	private function getRecordsListFromRequest(Vtiger_Request $request) {
+		$cvId = $request->get('viewname');
+		$selectedIds = $request->get('selected_ids');
+		$excludedIds = $request->get('excluded_ids');
+
+		if(!empty($selectedIds) && $selectedIds != 'all') {
+			if(!empty($selectedIds) && count($selectedIds) > 0) {
+				return $selectedIds;
+			}
+		}
+		
+		$customViewModel = CustomView_Record_Model::getInstanceById($cvId);
+		if($customViewModel) {
+			$searchKey = $request->get('search_key');
+			$searchValue = $request->get('search_value');
+			$operator = $request->get('operator');
+			if(!empty($operator)) {
+				$customViewModel->set('operator', $operator);
+				$customViewModel->set('search_key', $searchKey);
+				$customViewModel->set('search_value', $searchValue);
+			}
+			return $customViewModel->getRecordIds($excludedIds,$request->getModule());
 		}
 	}
 }

@@ -1994,4 +1994,30 @@ function http_request(
     return $ret; 
 } 
 
+/** ED150910
+ * Returns a clean string for multipicklist field value
+ * @param $values : may be a string or an array
+ * @return : string using ' |##| ' as separator
+ */
+function clean_pickList_values_string($values){
+	$separator = ' |##| ';
+	if(is_array($values)){
+		$arrValues = array();
+		foreach($values as $value)
+			if($value){
+				//$value is already a collection of values
+				if(strpos($value, $separator) !== false){
+					$arrValues = array_merge($arrValues, explode($separator, $value));
+				}
+				else
+					$arrValues[] = $value;
+			}
+		//ensure to remove duplicate
+		$arrValues = array_combine($arrValues, $arrValues);
+		unset($arrValues['']);
+		return implode($separator, $arrValues);
+	}
+	return preg_replace('/(^'.preg_quote(' |##| ').')|('.preg_quote(' |##|  |##| ').')|('.preg_quote(' |##| ').'$)' .'/'
+							   , '', $values);
+}
 ?>

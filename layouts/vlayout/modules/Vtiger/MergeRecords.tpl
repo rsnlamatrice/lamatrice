@@ -43,8 +43,14 @@
 					</td>
 					{foreach item=RECORD from=$RECORDMODELS name=recordList}
 						<td>
-							<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio name="{$FIELD->getName()}"
-							data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+							{*ED150910*}
+							{if $FIELD->get('uitype') == 33 }
+								<input checked type=checkbox name="{$FIELD->getName()}[]"
+								data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+							{else}
+								<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio name="{$FIELD->getName()}"
+								data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+							{/if}
 							 &nbsp;&nbsp;{$RECORD->getDisplayValue($FIELD->getName())}
 						</td>
 					{/foreach}

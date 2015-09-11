@@ -289,7 +289,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			
 			$account_id = $account->getId();
 			$this->set('account_id', $account_id);
-			$this->set('reference', 1);// contact referent du compte
+			$this->set('reference', 1);// contact referent du nouveau compte
 			
 			$this->save();
 			return $account;
@@ -525,5 +525,61 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		
 		global $adb;
 		return $adb->pquery($query, $params);
+	}
+	
+	
+
+	/** ED150910
+	 * Function to transfer related records of parent records to this record
+	 * @param <Array> $recordIds
+	 * @return <Boolean> true/false
+	 *
+	 * Called from Vtiger_ProcessDuplicates_Action
+	 * New values are already set.
+	 */
+	public function transferRelationInfoOfRecords($recordIds = array()) {
+		if ($recordIds) {
+			
+			$mainAccountModel = $this->getAccountRecordModel(false);
+			foreach($recordIds as $recordId){
+				$deleteRecord = Vtiger_Record_Model::getInstanceById($recordId, $this->getModuleName());
+				$deleteAccount = $deleteRecord->getAccountRecordModel(false);
+				if($deleteAccount){
+					if( ! $mainAccountModel){
+						// Transfers account owner
+						$this->set('mode', 'edit');
+						$this->set('reference', $deleteRecord->get('reference'));
+						$this->set('account_id', $deleteAccount->getId());
+						$this->save();
+						$mainAccountModel = $deleteAccount;
+					}
+					elseif($mainAccountModel->getId() != $deleteAccount->getId()){
+						// Transfers account related data
+						// only if this contact to delete is the "reference"
+						$deleteAccountContacts = $deleteAccount->getContactsRecordModels();
+						$doDeleteAccount = true;
+						if(count($deleteAccountContacts) > 1){
+							//Not alone
+							
+							if($deleteRecord->get('reference')){
+								// every one follow me ! (done above in $mainAccountModel->transferRelationInfoOfRecords())
+							}
+							else //some one else is the "reference"
+								$doDeleteAccount = false;
+						}
+						if($deleteRecord->get('reference')){
+							$mainAccountModel->transferRelationInfoOfRecords(array($deleteAccount->getId()));
+						}
+						if($doDeleteAccount)
+							$deleteAccount->delete();
+						
+					}
+				}
+			}
+			
+			parent::transferRelationInfoOfRecords($recordIds);
+			
+		}
+		return true;
 	}
 }

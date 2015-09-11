@@ -51,13 +51,29 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
         $pageLimit = $paging->getPageLimit();
 		$ignoreEmpty = $this->get('ignoreEmpty');
 
+		//ED150910
+		$source_query = $this->get('source_query');//selected ids
+		$among_query = $this->get('among_query');//among selected ids
+		
+		/*echo('<pre>');
+		echo('source_query : '. $source_query);
+		echo('</pre>');
+		echo('<pre>');
+		echo('among_query : '. $among_query);
+		echo('</pre>');*/
+			
         $focus = CRMEntity::getInstance($module);
-        $query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty);
+        $query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
+/*echo(__FILE__);
+echo('<pre>');
+echo($query);
+echo('</pre>');
+die(__FILE__);*/
 
 		$query .= " LIMIT $startIndex, ". ($pageLimit+1);
 		$result = $db->pquery($query, array());
         $rows = $db->num_rows($result);
-        $this->result = $result;
+		$this->result = $result;
 
         $group = 'group0';
         $temp = $fieldValues = array(); $groupCount = 0;
@@ -80,7 +96,9 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 		for ($i=0; $i<$rows; $i++) {
 			$row = $entries[$i];
             if($i != 0) {
-                $slicedArray = array_slice($row, 2);
+                //ED150910 I have added a record_label column $slicedArray = array_slice($row, 2);
+				// nota : $row[0] and $row['recordid'] exist, so double counter
+                $slicedArray = array_slice($row, 4);
                 array_walk($temp, 'lower_array');
                 array_walk($slicedArray, 'lower_array');
                 $arrDiff = array_diff($temp, $slicedArray);
@@ -92,8 +110,11 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
                 $group = "group".$groupCount;
             }
             $fieldValues[$group][$groupRecordCount]['recordid'] = $row['recordid'];
-            foreach($row as $field => $value) {
-                if($i == 0 && $field != 'recordid') $temp[$field] = $value;
+			$nColumn = 0;
+			foreach($row as $field => $value) {
+                //ED150910 I have added a record_label column $slicedArray = array_slice($row, 2);
+                // nota : $row[0] and $row['recordid'] exist, so double counter
+                if($i == 0 && $nColumn++ >= 4 /*$field != 'recordid' && $field != 'record_label'*/) $temp[$field] = $value;
                 $fieldModel = $fieldModels[$field];
                 $resultRow[$field] = $value;
             }
@@ -128,7 +149,12 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			}
 			$focus = CRMEntity::getInstance($module);
 			$ignoreEmpty = $this->get('ignoreEmpty');
-			$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty);
+
+			//ED150910
+			$source_query = $this->get('source_query');//selected ids
+			$among_query = $this->get('among_query');//among selected ids
+			
+			$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
 
 			$position = stripos($query, 'from');
 			if ($position) {
