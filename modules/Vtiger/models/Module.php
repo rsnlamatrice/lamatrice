@@ -493,6 +493,12 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		return $this->fields;
 	}
 
+	/** ED150910
+	 * Function that returns all fields usable for merging
+	 */
+	public function getMergeableFields(){
+		return $this->getFields();
+	}
 
 	/**
 	 * Function gives fields based on the type

@@ -14,7 +14,7 @@ class Vtiger_MergeRecord_View extends Vtiger_Popup_View {
 		$records = explode(',', $records);
 		$module = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($module);
-		$fieldModels =  $moduleModel->getFields();
+		$fieldModels =  $moduleModel->getMergeableFields();//ED150910 getMergeableFields instead of getFields
 
 		foreach($records as $record) {
 			$recordModels[] = Vtiger_Record_Model::getInstanceById($record);

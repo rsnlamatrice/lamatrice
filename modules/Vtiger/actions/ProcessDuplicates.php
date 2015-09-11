@@ -8,6 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 
+//Comming after FindDuplicates and MergeRecord
 class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 	function checkPermission(Vtiger_Request $request) {
 		$module = $request->getModule();
@@ -29,10 +30,22 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 		$primaryRecord = $request->get('primaryRecord');
 		$primaryRecordModel = Vtiger_Record_Model::getInstanceById($primaryRecord, $moduleName);
 
-		$fields = $moduleModel->getFields();
+		//Affectation des nouvelles valeurs
+		$fields = $moduleModel->getMergeableFields();//ED150910 getMergeableFields instead of getFields
 		foreach($fields as $field) {
 			$fieldValue = $request->get($field->getName());
 			if($field->isEditable()) {
+				//ED150910
+				if(is_array($fieldValue)){
+					switch($field->get('uitype')){
+						case 33 :
+							$fieldValue = clean_pickList_values_string($fieldValue);
+							break;
+						default :
+							$fieldValue = implode(',', $fieldValue);
+							break;
+					}
+				}
 				$primaryRecordModel->set($field->getName(), $fieldValue);
 			}
 		}

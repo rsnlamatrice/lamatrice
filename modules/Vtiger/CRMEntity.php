@@ -186,8 +186,16 @@ class Vtiger_CRMEntity extends CRMEntity {
 
 	/**
 	 * Function which will give the basic query to find duplicates
+	 * ED150910 SIC does this function really used ? see data/CRMEntity.php getQueryForDuplicates()
+	 * ED150910 : vtiger_users_last_import seams to be useless
 	 */
 	function getDuplicatesQuery($module,$table_cols,$field_values,$ui_type_arr,$select_cols='') {
+		
+		var_dump("DEBUG ED150910 : Recherche de l'éventuelle utilisation de cette fonction getDuplicatesQuery", __FILE__);
+		echo_callstack();
+		die("DEBUG ED150910 : Recherche de l'éventuelle utilisation de cette fonction getDuplicatesQuery");
+		
+		
 		$select_clause = "SELECT ". $this->table_name .".".$this->table_index ." AS recordid, vtiger_users_last_import.deleted,".$table_cols;
 
 		// Select Custom Field Table Columns if present

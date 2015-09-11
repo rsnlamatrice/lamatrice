@@ -211,7 +211,7 @@ class Critere4D_ToDocumentAjax_Action extends Vtiger_MassDelete_Action {
 		";
 		$result = $db->pquery($query, array(
 							$sourceRecordModel->get('createdtime')
-							, $sourceRecordModel->get('modifiedtime')
+							, $sourceRecordModel->get('createdtime')
 							, $documentId));
 		if(!$result){
 			return;
