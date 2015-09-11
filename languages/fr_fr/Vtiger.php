@@ -705,7 +705,7 @@ $languageStrings = array(
 	'Left Panel Show/Hide'	=> 'Masque/affiche le panneau gauche',
         
         'LBL_AVAILABLE_FIELDS'              => 'Champs disponibles', 
-	'LBL_MERGE'                         => 'Fusionner',
+	'LBL_MERGE'                         => 'Fusionner les contacts',
 	'LBL_MERGING_CRITERIA_SELECTION'    => 'Critère de sélection de la fusion',
 	'LBL_MERGE_RECORDS_DESCRIPTION'     => 'Le premier enregistrement sera retenu après la fusion. Vous pouvez sélectionner les valeurs à conserver.
             Les autres enregistrements seront supprimés mais les informations liées seront transférées.',
@@ -899,5 +899,6 @@ $jsLanguageStrings = array(
 	'SINGLE_PurchaseOrder'          => 'Document Fournisseur',
         
     'JS_HELP'                       => 'Aide',
-	'JS_SELECT_RECORDS_TO_MERGE_FROM_SAME_GROUP' => 'Veuillez sélectionner dans un même groupe les enregistrements à fusionner'
+	'JS_SELECT_RECORDS_TO_MERGE_FROM_SAME_GROUP' => 'Veuillez sélectionner dans un même groupe les enregistrements à fusionner',
+	'JS_SELECT_ATLEAST_TWO_RECORD_FOR_MERGING' => 'Veuillez sélectionner au moins deux enregistrements pour effectuer la fusion',
 );

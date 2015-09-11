@@ -181,7 +181,12 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
 		$queryGenerator = new QueryGenerator($moduleName, $currentUser);
-		$queryGenerator->initForCustomViewById($cvId);
+		
+		if($mode == $params_prefix.'AllDB'){
+			$queryGenerator->initForAllCustomView();
+		}
+		else
+			$queryGenerator->initForCustomViewById($cvId);
 		/*$fieldInstances = $moduleModel->getFields();
 		
         $accessiblePresenceValue = array(0,2);
@@ -195,7 +200,8 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 		$queryGenerator->setFields($fields);*/
 		$queryGenerator->setFields(array('id'));
 		
-		if($mode != $params_prefix.'SelectedRecords'){
+		if($mode != $params_prefix.'SelectedRecords'
+		&& $mode != $params_prefix.'AllDB'){
 			$searchKey = $request->get('search_key');
 			$searchValue = $request->get('search_value');
 			$operator = $request->get('operator');
@@ -215,7 +221,11 @@ class Vtiger_FindDuplicates_View extends Vtiger_List_View {
 
 		//source_ids=FromSelectedRecords&among_ids=AmongAllData
 		switch($mode) {
-			case $params_prefix.'AllData' :
+			case $params_prefix.'AllDB' :
+				return $query;
+				break;
+
+			case $params_prefix.'AllView' :
 				return $query;
 				break;
 

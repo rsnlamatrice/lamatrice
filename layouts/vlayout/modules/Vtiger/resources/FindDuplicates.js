@@ -165,6 +165,7 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 
 	/**
 	 * Function registers event for merge button
+	 * ED150910 manage merge_accounts
 	 */
 	registerMergeRecordEvent : function(cb) {
 		var thisInstance = this;
@@ -196,6 +197,10 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 				}
 				var popupInstance = Vtiger_Popup_Js.getInstance();
 				var url = 'module='+app.getModuleName()+'&view=MergeRecord&records='+records;
+				//ED150910
+				if(element.data('merge-mode'))
+					url += '&merge-mode=' + element.data('merge-mode');
+					
 				thisInstance.popupWindowInstance = popupInstance.show(url, '', '', '', function(params){
 					thisInstance.mergeRecordPopupCallback();
 				});

@@ -170,12 +170,23 @@ class QueryGenerator {
 		$this->initForCustomViewById($viewId);
 	}
 
+	/** ED150910
+	 * Initialize for the "All" custom view
+	 */
+	public function initForAllCustomView() {
+		$customView = new CustomView($this->module);
+		$viewId = $customView->getViewIdByName('All', $this->module);
+		$this->initForCustomViewById($viewId);
+	}
+
 	public function initForCustomViewById($viewId) {
 		
 		/* ED150121
 		 * on ne passe jamais ici lors du chargement initial de la page
+		 * ED150910
+		 * 	SIC...
 		 */
-		
+					
 		$customView = new CustomView($this->module);
 		$this->customViewColumnList = $customView->getColumnsListByCvid($viewId);
 		foreach ($this->customViewColumnList as $customViewColumnInfo) {

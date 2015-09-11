@@ -48,7 +48,7 @@
 							</label>
 						</div>
 						<div class="row-fluid" style="height:30px">
-							<label><input type="radio"  name="source_ids" value="FromAllData" />
+							<label><input type="radio"  name="source_ids" value="FromAllView" />
 							&nbsp;Depuis toutes les données de la vue
 							</label>
 						</div>
@@ -71,8 +71,14 @@
 							</label>
 						</div>
 						<div class="row-fluid" style="height:30px">
-							<label><input type="radio"  name="among_ids" value="AmongAllData" checked="checked"/>
-							&nbsp;Parmi tous les enregistrements
+							<label><input type="radio"  name="among_ids" value="AmongAllView"
+										   checked="checked" />
+							&nbsp;Depuis toutes les données de la vue
+							</label>
+						</div>
+						<div class="row-fluid" style="height:30px">
+							<label><input type="radio"  name="among_ids" value="AmongAllDB"/>
+							&nbsp;Parmi toute la base de données (très long !)
 							</label>
 						</div>
 					</div>
