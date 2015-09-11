@@ -21,7 +21,7 @@ ED141024
 <table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
 	<tbody>
 		<tr>
-			{if $FIELD_MODEL->isEmptyPicklistOptionAllowed()}
+			{if $FIELD_MODEL->isEmptyPicklistOptionAllowed() && !array_key_exists('', $PICKLIST_DATA)}
 				<td class="alphabetSearch textAlignCenter cursorPointer" style="padding : 0px !important;">
 					<a href="#" data-searchvalue="">
 						<label title="{vtranslate('LBL_ALL')}">{vtranslate('LBL_ALL')}</label>

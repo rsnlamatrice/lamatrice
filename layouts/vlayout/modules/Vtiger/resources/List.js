@@ -1956,7 +1956,7 @@ jQuery.Class("Vtiger_List_Js",{
 		listViewPageDiv.on('click','.alphabetSearch',function(e) {
 			var $target = jQuery(e.currentTarget);
 			var $alphabet = $target.find('a');
-			var alphabet = $alphabet.attr('data-searchvalue') ? $alphabet.attr('data-searchvalue') : $target.find('a').text();
+			var alphabet = $alphabet.attr('data-searchvalue') !== undefined ? $alphabet.attr('data-searchvalue') : $target.find('a').text();
 			var cvId = thisInstance.getCurrentCvId();
 			/* ED150903 defined search key in one ancestor */
 			var specificSearchKey = $target.parents('.alphabetSorting[data-searchkey]').attr('data-searchkey');
