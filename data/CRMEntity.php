@@ -71,7 +71,7 @@ class CRMEntity {
 			}
 		}
 		if(!$anyValue) {
-			var_dump($columnFields);
+			var_dump(__FILE__, $columnFields);
 			echo_callstack();
 			die("<center>" .getTranslatedString('LBL_MANDATORY_FIELD_MISSING')." Aucune valeur pour ".count($columnFields)." champ(s)</center>");
 		}
