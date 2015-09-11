@@ -6,6 +6,11 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
+/*
+ * ED150911 TODO
+ * Attention ce fichier est en doublon de layouts\vlayout\modules\Vtiger\resources\FindDuplicates.js !!!
+ *
+ */
 Vtiger_List_Js('Vtiger_FindDuplicates_Js',{},{
 
 	popupWindowInstance : false,
@@ -20,6 +25,8 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{},{
 		var fields = jQuery('#duplicateSearchFields').val();
 		var moduleName = app.getModuleName();
 		var url = 'module='+moduleName+'&view=FindDuplicates&fields='+fields;
+		
+		//ED150910 TODO ajouter viewname, search_key, selected_ids, ...
 
 		jQuery('#listViewNextPageButton').on('click',function() {
 			var pageLimit = jQuery('#pageLimit').val();

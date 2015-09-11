@@ -222,6 +222,7 @@ $languageStrings = array(
 );
 
 $jsLanguageStrings = array(
+	'JS_CHANGE_PASSWORD'=>'Modification du mot de passe',
 	'JS_ENTER_OLD_PASSWORD'=>'Saisir l\'ancien mot de passe.',
 	'JS_ENTER_NEW_PASSWORD'=>'Saisir le nouveau mot de passe.',
 	'JS_ENTER_CONFIRMATION_PASSWORD'=>'Confirmer le mot de passe.',
@@ -230,4 +231,5 @@ $jsLanguageStrings = array(
 	'JS_PASSWORD_CHANGE_FAILED_1'=>'Le changement du mot de passe pour ',
 	'JS_PASSWORD_CHANGE_FAILED_2'=>' a généré une erreur. Le nouveau mot de passe doit être initialisé.',
 	'JS_PASSWORD_INCORRECT_OLD'=>'Ancien mot de passe incorrect. Saisir à nouveau.',
+	'Changed password successfully' => 'La modification du mot de passe est effective',
 );
