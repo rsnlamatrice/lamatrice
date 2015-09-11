@@ -52,7 +52,13 @@ Vtiger_Detail_Js("Users_Detail_Js",{
 				function(data) {
 					if(data.success){
 						app.hideModalWindow();
-						Vtiger_Helper_Js.showPnotify(app.vtranslate(data.result.message));
+						Vtiger_Helper_Js.showMessage({
+							//TODO le fichier de traduction de Users n'est pas chargé !
+							//title: app.vtranslate('JS_CHANGE_PASSWORD'),
+							//text: app.vtranslate(data.result.message)
+							title: "Nouveau mot de passe",
+							text: "La modification du mot de passe est effective"
+						});
 					}else{
 						old_password.validationEngine('showPrompt', app.vtranslate(data.error.message) , 'error','topLeft',true);
 						return false;

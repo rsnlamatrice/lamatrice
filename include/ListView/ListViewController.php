@@ -336,7 +336,7 @@ class ListViewController {
 						$value = Vtiger_Language_Handler::getTranslatedString($value,$module);
 						$value = textlength_check($value);
 					}
-					else if ($value != '' && !$is_admin && $this->picklistRoleMap[$fieldName] &&
+					elseif ($value != '' && !$is_admin && $this->picklistRoleMap[$fieldName] &&
 							!in_array($value, $this->picklistValueMap[$fieldName])
 							&& !isset($this->picklistValueDataMap[$fieldName][trim($val)])
 							&& strtolower($value) != '--none--' && strtolower($value) != 'none' ) {

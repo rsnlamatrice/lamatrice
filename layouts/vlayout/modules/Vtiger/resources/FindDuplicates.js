@@ -6,6 +6,13 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
+
+/*
+ * ED150911 TODO
+ * Attention ce fichier est en doublon de modules\Vtiger\resources\FindDuplicates.js !!!
+ *
+ */
+
 Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 
 	massDeleteRecords : function(url) {
@@ -196,11 +203,9 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 					return false;
 				}
 				var popupInstance = Vtiger_Popup_Js.getInstance();
-				var url = 'module='+app.getModuleName()+'&view=MergeRecord&records='+records;
 				//ED150910
-				if(element.data('merge-mode'))
-					url += '&merge-mode=' + element.data('merge-mode');
-					
+				var view = element.data('view') ? element.data('view') : 'MergeRecord'
+				, url = 'module='+app.getModuleName()+'&view='+view+'&records='+records;
 				thisInstance.popupWindowInstance = popupInstance.show(url, '', '', '', function(params){
 					thisInstance.mergeRecordPopupCallback();
 				});
