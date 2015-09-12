@@ -12,7 +12,7 @@
 		<pre class='alert-info'>
 			{if $NO_ACCOUNT}
 				{vtranslate('LBL_MERGE_ACCOUNTS_NONE', $MODULE)}
-				{vtranslate('LBL_MERGE_ACCOUNTS_CHOOSE_REF', $MODULE)}
+				&nbsp;{vtranslate('LBL_MERGE_ACCOUNTS_CHOOSE_REF', $MODULE)}
 			{elseif $ALREADY_COMPTE_COMMUN}
 				{vtranslate('LBL_MERGE_ACCOUNTS_ALREADY', $MODULE)}
 				&nbsp;&nbsp;{$RECORDMODELS[0]->getDisplayValue('account_id')}
@@ -24,7 +24,7 @@
 	{if ! $ALREADY_COMPTE_COMMUN}
 	<form class="form-horizontal contentsBackground" name="massMerge" method="post" action="index.php">
 		<input type="hidden" name=module value="{$MODULE}" />
-		<input type="hidden" name="action" value="ProcessDuplicates" />
+		<input type="hidden" name="action" value="ProcessDuplicatesAccounts" />
 		<input type="hidden" name="records" value={Zend_Json::encode($RECORDS)} />
 
 	<div>
@@ -36,7 +36,12 @@
 			{foreach item=RECORD from=$RECORDMODELS name=recordList}
 				<th>
 					{$RECORD->getName()}{*vtranslate('LBL_RECORD')*} #{$smarty.foreach.recordList.index+1} &nbsp;
-					<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio value="{$RECORD->getId()}" name=primaryRecord style='bottom:1px;position:relative;'/>
+					<input {if $smarty.foreach.recordList.index eq 0}
+							checked="checked"
+						{*elseif !$RECORD->get('account_id')*}
+							{*disabled="disabled"*}
+						{/if}
+						type=radio value="{$RECORD->getId()}" name=primaryRecord style='bottom:1px;position:relative;'/>
 				</th>
 			{/foreach}
 			</thead>
@@ -48,15 +53,34 @@
 					</td>
 					{foreach item=RECORD from=$RECORDMODELS name=recordList}
 						<td>
-							{*ED150910*}
-							{if $FIELD->get('uitype') == 33 }
-								<input checked type=checkbox name="{$FIELD->getName()}[]"
-								data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+							{if $FIELD->getName() === 'reference' && (! $RECORD->get('reference') || ! $RECORD->get('account_id'))}
+								{if $NO_ACCOUNT}
+									<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio name="referent_contactid"
+									data-id="{$RECORD->getId()}" value="{$RECORD->getId()}" style='bottom:1px;position:relative;'/>
+									&nbsp;&nbsp;Référent du compte
+								{/if}
 							{else}
-								<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio name="{$FIELD->getName()}"
-								data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+								{*ED150910*}
+								{if $FIELD->getName() === 'account_id' && ! $RECORD->get($FIELD->getName())}
+								
+								{elseif $FIELD->getName() === 'reference'}
+									<input {if $RECORD->get('reference') && $RECORD->get('account_id') && ($smarty.foreach.recordList.index eq 0)}checked="checked"{/if}
+									type="radio" name="referent_contactid"
+									data-id="{$RECORD->getId()}" value="{$RECORD->getId()}" style='bottom:1px;position:relative;'/>
+								{elseif $FIELD->get('uitype') == 33 }
+									<input checked type=checkbox name="{$FIELD->getName()}[]"
+									data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+								{else}
+									<input {if $smarty.foreach.recordList.index eq 0}checked="checked"{/if} type=radio name="{$FIELD->getName()}"
+									data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+								{/if}
+								&nbsp;&nbsp;
+								{if $FIELD->getName() === 'reference'}
+									{if $RECORD->get($FIELD->getName()) && $RECORD->get('account_id')}Référent du compte{/if}
+								{else}
+									{$RECORD->getDisplayValue($FIELD->getName())}
+								{/if}
 							{/if}
-							 &nbsp;&nbsp;{$RECORD->getDisplayValue($FIELD->getName())}
 						</td>
 					{/foreach}
 				</tr>
@@ -66,7 +90,7 @@
 	</div>
 	<div class='row-fluid'>
 		<div class="offset4">
-			<button type=submit class='btn btn-success'>{vtranslate('LBL_MERGE', $MODULE)}</button>
+			<button type=submit class='btn btn-success'>{vtranslate('LBL_MERGE_ACCOUNTS', $MODULE)}</button>
 		</div>
 	</div>
 	</form>

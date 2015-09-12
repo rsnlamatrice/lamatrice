@@ -89,12 +89,14 @@ $languageStrings = array(
     'use_address2_for_revue'        => 'spécifiquement pour la Revue',
     'use_address2_for_recu_fiscal'  => 'spécifiquement pour le Reçu fiscal',
 	
+	'LBL_MERGE'                         => 'Fusionner les contacts',
+	
 	'LBL_MERGE_ACCOUNTS'			=> 'Fusionner les comptes',	
 	'LBL_MERGE_ACCOUNTS_TITLE'			=> 'Passage en compte commun (regroupement familiale)',	
 	'LBL_MERGE_ACCOUNTS_DESCRIPTION'	=> 'Sélectionner le contact qui conserve son compte. Les données de l\'autre compte seront transférées puis le compte sera supprimé.',
 	'LBL_MERGE_ACCOUNTS_ALREADY'		=> 'Les contacts sont déjà en compte-commun.',
 	'LBL_MERGE_ACCOUNTS_NONE'			=> 'Un compte commun va être créer.',
-	'LBL_MERGE_ACCOUNTS_CHOOSE_REF'		=> 'Choissisez le référent du compte.',
+	'LBL_MERGE_ACCOUNTS_CHOOSE_REF'		=> 'Choisissez le référent du compte.',
 		
 );
 $jsLanguageStrings = array(

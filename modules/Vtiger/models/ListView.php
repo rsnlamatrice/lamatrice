@@ -531,7 +531,7 @@ var_dump($listResult);*/
 			$basicLinks[] = array(
 					'linktype' => 'LISTVIEWBASIC',
 					'linklabel' => 'LBL_ADD_RECORD',
-					'linkurl' => $moduleModel->getCreateRecordUrl(),
+					'linkurl' => 'javascript:Vtiger_List_Js.triggerAddRecord(event, "'.$moduleModel->getCreateRecordUrl().'")',
 					'linkicon' => ''
 			);
 		}

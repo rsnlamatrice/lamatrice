@@ -38,7 +38,7 @@
 		&& $FIELD_NAME neq 'donototherdocuments'
 		
 		&& $FIELD_NAME neq 'phone'
-		&& ($FIELD_NAME neq 'reference' || $RECORD->get($FIELD_NAME))
+		&& ($FIELD_NAME neq 'reference' || ($RECORD->get($FIELD_NAME) && $RECORD->get('account_id')))
 		&& $FIELD_NAME neq 'rsnnpai'
 		}
 			<tr class="summaryViewEntries">

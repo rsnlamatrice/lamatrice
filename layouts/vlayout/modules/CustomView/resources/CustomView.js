@@ -288,30 +288,43 @@ var Vtiger_CustomView_Js = {
 	 */
 	registerNameChangedEvent : function() {
 		if (jQuery("#viewname").val())
-			jQuery("#viewname").change(function(){
-				jQuery("#customViewSubmitCopy").removeAttr('disabled');
+			jQuery("#viewname").bind("keypress", function(e){
+				if (e.keyCode != 13){
+					var $nameInput = $('#viewname')
+					, $lockstatusName = $nameInput.data('lockstatus-name')
+					, $customViewSubmitCopy = jQuery("#customViewSubmitCopy");
+					if ($lockstatusName && $customViewSubmitCopy.length) {
+						$customViewSubmitCopy
+							.find('input')
+								.attr('checked', 'checked').change()
+								.end()
+							.css({'opacity': '0.7'})
+							.children()
+								.css({'color': 'red'})
+						;
+					}
+					$customViewSubmitCopy.removeClass('hide');
+					$(this).unbind("keypress", arguments.callee);
+				}
 			});
 	},
 
 	/**
-	 * Function which will register save copy button event : clears record id input value.
+	 * Function which will register save copy button event
 	 * ED150212
 	 */
 	registerSaveAsCopyEvent : function() {
-		if (jQuery("#viewname").val()){
-			//copy button
-			jQuery("#customViewSubmitCopy").click(function(){
-				if ( ! $("#record").attr('original-value'))
-					//backup
-					$("#record").attr('original-value', $("#record").val());
-				//clear
-				$("#record").val('');
-			});
-			//standard button
-			jQuery("#customViewSubmit").click(function(){
-				if ($("#record").attr('original-value'))
-					//restore
-					$("#record").val($("#record").attr('original-value'));
+		if (jQuery("#viewname").val()){//not a new custom view
+			jQuery("#customViewSubmitCopy input").change(function(){
+				if ( this.checked ){
+					if ($("#lockstatus").val()) {
+						//unlock status
+						$("#lockstatus").val('');
+						//enable submit button
+						jQuery("#customViewSubmit").removeAttr('disabled')
+							.removeAttr('title');
+					}
+				}
 			});
 		}
 	},
@@ -350,14 +363,14 @@ var Vtiger_CustomView_Js = {
 		jQuery("#CustomView").submit(function(e) {
 			
 			//ED150212
-			// 'save as' button
-			var saveAsCopy = e.target.id == "customViewSubmitCopy";
+			// 'save as' checkbox
+			var saveAsCopy = contentsContainer.find("#customViewSubmitCopy input:checked").length;
 			
 			var selectElement = Vtiger_CustomView_Js.getColumnSelectElement();
 			var select2Element = app.getSelect2ElementFromSelect(selectElement);
 			var result = Vtiger_MultiSelect_Validator_Js.invokeValidation(selectElement);
 			if(result != true){
-				select2Element.validationEngine('showPrompt', result , 'error','bottomLeft',true);
+				select2Element.validationEngine('showPrompt', result , 'error', 'bottomLeft',true);
 				e.preventDefault();
 				return;
 			} else {
@@ -366,7 +379,16 @@ var Vtiger_CustomView_Js = {
 			
 			if(saveAsCopy)
 				$("#record").val('');
-
+			else {
+				var $nameInput = $('#viewname')
+				, $lockstatusName = $nameInput.data('lockstatus-name');
+				if ($lockstatusName && $lockstatusName != $nameInput.val()) {
+					var msg = app.vtranslate('JS_NAME_IS_LOCKED_NOT_CHANGEABLE');
+					$nameInput.validationEngine('showPrompt', msg , 'error','bottomLeft',true);
+					e.preventDefault();
+					return;
+				}
+			}
 			//Mandatory Fields selection validation
 			//Any one Mandatory Field should select while creating custom view.
 			var mandatoryFieldsList = JSON.parse(jQuery('#mandatoryFieldsList').val());

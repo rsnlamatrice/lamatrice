@@ -570,6 +570,44 @@ jQuery.Class("Vtiger_List_Js",{
 		    window.location.href = exportActionUrl;
 	},
 
+	/* ED150912
+	 * function to load an url with all filters as parameters
+	 * returns UI
+	 */
+	triggerUrlActionWithDefaultValues :function(event, actionUrl, massMove){
+		var listInstance = Vtiger_List_Js.getInstance();
+		
+		var cvId = listInstance.getCurrentCvId();
+		var urlParams = listInstance.getHeadersFiltersUrlParams(event, {
+			"viewname" : cvId,
+			"search_key" : [],
+			"search_value" : [],
+			"search_input" : [],
+			"operator" : []
+		});
+		
+		for (var i = 0; i < urlParams.search_key.length; i++) {
+			//TODO if not key already in url
+			actionUrl += '&' + urlParams.search_key[i] + '=' + encodeURI(urlParams.search_value[i]);
+		}
+		
+		// Compute selected ids, excluded ids values, along with cvid value and pass as url parameters
+		if (massMove) {
+			var selectedIds = listInstance.readSelectedIds(true);
+			var excludedIds = listInstance.readExcludedIds(true);
+			var pageNumber = jQuery('#pageNumber').val();
+	
+			actionUrl += '&selected_ids='+selectedIds+'&excluded_ids='+excludedIds+'&viewname='+cvId+'&page='+pageNumber;
+		}
+		
+	    window.location.href = actionUrl;
+	},
+
+	//ED150912
+	triggerAddRecord : function( event, url ) {
+		this.triggerUrlActionWithDefaultValues( event, url );
+	},
+	
 	/**
 	 * Function to reload list
 	 */
@@ -1975,7 +2013,6 @@ jQuery.Class("Vtiger_List_Js",{
 			for(i = 0; i < urlParams.search_key.length; i++)
 				if(urlParams.search_key[i] == AlphabetSearchKey){
 					addKey = false;
-					urlParams.search_key[i] = AlphabetSearchKey;
 					urlParams.search_value[i] = alphabet;
 					urlParams.search_input[i] = alphabet;
 					urlParams.operator[i] = 's';
