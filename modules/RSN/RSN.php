@@ -31,6 +31,7 @@ class RSN {
 			$this->add_invoice_handler();
 			$this->add_customview_description_field();
 			$this->add_customview_orderbyfields_field();
+			$this->add_customview_lockstatus_field();
 			$this->registerEvents();
 			selff::add_mysql_function_levenshtein();
 		} else if($eventType == 'module.disabled') {
@@ -231,6 +232,11 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$result = $db->pquery($sql);
 	}
 	
+	static function add_customview_lockstatus_field() {
+		$sql = "ALTER TABLE `vtiger_customview` ADD `lockstatus` VARCHAR(32) NULL";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($sql);
+	}
 	
 	static function add_mysql_function_levenshtein(){
 		$sql = 'DELIMITER $$

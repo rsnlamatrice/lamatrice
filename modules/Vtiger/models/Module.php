@@ -1652,6 +1652,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	* getPicklistValues called on HeaderFilter context
 	*/
 	public function getPicklistValuesDetailsForHeaderFilter($fieldname){
-		return $this->getPicklistValuesDetails($fieldname);
+		$recordModel = Vtiger_Record_Model::getCleanInstance($this->getName());
+		return $recordModel->getPicklistValuesDetailsForHeaderFilter($fieldname);
 	}
 }

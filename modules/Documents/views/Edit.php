@@ -30,5 +30,24 @@ Class Documents_Edit_View extends Vtiger_Edit_View {
 		return $headerScriptInstances;
 	}
 
+	/** ED150912
+	 * Intercepte les valeurs par défaut
+	 */
+	public function process(Vtiger_Request $request) {
+	    
+		$fieldName = 'codeaffaire';
+		$value = $request->get($fieldName);
+	    if($value)
+			$request->set($fieldName, strtoupper($value));
+		
+		$fieldName = 'folderid';
+		$value = $request->get($fieldName);
+	    if($value && !is_numeric($value)){
+			$document = Documents_Folder_Model::getInstanceByName($value);
+			$request->set($fieldName, $document->getId());
+	    }
+		
+		return parent::process($request);
+	}
 }
 ?>

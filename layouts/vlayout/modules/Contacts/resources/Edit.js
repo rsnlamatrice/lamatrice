@@ -445,6 +445,39 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 			}
 		})
 	},
+
+	/**
+	 * Function to register recordpresave event
+	 */
+	registerDONOTMassChangeEvent : function(form){
+		var thisInstance = this;
+		if(typeof form == 'undefined') {
+			form = this.getForm();
+		}
+		var $element = $('#change-all-donot');
+		$element
+			.buttonset()
+			//.find('input[type="radio"]')
+				.change(function(e){
+					var $block = $(this).parents('.blockContainer:first')
+					, $buttons = $block.find('> tbody .buttonset input[type="radio"]')
+					, forceValue = e.target.value;//$(this).val();//this.value;
+					$buttons
+						.filter(forceValue == '0' ? ':first-child' : ':not(:first-child)')
+							.prop('checked', true)
+							.next()
+								.addClass("ui-state-active")
+								.end()
+							.end()
+						.filter(forceValue == '1' ? ':first-child' : ':not(:first-child)')
+							.prop('checked', false)
+							.next()
+								.removeClass("ui-state-active")
+								.end()
+						;
+				})
+		;
+	},
 	
 	registerBasicEvents : function(container){
 		this._super(container);
@@ -457,5 +490,6 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		this.registerEventForSynchronizeGroupNameMailingStreet2(container);
 		this.registerEventSNAButtonClickEvent(container);
 		this.registerBlockAnimationEvent(); /*ED150707*/
+		this.registerDONOTMassChangeEvent(); /*ED150912*/
 	}
 })

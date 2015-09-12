@@ -182,7 +182,7 @@ function getNonEditablePicklistValues($fieldName, $lang=array(), $adb){
 
 /**
  * this function returns all the assigned picklist values for the given tablename for the given roleid
- * @param string $tableName - the picklist tablename
+ * @param string $tableName - the picklist tablename (eq to field name)
  * @param integer $roleid - the roleid of the role for which you want data
  * @param object $adb - the peardatabase object
  * @param &$picklistValuesData - returns more data : uicolor, uiicon (ED141128)
@@ -211,14 +211,22 @@ function getAssignedPicklistValues($tableName, $roleid, $adb, $lang=array(), &$p
 		$uicolor = $properties["uicolor"];
 		$uiicon = $properties["uiicon"];
 		
+		/*ED150911 LEFT instead of INNER
+		* Contournement en urgence de l'absence d'enregistrement dans vtiger_role2picklist pour certaines valeurs de la picklist
+		*/
+		$securized = false;
+		
 		$sql = "SELECT DISTINCT ".$adb->sql_escape_string($tableName)
 			. ($uicolor ? ', uicolor' : '')
 			. ($uiicon ? ', uiicon' : '')
 			." FROM ". $adb->sql_escape_string("vtiger_$tableName")
-			." INNER JOIN vtiger_role2picklist
+			." ".($securized ? "INNER" : "LEFT")." JOIN vtiger_role2picklist
 				ON ".$adb->sql_escape_string("vtiger_$tableName").".picklist_valueid=vtiger_role2picklist.picklistvalueid
 				AND roleid IN (".generateQuestionMarks($roleids).")
 			ORDER BY sortid";
+		/*echo '<br><br><br><br>';
+		var_dump($tableName, $sql);*/
+			
 		$result = $adb->pquery($sql, $roleids);
 		$count = $adb->num_rows($result);
 

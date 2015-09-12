@@ -29,17 +29,35 @@
 			<h4 class="filterHeaders">{vtranslate('LBL_BASIC_DETAILS',$MODULE)} :</h4>
 			<div class="row-fluid">
 				<span class="span span2">{vtranslate('LBL_VIEW_NAME',$MODULE)}*</span>
-				<input  class="span" type="text" id="viewname" data-validation-engine='validate[required]' name="viewname" value="{$CUSTOMVIEW_MODEL->get('viewname')}">
+				<span class="span">
+					<input  class="span" type="text" id="viewname" data-validation-engine='validate[required]' name="viewname"
+							value="{$CUSTOMVIEW_MODEL->get('viewname')}"
+							{if $CUSTOMVIEW_MODEL->get('lockstatus') eq 'NAME'}data-lockstatus-name="{$CUSTOMVIEW_MODEL->get('viewname')}"{/if}>
+					{if $MODE == 'edit'}
+						<div class="hide" id="customViewSubmitCopy" >
+							<label><input type="checkbox" name="duplicate-record" value="{$CUSTOMVIEW_MODEL->getId()}">&nbsp;{vtranslate('LBL_SAVE_COPY', $MODULE)}</label>
+						</div>
+					{/if}
+				</span>
 				<span class="span"><input id="setdefault" type="checkbox" name="setdefault" value="1" {if $CUSTOMVIEW_MODEL->isDefault()} checked="checked"{/if}><span class="alignMiddle"> {vtranslate('LBL_SET_AS_DEFAULT',$MODULE)}</span></span>
-				<span class="span"><input id="setmetrics" name="setmetrics" type="checkbox" value="1" {if $CUSTOMVIEW_MODEL->get('setmetrics') eq '1'} checked="checked"{/if}><span class="alignMiddle"> {vtranslate('LBL_LIST_IN_METRICS',$MODULE)}</span></span>
+				{*ED150912 hide TODO only for none admin*}
+				<span class="span hide"><input id="setmetrics" name="setmetrics" type="checkbox" value="1" {if $CUSTOMVIEW_MODEL->get('setmetrics') eq '1'} checked="checked"{/if}><span class="alignMiddle"> {vtranslate('LBL_LIST_IN_METRICS',$MODULE)}</span></span>
 				<span class="span"><input id="status" name="status" type="checkbox" {if $CUSTOMVIEW_MODEL->isSetPublic()} value="{$CUSTOMVIEW_MODEL->get('status')}" checked="checked" {else} value="{$CV_PENDING_VALUE}" {/if}><span class="alignMiddle"> {vtranslate('LBL_SET_AS_PUBLIC',$MODULE)}</span></span>
+				<span class="span" style="margin-left:5em;">
+					<select id="lockstatus" name="lockstatus" class="input-large redColor" title="{vtranslate('LBL_LOCKSTATUS',$MODULE)}">
+						{foreach item=VALUE from=array('', 'NAME', 'LOCKED')}
+							<option value="{$VALUE}" {if $CUSTOMVIEW_MODEL->get('lockstatus') eq $VALUE} selected{/if}>
+								{if $VALUE}{vtranslate('LBL_LOCKSTATUS_'|cat:$VALUE,$MODULE)}{/if}</option>
+						{/foreach}
+					</select>
+				</select>
 				
 			</div>
 			<br>
 			<div class="row-fluid">
 				<span class="span span2">{vtranslate('LBL_DESCRIPTION_INFORMATION')}</span>
 				<span class="span span5">
-						<a onclick="$(this).next().removeClass('hide').end().remove();" title="{vtranslate('LBL_CLICK_TO_EDIT')}">
+						<a onclick="$(this).next().removeClass('hide').end().remove();" title="{vtranslate('LBL_CLICK_TO_EDIT')}" style="cursor: pointer;">
 								{if $CUSTOMVIEW_MODEL->get('description')}
 										{str_replace("\n", "<br>", htmlentities($CUSTOMVIEW_MODEL->get('description')))}
 								{else}
@@ -75,7 +93,7 @@
 			</div>
 			<br>
 			<h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_ORDERBY_COLUMNS',$MODULE)} :
-			 {if ! $SELECTED_ORDERBY_FIELDS}<a onclick="$(this).parent().next().removeClass('hide').end().end().remove();">
+			 {if ! $SELECTED_ORDERBY_FIELDS}<a onclick="$(this).parent().next().removeClass('hide').end().end().remove();" title="{vtranslate('LBL_CLICK_TO_EDIT')}" style="cursor: pointer;">
 				<small> {vtranslate('LBL_SHOW')}</small></a>{/if}
 			 </h4>
 			<div class="columnsSelectDiv {if ! $SELECTED_ORDERBY_FIELDS}hide{/if}">
@@ -110,10 +128,9 @@
 		</div>
 		<div class="filterActions">
 			<a class="cancelLink pull-right padding1per" type="reset" onClick="window.location.reload()">{vtranslate('LBL_CANCEL', $MODULE)}</a>
-			<button class="btn btn-success pull-right" id="customViewSubmit" type="submit"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
-			{if $MODE == 'edit'}
-			<button class="btn btn-success save-copy pull-right marginRight10px" id="customViewSubmitCopy" type="submit" disabled="disabled"><strong>{vtranslate('LBL_SAVE_COPY', $MODULE)}</strong></button>
-			{/if}
+			<button class="btn btn-success pull-right" id="customViewSubmit" type="submit"
+				{if $CUSTOMVIEW_MODEL->get('lockstatus') eq 'LOCKED'} disabled title="{vtranslate('LBL_LOCKSTATUS_'|cat:$CUSTOMVIEW_MODEL->get('lockstatus'), $MODULE)}"{/if}
+			><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
 		</div>
 	</form>
 </div>

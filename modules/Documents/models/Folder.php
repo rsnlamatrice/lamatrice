@@ -115,7 +115,7 @@ class Documents_Folder_Model extends Vtiger_Base_Model {
 
 	/**
 	 * Function returns an instance of Folder Model
-	 * @param foldername
+	 * @param folderId
 	 * @return Documents_Folder_Model
 	 */
 	public static function getInstanceById($folderId) {
@@ -123,6 +123,24 @@ class Documents_Folder_Model extends Vtiger_Base_Model {
 		$folderModel = Documents_Folder_Model::getInstance();
 
 		$result = $db->pquery("SELECT * FROM vtiger_attachmentsfolder WHERE folderid = ?", array($folderId));
+		$num_rows = $db->num_rows($result);
+		if ($num_rows > 0) {
+			$values = $db->query_result_rowdata($result, 0);
+			$folderModel->setData($values);
+		}
+		return $folderModel;
+	}
+
+	/** ED150912
+	 * Function returns an instance of Folder Model
+	 * @param foldername
+	 * @return Documents_Folder_Model
+	 */
+	public static function getInstanceByName($folderName) {
+		$db = PearDatabase::getInstance();
+		$folderModel = Documents_Folder_Model::getInstance();
+
+		$result = $db->pquery("SELECT * FROM vtiger_attachmentsfolder WHERE foldername = ?", array($folderName));
 		$num_rows = $db->num_rows($result);
 		if ($num_rows > 0) {
 			$values = $db->query_result_rowdata($result, 0);

@@ -8,7 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 
-//Comming after FindDuplicates and MergeRecord
+//Coming after FindDuplicates and MergeRecord
 class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 	function checkPermission(Vtiger_Request $request) {
 		$module = $request->getModule();

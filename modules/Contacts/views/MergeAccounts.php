@@ -23,12 +23,13 @@ class Contacts_MergeAccounts_View extends Vtiger_MergeRecord_View {
 		foreach($records as $record) {
 			$recordModels[] = Vtiger_Record_Model::getInstanceById($record);
 		}
+		
 		//En premier, un référent
-		$nRecord = 0;
-		foreach($recordModels as $record) {
+		for($nRecord = 0; $nRecord < count($recordModels); $nRecord++) {
+			$record = $recordModels[$nRecord];
 			if($record->get('account_id')
 			&& $record->get('reference')){
-				if($record > 0){
+				if($nRecord > 0){
 					unset($recordModels[$nRecord]);
 					$recordModels = array_merge(array($record), $recordModels);
 				}

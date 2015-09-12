@@ -704,8 +704,8 @@ $languageStrings = array(
 	'LBL_EXCLUDED'		=> 'Exclu',
 	'Left Panel Show/Hide'	=> 'Masque/affiche le panneau gauche',
         
-        'LBL_AVAILABLE_FIELDS'              => 'Champs disponibles', 
-	'LBL_MERGE'                         => 'Fusionner les contacts',
+    'LBL_AVAILABLE_FIELDS'              => 'Champs disponibles', 
+	'LBL_MERGE'                         => 'Fusionner',
 	'LBL_MERGING_CRITERIA_SELECTION'    => 'Critère de sélection de la fusion',
 	'LBL_MERGE_RECORDS_DESCRIPTION'     => 'Le premier enregistrement sera retenu après la fusion. Vous pouvez sélectionner les valeurs à conserver.
             Les autres enregistrements seront supprimés mais les informations liées seront transférées.',
