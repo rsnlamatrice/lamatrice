@@ -245,6 +245,9 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		$description = $this->get('description');
 		//ED150622 adds orderbyfields
 		$orderbyfields = $this->get('orderbyfields');
+		//ED150912 adds lockstatus
+		$lockstatus = $this->get('lockstatus');
+		
 		if(is_array($orderbyfields))
 				$orderbyfields = implode('|', $orderbyfields);
 				
@@ -253,19 +256,28 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 				$status = self::CV_STATUS_PUBLIC;
 			}
 		}
-
+		//ED150912
+		if(!is_numeric($setDefault))
+			$setDefault = 0;
+		if(!is_numeric($setMetrics))
+			$setMetrics = 0;
+			
 		if(!$cvId) {
 			$cvId = $db->getUniqueID("vtiger_customview");
 			$this->set('cvid', $cvId);
-			$sql = 'INSERT INTO vtiger_customview(cvid, viewname, setdefault, setmetrics, entitytype, status, userid, description, orderbyfields)
-				VALUES (?,?,?,?,?,?,?,?,?)';
-			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $currentUserModel->getId(), $description, $orderbyfields);
-			$db->pquery($sql, $params);
+			$sql = 'INSERT INTO vtiger_customview(cvid, viewname, setdefault, setmetrics, entitytype, status, userid, description, orderbyfields, lockstatus)
+				VALUES (?,?,?,?,?,?,?,?,?,?)';
+			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $currentUserModel->getId(), $description, $orderbyfields, $lockstatus);
+			$result = $db->pquery($sql, $params);
+			if(!$result){
+				$db->echoError(__FILE__ . " save() : Erreur in " . $sql);
+				return false;
+			}
 
 		} else {
 
-			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=?, description=?, orderbyfields=? WHERE cvid=?';
-			$params = array($viewName, $setDefault, $setMetrics, $status, $description, $orderbyfields, $cvId);
+			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=?, description=?, orderbyfields=?, lockstatus=? WHERE cvid=?';
+			$params = array($viewName, $setDefault, $setMetrics, $status, $description, $orderbyfields, $lockstatus, $cvId);
 			$result = $db->pquery($sql, $params);
 			$db->pquery('DELETE FROM vtiger_cvcolumnlist WHERE cvid = ?', array($cvId));
 			$db->pquery('DELETE FROM vtiger_cvstdfilter WHERE cvid = ?', array($cvId));

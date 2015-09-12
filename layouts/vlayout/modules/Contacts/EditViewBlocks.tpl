@@ -84,6 +84,17 @@
 						{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
 						&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
 						</label>
+					{elseif $BLOCK_LABEL eq 'LBL_BLOCK_DO_NOT'}
+						{* ED150912 sélection de tous ou aucun *}
+						{assign var=UID value='change-all-donot'}
+						<div id="{$UID}" class="buttonset ui-buttonset" style="display: inline-block; margin-left: 5em; opacity: 0.6;">
+							<input type="radio" name="LBL_BLOCK_DO_NOT" id="{$UID}-0" value="0"/>
+								<label for="{$UID}-0" class="ui-buttonset">
+									<span class="ui-icon ui-icon-unlocked darkgreen"></span>&nbsp;</label>
+							<input type="radio" name="LBL_BLOCK_DO_NOT" id="{$UID}-1" value="1"/>
+								<label for="{$UID}-1" class="ui-buttonset">
+									<span class="ui-icon ui-icon-locked darkred"></span>&nbsp;</label>
+						</div>
 					{/if}
 			</th>
 			</tr></thead>

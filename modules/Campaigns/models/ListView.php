@@ -29,7 +29,7 @@ class Campaigns_ListView_Model extends Vtiger_ListView_Model {
 			$basicLinks[] = array(
 					'linktype' => 'LISTVIEWBASIC',
 					'linklabel' => 'LBL_ADD_RECORD',
-					'linkurl' => $moduleModel->getCreateRecordUrl(),
+					'linkurl' => 'javascript:Vtiger_List_Js.triggerAddRecord(event, "'.$moduleModel->getCreateRecordUrl().'")',
 					'linkicon' => ''
 			);
 		}

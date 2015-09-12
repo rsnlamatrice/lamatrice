@@ -47,7 +47,9 @@ class CustomView_Save_Action extends Vtiger_Action_Controller {
 					'setdefault' => $request->get('setdefault'),
 					'setmetrics' => $request->get('setmetrics'),
 					'status' => $request->get('status'),
-					'description' => $request->get('description')
+					'description' => $request->get('description'),
+					//ED150912
+					'lockstatus' => $request->get('lockstatus'),
 		);
 		$selectedColumnsList = $request->get('columnslist');
 		if(!empty($selectedColumnsList)) {

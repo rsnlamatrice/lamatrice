@@ -27,6 +27,32 @@ class Contacts_Edit_View extends Vtiger_Edit_View {
 		    $this->record = $recordModel;
 		}
 
+		/* ED150912
+		 * Ne pas par défaut
+		*/
+		if(!$recordId){
+			$params = $request->getAll();
+			if($params['donotprospect']){
+				if(!array_key_exists('emailoptout',$params))
+					$request->set('emailoptout', 1);
+				if(!array_key_exists('donotcall',$params))
+					$request->set('donotcall', 1);
+				if(!array_key_exists('donotappeldoncourrier',$params))
+					$request->set('donotappeldoncourrier', 1);
+				if(!array_key_exists('donotappeldonweb',$params))
+					$request->set('donotappeldonweb', 1);
+				if(!array_key_exists('donotappeldonweb',$params))
+					$request->set('donotappeldonweb', 1);
+				if(!array_key_exists('donotrelanceabo',$params))
+					$request->set('donotrelanceabo', 1);
+				if(!array_key_exists('donotrelanceadh',$params))
+					$request->set('donotrelanceadh', 1);
+				if(!array_key_exists('donototherdocuments',$params))
+					$request->set('donototherdocuments', 'Reçu fiscal seul');
+			}
+		}
+		
+		
 		$viewer = $this->getViewer($request);
 		$viewer->assign('IMAGE_DETAILS', $recordModel->getImageDetails());
 

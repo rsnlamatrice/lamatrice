@@ -114,6 +114,9 @@ layouts\vlayout\skins\woodspice\style.css a aussi des modifs de couleur sur .ui-
 label.ui-buttonset > span {
   vertical-align: middle;
 }
+label > input[type="checkbox"] {
+  vertical-align: top;
+}
 
 /* jQuery UI icons
  * add color class
