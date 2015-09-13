@@ -657,7 +657,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			}
 		} else {
 			//TODO: manage error
-			echo "not opened ...";
+			echo "<code>le fichier n'a pas pu être ouvert...</code>";
 		}
 
 		return true;
@@ -691,7 +691,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				return true;
 			} else {
 				//TODO: manage error
-				echo "not opened ...";
+				echo "<code>le fichier n'a pas pu être ouvert...</code>";
 			}
 		}
 		else

@@ -33,22 +33,18 @@ class Contacts_Edit_View extends Vtiger_Edit_View {
 		if(!$recordId){
 			$params = $request->getAll();
 			if($params['donotprospect']){
-				if(!array_key_exists('emailoptout',$params))
-					$request->set('emailoptout', 1);
-				if(!array_key_exists('donotcall',$params))
-					$request->set('donotcall', 1);
-				if(!array_key_exists('donotappeldoncourrier',$params))
-					$request->set('donotappeldoncourrier', 1);
-				if(!array_key_exists('donotappeldonweb',$params))
-					$request->set('donotappeldonweb', 1);
-				if(!array_key_exists('donotappeldonweb',$params))
-					$request->set('donotappeldonweb', 1);
-				if(!array_key_exists('donotrelanceabo',$params))
-					$request->set('donotrelanceabo', 1);
-				if(!array_key_exists('donotrelanceadh',$params))
-					$request->set('donotrelanceadh', 1);
-				if(!array_key_exists('donototherdocuments',$params))
-					$request->set('donototherdocuments', 'Reçu fiscal seul');
+				$defaultValues = array(
+					'emailoptout' => 1,
+					'donotcall' => 1,
+					'donotappeldoncourrier' => 1,
+					'donotappeldonweb' => 1,
+					'donotrelanceabo' => 1,
+					'donotrelanceadh' => 1,
+					'donototherdocuments' => 'Reçu fiscal seul',
+				);
+				foreach($defaultValues as $fieldName => $fieldValue)
+					if(!array_key_exists($fieldName, $params))
+						$request->set($fieldName, $fieldValue);
 			}
 		}
 		

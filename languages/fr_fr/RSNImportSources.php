@@ -106,6 +106,11 @@ $languageStrings = array(
         'LBL_DBUSER' => 'Utilisateur',
         'LBL_DBPWD' => 'Mot de passe',
 	
+	'LBL_SELECT_Documents_STEP' => 'Sélection d\'un document lié',
+	'LBL_SELECT_Documents_STEP_DESCRIPTION' => 'Veuillez sélectionner le document lié',
+	
+	'LBL_SELECT_Critere4D_STEP' => 'Sélection d\'un critère lié',
+	'LBL_SELECT_Critere4D_STEP_DESCRIPTION' => 'Veuillez sélectionner le critère lié',
 );
 
 ?>

@@ -292,7 +292,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			return true;
 		} else {
 			//TODO: manage error
-			echo "not opened ...";
+			echo "<code>le fichier n'a pas pu être ouvert...</code>";
 		}
 		return false;
 	}

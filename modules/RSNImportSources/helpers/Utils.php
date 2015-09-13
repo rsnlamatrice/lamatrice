@@ -522,6 +522,82 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			
 		return !!$result;
 	}
+	
+	
+	/**
+	 * Méthode qui affecte le contactid pour tous ceux qu'on trouve d'après les champs
+	 * @param $user
+	 * @param $moduleName
+	 * @param $contactIdField
+	 * @param $fieldsMapping : array(contactdetailsField => importField)
+	 */
+	public static function setPreImportDataContactIdByFields($user, $moduleName, $contactIdField, $fieldsMapping, $updateFieldStatus = false, $updateFieldStatusValue = false) {
+		
+		$db = PearDatabase::getInstance();
+		$importTableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
+		
+		
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		$moduleFields = $moduleModel->getFields();
+		
+		//uniquement le mapping des champs connus
+		$tables = array();
+		foreach($fieldsMapping as $fieldName => $importFieldName){
+			if(array_key_exists($fieldName, $moduleFields)){
+				$fieldModel = $moduleFields[$fieldName];
+				$tableName = $fieldModel->get('table');
+				if(!array_key_exists($tableName, $tables))
+					$tables[$tableName] = array();
+				$tables[$tableName][$fieldName] = $fieldModel;
+			}
+		}
+		if(!$tables){
+			var_dump($fieldsMapping, array_keys($moduleFields));
+			throw new Exception("setPreImportDataContactIdByFields : aucun champ fourni / $updateFieldStatusValue");
+		}
+		
+		// Pré-identifie les contacts
+		
+		/* Affecte la réf du contact d'après la ref 4D */
+		$query = "UPDATE $importTableName";
+		foreach($tables as $tableName => $fields){
+			$query .= "
+				JOIN `$tableName`";
+			$nField = 0;
+			foreach($fields as $fieldName => $fieldModel){
+				$importFieldName = $fieldsMapping[$fieldName];
+				
+				if($nField++ === 0)
+					$query .= " ON ";
+				else
+					$query .= " AND ";
+				$query .= "`$importTableName`.`$importFieldName` = `$tableName`.`$fieldName`";
+			}
+		}
+		$query .= "
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+		";
+		$query .= " SET `$importTableName`.`$contactIdField` = vtiger_crmentity.crmid";
+		
+		if($updateFieldStatus)
+			$query .= ", `$importTableName`.`$updateFieldStatus` = '$updateFieldStatusValue'";
+			
+		$query .= " 
+			WHERE vtiger_crmentity.deleted = 0
+			AND (`$importTableName`.`$contactIdField` IS NULL OR `$importTableName`.`$contactIdField` = '')
+			AND `$importTableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->query($query);
+		if(!$result){
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+		}
+		elseif($db->getAffectedRowCount($result))
+			var_dump("Contacts reconnus par $updateFieldStatusValue : " . $db->getAffectedRowCount($result));
+		
+		return !!$result;
+	}
 
 	/**
 	 * Méthode qui court-circuite tous les contacts qui existent déjà d'après leur Ref4D

@@ -346,7 +346,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			return true;
 		} else {
 			//TODO: manage error
-			echo "not opened ...";
+			echo "<code>le fichier n'a pas pu être ouvert...</code>";
 		}
 		return false;
 	}

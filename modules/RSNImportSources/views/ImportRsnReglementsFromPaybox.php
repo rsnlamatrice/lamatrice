@@ -768,7 +768,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			}
 		} else {
 			//TODO: manage error
-			echo "not opened ...";
+			echo "<code>le fichier n'a pas pu être ouvert...</code>";
 		}
 
 		return true;
@@ -811,7 +811,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				return !isset($error);
 			} else {
 				//TODO: manage error
-				echo "not opened ...";
+				echo "<code>le fichier n'a pas pu être ouvert...</code>";
 			}
 		}
 		return false;
@@ -842,7 +842,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			return !isset($error);
 		} else {
 			//TODO: manage error
-			echo "not opened ...";
+			echo "<code>le fichier n'a pas pu être ouvert...</code>";
 		}
 	}
 	/**

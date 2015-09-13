@@ -58,11 +58,59 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @param Vtiger_Request $request: the current request.
 	 */
 	function showConfiguration(Vtiger_Request $request) {
-		$viewer = $this->getViewer($request);
-		$viewer->assign('MODULE', $request->getModule());
+		$viewer = $this->initConfiguration($request);
 		return $viewer->view('NothingToConfigure.tpl', 'RSNImportSources');
 	}
 
+	/**
+	 * Method to initialize the configuration template of the import for the first step.
+	 *  It display the select file template.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @return viewer
+	 */
+	function initConfiguration(Vtiger_Request $request) {
+		$viewer = $this->getViewer($request);
+		$viewer->assign('MODULE', $request->getModule());
+		return $viewer;
+	}
+		
+	/** ED150913
+	 * Method to initialize the configuration template of the import for the first step.
+	 *  It display the select related record template.
+	 * @param Vtiger_Request $request: the curent request.
+	 * @return viewer
+	 */
+	function initConfigurationToSelectRelatedModule(Vtiger_Request $request, $relatedModuleName, $searchKey = false, $searchValue = false) {
+		
+		//Model du champ de type reference au module
+		//Cherche n'importe quel champ qui soit une référence au module lié
+		switch($relatedModuleName){
+			case 'Documents' :
+				//Par exemple, dans la facture, le champ notesid
+				$relatedModule = Vtiger_Module_Model::getInstance('Invoice');
+				$relatedFieldModels = $relatedModule->getFields();
+				$relatedFieldModel = $relatedFieldModels['notesid'];
+				
+				break;
+			case 'Critere4D' :
+				//TODO
+				break;
+			default:
+				//TODO
+				break;
+		}
+		
+		$viewer = $this->initConfiguration($request);
+		$viewer->assign('RELATED_MODULE', $relatedModuleName);
+		$viewer->assign('RELATED_SEARCH_KEY', $searchKey);
+		$viewer->assign('RELATED_SEARCH_VALUE', $searchValue);
+		$viewer->assign('RELATED_FIELD_MODEL', $relatedFieldModel);
+		
+		$viewer->assign('SELECT_RELATED_RECORD', 'Documents');
+		return $viewer;
+	}
+
+	
 	/**
 	 * Method to get the modules that are concerned by the import.
 	 *  By default it return only the current module.
@@ -909,6 +957,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	function postAutoPreImportData(){
 		$this->request->set('auto_preimport', 'done');
 	}
+	
 }
 
 ?>
