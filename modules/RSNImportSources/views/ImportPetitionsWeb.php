@@ -396,8 +396,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid_status',
 			'Tout'
 		);
-echo "debug ".__FILE__;
-return;		
+
 		$partialFields = $fields;
 		unset($partialFields['mailingstreet']);
 		unset($partialFields['mailingstreet2']);
