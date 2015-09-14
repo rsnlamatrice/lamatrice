@@ -113,6 +113,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	 */
 	function importContacts($importDataController) {
 		$config = new RSNImportSources_Config_Model();
+
+		$this->identifyContacts();
 		
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
@@ -382,11 +384,35 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			}
 		}
 		
+		return true;
+	}
+	
+	/**
+	 * Exécute des requêtes longues d'identification des contacts
+	 * Doit être déclenché par le cron
+	 * Seule au premier appel du cron on ne devrait exécuter cette fonction.
+	 */
+	function identifyContacts() {
+		
+		//Teste si on a déjà exécuté cette fonction
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT 1 FROM ' . $tableName . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND NOT (_contactid IS NULL OR _contactid = \'\')
+			LIMIT 1
+		';
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+		if ($numberOfRecords > 0) {
+			//Déjà exécutée
+			return;
+		}
+		
 		// Pré-identifie les contacts
 		
 		$fields = array_flip($this->getContactsFieldsMapping());//Remplace les clés par les valeurs, et les valeurs par les clés
 		unset($fields['']);
-		
 		
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
 			$this->user,
