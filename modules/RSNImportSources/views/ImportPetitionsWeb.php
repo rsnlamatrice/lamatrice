@@ -1,17 +1,19 @@
 <?php
 
-
 /* Phase de migration
- * Importation des infos comlplémentaires de groupes depuis le fichier provenant de 4D
+ * Importation des prelevements Web depuis le fichier provenant de 4D
  */
-class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportFromFile_View {
+class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFromFile_View {
         
+	var $relatedDocumentId = false;
+	var $relatedDocumentName = false;
+		
 	/**
 	 * Method to get the source import label to display.
 	 * @return string - The label.
 	 */
 	public function getSource() {
-		return 'LBL_GROUPES_4D';
+		return 'LBL_PETITIONS_WEB';
 	}
 
 	/**
@@ -69,32 +71,30 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 	function getContactsFieldsMapping() {
 		//laisser exactement les colonnes du fichier, dans l'ordre 
 		return array (
-			'reffiche' => '',//contact_no
-			'pasderelanceadhesion' => 'donotrelanceadh',
-			'pasdecourrierag' => 'donotcourrierag',
-			'affichagesurlewebspecifique' => 'webscriptspecifique',
-			'groupesignataire' => 'signcharte',
-			'datevalidationsignaturecharte' => '',//toujours vide
-			'cachernometprenom' => '',// rsnwebhide .= 'Nom et prénom'
-			'cacheradressepostale' => '',// rsnwebhide .= 'Adresse postale'
-			'cachertel' => '',// rsnwebhide .= 'Téléphone'
-			'cacherfax' => '',// rsnwebhide .= 'Fax'
-			'cacherportable' => '',// rsnwebhide .= 'Portable'
-			'cachermail' => '',// rsnwebhide .= 'Email'
-			'webinutilise1' => '',//toujours vide
-			'webinutilise2' => '',//toujours vide
-			'contactweb' => '',//toujours vide
-			'nomlongdugroupe' => '',//grpnomlong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomlong
-			'cacheradhesion' => '',// rsnwebhide .= 'Adhésion'
 			
-			/* post pré import */
-			'_contactid' => '',
+			"prenom" => "firstname",
+			"nom" => "lastname",
+			"adresse1" => "mailingstreet",
+			"adresse2" => "mailingstreet3",
+			"code" => "mailingzip",
+			"ville" => "mailingcity",
+			"pays" => "mailingcountry",
+			"mails" => "email",
+			"listesn" => "listesn",
+			"listesd" => "listesd",
+			"date" => "dateapplication",//format MySQL
+			"ip" => "address_ip",
+			"x" => "_no_use_of_x",
+			
+			//champ supplémentaire
+			'_contactid' => '', //Contact Id. May be many. Massively updated after preImport
+			'_contactid_status' => '', //Type de reconnaissance automatique. Massively updated after preImport
+			'_notesid' => '', //Document Pétition. Massively updated after preImport
 		);
 	}
 	
 	function getContactsDateFields(){
 		return array(
-			'datevalidationsignaturecharte'
 		);
 	}
 	
@@ -163,56 +163,85 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 					
 		global $log;
 		
-		$sourceId = $contactsData[0]['reffiche'];
-		$contactId = $contactsData[0]['_contactid'];
-		
-		if(false && !$contactId) //[Migration] see postParse
-			$contactId = $this->getContactIdFromRef4D($sourceId);
+		$entryId = $contactsData[0]['_contactid']; // initialisé dans le postPreImportData
+		if($entryId){
+			//clean up concatened ids
+			$entryId = preg_replace('/(^,+|,+$|,(,+))/', '$2', $entryId);
+			if(strpos($entryId, ',')){
+				//Contacts multiples : non validable
+				return false;
+			}
+		}
+		if(is_numeric($entryId)){
+			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
+			//Relations  only
+			$this->createContactRelatedDocument($record, $contactsData);
 			
-		if($contactId){
-			$record = Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
-			$modifiedtime = $record->get('modifiedtime');
-			
-			$record->set('mode', 'edit');
-			//update fields
-			$this->updateContactRecordModelFromData($record, $contactsData);
-			$record->save();
-			
-			$this->createInitialModComment($record, $contactsData);
-			
-			//restore modifiedtime
-			$db = PearDatabase::getInstance();
-			$query = "UPDATE vtiger_crmentity
-				SET modifiedtime = ?
-				WHERE vtiger_crmentity.crmid = ?
-			";
-			$result = $db->pquery($query, array(
-								$modifiedtime
-								, $contactId));
-			
-			$entryId = $this->getEntryId("Contacts", $contactId);
+			//already imported !!
 			foreach ($contactsData as $contactsLine) {
 				$entityInfo = array(
 					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_UPDATED,
 					'id'		=> $entryId
 				);
-				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
-			}
-		}
-		else {
-		
-			//TODO: manage error
-			echo "\r<pre><code>Contact C$sourceId inconnu</code></pre>";
-			foreach ($contactsData as $contactsLine) {
-				$entityInfo = array(
-					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
-				);
 				
 				//TODO update all with array
 				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
 			}
+		}
+		else {
+			$record = Vtiger_Record_Model::getCleanInstance('Contacts');
+			$record->set('mode', 'create');
+			
+			$this->updateContactRecordModelFromData($record, $contactsData);
+			
+			//$db->setDebug(true);
+			$record->save();
+			$contactId = $record->getId();
+			
+			if(!$contactId){
+				//TODO: manage error
+				echo "<pre><code>Impossible d'enregistrer le contact</code></pre>";
+				foreach ($contactsData as $contactsLine) {
+					$entityInfo = array(
+						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+					);
+					
+					//TODO update all with array
+					$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+				}
 
-			return false;
+				return false;
+			}
+			
+			$entryId = $this->getEntryId("Contacts", $contactId);
+			foreach ($contactsData as $contactsLine) {
+				$entityInfo = array(
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
+					'id'		=> $entryId
+				);
+				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+			}
+			
+			$record->set('mode','edit');
+			$db = PearDatabase::getInstance();
+			$query = "UPDATE vtiger_crmentity
+				SET smownerid = ?
+				, createdtime = ?
+				WHERE vtiger_crmentity.crmid = ?
+			";
+			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
+								, $contactsData[0]['date']
+								, $contactId));
+			
+			$log->debug("" . basename(__FILE__) . " update imported contacts (id=" . $record->getId() . ", Ref 4D=$sourceId , date=" . $contactsData[0]['datecreation']
+					. ", result=" . ($result ? " true" : "false"). " )");
+			if( ! $result)
+				$db->echoError();
+			else {
+				//Relations 
+				$this->createContactRelatedDocument($record, $contactsData);
+			}
+			return $record;
 		}
 
 		return true;
@@ -227,7 +256,7 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 				$vField = $fieldsMapping[$fieldName];
 				if($vField)
 					$record->set($vField, $value);
-			}		
+			}
 					
 		//cast des DateTime
 		foreach($this->getContactsDateFields() as $fieldName){
@@ -236,124 +265,59 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 				$record->set($fieldsMapping[$fieldName], $value->format('Y-m-d'));
 		}
 		
-		// Note TODO
-		// l'import précédent des contacts contenait l'info NomAssoAvant
-		// see 'nomassoentreprisealaplacedenomp' => 'mailingaddressformat',
-		// dans le traitement, 'mailingaddressformat' a pu devenir autre chose
+		$fieldName = 'isgroup';
+		$record->set('isgroup', 0);
+		$record->set('leadsource', 'PETITION');//TODO
 		
-		//'nomlongdugroupe' => '',//grpnomlong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomlong
-		$fieldName = 'grpnomlong';
-		$value = $contactsData[0]['nomlongdugroupe'];
-		if( $value ) {
-			if( $value == $record->get('grpnomllong')
-			||  $value == $record->get('mailingstreet2')
-			||  $value == $record->get('lastname')){
-				//nada
-				$fieldName = '';
-			}
-			elseif($record->get('grpnomllong')){
-				if($record->get('mailingstreet2')){
-					//TODO Où mettre l'info ?
-					//Stock la valeur précédente (issue de AssociationNomCourt)
-					if($record->get('grpdescriptif'))
-						$record->set('grpdescriptif', $record->get('grpnomllong') . "\r" . $record->get('grpdescriptif'));
-					else
-						$record->set('grpdescriptif', $record->get('grpnomllong'));
-					//let update 'grpnomllong'
-				}
-				else {
-					$record->set('mailingstreet2', $record->get('grpnomllong'));
-					//let update 'grpnomllong'
-				}
-			}
-			else {
-				//let update 'grpnomllong'
-			}
-			if($fieldName)
-				$record->set($fieldName, $value);
-		}
-		
-		
-		$fieldName = 'rsnwebhide';
-		$webHide = '';
-		//'cachernometprenom' => '',// rsnwebhide .= 'Nom et prénom'
-		if($contactsData[0]['cachernometprenom'])
-			$webHide .= ($webHide ? ' |##| ' : '') . 'Nom et prénom';
-		//'cacheradressepostale' => '',// rsnwebhide .= 'Adresse postale'
-		if($contactsData[0]['cacheradressepostale'])
-			$webHide .= ($webHide ? ' |##| ' : '') . 'Adresse postale';
-		//'cachertel' => '',// rsnwebhide .= 'Téléphone'
-		if($contactsData[0]['cachertel'])
-			$webHide .= ($webHide ? ' |##| ' : '') . 'Téléphone';
-		//'cacherfax' => '',// rsnwebhide .= 'Fax'
-		if($contactsData[0]['cacherfax'])
-			$webHide .= ($webHide ? ' |##| ' : '') . 'Fax';
-		//'cacherportable' => '',// rsnwebhide .= 'Portable'
-		if($contactsData[0]['cacherportable'])
-			$webHide .= ($webHide ? ' |##| ' : '') . 'Portable';
-		//'cachermail' => '',// rsnwebhide .= 'Email'
-		if($contactsData[0]['cachermail'])
-			$webHide .= ($webHide ? ' |##| ' : '') . 'Email';
-		//'cacheradhesion' => '',// rsnwebhide .= 'Adhésion'
-		if($contactsData[0]['cacheradhesion'])
-			$webHide .= ($webHide ? ' |##| ' : '') . 'Adhésion';
-		//set
-		if($webHide){
-			$record->set($fieldName, $webHide);
-		}
-			
-			
 		// copie depuis tout en haut
 		//
-		//'reffiche' => '',//contact_no
-		//'pasderelanceadhesion' => 'donotrelanceadh',
-		//'pasdecourrierag' => 'donotcourrierag',
-		//'affichagesurlewebspecifique' => 'webscriptspecifique',
-		//'groupesignataire' => '',//toujours vide
-		//'datevalidationsignaturecharte' => '',//toujours vide
-		//'cachernometprenom' => '',// rsnwebhide .= 'Nom et prénom'
-		//'cacheradressepostale' => '',// rsnwebhide .= 'Adresse postale'
-		//'cachertel' => '',// rsnwebhide .= 'Téléphone'
-		//'cacherfax' => '',// rsnwebhide .= 'Fax'
-		//'cacherportable' => '',// rsnwebhide .= 'Portable'
-		//'cachermail' => '',// rsnwebhide .= 'Email'
-		//'webinutilise1' => '',//toujours vide
-		//'webinutilise2' => '',//toujours vide
-		//'contactweb' => '',//toujours vide
-		//'nomlongdugroupe' => '',//grpnomlong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomlong
-		//'cacheradhesion' => '',// rsnwebhide .= 'Adhésion'
+		//
+			
+		//"prenom" => "firstname",
+		//"nom" => "lastname",
+		//"adresse1" => "mailingstreet",
+		//"adresse2" => "mailingstreet3",
+		//"code" => "mailingzip",
+		//"ville" => "mailingcity",
+		//"pays" => "mailingcountry",
+		//"mails" => "mails",
+		//"listesn" => "listesn",
+		//"listesd" => "listesd",
+		//"date" => "dateapplication",//format MySQL
+		//"ip" => "address_ip",
+		//"x" => "_no_use_of_x",
+		//
+		
+	}
+	
+	//Mise à jour des données du record model nouvellement créé à partir des données d'importation
+	private function createContactRelatedDocument($record, $contactsData){
+		
+		$db = PearDatabase::getInstance();
+		
+		/* Affecte l'id de la pétition de cet import */
+		$query = "INSERT INTO `vtiger_senotesrel` (`crmid`, `notesid`, `dateapplication`, `data`) 
+			VALUES(?, ?, ?, ?)
+			ON DUPLICATE KEY UPDATE data = data
+		";
+		$params = array(
+			$record->getId(),
+			$contactsData[0]['_notesid'],
+			$contactsData[0]['date'],
+			$contactsData[0]['ip'],
+			
+		);
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError($query);
+			die();
+		}		
 	}
 	
 	/**
-	 * Crée un commentaire avec les données initiales de 4D
-	 */
-	function createInitialModComment($contact, $contactsData){
-		$currentUserModel = Users_Record_Model::getCurrentUserModel();
-		
-		$record = Vtiger_Record_Model::getCleanInstance('ModComments');
-		$record->set('mode', 'create');
-		
-		$text = 'Données 4D du Groupe : ';
-		$fieldsMapping = $this->getContactsFieldsMapping();
-		foreach($fieldsMapping as $srcFieldName => $fieldName)
-			$text .= "\n- $srcFieldName = " . print_r($contactsData[0][$srcFieldName], true);
-		
-		$record->set('commentcontent', $text);
-		$record->set('related_to', $contact->getId());
-		
-		$record->set('assigned_user_id', ASSIGNEDTO_ALL);
-		$record->set('userid', $currentUserModel->getId());
-		
-		$record->save();
-		
-		return $record;
-	}
-	
-	
-	/**
-	 * Method that pre import an invoice.
-	 *  It adds one row in the temporary pre-import table by invoice line.
-	 * @param $contactsData : the data of the invoice to import.
+	 * Method that pre import a contact.
+	 *  It adds one row in the temporary pre-import table by contact line.
+	 * @param $contactsData : the data of the contact to import.
 	 */
 	function preImportContact($contactsData) {
 		
@@ -361,32 +325,6 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 		
 		$contacts = new RSNImportSources_Preimport_Model($contactsValues, $this->user, 'Contacts');
 		$contacts->save();
-	}
-
-	/**
-	 * Method that retrieve a contact.
-	 * @param string $firstname : the firstname of the contact.
-	 * @param string $lastname : the lastname of the contact.
-	 * @param string $email : the mail of the contact.
-	 * @return the row data of the contact | null if the contact is not found.
-	 */
-	function getContact($ref4d) {
-		$id = false;
-		if(is_array($ref4d)){
-			//$ref4d is $rsnprelvirementsData
-			if($ref4d[0]['_contactid'])
-				$id = $ref4d[0]['_contactid'];
-			else{
-				$ref4d = $ref4d[0]['reffiche'];
-			}
-		}
-		if(!$id)
-			$id = $this->getContactIdFromRef4D($ref4d);
-		if($id){
-			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
-		}
-
-		return null;
 	}
 	
 	/**
@@ -413,7 +351,7 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 			return true;
 		} else {
 			//TODO: manage error
-			echo "<code>le fichier n'a pas pu être ouvert...</code>";
+			echo "<code>Erreur : le fichier n'a pas pu être ouvert...</code>";
 		}
 		return false;
 	}
@@ -423,21 +361,76 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 	 *  This method must be overload in the child class.
 	 */
 	function postPreImportData() {
+		if($this->relatedDocumentId){
+			$db = PearDatabase::getInstance();
+			$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+			
+			/* Affecte l'id de la pétition de cet import */
+			$query = "UPDATE $tableName
+			";
+			$query .= " SET `_notesid` = ?";
+			$query .= "
+				WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+				AND (`$tableName`.`_notesid` IS NULL OR `$tableName`.`_notesid` = '')
+			";
+			$result = $db->pquery($query, array($this->relatedDocumentId));
+			if(!$result){
+				echo '<br><br><br><br>';
+				$db->echoError($query);
+				echo("<pre>$query</pre>");
+				die();
+			}
+		}
+		
 		// Pré-identifie les contacts
 		
-		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+		$fields = array_flip($this->getContactsFieldsMapping());//Remplace les clés par les valeurs, et les valeurs par les clés
+		unset($fields['']);
+		
+		
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
 			$this->user,
 			'Contacts',
-			'reffiche',
 			'_contactid',
-			/*$changeStatus*/ false
+			$fields,
+			'_contactid_status',
+			'Tout'
 		);
-	
-		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
+echo "debug ".__FILE__;
+return;		
+		$partialFields = $fields;
+		unset($partialFields['mailingstreet']);
+		unset($partialFields['mailingstreet2']);
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
 			$this->user,
 			'Contacts',
-			'_contactid'
+			'_contactid',
+			$partialFields,
+			'_contactid_status',
+			'Tout sauf adresse1 et adresse2'
 		);
+		
+		$partialFields = array('lastname' => $fields['lastname'], 'firstname' => $fields['firstname'], 'mailingzip' => $fields['mailingzip']);
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+			$this->user,
+			'Contacts',
+			'_contactid',
+			$partialFields,
+			'_contactid_status',
+			'Nom, prénom et code postal'
+		);
+		
+		$partialFields = array('email' => $fields['email']);
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+			$this->user,
+			'Contacts',
+			'_contactid',
+			$partialFields,
+			'_contactid_status',
+			'Email seul'
+		);
+		
+		return true;
 	}
         
 	/**
@@ -447,7 +440,8 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 	 */
 	function isDate($string) {
 		//TODO do not put this function here ?
-		return preg_match("/^[0-3]?[0-9][-\/][0-1]?[0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
+		//already mysql format
+		return preg_match("/^(20)?[0-9][0-9][-\/][0-1]?[0-9][-\/][0-3]?[0-9]/", $string);//only true for french format
 	}
 	/**
 	 * Method that returns a formatted date for mysql (Y-m-d).
@@ -455,10 +449,9 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 	 * @return string - formated date.
 	 */
 	function getMySQLDate($string) {
-		if(!$string || $string === '00/00/00')
+		if(!$string)
 			return null;
-		$dateArray = preg_split('/[-\/]/', $string);
-		return '20'.$dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
+		return $string;
 	}
 
 	/**
@@ -468,7 +461,7 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 	 * @return boolean - true if the line is a contact information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && is_numeric($line[0]) && is_numeric($line[1])) {
+		if (sizeof($line) > 0 && $line[7] && $this->isDate($line[10])) {
 			return true;
 		}
 
@@ -551,7 +544,31 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 		//Parse dates
 		foreach($this->getContactsDateFields() as $fieldName)
 			$contactsHeader[$fieldName] = $this->getMySQLDate($contactsHeader[$fieldName]);
-			
+		
 		return $contactsHeader;
+	}
+	
+	
+	/**
+	 * Method to show the configuration template of the import for the first step.
+	 *  It display the select file template.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function showConfiguration(Vtiger_Request $request) {
+		parent::showConfiguration($request);
+	
+		$viewer = $this->initConfigurationToSelectRelatedModule($request, 'Documents', 'folderid', 'Pétitions');
+		return $viewer->view('ImportSelectRelatedRecordStep.tpl', 'RSNImportSources');
+	}
+	
+	/**
+	 * Method to process to the first step (pre-importing data).
+	 *  It calls the parseAndSave methode that must be implemented in the child class.
+	 */
+	public function preImportData(Vtiger_Request $request) {
+		$fieldName = $request->get('related_record_fieldname');
+		$this->relatedDocumentId = $request->get($fieldName);
+		$this->relatedDocumentName = $request->get($fieldName . '_display');
+		return parent::preImportData($request);
 	}
 }

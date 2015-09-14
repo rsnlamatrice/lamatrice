@@ -381,7 +381,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			return true;
 		} else {
 			//TODO: manage error
-			echo "not opened ...";
+			echo "<code>le fichier n'a pas pu être ouvert...</code>";
 		}
 		return false;
 	}
