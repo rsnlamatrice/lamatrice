@@ -87,9 +87,9 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			"x" => "_no_use_of_x",
 			
 			//champ supplémentaire
-			'_notesid' => '', //Massively updated after preImport
-			'_contactid' => '', //Massively updated after preImport
-			'_contactid_action' => '', //Massively updated after preImport
+			'_contactid' => '', //Contact Id. May be many. Massively updated after preImport
+			'_contactid_status' => '', //Type de reconnaissance automatique. Massively updated after preImport
+			'_notesid' => '', //Document Pétition. Massively updated after preImport
 		);
 	}
 	
@@ -165,6 +165,14 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		
 		$entryId = $contactsData[0]['_contactid']; // initialisé dans le postPreImportData
 		if($entryId){
+			//clean up concatened ids
+			$entryId = preg_replace('/(^,+|,+$|,(,+))/', '$2', $entryId);
+			if(strpos($entryId, ',')){
+				//Contacts multiples : non validable
+				return false;
+			}
+		}
+		if(is_numeric($entryId)){
 			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
 			//Relations  only
 			$this->createContactRelatedDocument($record, $contactsData);
@@ -307,9 +315,9 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	}
 	
 	/**
-	 * Method that pre import an invoice.
-	 *  It adds one row in the temporary pre-import table by invoice line.
-	 * @param $contactsData : the data of the invoice to import.
+	 * Method that pre import a contact.
+	 *  It adds one row in the temporary pre-import table by contact line.
+	 * @param $contactsData : the data of the contact to import.
 	 */
 	function preImportContact($contactsData) {
 		
@@ -343,7 +351,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			return true;
 		} else {
 			//TODO: manage error
-			echo "<code>le fichier n'a pas pu être ouvert...</code>";
+			echo "<code>Erreur : le fichier n'a pas pu être ouvert...</code>";
 		}
 		return false;
 	}
@@ -385,10 +393,11 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'Contacts',
 			'_contactid',
 			$fields,
-			'_contactid_action',
+			'_contactid_status',
 			'Tout'
 		);
-		
+echo "debug ".__FILE__;
+return;		
 		$partialFields = $fields;
 		unset($partialFields['mailingstreet']);
 		unset($partialFields['mailingstreet2']);
@@ -397,7 +406,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'Contacts',
 			'_contactid',
 			$partialFields,
-			'_contactid_action',
+			'_contactid_status',
 			'Tout sauf adresse1 et adresse2'
 		);
 		
@@ -407,7 +416,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'Contacts',
 			'_contactid',
 			$partialFields,
-			'_contactid_action',
+			'_contactid_status',
 			'Nom, prénom et code postal'
 		);
 		
@@ -417,7 +426,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'Contacts',
 			'_contactid',
 			$partialFields,
-			'_contactid_action',
+			'_contactid_status',
 			'Email seul'
 		);
 		

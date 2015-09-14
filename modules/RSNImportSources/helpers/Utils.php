@@ -538,6 +538,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		
 		
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		$focus = CRMEntity::getInstance($moduleName);
 		$moduleFields = $moduleModel->getFields();
 		
 		//uniquement le mapping des champs connus
@@ -559,42 +560,80 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		// Pré-identifie les contacts
 		
 		/* Affecte la réf du contact d'après la ref 4D */
-		$query = "UPDATE $importTableName";
-		foreach($tables as $tableName => $fields){
+		$query = "UPDATE $importTableName
+			JOIN (
+				SELECT GROUP_CONCAT(vtiger_crmentity.crmid, ',') AS crmids, COUNT(*) AS crmids_counter
+		";
+			$grouped_TableName = $moduleName."_grouped_by_fields";
+			foreach($tables as $tableName => $fields){
+				foreach($fields as $fieldName => $fieldModel){
+					$query .= ", `$tableName`.`$fieldName`";
+				}
+			}
 			$query .= "
-				JOIN `$tableName`";
+				FROM vtiger_crmentity
+			";
+					
+			$nTable = 0;
+			foreach($tables as $tableName => $fields){
+				$tableIndexField = $focus->tab_name_index[$tableName];
+				$query .= "
+					JOIN `$tableName`
+						ON vtiger_crmentity.crmid = `$tableName`.`$tableIndexField`";
+			}
+			
+			$query .= "
+				WHERE vtiger_crmentity.deleted = 0
+				GROUP BY
+			";
 			$nField = 0;
+			foreach($tables as $tableName => $fields){
+				foreach($fields as $fieldName => $fieldModel){
+					if($nField++)
+						$query .= ",";
+					$query .= "`$tableName`.`$fieldName`";
+				}
+			}
+		
+		$query .= "
+		) `$grouped_TableName`
+		";
+		$nField = 0;
+		foreach($tables as $tableName => $fields){
 			foreach($fields as $fieldName => $fieldModel){
-				$importFieldName = $fieldsMapping[$fieldName];
-				
 				if($nField++ === 0)
 					$query .= " ON ";
-				else
+				else				
 					$query .= " AND ";
-				$query .= "`$importTableName`.`$importFieldName` = `$tableName`.`$fieldName`";
+				$importFieldName = $fieldsMapping[$fieldName];
+				$query .= "`$importTableName`.`$importFieldName` = `$grouped_TableName`.`$fieldName`";
 			}
 		}
-		$query .= "
-			JOIN vtiger_crmentity
-				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-		";
-		$query .= " SET `$importTableName`.`$contactIdField` = vtiger_crmentity.crmid";
+		//Concatenation de l'id trouvé
+		//, avec nettoyage par la fonction ajoutée REGEX_REPLACE
+		//TODO il faut implémenter une function dans MySQL, mais je n'ai trouvé que du "signle char replacement"
+		//$query .= " SET `$importTableName`.`$contactIdField` = REGEX_REPLACE('^,+|,+$', '', `$grouped_TableName`.crmids)";
+		$query .= " SET `$importTableName`.`$contactIdField` = `$grouped_TableName`.crmids";
 		
 		if($updateFieldStatus)
 			$query .= ", `$importTableName`.`$updateFieldStatus` = '$updateFieldStatusValue'";
 			
 		$query .= " 
-			WHERE vtiger_crmentity.deleted = 0
-			AND (`$importTableName`.`$contactIdField` IS NULL OR `$importTableName`.`$contactIdField` = '')
+			WHERE (`$importTableName`.`$contactIdField` IS NULL OR `$importTableName`.`$contactIdField` = '')
 			AND `$importTableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
+		echo("<h4>Recherche de contacts similaires par \"$updateFieldStatusValue\"</h4>");
+		//echo("<pre>$query</pre>");
+		$perf = new RSNImportSources_Utils_Performance(1);
 		$result = $db->query($query);
+		$perf->tick();
+		$perf->terminate();
 		if(!$result){
 			$db->echoError($query);
 			echo("<pre>$query</pre>");
 		}
 		elseif($db->getAffectedRowCount($result))
-			var_dump("Contacts reconnus par $updateFieldStatusValue : " . $db->getAffectedRowCount($result));
+			echo "<pre>Contacts reconnus par $updateFieldStatusValue : " . $db->getAffectedRowCount($result) . '</pre>';
 		
 		return !!$result;
 	}
