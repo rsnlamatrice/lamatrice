@@ -31,7 +31,7 @@ class RSNImportSources_Utils_Performance {
 		echo "\n Importation terminée";
 		if($this->maxItems > 1)
 			echo " pour $this->tickCounter/$this->maxItems "
-				."( $perfPC %, $perfElapsed, ",
+				."( $perfPC %, $perfElapsed, "
 				.", memoire : ". self::getMemoryUsage()
 				." ) "
 			;
