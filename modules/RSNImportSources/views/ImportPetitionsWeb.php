@@ -423,17 +423,18 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'Tout'
 		);
 
-		$partialFields = $fields;
-		unset($partialFields['mailingstreet']);
-		unset($partialFields['mailingstreet2']);
-		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
-			$this->user,
-			'Contacts',
-			'_contactid',
-			$partialFields,
-			'_contactid_status',
-			'Tout sauf adresse1 et adresse2'
-		);
+		/* pas très intéressant et aussi long que le précédent */
+		//$partialFields = $fields;
+		//unset($partialFields['mailingstreet']);
+		//unset($partialFields['mailingstreet2']);
+		//RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+		//	$this->user,
+		//	'Contacts',
+		//	'_contactid',
+		//	$partialFields,
+		//	'_contactid_status',
+		//	'Tout sauf adresse1 et adresse2'
+		//);
 		
 		$partialFields = array('email' => $fields['email'], 'lastname' => $fields['lastname'], 'firstname' => $fields['firstname'], 'mailingzip' => $fields['mailingzip']);
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
@@ -610,10 +611,10 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	 * Method to process to the first step (pre-importing data).
 	 *  It calls the parseAndSave methode that must be implemented in the child class.
 	 */
-	public function preImportData(Vtiger_Request $request) {
-		$fieldName = $request->get('related_record_fieldname');
-		$this->relatedDocumentId = $request->get($fieldName);
-		$this->relatedDocumentName = $request->get($fieldName . '_display');
-		return parent::preImportData($request);
+	public function preImportData() {
+		$fieldName = $this->request->get('related_record_fieldname');
+		$this->relatedDocumentId = $this->request->get($fieldName);
+		$this->relatedDocumentName = $this->request->get($fieldName . '_display');
+		return parent::preImportData($this->request);
 	}
 }
