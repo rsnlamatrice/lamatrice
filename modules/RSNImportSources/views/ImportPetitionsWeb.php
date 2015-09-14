@@ -409,6 +409,26 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'Tout sauf adresse1 et adresse2'
 		);
 		
+		$partialFields = array('email' => $fields['email', 'lastname' => $fields['lastname'], 'firstname' => $fields['firstname'], 'mailingzip' => $fields['mailingzip']);
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+			$this->user,
+			'Contacts',
+			'_contactid',
+			$partialFields,
+			'_contactid_status',
+			'Email, nom, prénom et code postal'
+		);
+		
+		$partialFields = array('email' => $fields['email', 'lastname' => $fields['lastname'], 'firstname' => $fields['firstname']);
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+			$this->user,
+			'Contacts',
+			'_contactid',
+			$partialFields,
+			'_contactid_status',
+			'Email, nom et prénom'
+		);
+		
 		$partialFields = array('lastname' => $fields['lastname'], 'firstname' => $fields['firstname'], 'mailingzip' => $fields['mailingzip']);
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
 			$this->user,

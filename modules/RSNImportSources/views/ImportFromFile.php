@@ -30,6 +30,9 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 		$viewer->assign('IMPORT_ULPOAD_FILE_ENCODING', $this->getDefaultFileEncoding());
 		$viewer->assign('IMPORT_ULPOAD_FILE_DELIMITER', $this->getDefaultFileDelimiter());
 		$viewer->assign('IMPORT_UPLOAD_SIZE', $this->getImportUploadSize());
+		
+		$viewer->assign('IMPORT_FILE_LOCALPATH', '');//Chemin du dernier fichier local au serveur
+		
 		return $viewer;
 	}
 
