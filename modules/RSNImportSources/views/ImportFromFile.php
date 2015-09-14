@@ -118,7 +118,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * Method to process to the first step (pre-importing data).
 	 *  It calls the parseAndSave methode that must be implemented in the child class.
 	 */
-	public function preImportData(Vtiger_Request $request) {
+	public function preImportData() {
 		if ($this->uploadFile()) {
 		
 			$fileReader = RSNImportSources_Utils_Helper::getFileReader($this->request, $this->user);
