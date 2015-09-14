@@ -22,8 +22,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * @return viewer
 	 */
 	function initConfiguration(Vtiger_Request $request) {
-		$viewer = $this->getViewer($request);
-		$viewer->assign('MODULE', $request->getModule());
+		$viewer = parent::initConfiguration($request);
 		$viewer->assign('SUPPORTED_FILE_TYPES', $this->getSupportedFileExtentions());//tmp function of import module !!!
 		$viewer->assign('SUPPORTED_FILE_ENCODING', RSNImportSources_Utils_Helper::getSupportedFileEncoding());
 		$viewer->assign('SUPPORTED_DELIMITERS', RSNImportSources_Utils_Helper::getSupportedDelimiters());
@@ -31,6 +30,9 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 		$viewer->assign('IMPORT_ULPOAD_FILE_ENCODING', $this->getDefaultFileEncoding());
 		$viewer->assign('IMPORT_ULPOAD_FILE_DELIMITER', $this->getDefaultFileDelimiter());
 		$viewer->assign('IMPORT_UPLOAD_SIZE', $this->getImportUploadSize());
+		
+		$viewer->assign('IMPORT_FILE_LOCALPATH', '');//Chemin du dernier fichier local au serveur
+		
 		return $viewer;
 	}
 
@@ -116,7 +118,7 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 	 * Method to process to the first step (pre-importing data).
 	 *  It calls the parseAndSave methode that must be implemented in the child class.
 	 */
-	public function preImportData() {
+	public function preImportData(Vtiger_Request $request) {
 		if ($this->uploadFile()) {
 		
 			$fileReader = RSNImportSources_Utils_Helper::getFileReader($this->request, $this->user);

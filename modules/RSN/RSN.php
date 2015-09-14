@@ -33,7 +33,7 @@ class RSN {
 			$this->add_customview_orderbyfields_field();
 			$this->add_customview_lockstatus_field();
 			$this->registerEvents();
-			selff::add_mysql_function_levenshtein();
+			self::add_mysql_function_levenshtein();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -239,6 +239,10 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 	}
 	
 	static function add_mysql_function_levenshtein(){
+		$db = PearDatabase::getInstance();
+		$sql = 'DROP FUNCTION `levenshtein`';
+		$db->pquery($sql);
+		
 		$sql = 'DELIMITER $$
 CREATE FUNCTION levenshtein( s1 VARCHAR(255), s2 VARCHAR(255) )
 RETURNS INT
@@ -293,7 +297,7 @@ BEGIN
 	RETURN c;
 END$$
 DELIMITER ;';
-		$db = PearDatabase::getInstance();
 		$result = $db->pquery($sql);
 	}
+	
 }
