@@ -11,8 +11,9 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 	 * @param string $module : the import module name.
 	 * @param array $fieldMapping : the field mapping.
 	 * @param array $defaultValues : the default field values.
+	 * @param array $status : the initial status. If omitted, depends of $request->get('is_scheduled')
 	 */
-	public static function add($request, $user, $module, $fieldMapping, $defaultValues = null) {
+	public static function add($request, $user, $module, $fieldMapping, $defaultValues = null, $status = null) {
 		if(!$defaultValues)
 			$defaultValues = null;
 		$db = PearDatabase::getInstance();
@@ -32,11 +33,12 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 				true);
 		}
 
-		if($request->get('is_scheduled')) {
-			$status = self::$IMPORT_STATUS_SCHEDULED;
-		} else {
-			$status = self::$IMPORT_STATUS_NONE;
-		}
+		if($status === null)
+			if($request->get('is_scheduled')) {
+				$status = self::$IMPORT_STATUS_SCHEDULED;
+			} else {
+				$status = self::$IMPORT_STATUS_NONE;
+			}
 
 		$result = $db->pquery('INSERT INTO ' . self::$importQueueTable . ' VALUES(?,?,?,?,?,?,?,?,?)',
 				array($db->getUniqueID(self::$importQueueTable),
