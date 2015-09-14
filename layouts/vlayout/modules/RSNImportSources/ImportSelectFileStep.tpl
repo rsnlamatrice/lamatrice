@@ -13,14 +13,15 @@
 			<input type="radio"  id="import_file_mode_upload" name="import_file_src_mode" value="upload" checked="checked"/>&nbsp;
 				<input type="file" name="import_file[]" id="import_file" multiple
 					onchange="if(this.value) $('#import_file_mode_upload').get(0).checked = true;"/>
+			{*if $IS_ADMIN*}
 			<br>
 			<input type="radio" id="import_file_mode_localpath" name="import_file_src_mode" value="localpath"/>&nbsp;
 				<input type="text" name="import_file_localpath" id="import_file_localpath"
 					title="Chemin d'un fichier d&eacute;j&agrave; pr&eacute;sent sur le serveur"
-					value="/home/emmanuel/transferts/Adresse-1-mini.csv"
+					value="{$IMPORT_FILE_LOCALPATH}"
 					onchange="if(this.value) $('#import_file_mode_localpath').get(0).checked = true;"
 					style="width: 90%;"/>
-			<!-- input type="hidden" name="userfile_hidden" value=""/ -->
+			{*/if $IS_ADMIN*}
 		</td>
 	</tr>
 	<tr>

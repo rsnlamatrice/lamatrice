@@ -624,9 +624,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		";
 		echo("<h4>Recherche de contacts similaires par \"$updateFieldStatusValue\"</h4>");
 		//echo("<pre>$query</pre>");
-		$perf = new RSNImportSources_Utils_Performance(1);
+		$perf = new RSNImportSources_Utils_Performance(0);
 		$result = $db->query($query);
-		$perf->tick();
 		$perf->terminate();
 		if(!$result){
 			$db->echoError($query);

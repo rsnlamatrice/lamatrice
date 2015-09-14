@@ -13,7 +13,7 @@ class RSNImportSources_Utils_Performance {
 	
 	public function tick(){
 		$this->tickCounter++;
-		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
+		$perfPC = $this->maxItems ? (int)($this->tickCounter/$this->maxItems * 100) : 0;
 		if($this->prevPercent != $perfPC){
 			$perfNow = new DateTime();
 			$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%S');
@@ -25,13 +25,18 @@ class RSNImportSources_Utils_Performance {
 		}
 	}
 	public function terminate(){
-		$perfPC = (int)($this->tickCounter/$this->maxItems * 100);
+		$perfPC = $this->maxItems ? (int)($this->tickCounter/$this->maxItems * 100) : 0;
 		$perfNow = new DateTime();
 		$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%s');
-		echo "\n Importation terminée pour $this->tickCounter/$this->maxItems "
-			."( $perfPC %, $perfElapsed, "
-			.", memoire : ". self::getMemoryUsage()
-			." ) ";
+		echo "\n Importation terminée";
+		if($this->maxItems > 1)
+			echo " pour $this->tickCounter/$this->maxItems "
+				."( $perfPC %, $perfElapsed, "
+				.", memoire : ". self::getMemoryUsage()
+				." ) "
+			;
+		else
+			echo " ( $perfElapsed ) ";
 	}
 	static function getMemoryUsage(){
 		$size = memory_get_usage();
