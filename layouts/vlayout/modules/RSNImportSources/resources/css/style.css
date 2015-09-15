@@ -18,7 +18,7 @@
 }
 
 .RECORDID_STATUS_COLORS_0 {
-  background-color : #FFC0A0;
+  background-color : rgb(220, 184, 184);;
 }
 .RECORDID_STATUS_COLORS_1 {
   background-color : green;
@@ -46,6 +46,14 @@
     color: green !important;
 }
 
+.importContents input{
+  display: inline;
+}
+
+.importContents td.create-contact label {
+  margin-bottom: 0px;
+}
+
 .importContents thead th{
   color: red;
 }
@@ -56,8 +64,14 @@
 .importContents .preimport-row th{
   color: gray;
 }
+.importContents tr.preimport-row:first-of-type,
 .importContents tr.contact-row + tr.preimport-row {
   border-top: 1px solid gray;
+}
+.importContents tr.preimport-row,
+.importContents tr.contact-row {
+  border-left: 1px solid gray;
+  border-right: 1px solid gray;
 }
 .importContents tr.contact-row th
 , .importContents tr.contact-row td {

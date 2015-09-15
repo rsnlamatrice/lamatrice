@@ -21,7 +21,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents">
 								{if $ROW_OFFSET === 0}
 									<thead><tr>
-										<th colspan="2"></th>
+										<th colspan="3"></th>
 										{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
 											{if $FIELD_NAME[0] === '_'}
 												{continue}
@@ -39,7 +39,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 										{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$ROW['_contactid_status']}
 									{/if}
 									<tr class="preimport-row {$ROW_CLASS}">
-										<th colspan="2">{$ROW_OFFSET}</th>
+										<th colspan="3">{$ROW_OFFSET}</th>
 										{foreach key=FIELD_NAME item=VALUE from=$ROW}
 											{if $FIELD_NAME[0] === '_'}
 												{continue}
@@ -64,15 +64,14 @@ $IMPORT_RECORD_FAILED = 5;*}
 													</th>
 												{/if}
 												<th>
-													<a href="#actions"></a>
-													<a href="{$CONTACTS_MODULE_MODEL->getDetailViewUrl($CONTACT_ID)}" target="_blank">
-														<span class="icon-rsn-small-contact" data-value="0"></span>
-													</a>
-													
 													<input type="radio" name="contact_related_to_{$ROW_INDEX}"
 															{if $CONTACT_ROW_INDEX === 0}checked="checked"{/if}
 													/>
-													
+												</th>
+												<th>
+													<a href="{$CONTACTS_MODULE_MODEL->getDetailViewUrl($CONTACT_ID)}" target="_blank">
+														<span class="icon-rsn-small-isgroup{$CONTACT_ROW['isgroup']}"></span>
+													</a>
 												</th>
 												{foreach key=FIELD_NAME item=VALUE from=$ROW}
 													{if $FIELD_NAME[0] === '_'}
@@ -97,11 +96,12 @@ $IMPORT_RECORD_FAILED = 5;*}
 											{if ! $CONTACT_ROWS}
 												<th></th>
 											{/if}
-											<th>
+											<td colspan="3" class="select-contact">
 												<input type="radio" name="contact_related_to_{$ROW_INDEX}"/>
-											</th>
-											<td colspan="2">
-												<a href="#" class="select-contact">sélectionner...</a></td>
+												<a href="#"><i>sélectionner...</i></a></td>
+											<td colspan="3" class="create-contact">
+												<label><input type="radio" name="contact_related_to_{$ROW_INDEX}"/>
+													<i>créer</i></label></td>
 										</tr>
 									{/if}
 								{/foreach}
