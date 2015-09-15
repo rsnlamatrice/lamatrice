@@ -39,9 +39,14 @@ jQuery(document).ready(function() {
 					
 					<button class="btn" name="continue" style="margin-left: 2em;"
 						id="continueHaltedImport"
-						onclick="location.href='index.php?for_module={$FOR_MODULE}&module=RSNImportSources&view=Index&mode=continueHaltedImport&import_id={$IMPORT_ID}'"><strong>{'LBL_REACTIVATE'|@vtranslate:$MODULE}</strong></button>
+						onclick="location.href='index.php?for_module={$FOR_MODULE}&module={$MODULE}&view=Index&mode=continueHaltedImport&import_id={$IMPORT_ID}&ImportSource={$IMPORT_SOURCE}'"><strong>{'LBL_REACTIVATE'|@vtranslate:$MODULE}</strong></button>
+				{elseif $IMPORT_STATUS eq Import_Queue_Action::$IMPORT_STATUS_VALIDATING}
+					{'LBL_VALIDATING'|@vtranslate:$MODULE}
+					<button class="btn" name="continue" style="margin-left: 2em;"
+						id="validatePreImportData"
+						onclick="location.href='index.php?for_module={$FOR_MODULE}&module={$MODULE}&view=Index&mode=validatePreImportData&import_id={$IMPORT_ID}&ImportSource={$IMPORT_SOURCE}'"><strong>{'LBL_SHOW'|@vtranslate:$MODULE}</strong></button>
 				{else}
-					<a href="index.php?for_module={$FOR_MODULE}&module=RSNImportSources&view=Index&mode=continueHaltedImport&import_id={$IMPORT_ID}"
+					<a href="index.php?for_module={$FOR_MODULE}&module={$MODULE}&view=Index&mode=continueHaltedImport&import_id={$IMPORT_ID}&ImportSource={$IMPORT_SOURCE}"
 						onclick="return confirm('Retour &agrave; l\'&eacute;tat de programmation horaire.
 												\r&Ecirc;tes vous s&ucirc;r que le traitement n\'est pas en cours ?
 												\rLes cons&eacute;quences pourraient &ecirc;tre graves (doublons &agrave; gogo).');"

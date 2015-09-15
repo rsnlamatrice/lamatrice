@@ -32,8 +32,10 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 					status INT default 0)",
 				true);
 		}
+		else
+			self::removeByImportSource($request, $user, $module);
 
-		if($status === null)
+		if($status === null || $status === false)
 			if($request->get('is_scheduled')) {
 				$status = self::$IMPORT_STATUS_SCHEDULED;
 			} else {
@@ -52,6 +54,25 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 						$status));
 		if(!$result)
 			$db->echoError('RSNImportSources_Queue_Action::add()');
+	}
+
+	/** 
+	 * Method to remove an import of the queue table.
+	 * @param int $importId : the id of the import do remove.
+	 */
+	public static function removeByImportSource($request, $user, $module) {
+		$db = PearDatabase::getInstance();
+		if(Vtiger_Utils::CheckTable(self::$importQueueTable)) {
+			$db->pquery('DELETE FROM ' . self::$importQueueTable . '
+							WHERE userid = ?
+							AND tabid = ?
+							AND importsourceclass = ?'
+						, array($user->id,									  
+							getTabid($module),
+							$request->get('ImportSource'),
+						)
+					);
+		}
 	}
 
 	/** 
@@ -222,7 +243,7 @@ class RSNImportSources_Queue_Action extends Import_Queue_Action {
 	 */
 	static function updateStatus($importId, $status) {
 		$db = PearDatabase::getInstance();
-		$db->pquery('UPDATE ' . self::$importQueueTable . ' SET status=? WHERE importid=?', array($status, $importId));
+		$result = $db->pquery('UPDATE ' . self::$importQueueTable . ' SET status=? WHERE importid=?', array($status, $importId));
 	}
 
 	/** 

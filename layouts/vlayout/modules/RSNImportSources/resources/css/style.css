@@ -1,0 +1,67 @@
+.ROW_STATUS_COLORS_0 {
+  background-color : inherit;
+}
+.ROW_STATUS_COLORS_1 {
+  background-color : green;
+}
+.ROW_STATUS_COLORS_2 {
+  background-color : yellow;
+}
+.ROW_STATUS_COLORS_3 {
+  background-color : green;
+}
+.ROW_STATUS_COLORS_4 {
+  background-color : green;
+}
+.ROW_STATUS_COLORS_4 {
+  background-color : #FFC0A0;
+}
+
+.RECORDID_STATUS_COLORS_0 {
+  background-color : #FFC0A0;
+}
+.RECORDID_STATUS_COLORS_1 {
+  background-color : green;
+}
+.RECORDID_STATUS_COLORS_2 {
+  background-color : #A0FFC0;
+}
+.RECORDID_STATUS_COLORS_3 {
+  background-color : #C0FFA0;
+}
+.RECORDID_STATUS_COLORS_10 {
+  background-color : yellow;
+}
+.RECORDID_STATUS_COLORS_11 {
+  background-color : yellow;
+}
+.RECORDID_STATUS_COLORS_12 {
+  background-color : orange;
+}
+
+.values-neq {
+    color: red !important;
+}
+.values-eq {
+    color: green !important;
+}
+
+.importContents thead th{
+  color: red;
+}
+
+.importContents td, .importContents th{
+  color: black;
+}
+.importContents .preimport-row th{
+  color: gray;
+}
+.importContents tr.contact-row + tr.preimport-row {
+  border-top: 1px solid gray;
+}
+.importContents tr.contact-row th
+, .importContents tr.contact-row td {
+  color: #666666;
+  padding: 3px 10px;
+  border-bottom: 1px solid gray;
+}

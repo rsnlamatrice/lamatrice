@@ -19,6 +19,18 @@ class Vtiger_Index_View extends Vtiger_Basic_View {
 		return true;
 	}
 
+	public function getHeaderCss(Vtiger_Request $request) {
+		$headerCssInstances = parent::getHeaderCss($request);
+
+		$cssFileNames = array(
+			'~/layouts/vlayout/modules/RSNImportSources/resources/css/style.css',
+		);
+		$cssInstances = $this->checkAndConvertCssStyles($cssFileNames);
+		$headerCssInstances = array_merge($headerCssInstances, $cssInstances);
+
+		return $headerCssInstances;
+	}
+	
 	public function preProcess (Vtiger_Request $request, $display=true) {
 		parent::preProcess($request, false);
 

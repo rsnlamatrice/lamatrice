@@ -16,6 +16,18 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	/*ED150831*/
 	var $recordModel;
 
+	/* Etats de validation des données.
+	 * Utilisé dans l'importation des pétitions pour la reconnaissance des contacts, avant importation
+	*/
+	static $RECORDID_STATUS_NONE = 0;
+	static $RECORDID_STATUS_SELECT = 1;
+	static $RECORDID_STATUS_CREATE = 2;
+	static $RECORDID_STATUS_UPDATE = 3;
+	static $RECORDID_STATUS_CHECK = 10;
+	static $RECORDID_STATUS_SINGLE = 11;
+	static $RECORDID_STATUS_MULTI = 12;
+	
+	
 	public function __construct($request = FALSE, $user = FALSE) {
 		parent::__construct();
 		$this->request = $request;
@@ -239,6 +251,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		return $numberOfRecords;
 	}
 
+	function getImportPreviewTemplateName($moduleName){
+		return 'ImportPreview.tpl';
+	}
+	
 	/**
 	 * Method to display the preview of the preimported data.
 	 *  this method can be overload in the child class.
@@ -270,7 +286,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$limit = min(100, max($offset, 12));
 		$viewer->assign('MORE_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, $offset, $limit));
 						
-		return $viewer->view('ImportPreview.tpl', 'RSNImportSources');
+		return $viewer->view($this->getImportPreviewTemplateName($moduleName), 'RSNImportSources');
 	}
 
 	/**
@@ -301,17 +317,30 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	}
 
 	/**
+	 * After preImport validation, and before real import, does the controller need a validation step of pre-imported data ?
+	 */
+	public function needValidatingStep(){
+		return false;
+	}
+	
+	/**
 	 * Method to add a import in the import queue table for a specific module.
 	 * @param string $module : the module name.
 	 */
-	public function queueDataImport($module = false) {
+	public function queueDataImport($module = false, $status = null) {
 		if(!$module){
 			foreach($this->getImportModules() as $module)
-				$this->queueDataImport($module);
+				$this->queueDataImport($module, $status);
 		}
 		else {
 			$this->request->set('is_scheduled', true);
-			RSNImportSources_Queue_Action::add($this->request, $this->user, $module, $this->getMappingFor($module));
+			if($status === null || $status === false){
+				if($this->needValidatingStep())
+					$status = RSNImportSources_Queue_Action::$IMPORT_STATUS_VALIDATING;
+				else
+					$status = RSNImportSources_Queue_Action::$IMPORT_STATUS_SCHEDULED;
+			}
+			RSNImportSources_Queue_Action::add($this->request, $this->user, $module, $this->getMappingFor($module), null, $status);
 		}
 	}
 
@@ -350,7 +379,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			} else {
 				$importDataController->importData();
 			}
-			$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+			if($this->needValidatingStep())
+				$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_VALIDATING);
+			else
+				$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
 		}
 		catch(Exception $ex){
 			$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_HALTED);
@@ -496,8 +528,9 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		foreach($importInfos as $importInfo) {
 
 			$importDataController = new RSNImportSources_Data_Action($importInfo, $user);
-			if($importInfo['status'] == RSNImportSources_Queue_Action::$IMPORT_STATUS_HALTED ||
-					$importInfo['status'] == RSNImportSources_Queue_Action::$IMPORT_STATUS_NONE) {
+			if($importInfo['status'] == RSNImportSources_Queue_Action::$IMPORT_STATUS_HALTED
+			|| $importInfo['status'] == RSNImportSources_Queue_Action::$IMPORT_STATUS_VALIDATING
+			|| $importInfo['status'] == RSNImportSources_Queue_Action::$IMPORT_STATUS_NONE) {
 				$continueImport = true;
 			} else {
 				$continueImport = false;
@@ -548,7 +581,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('IMPORT_STATUS', $importInfo['status']);
 		$viewer->assign('INVENTORY_MODULES', getInventoryModules());
 		$viewer->assign('CONTINUE_IMPORT', $continueImport);
-
+		$viewer->assign('IMPORT_SOURCE', $importInfo['importsourceclass']);
 		$viewer->view('ImportStatus.tpl', 'RSNImportSources');
 	}
 
