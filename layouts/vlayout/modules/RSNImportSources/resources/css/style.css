@@ -99,11 +99,9 @@ a.address-sna-check:active {
 }
 
 
-.importContents tr.preimport-row .cell-toolbox a {
+.importContents .cell-toolbox a {
   cursor: pointer;
-}
-.importContents td.cell-deleted .ui-icon {
-  padding: 2px;
+  padding: 4px;
 }
 .importContents td.selected-value {
   border: 2px inset gray;
