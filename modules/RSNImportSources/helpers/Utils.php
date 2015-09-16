@@ -710,4 +710,30 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				$array[$i] = trim($v);
 		return $array;
 	}
+	
+	/* TODO mettre dans un RSN_Helper_Utils */
+	/* Liste des pays selon la table vtiger_rsncountry */
+	static $cache_rsncountry = false;
+	public static function getRSNCountries(){
+		if (!self::$cache_rsncountry)
+			self::$cache_rsncountry = getAllPickListData('rsncountry');
+		return self::$cache_rsncountry;
+	}
+	/* Vérifie le préfixe du code postal en fonction du pays */
+	public static function checkZipCodePrefix($zipCode, $country){
+		//TODO 'France' en constante de config
+		if(!$country || strcasecmp($country, 'France') === 0){
+			//Supprime le préfixe FR-
+			return preg_replace('/^FR[\s-]*/i', '', $zipCode);
+		}
+		$rsnCountries = self::getRSNCountries();
+		if(array_key_exists(strtoupper($country), $rsnCountries)){
+			$prefix = $rsnCountries[strtoupper($country)]['countryalpha2'];
+			if($prefix){
+				//Ajoute ou reformule le code postal avec le préfixe
+				return preg_replace('/^('.$prefix.'[\s-]*)?(\d.*\d)(\D+)?$/i', $prefix . '-$2', $zipCode);
+			}
+		}
+		return $zipCode;
+	}
 }

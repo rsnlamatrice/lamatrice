@@ -18,12 +18,13 @@ $IMPORT_RECORD_FAILED = 5;*}
 				<tr>
 					<td valign="top">
 						{if sizeof($MODULE_DATA) gt 0}
-							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents">
+							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents"
+								data-module="Contacts">
 								{if $ROW_OFFSET === 0}
 									<thead><tr>
 										<th colspan="3"></th>
 										{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
-											{if $FIELD_NAME[0] === '_'}
+											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
 											{/if}
 											<th class="redColor">{$FIELD_NAME}</th>
@@ -38,17 +39,22 @@ $IMPORT_RECORD_FAILED = 5;*}
 									{else}
 										{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$ROW['_contactid_status']}
 									{/if}
-									<tr class="preimport-row {$ROW_CLASS}">
-										<th colspan="3">{$ROW_OFFSET}</th>
+									<tr class="preimport-row {$ROW_CLASS}" data-rowid="{$ROW['id']}">
+										<th colspan="3">{$ROW['id']}
+											{if $ROW['_contactid_status'] !== null
+											&& (!$ROW['mailingcountry'] || $ROW['mailingcountry'] === 'France')}
+												<a href="#" class="address-sna-check">SNA</a>
+											{/if}
+										</th>
 										{foreach key=FIELD_NAME item=VALUE from=$ROW}
-											{if $FIELD_NAME[0] === '_'}
+											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
 											{/if}
-											<td>
+											<td data-fieldname="{$FIELD_NAME}">
 											{if $FIELD_NAME eq '_contactid_status'}
 												{vtranslate('LBL_RECORDID_STATUS_'|cat:$VALUE, $MODULE)}
 											{else}
-												{$VALUE}
+												<span class="value">{$VALUE}</span>
 											{/if}
 											</td>
 										{/foreach}
@@ -57,7 +63,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 									{if $CONTACT_ROWS}
 										{assign var=CONTACT_ROW_INDEX value=0}
 										{foreach item=CONTACT_ROW key=CONTACT_ID from=$CONTACT_ROWS}
-											<tr class="contact-row" data-contactid="{$CONTACT_ID}">
+											<tr class="contact-row"  data-rowid="{$ROW['id']}" data-contactid="{$CONTACT_ID}">
 												{if $CONTACT_ROW_INDEX === 0}
 													<th rowspan="{count($CONTACT_ROWS) + 1}">
 														{$ROW['_contactid_source']}
@@ -84,7 +90,8 @@ $IMPORT_RECORD_FAILED = 5;*}
 															class="values-eq"
 														{else}
 															class="values-neq"
-														{/if}>{$CONTACT_ROW[$CONTACT_FIELD]}</td>
+														{/if}><span class="value">{$CONTACT_ROW[$CONTACT_FIELD]}</span>
+														</td>
 													{/if}
 												{/foreach}
 											</tr>
@@ -100,7 +107,8 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<input type="radio" name="contact_related_to_{$ROW_INDEX}"/>
 												<a href="#"><i>sélectionner...</i></a></td>
 											<td colspan="3" class="create-contact">
-												<label><input type="radio" name="contact_related_to_{$ROW_INDEX}"/>
+												<label><input type="radio" name="contact_related_to_{$ROW_INDEX}"
+													{if ! $CONTACT_ROWS}checked="checked"{/if}/>
 													<i>créer</i></label></td>
 										</tr>
 									{/if}

@@ -203,6 +203,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			$previewData[$module] = array();
 			$fields = $this->getFieldsFor($module);
 			$fields[] = 'status';
+			$fields[] = 'id';
 			$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, $module);
 			$sql = 'SELECT ';
 

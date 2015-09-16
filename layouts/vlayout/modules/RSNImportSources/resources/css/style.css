@@ -63,6 +63,8 @@
 }
 .importContents .preimport-row th{
   color: gray;
+  text-align: left;
+  padding-left: 2em;
 }
 .importContents tr.preimport-row:first-of-type,
 .importContents tr.contact-row + tr.preimport-row {
@@ -78,4 +80,44 @@
   color: #666666;
   padding: 3px 10px;
   border-bottom: 1px solid gray;
+}
+.importContents tr.preimport-row td {
+  border-left: 1px solid #CCCCCC;
+}
+a.address-sna-check {
+  float: right;
+  color: #8888CC;
+  padding: 2px;
+  border-radius: 3px;
+}
+a.address-sna-check:hover {
+  border: 2px outset gray;
+  color: #333333;
+}
+a.address-sna-check:active {
+  border: 2px inset gray;
+}
+
+
+.importContents tr.preimport-row .cell-toolbox a {
+  cursor: pointer;
+}
+.importContents td.cell-deleted .ui-icon {
+  padding: 2px;
+}
+.importContents td.selected-value {
+  border: 2px inset gray;
+  border-radius: 3px;
+  font-weight: bold;
+}
+.importContents td.not-selected-value {
+  opacity: 0.9;
+  text-decoration: line-through;
+}
+.importContents td.cell-deleted {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+.importContents td.cell-deleted .ui-icon-trash {
+  border: 2px inset black;
 }

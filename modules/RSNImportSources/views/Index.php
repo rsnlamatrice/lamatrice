@@ -65,11 +65,16 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 */
 	function getHeaderScripts(Vtiger_Request $request) {
 		$headerScriptInstances = parent::getHeaderScripts($request);
-
+		
 		$jsFileNames = array(
 			'modules.RSNImportSources.resources.RSNImportSources'
 		);
 
+		$moduleName = $request->get('for_module');
+		if($moduleName === 'Contacts'){
+			$jsFileNames[] = 'modules.RSNImportSources.resources.RSNImportContacts';
+		}
+		
 		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
 		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
 

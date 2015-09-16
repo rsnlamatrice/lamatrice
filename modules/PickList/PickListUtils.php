@@ -126,6 +126,27 @@ function getAllPickListValues($fieldName,$lang = Array() ){
 	return $arr;
 }
 
+/** ED150916
+ * this function returns all the picklist values that are available for a given
+ * @param string $fieldName - the name of the field
+ * @return array $arr - the associative (by value in upper case) array containing the picklist data from table, with 'id' and 'value' columns
+ */
+function getAllPickListData( $fieldName ){
+	global $adb;
+	$sql = 'SELECT * FROM vtiger_'.$adb->sql_escape_string($fieldName);
+	$result = $adb->query($sql);
+	$count = $adb->num_rows($result);
+
+	$arr = array();
+	for($i=0;$i<$count;$i++){
+		$row = $adb->fetch_row($result);
+		$row['id'] = $row[$fieldName.'id'];
+		$row['value'] = $row[$fieldName];
+		$arr[strtoupper($row['value'])] = $row;
+	}
+	return $arr;
+}
+
 
 /**
  * this function accepts the fieldname and the language string array and returns all the editable picklist values for that fieldname
@@ -192,7 +213,7 @@ function getAssignedPicklistValues($tableName, $roleid, $adb, $lang=array(), &$p
 	$cache = Vtiger_Cache::getInstance();
 	if($cache->hasAssignedPicklistValues($tableName,$roleid)) {
 		return $cache->getAssignedPicklistValues($tableName,$roleid);
-	} else {
+	} 
 	$arr = array();
 	
 	$properties = getPicklistProperties($tableName, $roleid, $cache);
@@ -252,9 +273,8 @@ function getAssignedPicklistValues($tableName, $roleid, $adb, $lang=array(), &$p
 		}
 	}
 	// END
-		$cache->setAssignedPicklistValues($tableName,$roleid,$arr);
+	$cache->setAssignedPicklistValues($tableName,$roleid,$arr);
 	return $arr;
-	}
 }
 
 function getPicklistProperties($fiedName, $roleId = null, $cache = FALSE){

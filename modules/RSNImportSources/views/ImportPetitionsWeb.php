@@ -94,14 +94,14 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		//laisser exactement les colonnes du fichier, dans l'ordre 
 		return array (
 			
-			"prenom" => "firstname",
-			"nom" => "lastname",
-			"adresse1" => "mailingstreet3",
-			"adresse2" => "mailingstreet2",
-			"code" => "mailingzip",
-			"ville" => "mailingcity",
-			"pays" => "mailingcountry",
-			"mails" => "email",
+			"firstname" => "firstname",
+			"lastname" => "lastname",
+			"mailingstreet3" => "mailingstreet3",
+			"mailingstreet2" => "mailingstreet2",
+			"mailingzip" => "mailingzip",
+			"mailingcity" => "mailingcity",
+			"mailingcountry" => "mailingcountry",
+			"email" => "email",
 			"listesn" => "listesn",
 			"listesd" => "listesd",
 			"date" => "dateapplication",//format MySQL
@@ -314,7 +314,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		//"adresse2" => "mailingstreet3",
 		//"code" => "mailingzip",
 		//"ville" => "mailingcity",
-		//"pays" => "mailingcountry",
+		//"mailingcountry" => "mailingcountry",
 		//"mails" => "mails",
 		//"listesn" => "listesn",
 		//"listesd" => "listesd",
@@ -645,10 +645,25 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		foreach($this->getContactsDateFields() as $fieldName)
 			$contactsHeader[$fieldName] = $this->getMySQLDate($contactsHeader[$fieldName]);
 		
+		//numérique
 		$contactsHeader['_contactid_status'] = null;
 		
-		if($contactsHeader['pays'] == 'France')
-			$contactsHeader['pays'] = '';
+		//nom en majuscules
+		// mb_strtoupper fonctionne pour les accents grace au paramétrage ini_set('mbstring',) dans modules\RSN\RSN.php
+		$contactsHeader['lastname'] = mb_strtoupper($contactsHeader['lastname']);
+		//ville en majuscules
+		$contactsHeader['mailingcity'] = mb_strtoupper($contactsHeader['mailingcity']);
+		//email en minuscules
+		$contactsHeader['email'] = strtolower($contactsHeader['email']);
+		
+		//TODO clean up email address (noms de domaines connus)
+		
+		//TODO 'France' en constante de config
+		if(strcasecmp($contactsHeader['mailingcountry'], 'France') === 0)
+			$contactsHeader['mailingcountry'] = '';
+		
+		//Ajout du code de pays en préfixe du code postal
+		$contactsHeader['mailingzip'] = RSNImportSources_Utils_Helper::checkZipCodePrefix($contactsHeader['mailingzip'], $contactsHeader['mailingcountry']);
 		
 		return $contactsHeader;
 	}

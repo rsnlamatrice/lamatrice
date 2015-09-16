@@ -8,6 +8,16 @@
  * All Rights Reserved.
  ************************************************************************************/
 
+//modifications ini_set('mbstring',)
+// de sorte que $zipCode = mb_strtoupper('iété'); returns "IÉTÉ" et non "IéTé"
+ini_set('mbstring.language', 'UTF-8');
+ini_set('mbstring.internal_encoding', 'UTF-8');
+ini_set('mbstring.http_input', 'UTF-8');
+ini_set('mbstring.http_output', 'UTF-8');
+ini_set('mbstring.detect_order', 'auto');
+
+
+
 class RSN {
 	/**
 	* Invoked when special actions are performed on the module.
