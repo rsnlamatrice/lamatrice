@@ -1,0 +1,121 @@
+.ROW_STATUS_COLORS_0 {
+  background-color : inherit;
+}
+.ROW_STATUS_COLORS_1 {
+  background-color : green;
+}
+.ROW_STATUS_COLORS_2 {
+  background-color : yellow;
+}
+.ROW_STATUS_COLORS_3 {
+  background-color : green;
+}
+.ROW_STATUS_COLORS_4 {
+  background-color : green;
+}
+.ROW_STATUS_COLORS_4 {
+  background-color : #FFC0A0;
+}
+
+.RECORDID_STATUS_COLORS_0 {
+  background-color : rgb(220, 184, 184);;
+}
+.RECORDID_STATUS_COLORS_1 {
+  background-color : green;
+}
+.RECORDID_STATUS_COLORS_2 {
+  background-color : #A0FFC0;
+}
+.RECORDID_STATUS_COLORS_3 {
+  background-color : #C0FFA0;
+}
+.RECORDID_STATUS_COLORS_10 {
+  background-color : yellow;
+}
+.RECORDID_STATUS_COLORS_11 {
+  background-color : yellow;
+}
+.RECORDID_STATUS_COLORS_12 {
+  background-color : orange;
+}
+
+.values-neq {
+    color: red !important;
+}
+.values-eq {
+    color: green !important;
+}
+
+.importContents input{
+  display: inline;
+}
+
+.importContents td.create-contact label {
+  margin-bottom: 0px;
+}
+
+.importContents thead th{
+  color: red;
+}
+
+.importContents td, .importContents th{
+  color: black;
+}
+.importContents .preimport-row th{
+  color: gray;
+  text-align: left;
+  padding-left: 2em;
+}
+.importContents tr.preimport-row:first-of-type,
+.importContents tr.contact-row + tr.preimport-row {
+  border-top: 1px solid gray;
+}
+.importContents tr.preimport-row,
+.importContents tr.contact-row {
+  border-left: 1px solid gray;
+  border-right: 1px solid gray;
+}
+.importContents tr.contact-row th
+, .importContents tr.contact-row td {
+  color: #666666;
+  padding: 3px 10px;
+  border-bottom: 1px solid gray;
+}
+.importContents tr.preimport-row td {
+  border-left: 1px solid #CCCCCC;
+}
+a.address-sna-check {
+  float: right;
+  color: #8888CC;
+  padding: 2px;
+  border-radius: 3px;
+}
+a.address-sna-check:hover {
+  border: 2px outset gray;
+  color: #333333;
+}
+a.address-sna-check:active {
+  border: 2px inset gray;
+}
+
+
+.importContents .cell-toolbox a {
+  cursor: pointer;
+  padding: 4px;
+}
+.importContents td.selected-value {
+  border: 2px inset gray;
+  border-radius: 3px;
+  font-weight: bold;
+}
+.importContents td.not-selected-value {
+  opacity: 0.9;
+  text-decoration: line-through;
+}
+.importContents td.cell-deleted {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+.importContents td.cell-deleted .ui-icon-trash {
+  border: 2px inset black;
+}

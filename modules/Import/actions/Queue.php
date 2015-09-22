@@ -15,6 +15,7 @@ class Import_Queue_Action extends Vtiger_Action_Controller {
 	static $IMPORT_STATUS_RUNNING = 2;
 	static $IMPORT_STATUS_HALTED = 3;
 	static $IMPORT_STATUS_COMPLETED = 4;
+	static $IMPORT_STATUS_VALIDATING = 5;//Validation préalable des données à importer
 	static $importQueueTable = 'vtiger_import_queue';
 
 	public function  __construct() {
@@ -151,6 +152,7 @@ class Import_Queue_Action extends Vtiger_Action_Controller {
 	static function updateStatus($importId, $status) {
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery('UPDATE ' . self::$importQueueTable . ' SET status=? WHERE importid=?', array($status, $importId));
+		
 	}
 
 }

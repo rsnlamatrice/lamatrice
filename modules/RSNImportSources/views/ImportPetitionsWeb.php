@@ -23,7 +23,29 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	public function getImportModules() {
 		return array('Contacts');
 	}
+	
+	/**
+	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
+	 */
+	public function needValidatingStep(){
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT * FROM ' . $tableName . '
+			WHERE (_contactid_status = '.RSNImportSources_Import_View::$RECORDID_STATUS_NONE.'
+			OR _contactid_status >= '.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')
+			AND status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE .'
+			LIMIT 1';
 
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+
+		return $numberOfRecords;
+	}
+
+	function getImportPreviewTemplateName($moduleName){
+		return 'ImportPreviewContacts.tpl';
+	}
+	
 	/**
 	 * Method to default file enconding for this import.
 	 * @return string - the default file encoding.
@@ -72,14 +94,14 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		//laisser exactement les colonnes du fichier, dans l'ordre 
 		return array (
 			
-			"prenom" => "firstname",
-			"nom" => "lastname",
-			"adresse1" => "mailingstreet",
-			"adresse2" => "mailingstreet3",
-			"code" => "mailingzip",
-			"ville" => "mailingcity",
-			"pays" => "mailingcountry",
-			"mails" => "email",
+			"firstname" => "firstname",
+			"lastname" => "lastname",
+			"mailingstreet3" => "mailingstreet3",
+			"mailingstreet2" => "mailingstreet2",
+			"mailingzip" => "mailingzip",
+			"mailingcity" => "mailingcity",
+			"mailingcountry" => "mailingcountry",
+			"email" => "email",
 			"listesn" => "listesn",
 			"listesd" => "listesd",
 			"date" => "dateapplication",//format MySQL
@@ -89,6 +111,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			//champ supplémentaire
 			'_contactid' => '', //Contact Id. May be many. Massively updated after preImport
 			'_contactid_status' => '', //Type de reconnaissance automatique. Massively updated after preImport
+			'_contactid_source' => '', //Source de la reconnaissance automatique. Massively updated after preImport
 			'_notesid' => '', //Document Pétition. Massively updated after preImport
 		);
 	}
@@ -112,11 +135,23 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importContacts($importDataController) {
+
+		$this->identifyContacts();
+		if($this->needValidatingStep()){
+			$this->keepScheduledImport = true;
+			return;
+		}
+		
 		$config = new RSNImportSources_Config_Model();
 		
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
-		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
+		$sql = 'SELECT * FROM ' . $tableName . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND _contactid_status IN ('.RSNImportSources_Import_View::$RECORDID_STATUS_SELECT.'
+									, '.RSNImportSources_Import_View::$RECORDID_STATUS_CREATE.'
+									, '.RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE.')
+			ORDER BY id';
 
 		$result = $adb->query($sql);
 		$numberOfRecords = $adb->num_rows($result);
@@ -279,7 +314,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		//"adresse2" => "mailingstreet3",
 		//"code" => "mailingzip",
 		//"ville" => "mailingcity",
-		//"pays" => "mailingcountry",
+		//"mailingcountry" => "mailingcountry",
 		//"mails" => "mails",
 		//"listesn" => "listesn",
 		//"listesd" => "listesd",
@@ -382,11 +417,35 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			}
 		}
 		
+		return true;
+	}
+	
+	/**
+	 * Exécute des requêtes longues d'identification des contacts
+	 * Doit être déclenché par le cron
+	 * Seulement au premier appel du cron on ne devrait exécuter cette fonction.
+	 * On peut réactiver la recherche sur certaines lignes en mettant à NULL _contactid_status
+	 */
+	function identifyContacts() {
+		
+		//Teste si il y a des lignes à analyser
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT 1 FROM ' . $tableName . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND _contactid_status IS NULL
+			LIMIT 1
+		';
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+		if ($numberOfRecords === 0) {
+			return;
+		}
+		
 		// Pré-identifie les contacts
 		
 		$fields = array_flip($this->getContactsFieldsMapping());//Remplace les clés par les valeurs, et les valeurs par les clés
 		unset($fields['']);
-		
 		
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
 			$this->user,
@@ -394,20 +453,23 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$fields,
 			'_contactid_status',
+			'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE.')',
+			'_contactid_source',
 			'Tout'
 		);
 
-		$partialFields = $fields;
-		unset($partialFields['mailingstreet']);
-		unset($partialFields['mailingstreet2']);
-		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
-			$this->user,
-			'Contacts',
-			'_contactid',
-			$partialFields,
-			'_contactid_status',
-			'Tout sauf adresse1 et adresse2'
-		);
+		/* pas très intéressant et aussi long que le précédent */
+		//$partialFields = $fields;
+		//unset($partialFields['mailingstreet']);
+		//unset($partialFields['mailingstreet2']);
+		//RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+		//	$this->user,
+		//	'Contacts',
+		//	'_contactid',
+		//	$partialFields,
+		//	'_contactid_status',
+		//	'Tout sauf adresse1 et adresse2'
+		//);
 		
 		$partialFields = array('email' => $fields['email'], 'lastname' => $fields['lastname'], 'firstname' => $fields['firstname'], 'mailingzip' => $fields['mailingzip']);
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
@@ -416,6 +478,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
+			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'_contactid_source',
 			'Email, nom, prénom et code postal'
 		);
 		
@@ -426,6 +490,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
+			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'_contactid_source',
 			'Email, nom et prénom'
 		);
 		
@@ -436,6 +502,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
+			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'_contactid_source',
 			'Nom, prénom et code postal'
 		);
 		
@@ -446,8 +514,18 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
+			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'_contactid_source',
 			'Email seul'
 		);
+		
+		//Marque tous les autres enregistrements
+		$sql = 'UPDATE ' . $tableName . '
+			SET _contactid_status = '. RSNImportSources_Import_View::$RECORDID_STATUS_NONE . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND _contactid_status IS NULL
+		';
+		$result = $adb->query($sql);
 		
 		return true;
 	}
@@ -550,6 +628,9 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	function getContactsValues($contacts) {
 		$fields = $this->getContactsFields();
 		
+		//trim de tous les champs
+		RSNImportSources_Utils_Helper::array_map_trim($contacts['header']);
+		
 		// contrôle l'égalité des tailles de tableaux
 		if(count($fields) != count($contacts['header'])){
 			if(count($fields) > count($contacts['header']))
@@ -563,6 +644,26 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		//Parse dates
 		foreach($this->getContactsDateFields() as $fieldName)
 			$contactsHeader[$fieldName] = $this->getMySQLDate($contactsHeader[$fieldName]);
+		
+		//numérique
+		$contactsHeader['_contactid_status'] = null;
+		
+		//nom en majuscules
+		// mb_strtoupper fonctionne pour les accents grace au paramétrage ini_set('mbstring',) dans modules\RSN\RSN.php
+		$contactsHeader['lastname'] = mb_strtoupper($contactsHeader['lastname']);
+		//ville en majuscules
+		$contactsHeader['mailingcity'] = mb_strtoupper($contactsHeader['mailingcity']);
+		//email en minuscules
+		$contactsHeader['email'] = strtolower($contactsHeader['email']);
+		
+		//TODO clean up email address (noms de domaines connus)
+		
+		//TODO 'France' en constante de config
+		if(strcasecmp($contactsHeader['mailingcountry'], 'France') === 0)
+			$contactsHeader['mailingcountry'] = '';
+		
+		//Ajout du code de pays en préfixe du code postal
+		$contactsHeader['mailingzip'] = RSNImportSources_Utils_Helper::checkZipCodePrefix($contactsHeader['mailingzip'], $contactsHeader['mailingcountry']);
 		
 		return $contactsHeader;
 	}
@@ -584,10 +685,84 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	 * Method to process to the first step (pre-importing data).
 	 *  It calls the parseAndSave methode that must be implemented in the child class.
 	 */
-	public function preImportData(Vtiger_Request $request) {
-		$fieldName = $request->get('related_record_fieldname');
-		$this->relatedDocumentId = $request->get($fieldName);
-		$this->relatedDocumentName = $request->get($fieldName . '_display');
-		return parent::preImportData($request);
+	public function preImportData() {
+		//Récupération de la référence de la pétition
+		$fieldName = $this->request->get('related_record_fieldname');
+		$this->relatedDocumentId = $this->request->get($fieldName);
+		$this->relatedDocumentName = $this->request->get($fieldName . '_display');
+		
+		return parent::preImportData($this->request);
+	}
+	
+	
+	function displayDataPreview() {
+		$viewer = $this->getViewer($this->request);
+		$moduleName = $this->request->get('for_module');
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		
+		$viewer->assign('CONTACTS_FIELDS_MAPPING', $this->getContactsFieldsMapping());
+		$viewer->assign('CONTACTS_MODULE_MODEL', $moduleModel);
+		
+		return parent::displayDataPreview();
+	}
+
+	/**
+	 * Method to get the pre Imported data in order to preview them.
+	 *  By default, it return the values in the pre-imported table.
+	 *  This method can be overload in the child class.
+	 * @return array - the pre-imported values group by module.
+	 */
+	public function getPreviewData($offset = 0, $limit = 12) {
+		$data = parent::getPreviewData($offset, $limit);
+		
+		$db = PearDatabase::getInstance();
+		
+		/* Ajoute une propriété '_contact_rows' dont la valeur est un tableau des contacts similaires */
+		
+		//Référencement des contacts
+		$moduleName = 'Contacts';
+		$rowsByContactId = array();
+		foreach($data[$moduleName] as $rowId => $importRow){
+			$contactId = preg_replace('/(^,+|,+$|,(,+))/', '$2', $importRow['_contactid']);
+			if($contactId){
+				foreach( explode(',', $contactId) as $contactId)
+					if($contactId){
+						if(!$rowsByContactId[$contactId])
+							$rowsByContactId[$contactId] = array();
+						$rowsByContactId[$contactId][] = $rowId;
+					}
+			}
+		}
+		if($rowsByContactId){
+			$query = 'SELECT vtiger_crmentity.crmid
+				, vtiger_contactdetails.contact_no, vtiger_contactdetails.isgroup
+				, vtiger_contactdetails.firstname, vtiger_contactdetails.lastname, vtiger_contactdetails.email
+				, vtiger_contactaddress.*
+				FROM vtiger_contactdetails
+				JOIN vtiger_contactaddress
+					ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
+				JOIN vtiger_crmentity
+					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_crmentity.crmid IN ('.generateQuestionMarks($rowsByContactId).')
+			';
+			$params = array_keys($rowsByContactId);
+			$result = $db->pquery($query, $params);
+			if(!$result){
+				echo '<br><br><br><br>';
+				$db->echoError();
+				echo("<pre>$query</pre>");
+				die();
+			}
+			while($contact = $db->fetch_row($result)){
+				$contactId = $contact['crmid'];
+				foreach($rowsByContactId[$contactId] as $rowId){
+					if(!$data[$moduleName][$rowId]['_contact_rows'])
+						$data[$moduleName][$rowId]['_contact_rows'] = array();
+					$data[$moduleName][$rowId]['_contact_rows'][$contactId] = $contact;
+				}
+			}
+		}
+		return $data;
 	}
 }

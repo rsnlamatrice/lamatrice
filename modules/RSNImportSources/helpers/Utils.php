@@ -189,6 +189,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
             	$columnsListQuery .= RSNImportSources_Utils_Helper::getDBColumnType($fieldObject, $fieldTypes);
             } elseif($fieldName == 'remarque' || $fieldName == 'description') {
             	$columnsListQuery .= ','.$fieldName.' TEXT';
+			} elseif($fieldName == '_contactid_status') {
+            	$columnsListQuery .= ','.$fieldName.' INT(11) DEFAULT NULL';
 			}
 			else {
             	$columnsListQuery .= ','.$fieldName.' varchar(255)';
@@ -531,7 +533,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	 * @param $contactIdField
 	 * @param $fieldsMapping : array(contactdetailsField => importField)
 	 */
-	public static function setPreImportDataContactIdByFields($user, $moduleName, $contactIdField, $fieldsMapping, $updateFieldStatus = false, $updateFieldStatusValue = false) {
+	public static function setPreImportDataContactIdByFields($user, $moduleName, $contactIdField, $fieldsMapping, $updateFieldStatus = false, $updateFieldStatusValue = false, $updateFieldSource = false, $updateFieldSourceValue = false) {
 		
 		$db = PearDatabase::getInstance();
 		$importTableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
@@ -554,13 +556,13 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		if(!$tables){
 			var_dump($fieldsMapping, array_keys($moduleFields));
-			throw new Exception("setPreImportDataContactIdByFields : aucun champ fourni / $updateFieldStatusValue");
+			throw new Exception("setPreImportDataContactIdByFields : aucun champ fourni / $updateFieldSourceValue");
 		}
 		
 		// Pré-identifie les contacts
 		
 		/* Affecte la réf du contact d'après la ref 4D */
-		$query = "UPDATE $importTableName
+		$query = "UPDATE $importTableName /*$updateFieldSourceValue*/
 			JOIN (
 				SELECT GROUP_CONCAT(vtiger_crmentity.crmid, ',') AS crmids, COUNT(*) AS crmids_counter
 		";
@@ -584,6 +586,13 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			
 			$query .= "
 				WHERE vtiger_crmentity.deleted = 0
+			";
+			if($fieldsMapping['email'])
+				$query .= "
+					AND vtiger_contactdetails.email IS NOT NULL
+					AND vtiger_contactdetails.email <> ''
+				";
+			$query .= "
 				GROUP BY
 			";
 			$nField = 0;
@@ -613,16 +622,19 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		//, avec nettoyage par la fonction ajoutée REGEX_REPLACE
 		//TODO il faut implémenter une function dans MySQL, mais je n'ai trouvé que du "signle char replacement"
 		//$query .= " SET `$importTableName`.`$contactIdField` = REGEX_REPLACE('^,+|,+$', '', `$grouped_TableName`.crmids)";
-		$query .= " SET `$importTableName`.`$contactIdField` = `$grouped_TableName`.crmids";
+		$query .= "
+			SET `$importTableName`.`$contactIdField` = `$grouped_TableName`.crmids";
 		
 		if($updateFieldStatus)
-			$query .= ", `$importTableName`.`$updateFieldStatus` = '$updateFieldStatusValue'";
+			$query .= ", `$importTableName`.`$updateFieldStatus` = $updateFieldStatusValue";
+		if($updateFieldSource)
+			$query .= ", `$importTableName`.`$updateFieldSource` = '$updateFieldSourceValue'";
 			
 		$query .= " 
 			WHERE (`$importTableName`.`$contactIdField` IS NULL OR `$importTableName`.`$contactIdField` = '')
 			AND `$importTableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
-		echo("<h4>Recherche de contacts similaires par \"$updateFieldStatusValue\"</h4>");
+		echo("\r<h4>Recherche de contacts similaires par \"$updateFieldSourceValue\"</h4>\r");
 		//echo("<pre>$query</pre>");
 		$perf = new RSNImportSources_Utils_Performance(0);
 		$result = $db->query($query);
@@ -632,7 +644,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			echo("<pre>$query</pre>");
 		}
 		elseif($db->getAffectedRowCount($result))
-			echo "<pre>Contacts reconnus par $updateFieldStatusValue : " . $db->getAffectedRowCount($result) . '</pre>';
+			echo "<pre>Contacts reconnus par $updateFieldSourceValue : " . $db->getAffectedRowCount($result) . '</pre>';
 		
 		return !!$result;
 	}
@@ -689,5 +701,39 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$db->echoError($query);
 			
 		return !!$result;
+	}
+	
+	//trim de tous les champs string
+	public static function array_map_trim(&$array){
+		foreach($array as $i=>$v)
+			if(is_string($v))
+				$array[$i] = trim($v);
+		return $array;
+	}
+	
+	/* TODO mettre dans un RSN_Helper_Utils */
+	/* Liste des pays selon la table vtiger_rsncountry */
+	static $cache_rsncountry = false;
+	public static function getRSNCountries(){
+		if (!self::$cache_rsncountry)
+			self::$cache_rsncountry = getAllPickListData('rsncountry');
+		return self::$cache_rsncountry;
+	}
+	/* Vérifie le préfixe du code postal en fonction du pays */
+	public static function checkZipCodePrefix($zipCode, $country){
+		//TODO 'France' en constante de config
+		if(!$country || strcasecmp($country, 'France') === 0){
+			//Supprime le préfixe FR-
+			return preg_replace('/^FR[\s-]*/i', '', $zipCode);
+		}
+		$rsnCountries = self::getRSNCountries();
+		if(array_key_exists(strtoupper($country), $rsnCountries)){
+			$prefix = $rsnCountries[strtoupper($country)]['countryalpha2'];
+			if($prefix){
+				//Ajoute ou reformule le code postal avec le préfixe
+				return preg_replace('/^('.$prefix.'[\s-]*)?(\d.*\d)(\D+)?$/i', $prefix . '-$2', $zipCode);
+			}
+		}
+		return $zipCode;
 	}
 }
