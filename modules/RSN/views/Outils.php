@@ -116,8 +116,8 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$coupon = Vtiger_Record_Model::getInstanceById(203718, 'Documents');
-		var_dump($coupon->getRelatedCampaigns());
+		$zip = RSNImportSources_Utils_Helper::checkZipCodePrefix('7812Moulbaix', 'Belgique');
+		var_dump($zip);
 	}
 	
 	

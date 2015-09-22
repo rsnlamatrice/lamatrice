@@ -15,7 +15,7 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 
 	/** ED150827
 	 * Static Function to get the instance of the Vtiger Record Model given the className and the module name
-	 * @param <Number> $className
+	 * @param <String> $className
 	 * @param <String> $moduleName
 	 * @return Vtiger_Record_Model or Module Specific Record Model instance
 	 */
@@ -25,9 +25,41 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 		JOIN vtiger_rsnimportsources
 			ON vtiger_crmentity.crmid
 		WHERE vtiger_crmentity.deleted = 0
-		AND classname = ?';
+		AND class = ?';
 		global $adb;
 		$result = $adb->pquery($query, array($className));
+		if(!$result){
+			$adb->echoError($query);
+			echo_callstack();
+			return;
+		}
+		$id = $adb->query_result($result, 0);
+		if($id)
+			return self::getInstanceById($id, 'RSNImportSources');
+	}
+	
+	/** ED150827
+	 * Static Function to get the instance of the Vtiger Record Model given the id of a queue record
+	 * @param <Number> $queueId (field importid)
+	 * @param <String> $moduleName
+	 * @return Vtiger_Record_Model or Module Specific Record Model instance
+	 */
+	public static function getInstanceByQueueId($queueId) {
+		$query = 'SELECT vtiger_crmentity.crmid
+		FROM vtiger_crmentity
+		JOIN vtiger_rsnimportsources
+			ON vtiger_crmentity.crmid = vtiger_rsnimportsources.rsnimportsourcesid
+		JOIN vtiger_rsnimport_queue
+			ON vtiger_rsnimport_queue.importsourceclass = vtiger_rsnimportsources.class
+		WHERE vtiger_crmentity.deleted = 0
+		AND vtiger_rsnimport_queue.importid = ?';
+		global $adb;
+		$result = $adb->pquery($query, array($queueId));
+		if(!$result){
+			$adb->echoError($query);
+			echo_callstack();
+			return;
+		}
 		$id = $adb->query_result($result, 0);
 		if($id)
 			return self::getInstanceById($id, 'RSNImportSources');
@@ -35,21 +67,28 @@ class RSNImportSources_Record_Model extends Vtiger_Record_Model {
 	
 	
 	/**
-	 * Method to get an instance of the import controller. It use the ImportSource parameter to retrive the name of the import class.
+	 * Method to get an instance of the import controller. It use the ImportSource parameter to retreive the name of the import class.
 	 * Vtiger_Request $request est initialisé sur la base des données du champ autosourcedata
 	 * @return Import - An instance of the import controller, or null.
 	 */
-	function getImportController() {
+	function getImportController($request = false) {
 		
-		$request = $this->getRequest();
+		$className = $this->get('class');
 		
-		$className = $request->get('ImportSource');
+		if(!$request)
+			$request = $this->getRequest();
+			
+		if(!$className){
+			$className = $request->get('ImportSource');
+		}
+		
 		if ($className) {
 			$importClass = RSNImportSources_Utils_Helper::getClassFromName($className);
 			$user = Users_Record_Model::getCurrentUserModel();
 			$importController = new $importClass($request, $user);
-			if($importController)
+			if($importController){
 				$importController->recordModel = $this;
+			}
 			return $importController;
 		}
 

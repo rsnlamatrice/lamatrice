@@ -64,6 +64,7 @@
 		<p>Portez vous bien.</p>
 		<p>Annie</p>
 	</div>
+	{include file="LetterFooter.tpl"|vtemplate_path:$MODULE}
 	{assign var=NUM_PAGE value=$NUM_PAGE + 1}
 {/foreach}
 <script>

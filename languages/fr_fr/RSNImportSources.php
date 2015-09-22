@@ -67,12 +67,13 @@ $languageStrings = array(
 	'LBL_UNDO_RESULT'              => 'Annuler le résultat de l\'import', 
 	'LBL_TOTAL_RECORDS'            => 'Nombre total d\'enregistrements', 
 	'LBL_OK_BUTTON_LABEL'          => 'Ok',
-	'LBL_IMPORT_SCHEDULED'         => 'Import programmé'           , 
-	'LBL_RUNNING'                  => 'En cours'                    , 
-	'LBL_HALTED'                  => 'Suspendu'                    ,  
-	'LBL_REACTIVATE'                  => 'Réactiver'                    , 
-	'LBL_CANCEL_IMPORT'            => 'Annuler Import'              , 
-	'LBL_ERROR'                    => 'Erreur'                      ,
+	'LBL_IMPORT_SCHEDULED'         => 'Import programmé', 
+	'LBL_RUNNING'                  => 'En cours', 
+	'LBL_HALTED'                  => 'Suspendu',
+	'LBL_VALIDATING'              => 'Validation des données à terminer',
+	'LBL_REACTIVATE'                  => 'Réactiver', 
+	'LBL_CANCEL_IMPORT'            => 'Annuler Import', 
+	'LBL_ERROR'                    => 'Erreur',
 	'LBL_CLEAR_DATA'               => 'Effacer les données', 
 	'ERR_UNIMPORTED_RECORDS_EXIST' => 'Il existe des données non traités dans le processus d\'import, vous empéchant d\'importer des données pour ce module. <br>
 										Purger les données non importées pour relancer un nouvel import', 
@@ -96,21 +97,30 @@ $languageStrings = array(
 	'LBL_PAYBOX' => 'PayBox',
 	'LBL_PAYPAL' => 'PayPal',
 	'LBL_COGILOG' => 'Cogilog',
-        'LBL_DONATEURSWEB' => 'Donateurs web',
-        'LBL_DONATEURSWEB_4D' => 'Donateurs web depuis 4D',
-        
-        'LBL_DBTYPE' => 'Type de base',
-        'LBL_DBSERVER' => 'Serveur',
-        'LBL_DBPORT' => 'Port',
-        'LBL_DBNAME' => 'Nom de la base',
-        'LBL_DBUSER' => 'Utilisateur',
-        'LBL_DBPWD' => 'Mot de passe',
+	'LBL_DONATEURSWEB' => 'Donateurs web',
+	'LBL_DONATEURSWEB_4D' => 'Donateurs web depuis 4D',
+	
+	'LBL_DBTYPE' => 'Type de base',
+	'LBL_DBSERVER' => 'Serveur',
+	'LBL_DBPORT' => 'Port',
+	'LBL_DBNAME' => 'Nom de la base',
+	'LBL_DBUSER' => 'Utilisateur',
+	'LBL_DBPWD' => 'Mot de passe',
 	
 	'LBL_SELECT_Documents_STEP' => 'Sélection d\'un document lié',
 	'LBL_SELECT_Documents_STEP_DESCRIPTION' => 'Veuillez sélectionner le document lié',
 	
 	'LBL_SELECT_Critere4D_STEP' => 'Sélection d\'un critère lié',
 	'LBL_SELECT_Critere4D_STEP_DESCRIPTION' => 'Veuillez sélectionner le critère lié',
+	
+	
+	'LBL_RECORDID_STATUS_0' => '?',
+	'LBL_RECORDID_STATUS_1' => 'Trouvé',
+	'LBL_RECORDID_STATUS_2' => 'A créer',
+	'LBL_RECORDID_STATUS_3' => 'A mettre à jour',
+	'LBL_RECORDID_STATUS_10' => 'Vérifier',
+	'LBL_RECORDID_STATUS_11' => 'Une proposition',
+	'LBL_RECORDID_STATUS_12' => 'Plusieurs propositions',
 );
 
 ?>

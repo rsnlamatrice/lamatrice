@@ -15,6 +15,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		$this->exposeMethod('clearCorruptedData');
 		$this->exposeMethod('cancelImport');
 		$this->exposeMethod('continueHaltedImport');
+		$this->exposeMethod('validatePreImportData');
 		$this->exposeMethod('getPreviewData');
 	}
 
@@ -64,11 +65,16 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 */
 	function getHeaderScripts(Vtiger_Request $request) {
 		$headerScriptInstances = parent::getHeaderScripts($request);
-
+		
 		$jsFileNames = array(
 			'modules.RSNImportSources.resources.RSNImportSources'
 		);
 
+		$moduleName = $request->get('for_module');
+		if($moduleName === 'Contacts'){
+			$jsFileNames[] = 'modules.RSNImportSources.resources.RSNImportContacts';
+		}
+		
 		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
 		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
 
@@ -101,6 +107,24 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 */
 	function getImportController(Vtiger_Request $request) {
 		$className = $request->get('ImportSource');
+		
+		if (!$className) {
+			
+			//Id de la queue
+			$importId = $request->get('import_id');
+			if($importId){
+				$recordModel = RSNImportSources_Record_Model::getInstanceByQueueId($importId);
+				if($recordModel)
+					return $recordModel->getImportController($request);
+			}
+			
+			$forModule = $request->get('for_module');
+			$user = Users_Record_Model::getCurrentUserModel();
+			//teste si une table d'importation existe pour ce module
+			$className = RSNImportSources_Queue_Action::getImportClassName($forModule, $user);
+			$request->set('ImportSource', $className);
+		}
+		
 		if ($className) {
 			$importClass = RSNImportSources_Utils_Helper::getClassFromName($className);
 			$user = Users_Record_Model::getCurrentUserModel();
@@ -108,7 +132,6 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 
 			return $importController;
 		}
-
 		return null;
 	}
 	
@@ -238,12 +261,34 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 * @param Vtiger_Request $request: the curent request.
 	 */
 	function continueHaltedImport(Vtiger_Request $request) {
-		$importId = $request->get('import_id');
-		if ($importId) {			
-			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+		$importController = $this->getImportController($request);
+		if (!$importController) {	
+			echo "<pre>Impossible de trouver le controller.</pre>";
+			$this->checkImportStatus($request);
+			return;
 		}
+		$importId = $request->get('import_id');
+		if ($importController->needValidatingStep())
+			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_VALIDATING);
+		else
+			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+
 		$request->set('mode', false);
 		$this->checkImportStatus($request);
+	}
+
+	/** ED150914
+	 * Method to show and edit pre-import data.
+	 * @param Vtiger_Request $request: the curent request.
+	 */
+	function validatePreImportData(Vtiger_Request $request) {
+		$importController = $this->getImportController($request);
+		if (!$importController) {	
+			echo "<pre>Impossible de trouver le controller.</pre>";
+			$this->checkImportStatus($request);
+			return;
+		}
+		$importController->displayDataPreview();
 	}
 
 	/**
@@ -287,8 +332,10 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 					exit;
 				} else {
 					if($mode == 'continueImport' && $user->id == $lockedBy) {
-						
-						$importController->triggerImport(true);
+						if($importController)
+							$importController->triggerImport(true);
+						else
+							throw new Exception('Missing controller');
 					} else {
 						$lockOwner = $user;
 						if($user->id != $lockedBy) {
