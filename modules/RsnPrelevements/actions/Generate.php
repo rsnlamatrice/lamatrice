@@ -1,6 +1,6 @@
 <?php
 /*+***********************************************************************************
- * 
+ * Génération des ordres de virement
  *************************************************************************************/
 
 class RsnPrelevements_Generate_Action extends Vtiger_Action_Controller {
