@@ -164,23 +164,41 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		$fileName = str_replace(' ','_',vtranslate($moduleName, $moduleName));    
 		$exportType = $this->getExportContentType($request);
 
+		//ED150922
+		$csvseparator = $this->getCSVSeparator();
+		
 		header("Content-Disposition:attachment;filename=$fileName.csv");
 		header("Content-Type:$exportType;charset=UTF-8");
 		header("Expires: Mon, 31 Dec 2000 00:00:00 GMT" );
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
 		header("Cache-Control: post-check=0, pre-check=0", false );
 
-		$header = implode("\", \"", $headers);
+		$header = implode("\"$csvseparator\"", $headers);
 		$header = "\"" .$header;
 		$header .= "\"\r\n";
 		echo $header;
 
 		foreach($entries as $row) {
-			$line = implode("\",\"",$row);
+			$line = implode("\"$csvseparator\"", $row);
 			$line = "\"" .$line;
 			$line .= "\"\r\n";
 			echo $line;
 		}
+	}
+	
+	
+	//ED150922
+	function getCSVSeparator(){
+		return "\t";	
+	}
+
+	//ED150922
+	function escapeForCSV($string){
+		if(strpos($string, "\t") !== FALSE)
+			$string = str_replace("\t", "\\t", $string);
+		if(strpos($string, '"') !== FALSE)
+			$string = str_replace('"', '\'\'', $string);
+		return $string;
 	}
 
 	private $picklistValues;
@@ -267,6 +285,7 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 				array_push($new_arr,$value);
 			}
 		}
-		return $arr;
+		//ED150922 $this->escapeForCSV
+		return array_map($this->escapeForCSV, $arr);
 	}
 }

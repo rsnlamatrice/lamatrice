@@ -125,17 +125,21 @@ class Contacts extends CRMEntity {
 	var $search_fields = Array(
 		'Last Name' => Array('contactdetails'=>'lastname'),
 		'First Name' => Array('contactdetails'=>'firstname'),
-		'Title' => Array('contactdetails'=>'title'),
+		'N° Contact' => Array('contactdetails'=>'contact_no'),
+		//'Title' => Array('contactdetails'=>'title'),
 		'Account Name'=>Array('contactdetails'=>'account_id'),
-		'Assigned To'=>Array('crmentity'=>'smownerid'),
+		//TODO en popup affiche le texte en plus de l'icône, et c'est pas beau 'Particulier ou Structure'=>Array('contactdetails'=>'isgroup'),
+		//'Assigned To'=>Array('crmentity'=>'smownerid'),
 	);
 
 	var $search_fields_name = Array(
 		'Last Name' => 'lastname',
 		'First Name' => 'firstname',
-		'Title' => 'title',
+		'N° Contact' => 'contact_no',
+		//'Title' => 'title',
 		'Account Name'=>'account_id',
-		'Assigned To'=>'assigned_user_id',
+		//TODO en popup affiche le texte en plus de l'icône, et c'est pas beau 'Particulier ou Structure'=>'isgroup',
+		//'Assigned To'=>'assigned_user_id',
 	);
 
 	// This is the list of vtiger_fields that are required
