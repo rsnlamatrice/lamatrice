@@ -88,6 +88,8 @@ $languageStrings = array(
         
     'use_address2_for_revue'        => 'spécifiquement pour la Revue',
     'use_address2_for_recu_fiscal'  => 'spécifiquement pour le Reçu fiscal',
+    
+    'LBL_ADDRESS2_EXISTS'           => 'Attention : adresse secondaire',
 	
 	'LBL_MERGE'                         => 'Fusionner les contacts',
 	

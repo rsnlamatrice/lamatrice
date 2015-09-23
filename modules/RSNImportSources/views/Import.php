@@ -666,7 +666,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 					ON s.serviceid = e.crmid
 				WHERE s.productcode = ?
 				AND e.deleted = FALSE
-				AND discontinued = 1
+				ORDER BY discontinued DESC
 				LIMIT 1';
 			$result = $db->pquery($query, array($productcode));
 	
@@ -685,7 +685,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 					ON p.productid = e.crmid
 				WHERE p.productcode = ?
 				AND e.deleted = FALSE
-				AND discontinued = 1
+				ORDER BY discontinued DESC
 				LIMIT 1';
 			$result = $db->pquery($query, array($productcode));
 	

@@ -95,8 +95,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
 		if(FALSE)
-			$query .= ' WHERE facture.numero = 3661
-				AND annee = 2015
+			$query .= ' WHERE facture.numero = 12923
+				AND annee = 2012
 			';
 		else {
 			/* Attention à ne pas importer une facture en cours de saisie */
@@ -492,14 +492,22 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 */
 	function productExist($product) {
 		$db = PearDatabase::getInstance();
-		$query = 'SELECT productid FROM vtiger_products p JOIN vtiger_crmentity e on p.productid = e.crmid WHERE p.productcode = ? AND e.deleted = FALSE LIMIT 1';
+		$query = 'SELECT productid
+			FROM vtiger_products p
+			JOIN vtiger_crmentity e on p.productid = e.crmid
+			WHERE p.productcode = ? AND e.deleted = FALSE LIMIT 1';
 		$result = $db->pquery($query, array($product['productcode']));
 
 		if ($db->num_rows($result) == 1) {
 			return true;
 		}
 
-		$query = 'SELECT * FROM vtiger_service s JOIN vtiger_crmentity e on s.serviceid = e.crmid WHERE s.productcode = ? AND e.deleted = FALSE LIMIT 1';
+		$query = 'SELECT 1
+			FROM vtiger_service s
+			JOIN vtiger_crmentity e on s.serviceid = e.crmid
+			WHERE s.productcode = ?
+			AND e.deleted = FALSE
+			LIMIT 1';
 		$result = $db->pquery($query, array($product['productcode']));
 
 		return ($db->num_rows($result) == 1);
@@ -937,7 +945,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'rsnsectionanal' => $product[$this->columnName_indexes['section_produit']],
 			'qtyinstock' => $product[$this->columnName_indexes['stock_produit']],
 			'glacct' => $product[$this->columnName_indexes['glacct']],
-			'discontinued' => $product[$this->columnName_indexes['indisponible']],
+			'discontinued' => $product[$this->columnName_indexes['indisponible']], //TODO n'est ce pas l'inverse ?
 		);
 		return $product;
 	}
@@ -1007,8 +1015,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 *  This method must be overload in the child class.
 	 */
 	function postPreImportData() {
-		// Pré-identifie les contacts
-		
+		// Pré-identifie les contacts//
+			
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,
 			'Invoice',

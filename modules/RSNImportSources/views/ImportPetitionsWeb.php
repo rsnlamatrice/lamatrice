@@ -97,7 +97,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			"firstname" => "firstname",
 			"lastname" => "lastname",
 			"mailingstreet3" => "mailingstreet3",
-			"mailingstreet2" => "mailingstreet2",
+			"mailingstreet2" => "mailingstreet",
 			"mailingzip" => "mailingzip",
 			"mailingcity" => "mailingcity",
 			"mailingcountry" => "mailingcountry",

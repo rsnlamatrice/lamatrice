@@ -69,6 +69,7 @@
 					{/if}
 					{vtranslate($BLOCK_LABEL, $MODULE)}
 					{if $BLOCK_LABEL eq 'Adresse secondaire'}
+						<a id="adresse_secondaire"/>
 						<label class="blockToggler" style="margin-left: 4em; display: inline-block; color: white;">
 						{assign var=FIELD_NAME value='use_address2_for_revue'}
 						{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
@@ -84,6 +85,14 @@
 						{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
 						&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
 						</label>
+					{elseif $BLOCK_LABEL eq 'LBL_ADDRESS_INFORMATION' && ($RECORD_MODEL->get('use_address2_for_revue') || $RECORD_MODEL->get('use_address2_for_recu_fiscal'))}
+						{* ED150912 notification de l'existence d'une adresse secondaire spécifique *}
+						<div style="display: inline-block; margin-left: 5em; opacity: 0.6;">
+							<a href="#adresse_secondaire">{vtranslate('LBL_ADDRESS2_EXISTS', $MODULE)} : 
+								{if $RECORD_MODEL->get('use_address2_for_revue')}&nbsp;{vtranslate('USE ADDRESS2 FOR REVUE', $MODULE)}{/if}
+								{if $RECORD_MODEL->get('use_address2_for_recu_fiscal')}&nbsp;{vtranslate('USE ADDRESS2 FOR RECU FISCAL', $MODULE)}{/if}
+							</a>
+						</div>
 					{elseif $BLOCK_LABEL eq 'LBL_BLOCK_DO_NOT'}
 						{* ED150912 sélection de tous ou aucun *}
 						{assign var=UID value='change-all-donot'}
