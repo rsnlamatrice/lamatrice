@@ -27,6 +27,16 @@ class Contacts_PopupAjax_View extends Contacts_Popup_View {
 
 	public function process (Vtiger_Request $request) {
 		$mode = $request->get('mode');
+		
+		//ED150922 : si on cherche par code alors qu'on est positionné en recherche par nom, change le champ de recherche
+		$search_key = $request->get('search_key');
+		$search_value = $request->get('search_value');
+		if((empty($mode) || $mode == 'getPageCount')
+		&& $search_key == 'lastname'
+		&& preg_match('/^C\d+/i', $search_value)){
+			$request->set('search_key', 'contact_no');
+		}
+		
 		if(!empty($mode)) {
 			$this->invokeExposedMethod($mode, $request);
 			return;
