@@ -6,6 +6,14 @@ label {
 .muted {
   color: #444444;
 }
+
+/* placeholder, trop foncé chez certains */
+::-webkit-input-placeholder { color: #888888; }
+::-moz-placeholder { color: #888888; }
+:-moz-placeholder { color: #888888; }
+:-ms-input-placeholder { color: #888888; }
+
+
 .rsn_block_values_summary {
     display: inline-block;
     padding-left: 3em;
