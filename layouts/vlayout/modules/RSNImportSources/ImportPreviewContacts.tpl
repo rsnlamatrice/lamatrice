@@ -70,7 +70,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 													</th>
 												{/if}
 												<th>
-													<input type="radio" name="contact_related_to_{$ROW_INDEX}"
+													<input type="radio" name="contact_related_to_{$ROW['id']}"
 															{if $CONTACT_ROW_INDEX === 0}checked="checked"{/if}
 													/>
 												</th>
@@ -86,7 +86,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 													{assign var=CONTACT_FIELD value=$CONTACTS_FIELDS_MAPPING[$FIELD_NAME]}
 													{if $CONTACT_FIELD && array_key_exists($CONTACT_FIELD, $CONTACT_ROW)}
 														<td data-fieldname="{$FIELD_NAME}"
-														{if strcasecmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
+														{if straccentscmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
 															class="values-eq"
 														{else}
 															class="values-neq"
@@ -104,10 +104,10 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<th></th>
 											{/if}
 											<td colspan="3" class="select-contact">
-												<input type="radio" name="contact_related_to_{$ROW_INDEX}"/>
+												<input type="radio" name="contact_related_to_{$ROW['id']}"/>
 												<a href="#"><i>sélectionner...</i></a></td>
 											<td colspan="3" class="create-contact">
-												<label><input type="radio" name="contact_related_to_{$ROW_INDEX}"
+												<label><input type="radio" name="contact_related_to_{$ROW['id']}"
 													{if ! $CONTACT_ROWS}checked="checked"{/if}/>
 													<i>créer</i></label></td>
 										</tr>

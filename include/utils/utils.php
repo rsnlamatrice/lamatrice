@@ -2020,4 +2020,14 @@ function clean_pickList_values_string($values){
 	return preg_replace('/(^'.preg_quote(' |##| ').')|('.preg_quote(' |##|  |##| ').')|('.preg_quote(' |##| ').'$)' .'/'
 							   , '', $values);
 }
+
+/* ED150923
+ * Comparaison de chaines, sans la casse et sans les accents
+ */
+function straccentscmp($str1, $str2){
+	$str1 = remove_accent(html_entity_decode($str1, ENT_COMPAT | ENT_HTML401, 'UTF-8'));
+	$str2 = remove_accent(html_entity_decode($str2, ENT_COMPAT | ENT_HTML401, 'UTF-8'));
+	return strcasecmp($str1, $str2);
+}
+
 ?>
