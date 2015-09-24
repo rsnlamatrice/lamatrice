@@ -1631,7 +1631,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	} 
 
     
-	/**
+	/** ED140000
 	 * Retourne les valeurs des picklists
 	 */
 	public function getPicklistValuesDetails($fieldname){
@@ -1640,7 +1640,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	}
 
     
-	/**
+	/** ED140000
 	 * Retourne les valeurs des picklists
 	 */
 	public function getListViewPicklistValues($fieldname){

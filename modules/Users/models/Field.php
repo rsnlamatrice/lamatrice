@@ -74,23 +74,44 @@ class Users_Field_Model extends Vtiger_Field_Model {
 	 * @return <Array> List of picklist values if the field is of type picklist or multipicklist, null otherwise.
 	 */
 	public function getPicklistValues() {
-		if($this->get('uitype') == 32) {
-			return Vtiger_Language_Handler::getAllLanguages();
+	    if($this->get('uitype') == 32) {
+		    return Vtiger_Language_Handler::getAllLanguages();
+	    }
+	    elseif ($this->get('uitype') == '115') {
+		$db = PearDatabase::getInstance();
+		
+		$query = 'SELECT '.$this->getFieldName().' FROM vtiger_'.$this->getFieldName();
+		$result = $db->pquery($query, array());
+		$num_rows = $db->num_rows($result);
+		$fieldPickListValues = array();
+		for($i=0; $i<$num_rows; $i++) {
+		    $picklistValue = $db->query_result($result,$i,$this->getFieldName());
+		    $fieldPickListValues[$picklistValue] = vtranslate($picklistValue,$this->getModuleName());
 		}
-        else if ($this->get('uitype') == '115') {
-            $db = PearDatabase::getInstance();
-            
-            $query = 'SELECT '.$this->getFieldName().' FROM vtiger_'.$this->getFieldName();
-            $result = $db->pquery($query, array());
-            $num_rows = $db->num_rows($result);
-            $fieldPickListValues = array();
-            for($i=0; $i<$num_rows; $i++) {
-                $picklistValue = $db->query_result($result,$i,$this->getFieldName());
-                $fieldPickListValues[$picklistValue] = vtranslate($picklistValue,$this->getModuleName());
-            }
-            return $fieldPickListValues;
-        }
-		return parent::getPicklistValues();
+		return $fieldPickListValues;
+	    }
+	    elseif ($this->getFieldName() === 'default_module') {
+		    
+		$db = PearDatabase::getInstance();
+		
+		$presence = array(0);
+		$restrictedModules = array('Webmails', 'Emails', 'Integration', 'Dashboard');
+		$query = 'SELECT name, tablabel FROM vtiger_tab WHERE presence IN (' . generateQuestionMarks($presence) . ') AND isentitytype = ? AND name NOT IN (' . generateQuestionMarks($restrictedModules) . ')';
+		
+		$result = $db->pquery($query, array($presence, '1', $restrictedModules));
+		$numOfRows = $db->num_rows($result);
+		
+		$moduleData = array(
+		    '' => '(' . vtranslate(vglobal('default_module')) . ')',
+		    'Home' => vtranslate('Home'),
+		);
+		for ($i = 0; $i < $numOfRows; $i++) {
+			$row = $db->query_result_rowdata($result, $i);
+			$moduleData[$db->query_result($result, $i, 'name')] = vtranslate($db->query_result($result, $i, 'tablabel'), $db->query_result($result, $i, 'name'));
+		}
+		return $moduleData;
+	    }
+	    return parent::getPicklistValues();
 	}
 
     /**

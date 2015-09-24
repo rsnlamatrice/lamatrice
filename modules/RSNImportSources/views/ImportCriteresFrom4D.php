@@ -83,6 +83,10 @@ class RSNImportSources_ImportCriteresFrom4D_View extends RSNImportSources_Import
 			'valeur_par_defaut' => '',//nu
 			'categorieducritere' => 'categorie',
 			'vtiger' => '',//abandon
+			
+			//
+			'_critere4did' => '',//Critere existant. massively updated
+			'_notesid' => '',//Document existant. massively updated
 		);
 			//donotcourrierag, rsnwebhide dans import Groupe ?
 	}
@@ -345,6 +349,60 @@ class RSNImportSources_ImportCriteresFrom4D_View extends RSNImportSources_Import
 		return false;
 	}
         
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Critere4D');
+		
+		/* Affecte l'id du document */
+		$query = "UPDATE $tableName
+		JOIN  vtiger_notescf
+			ON  vtiger_notescf.critere4d = `$tableName`.critere
+		JOIN vtiger_crmentity
+			ON vtiger_notescf.notesid = vtiger_crmentity.crmid
+		";
+		$query .= " SET `_notesid` = vtiger_notescf.notesid
+		, `$tableName`.status = ?";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		/* Affecte l'id du critere */
+		$query = "UPDATE $tableName
+		JOIN vtiger_critere4d
+			ON vtiger_critere4d.nom = `$tableName`.critere
+		JOIN vtiger_crmentity
+			ON vtiger_critere4d.critere4did = vtiger_crmentity.crmid
+		";
+		$query .= " SET `_critere4did` = vtiger_critere4d.critere4did
+		, `$tableName`.status = ?";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Method that check if a string is a formatted date (DD/MM/YYYY).
 	 * @param string $string : the string to check.

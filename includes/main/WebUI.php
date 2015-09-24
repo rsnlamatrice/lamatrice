@@ -122,7 +122,9 @@ class Vtiger_WebUI extends Vtiger_EntryPoint {
 
 			if(empty($module)) {
 				if ($this->hasLogin()) {
-					$defaultModule = vglobal('default_module');
+					$defaultModule = $currentUser->default_module;
+					if(!$defaultModule)
+						$defaultModule = vglobal('default_module');
 					if(!empty($defaultModule) && $defaultModule != 'Home') {
 						$module = $defaultModule; $qualifiedModuleName = $defaultModule; $view = 'List';
                         if($module == 'Calendar') { 
