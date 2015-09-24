@@ -29,7 +29,16 @@ $languageStrings = array(
 	'305-Sales Other'              => '305-Sales Other'             , 
 	'306-Internet Sales'           => '306-Internet Sales'          , 
 	'307-Service-Hardware Labor'   => '307-Service-Hardware Labor'  , 
-	'308-Sales-Books'              => '308-Sales-Books'             , 
+	'308-Sales-Books'              => '308-Sales-Books'             ,
+                        
+	'vendorcode'              => 'Code Fournisseur'             , 
+	'contactname'              => 'Nom du contact'             , 
+	'phone2'              => 'Téléphone 2'             , 
+	'fax'              => 'Fax'             , 
+	'intracom'              => 'N° Intra-communautaire',
+	'paymode'              => 'Mode de réglement',
+	'paycomment'              => 'Commentaire sur le réglement',
+	'paydelay'              => 'Délai de réglement',
 );
 $jsLanguageStrings = array(
 	'LBL_RELATED_RECORD_DELETE_CONFIRMATION' => 'Confirmer la suppression?', 

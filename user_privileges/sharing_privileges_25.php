@@ -142,10 +142,6 @@ $RsnAdhesions_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RsnAdhesions_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
-$RsnAbonnements_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnAbonnements_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
 $RSNMedias_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNMedias_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
