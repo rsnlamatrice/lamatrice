@@ -78,6 +78,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			
 			//post preimport
 			'_critere4did' => '',
+			'_notesid' => '',
 			'_contactid' => '',
 		);
 			//donotcourrierag, rsnwebhide dans import Groupe ?
@@ -155,6 +156,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		global $log;
 		
 		$critere4dId = $critere4dsData[0]['_critere4did'];
+		$notesId = $critere4dsData[0]['_notesid'];
 		$contactId = $critere4dsData[0]['_contactid'];
 		
 		//Le post-préImport fait déjà le ménage */
@@ -184,7 +186,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		}
 		*/
 		
-		if(!$contactId || !$critere4dId){
+		if(!$contactId || (!$critere4dId && !$notesId)){
 			//var_dump("One is null", $contactId, $critere4dId, $critere4dsData);
 			foreach ($critere4dsData as $critere4dsLine) {
 				$entityInfo = array(
@@ -211,11 +213,21 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			}
 			
 			$db = PearDatabase::getInstance();
-			$query = "INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication, data)
-					VALUES(?, ?, ?, ?)
-					ON DUPLICATE KEY UPDATE data = ?
-			";
-			$params = array($critere4dId, $contactId, $dateApplication, $relData, $relData);
+			
+			if($notesId){
+				$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
+						VALUES(?, ?, ?, ?)
+						ON DUPLICATE KEY UPDATE data = ?
+				";
+				$params = array($notesId, $contactId, $dateApplication, $relData, $relData);
+			}
+			else {
+				$query = "INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication, data)
+						VALUES(?, ?, ?, ?)
+						ON DUPLICATE KEY UPDATE data = ?
+				";
+				$params = array($critere4dId, $contactId, $dateApplication, $relData, $relData);
+			}
 			$result = $db->pquery($query, $params);
 			
 			if(!$result){
@@ -321,6 +333,14 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			'_critere4did',
 			/*$changeStatus*/ false
 		);
+		
+		self::setPreImportDataDocumentIdByNom(
+			$this->user,
+			'Critere4D',
+			'critere',
+			'_notesid',
+			/*$changeStatus*/ false
+		);
 	
 		self::failPreImportDataForNonExistingCritere4DOrContact(
 			$this->user,
@@ -332,7 +352,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	}
 	
 	/**
-	 * Méthode qui affecte le contactid pour tous ceux qu'on trouve d'après leur Ref4D
+	 * Méthode qui affecte le critere4did pour tous ceux qu'on trouve d'après leur Ref4D
 	 */
 	public static function setPreImportDataCritere4DIdByNom($user, $moduleName, $nomFieldName, $critere4DIdField, $changeStatus = true) {
 		$db = PearDatabase::getInstance();
@@ -343,7 +363,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			
 		// Pré-identifie les contacts
 		
-		/* Affecte la réf du contact d'après la ref 4D */
+		/* Affecte la réf du critere d'après la ref 4D */
 		$query = "UPDATE $tableName
 			JOIN vtiger_critere4d
 				ON vtiger_critere4d.nom = `$tableName`.`$nomFieldName`
@@ -352,6 +372,43 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		";
 		
 		$query .= " SET `$tableName`.`$critere4DIdField` = vtiger_crmentity.crmid";
+		
+		if($changeStatus !== false)
+			$query .= ", `$tableName`.status = ".$changeStatus;
+			
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND `$tableName`._contactid IS NOT NULL
+		";
+		$result = $db->query($query);
+		if(!$result)
+			$db->echoError($query);
+			
+		return !!$result;
+	}
+	
+	/**
+	 * Méthode qui affecte le notesid pour tous ceux qu'on trouve d'après leur Ref4D
+	 */
+	public static function setPreImportDataDocumentIdByNom($user, $moduleName, $nomFieldName, $notesIdField, $changeStatus = true) {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
+		
+		if($changeStatus === true)
+			$changeStatus = RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED;
+			
+		// Pré-identifie les contacts
+		
+		/* Affecte la réf du document d'après la ref 4D */
+		$query = "UPDATE $tableName
+			JOIN vtiger_notescf
+				ON vtiger_notescf.critere4d = `$tableName`.`$nomFieldName`
+			JOIN vtiger_crmentity
+				ON vtiger_notescf.notesid = vtiger_crmentity.crmid
+		";
+		
+		$query .= " SET `$tableName`.`$notesIdField` = vtiger_crmentity.crmid";
 		
 		if($changeStatus !== false)
 			$query .= ", `$tableName`.status = ".$changeStatus;
@@ -383,7 +440,9 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		$query .= "
 			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 			AND (`$tableName`._contactid IS NULL OR `$tableName`._contactid = ''
-				OR `$tableName`._critere4did IS NULL OR `$tableName`._critere4did = '' )
+				OR ((`$tableName`._critere4did IS NULL OR `$tableName`._critere4did = '')
+					AND (`$tableName`._notesid IS NULL OR `$tableName`._notesid = ''))
+			)
 		";
 		$result = $db->query($query);
 		if(!$result)

@@ -44,6 +44,7 @@ class RSN {
 			$this->add_customview_lockstatus_field();
 			$this->registerEvents();
 			self::add_mysql_function_levenshtein();
+			$this->add_users_default_module_field();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -247,6 +248,28 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($sql);
 	}
+	
+	static function add_users_default_module_field() {
+		$sql = "ALTER TABLE `vtiger_users` ADD `default_module` VARCHAR( 64 ) NULL ";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($sql);
+		if(!$result)
+			return;
+		$module = Vtiger_Module_Model::getInstance('Users');
+		foreach( $module->getBlocks() as $block1)
+			break;
+		
+		$field3 = new Vtiger_Field();
+		$field3->name = 'default_module';
+		$field3->label = 'default_module';
+		$field3->table = 'vtiger_users';
+		$field3->column = 'default_module';
+		$field3->columntype = 'VARCHAR(64)';
+		$field3->uitype = 16;
+		$field3->typeofdata = 'V~O';
+		$block1->addField($field3);
+	}
+	
 	
 	static function add_mysql_function_levenshtein(){
 		$db = PearDatabase::getInstance();

@@ -259,4 +259,5 @@ class Users_Module_Model extends Vtiger_Module_Model {
 	   }
 	   return $languages_list;
    }
+
 }

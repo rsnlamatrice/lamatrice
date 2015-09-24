@@ -1997,7 +1997,9 @@ jQuery.Class("Vtiger_List_Js",{
 			var alphabet = $alphabet.attr('data-searchvalue') !== undefined ? $alphabet.attr('data-searchvalue') : $target.find('a').text();
 			var cvId = thisInstance.getCurrentCvId();
 			/* ED150903 defined search key in one ancestor */
-			var specificSearchKey = $target.parents('.alphabetSorting[data-searchkey]').attr('data-searchkey');
+			var $container = $target.parents('.alphabetSorting[data-searchkey]');
+			var specificSearchKey = $container.attr('data-searchkey');
+			var specificSearchOperator = $container.attr('data-searchoperator');
 			var AlphabetSearchKey = specificSearchKey ? specificSearchKey : thisInstance.getAlphabetSearchField();
 			
 			//ED150903 this search complete header filters
@@ -2015,14 +2017,14 @@ jQuery.Class("Vtiger_List_Js",{
 					addKey = false;
 					urlParams.search_value[i] = alphabet;
 					urlParams.search_input[i] = alphabet;
-					urlParams.operator[i] = 's';
+					urlParams.operator[i] = specificSearchOperator ? specificSearchOperator : 's';
 					break;
 				}
 			if (addKey) {
 				urlParams.search_key.push( AlphabetSearchKey );
 				urlParams.search_value.push( alphabet );
 				urlParams.search_input.push( alphabet );
-				urlParams.operator.push( 's' );
+				urlParams.operator.push( specificSearchOperator ? specificSearchOperator : 's' );
 			}
 			
 			jQuery('#recordsCount').val('');

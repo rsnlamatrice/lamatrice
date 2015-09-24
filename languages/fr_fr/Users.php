@@ -217,7 +217,8 @@ $languageStrings = array(
 		'Thursday' => 'Jeudi',
 		'Friday' => 'Vendredi',
 		'Saturday' => 'Samedi',
-
+                
+        'default_module' => 'Module par défaut',
 	
 );
 

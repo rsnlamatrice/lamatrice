@@ -17,7 +17,7 @@ ED141024
 {assign var=SELECTED_VALUE value=$FIELD_MODEL->get('fieldvalue')}
 
 		
-<div class="alphabetSorting noprint" data-searchkey="{$FIELD_MODEL->getFieldName()}">
+<div class="alphabetSorting noprint" data-searchkey="{$FIELD_MODEL->getFieldName()}" data-searchoperator="{if $FIELD_MODEL->get('uitype') eq '33'}c{else}e{/if}">
 <table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
 	<tbody>
 		<tr>
