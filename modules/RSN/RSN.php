@@ -45,6 +45,7 @@ class RSN {
 			$this->registerEvents();
 			self::add_mysql_function_levenshtein();
 			$this->add_users_default_module_field();
+			$this->add_vendors_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -268,6 +269,47 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$field3->uitype = 16;
 		$field3->typeofdata = 'V~O';
 		$block1->addField($field3);
+	}
+	
+	static function add_vendors_fields() {
+		$module = Vtiger_Module_Model::getInstance('Vendors');
+		foreach( $module->getBlocks() as $block1)
+			break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'vendorcode' 	=> array( 'columntype' => 'VARCHAR(32)',	),
+			'contactname' 	=> array( 'columntype' => 'VARCHAR(255)',	),
+			'phone2' 	=> array( 'columntype' => 'VARCHAR(32)', 'uitype' => '11',	),
+			'fax' 		=> array( 'columntype' => 'VARCHAR(32)', 'uitype' => '11',	),
+			'intracom' 	=> array( 'columntype' => 'VARCHAR(32)',	),
+			'paymode' 	=> array( 'columntype' => 'VARCHAR(32)',	),
+			'paycomment' 	=> array( 'columntype' => 'VARCHAR(255)', 'uitype' => '24',	),
+			'paydelay' 	=> array( 'columntype' => 'INT(3)', 'uitype' => '1',	),
+		);
+		foreach($newFields as $newFieldName => $newField){
+			if($existingFields[$newFieldName])
+				continue;
+		
+			//Pas sûr que ce soit nécessaire
+			$sql = "ALTER TABLE `vtiger_vendorcf` ADD `$newFieldName` ".$newField['columntype']." NULL ";
+			$db = PearDatabase::getInstance();
+			$result = $db->pquery($sql);
+			if(!$result){
+				/*$db->echoError();
+				die($sql);*/
+				continue;
+			}
+			
+			$field3 = new Vtiger_Field();
+			$field3->name = $newFieldName;
+			$field3->label = $newFieldName;
+			$field3->table = 'vtiger_vendorcf';
+			$field3->column = $newFieldName;
+			$field3->columntype = $newField['columntype'];
+			$field3->uitype = $newField['uitype'] ? $newField['uitype'] : 1;
+			$field3->typeofdata = 'V~O';
+			$block1->addField($field3);
+		}
 	}
 	
 	
