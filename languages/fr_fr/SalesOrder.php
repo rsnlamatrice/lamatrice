@@ -55,4 +55,6 @@ $languageStrings = array(
 	'Grand Total:' => 'Total:',
 	
 	'Recurring Invoice Information' => 'Génération périodique de facture',
+        
+        'socomment' => 'Commentaire',
 );
