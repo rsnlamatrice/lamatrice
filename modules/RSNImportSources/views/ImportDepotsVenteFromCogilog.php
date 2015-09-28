@@ -11,7 +11,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	 * @return string - The label.
 	 */
 	public function getSource() {
-		return 'LBL_COGILOG_DEPOTSVENTE';
+		return 'LBL_COGILOG_SALESORDER';
 	}
 
 
@@ -21,7 +21,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	 * @return string - the default db port.
 	 */
 	public function getDefaultMaxQueryRows() {
-		return 100;//30000;
+		return 30000;
 	}
 
 	/**
@@ -29,7 +29,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	 * @return array - An array containing concerned module names.
 	 */
 	public function getImportModules() {
-		return array('SalesOrder');
+		return array(/*'Contacts', */'SalesOrder');
 	}
 
 	/**
@@ -61,17 +61,19 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			, netht, nettva, solde, "bdc".archive, verrouille, imprime, transformtype, transformid
 			, "bdc".tssaisie, "bdc".tsmod
 			, contact, "bdc".notes, ptexte1, ptexte2, ptexte3, pdate1, pdate2, pdate3, commentaires
-			, affaire.code AS "code_affaire"
+			, affaire.code AS "affaire_code"
 			, "ligne_bdc".*
-			, "client".*
+			, client.CodeClient, client.NomClient
 			, "bdc".num || \' \' || "bdc".voie AS "voie", "bdc".compad1, "bdc".compad2, "bdc".cp, "bdc".ville, "bdc".cedex, "bdc".pays
 			, 0 as "_contactid"
 			, 0 as "_productid"
 			 FROM "gbdcom00002" "bdc"
 			 INNER JOIN ( 
 				SELECT "glbdco00002"."id_piece", "glbdco00002"."id_gprodu", "gprodu00002"."nom" AS "nom_produit", "gprodu00002"."code" AS "code_produit"
-				, "codetauxtva"."taux" AS "taux_tva"
+				, "codetauxtva"."taux" AS "tva_produit"
 				, SUM( "quantite" ) AS "quantite"
+				, SUM( "ht2" ) AS "total_ligne_ht"
+				, AVG( "glbdco00002"."prix" ) AS "prix_unit_ht"
 				FROM "glbdco00002"
 				INNER JOIN "gprodu00002" ON "glbdco00002"."id_gprodu" = "gprodu00002"."id"
 			 LEFT JOIN "gtvacg00002" AS "codetauxtva"
@@ -80,7 +82,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			) AS "ligne_bdc" 
 				ON "ligne_bdc"."id_piece" = "bdc"."id"
 			 INNER JOIN (
-				SELECT id as id_gclien, nom2 AS nom_client, code AS code_client
+				SELECT id as id_gclien, code AS CodeClient, nom2 AS NomClient
 				FROM "gclien00002"
 			 ) "client"
 				ON "client"."id_gclien" = "bdc"."id_gclien"
@@ -96,7 +98,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			$query .= ' WHERE bdc.datepiece < CURRENT_DATE 
 			';
 			if($factMax)
-				$query .= ' AND ((facture.numero > '.$factMax.' AND facture.annee = '.$anneeMax.')
+				$query .= ' AND ((bdc.numero > '.$factMax.' AND bdc.annee = '.$anneeMax.')
 				OR bdc.annee > '.$anneeMax.')';
 		}
 		$query .= ' ORDER BY bdc.annee, bdc.numero
@@ -113,7 +115,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 		$rows = parent::getDBRows();
 		if(!$rows)
 			return $rows;
-		
+				
 		//Identifie les lignes qui sont les en-têtes de factures ou les lignes suivantes de produits
 		$fieldName = '_header_';
 		$this->columnName_indexes[$fieldName] = count($this->columnName_indexes);
@@ -142,101 +144,47 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			$new_rows = array_slice($new_rows, 0, $previous_row);
 		}
 		if(count($new_rows))
-			echo "\rNouvelles factures de Cogilog à importer : " . count($new_rows);
+			echo "\rNouveaux dépôts-vente de Cogilog à importer : " . count($new_rows);
 		return $new_rows;
 	}
 	
 	/**
-	 * Method to get the imported fields for the vendors module.
-	 * @return array - the imported fields for the vendors module.
+	 * Method to get the imported fields for the salesorder module.
+	 * @return array - the imported fields for the salesorder module.
 	 */
-	function getSalesOrderFieldsMapping() {
-		//transformtype
-		// 0 : en cours
-		// 1 : archivé, transformé en F
-		// 6 : transformé en K
-		
-		//id_gtremi
-		// 1 : aucune remise
-		// 2 : dépôt
-		
-		//les factures de dépots-vente sont déjà intégrées en facture
-		
-		//sostatus
-		/* {"Created":"Cr\u00e9\u00e9","Approved":"Valid\u00e9","Delivered":"Livr\u00e9","Archived":"Archiv\u00e9","Cancelled":"Annul\u00e9"}}
-		 */
-		
-		//laisser exactement les colonnes du fichier, dans l'ordre 
-		return array (
-			"bdcid" => "",
-			"annee" => "",//salesorder_no avec prefixe DV
-			"numero" => "",//avec prefixe DV
-			"datepiece" => "createdtime",
-			"facturation" => "",//0 ou 2
-			"id_gtremi" => "",//1 : aucune remise, 2 : dépôt
-			"id_gcomme" => "",//ignore
-			"compteclient" => "",//TODO voir avec Bate
-			"paiementpropose" => "",
-			"mention" => "",
-			"netht" => "",// $totalAmountHT +=
-			"nettva" => "",// $totalTax += 
-			"solde" => "",// $total += 
-			"archive" => "",//sostatus = Archived
-			"verrouille" => "",
-			"imprime" => "",
-			"transformtype" => "", //0 : en cours, 1 : archivé, transformé en F, 6 : transformé en K
-			"transformid" => "", //facture liée
-			"tssaisie" => "",//datepiece createdtime
-			"tsmod" => "modifiedtime",//
-			"contact" => "",
-			"notes" => "socomment",
-			"ptexte1" => "",// socomment .=
-			"ptexte2" => "",// socomment .=
-			"ptexte3" => "",// socomment .=
-			"pdate1" => "",
-			"pdate2" => "",
-			"pdate3" => "",
-			"commentaires" => "",// socomment .=
-			"code_affaire" => "",
-			"id_piece" => "",
-			"id_gprodu" => "",
-			"nom_produit" => "",
-			"code_produit" => "",
-			"taux_tva" => "",
-			"quantite" => "",
-			"id_gclien" => "",
-			"nom_client" => "subject",
-			"code_client" => "",//"C" . $contact_no
-			//bill_ & ship_
-			"voie" => "bill_street",//trim()
-			"compad1" => "bill_street2",
-			"compad2" => "bill_street3",
-			"cp" => "bill_zip",
-			"ville" => "bill_city",
-			"cedex" => "bill_pobox",
-			"pays" => "bill_country",
+	function getSalesOrderFields() {
+		return array(
+			//header
+			'sourceid',
+			'reffiche',
+			'lastname',
+			'firstname',
+			'email',
+			'street',
+			'street2',
+			'street3',
+			'pobox',
+			'zip',
+			'city',
+			'country',
+			'subject',
+			'affaire_code',
+			'salesorderdate',
+			'sostatus',
+			//lines
+			'productcode',
+			'productid',
+			'article',
+			'isproduct',
+			'quantity',
+			'prix_unit_ht',
+			'taxrate',
+			
 			
 			/* post pré-import */
 			'_contactid',
-			'_productid',
 		);
 	}
-	
-	function getSalesOrderDateFields(){
-		return array(
-			'datepiece', 'tssaisie', 'tsmod',
-		);
-	}
-	
-	/**
-	 * Method to get the imported fields for the vendors module.
-	 * @return array - the imported fields for the vendors module.
-	 */
-	function getSalesOrderFields() {
-		//laisser exactement les colonnes du fichier
-		return array_keys($this->getSalesOrderFieldsMapping());
-	}
-
 
 	/**
 	 * Method to process to the import of the salesorder module.
@@ -330,7 +278,12 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel, $taxName) VALUES(?,?,?,?,?,?,?,?)";
 		$qparams = array($salesorder->getId(), $salesorderLine['productid'], $sequence, $qty, $listprice, $discount_amount, $incrementOnDel, $taxValue);
 		//$db->setDebug(true);
-		$db->pquery($query, $qparams);
+		$result = $db->pquery($query, $qparams);
+		if(!$result){
+			$db->echoError();
+			var_dump($query, $qparams);
+			die();
+		}
 	}
 
 	/**
@@ -392,27 +345,10 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 					$record->set('account_id', $account->getId());
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
-					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('salesorderstatus', 'Paid');//TODO
+					$record->set('sostatus', $salesorderData[0]['sostatus']);//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
-		                    
-				    $record->set('sent2compta', $salesorderData[0]['salesorderdate']);
-					
-					//Coupon et campagne
-					$coupon = $this->getCoupon($salesorderData[0]['affaire_code']);
-					if($coupon){
-						$record->set('notesid', $coupon->getId());
-						$campagne = $this->getCampaign($salesorderData[0], $coupon);
-						if($campagne)
-							$record->set('campaign_no', $campagne->getId());
-						
-					}
-					//Coupon introuvable dans la Matrice
-					//TODO log 
-					elseif($salesorderData[0]['affaire_code'])
-						$record->set('description', 'Code affaire : ' + $salesorderData[0]['affaire_code']);
 						
 					//$db->setDebug(true);
 					$record->saveInBulkMode();
@@ -420,7 +356,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 
 					if(!$salesorderId){
 						//TODO: manage error
-						echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
+						echo "<pre><code>Impossible d'enregistrer le nouveau dépôt-vente </code></pre>";
 						foreach ($salesorderData as $salesorderLine) {
 							$entityInfo = array(
 								'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
@@ -538,6 +474,15 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	}
 
 	/**
+	 * Method that pre import a contact.
+	 * @param $contactValues : the values of the contact to import.
+	 */
+	function preImportContact($contactValues) {
+		$contact = new RSNImportSources_Preimport_Model($contactValues, $this->user, 'Contacts');
+		$contact->save();
+	}
+
+	/**
 	 * Method that pre import an salesorder.
 	 *  It adone row in the temporary pre-import table by salesorder line.
 	 * @param $salesorderData : the data of the salesorder to import.
@@ -561,7 +506,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			if($ref4d[0]['_contactid'])
 				$id = $ref4d[0]['_contactid'];
 			else{
-				$ref4d = $ref4d[0]['code_client'];
+				$ref4d = $ref4d[0]['reffiche'];
 			}
 		}
 		if(!$id)
@@ -685,7 +630,6 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 		return false;
 	}
 
-	        
 	/**
 	 * Method that check if a string is a formatted date (DD/MM/YYYY).
 	 * @param string $string : the string to check.
@@ -749,7 +693,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 		$nextLine = $fileReader->readNextDataLine($fileReader);
 		if ($nextLine != false) {
 			$salesorder = array(
-				'header' => $nextLine,
+				'salesorderInformations' => $nextLine,
 				'detail' => array($nextLine));
 			do {
 				$cursorPosition = $fileReader->getCurentCursorPosition();
@@ -804,33 +748,34 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	function getSalesOrderValues($salesorder) {
 	//TODO end implementation of this method
 		$salesorderValues = array();
-		$header = $salesorder['header'];
-		$date = $this->getMySQLDate($header[$this->columnName_indexes['datepiece']]);
+		$salesorderInformations = $salesorder['salesorderInformations'];
+		$date = $this->getMySQLDate($salesorderInformations[$this->columnName_indexes['datepiece']]);
 		$salesorderHeader = array(
-			'sourceid'		=> 'COG' . substr($date, 2, 2) . str_pad ($header[$this->columnName_indexes['numero']], 5, '0', STR_PAD_LEFT),
-			'code_client' 		=> $header[$this->columnName_indexes['code_client']],
-			'lastname'		=> $header[$this->columnName_indexes['nomclient']],
+			'sourceid'		=> 'COG' . substr($date, 2, 2) . str_pad ($salesorderInformations[$this->columnName_indexes['numero']], 5, '0', STR_PAD_LEFT),
+			'reffiche' 		=> $salesorderInformations[$this->columnName_indexes['codeclient']],
+			'lastname'		=> $salesorderInformations[$this->columnName_indexes['nomclient']],
 			'firstname'		=> '',
-			'email'			=> $header[$this->columnName_indexes['email']],
-			'street'		=> $header[$this->columnName_indexes['num']]. ' ' .$header[$this->columnName_indexes['voie']],//$srcRow['num']. ' ' .$srcRow['voie']
-			'street2'	=> $header[$this->columnName_indexes['nom1']],
-			'street3'	=> $header[$this->columnName_indexes['compad1']],
-			'pobox'		=> $header[$this->columnName_indexes['compad2']],
-			'zip'		=> $header[$this->columnName_indexes['cp']],
-			'city'		=> $header[$this->columnName_indexes['ville']],
-			'country' 	=> $header[$this->columnName_indexes['pays']],
-			'subject'		=> $header[$this->columnName_indexes['nomclient']].' / '. $header[$this->columnName_indexes['datepiece']],
+			'email'			=> $salesorderInformations[$this->columnName_indexes['email']],
+			'street'		=> $salesorderInformations[$this->columnName_indexes['num']]. ' ' .$salesorderInformations[$this->columnName_indexes['voie']],//$srcRow['num']. ' ' .$srcRow['voie']
+			'street2'	=> $salesorderInformations[$this->columnName_indexes['nom1']],
+			'street3'	=> $salesorderInformations[$this->columnName_indexes['compad1']],
+			'pobox'		=> $salesorderInformations[$this->columnName_indexes['compad2']],
+			'zip'		=> $salesorderInformations[$this->columnName_indexes['cp']],
+			'city'		=> $salesorderInformations[$this->columnName_indexes['ville']],
+			'country' 	=> $salesorderInformations[$this->columnName_indexes['pays']],
+			'subject'		=> $salesorderInformations[$this->columnName_indexes['nomclient']].' / '. $salesorderInformations[$this->columnName_indexes['datepiece']],
 			'salesorderdate'		=> $date,
-			'affaire_code' 	=> $header[$this->columnName_indexes['affaire_code']],
+			'affaire_code' 	=> $salesorderInformations[$this->columnName_indexes['affaire_code']],
+			'sostatus' 	=> $salesorderInformations[$this->columnName_indexes['archive']] == 't' ? 'Archived' : 'Approved',
 			
 		);
-		$codeClient = preg_replace('/^0+/', '', $salesorderHeader['code_client']);
+		$codeClient = preg_replace('/^0+/', '', $salesorderHeader['reffiche']);
 		$regexp = '/^0*'.$codeClient.'\s(.+)\/(\w+-)?\d+\*.*$/';
 		if(preg_match($regexp, $salesorderHeader['lastname'])){
 			$nomClient = preg_replace($regexp,'$1', $salesorderHeader['lastname']);
 			$salesorderHeader['lastname'] = $nomClient;
 		}
-		$salesorderHeader['code_client'] = $codeClient;
+		$salesorderHeader['reffiche'] = $codeClient;
 		
 		//var_dump($this->columnName_indexes);
 		
@@ -865,7 +810,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,
 			'SalesOrder',
-			'code_client',
+			'reffiche',
 			'_contactid',
 			/*$changeStatus*/ false
 		);

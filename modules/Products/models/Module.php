@@ -10,6 +10,14 @@
 
 class Products_Module_Model extends Vtiger_Module_Model {
 
+	/** ED150928
+	 * Function to get the url pour le recalcul des quantités en demande des dépôts-vente
+	 * @return <String> - url
+	 */
+	public function getRefreshQtyInDemandUrl() {
+		return 'index.php?module=Products&view=List&mode=refreshQtyInDemand';
+	}
+	
 	/**
 	 * Function to get list view query for popup window
 	 * @param <String> $sourceModule Parent module

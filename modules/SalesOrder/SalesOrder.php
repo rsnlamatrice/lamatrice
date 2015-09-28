@@ -160,7 +160,8 @@ class SalesOrder extends CRMEntity {
 		}
 			
 		//ED150708 refreshes qty in demand
-		$this->refreshQtyInDemand($productIdsList);
+		if($productIdsList)
+			$this->refreshQtyInDemand($productIdsList);
 
 		// Update the currency id and the conversion rate for the sales order
 		$update_query = "update vtiger_salesorder set currency_id=?, conversion_rate=? where salesorderid=?";
@@ -172,10 +173,11 @@ class SalesOrder extends CRMEntity {
 	 * Recalcule les quantités demandées sur toutes les commandes client liées aux produits
 	 * TODO sub products
 	 */
-	function refreshQtyInDemand($productIdsList){
+	function refreshQtyInDemand($productIdsList = false, $recordId = false){
 		global $adb, $log;
 		$log->debug("Entering refreshQtyInDemand(".print_r($productIdsList, true).") method ...");
-		$recordId = $this->id;
+		if(!$recordId)
+			$recordId = $this->id;
 		/* Mise à jour de vtiger_products.qtyindemand pour tous les produits en question, même sans salesorder liée (d'où le LEFT) */
 		$sql = "UPDATE vtiger_products
 			LEFT JOIN (
@@ -183,7 +185,7 @@ class SalesOrder extends CRMEntity {
 				FROM (
 					SELECT DISTINCT productid
 					FROM vtiger_inventoryproductrel
-					WHERE id = ?
+					" . ($recordId ? "WHERE id = ?" : "")."
 				) this_so_products
 				JOIN vtiger_inventoryproductrel
 					ON vtiger_inventoryproductrel.productid = this_so_products.productid
@@ -193,26 +195,58 @@ class SalesOrder extends CRMEntity {
 					ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid
 				WHERE vtiger_crmentity.deleted = 0
 				AND vtiger_salesorder.sostatus IN (" . generateQuestionMarks($this->statusForQtyInDemand) . ")
-				AND vtiger_inventoryproductrel.productid IN (" . generateQuestionMarks($productIdsList) . ")
+			".($productIdsList
+				? " AND vtiger_inventoryproductrel.productid IN (" . generateQuestionMarks($productIdsList) . ")"
+				: ""
+			)."
 				GROUP BY vtiger_inventoryproductrel.productid
 			) _calculation_
 			ON vtiger_products.productid = _calculation_.productid
 			SET vtiger_products.qtyindemand = IFNULL(quantity, 0)
-			WHERE vtiger_products.productid IN (" . generateQuestionMarks($productIdsList) . ")
+			".($productIdsList
+				? " WHERE vtiger_products.productid IN (" . generateQuestionMarks($productIdsList) . ")"
+				: ""
+			)."
 		";
-		$params = array($recordId);
+		$params = array();
+		if($recordId)
+			$params[] = $recordId;
 		$params = array_merge($params, $this->statusForQtyInDemand);
-		$params = array_merge($params, $productIdsList);
-		$params = array_merge($params, $productIdsList);
+		if($productIdsList){
+			$params = array_merge($params, $productIdsList);
+			$params = array_merge($params, $productIdsList);
+		}
 		$result = $adb->pquery($sql, $params);
 		if(!$result){
 			$adb->echoError('Erreur de mise à jour des quantités demandées');
 			echo "<pre>$sql</pre>";
+			echo "<h5>Paramètres :</h5>";
 			var_dump($params);
+			echo_callstack();
 			$log->debug("Exiting refreshQtyInDemand method : Erreur de mise à jour des quantités demandées");
 			die();
 		}
 		$log->debug("Exiting refreshQtyInDemand method ...");
+	}
+	
+	
+	
+	/* ED150928
+	 */
+	function trash($module, $id) {
+		parent::trash($module, $id);
+		$this->refreshQtyInDemand(false, $id);
+	}
+	
+
+	/** ED150928
+	 * Function to restore a deleted record of specified module with given crmid
+	 * @param $module -- module name:: Type varchar
+	 * @param $entity_ids -- list of crmids :: Array
+	 */
+	function restore($module, $id) {
+		parent::restore($module, $id);
+		$this->refreshQtyInDemand(false, $id);
 	}
 	
 	/** Function to get activities associated with the Sales Order
@@ -224,10 +258,10 @@ class SalesOrder extends CRMEntity {
 		$log->debug("Entering get_activities(".$id.") method ...");
 		$this_module = $currentModule;
 
-        $related_module = vtlib_getModuleNameById($rel_tab_id);
+		$related_module = vtlib_getModuleNameById($rel_tab_id);
 		require_once("modules/$related_module/Activity.php");
 		$other = new Activity();
-        vtlib_setup_modulevars($related_module, $other);
+		vtlib_setup_modulevars($related_module, $other);
 		$singular_modname = vtlib_toSingular($related_module);
 
 		$parenttab = getParentTab();
@@ -551,8 +585,7 @@ class SalesOrder extends CRMEntity {
 	* @param reference variable - where condition is passed when the query is executed
 	* Returns Export SalesOrder Query.
 	*/
-	function create_export_query($where)
-	{
+	function create_export_query($where){
 		global $log;
 		global $current_user;
 		$log->debug("Entering create_export_query(".$where.") method ...");
@@ -594,7 +627,6 @@ class SalesOrder extends CRMEntity {
 		$log->debug("Exiting create_export_query method ...");
 		return $query;
 	}
-
 }
 
 ?>

@@ -183,6 +183,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
         $moduleFields = $moduleModel->getFields();
         $columnsListQuery = 'id INT PRIMARY KEY AUTO_INCREMENT, status INT DEFAULT 0, recordid INT';
 		$fieldTypes = RSNImportSources_Utils_Helper::getModuleFieldDBColumnType($moduleModel);
+		
 		foreach($fields as $fieldIndex => $fieldName) {
             $fieldObject = $moduleFields[$fieldName];
             if (is_object($fieldObject)) {
