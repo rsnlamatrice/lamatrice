@@ -12,14 +12,6 @@
  * Inventory ListView Model Class
  */
 class Inventory_ListView_Model extends Vtiger_ListView_Model {
-
-	/*
-	 * Function to give advance links of a module
-	 *	@RETURN array of advanced links
-	 */
-	public function getAdvancedLinks(){
-		return parent::getAdvancedLinks();
-	}
 	
 	/**
 	 * Function to get the list view header
@@ -86,6 +78,44 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 		}
 		return $links;
 	}
+	
+	/*
+	 * Function to give advance links of a module
+	 *	@RETURN array of advanced links
+	 */
+	public function getAdvancedLinks(){
+		return parent::getAdvancedLinks();
+	}
+
+	/** ED150928
+	 * Function to get the list of Mass actions for the module
+	 * @param <Array> $linkParams
+	 * @return <Array> - Associative array of Link type to List of  Vtiger_Link_Model instances for Mass Actions
+	 */
+	public function getListViewMassActions($linkParams) {
+	
+		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+		$moduleModel = $this->getModule();
+
+		$links = parent::getListViewMassActions($linkParams);
+
+		$massActionLinks = array();
+		if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
+			$massActionLinks[] = array(
+				'linktype' => 'LISTVIEWMASSACTION',
+				'linklabel' => 'LBL_SEND2COMPTA',
+				'linkurl' => 'javascript:Vtiger_List_Js.triggerMassEdit("index.php?module='.$moduleModel->get('name').'&view=MassActionAjax&mode=showSend2ComptaForm");',
+				'linkicon' => ''
+			);
+		}
+
+		foreach($massActionLinks as $massActionLink) {
+			$links['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+		}
+
+		return $links;
+	}
+
 
 	/* ED150417
 	 * add sql filter to get only first product of invoice
@@ -131,6 +161,11 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
 
+		//ED150928
+		if($calculatedTotals !== false){
+			$queryGenerator->addField('total');
+		}
+		
 		$listQuery = $this->getQuery();
 
 		$sourceModule = $this->get('src_module');

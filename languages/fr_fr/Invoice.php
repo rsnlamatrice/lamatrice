@@ -67,14 +67,16 @@ $languageStrings = array(
 	'LBL_THIS_LINE_ITEM_IS_DELETED_FROM_THE_SYSTEM_PLEASE_REMOVE_THIS_LINE_ITEM' => 'Cette ligne est supprimée du système. Veuillez supprimer ou remplacer cet article.',
 	
 	/* ED150529 override */
-	'LBL_ITEMS_TOTAL'              => 'Total',
+	'LBL_ITEMS_TOTAL'               => 'Total',
 	
-	'Part Number'                  => 'Code produit',
-	'Unit Price'                  => 'Prix unitaire',
+	'Part Number'                   => 'Code produit',
+	'Unit Price'                    => 'Prix unitaire',
 	'Service Name'                  => 'Service',
 	'Service Code'                  => 'Code produit',
-	'Product Category'                  => 'Catégorie',
-	'Service Category'                  => 'Catégorie',
+	'Product Category'              => 'Catégorie',
+	'Service Category'              => 'Catégorie',
+        
+        'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
 );
 
 $jsLanguageStrings = array(
