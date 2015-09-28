@@ -9,7 +9,39 @@
  *************************************************************************************/
 
 class Products_ListView_Model extends Vtiger_ListView_Model {
+/*
+	 * Function to give advance links of a module
+	 *	@RETURN array of advanced links
+	 */
+	public function getAdvancedLinks(){
+		$advancedLinks = parent::getAdvancedLinks();
+		
+		//ED150928 Recalcule des quantités en commande pour tous les produits
+		$moduleModel = $this->getModule();
+		$createPermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'EditView');
+		if($createPermission) {
+			//Quantité en demande
+			$advancedLink = array(
+				'linktype' => 'LISTVIEW',
+				'linklabel' => '---',
+				'linkurl' => '',
+				'linkicon' => ''
+			);
+			$advancedLinks[] = $advancedLink;
+		
+			$advancedLink = array(
+				'linktype' => 'LISTVIEW',
+				'linklabel' => 'Recalcul du dépôt-vente',
+				'linkurl' => $moduleModel->getRefreshQtyInDemandUrl(),
+				'linkicon' => ''
+			);
+			$advancedLinks[] = $advancedLink;
+		
+		}
 
+		return $advancedLinks;
+	}
+	
 	/**
 	 * Function to get the list view entries
 	 * @param Vtiger_Paging_Model $pagingModel

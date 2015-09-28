@@ -359,7 +359,6 @@ class QueryGenerator {
 								$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
 								//get view query, adding filters
 								$relatedSql = $listView->getQuery();
-							
 								//SELECT `id`  only
 								$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
 								if(strpos($relationInfos['fieldName'], '.') === FALSE)
@@ -399,6 +398,9 @@ class QueryGenerator {
 							//echo str_repeat('<br>',5).__FILE__.'<br>';
 							//var_dump($this->getSQLColumn('id'), "/*BEGIN ".$filter['viewname']."*/\n\t$relatedSql\n\t/*END ".$filter['viewname']."*/", 'IN', 'AND');
 							//TODO $field =	var_dump($this->meta->getFieldByColumnName("contact_id"));
+							
+							//TODO bugg vu avec un filtre juste avant
+							
 							$this->startGroup('', $filter['comparator'] . ' [' . $filter['viewname'] . ']');
 							$this->addCondition($sourceFieldName
 									    , $relatedSql
@@ -1241,7 +1243,8 @@ class QueryGenerator {
 		$conditionNumber = $this->conditionInstanceCount++;
 		if($glue != null && $conditionNumber > 0)
 			$this->addConditionGlue ($glue);
-
+		//else
+		//	var_dump($conditionNumber, $fieldname, $glue, $operator, $value);
 		$this->groupInfo .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/
 		$this->whereFields[] = $fieldname;
 		$this->ignoreComma = $ignoreComma;

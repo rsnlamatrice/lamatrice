@@ -69,4 +69,21 @@ class Products_Relation_Model extends Vtiger_Relation_Model {
 			}
 		}
 	}
+
+	/**
+	 * Function to get filtered list of records linked to an other module
+	 * @return <array> Relation details
+	 * ED140906
+	 */
+	public function getModulesInfoForDetailView() {
+		return array(
+			'SalesOrder' => array('fieldName' => 'productid', 'tableName' => 'vtiger_inventoryproductrel'
+					   , 'sourceFieldName' => 'vtiger_products.productid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_inventoryproductrel.productid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_inventoryproductrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'salesorderid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'id'),
+		);
+	}
+
 }

@@ -1183,16 +1183,16 @@ var_dump($params);*/
 		global $log, $current_user, $adb;
 
 		if(!self::isBulkSaveMode()) {
-            require_once("include/events/include.inc");
-            $em = new VTEventsManager($adb);
-
-            // Initialize Event trigger cache
-            $em->initTriggerCache();
-
-            $entityData = VTEntityData::fromEntityId($adb, $id);
-
-            $em->triggerEvent("vtiger.entity.beforedelete", $entityData);
-        }
+			require_once("include/events/include.inc");
+			$em = new VTEventsManager($adb);
+			
+			// Initialize Event trigger cache
+			$em->initTriggerCache();
+			
+			$entityData = VTEntityData::fromEntityId($adb, $id);
+			
+			$em->triggerEvent("vtiger.entity.beforedelete", $entityData);
+		}
 		$this->mark_deleted($id);
 		$this->unlinkDependencies($module, $id);
 
@@ -1204,8 +1204,8 @@ var_dump($params);*/
 		$this->db->pquery($sql_recentviewed, array($current_user->id, $id));
 
 		if($em){
-            $em->triggerEvent("vtiger.entity.afterdelete", $entityData);
-        }
+			$em->triggerEvent("vtiger.entity.afterdelete", $entityData);
+		}
 	}
 
 	/** Function to unlink all the dependent entities of the given Entity by Id */

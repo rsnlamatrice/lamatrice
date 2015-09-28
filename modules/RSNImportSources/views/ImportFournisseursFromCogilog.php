@@ -19,7 +19,7 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	 * @return array - An array containing concerned module names.
 	 */
 	public function getImportModules() {
-		return array('vendors');
+		return array('Vendors');
 	}
 
 	/**
@@ -69,51 +69,58 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	function getVendorsFieldsMapping() {
 		//laisser exactement les colonnes du fichier, dans l'ordre 
 		return array (
-			"code" => "",//TODO
+			"code" => "",//useless
 			"nom" => "vendorname",
 			"cp" => "postalcode",
 			"ville" => "city",
 			"telephone" => "phone",
-			"prefixe fournisseur" => "",//vide
+			"num_intracom" => "intracom",//TODO fusion avec compte ?
+			"num_client" => "",//vide
+			"compte" => "glacct",//TODO  ? completer A voir avec Bate
+			"prefixe_fournisseur" => "",//vide
 			"complement" => "street2",
-			"n°" => "",//à concaténer avec Rue
+			"num_rue" => "",//à concaténer avec Rue
 			"rue" => "street",
-			"complement 2" => "street3",
+			"complement2" => "street3",//si BP*, dans pobox
 			"cedex" => "pobox",
 			"pays" => "country",//vider si FR
-			"contact" => "",//TODO
-			"contact bis" => "",//ignorer
-			"telephone 2" => "",//TODO
-			"fax" => "",//TODO
-			"e-mail" => "email",
-			"n° intracom." => "",//TODO fusion avec compte ?
-			"n° client" => "",//vide
-			"compte" => "",//TODO glacct ? completer A voir avec Bate
-			"categorie" => "",//not used
-			"facturation" => "",//TODO mode de facturation HT+TVA, TTC, Import HT
-			"r %" => "",//vide
-			"e %" => "",//vide
-			"solde" => "",//TODO 
-			"paiement" => "",//TODO remarque sur le paiement
+			"contact" => "contactname",//TODO
+			"contactbis" => "",//ignorer
+			"telephone2" => "phone2",//TODO
+			"fax" => "fax",//TODO
+			"email" => "email",
+			"categorie" => "vendorscategory",//vide check picklist
+			"facturation" => "paymode",//TODO mode de facturation HT+TVA, TTC, Import HT
+			"r_pc" => "",//vide
+			"e_pc" => "",//vide
+			"solde" => "",//ignorer 
+			"paiement" => "paycomment",//TODO remarque sur le paiement
 			"notation" => "",//vide
-			"d" => "",//TODO délai de paiement
-			"banque 1" => "",//vide
-			"iban 1" => "",//vide
-			"bic 1" => "",//vide
+			"d" => "paydelay",//TODO délai de paiement
+			"banque1" => "",//vide
+			"iban1" => "",//vide
+			"bic1" => "",//vide
+			"banque2" => "",
+			"iban2" => "",
+			"bic2" => "",
+			"banque3" => "",
+			"iban3" => "",
+			"bic3" => "",
+			"banque4" => "",
+			"iban4" => "",
+			"bic4" => "",
 			"notes" => "description",
 			"dossier" => "",//vide
-			"date de saisie" => "createdtime",
-			"date de modif" => "modifiedtime",
-
-			
-			//
-			'_vendorid' => '',//Fournisseur existant. massively updated
+			"date_saisie" => "createdtime",
+			"date_modif" => "modifiedtime",
+			"cree" => "creatoruser",
+			"mod_user" => "",//ignore
 		);
 	}
 	
 	function getVendorsDateFields(){
 		return array(
-			'date de saisie', 'date de modif',
+			'date_saisie', 'date_modif',
 		);
 	}
 	
@@ -182,7 +189,7 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 					
 		global $log;
 		
-		$sourceId = $vendorsData[0]['critere'];
+		$sourceId = $vendorsData[0]['nom'];
 		
 		//test sur nom == $sourceId
 		$query = "SELECT crmid
@@ -190,7 +197,7 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 			JOIN vtiger_crmentity
 				ON vtiger_vendor.vendorid = vtiger_crmentity.crmid
 			WHERE deleted = FALSE
-			AND nom = ?
+			AND vendorname = ?
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
@@ -221,7 +228,7 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 			
 			if(!$vendorsId){
 				//TODO: manage error
-				echo "<pre><code>Impossible d'enregistrer le vendors</code></pre>";
+				echo "<pre><code>Impossible d'enregistrer le fournisseur</code></pre>";
 				foreach ($vendorsData as $vendorsLine) {
 					$entityInfo = array(
 						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
@@ -250,13 +257,15 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 					ON vtiger_crmentity.crmid = vtiger_vendor.vendorid
 				SET smownerid = ?
 				, createdtime = ?
+				, modifiedtime = ?
 				WHERE vtiger_crmentity.crmid = ?
 			";
 			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
-								, $vendorsData[0]['periode']
+								, $vendorsData[0]['date_saisie']
+								, $vendorsData[0]['date_modif'] ? $vendorsData[0]['date_modif'] : $vendorsData[0]['date_saisie']
 								, $vendorsId));
 			
-			$log->debug("" . basename(__FILE__) . " update imported vendors (id=" . $record->getId() . ", Ref 4D=$sourceId , date=" . $vendorsData[0]['datecreation']
+			$log->debug("" . basename(__FILE__) . " update imported vendors (id=" . $record->getId() . ", Ref 4D=$sourceId , date=" . $vendorsData[0]['date_saisie']
 					. ", result=" . ($result ? " true" : "false"). " )");
 			if( ! $result)
 				$db->echoError();
@@ -286,45 +295,56 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 				$record->set($fieldsMapping[$fieldName], $value->format('Y-m-d'));
 		}
 		
-		//TODO Check exist in picklist known values -> generic function to insert new value
-		//'critereorigine' => 'origine',
-		$fieldName = 'origine';
-		if($record->get($fieldName))
-			RSNImportSources_Utils_Helper::checkPickListValue('Vendors', $fieldName, $fieldName, $record->get($fieldName));
 		
-		//'categorieducritere' => 'categorie',
-		$fieldName = 'categorie';
-		if(!$record->get($fieldName))//critère par défaut : Divers
-			$record->set($fieldName, 'Divers');
-		elseif(!$record->get($fieldName))
-			RSNImportSources_Utils_Helper::checkPickListValue('Vendors', $fieldName, $fieldName, $record->get($fieldName));
-		
+		$fieldName = 'enable';
+		$record->set($fieldName, 1);
 			
-		$fieldName = 'relationparameters';
-		if($vendorsData[0]['typechampcompl']){
-			$value = $record->get($fieldName);
-			foreach(array('typechampcompl', 'libellechampcompl', 'libelledatecompl' ) as $srcField)
-				if($vendorsData[0][$srcField]){
-					if($value) $value .= "\r";
-					$value .= "4D.$srcField = ".$vendorsData[0][$srcField];
-				}
-			$record->set($fieldName, $value);
-		}
-		
-		//'critere' => 'nom',
-		//'libelledetail' => 'commentaire',
-		//'periode' => 'usage_debut',
-		//'periodefin' => 'usage_fin',
-		//'ordredetri' => 'ordredetri',
-		//'critereorigine' => 'origine',
-		//'numeroencours' => '',//toujours à 0
-		//'utilisedansautomates' => '',//nu
-		//'typechampcompl' => '',//relationparameters .=
-		//'libellechampcompl' => '',//relationparameters .=
-		//'libelledatecompl' => '',//relationparameters .=
-		//'valeur_par_defaut' => '',//nu
-		//'categorieducritere' => 'categorie',
-		//'vtiger' => '',//abandon
+		//"code" => "",//useless
+		//"nom" => "vendorname",
+		//"cp" => "postalcode",
+		//"ville" => "city",
+		//"telephone" => "phone",
+		//"num_rue intracom." => "intracom",//TODO fusion avec compte ?
+		//"num_rue client" => "",//vide
+		//"prefixe fournisseur" => "",//vide
+		//"complement" => "street2",
+		//"num_rue" => "",//à concaténer avec Rue
+		//"rue" => "street",
+		//"complement 2" => "street3",
+		//"cedex" => "pobox",
+		//"pays" => "country",//vider si FR
+		//"contact" => "contactname",//TODO
+		//"contact bis" => "",//ignorer
+		//"telephone 2" => "phone2",//TODO
+		//"fax" => "fax",//TODO
+		//"e-mail" => "email",
+		//"compte" => "glacct",//TODO  ? completer A voir avec Bate
+		//"categorie" => "vendorscategory",//vide check picklist
+		//"facturation" => "paymode",//TODO mode de facturation HT+TVA, TTC, Import HT
+		//"r %" => "",//vide
+		//"e %" => "",//vide
+		//"solde" => "",//ignorer 
+		//"paiement" => "paycomment",//TODO remarque sur le paiement
+		//"notation" => "",//vide
+		//"d" => "paydelay",//TODO délai de paiement
+		//"banque 1" => "",//vide
+		//"iban 1" => "",//vide
+		//"bic 1" => "",//vide
+		//"banque 2" => "",
+		//"iban 2" => "",
+		//"bic 2" => "",
+		//"banque 3" => "",
+		//"iban 3" => "",
+		//"bic 3" => "",
+		//"banque 4" => "",
+		//"iban 4" => "",
+		//"bic 4" => "",
+		//"notes" => "description",
+		//"dossier" => "",//vide
+		//"date_saisie" => "createdtime",
+		//"date_modif" => "modifiedtime",
+		//"cree" => "creatoruser",
+		//"mod" => "",//ignore
 	}
 	
 	/**
@@ -369,59 +389,6 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 		return false;
 	}
         
-
-	/**
-	 * Method called after the file is processed.
-	 *  This method must be overload in the child class.
-	 */
-	function postPreImportData() {
-		$db = PearDatabase::getInstance();
-		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Vendors');
-		
-		/* Affecte l'id du document */
-		$query = "UPDATE $tableName
-		JOIN  vtiger_notescf
-			ON  vtiger_notescf.vendors = `$tableName`.critere
-		JOIN vtiger_crmentity
-			ON vtiger_notescf.notesid = vtiger_crmentity.crmid
-		";
-		$query .= " SET `_notesid` = vtiger_notescf.notesid
-		, `$tableName`.status = ?";
-		$query .= "
-			WHERE vtiger_crmentity.deleted = 0
-			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
-		";
-		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
-		if(!$result){
-			echo '<br><br><br><br>';
-			$db->echoError($query);
-			echo("<pre>$query</pre>");
-			die();
-		}
-		
-		/* Affecte l'id du critere */
-		$query = "UPDATE $tableName
-		JOIN vtiger_vendor
-			ON vtiger_vendor.nom = `$tableName`.critere
-		JOIN vtiger_crmentity
-			ON vtiger_vendor.vendorid = vtiger_crmentity.crmid
-		";
-		$query .= " SET `_vendorid` = vtiger_vendor.vendorid
-		, `$tableName`.status = ?";
-		$query .= "
-			WHERE vtiger_crmentity.deleted = 0
-			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
-		";
-		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
-		if(!$result){
-			echo '<br><br><br><br>';
-			$db->echoError($query);
-			echo("<pre>$query</pre>");
-			die();
-		}
-		
-		return true;
-	}
 	
 	/**
 	 * Method that check if a string is a formatted date (DD/MM/YYYY).
@@ -440,8 +407,10 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	function getMySQLDate($string) {
 		if(!$string || $string === '00/00/00')
 			return null;
-		$dateArray = preg_split('/[-\/]/', $string);
-		return '20'.$dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
+		$dateArray = preg_split('/[-\/\s]/', trim($string));
+		if(strlen($dateArray[2])<4)
+			$dateArray[2] += 2000;
+		return $dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
 	}
 
 	/**
@@ -451,7 +420,8 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	 * @return boolean - true if the line is a vendors information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && is_numeric($line[5]) && $this->isDate($line[3])) {
+		
+		if (sizeof($line) > 0 && $line[1] && $this->isDate($line[42])) {
 			return true;
 		}
 
@@ -515,31 +485,48 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	
 	/**
 	 * Method that return the formated information of a record found in the file.
-	 * @param $critere4D : the invoice data found in the file.
+	 * @param $vendor : the invoice data found in the file.
 	 * @return array : the formated data of the invoice.
 	 */
-	function getVendorsValues($critere4D) {
+	function getVendorsValues($vendor) {
 		$fields = $this->getVendorsFields();
 		
 		// contrôle l'égalité des tailles de tableaux
-		if(count($fields) != count($critere4D['header'])){
-			if(count($fields) > count($critere4D['header']))
-				$critere4D['header'] = array_merge($critere4D['header'], array_fill (0, count($fields) - count($critere4D['header']), null));
+		if(count($fields) != count($vendor['header'])){
+			if(count($fields) > count($vendor['header']))
+				$vendor['header'] = array_merge($vendor['header'], array_fill (0, count($fields) - count($vendor['header']), null));
 			else
-				$critere4D['header'] = array_slice($critere4D['header'], 0, count($fields));
+				$vendor['header'] = array_slice($vendor['header'], 0, count($fields));
 		}
 		//tableau associatif dans l'ordre fourni
-		$critere4DHeader = array_combine($fields, $critere4D['header']);
+		$vendorHeader = array_combine($fields, $vendor['header']);
 		
 		//Parse dates
 		foreach($this->getVendorsDateFields() as $fieldName)
-			$critere4DHeader[$fieldName] = $this->getMySQLDate($critere4DHeader[$fieldName]);
+			$vendorHeader[$fieldName] = $this->getMySQLDate($vendorHeader[$fieldName]);
 		
-		$fieldName = 'libelledetail';
-		if($critere4DHeader[$fieldName])
-			$critere4DHeader[$fieldName] = str_replace("\\r", "\r", $critere4DHeader[$fieldName]);
+		$fieldName = "ville";
+		$vendorHeader[$fieldName] = strtoupper($vendorHeader[$fieldName]);
+			
+		$fieldName = "rue";
+		if($vendorHeader["num_rue"] && stripos($vendorHeader[$fieldName], $vendorHeader["num_rue"]) === false)
+			$vendorHeader[$fieldName] = trim($vendorHeader["num_rue"] . ' ' . $vendorHeader[$fieldName]);
 		
-		return $critere4DHeader;
+		$fieldName = "cedex";
+		//"cedex" => "pobox",
+		if($vendorHeader[$fieldName] && strcasecmp($vendorHeader[$fieldName], 'cedex') !== false)
+			$vendorHeader[$fieldName] = trim('Cedex ' . $vendorHeader[$fieldName]);
+		
+		$fieldName = "complement2";
+		//"complement2" => "street3",//si BP*, dans pobox
+		if(stripos($vendorHeader[$fieldName], 'TSA') === 0
+		|| stripos($vendorHeader[$fieldName], 'BP') === 0
+		|| stripos($vendorHeader[$fieldName], 'boite postale') === 0){
+			$vendorHeader['cedex'] = trim($vendorHeader[$fieldName] . ' ' . $vendorHeader['cedex']);
+			$vendorHeader[$fieldName] = '';
+		}
+		
+		return $vendorHeader;
 	}
 	
 }

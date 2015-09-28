@@ -10,5 +10,14 @@
 
 class SalesOrder_Module_Model extends Inventory_Module_Model{
 
+	
+
+	/** ED150928
+	 * Function to get the url pour le recalcul des quantités en demande
+	 * @return <String> - url
+	 */
+	public function getRefreshQtyInDemandUrl() {
+		return 'index.php?module=Products&view=List&mode=refreshQtyInDemand';
+	}
 }
 ?>
