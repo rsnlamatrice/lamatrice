@@ -194,13 +194,14 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 *  This method can be overload in the child class.
 	 * @return array - the pre-imported values group by module.
 	 */
-	public function getPreviewData($offset = 0, $limit = 12) {
+	public function getPreviewData($request, $offset = 0, $limit = 12) {
 		$adb = PearDatabase::getInstance();
 		$importModules = $this->getImportModules();
 		$previewData = array();
 
 		foreach($importModules as $module) {
 			$previewData[$module] = array();
+			$params = array();
 			$fields = $this->getFieldsFor($module);
 			$fields[] = 'status';
 			$fields[] = 'id';
@@ -219,8 +220,17 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			$sql .= '
 				FROM ' . $tableName . '
 				/*WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '*/
+			';
+			
+			if($request->get('search_key') && ($request->get('search_value') || $request->get('search_value') === '0')){
+				$sql .= '
+					WHERE '. $request->get('search_key') . ' = ?';
+				$params[] = $request->get('search_value');
+			}
+		
+			$sql .= '
 				LIMIT '.$offset.', '.$limit;
-			$result = $adb->query($sql);
+			$result = $adb->pquery($sql, $params);
 			$numberOfRecords = $adb->num_rows($result);
 
 			for ($i = 0; $i < $numberOfRecords; ++$i) {
@@ -272,11 +282,11 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$offset = $this->request->get('page_offset');
 		if(!$offset) $offset = 0;
 		$limit = $this->request->get('page_limit');
-		if(!$limit) $limit = min(100, max($offset, 12));
+		if(!$limit) $limit = min(200, max($offset, 12));
 		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
-		$viewer->assign('PREVIEW_DATA', $this->getPreviewData($offset, $limit));
+		$viewer->assign('PREVIEW_DATA', $this->getPreviewData($this->request, $offset, $limit));
 		$viewer->assign('IMPORT_SOURCE', $this->request->get('ImportSource'));
 		$viewer->assign('ERROR_MESSAGE', $this->request->get('error_message'));
 
@@ -284,7 +294,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('ROW_OFFSET', $offset);
 		$thisModule = Vtiger_Module_Model::getInstance($this->request->getModule());
 		$offset += $limit;
-		$limit = min(100, max($offset, 12));
+		$limit = min(200, max($offset, 12));
+		$viewer->assign('PREVIEW_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, 0, $limit));
 		$viewer->assign('MORE_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, $offset, $limit));
 						
 		return $viewer->view($this->getImportPreviewTemplateName($moduleName), 'RSNImportSources');

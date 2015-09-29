@@ -10,6 +10,7 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			this.registerCellClickEvent();
 			this.registerCellDoubleClickEvent();
 			this.registerCellHOverEvent();
+			this.registerHeaderFiltersEvent();
     	},
 		
 		getContainer: function() {
@@ -21,6 +22,13 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
     	},
 		
 	/* registers */
+		
+    	registerHeaderFiltersEvent: function() {
+			var thisInstance = this;
+			thisInstance.getContainer().on('change', '.header-filters :input:visible', function(e){
+				RSNImportSourcesJs.reloadPreviewData(e);
+			});
+		},
 		
     	registerSelectContactEvent: function() {
 			var thisInstance = this;

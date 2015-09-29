@@ -8,7 +8,7 @@ $IMPORT_RECORD_MERGED = 4;
 $IMPORT_RECORD_FAILED = 5;*}
 <div class="marginLeftZero" style="overflow: scroll;width:95%;">
 	{if sizeof($PREVIEW_DATA) gt 0}
-		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="searchUIBasic well">
+		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
 			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
 				<tr>
 					<td class="font-x-large" align="left" colspan="2">
@@ -21,8 +21,22 @@ $IMPORT_RECORD_FAILED = 5;*}
 							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents"
 								data-module="Contacts">
 								{if $ROW_OFFSET === 0}
-									<thead><tr>
-										<th colspan="3"></th>
+									<thead><tr class="header-filters">
+										<th colspan="3">{* filters *}
+											<param name="PREVIEW_DATA_URL" value="{$PREVIEW_DATA_URL}"/>
+											<input type="hidden" name="search_key" value="_contactid_status"/>
+											<input type="hidden" name="operator" value="e"/>
+											<select name="search_value">
+												<option value="">(tous)</option>
+												<option value="{RSNImportSources_Import_View::$RECORDID_STATUS_NONE}">{vtranslate('LBL_RECORDID_STATUS_'|cat:RSNImportSources_Import_View::$RECORDID_STATUS_NONE, $MODULE)}</option>
+												<option value="{RSNImportSources_Import_View::$RECORDID_STATUS_SELECT}">{vtranslate('LBL_RECORDID_STATUS_'|cat:RSNImportSources_Import_View::$RECORDID_STATUS_SELECT, $MODULE)}</option>
+												<option value="{RSNImportSources_Import_View::$RECORDID_STATUS_CREATE}">{vtranslate('LBL_RECORDID_STATUS_'|cat:RSNImportSources_Import_View::$RECORDID_STATUS_CREATE, $MODULE)}</option>
+												<option value="{RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE}">{vtranslate('LBL_RECORDID_STATUS_'|cat:RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE, $MODULE)}</option>
+												<option value="{RSNImportSources_Import_View::$RECORDID_STATUS_CHECK}">{vtranslate('LBL_RECORDID_STATUS_'|cat:RSNImportSources_Import_View::$RECORDID_STATUS_CHECK, $MODULE)}</option>
+												<option value="{RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}">{vtranslate('LBL_RECORDID_STATUS_'|cat:RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE, $MODULE)}</option>
+												<option value="{RSNImportSources_Import_View::$RECORDID_STATUS_MULTI}">{vtranslate('LBL_RECORDID_STATUS_'|cat:RSNImportSources_Import_View::$RECORDID_STATUS_MULTI, $MODULE)}</option>
+											</select>
+										</th>
 										{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
 											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
@@ -65,7 +79,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 										{foreach item=CONTACT_ROW key=CONTACT_ID from=$CONTACT_ROWS}
 											<tr class="contact-row"  data-rowid="{$ROW['id']}" data-contactid="{$CONTACT_ID}">
 												{if $CONTACT_ROW_INDEX === 0}
-													<th rowspan="{count($CONTACT_ROWS) + 1}">
+													<th class="contact-source" rowspan="{count($CONTACT_ROWS) + 1}">
 														{$ROW['_contactid_source']}
 													</th>
 												{/if}
@@ -101,10 +115,10 @@ $IMPORT_RECORD_FAILED = 5;*}
 									{if $ROW['status'] == 0 && $ROW['_contactid_status'] !== null}
 										<tr class="contact-row" data-contactid="">
 											{if ! $CONTACT_ROWS}
-												<th></th>
+												<th class="contact-source">&nbsp;</th>
 											{/if}
 											<td colspan="3" class="select-contact">
-												<input type="radio" name="contact_related_to_{$ROW['id']}"/>
+												<input type="radio" name="contact_related_to_{$ROW['id']}" disabled="disabled"/>
 												<a href="#"><i>sélectionner...</i></a></td>
 											<td colspan="3" class="create-contact">
 												<label><input type="radio" name="contact_related_to_{$ROW['id']}"
