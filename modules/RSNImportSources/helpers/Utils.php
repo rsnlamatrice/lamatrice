@@ -246,7 +246,10 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
         if($dataType == 'reference' || $dataType == 'owner' || $dataType == 'currencyList'){
             $columnsListQuery .= ','.$fieldName.' varchar(250)';
         } else {
-            $columnsListQuery .= ','.$fieldName.' '.$fieldTypes[$fieldObject->get('column')];
+            $columnType = $fieldTypes[$fieldObject->get('column')];
+			if(strcasecmp($columnType, 'datetime'))
+				$columnType .= ' DEFAULT 0';
+            $columnsListQuery .= ','.$fieldName.' '.$columnType;
         }
         
         return $columnsListQuery;
@@ -292,7 +295,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		//}
 		$query .= ' ORDER BY sortorderid';
 		$result = $db->pquery($query, $params);
-
+			
 		$noOfRecords = $db->num_rows($result);
 		for($i=0; $i<$noOfRecords; $i++) {
 			$class = self::getClassFromName($db->query_result($result, $i, 'class'));
@@ -306,7 +309,6 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				sourcetype 	=> $class::getSourceType()
 			));
 		}
-        
         return $return_values;
 	}
 
@@ -316,7 +318,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	 * @return the class.
 	 */
 	public static function getClassFromName($className) {
-		return Vtiger_Loader::getComponentClassName('View', $className, 'RSNImportSources');;
+		return Vtiger_Loader::getComponentClassName('View', $className, 'RSNImportSources');
 	}
 
 	/**

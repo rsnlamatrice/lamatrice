@@ -1,6 +1,5 @@
 <?php
 
-
 /* Phase de migration
  * Importation des prelevements Web depuis le fichier provenant de 4D
  */
@@ -546,7 +545,8 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	//TODO end implementation of this method
 		/*if(!self::str_to_float($rsnprelvirements['prlvInformations'][3]))
 			var_dump('getRsnPrelVirementValues', self::str_to_float($rsnprelvirements['prlvInformations'][3]), $rsnprelvirements['prlvInformations'][3]);
-		*/	
+		*/
+		
 		$rsnprelvirementsHeader = array(
 			'annee'	=> $rsnprelvirements['prlvInformations'][0],
 			'mois'	=> $rsnprelvirements['prlvInformations'][1],
