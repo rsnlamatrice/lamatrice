@@ -23,6 +23,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	static $RECORDID_STATUS_SELECT = 1;
 	static $RECORDID_STATUS_CREATE = 2;
 	static $RECORDID_STATUS_UPDATE = 3;
+	static $RECORDID_STATUS_SKIP = 4;
 	static $RECORDID_STATUS_CHECK = 10;
 	static $RECORDID_STATUS_SINGLE = 11;
 	static $RECORDID_STATUS_MULTI = 12;
@@ -194,7 +195,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 *  This method can be overload in the child class.
 	 * @return array - the pre-imported values group by module.
 	 */
-	public function getPreviewData($request, $offset = 0, $limit = 12) {
+	public function getPreviewData($request, $offset = 0, $limit = 24) {
 		$adb = PearDatabase::getInstance();
 		$importModules = $this->getImportModules();
 		$previewData = array();
@@ -222,15 +223,34 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				/*WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '*/
 			';
 			
-			if($request->get('search_key') && ($request->get('search_value') || $request->get('search_value') === '0')){
-				$sql .= '
-					WHERE '. $request->get('search_key') . ' = ?';
-				$params[] = $request->get('search_value');
+			if($request->get('search_key')){
+				$search_key = $request->get('search_key');
+				$search_value = $request->get('search_value');
+				if(!is_array($search_key)){
+					$search_key = array($search_key);
+					$search_value = array($search_value);
+				}
+				$nCondition = 0;
+				for($i = 0; $i < count($search_key); $i++)
+					if($search_value[$i] || $search_value[$i] === '0'){
+						if($nCondition++)
+							$sql .= ' AND ';
+						else
+							$sql .= ' WHERE ';
+						if($search_value[$i] === '(null)')
+							$sql .= $search_key[$i] . ' IS NULL';
+						else {
+							$sql .= $search_key[$i] . ' = ?';
+							$params[] = $search_value[$i];
+						}
+					}
 			}
 		
 			$sql .= '
 				LIMIT '.$offset.', '.$limit;
 			$result = $adb->pquery($sql, $params);
+			if(!$result)
+				$adb->echoError('Erreur dans getPreviewData');
 			$numberOfRecords = $adb->num_rows($result);
 
 			for ($i = 0; $i < $numberOfRecords; ++$i) {
@@ -246,6 +266,33 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		return $previewData;
 	}
 
+	/**
+	 * Compte le nombre de lignes de pré-imports par valeur distinct d'un champ
+	 */
+	function getPreImportCountersByField($module, $fieldName){
+		$adb = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, $module);
+		$sql = "SELECT `$fieldName` `key`, COUNT(*)
+			FROM $tableName
+			WHERE status = " . RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . "
+			GROUP BY `$fieldName`
+			ORDER BY `$fieldName`";
+		$counters = array();
+		$result = $adb->query($sql);
+		if(!$result){
+			$adb->echoError('Erreur dans getPreImportCountersByField');
+		}
+		$numberOfRecords = $adb->num_rows($result);
+
+		for ($i = 0; $i < $numberOfRecords; ++$i) {
+			$key = $adb->query_result($result, $i, 0);
+			if($key === null)
+				$key = '(null)';
+			$counters[$key] = $adb->query_result($result, $i, 1);
+		}
+		return $counters;
+	}
+	
 	/**
 	 * Method to get the number of pre-imported records.
 	 * @param $status filter. False === all. Import_Data_Action::$IMPORT_RECORD_NONE === 0.
@@ -282,7 +329,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$offset = $this->request->get('page_offset');
 		if(!$offset) $offset = 0;
 		$limit = $this->request->get('page_limit');
-		if(!$limit) $limit = min(200, max($offset, 12));
+		if(!$limit) $limit = min(200, max($offset, 24));
 		
 		$viewer->assign('FOR_MODULE', $moduleName);
 		$viewer->assign('MODULE', 'RSNImportSources');
@@ -292,13 +339,14 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 		//ED150906 get more data
 		$viewer->assign('ROW_OFFSET', $offset);
-		$thisModule = Vtiger_Module_Model::getInstance($this->request->getModule());
+		$thisModuleName = $this->request->getModule();
+		$thisModule = Vtiger_Module_Model::getInstance($thisModuleName);
 		$offset += $limit;
-		$limit = min(200, max($offset, 12));
+		$limit = min(200, max($offset, 24));
 		$viewer->assign('PREVIEW_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, 0, $limit));
 		$viewer->assign('MORE_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, $offset, $limit));
 						
-		return $viewer->view($this->getImportPreviewTemplateName($moduleName), 'RSNImportSources');
+		return $viewer->view($this->getImportPreviewTemplateName($moduleName), $thisModuleName);
 	}
 
 	/**

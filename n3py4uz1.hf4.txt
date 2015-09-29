@@ -1,0 +1,7 @@
+﻿config.inc.php :
+/* ED150929
+ * Limitation du maximum de mémoire définissable pour ini_set("memory_limit", $max)
+ * Utilisé pour les imports
+ * Une valeur trop grande peut faire planter php au chargement d'une page même sans utiliser la mémoire allouée
+ */
+$php_max_memory_limit = "1G";

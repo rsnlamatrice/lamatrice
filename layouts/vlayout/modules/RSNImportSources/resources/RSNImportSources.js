@@ -3,6 +3,16 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 	 * Namespaced javascript class for RSNImport
 	 */
     RSNImportSourcesJs = {
+		
+		/* constantes */
+		RECORDID_STATUS_NONE : 0,
+		RECORDID_STATUS_SELECT : 1,
+		RECORDID_STATUS_CREATE : 2,
+		RECORDID_STATUS_UPDATE : 3,
+		RECORDID_STATUS_SKIP : 4,
+		RECORDID_STATUS_CHECK : 10,
+		RECORDID_STATUS_SINGLE : 11,
+		RECORDID_STATUS_MULTI : 12,
 
     	registerEvent: function() {
     		this.registerSelectSourceEvent();
@@ -28,7 +38,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 		 * TODO pas sûr que ça fonctionne avec plusieurs modules simultannéement
 		 */
 		reloadPreviewData : function(e){
-			var $thisElement = $(e.target)
+			var $thisElement = e.jquery ? e : $(e.target)
 			, $destTablePage = $thisElement.parents('table.importPreview:first')
 			, $destTableData = $destTablePage.find('table.importContents:first')
 			, url = $destTableData.find('param[name="PREVIEW_DATA_URL"]').attr('value')
@@ -48,6 +58,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			);
 		},
 		
+		// Ajoute des lignes en fin de tableau 
 		getMorePreviewData : function(e){
 			var url = e.target.href
 			, $thisElement = $(e.target)
@@ -69,14 +80,22 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			);
 		},
 		
+		// Paramètres pour la requête de chargement de données */
 		getPreviewDataRequestParams : function(e){
-			var $thisElement = $(e.target)
+			var $thisElement = e.jquery ? e : $(e.target)
 			, $destTablePage = $thisElement.parents('table.importPreview:first')
 			, $destTableData = $destTablePage.find('table.importContents:first')
 			, $filters = $destTableData.find('.header-filters :input[name]')
 			, params = {};
 			$filters.each(function(){
-				params[this.name] = this.value;
+				//champ comme tableau
+				if (/\[\]$/.test(this.name)){
+					if (!params[this.name]) 
+						params[this.name] = [];
+					params[this.name].push( this.value );
+				}
+				else
+					params[this.name] = this.value;
 			});
 			return params;
 		},

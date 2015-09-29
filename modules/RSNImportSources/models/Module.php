@@ -38,6 +38,18 @@ class RSNImportSources_Module_Model extends Vtiger_Module_Model {
 			.'&page_offset='.$offset.'&page_limit='.$limit
 		;
 	}
+	
+	/**
+	 * Url pour valider les données de pré-importations
+	 */
+	public function getValidatePreImportRowsUrl($importSource, $module, $offset = 0, $limit = 12){
+		return 'index.php?module='.$this->get('name')
+			.'&action=PreImport'
+			.'&mode=validateRows'
+			.'&for_module='.$module
+			.'&ImportSource='.$importSource
+		;
+	}
 
 	/**
 	 * Function to get the list of recently visisted records
