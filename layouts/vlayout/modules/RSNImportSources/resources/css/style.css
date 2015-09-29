@@ -49,7 +49,9 @@
 .importContents input{
   display: inline;
 }
-
+.importContents td.select-contact, .importContents td.create-contact {
+  padding-bottom: 1em !important; 
+}
 .importContents td.create-contact label {
   margin-bottom: 0px;
 }
