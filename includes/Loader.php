@@ -56,7 +56,6 @@ class Vtiger_Loader {
 		}
 
 		$file = self::resolveNameToPath($qualifiedName);
-
 		if (!file_exists($file)) {
 			return false;
 		}
@@ -132,8 +131,7 @@ class Vtiger_Loader {
 		if(file_exists($moduleSpecificComponentFilePath)) {
 			return $moduleSpecificComponentClassName;
 		}
-
-
+		
 		// Build first intermediate fall back file path and class name
 		if(!empty($firstFallBackDir) && !empty($firstFallBackClassPath)) {
 			$fallBackComponentFilePath = Vtiger_Loader::resolveNameToPath('modules.'.$firstFallBackDir.'.'.$componentTypeDirectory.'.'.$componentName);
@@ -160,7 +158,7 @@ class Vtiger_Loader {
 		if(file_exists($fallBackComponentFilePath)) {
 			return $fallBackComponentClassName;
 		}
-		throw new AppException('Handler not found.');
+		throw new AppException('Handler "'.$moduleSpecificComponentClassName.'" not found.');
 	}
 
 	/**

@@ -1,6 +1,5 @@
 <?php
 
-
 /* Phase de migration
  * Importation des prelevements Web depuis le fichier provenant de 4D
  */

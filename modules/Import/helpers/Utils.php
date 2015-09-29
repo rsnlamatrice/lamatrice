@@ -10,7 +10,9 @@
  * *********************************************************************************** */
 
 //ED150826 both for preImport and import
-ini_set("memory_limit","8G");
+//Vu le 150929, sur mon PC n'ayant que 6G de RAM : '8G' fait planter sans vraiment le dire (sauf log de php)
+global $php_max_memory_limit;
+ini_set("memory_limit", empty($php_max_memory_limit) ? "8G" : $php_max_memory_limit);
 
 class Import_Utils_Helper {
 
