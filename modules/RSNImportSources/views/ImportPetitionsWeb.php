@@ -51,7 +51,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	 * @return string - the default file encoding.
 	 */
 	public function getDefaultFileEncoding() {
-		return 'ISO-8859-1';
+		return 'macintosh';
 	}
 
 	/**
