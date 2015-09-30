@@ -114,13 +114,16 @@ $languageStrings = array(
 	'LBL_SELECT_Critere4D_STEP_DESCRIPTION' => 'Veuillez sélectionner le critère lié',
 	
 	
-	'LBL_RECORDID_STATUS_0' => '?',
+	'LBL_RECORDID_STATUS_0' => 'Inconnu',
 	'LBL_RECORDID_STATUS_1' => 'Trouvé',
 	'LBL_RECORDID_STATUS_2' => 'A créer',
 	'LBL_RECORDID_STATUS_3' => 'A mettre à jour',
-	'LBL_RECORDID_STATUS_10' => 'Vérifier',
-	'LBL_RECORDID_STATUS_11' => 'Une proposition',
+	'LBL_RECORDID_STATUS_4' => 'Annulé',
+	'LBL_RECORDID_STATUS_10' => 'Une proposition à vérifier',
+	'LBL_RECORDID_STATUS_11' => 'Une proposition fiable',
 	'LBL_RECORDID_STATUS_12' => 'Plusieurs propositions',
+	
+	'LBL_VALIDATE_SELECTED_ROWS' => 'Valider les lignes sélectionnées',
 );
 
 ?>
