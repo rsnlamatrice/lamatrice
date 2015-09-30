@@ -29,6 +29,9 @@
 .RECORDID_STATUS_COLORS_3 {
   background-color : #C0FFA0;
 }
+.RECORDID_STATUS_COLORS_4 {
+  background-color : #7fab6a;
+}
 .RECORDID_STATUS_COLORS_10 {
   background-color : yellow;
 }
@@ -46,11 +49,12 @@
     color: green !important;
 }
 
-.importContents input{
+.importPreview input{
   display: inline;
 }
 .importContents td.select-contact, .importContents td.create-contact {
-  padding-bottom: 1em !important; 
+  padding-bottom: 1em !important;
+  white-space: nowrap;
 }
 .importContents td.create-contact label {
   margin-bottom: 0px;
@@ -127,4 +131,9 @@ a.address-sna-check:active {
 }
 .importContents td.cell-deleted .ui-icon-trash {
   border: 2px inset black;
+}
+
+/* case à cocher "sélectionner toutes les lignes"*/
+.importPreview .all-rows-selection {
+  margin-right: 8px;
 }

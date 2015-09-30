@@ -13,6 +13,7 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			this.registerHeaderFiltersEvent();
 			this.registerValidatePreImportRowsEvent();
 			this.registerContactSelectionEvent();
+			this.registerAllRowsSelectionEvent();
     	},
 		
 		getContainer: function() {
@@ -35,6 +36,14 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			var thisInstance = this;
 			thisInstance.getContainer().on('change', 'input.contact-mode-selection[type="radio"]', function(e){
 				thisInstance.checkValidateRow(e);
+			});
+		},
+		
+    	//Coche de toutes les lignes
+		registerAllRowsSelectionEvent: function() {
+			var thisInstance = this;
+			thisInstance.getPageContainer().on('change', 'input.all-rows-selection[type="checkbox"]', function(e){
+				thisInstance.checkAllRows(e);
 			});
 		},
 		
@@ -124,7 +133,8 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		
 		/* remplace l'affichage de valeur par un input */
 		editCellValue: function(e){
-			var $td = this.getCell(e)
+			var thisInstance = this
+			, $td = this.getCell(e)
 			, $value = $td.children('.value')
 			, $input = $value.children('input');
 			if($input.length){
@@ -155,6 +165,7 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 					.blur(function(e){
 						var $value = $(this.parentNode);
 						$value.html(this.value);
+						thisInstance.setChangedValueCell($value);
 					})
 			);
 		},
@@ -221,6 +232,12 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			return $toolbox;
 		},
 		
+		//Marque la cellule comme ayant eu sa valeur modifiée
+		setChangedValueCell: function(e){
+			var $cell = this.getCell(e);
+			$cell.addClass('changed-value');
+		},
+		
 		//Echange les valeurs de deux cellules mitoyennes
 		swapCellValues: function(e, direction){
 			var $action = $(e.target)
@@ -234,10 +251,14 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			$td1.children('.value').html(value2);
 			$value1.data('original-value', false);
 			this.selectCellValue($td1);
+			this.setChangedValueCell($td1);
 			
 			$td2.children('.value').html(value1);
 			$value2.data('original-value', false);
 			this.selectCellValue($td2);
+			this.setChangedValueCell($td2);
+			
+			this.checkContactRow(e);
 		},
 		
 		//Supprime la valeur de la cellule
@@ -246,6 +267,8 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			, $td = $action.parents('td:first');
 			$td.toggleClass('cell-deleted');
 			this.unselectCellValue(e);
+			this.checkContactRow(e);
+			this.setChangedValueCell($td);
 		},
 		
 		//Inverse la sélection d'une cellule
@@ -321,6 +344,20 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 				$checkbox[0].checked = true;
 		},
 		
+		//Coche la ligne pour mise à jour
+		checkAllRows: function(e){
+			var $thisElement = e.jquery ? e : $(e.target)
+			, checked = $thisElement[0].checked
+			, $destTablePage = $thisElement.parents('table.importPreview:first')
+			, $destTableData = $destTablePage.find('table.importContents:first')
+			, $preImportRows = $destTableData.find('tr.preimport-row[data-rowid]')
+			, $preImportRowCheckboxes = $preImportRows.find('input.row-selection[type="checkbox"]')
+			;
+			$preImportRowCheckboxes.each(function(){
+				this.checked = checked;
+			});
+		},
+		
 		/**
 		 * Enregistrement des validations de l'utilisateur
 		 * Bascule les lignes courantes dans un état prêt à importer
@@ -394,12 +431,23 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 					return true;
 				});
 				
-				//cellules sélectionnées depuis les données de l'import
-				var $selectedCells = $tr.find('td.selected-value[data-fieldname]');
+				//cellules sélectionnées ou modifiées depuis les données de l'import
+				var $selectedCells = $tr.find('td.selected-value[data-fieldname],td.changed-value[data-fieldname]');
 				$selectedCells.each(function(){
 					if(!rowsData[rowId].update)
-						rowsData[rowId].update = {}
-					rowsData[rowId].update[this.getAttribute('data-fieldname')] = $(this).children('.value').html();
+						rowsData[rowId].update = {};
+					var value;
+					if (/cell-deleted/.test(this.className)){
+					    if (rowsData[rowId].update[this.getAttribute('data-fieldname')])
+						return;//supprimée mais déjà attribuée (par contact)
+					    value = '';
+					}
+					else if (/changed-value/.test(this.className)
+					    && rowsData[rowId].update[this.getAttribute('data-fieldname')])
+					    return; //modifiée mais déjà attribuée (par contact)
+					else
+					    value = $(this).children('.value').html();
+					rowsData[rowId].update[this.getAttribute('data-fieldname')] = value;
 				});
 				
 			});

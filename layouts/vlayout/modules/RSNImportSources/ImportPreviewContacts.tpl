@@ -30,7 +30,8 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<input type="hidden" name="operator[]" value="e"/>
 												<select name="search_value[]">
 													{foreach item=LABEL key=STATUS_ID from=$CONTACTID_STATUS}
-														<option value="{$STATUS_ID}">{$LABEL}</option>
+														{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$STATUS_ID}
+														<option class="{$ROW_CLASS}" value="{$STATUS_ID}">{$LABEL}</option>
 													{/foreach}
 												</select>
 											</div>
@@ -49,7 +50,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
 											{/if}
-											<th class="redColor">{$FIELD_NAME}</th>
+											<th class="redColor">{$FIELD_NAME|@vtranslate:$MODULE_NAME}</th>
 										{/foreach}
 									</tr></thead>
 								{/if}
@@ -65,7 +66,9 @@ $IMPORT_RECORD_FAILED = 5;*}
 										<th colspan="3">
 											{* sélection de la ligne pour validation *}
 											<label><input type="checkbox" class="row-selection"
-												{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}checked="checked"{/if}
+												{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
+													checked="checked"
+												{/if}
 												/>&nbsp;{$ROW['id']}</label>
 											
 											{* SNA *}
@@ -133,15 +136,15 @@ $IMPORT_RECORD_FAILED = 5;*}
 											{/if}
 											<td colspan="3" class="select-contact">
 												<input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" disabled="disabled"/>
-												<a href="#"><i>sélectionner...</i></a></td>
+												<a href="#"><i>&nbsp;sélectionner...</i></a></td>
 											<td colspan="1" class="create-contact">
 												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_CREATE}"
 													{if ! $CONTACT_ROWS}checked="checked"{/if}/>
-													<i>créer</i></label></td>
+													<i>&nbsp;créer</i></label></td>
 											<td colspan="1" class="skip-row">
 												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}"
 													{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}checked="checked"{/if}/>
-													<i>annuler</i></label></td>
+													<i>&nbsp;annuler</i></label></td>
 										</tr>
 									{/if}
 								{/foreach}
@@ -157,6 +160,10 @@ $IMPORT_RECORD_FAILED = 5;*}
 				{if $IMPORTABLE_ROWS_COUNT}
 					<tr>
 						<td class="style1" align="left">
+							<label><input class="all-rows-selection" type="checkbox"
+								{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
+									checked="checked"
+								{/if}>sélectionner toutes les lignes</label>
 						{if $VALIDATE_PREIMPORT_URL}
 							<param name="VALIDATE_PREIMPORT_URL" value="{$VALIDATE_PREIMPORT_URL}"/>
 							<button type="submit" name="validate-preimport-rows" class="btn btn-success">
