@@ -29,11 +29,14 @@
 .RECORDID_STATUS_COLORS_3 {
   background-color : #C0FFA0;
 }
+.RECORDID_STATUS_COLORS_4 {
+  background-color : #7fab6a;
+}
 .RECORDID_STATUS_COLORS_10 {
   background-color : yellow;
 }
 .RECORDID_STATUS_COLORS_11 {
-  background-color : yellow;
+  background-color : yellowgreen;
 }
 .RECORDID_STATUS_COLORS_12 {
   background-color : orange;
@@ -46,10 +49,13 @@
     color: green !important;
 }
 
-.importContents input{
+.importPreview input{
   display: inline;
 }
-
+.importContents td.select-contact, .importContents td.create-contact {
+  padding-bottom: 1em !important;
+  white-space: nowrap;
+}
 .importContents td.create-contact label {
   margin-bottom: 0px;
 }
@@ -68,12 +74,12 @@
 }
 .importContents tr.preimport-row:first-of-type,
 .importContents tr.contact-row + tr.preimport-row {
-  border-top: 1px solid gray;
+  border-top: 2px inset gray;
 }
 .importContents tr.preimport-row,
 .importContents tr.contact-row {
-  border-left: 1px solid gray;
-  border-right: 1px solid gray;
+  border-left: 2px inset gray;
+  border-right: 2px inset gray;
 }
 .importContents tr.contact-row th
 , .importContents tr.contact-row td {
@@ -101,8 +107,15 @@ a.address-sna-check:active {
 
 .importContents .cell-toolbox a {
   cursor: pointer;
-  padding: 4px;
+  padding: 0px 2px;
+  vertical-align: top;
 }
+.importContents .cell-toolbox a.trash{
+  padding-bottom: 8px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
 .importContents td.selected-value {
   border: 2px inset gray;
   border-radius: 3px;
@@ -118,4 +131,9 @@ a.address-sna-check:active {
 }
 .importContents td.cell-deleted .ui-icon-trash {
   border: 2px inset black;
+}
+
+/* case à cocher "sélectionner toutes les lignes"*/
+.importPreview .all-rows-selection {
+  margin-right: 8px;
 }

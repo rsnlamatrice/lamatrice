@@ -8,7 +8,7 @@ $IMPORT_RECORD_MERGED = 4;
 $IMPORT_RECORD_FAILED = 5;*}
 <div class="marginLeftZero" style="overflow: scroll;width:95%;">
 	{if sizeof($PREVIEW_DATA) gt 0}
-		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="searchUIBasic well">
+		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
 			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
 				<tr>
 					<td class="font-x-large" align="left" colspan="2">
@@ -16,18 +16,41 @@ $IMPORT_RECORD_FAILED = 5;*}
 					</td>
 				</tr>
 				<tr>
-					<td valign="top">
+					<td valign="top" colspan="2">
 						{if sizeof($MODULE_DATA) gt 0}
 							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents"
 								data-module="Contacts">
 								{if $ROW_OFFSET === 0}
-									<thead><tr>
-										<th colspan="3"></th>
+									<thead><tr class="header-filters">
+										<th colspan="3">
+											{* filters *}
+											<param name="PREVIEW_DATA_URL" value="{$PREVIEW_DATA_URL}"/>
+											<div>
+												<input type="hidden" name="search_key[]" value="_contactid_status"/>
+												<input type="hidden" name="operator[]" value="e"/>
+												<select name="search_value[]">
+													{foreach item=LABEL key=STATUS_ID from=$CONTACTID_STATUS}
+														{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$STATUS_ID}
+														<option class="{$ROW_CLASS}" value="{$STATUS_ID}">{$LABEL}</option>
+													{/foreach}
+												</select>
+											</div>
+											<div>
+											<input type="hidden" name="search_key[]" value="_contactid_source"/>
+											<input type="hidden" name="operator[]" value="e"/>
+											<select name="search_value[]">
+												{foreach item=LABEL key=STATUS_ID from=$CONTACTID_SOURCES}
+													<option value="{$STATUS_ID}">{$LABEL}</option>
+												{/foreach}
+											</select>
+											</div>
+											
+										</th>
 										{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
 											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
 											{/if}
-											<th class="redColor">{$FIELD_NAME}</th>
+											<th class="redColor">{$FIELD_NAME|@vtranslate:$MODULE_NAME}</th>
 										{/foreach}
 									</tr></thead>
 								{/if}
@@ -40,7 +63,15 @@ $IMPORT_RECORD_FAILED = 5;*}
 										{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$ROW['_contactid_status']}
 									{/if}
 									<tr class="preimport-row {$ROW_CLASS}" data-rowid="{$ROW['id']}">
-										<th colspan="3">{$ROW['id']}
+										<th colspan="3">
+											{* sélection de la ligne pour validation *}
+											<label><input type="checkbox" class="row-selection"
+												{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
+													checked="checked"
+												{/if}
+												/>&nbsp;{$ROW['id']}</label>
+											
+											{* SNA *}
 											{if $ROW['_contactid_status'] !== null
 											&& (!$ROW['mailingcountry'] || $ROW['mailingcountry'] === 'France')}
 												<a href="#" class="address-sna-check">SNA</a>
@@ -65,12 +96,12 @@ $IMPORT_RECORD_FAILED = 5;*}
 										{foreach item=CONTACT_ROW key=CONTACT_ID from=$CONTACT_ROWS}
 											<tr class="contact-row"  data-rowid="{$ROW['id']}" data-contactid="{$CONTACT_ID}">
 												{if $CONTACT_ROW_INDEX === 0}
-													<th rowspan="{count($CONTACT_ROWS) + 1}">
+													<th class="contact-source" rowspan="{count($CONTACT_ROWS) + 1}">
 														{$ROW['_contactid_source']}
 													</th>
 												{/if}
 												<th>
-													<input type="radio" name="contact_related_to_{$ROW['id']}"
+													<input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}"
 															{if $CONTACT_ROW_INDEX === 0}checked="checked"{/if}
 													/>
 												</th>
@@ -101,15 +132,19 @@ $IMPORT_RECORD_FAILED = 5;*}
 									{if $ROW['status'] == 0 && $ROW['_contactid_status'] !== null}
 										<tr class="contact-row" data-contactid="">
 											{if ! $CONTACT_ROWS}
-												<th></th>
+												<th class="contact-source">&nbsp;</th>
 											{/if}
 											<td colspan="3" class="select-contact">
-												<input type="radio" name="contact_related_to_{$ROW['id']}"/>
-												<a href="#"><i>sélectionner...</i></a></td>
-											<td colspan="3" class="create-contact">
-												<label><input type="radio" name="contact_related_to_{$ROW['id']}"
+												<input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" disabled="disabled"/>
+												<a href="#"><i>&nbsp;sélectionner...</i></a></td>
+											<td colspan="1" class="create-contact">
+												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_CREATE}"
 													{if ! $CONTACT_ROWS}checked="checked"{/if}/>
-													<i>créer</i></label></td>
+													<i>&nbsp;créer</i></label></td>
+											<td colspan="1" class="skip-row">
+												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}"
+													{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}checked="checked"{/if}/>
+													<i>&nbsp;annuler</i></label></td>
 										</tr>
 									{/if}
 								{/foreach}
@@ -124,11 +159,25 @@ $IMPORT_RECORD_FAILED = 5;*}
 			<tfoot>
 				{if $IMPORTABLE_ROWS_COUNT}
 					<tr>
-						<td class="style1" align="left" colspan="2">
+						<td class="style1" align="left">
+							<label><input class="all-rows-selection" type="checkbox"
+								{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
+									checked="checked"
+								{/if}>sélectionner toutes les lignes</label>
+						{if $VALIDATE_PREIMPORT_URL}
+							<param name="VALIDATE_PREIMPORT_URL" value="{$VALIDATE_PREIMPORT_URL}"/>
+							<button type="submit" name="validate-preimport-rows" class="btn btn-success">
+								<strong>{'LBL_VALIDATE_SELECTED_ROWS'|@vtranslate:$MODULE}</strong>
+							</button>
+						{/if}
+						</td>
+						<td class="style1" align="left">
 							Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}{if true || $SOURCE_ROWS_COUNT neq $IMPORTABLE_ROWS_COUNT}&nbsp;/&nbsp;{$SOURCE_ROWS_COUNT}{/if}
+							&nbsp;-&nbsp;Affichée{if $ROW_OFFSET > 1}s{/if} : {$ROW_OFFSET} 
+							
 							{if $ROW_OFFSET < $SOURCE_ROWS_COUNT}
 								<a class="getMorePreviewData" href="{$MORE_DATA_URL}" style="margin-left: 2em">voir plus de lignes</a>
-							{/if}		
+							{/if}	
 						</td>
 					</tr>
 				{/if}

@@ -26,7 +26,7 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 	}
 
 	//ED150628
-	protected function getRecordsQueryFromRequest(Vtiger_Request $request, &$asColumnName = FALSE) {
+	public function getRecordsQueryFromRequest(Vtiger_Request $request, &$asColumnName = FALSE) {
 		$selectedIds = $request->get('selected_ids');
 
 		if(!empty($selectedIds) && $selectedIds != 'all') {

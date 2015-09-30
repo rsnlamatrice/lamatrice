@@ -126,6 +126,12 @@ class QueryGenerator {
 		return $this->fields;
 	}
 
+	/*ED150928*/
+	public function addField($fieldName) {
+		if(! array_key_exists( 'total', $this->fields ))
+			$this->fields[] = $fieldName;
+	}
+
 	public function getWhereFields() {
 		return $this->whereFields;
 	}

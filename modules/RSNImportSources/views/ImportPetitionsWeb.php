@@ -478,7 +478,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
-			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
 			'_contactid_source',
 			'Email, nom, prénom et code postal'
 		);
@@ -490,7 +490,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
-			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
 			'_contactid_source',
 			'Email, nom et prénom'
 		);
@@ -502,7 +502,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
-			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
 			'_contactid_source',
 			'Nom, prénom et code postal'
 		);
@@ -514,7 +514,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			'_contactid',
 			$partialFields,
 			'_contactid_status',
-			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK,
+			'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
 			'_contactid_source',
 			'Email seul'
 		);
@@ -699,9 +699,51 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		$viewer = $this->getViewer($this->request);
 		$moduleName = $this->request->get('for_module');
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		$thisModuleName = $this->request->getModule();
+		$thisModule = Vtiger_Module_Model::getInstance($thisModuleName);
 		
 		$viewer->assign('CONTACTS_FIELDS_MAPPING', $this->getContactsFieldsMapping());
 		$viewer->assign('CONTACTS_MODULE_MODEL', $moduleModel);
+		
+		$viewer->assign('VALIDATE_PREIMPORT_URL', $thisModule->getValidatePreImportRowsUrl( $this->request->get('ImportSource'), $moduleName, 0, $limit));
+		
+		//Décompte des statuts du contactid
+		$counters = $this->getPreImportCountersByField($moduleName, '_contactid_status');
+		$status = array(
+			'' => '(tous)',
+			RSNImportSources_Import_View::$RECORDID_STATUS_NONE => '',
+			RSNImportSources_Import_View::$RECORDID_STATUS_SELECT => '',
+			RSNImportSources_Import_View::$RECORDID_STATUS_CREATE => '',
+			RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE => '',
+			RSNImportSources_Import_View::$RECORDID_STATUS_SKIP => '',
+			RSNImportSources_Import_View::$RECORDID_STATUS_CHECK => '',
+			RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE => '',
+			RSNImportSources_Import_View::$RECORDID_STATUS_MULTI => '',
+		);
+		$total = 0;
+		foreach($status as $statusKey => $statusValue){
+			$counter = $counters[$statusKey] ? $counters[$statusKey] : 0;
+			$total += $counter;
+			$status[$statusKey] = vtranslate('LBL_RECORDID_STATUS_'.$statusKey, $thisModuleName)
+				. ' (' . $counter . ')';
+		}
+		$status[''] = '(tous) (' . $total . ')';
+		$viewer->assign('CONTACTID_STATUS', $status);
+		
+		//Décompte des sources
+		$counters = $this->getPreImportCountersByField($moduleName, '_contactid_source');
+		$sources = array( '' => '(tous)', '(null)' => '(inconnu)');
+		$total = 0;
+		foreach($counters as $sourceKey => $counter){
+			$total += $counter;
+			if($sourceKey === '(null)')
+				$sourceLabel = '(inconnu)';
+			else
+				$sourceLabel = $sourceKey;
+			$sources[$sourceKey] = $sourceLabel . ' (' . $counter . ')';
+		}
+		$sources[''] = '(tous) (' . $total . ')';
+		$viewer->assign('CONTACTID_SOURCES', $sources);
 		
 		return parent::displayDataPreview();
 	}

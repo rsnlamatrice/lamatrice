@@ -99,6 +99,14 @@ $languageStrings = array(
 	'LBL_MERGE_ACCOUNTS_ALREADY'		=> 'Les contacts sont déjà en compte-commun.',
 	'LBL_MERGE_ACCOUNTS_NONE'			=> 'Un compte commun va être créer.',
 	'LBL_MERGE_ACCOUNTS_CHOOSE_REF'		=> 'Choisissez le référent du compte.',
+        
+        'firstname'         => 'prénom',
+        'lastname'          => 'nom',
+        'mailingstreet3'    => 'compl. d\'adresse',
+        'mailingstreet2'    => 'adresse',
+        'mailingzip'        => 'code postal',
+        'mailingcity'       => 'ville',
+        'mailingcountry'    => 'pays',
 		
 );
 $jsLanguageStrings = array(
