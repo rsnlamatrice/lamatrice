@@ -50,7 +50,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
 											{/if}
-											<th class="redColor">{$FIELD_NAME|@vtranslate:$MODULE_NAME}</th>
+											<th>{$FIELD_NAME|@vtranslate:$MODULE_NAME}</th>
 										{/foreach}
 									</tr></thead>
 								{/if}

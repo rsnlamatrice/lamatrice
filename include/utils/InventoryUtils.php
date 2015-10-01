@@ -273,6 +273,7 @@ function getAllTaxes($available='all', $sh='',$mode='',$id='')
 				$inventory_tax_val_result = $adb->pquery("SELECT $taxname FROM $value_table WHERE id=?",array($id));
 				$taxtypes[$i]['percentage'] = $adb->query_result($inventory_tax_val_result, 0, $taxname);;
 				$taxtypes[$i]['taxlabel'] = $adb->query_result($result,$i,'taxlabel');
+				$taxtypes[$i]['account'] = $adb->query_result($result,$i,'account');//ED151001
 				$taxtypes[$i]['deleted'] = $adb->query_result($result,$i,'deleted');
 			}
 		} else {
@@ -287,6 +288,7 @@ function getAllTaxes($available='all', $sh='',$mode='',$id='')
 				$taxtypes[$i]['taxname'] = $adb->query_result($result, $i, 'taxname');
 				$taxtypes[$i]['taxlabel'] = $adb->query_result($result, $i, 'taxlabel');
 				$taxtypes[$i]['percentage'] = $adb->query_result($result, $i, 'percentage');
+				$taxtypes[$i]['account'] = $adb->query_result($result,$i,'account');//ED151001
 				$taxtypes[$i]['deleted'] = $adb->query_result($result, $i, 'deleted');
 			}
 		}
@@ -330,6 +332,7 @@ function getAllTaxes($available='all', $sh='',$mode='',$id='')
 			$taxtypes[$i]['taxname'] = $adb->query_result($res, $i, 'taxname');
 			$taxtypes[$i]['taxlabel'] = $adb->query_result($res, $i, 'taxlabel');
 			$taxtypes[$i]['percentage'] = $adb->query_result($res, $i, 'percentage');
+			$taxtypes[$i]['account'] = $adb->query_result($res,$i,'account');//ED151001
 			$taxtypes[$i]['deleted'] = $adb->query_result($res, $i, 'deleted');
 		}
 	}

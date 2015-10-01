@@ -52,11 +52,16 @@
 .importPreview input{
   display: inline;
 }
-.importContents td.select-contact, .importContents td.create-contact {
+.importContents td.select-contact
+, .importContents td.create-contact
+, .importContents td.skip-row {
+  min-width: 70px;
   padding-bottom: 1em !important;
   white-space: nowrap;
 }
-.importContents td.create-contact label {
+.importContents td.select-contact label
+, .importContents td.create-contact label
+, .importContents td.skip-row label {
   margin-bottom: 0px;
 }
 

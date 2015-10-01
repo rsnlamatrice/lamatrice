@@ -1058,7 +1058,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerLineItemActionSaveEvent : function(){
 		var editForm =  this.getForm();
 		editForm.on('click','button[name="lineItemActionSave"]',function(){
-			jQuery('.closeDiv').trigger('click');
+			//ED150930 adds :visible. Sinon très très très long quand il y a bq de lignes de facture
+			jQuery('.closeDiv:visible').trigger('click');
 		});
 	},
 
@@ -1128,7 +1129,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerLineItemsPopUpCancelClickEvent : function(){
 		var editForm = this.getForm();
 		editForm.on('click','.cancelLink',function(){
-			jQuery('.closeDiv').trigger('click')
+			//ED150930 adds :visible. Sinon très très très long quand il y a bq de lignes de facture
+			jQuery('.closeDiv:visible').trigger('click');
 		})
 	},
 

@@ -1162,7 +1162,8 @@ jQuery.Class("Vtiger_List_Js",{
                     fieldsChanged = true;
                 }
 			}
-			if(fieldsChanged == false){
+			if(massEditFieldList /* ED150930 */
+			&& fieldsChanged == false){
 				Vtiger_Helper_Js.showPnotify(app.vtranslate('NONE_OF_THE_FIELD_VALUES_ARE_CHANGED_IN_MASS_EDIT'));
 				form.find('[name="saveButton"]').removeAttr('disabled');
 				aDeferred.reject();

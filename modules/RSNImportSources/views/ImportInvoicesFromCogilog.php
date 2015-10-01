@@ -94,8 +94,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
 		if(FALSE)
-			$query .= ' WHERE facture.numero = 12923
-				AND annee = 2012
+			$query .= ' WHERE facture.numero = 6166
+				AND annee = 2015
 			';
 		else {
 			/* Attention à ne pas importer une facture en cours de saisie */

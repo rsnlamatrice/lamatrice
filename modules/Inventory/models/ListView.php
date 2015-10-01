@@ -104,7 +104,7 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 			$massActionLinks[] = array(
 				'linktype' => 'LISTVIEWMASSACTION',
 				'linklabel' => 'LBL_SEND2COMPTA',
-				'linkurl' => 'javascript:Vtiger_List_Js.triggerMassEdit("index.php?module='.$moduleModel->get('name').'&view=MassActionAjax&mode=showSend2ComptaForm");',
+				'linkurl' => 'javascript:Vtiger_List_Js.triggerMassEdit("index.php?module='.$moduleModel->get('name').'&view=Send2Compta&mode=showSend2ComptaForm");',
 				'linkicon' => ''
 			);
 		}

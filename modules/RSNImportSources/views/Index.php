@@ -29,7 +29,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if(!$currentUserPriviligesModel->hasModuleActionPermission($moduleModel->getId(), 'Import')) {
+		if(!$currentUserPriviligesModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
 			throw new AppException('LBL_PERMISSION_DENIED');
 		}
 	}

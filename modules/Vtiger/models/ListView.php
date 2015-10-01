@@ -477,7 +477,8 @@ var_dump($listResult);*/
 							'linkurl' => $moduleModel->getImportUrl(),
 							'linkicon' => ''
 			);
-
+		}
+		if($createPermission) {
 			// For RSN Import Module
 			$advancedLinks[] = array(
 							'linktype' => 'LISTVIEW',
