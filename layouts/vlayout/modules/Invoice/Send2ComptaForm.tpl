@@ -31,8 +31,12 @@
 					<span class="span2">{CurrencyField::convertToUserFormat($INVOICES_TOTAL)} €</span>
 				</div>
 				
-				<div class="row-fluid" style="margin-top: 2em;">
+				<div class="row-fluid" style="margin-top: 2em; font-size: larger">
 					<a class="downloadSend2Compta" href="#downloadSend2Compta">Télécharger le fichier pour la compta</a>
+				</div>
+				
+				<div class="row-fluid" style="margin-top: 2em; font-size: larger; font-style: italic;">
+					Après avoir téléchargé le fichier, vous devez cliquer sur le bouton "Enregistrer" pour valider les factures comme étant en compta.
 				</div>
 			</div>
 		</div>
