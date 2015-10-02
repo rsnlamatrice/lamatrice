@@ -28,12 +28,13 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 	//ED150628
 	public function getRecordsQueryFromRequest(Vtiger_Request $request, &$asColumnName = FALSE) {
 		$selectedIds = $request->get('selected_ids');
+		$moduleName = $request->get('module');
 
 		if(!empty($selectedIds) && $selectedIds != 'all') {
 			if(!empty($selectedIds) && count($selectedIds) > 0) {
 				
 				if(!$asColumnName){
-					$moduleModel = $this->getModule();
+					$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 					$asColumnName = $moduleModel->get('basetableid');
 				}
 				$query = '';
@@ -48,8 +49,7 @@ abstract class Vtiger_Mass_Action extends Vtiger_Action_Controller {
 		$customViewModel = $this->getCustomViewToGetRecordsListFromRequest($request);
 		if($customViewModel) {
 			$excludedIds = $request->get('excluded_ids');
-			$module = $request->get('module');
-			return $customViewModel->getRecordIdsQuery($excludedIds, $module, false, $asColumnName);
+			return $customViewModel->getRecordIdsQuery($excludedIds, $moduleName, false, $asColumnName);
 		}
 	}
 	

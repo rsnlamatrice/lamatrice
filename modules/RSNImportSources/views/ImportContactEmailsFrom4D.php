@@ -338,8 +338,17 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		if($documents){
 			$record->set($fieldName, $documents);
 		}
-			
-			
+	
+		//Adresse principale
+		$fieldName = 'email';
+		if($contactemailsData[0]['origine'] === 'Principale'){
+			$contact = $this->getContact($contactemailsData);
+			if(strcasecmp($contact->get($fieldName), $contactemailsData[0][$fieldName]) !== 0){
+				$contact->set('mode', 'edit');
+				$contact->set($fieldName);
+				$contact->save();
+			}
+		}
 		// copie depuis tout en haut
 		//		
 		//'ref4d' => 'ref4d',
@@ -559,9 +568,13 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		foreach($this->getContactEmailsDateFields() as $fieldName)
 			$contactemailsHeader[$fieldName] = $this->getMySQLDate($contactemailsHeader[$fieldName]);
 		
+		$fieldName = 'email';
+		$contactemailsHeader[$fieldName] = trim($contactemailsHeader[$fieldName]);
+		
 		return $contactemailsHeader;
 	}
 	
+	//translate origine
 	function getEmailOrigine($origine){
 		switch($origine){
 			case 'PRINCIPAL' :

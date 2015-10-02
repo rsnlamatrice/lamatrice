@@ -20,7 +20,6 @@ class Settings_Vtiger_TaxIndex_View extends Settings_Vtiger_Index_View {
 		$taxRecordModel = new Settings_Vtiger_TaxRecord_Model();
         $productAndServicesTaxList = Settings_Vtiger_TaxRecord_Model::getProductTaxes();
         $shippingAndHandlingTaxList = Settings_Vtiger_TaxRecord_Model::getShippingTaxes();
-        
         $qualifiedModuleName = $request->getModule(false);
         
         $viewer = $this->getViewer($request);
@@ -29,8 +28,6 @@ class Settings_Vtiger_TaxIndex_View extends Settings_Vtiger_Index_View {
         $viewer->assign('SHIPPING_AND_HANDLING_TAXES',$shippingAndHandlingTaxList);
         $viewer->view('TaxIndex.tpl',$qualifiedModuleName);
     }
-	
-	
 		
 	
 	function getPageTitle(Vtiger_Request $request) {

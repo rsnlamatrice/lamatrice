@@ -530,4 +530,19 @@ function updateRecordLabel($module,$recordId){
 	return Vtiger_Functions::updateCRMRecordLabel($module, $recordId);
 }
 
+/* ED151001*/	
+function str_to_float($str){
+	if(!is_string($str))
+		return $str;
+	try {
+		if(!is_numeric($str[0]) && $str[0] != '-' && $str[0] != '+')//TODO ".50"
+			return false;
+		return (float)str_replace(',', '.', $str);
+	}
+	catch(Exception $ex){
+		var_dump($ex, $str);
+		die("str_to_float");
+	}
+}
+
 ?>

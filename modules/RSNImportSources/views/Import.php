@@ -46,7 +46,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
 		$currentUserPriviligesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		if(!$currentUserPriviligesModel->hasModuleActionPermission($moduleModel->getId(), 'Import')) {
+		if(!$currentUserPriviligesModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
 			throw new AppException('LBL_PERMISSION_DENIED');
 		}
 	}
@@ -759,6 +759,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		return null;
 	}
 	
+	//TODO replace call with global function str_to_float defined in include/utils/CommonUtils.php
 	static function str_to_float($str){
 		if(!is_string($str))
 			return $str;

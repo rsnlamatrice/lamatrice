@@ -141,8 +141,8 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 				WHERE vtiger_crmentity.crmid = ?
 			";
 			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
-								, $rsndonateurswebData[0]['date']
-								, $rsndonateurswebId));
+							, $rsndonateurswebData[0]['datedon']
+							, $rsndonateurswebId));
 			
 			$log->debug("" . basename(__FILE__) . " update imported rsndonateursweb (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsndonateurswebData[0]['datedon']
 					. ", result=" . ($result ? " true" : "false"). " )");
