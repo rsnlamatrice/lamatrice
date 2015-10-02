@@ -44,6 +44,7 @@
 
 .values-neq {
     color: red !important;
+    font-weight: bold;
 }
 .values-eq {
     color: green !important;
