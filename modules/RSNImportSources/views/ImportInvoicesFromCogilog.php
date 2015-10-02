@@ -94,7 +94,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
 		if(FALSE)
-			$query .= ' WHERE facture.numero = 6166
+			$query .= ' WHERE facture.numero = 6769
 				AND annee = 2015
 			';
 		else {
@@ -992,7 +992,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			//var_dump($product);
 			$isProduct = null;
 			$product_name = '';
-			$taxrate = self::str_to_float($product[$this->columnName_indexes['tva_produit']])/100;
+			$taxrate = self::str_to_float($product[$this->columnName_indexes['taux_tva']])/100;
 			$qty = self::str_to_float($product[$this->columnName_indexes['quantite']]);
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
 				'productcode'	=> $product[$this->columnName_indexes['code_produit']],
@@ -1001,7 +1001,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				'article'	=> $product_name,
 				'prix_unit_ht'	=> self::str_to_float($product[$this->columnName_indexes['total_ligne_ht']]) / $qty /* / (1 + $taxrate) */,
 				'isproduct'	=> $isProduct,
-				'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['tva_produit']]),
+				'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['taux_tva']]),
             
 			)));
 		}

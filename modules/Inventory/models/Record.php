@@ -172,6 +172,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 
 		$data = array();
 		
+		//echo('<pre>');var_dump($parentRecordModel);echo('</pre>');
 		//ED150605
 		if($moduleName === 'Accounts'){
 			
@@ -196,7 +197,6 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			$parentRecordModel = $accountRecordModel;
 			$data['account_id'] = $accountRecordModel->getId();
 			$data['subject'] = $subject;
-			//echo('<pre>');var_dump($parentRecordModel);echo('</pre>');
 		}
 		$fieldMappingList = $parentRecordModel->getInventoryMappingFields();
 
