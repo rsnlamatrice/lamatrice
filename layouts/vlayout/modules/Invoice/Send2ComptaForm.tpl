@@ -25,7 +25,7 @@
 				<div class="row-fluid">
 					<span class="span3">Nombre de factures concernées :</span>
 					<span class="span2">{$INVOICES_COUNT}</span>
-					{if $INVOICES_COUNT == 200}<span class="span2"><i>{$INVOICES_COUNT} est le nombre maximum traité en une fois</i></span>{/if}
+					{if $INVOICES_COUNT == 200}<span class="span5"><i>{$INVOICES_COUNT} est le nombre maximum de factures traitées en une seule fois. Bref, il vous faut recommencer plusieurs fois l'opération.</i></span>{/if}
 				</div>
 				<div class="row-fluid">
 					<span class="span3">Montant total :</span>
