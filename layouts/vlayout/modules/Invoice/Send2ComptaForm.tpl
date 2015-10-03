@@ -25,14 +25,19 @@
 				<div class="row-fluid">
 					<span class="span3">Nombre de factures concernées :</span>
 					<span class="span2">{$INVOICES_COUNT}</span>
+					{if $INVOICES_COUNT == 200}<span class="span5"><i>{$INVOICES_COUNT} est le nombre maximum de factures traitées en une seule fois. Bref, il vous faut recommencer plusieurs fois l'opération.</i></span>{/if}
 				</div>
 				<div class="row-fluid">
 					<span class="span3">Montant total :</span>
 					<span class="span2">{CurrencyField::convertToUserFormat($INVOICES_TOTAL)} €</span>
 				</div>
 				
-				<div class="row-fluid" style="margin-top: 2em;">
+				<div class="row-fluid" style="margin-top: 2em; font-size: larger">
 					<a class="downloadSend2Compta" href="#downloadSend2Compta">Télécharger le fichier pour la compta</a>
+				</div>
+				
+				<div class="row-fluid" style="margin-top: 2em; font-size: larger; font-style: italic;">
+					Après avoir téléchargé le fichier, vous devez cliquer sur le bouton "Enregistrer" pour valider les factures comme étant en compta.
 				</div>
 			</div>
 		</div>

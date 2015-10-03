@@ -8,10 +8,11 @@
  * All Rights Reserved.
  ********************************************************************************/
 
- //ED150625
+//ED150625
+//TODO transposer en fichier de config locale
 define('COUPON_FOLDERID', '9');
 define('COUPON_FOLDERNAME', 'Coupons');
-define('COUPON_LIBRE_ID', '218962');
+define('COUPON_LIBRE_ID', '1197732'); //TODO pas fiable
 
 include_once('config.php');
 require_once('include/logging.php');
