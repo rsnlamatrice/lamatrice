@@ -121,6 +121,29 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		
 	/* functions */
 		
+		// Obtention de la valeur d'une cellule
+		getCellValue: function($cell){
+			if (!$cell.jquery)
+				$cell = $($cell);
+			var $value = $cell.is('.value') ? $cell : $cell.find('.value:first')
+			, $input = $cell.find(':input:first');
+			if ($input.length) {
+				return $input.val();
+			}
+			return $value.html();
+		},
+		// Affectation de la valeur d'une cellule
+		setCellValue: function($cell, value, setChangedValueCell, setSelectedCell){
+			if (!$cell.jquery)
+				$cell = $($cell);
+			var $value = $cell.is('.value') ? $cell : $cell.find('.value:first');
+			if(setChangedValueCell)
+				this.setChangedValueCell($value);
+			if(setSelectedCell)
+				this.selectCellValue($cell);
+			return $value.html(value);
+		},
+		
 		// Sélection d'un contact
 		selectContact: function(e){
 			alert('TODO');
@@ -135,39 +158,90 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		editCellValue: function(e){
 			var thisInstance = this
 			, $td = this.getCell(e)
-			, $value = $td.children('.value')
-			, $input = $value.children('input');
+			, fieldName = $td.data('fieldname')
+			, $value = $td.children('.value')//TODO thisInstance.getCellValue(
+			, value = thisInstance.getCellValue($value)
+			, $input = $value.children('input:visible');
 			if($input.length){
-				$value.html($input.val());
+				thisInstance.setCellValue($value, value);//scratch input
 				return;
 			}
 			if (!$value.data('original-value')) 
 				$value
-					.data('original-value', $value.text());
-			$value.html(
-				$('<input/>')
-					.val($value.text())
-					.css({ width: '100%', 'min-width': '8em' })
-					.focus()
-					.select()
-					.click(function(e){ return false; })
-					.dblclick(function(e){ return false; })
-					.keyup(function(e){
-						if (e.keyCode === 27) {
+					.data('original-value', value);
+					
+			thisInstance.createCellEditor(e);
+			thisInstance.selectCellValue($td);
+			e.preventDefault();
+		},
+		
+		createCellEditor: function(e){
+			var thisInstance = this
+			, $td = this.getCell(e)
+			, fieldName = $td.data('fieldname')
+			, $value = $td.children('.value')
+			, value = thisInstance.getCellValue($value);
+					
+			switch (fieldName){
+			case 'rsnnpai' :
+				var picklistValues = eval($('#' + fieldName + '-picklistvalues').val())
+				, $editor = 
+					$('<select/>')
+						.val(value)
+						.focus()
+						.click(function(e){ return false; })
+						.keyup(function(e){
+							if (e.keyCode === 27) {
+								var $value = $(this.parentNode);
+								thisInstance.setCellValue($value, $value.data('original-value'), false);
+							}
+							else if (e.keyCode === 13) {
+								var $value = $(this.parentNode);
+								thisInstance.setCellValue($value, this.value, true, true);
+							}
+						})
+						.blur(function(e){
 							var $value = $(this.parentNode);
-							$value.html($value.data('original-value'));
-						}
-						else if (e.keyCode === 13) {
+							thisInstance.setCellValue($value, this.value, true, true);
+						})
+				;
+				for(picklistValueId in picklistValues) {
+					$editor.append(
+						'<option value="' + picklistValueId + '"'
+						+ (picklistValueId == value ? ' selected="selected"' : '')
+						+'>'
+						+ picklistValues[picklistValueId].label
+						+ '</option>'
+					);
+				}
+				break;
+			default :
+				var $editor = 
+					$('<input/>')
+						.val(value)
+						.focus()
+						.select()
+						.click(function(e){ return false; })
+						.dblclick(function(e){ return false; })
+						.keyup(function(e){
+							if (e.keyCode === 27) {
+								var $value = $(this.parentNode);
+								thisInstance.setCellValue($value, $value.data('original-value'), false);
+							}
+							else if (e.keyCode === 13) {
+								var $value = $(this.parentNode);
+								thisInstance.setCellValue($value, this.value, true, true);
+							}
+						})
+						.blur(function(e){
 							var $value = $(this.parentNode);
-							$value.html(this.value);
-						}
-					})
-					.blur(function(e){
-						var $value = $(this.parentNode);
-						$value.html(this.value);
-						thisInstance.setChangedValueCell($value);
-					})
-			);
+							thisInstance.setCellValue($value, this.value, true, true);
+						})
+				;
+				break;
+			}
+			$value.html($editor);
+			return $editor;
 		},
 		
 		//Retourne la boîte à outils d'une cellule
@@ -184,17 +258,10 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		//Initialise la boîte à outils d'une cellule
 		createPreImportRowCellToolBox: function($td){
 			var thisInstance = this
-			, $toolbox = $('<div></div>')
-				.addClass('cell-toolbox')
-				.css({
-					position: 'absolute',
-					top: '0px',
-					right: '0px',
-					margin: '5px',
-				})
+			, $toolbox = $('<div class="cell-toolbox"></div>')
 			;
 			//swap left
-			if ($td.prev().is('td')) {
+			if ($td.prev().is('td') && !$td.is('.no-swap-value, .no-swap-value-left')) {
 				$toolbox
 					.append($('<a><span class="ui-icon ui-icon-arrowthick-1-w" title="échanger à gauche"></span></a>')
 						.click(function(e){
@@ -205,7 +272,7 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 				;
 			}
 			//swap right
-			if ($td.next().is('td')) {
+			if ($td.next().is('td') && !$td.is('.no-swap-value, .no-swap-value-right')) {
 				$toolbox
 					.append($('<a><span class="ui-icon ui-icon-arrowthick-1-e" title="échanger à droite"></span></a>')
 						.click(function(e){
@@ -216,14 +283,16 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 				;
 			}
 			//trash
-			$toolbox
-				.append($('<a class="trash"><span class="ui-icon ui-icon-trash"></span></a>')
-					.click(function(e){
-						thisInstance.clearCellValue(e);
-						return false;
-					})
-				)
-			;
+			if (!$td.is( '.not-trashable')) {
+				$toolbox
+					.append($('<a class="trash"><span class="ui-icon ui-icon-trash"></span></a>')
+						.click(function(e){
+							thisInstance.clearCellValue(e);
+							return false;
+						})
+					)
+				;
+			}
 			//append
 			$td
 				.css({position: 'relative'})
@@ -243,10 +312,10 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			var $action = $(e.target)
 			, $td1 = $action.parents('td:first')
 			, $value1 = $td1.children('.value')
-			, value1 = $value1.html()
+			, value1 = this.getCellValue($value1)
 			, $td2 = direction === 'left' ? $td1.prev('td') : $td1.next('td')
 			, $value2 = $td2.children('.value')
-			, value2 = $value2.html()
+			, value2 = this.getCellValue($value2)
 			;
 			$td1.children('.value').html(value2);
 			$value1.data('original-value', false);
@@ -376,6 +445,8 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 					RSNImportSourcesJs.reloadPreviewData($destTableData);
 				},
 				function(error){
+					//on peut arriver ici si des espaces seuls sont retournés
+					//vu alors que le fichier modules\Contacts\ContactsHandler.php contenait des espaces après le "?>" final
 				}
 			);
 			
@@ -386,7 +457,8 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		 * Données de validation des lignes de pré-imports
 		 */
 		getPreImportRowsData : function (e) {
-			var $thisElement = e.jquery ? e : $(e.target)
+			var thisInstance = this
+			, $thisElement = e.jquery ? e : $(e.target)
 			, $destTablePage = $thisElement.parents('table.importPreview:first')
 			, $destTableData = $destTablePage.find('table.importContents:first')
 			, $preImportRows = $destTableData.find('tr.preimport-row[data-rowid]')
@@ -398,34 +470,40 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 					return true;//skip
 				var rowId = $tr.data('rowid')
 				, $nextRows = $tr.nextAll('tr') /*not .contact-row parce qu'on sort de la boucle quand ce n'est plus la bonne classe*/
+				, selectedContactId = false
+				, proposedContactIds = ''
 				;
 				rowsData[rowId] = {};
 				//cherche le contact sélectionné dans les lignes suivantes
 				$nextRows.each(function(){
 					if (!/contact-row/.test(this.className)) 
-						return false;//stop
+						return false; // stop. arrête de parcourir les lignes suivantes
 					var $contact = $(this)
-					, $radio = $contact.find('input[type="radio"]:checked');
-					if (!$radio.length)
-						return true;
+					, $contactChecked = $contact.find('input[type="radio"]:checked');
 					//Contact connu
 					if ($contact.data('contactid')) {
-						rowsData[rowId].update = {
-							'_contactid_status' : RSNImportSourcesJs.RECORDID_STATUS_UPDATE,
-							'_contactid' : $contact.data('contactid')
-						};
+						proposedContactIds += ',' + $contact.data('contactid');
+						if ($contactChecked.length){//Contact sélectionné
+							selectedContactId = $contact.data('contactid');
+							rowsData[rowId].update = {
+								'_contactid_status' : RSNImportSourcesJs.RECORDID_STATUS_SELECT,//ligne prête à être importée
+								'_contactid' : selectedContactId
+							};
+						}
 						//cellules sélectionnées depuis les données du contact connu
 						var $selectedCells = $contact.find('td.selected-value[data-fieldname]');
 						$selectedCells.each(function(){
-							rowsData[rowId].update[this.getAttribute('data-fieldname')] = $(this).children('.value').html();
+							rowsData[rowId].update[this.getAttribute('data-fieldname')] = thisInstance.getCellValue(this);
 						});
 					}
-					//Contact inconnu
-					else {
-						//créer
+					//Contact inconnu (Créer ou Annuler)
+					else if($contactChecked.length) {
+						//Ne conserve la référence au contact que dans le rétablissement de l'état "A vérififer"
+						if($contactChecked.data('status') != RSNImportSourcesJs.RECORDID_STATUS_CHECK)
+							proposedContactIds = '';
 						rowsData[rowId].update = {
-							'_contactid_status' : $radio.data('status'),//RSNImportSourcesJs.RECORDID_STATUS_CREATE | SKIP,
-							'_contactid' : null
+							'_contactid_status' : $contactChecked.data('status'),//RSNImportSourcesJs.RECORDID_STATUS_CREATE | SKIP | CHECK,
+							'_contactid' :  proposedContactIds 
 						};
 					}
 					return true;
@@ -434,20 +512,33 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 				//cellules sélectionnées ou modifiées depuis les données de l'import
 				var $selectedCells = $tr.find('td.selected-value[data-fieldname],td.changed-value[data-fieldname]');
 				$selectedCells.each(function(){
-					if(!rowsData[rowId].update)
-						rowsData[rowId].update = {};
-					var value;
+					var value
+					, fieldName = this.getAttribute('data-fieldname');
 					if (/cell-deleted/.test(this.className)){
-					    if (rowsData[rowId].update[this.getAttribute('data-fieldname')])
-						return;//supprimée mais déjà attribuée (par contact)
+					    if (rowsData[rowId].update
+						&& rowsData[rowId].update[fieldName])
+							return;//supprimée mais déjà attribuée (par contact)
 					    value = '';
 					}
 					else if (/changed-value/.test(this.className)
-					    && rowsData[rowId].update[this.getAttribute('data-fieldname')])
+					&& rowsData[rowId].update
+					&& rowsData[rowId].update[fieldName])
 					    return; //modifiée mais déjà attribuée (par contact)
 					else
-					    value = $(this).children('.value').html();
-					rowsData[rowId].update[this.getAttribute('data-fieldname')] = value;
+					    value = thisInstance.getCellValue(this);
+					//Si on connait le contact final, mise à jour de la fiche Contact
+					if (/selected-value/.test(this.className)
+					&& selectedContactId) {
+						if(!rowsData[rowId].updateContacts)
+							rowsData[rowId].updateContacts = { id : selectedContactId };
+						rowsData[rowId].updateContacts[fieldName] = value;
+					}
+					
+					//Mise à jour des données d'import, au cas où la valeur ait changé	
+					if(!rowsData[rowId].update)
+						rowsData[rowId].update = {};
+					rowsData[rowId].update[fieldName] = value;
+					
 				});
 				
 			});

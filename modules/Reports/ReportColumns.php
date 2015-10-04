@@ -155,4 +155,3 @@ function getSecondaryColumnsHTML($module)
 
 $report_column->display("ReportColumns.tpl");
 ?>
-

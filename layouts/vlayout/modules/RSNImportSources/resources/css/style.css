@@ -2,16 +2,16 @@
   background-color : inherit;
 }
 .ROW_STATUS_COLORS_1 {
-  background-color : green;
+  background-color : #3FF13F;
 }
 .ROW_STATUS_COLORS_2 {
   background-color : yellow;
 }
 .ROW_STATUS_COLORS_3 {
-  background-color : green;
+  background-color : #3FF13F;
 }
 .ROW_STATUS_COLORS_4 {
-  background-color : green;
+  background-color : #3FF13F;
 }
 .ROW_STATUS_COLORS_4 {
   background-color : #FFC0A0;
@@ -21,7 +21,7 @@
   background-color : rgb(220, 184, 184);;
 }
 .RECORDID_STATUS_COLORS_1 {
-  background-color : green;
+  background-color : #3FF13F;
 }
 .RECORDID_STATUS_COLORS_2 {
   background-color : #A0FFC0;
@@ -55,14 +55,16 @@
 }
 .importContents td.select-contact
 , .importContents td.create-contact
-, .importContents td.skip-row {
+, .importContents td.skip-row
+, .importContents td.restore-check-row {
   min-width: 70px;
   padding-bottom: 1em !important;
   white-space: nowrap;
 }
 .importContents td.select-contact label
 , .importContents td.create-contact label
-, .importContents td.skip-row label {
+, .importContents td.skip-row label
+, .importContents td.restore-check-row label {
   margin-bottom: 0px;
 }
 
@@ -78,6 +80,12 @@
   text-align: left;
   padding-left: 2em;
 }
+.importContents .preimport-row th:first-of-type label {
+  height: 2em;
+  float: left;
+  width: 70%;
+}
+
 .importContents tr.preimport-row:first-of-type,
 .importContents tr.contact-row + tr.preimport-row {
   border-top: 2px inset gray;
@@ -95,7 +103,18 @@
 }
 .importContents tr.preimport-row td {
   border-left: 1px solid #CCCCCC;
+  min-width: 5em;/*toolbox no-wrap*/
 }
+.importContents tr.preimport-row .value input
+, .importContents tr.preimport-row .value select {
+  margin-top: 8px;
+  width: 100%;
+  min-width: 8em;
+}
+.importContents tr.preimport-row .value select{
+  width: initial;
+}
+
 a.address-sna-check {
   float: right;
   color: #8888CC;
@@ -111,6 +130,14 @@ a.address-sna-check:active {
 }
 
 
+.importContents div.cell-toolbox {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin: 5px;
+  /*white-space: nowrap;*//*useless, set min-width*/
+  /*min-width: 4em;*/
+}
 .importContents .cell-toolbox a {
   cursor: pointer;
   padding: 0px 2px;

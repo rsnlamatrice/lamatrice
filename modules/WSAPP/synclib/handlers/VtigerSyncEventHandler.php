@@ -95,4 +95,3 @@ class WSAPP_VtigerSyncEventHandler extends SyncHandler{
 	 }
 }
 ?>
-
