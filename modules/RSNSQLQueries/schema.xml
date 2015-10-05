@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnsqlqueries</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnsqlqueries` (
+  `rsnsqlqueriesid` int(11) NOT NULL DEFAULT '0',
+    `query` TEXT DEFAULT NULL,
+    `description` VARCHAR(128) DEFAULT NULL,
+    `prescript` VARCHAR(128) DEFAULT NULL,
+    `executiontime` INT(11) DEFAULT NULL,
+    `name` VARCHAR(128) DEFAULT NULL,
+    `postscript` VARCHAR(128) DEFAULT NULL,
+    PRIMARY KEY (`rsnsqlqueriesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnsqlqueriescf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnsqlqueriescf` (
+  `rsnsqlqueriesid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnsqlqueriesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

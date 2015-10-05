@@ -1448,7 +1448,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 			//if(!preg_match('/\sUNION\s+SELECT\s/i', $query)){//TODO UNION for root query
 				$currentUser = Users_Record_Model::getCurrentUserModel();
 				$queryGenerator = new QueryGenerator($relatedModuleName, $currentUser);
-				$queryGenerator->setFields($relatedListFields);;
+				$queryGenerator->setFields($relatedListFields);
 				$selectColumnSql = $queryGenerator->getSelectClauseColumnSQL();
 				//TODO BUG : UNION is broken
 				$newQuery = preg_split('/\sFROM\s/i', $query); //ED150226
@@ -1497,6 +1497,8 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				,'vtiger_crmentity.crmid, vtiger_crmentity.smownerid, vtiger_crmentity.setype, vtiger_activity.*'
 				,$relationQuery);
 			break;
+		 case 'RSNStatistics':
+		 	return false;
 		}
 		switch($relatedModule->getName()){
 		 case 'Calendar':

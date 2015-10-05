@@ -172,6 +172,7 @@ $languageStrings = array(
 	'Invoice'=>'Invoice',
 	'MailManager' => 'Mail Manager',
 	'Activities' => 'Activities',
+	'STAT_FIELDS' => 'Statistical Fields',
 
 
 	//Basic String Translation

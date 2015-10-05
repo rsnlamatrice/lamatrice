@@ -36,7 +36,7 @@ class Vtiger_Util_Helper {
 					);
 					$files[$name] = self::transformUploadedFiles($files[$name], FALSE);
 				}
-			}else {
+			} else {
 				$files[$name] = $file;
 			}
 		}
@@ -285,6 +285,8 @@ class Vtiger_Util_Helper {
 		 	$fieldName = 'rsncity';
 		 	break;
 		 case 'mailingzip':
+		 case 'otherzip':
+		 case 'address_zip':
 		 	$fieldName = 'rsnzipcode';
 		 	break;
 		 case 'rsnmoderegl':

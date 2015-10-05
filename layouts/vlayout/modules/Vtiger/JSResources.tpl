@@ -93,7 +93,12 @@
 	<script type="text/javascript" src="libraries/jquery/datepicker/js/datepicker.js"></script>
 	<script type="text/javascript" src="libraries/jquery/dangrossman-bootstrap-daterangepicker/date.js"></script>
 	<script type="text/javascript" src="libraries/jquery/jquery.ba-outside-events.min.js"></script>
-        
+
+    {*AV150723*}
+  <!-- autocomplete lib -->
+  <script type="text/javascript" src="resources/autocompletor/autocompletor.js"></script>
+  <link rel="stylesheet" type="text/css" href="resources/autocompletor/autocompletor.css" media="screen" />
+
 	{foreach key=index item=jsModel from=$SCRIPTS}
 		<script type="{$jsModel->getType()}" src="{$jsModel->getSrc()}?&v={$VTIGER_VERSION}"></script>
 	{/foreach}

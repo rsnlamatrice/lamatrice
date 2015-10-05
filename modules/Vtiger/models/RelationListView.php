@@ -356,15 +356,24 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		$db = PearDatabase::getInstance();
 		//echo __FILE__; $db->setDebug(true);
 		
-		$parentModule = $this->getParentRecordModel()->getModule();
+		$parentRecordModel = $this->getParentRecordModel();
+		$parentModule = $parentRecordModel->getModule();
 		$relationModule = $this->getRelationModel()->getRelationModuleModel();
 		
-		$relatedColumnFields = $relationModule->getConfigureRelatedListFields();
-		if(count($relatedColumnFields) <= 0){
-			$relatedColumnFields = $relationModule->getRelatedListFields();
+		//AV150702
+		switch($relationModule->getName()) {
+		case "RSNStatistics":
+			//AUR_TMP
+			$relatedColumnFields = $relationModule->getRelatedListFields($parentModule->getName());
+			$query = RSNStatistics_Utils_Helper::getRelationQuery($parentModule->getName(), $parentRecordModel->getId());
+			break;
+		default:
+			$relatedColumnFields = $relationModule->getConfigureRelatedListFields();
+			if(count($relatedColumnFields) <= 0){
+				$relatedColumnFields = $relationModule->getRelatedListFields();
+			}
+			$query = $this->getRelationQuery();		
 		}
-		
-		$query = $this->getRelationQuery();
 		
 		//ED150704
 		$searchKey = $this->get('search_key');
@@ -435,15 +444,24 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 				$newRow[$relatedColumnFields[$col]] = $val;
 			    }
 			}
-		
-			//To show the value of "Assigned to"
-			$newRow['assigned_user_id'] = $row['smownerid'];
-			$record = Vtiger_Record_Model::getCleanInstance($relationModule->get('name'));
-			$record->setData($newRow)->setModuleFromInstance($relationModule);
-			$record->setId($row['crmid']);
-			/*if(isset($relatedRecordList[$row['crmid']]))
-				var_dump($newRow);*/
-			$relatedRecordList[$row['crmid']] = $record;
+
+			//AV150702
+			switch($relationModule->getName()) {
+			case "RSNStatistics":
+				$record = Vtiger_Record_Model::getCleanInstance($relationModule->get('name'));
+				$record->setData($newRow)->setModuleFromInstance($relationModule);
+				$relatedRecordList[$i] = $record;
+				break;
+			default:
+				//To show the value of "Assigned to"
+				$newRow['assigned_user_id'] = $row['smownerid'];
+				$record = Vtiger_Record_Model::getCleanInstance($relationModule->get('name'));
+				$record->setData($newRow)->setModuleFromInstance($relationModule);
+				$record->setId($row['crmid']);
+				/*if(isset($relatedRecordList[$row['crmid']]))
+					var_dump($newRow);*/
+				$relatedRecordList[$row['crmid']] = $record;	
+			}
 		}
 		//var_dump($relatedRecordList);
 		/* ED140917
@@ -471,6 +489,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 	}
 
 	public function getHeaders() {
+		$relationModel = $this->getRelationModel();
 		$relatedModuleModel = $this->getRelatedModuleModel();//ED150817
 
 		$summaryFieldsList = $relatedModuleModel->getSummaryViewFieldsList();
@@ -496,7 +515,12 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$headerFields = array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
 		    	
 			break;
-	
+		
+		//AUR_TMP AV150702
+		case "RSNStatistics":
+			$headerFields = $relatedModuleModel->getRelationHeaders($this->parentRecordModel->getModule()->getName());//array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
+			break;
+
 		default:
 			$parentRecordModule = $this->getParentRecordModel();
 			$parentModule = $parentRecordModule->getModule();

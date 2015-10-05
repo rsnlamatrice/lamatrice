@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnstatisticsfields</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnstatisticsfields` (
+  `rsnstatisticsfieldsid` int(11) NOT NULL DEFAULT '0',
+    `fieldname` VARCHAR(128) DEFAULT NULL,
+    `fieldtype` VARCHAR(128) DEFAULT NULL,
+    `uniquecode` VARCHAR(128) DEFAULT NULL,
+    `statisticparameters` VARCHAR(128) DEFAULT NULL,
+    `rsnsqlqueriesid` INT(19) DEFAULT NULL,
+    PRIMARY KEY (`rsnstatisticsfieldsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnstatisticsfieldscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnstatisticsfieldscf` (
+  `rsnstatisticsfieldsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnstatisticsfieldsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
