@@ -720,13 +720,14 @@ jQuery.Class("Vtiger_List_Js",{
 		var module = app.getModuleName();
 		var parent = app.getParentModuleName();
 		var cvId = this.getCurrentCvId();
+		var viewName = app.getViewName();//ED151005
 		var orderBy = jQuery('#orderBy').val();
 		var sortOrder = jQuery("#sortOrder").val();
 		var params = {
 			'module': module,
 			'parent' : parent,
 			'page' : pageNumber,
-			'view' : "List",
+			'view' : viewName,
 			'viewname' : cvId,
 			'orderby' : orderBy,
 			'sortorder' : sortOrder

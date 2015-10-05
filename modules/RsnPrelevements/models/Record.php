@@ -47,7 +47,7 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 		$recordModel->set('rsnprelevementsid', $this->getId());
 		$recordModel->set('is_first', !$this->get('dejapreleve') ? 1 : 0);
 		$recordModel->set('dateexport', $dateVir->format('d-m-Y'));
-		$recordModel->set('montant', decimalFormat($this->get('montant')));
+		$recordModel->set('montant', str_replace('.', ',', ($this->get('montant'))));
 		$recordModel->set('separum', $this->get('separum'));
 		$recordModel->set('iban', $this->get('sepaibanbban'));
 		$recordModel->set('bic', $this->get('sepabic'));

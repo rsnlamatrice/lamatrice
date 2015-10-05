@@ -442,6 +442,10 @@ class RSNInvoiceHandler extends VTEventHandler {
 		if($grandTotal < 20 && $foreigner){
 			//walou
 		}
+		// Pour moins de 4, nada  TODO A vérifier avec Bate
+		elseif($grandTotal < 4){
+			//walou
+		}
 		// Pour plus de 48 € de commande ou de dons, un an
 		elseif($grandTotal >= 48){
 			$nbTrimestresGratos = 4;

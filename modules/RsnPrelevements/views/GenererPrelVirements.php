@@ -43,27 +43,6 @@ class RsnPrelevements_GenererPrelVirements_View extends Vtiger_Index_View {
 	
 	function getExistingPrelVirements($moduleModel, $dateVir){
 		$db = PearDatabase::getInstance();
-		/*$prelvtypes = $moduleModel->getTypesPrelvntsToGenerateVirnts();
-		$query = 'SELECT IFNULL(vtiger_rsnprelvirement.is_first, 0) AS dejapreleve, COUNT(*) AS nombre, SUM(vtiger_rsnprelvirement.montant) AS `montant`
-			FROM vtiger_rsnprelvirement
-			JOIN vtiger_crmentity
-				ON vtiger_rsnprelvirement.rsnprelvirementid = vtiger_crmentity.crmid
-			JOIN vtiger_rsnprelevements
-				ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_rsnprelvirement.rsnprelevementsid
-			JOIN vtiger_crmentity rsnprelevements_crmentity
-				ON vtiger_rsnprelevements.rsnprelevementsid = rsnprelevements_crmentity.crmid
-			WHERE vtiger_crmentity.deleted  = 0
-			AND rsnprelevements_crmentity.deleted  = 0
-			AND vtiger_rsnprelevements.prelvtype IN (' . generateQuestionMarks($prelvtypes) . ')
-			AND vtiger_rsnprelvirement.dateexport 
-				BETWEEN DATE_SUB(?, INTERVAL 7 DAY)
-				AND DATE_ADD(?, INTERVAL 7 DAY)
-			GROUP BY IFNULL(vtiger_rsnprelvirement.is_first, 0)';
-			
-		$params = array();
-		$params = array_merge($params, $prelvtypes);
-		$params[] = $dateVir->format('Y-m-d');
-		$params[] = $dateVir->format('Y-m-d');*/
 		
 		$params = array();
 		$query = $moduleModel->getExistingPrelVirementsQuery($dateVir, false, $params);
