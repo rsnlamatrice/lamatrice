@@ -60,7 +60,6 @@ var dHdr = '$columnString';
 var dSrc = '$columnValString';
 </script>";
 ?>
-
 <OBJECT Name="vtigerVM" codebase="http://<?php echo $_SERVER["HTTP_HOST"] ?>/modules/Settings/vtigerVM.CAB#Version1,0,0,1"
 id="objMMPage" classid="clsid:42C50C38-1984-4393-A736-890357E7112B" width=0 height=0></object><!--METADATA TYPE="MsHtmlPageDesigner" endspan-->
 <Script>

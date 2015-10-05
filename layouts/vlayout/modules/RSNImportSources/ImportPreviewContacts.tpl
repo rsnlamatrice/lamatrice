@@ -8,6 +8,7 @@ $IMPORT_RECORD_MERGED = 4;
 $IMPORT_RECORD_FAILED = 5;*}
 <div class="marginLeftZero" style="overflow: scroll;width:95%;">
 	{if sizeof($PREVIEW_DATA) gt 0}
+		<param id="rsnnpai-picklistvalues" value="{htmlspecialchars (json_encode($RSNNPAI_VALUES))}"/>
 		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
 			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
 				<tr>
@@ -29,9 +30,13 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<input type="hidden" name="search_key[]" value="_contactid_status"/>
 												<input type="hidden" name="operator[]" value="e"/>
 												<select name="search_value[]">
-													{foreach item=LABEL key=STATUS_ID from=$CONTACTID_STATUS}
-														{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$STATUS_ID}
-														<option class="{$ROW_CLASS}" value="{$STATUS_ID}">{$LABEL}</option>
+													{foreach item=CONTACTID_STATUS key=GROUP_LABEL from=$CONTACTID_STATUS_GROUPS}
+														{if $GROUP_LABEL}<optgroup label="{$GROUP_LABEL}">{/if}
+														{foreach item=LABEL key=STATUS_ID from=$CONTACTID_STATUS}
+															{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$STATUS_ID}
+															<option class="{$ROW_CLASS}" value="{$STATUS_ID}">{$LABEL}</option>
+														{/foreach}
+														{if $GROUP_LABEL}</optgroup>{/if}
 													{/foreach}
 												</select>
 											</div>
@@ -46,7 +51,8 @@ $IMPORT_RECORD_FAILED = 5;*}
 											</div>
 											
 										</th>
-										{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
+										{*foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE*}
+										{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
 											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
 											{/if}
@@ -58,9 +64,9 @@ $IMPORT_RECORD_FAILED = 5;*}
 								{foreach item=ROW key=ROW_INDEX from=$MODULE_DATA}
 									{assign var=ROW_OFFSET value=$ROW_OFFSET + 1}
 									{if $ROW['status']}
-										{assign var=ROW_CLASS value='ROW_STATUS_COLORS_'|cat:$ROW['status']}
+										{assign var=ROW_CLASS value='ROW_STATUS ROW_STATUS_COLORS_'|cat:$ROW['status']}
 									{else}
-										{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$ROW['_contactid_status']}
+										{assign var=ROW_CLASS value='RECORDID_STATUS RECORDID_STATUS_COLORS_'|cat:$ROW['_contactid_status']}
 									{/if}
 									<tr class="preimport-row {$ROW_CLASS}" data-rowid="{$ROW['id']}">
 										<th colspan="3">
@@ -77,15 +83,39 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<a href="#" class="address-sna-check">SNA</a>
 											{/if}
 										</th>
-										{foreach key=FIELD_NAME item=VALUE from=$ROW}
+										{*foreach key=FIELD_NAME item=VALUE from=$ROW*}
+										{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
 											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
 												{continue}
 											{/if}
-											<td data-fieldname="{$FIELD_NAME}">
+											<td data-fieldname="{$FIELD_NAME}"
+												{if $FIELD_NAME eq 'rsnnpai'
+													|| $FIELD_NAME eq 'listesn'
+													|| $FIELD_NAME eq 'listesd'
+													|| $FIELD_NAME eq 'ip'
+													|| $FIELD_NAME eq 'date'}
+													class="no-swap-value not-trashable"
+												{elseif $FIELD_NAME eq 'email'
+													|| $FIELD_NAME eq 'mailingcountry'}
+													class="no-swap-value"
+												{elseif $FIELD_NAME eq 'lastname'
+													|| $FIELD_NAME eq 'mailingcity'}
+													class="no-swap-value-right"
+												{elseif $FIELD_NAME eq 'firstname'
+													|| $FIELD_NAME eq 'mailingstreet2'}
+													class="no-swap-value-left"
+												{/if}
+											>
 											{if $FIELD_NAME eq '_contactid_status'}
-												{vtranslate('LBL_RECORDID_STATUS_'|cat:$VALUE, $MODULE)}
+												{vtranslate('LBL_RECORDID_STATUS_'|cat:$ROW[$FIELD_NAME], $MODULE)}
+											{elseif $FIELD_NAME eq 'rsnnpai' && ($ROW[$FIELD_NAME] || $ROW[$FIELD_NAME] === '0')}
+												<span class="value">
+													<input type="hidden" value="{$ROW[$FIELD_NAME]}"/>
+													<span class="{$RSNNPAI_VALUES[$ROW[$FIELD_NAME]]['icon']}"></span>
+													{$RSNNPAI_VALUES[$ROW[$FIELD_NAME]]['label']}
+												</span>
 											{else}
-												<span class="value">{$VALUE}</span>
+												<span class="value">{$ROW[$FIELD_NAME]}</span>
 											{/if}
 											</td>
 										{/foreach}
@@ -110,18 +140,29 @@ $IMPORT_RECORD_FAILED = 5;*}
 														<span class="icon-rsn-small-isgroup{$CONTACT_ROW['isgroup']}"></span>
 													</a>
 												</th>
-												{foreach key=FIELD_NAME item=VALUE from=$ROW}
+												{*foreach key=FIELD_NAME item=VALUE from=$ROW*}
+												{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
 													{if $FIELD_NAME[0] === '_'}
 														{continue}
 													{/if}
-													{assign var=CONTACT_FIELD value=$CONTACTS_FIELDS_MAPPING[$FIELD_NAME]}
 													{if $CONTACT_FIELD && array_key_exists($CONTACT_FIELD, $CONTACT_ROW)}
 														<td data-fieldname="{$FIELD_NAME}"
-														{if straccentscmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
+														{if $FIELD_NAME eq 'mailingstreet2'
+														|| $FIELD_NAME eq 'rsnnpai'
+														|| $FIELD_NAME eq 'mailingpobox'
+														|| straccentscmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
 															class="values-eq"
 														{else}
 															class="values-neq"
-														{/if}><span class="value">{$CONTACT_ROW[$CONTACT_FIELD]}</span>
+														{/if}>
+															<span class="value">
+															{if $FIELD_NAME eq 'rsnnpai'}
+																<input type="hidden" value="{$CONTACT_ROW[$CONTACT_FIELD]}"/>
+																<span class="{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['icon']}"/></span>{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['label']}
+															{else}
+																{$CONTACT_ROW[$CONTACT_FIELD]}
+															{/if}
+															</span>
 														</td>
 													{/if}
 												{/foreach}
@@ -145,6 +186,15 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}"
 													{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}checked="checked"{/if}/>
 													<i>&nbsp;annuler</i></label></td>
+											{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SKIP
+											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE
+											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_CREATE
+											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SELECT}
+											<td colspan="1" class="restore-check-row">
+												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_CHECK}"
+													title="remettre cette ligne en attente de validation"/>
+													<i>&nbsp;vérifier</i></label></td>
+											{/if}
 										</tr>
 									{/if}
 								{/foreach}
@@ -159,18 +209,20 @@ $IMPORT_RECORD_FAILED = 5;*}
 			<tfoot>
 				{if $IMPORTABLE_ROWS_COUNT}
 					<tr>
-						<td class="style1" align="left">
-							<label><input class="all-rows-selection" type="checkbox"
-								{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
-									checked="checked"
-								{/if}>sélectionner toutes les lignes</label>
-						{if $VALIDATE_PREIMPORT_URL}
-							<param name="VALIDATE_PREIMPORT_URL" value="{$VALIDATE_PREIMPORT_URL}"/>
-							<button type="submit" name="validate-preimport-rows" class="btn btn-success">
-								<strong>{'LBL_VALIDATE_SELECTED_ROWS'|@vtranslate:$MODULE}</strong>
-							</button>
+						{if $VALIDABLE_CONTACTS_COUNT}
+							<td class="style1" align="left">
+								<label><input class="all-rows-selection" type="checkbox"
+									{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
+										checked="checked"
+									{/if}>sélectionner toutes les lignes</label>
+							{if $VALIDATE_PREIMPORT_URL}
+								<param name="VALIDATE_PREIMPORT_URL" value="{$VALIDATE_PREIMPORT_URL}"/>
+								<button type="submit" name="validate-preimport-rows" class="btn btn-success">
+									<strong>{'LBL_VALIDATE_SELECTED_ROWS'|@vtranslate:$MODULE}</strong>
+								</button>
+							{/if}
+							</td>
 						{/if}
-						</td>
 						<td class="style1" align="left">
 							Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}{if true || $SOURCE_ROWS_COUNT neq $IMPORTABLE_ROWS_COUNT}&nbsp;/&nbsp;{$SOURCE_ROWS_COUNT}{/if}
 							&nbsp;-&nbsp;Affichée{if $ROW_OFFSET > 1}s{/if} : {$ROW_OFFSET} 

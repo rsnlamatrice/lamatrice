@@ -2775,5 +2775,10 @@ var_dump($params);*/
                 " ORDER BY $tableColumnsString," . $this->table_name . "." . $this->table_index . " ASC";
         return $query;
     }
+
+    //AV150
+    public function getMode() {
+    	return $this->mode;
+    }
 }
 ?>

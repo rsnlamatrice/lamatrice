@@ -217,4 +217,3 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
 
 }
 ?>
-

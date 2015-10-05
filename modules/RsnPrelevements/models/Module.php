@@ -156,7 +156,8 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 			AND vtiger_rsnprelevements.etat = 0
 			AND vtiger_rsnprelevements.prelvtype IN (' . generateQuestionMarks($prelvtypes) . ')
 			AND vtiger_rsnprelevements.periodicite IN (' . generateQuestionMarks($periodicites) . ')
-			AND vtiger_rsnprelevements.rsnprelevementsid NOT IN (' . $query . ')';
+			AND vtiger_rsnprelevements.rsnprelevementsid NOT IN (' . $query . ')
+			';
 		return $query;
 	}
 
@@ -168,6 +169,9 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 		$db = PearDatabase::getInstance();
 		$params = array();
 		$query = $this->getPrelevementsToGenerateVirntsQuery($dateVir, $params);
+		/*echo "<pre>$query</pre>";
+		var_dump( $params);
+		die();*/
 		$result = $db->pquery($query, $params);
 		if(!$result){
 			$db->echoError('getPrelevementsToGenerateVirnts');

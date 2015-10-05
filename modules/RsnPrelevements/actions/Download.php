@@ -71,7 +71,10 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		//create the document tag, you can specify the version and encoding here
 		$xml->startDocument();
 		
-		$xml->startElement('Document');
+		$node = $xml->startElement('Document');
+		$xml->writeAttribute('xmlns',"urn:iso:std:iso:20022:tech:xsd:pain.008.001.02");
+		$xml->writeAttribute('xmlns:xsi',"http://www.w3.org/2001/XMLSchema-intance");
+		
 		return $xml;
 	}
 		

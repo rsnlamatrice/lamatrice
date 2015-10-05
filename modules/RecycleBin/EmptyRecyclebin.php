@@ -21,4 +21,3 @@ $parenttab = getParentTab();
 
 header("Location: index.php?module=RecycleBin&action=RecycleBinAjax&file=index&parenttab=$parenttab&mode=ajax");
 ?>
-

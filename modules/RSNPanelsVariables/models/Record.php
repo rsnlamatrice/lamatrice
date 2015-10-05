@@ -49,7 +49,7 @@ class RSNPanelsVariables_Record_Model extends Vtiger_Record_Model {
 					$uitype = 7;
 					break;
 				case "date":
-					$uitype = 5;
+					$uitype = 5;//bug -> USER_MODEL not defined ...
 					break;
 				case "color":
 					$uitype = 401;

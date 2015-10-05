@@ -128,7 +128,7 @@ class QueryGenerator {
 
 	/*ED150928*/
 	public function addField($fieldName) {
-		if(! array_key_exists( 'total', $this->fields ))
+		if(! in_array( $fieldName, $this->fields ))
 			$this->fields[] = $fieldName;
 	}
 
@@ -1106,19 +1106,28 @@ class QueryGenerator {
 					}
 				}
 			}
+			//ED151005
+			elseif($this->isNumericType($fieldDataType)) {
+				switch($operator) {
+				case 's': 
+					$operator = 'e';
+					break;
+				case 'k':
+					$operator = 'n';
+					break;
+				}
+			}
 
-			if($field->getFieldName() == 'birthday' && !$this->isRelativeSearchOperators(
-					$operator)) {
+			if($field->getFieldName() == 'birthday' && !$this->isRelativeSearchOperators($operator)) {
 				$value = "DATE_FORMAT(".$db->quote($value).", '%m%d')";
 			} else {
 				$value = $db->sql_escape_string($value);
 			}
-
 			if(trim($value) == '' && ($operator == 's' || $operator == 'ew' || $operator == 'c' || $operator == 'ct' || $operator == 'ca') //ED150619 ct
-					&& ($this->isStringType($fieldDataType) ||
-					$fieldDataType == 'picklist' ||
-					$fieldDataType == 'multipicklist' ||
-					$fieldDataType == 'buttonset')) {
+					&& (	$this->isStringType($fieldDataType) ||
+						$fieldDataType == 'picklist' ||
+						$fieldDataType == 'multipicklist' ||
+						$fieldDataType == 'buttonset')) {
 				$sql[] = "LIKE ''";
 				continue;
 			}

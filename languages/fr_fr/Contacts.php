@@ -102,8 +102,11 @@ $languageStrings = array(
         
         'firstname'         => 'prénom',
         'lastname'          => 'nom',
+		'rsnnpai'			=> 'NPAI',
         'mailingstreet3'    => 'compl. d\'adresse',
-        'mailingstreet2'    => 'adresse',
+        'mailingstreet2'    => 'struct, chez, ...',
+        'mailingstreet'    => 'adresse',
+		'mailingpobox'		=> 'boîte postale',
         'mailingzip'        => 'code postal',
         'mailingcity'       => 'ville',
         'mailingcountry'    => 'pays',

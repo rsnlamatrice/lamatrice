@@ -13,7 +13,6 @@
  ************************************************************************************/
 ?>
 <?php echo '<?xml version="1.0"?>'; ?>
-
 <module>
 <exporttime><?php echo date("Y-m-d H:i:s"); ?></exporttime>
 <name><?php echo $o_module->name; ?></name>

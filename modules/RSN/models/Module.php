@@ -257,6 +257,12 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		;
 		
 		$list[] = array(
+				'sub' => 'DefinePrelevementsPeriodicites',
+				'label' => 'Affectation des périodicités des prélèvements'
+			)
+		;
+		
+		$list[] = array(
 				'sub' => 'PicklistValuesTransfer',
 				'label' => 'Transfert des listes de valeurs'
 			)

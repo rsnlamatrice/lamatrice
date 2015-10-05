@@ -545,4 +545,41 @@ function str_to_float($str){
 	}
 }
 
+/* ED151004 */
+if(!function_exists('array_swap_assoc')) {
+    function array_swap_assoc($key1, $key2, $array) {
+        $newArray = array ();
+        foreach ($array as $key => $value) {
+            if ($key == $key1) {
+                $newArray[$key2] = $array[$key2];
+            } elseif ($key == $key2) {
+                $newArray[$key1] = $array[$key1];
+            } else {
+                $newArray[$key] = $value;
+            }
+        }
+        return $newArray;
+    }
+}
+if(!function_exists('array_move_assoc')) {
+	/* Move an item after an other one in an associative array */
+    function array_move_assoc($findKey, $keyBefore, $array) {
+        $newArray = array ();
+		$found = false;
+        foreach ($array as $key => $value) {
+            if ($key == $findKey) {
+                continue;
+            } else {
+                $newArray[$key] = $value;
+            }
+			if ($key == $keyBefore) {
+				$found = true;
+                $newArray[$findKey] = $array[$findKey];
+            }
+        }
+		if(!$found && array_key_exists($findKey)) //$keyBefore does not exists
+			$newArray[$findKey] = $array[$findKey];
+        return $newArray;
+    }
+}
 ?>

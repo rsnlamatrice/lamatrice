@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnstatistics</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnstatistics` (
+  `rsnstatisticsid` int(11) NOT NULL DEFAULT '0',
+    `stat_name` VARCHAR(128) DEFAULT NULL,
+    `relmodule` VARCHAR(128) DEFAULT NULL,
+    PRIMARY KEY (`rsnstatisticsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnstatisticscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnstatisticscf` (
+  `rsnstatisticsid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnstatisticsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>

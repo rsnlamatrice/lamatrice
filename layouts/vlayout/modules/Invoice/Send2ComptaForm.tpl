@@ -13,6 +13,7 @@
 		<button type="button" class="close " data-dismiss="modal" aria-hidden="true">&times;</button>
 		<h3 id="massEditHeader">{vtranslate($MODULE, $MODULE)} - {vtranslate('LBL_SEND2COMPTA', $MODULE)}</h3>
 	</div>
+	{if $INVOICES_COUNT}
 	<form class="form-horizontal send2Compta" id="massEdit" name="MassEdit" method="post" action="index.php">
 		<input type="hidden" name="module" value="{$MODULE}" />
 		<input type="hidden" name="view" value="Send2Compta" />
@@ -43,5 +44,14 @@
 		</div>
 		{include file='ModalFooter.tpl'|@vtemplate_path:$MODULE}
 	</form>
+	{else}
+		<div name='massEditContent'>
+			<div class="modal-body">
+				<div class="row-fluid" style="margin-top: 2em; font-size: larger;">
+					Aucune donnée à exporter
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
 {/strip}

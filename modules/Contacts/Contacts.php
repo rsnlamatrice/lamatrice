@@ -2048,6 +2048,68 @@ class Contacts extends CRMEntity {
 		}
 		return $list_buttons;
 	}
+
+	//AUR_TMP
+	function get_statistics_data($id, $cur_tab_id, $rel_tab_id, $actions=false) {//tmp (do not put this method here -> need a generic method not depanding to the module!!!!!!!!!!!!
+		global $log, $singlepane_view,$currentModule,$current_user;
+		$log->debug("Entering get_statistics(".$id.") method ...");
+		$this_module = $currentModule;
+
+		$related_module = vtlib_getModuleNameById($rel_tab_id);
+		require_once("modules/$related_module/$related_module.php");
+		$other = new $related_module();
+		vtlib_setup_modulevars($related_module, $other);
+		$singular_modname = vtlib_toSingular($related_module);
+
+		$parenttab = getParentTab();
+
+		if($singlepane_view == 'true')
+			$returnset = '&return_module='.$this_module.'&return_action=DetailView&return_id='.$id;
+		else
+			$returnset = '&return_module='.$this_module.'&return_action=CallRelatedList&return_id='.$id;
+
+		$button = '';
+
+		if($actions && getFieldVisibilityPermission($related_module, $current_user->id, 'contact_id', 'readwrite') == '0') {
+			if(is_string($actions)) $actions = explode(',', strtoupper($actions));
+			if(in_array('SELECT', $actions) && isPermitted($related_module,4, '') == 'yes') {
+				$button .= "<input title='".getTranslatedString('LBL_SELECT')." ". getTranslatedString($related_module). "' class='crmbutton small edit' type='button' onclick=\"return window.open('index.php?module=$related_module&return_module=$currentModule&action=Popup&popuptype=detailview&select=enable&form=EditView&form_submit=false&recordid=$id&parenttab=$parenttab','test','width=640,height=602,resizable=0,scrollbars=0');\" value='". getTranslatedString('LBL_SELECT'). " " . getTranslatedString($related_module) ."'>&nbsp;";
+			}
+			if(in_array('ADD', $actions) && isPermitted($related_module,1, '') == 'yes') {
+				$button .= "<input title='".getTranslatedString('LBL_ADD_NEW'). " ". getTranslatedString($singular_modname) ."' class='crmbutton small create'" .
+					" onclick='this.form.action.value=\"EditView\";this.form.module.value=\"$related_module\"' type='submit' name='button'" .
+					" value='". getTranslatedString('LBL_ADD_NEW'). " " . getTranslatedString($singular_modname) ."'>&nbsp;";
+			}
+		}
+
+		$userNameSql = getSqlForNameInDisplayFormat(array('first_name'=>
+							'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
+
+		$relatedStatsTablesNames = RSNStatistics_Utils_Helper::getRelatedStatsTablesNames("Contacts");
+
+
+		/*$query = "SELECT `vtiger_rsnstatsfields`.*, `vtiger_crmentity`.*
+			FROM `vtiger_rsnstatsfields`
+			INNER JOIN `vtiger_crmentity`
+				ON `vtiger_crmentity`.`crmid` = `vtiger_rsnstatsfields`.`rsnstatsfieldsid`
+			LEFT JOIN `vtiger_crmentityrel`
+				ON `vtiger_crmentityrel`.`relcrmid` = `vtiger_rsnstatsfields`.`rsnstatsfieldsid`
+			INNER JOIN `vtiger_rsnstatistics`
+				ON `vtiger_rsnstatistics`.`rsnstatisticsid` = `vtiger_crmentityrel`.`crmid`
+			WHERE `vtiger_crmentity`.`deleted` = 0
+			AND `vtiger_rsnstatistics`.`relmodule` = 'Contacts'";*/
+			//AUR_TMP
+		$query = "SELECT * FROM " . $relatedStatsTablesNames[0] . " WHERE crmid=".$id;
+		//echo $query;
+
+		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
+
+		if($return_value == null) $return_value = Array();
+		$return_value['CUSTOM_BUTTON'] = $button;
+
+		$log->debug("Exiting get_invoices method ...");
+		return $return_value;
+	}
 }
 
 ?>

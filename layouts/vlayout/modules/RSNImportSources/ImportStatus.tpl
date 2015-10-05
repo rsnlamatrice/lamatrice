@@ -42,7 +42,7 @@ jQuery(document).ready(function() {
 						onclick="location.href='index.php?for_module={$FOR_MODULE}&module={$MODULE}&view=Index&mode=continueHaltedImport&import_id={$IMPORT_ID}&ImportSource={$IMPORT_SOURCE}'"><strong>{'LBL_REACTIVATE'|@vtranslate:$MODULE}</strong></button>
 				{elseif $IMPORT_STATUS eq Import_Queue_Action::$IMPORT_STATUS_VALIDATING}
 					{'LBL_VALIDATING'|@vtranslate:$MODULE}
-					<button class="btn" name="continue" style="margin-left: 2em;"
+					<button class="btn btn-success" name="continue" style="margin-left: 2em;"
 						id="validatePreImportData"
 						onclick="location.href='index.php?for_module={$FOR_MODULE}&module={$MODULE}&view=Index&mode=validatePreImportData&import_id={$IMPORT_ID}&ImportSource={$IMPORT_SOURCE}'"><strong>{'LBL_SHOW'|@vtranslate:$MODULE}</strong></button>
 				{else}

@@ -16,7 +16,7 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 		return parent::process($request);
 	}
 	
-	/*
+	/* Validation des lignes de pré-imports
 	 */
 	public function validateRows(Vtiger_Request $request) {
 		
@@ -43,16 +43,57 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 				$params[] = $fieldValue;
 			}
 			
-			$query .= ' WHERE id = ?';
-			$params[] = $rowId;
-			
-			$result = $db->pquery($query, $params);
-			if(!$result){
-				$db->echoError();
-				var_dump($query, $params);
-				break;
+			if($nParam > 0){
+					
+				$query .= ' WHERE id = ?';
+				$params[] = $rowId;
+				
+				$result = $db->pquery($query, $params);
+				if(!$result){
+					$db->echoError();
+					var_dump($query, $params);
+					break;
+				}	
 			}
 		}
+		//Mise à jour de l'enregistrement final associé
+		if($rowData['update'.$moduleName]){
+			$recordId = $rowData['update'.$moduleName]['id'];
+			
+			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+			
+			//Archive l'ancienne adresse
+			switch($moduleName){
+			case 'Contacts' :
+				if(array_key_exists('mailingstreet', $rowData['update'.$moduleName])
+				|| array_key_exists('mailingzip', $rowData['update'.$moduleName])
+				|| array_key_exists('mailingcity', $rowData['update'.$moduleName])
+				){
+					$addressRecord = $recordModel->createContactAddressesRecord('mailing', true);
+				}
+				
+				//email
+				$fieldName = 'email';
+				if($rowData['update'.$moduleName][$fieldName]
+				&& $rowData['update'.$moduleName][$fieldName] != $recordModel->get($fieldName)){
+					$recordModel->createContactEmailsRecord(true);
+				}
+				break;
+			default:
+				break;
+			}//switch($moduleName)
+			
+			$recordModel->set('mode', 'edit');
+			foreach($rowData['update'.$moduleName] as $fieldName => $fieldValue){
+				if($fieldName != 'id')
+					$recordModel->set($fieldName, $fieldValue);
+			}
+			$recordModel->save();
+		}
+
+		$response = new Vtiger_Response();
+		$response->setResult(true);
+		$response->emit();
 	}
 	
 

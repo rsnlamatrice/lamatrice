@@ -91,6 +91,10 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->defineMissingLabels();
 			break;
 		
+		case 'DefinePrelevementsPeriodicites' :
+			$this->definePrelevementsPeriodicites();
+			break;
+		
 		case 'TestsED' :
 			$this->freeDebug();
 			break;
@@ -232,6 +236,42 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			}
 			else {
 				//par exemple, le crmentity existe mais pas le contactdetails...
+			}
+		}
+		var_dump($updated);
+	}
+	
+	private function definePrelevementsPeriodicites(){
+		
+		$db = PearDatabase::getInstance();
+		
+		$query = 'SELECT vtiger_crmentity.crmid, vtiger_rsnprelevements.periodicite
+			, EXTRACT(MONTH FROM MAX(vtiger_rsnprelvirement.dateexport)) AS dateexport
+			FROM vtiger_rsnprelevements
+			JOIN vtiger_rsnprelvirement
+				ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_rsnprelevements.rsnprelevementsid
+			JOIN vtiger_crmentity
+				ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_crmentity.crmid 
+			WHERE deleted = 0
+			AND vtiger_rsnprelevements.periodicite <> "Mensuel"
+			GROUP BY vtiger_crmentity.crmid, vtiger_rsnprelevements.periodicite';
+
+		$result = $db->pquery($query);
+		$noOfRows = $db->num_rows($result);
+		$updated = array();
+		for($i=0; $i<$noOfRows; ++$i) {
+			$row = $db->query_result_rowdata($result, $i);
+			
+			$periodicite = $row['periodicite'];
+			$periodName = explode(' ', $periodicite)[0];
+			$nbMonths = ($periodName == 'Trimestriel' ? 3 : ($periodName == 'Bimestriel' ? 2 : $periodName == 'Semestre' ? 6 : ($periodName == 'Annuel' ? 12 : 0)));
+			if ($nbMonths) {
+				//$db->pquery('UPDATE vtiger_rsnprelevements SET periodicite=? WHERE crmid=?', array($periodicite, $row['crmid']));
+			
+				$updated[$row['crmid']] = $row['periodicite'] . " -> " . $periodicite;
+			}
+			else {
+				var_dump('Erreur : ', $periodicite, $periodName);
 			}
 		}
 		var_dump($updated);
