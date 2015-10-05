@@ -17,16 +17,16 @@
  *
  * 
  */
-class RSNPanelsVariables_Record_Model extends Vtiger_Record_Model {
+class RSNQueriesVariables_Record_Model extends Vtiger_Record_Model {
 
 	/**
 	 * retourne le Field associé à la variable d'après le champ fieldid
 	 * @param $columnName = FALSE, équivaut à $this->get('fieldid')
 	 * 	de la forme tablename.columnname
 	 */
-	public function getQueryField($columnName = FALSE){
+	public function getQueryField($columnName = FALSE){ //AUR_TMP !!!!!!
 		if(!$columnName)
-			$columnName = $this->get('fieldid');
+			$columnName = $this->get('referencefield');
 		$fieldObject = Vtiger_Cache::get('rsnpanelvariable-field', $columnName);
 		if($fieldObject){
 			$fieldObject->set('fieldvalue', $this->get('defaultvalue'));
@@ -49,7 +49,7 @@ class RSNPanelsVariables_Record_Model extends Vtiger_Record_Model {
 					$uitype = 7;
 					break;
 				case "date":
-					$uitype = 5;//bug -> USER_MODEL not defined ...
+					$uitype = 5;
 					break;
 				case "color":
 					$uitype = 401;
@@ -88,42 +88,39 @@ class RSNPanelsVariables_Record_Model extends Vtiger_Record_Model {
 		}
 		return null;
 	}
+
 	
-	
-	
-	
-	
-	/* ED150117 */
-	public function getSQLOperation(&$value, &$params = FALSE){
-		//var_dump($this);
-		switch(html_entity_decode ( $this->get('rsnvariableoperator') )){
-			case '<' :
-			case 'inférieur' :
-				return ' < ?';
-			case '>' :
-			case 'supérieur' :
-				return ' > ?';
-			case '<=' :
-			case 'inférieur ou égal' :
-				return ' <= ?';
-			case '>=' :
-			case 'supérieur ou égal' :
-				return ' >= ?';
-			case '=' :
-			case 'égal' :
-				return ' = ?';
-			case '<>' :
-			case '!=' :
-			case 'différent' :
-				return ' != ?';
-			case 'contient' :
-				return ' LIKE CONCAT(\'%\', ?, \'%\')';
-			case 'ne contient pas' :
-				return ' NOT LIKE CONCAT(\'%\', ?, \'%\')';
-			default:
-				//var_dump(html_entity_decode ( $this->get('rsnvariableoperator') ));
-				return ' # operateur "' . $this->get('rsnvariableoperator') . '" inconnu #';
-				return $this->get('RSNVariableOperator');
-		}
-	}
+	// /* ED150117 */
+	// public function getSQLOperation(&$value, &$params = FALSE){
+	// 	//var_dump($this);
+	// 	switch(html_entity_decode ( $this->get('rsnvariableoperator') )){
+	// 		case '<' :
+	// 		case 'inférieur' :
+	// 			return ' < ?';
+	// 		case '>' :
+	// 		case 'supérieur' :
+	// 			return ' > ?';
+	// 		case '<=' :
+	// 		case 'inférieur ou égal' :
+	// 			return ' <= ?';
+	// 		case '>=' :
+	// 		case 'supérieur ou égal' :
+	// 			return ' >= ?';
+	// 		case '=' :
+	// 		case 'égal' :
+	// 			return ' = ?';
+	// 		case '<>' :
+	// 		case '!=' :
+	// 		case 'différent' :
+	// 			return ' != ?';
+	// 		case 'contient' :
+	// 			return ' LIKE CONCAT(\'%\', ?, \'%\')';
+	// 		case 'ne contient pas' :
+	// 			return ' NOT LIKE CONCAT(\'%\', ?, \'%\')';
+	// 		default:
+	// 			//var_dump(html_entity_decode ( $this->get('rsnvariableoperator') ));
+	// 			return ' # operateur "' . $this->get('rsnvariableoperator') . '" inconnu #';
+	// 			return $this->get('RSNVariableOperator');
+	// 	}
+	// }
 }

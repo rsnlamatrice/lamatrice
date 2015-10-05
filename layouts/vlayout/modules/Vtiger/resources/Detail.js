@@ -331,6 +331,10 @@ jQuery.Class("Vtiger_Detail_Js",{
 				thisInstance.registerEventForRelatedInvoiceList();
 				
 				aDeferred.resolve(responseData);
+				
+				//AV150813
+				var event = new Event('contentsLoad');
+				document.dispatchEvent(event);
 			},
 			function(){
 

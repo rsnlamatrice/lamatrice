@@ -180,6 +180,31 @@ class VTCacheUtils {
 		return false;
 	}
 
+	//AV150715
+	static $_statsfieldinfo_cache = array();
+	static function updateStatsFieldInfo($fieldUniquecode, $fieldname, $uitype, $typeofdata) {
+
+		self::$_statsfieldinfo_cache[$fieldUniquecode] = array(
+			'statId'     		=> $statId,
+			'fieldUniquecode' 	=> $fieldUniquecode,
+			'fieldname' 		=> $fieldname,
+			'uitype'    		=> $uitype,
+			'typeofdata'		=> $typeofdata,
+		);
+        Vtiger_Cache::set('statsFieldInfo', $fieldUniquecode, self::$_statsfieldinfo_cache[$fieldUniquecode]);
+	}
+	//AV150715
+	static function lookupStatsFieldInfo($fieldUniquecode) {
+        $fieldInfo = Vtiger_Cache::get('statsFieldInfo', $fieldUniquecode);
+        if($fieldInfo){
+            return $fieldInfo;
+        }else if(isset(self::$_statsfieldinfo_cache[$fieldUniquecode])) {
+			return self::$_statsfieldinfo_cache[$fieldUniquecode];
+		}
+		
+		return false;
+	}
+
 	/** Entityname information */
 	static $_module_entityname_cache = array();
 	static function updateEntityNameInfo($module, $data) {

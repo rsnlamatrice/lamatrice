@@ -743,4 +743,9 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		$focus->id = $this->getId();
 		return $focus;
 	}
+
+	//AV150813
+	public function isUnsavedRecord() {
+		return (!$this->getId());
+	}
 }

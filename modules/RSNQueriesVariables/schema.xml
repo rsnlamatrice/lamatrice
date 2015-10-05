@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnqueriesvariables</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnqueriesvariables` (
+  `rsnqueriesvariablesid` int(11) NOT NULL DEFAULT '0',
+    `name` VARCHAR(128) DEFAULT NULL,
+    `label` VARCHAR(128) DEFAULT NULL,
+    `defaultvalue` VARCHAR(128) DEFAULT NULL,
+    `referencefield` VARCHAR(128) DEFAULT NULL,
+    `type` VARCHAR(128) DEFAULT NULL,
+    PRIMARY KEY (`rsnqueriesvariablesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnqueriesvariablescf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnqueriesvariablescf` (
+  `rsnqueriesvariablesid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnqueriesvariablesid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
