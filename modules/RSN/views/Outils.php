@@ -254,6 +254,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 				ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_crmentity.crmid 
 			WHERE deleted = 0
 			AND vtiger_rsnprelevements.periodicite <> "Mensuel"
+			/*AND vtiger_rsnprelevements.periodicite NOT LIKE "Trimestriel%"*/
 			GROUP BY vtiger_crmentity.crmid, vtiger_rsnprelevements.periodicite';
 
 		$result = $db->pquery($query);
@@ -263,12 +264,22 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$row = $db->query_result_rowdata($result, $i);
 			
 			$periodicite = $row['periodicite'];
+			$lastMonth = $row['dateexport'];
 			$periodName = explode(' ', $periodicite)[0];
-			$nbMonths = ($periodName == 'Trimestriel' ? 3 : ($periodName == 'Bimestriel' ? 2 : $periodName == 'Semestre' ? 6 : ($periodName == 'Annuel' ? 12 : 0)));
+			$nbMonths = ($periodName == 'Trimestriel' ? 3 : ($periodName == 'Bimestriel' ? 2 : ($periodName == 'Semestre' ? 6 : ($periodName == 'Semestriel' ? 6 : ($periodName == 'Annuel' ? 12 : 0)))));
 			if ($nbMonths) {
-				//$db->pquery('UPDATE vtiger_rsnprelevements SET periodicite=? WHERE crmid=?', array($periodicite, $row['crmid']));
-			
-				$updated[$row['crmid']] = $row['periodicite'] . " -> " . $periodicite;
+				$nMonth = fmod($lastMonth, $nbMonths);
+				if($nMonth == 0) $nMonth = $nbMonths;
+				if($periodicite == "$periodName $nMonth")
+					continue;
+				$periodicite = "$periodName $nMonth";
+				/*$update = $db->pquery('UPDATE vtiger_rsnprelevements SET periodicite=? WHERE rsnprelevementsid=?', array($periodicite, $row['crmid']));
+				if(!$update){
+					$db->echoError();
+					var_dump('Erreur : ', $row['periodicite'], $periodicite);
+				}
+				else*/
+					$updated[$row['crmid']] = $row['periodicite'] . " -> " . $periodicite;
 			}
 			else {
 				var_dump('Erreur : ', $periodicite, $periodName);
