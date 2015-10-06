@@ -339,13 +339,22 @@ class Vtiger_InventoryPDFController {
 	function buildHeaderBillingAddress() {
 		$billPoBox	= $this->focusColumnValues(array('bill_pobox'));
 		$billStreet = $this->focusColumnValues(array('bill_street'));
+		$billStreet3 = $this->focusColumnValues(array('bill_street3'));
 		$billCity	= $this->focusColumnValues(array('bill_city'));
 		$billState	= $this->focusColumnValues(array('bill_state'));
 		$billCountry = $this->focusColumnValues(array('bill_country'));
 		$billCode	=  $this->focusColumnValues(array('bill_code'));
-		$address	= $this->joinValues(array($billPoBox, $billStreet), ' ');
+		//ED151006
+		if($billStreet3){
+			$address	= $billStreet;
+			$address .= "\n".$this->joinValues(array($billPoBox, $billStreet3), ',');
+		}
+		else {
+			$address	= $this->joinValues(array($billPoBox, $billStreet), ' ');
+		}
 		$address .= "\n".$this->joinValues(array($billCity, $billState), ',')." ".$billCode;
-		$address .= "\n".$billCountry;
+		if($billCountry &&  $billCountry!= 'France')//ED151006 // TODO France en constante
+			$address .= "\n".$billCountry;
 		return $address;
 	}
 

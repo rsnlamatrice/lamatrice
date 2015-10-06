@@ -250,7 +250,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 					if(!$reglementId){
 						//TODO: manage error
-						echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
+						echo "<pre><code>Impossible d'enregistrer le nouveau réglement</code></pre>";
 						foreach ($reglementData as $reglementLine) {
 							$entityInfo = array(
 								'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,

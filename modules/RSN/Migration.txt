@@ -23,6 +23,7 @@
 	- TODO Prélèvements_HistoRejets 4D
 	- TODO LiensAdresses
 	- Fichier Prélèvements.csv
+		- Exécuter la mise à jour des périodicités depuis le module La Matrice
 	- Fichiers Prélèvements_HistoDétail[-*].csv ( Ordres de virement )
 	- Fichier Critères.csv ( Critères de contacts )
 	- Fichiers Critères_Adr[-*].csv ( Relation entre Critères et contacts )

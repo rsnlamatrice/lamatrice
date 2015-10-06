@@ -12,11 +12,14 @@ include_once 'include/InventoryPDFController.php';
 
 class Vtiger_PurchaseOrderPDFController extends Vtiger_InventoryPDFController{
 	function buildHeaderModelTitle() {
+		/* ED151006 Le label est donné par le type de document
 		$singularModuleNameKey = 'SINGLE_'.$this->moduleName;
 		$translatedSingularModuleLabel = getTranslatedString($singularModuleNameKey, $this->moduleName);
 		if($translatedSingularModuleLabel == $singularModuleNameKey) {
 			$translatedSingularModuleLabel = getTranslatedString($this->moduleName, $this->moduleName);
-		}
+		}*/
+		$potype = $this->focusColumnValue('potype');
+		$translatedSingularModuleLabel = getTranslatedString("LBL_POTYPE_$potype", $this->moduleName);	
 		return sprintf("%s: %s", $translatedSingularModuleLabel, $this->focusColumnValue('purchaseorder_no'));
 	}
 
@@ -59,7 +62,13 @@ class Vtiger_PurchaseOrderPDFController extends Vtiger_InventoryPDFController{
 	}
 
 	function getWatermarkContent() {
-		return $this->focusColumnValue('postatus');
+		//ED151006 switch et vtranslate
+		switch($this->focusColumnValue('postatus')){
+		case 'Cancelled':
+			return vtranslate($this->focusColumnValue('postatus'), $this->moduleName);	
+		default:
+			return '';
+		}
 	}
 }
 ?>
