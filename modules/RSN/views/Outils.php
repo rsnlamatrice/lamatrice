@@ -273,18 +273,21 @@ class RSN_Outils_View extends Vtiger_Index_View {
 				if($periodicite == "$periodName $nMonth")
 					continue;
 				$periodicite = "$periodName $nMonth";
-				/*$update = $db->pquery('UPDATE vtiger_rsnprelevements SET periodicite=? WHERE rsnprelevementsid=?', array($periodicite, $row['crmid']));
+				$update = $db->pquery('UPDATE vtiger_rsnprelevements SET periodicite=? WHERE rsnprelevementsid=?', array($periodicite, $row['crmid']));
 				if(!$update){
 					$db->echoError();
 					var_dump('Erreur : ', $row['periodicite'], $periodicite);
 				}
-				else*/
+				else
 					$updated[$row['crmid']] = $row['periodicite'] . " -> " . $periodicite;
 			}
 			else {
 				var_dump('Erreur : ', $periodicite, $periodName);
 			}
 		}
-		var_dump($updated);
+		echo "<pre>";
+		print_r($updated);
+		echo "</pre>";
+		
 	}
 }
