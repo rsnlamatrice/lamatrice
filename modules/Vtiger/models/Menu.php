@@ -23,7 +23,7 @@ class Vtiger_Menu_Model extends Vtiger_Module_Model {
         $currentUser = Users_Record_Model::getCurrentUserModel();
         $userPrivModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
         $restrictedModulesList = array('Emails', 'ProjectMilestone', 'ProjectTask', 'ModComments', 'Rss', 'Portal',
-					'Integration', 'PBXManager', 'Dashboard', 'Home', 'vtmessages', 'vttwitter');
+					'Integration', 'PBXManager', 'Dashboard', 'Home', 'vtmessages', 'vttwitter', 'RsnPrelevements');
 	/*echo __FILE__."<br><br><br><br><br>";
 	var_dump($roleid);
 	echo_callstack();
@@ -56,6 +56,7 @@ $db->setDebug(true);*/
                     $menuModels[$module->getName()] = $module;
             }
         }
+
         return $menuModels;
     }
 
