@@ -120,8 +120,12 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$zip = RSNImportSources_Utils_Helper::checkZipCodePrefix('7812Moulbaix', 'Belgique');
-		var_dump($zip);
+		
+		$module = Vtiger_Module_Model::getInstance('PurchaseOrder');
+		foreach( $module->getBlocks() as $block1)
+			if($block1->get('label') === 'LBL_ADDRESS_INFORMATION')
+				break;
+		var_dump($block1);
 	}
 	
 	

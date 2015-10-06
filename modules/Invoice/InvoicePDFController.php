@@ -58,7 +58,14 @@ class Vtiger_InvoicePDFController extends Vtiger_InventoryPDFController{
 	}
 
 	function getWatermarkContent() {
-		return $this->focusColumnValue('invoicestatus');
+		//ED151006 switch et vtranslate
+		switch($this->focusColumnValue('invoicestatus')){
+		case 'Credit Invoice':
+		case 'Cancelled':
+			return vtranslate($this->focusColumnValue('invoicestatus'), $this->moduleName);	
+		default:
+			return '';
+		}
 	}
 }
 ?>

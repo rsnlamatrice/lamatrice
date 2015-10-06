@@ -98,10 +98,10 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	 * @return contact record
 	 */
 	function getRelatedMainContact() {
-			foreach($this->getRelatedMainContacts() as $contactId => $contact){
-				return Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
-			}
-			return false;
+		foreach($this->getRelatedMainContacts() as $contactId => $contact){
+			return Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
+		}
+		return false;
 	}
 	
 	/**

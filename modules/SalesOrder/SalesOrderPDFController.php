@@ -38,7 +38,7 @@ class Vtiger_SalesOrderPDFController extends Vtiger_InventoryPDFController{
 		$quoteName = $this->resolveReferenceLabel($this->focusColumnValue('quote_id'), 'Quotes');
 		
 		$subjectLabel = getTranslatedString('Subject', $this->moduleName);
-        $quoteNameLabel = getTranslatedString('Quote Name', $this->moduleName);
+		$quoteNameLabel = getTranslatedString('Quote Name', $this->moduleName);
 		$customerNameLabel = getTranslatedString('Customer Name', $this->moduleName);
 		$contactNameLabel = getTranslatedString('Contact Name', $this->moduleName);
 		$purchaseOrderLabel = getTranslatedString('Purchase Order', $this->moduleName);
@@ -48,7 +48,7 @@ class Vtiger_SalesOrderPDFController extends Vtiger_InventoryPDFController{
 				$customerNameLabel	=>	$customerName,
 				$contactNameLabel	=>	$contactName,
 				$purchaseOrderLabel =>  $purchaseOrder,
-                $quoteNameLabel => $quoteName
+				$quoteNameLabel => $quoteName
 			);
 		return $modelColumn1;
 	}
@@ -72,7 +72,13 @@ class Vtiger_SalesOrderPDFController extends Vtiger_InventoryPDFController{
 	}
 
 	function getWatermarkContent() {
-		return $this->focusColumnValue('sostatus');
+		//ED151006 switch et vtranslate
+		switch($this->focusColumnValue('sostatus')){
+		case 'Cancelled':
+			return vtranslate($this->focusColumnValue('sostatus'), $this->moduleName);	
+		default:
+			return '';
+		}
 	}
 }
 ?>
