@@ -18,6 +18,10 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 		return false ;
 	}
 
+	public function isQuickCreateSupported() {
+		return false ;
+	}
+
 	function getGenererPrelVirementsUrl($dateVir = false){
 		if($dateVir)
 			$dateVir = $this->getNextDateToGenerateVirnts($dateVir);
