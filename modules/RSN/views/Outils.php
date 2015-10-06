@@ -91,7 +91,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->defineMissingLabels();
 			break;
 		
-		case 'DefinePrelevementsPeriodicites' :
+		case 'Migration/DefinePrelevementsPeriodicites' :
 			$this->definePrelevementsPeriodicites();
 			break;
 		
@@ -258,9 +258,11 @@ class RSN_Outils_View extends Vtiger_Index_View {
 				ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_crmentity.crmid 
 			WHERE deleted = 0
 			AND vtiger_rsnprelevements.periodicite <> "Mensuel"
-			/*AND vtiger_rsnprelevements.periodicite NOT LIKE "Trimestriel%"*/
+			AND vtiger_rsnprelevements.periodicite NOT LIKE "Trimestriel%"
 			GROUP BY vtiger_crmentity.crmid, vtiger_rsnprelevements.periodicite';
-
+		
+		//TODO contrôler les Trimestriel
+		
 		$result = $db->pquery($query);
 		$noOfRows = $db->num_rows($result);
 		$updated = array();

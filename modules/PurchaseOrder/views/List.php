@@ -9,4 +9,24 @@
  *************************************************************************************/
 
 class PurchaseOrder_List_View extends Inventory_List_View {
+
+	/**
+	 * Function to get the list of Script models to be included
+	 * @param Vtiger_Request $request
+	 * @return <Array> - List of Vtiger_JsScript_Model instances
+	 */
+	function getHeaderScripts(Vtiger_Request $request) {
+		$headerScriptInstances = parent::getHeaderScripts($request);
+		$moduleName = $request->getModule();
+
+		$jsFileNames = array(
+			'modules.Invoice.resources.List',
+		);
+
+		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
+		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
+                //Met Invoice avant PurchaseOrder car ce dernier hérite du premier
+                $headerScriptInstances = array_swap_assoc('modules.Invoice.resources.List', 'modules.PurchaseOrder.resources.List', $headerScriptInstances);
+		return $headerScriptInstances;
+	}
 }

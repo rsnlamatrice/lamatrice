@@ -705,7 +705,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var taxes = recordData.taxes;
 			//ED150602 discount % from account discount type
 			var discountpc = recordData.discountpc;
-			
+			this.checkLineWithSameProduct(recordId, selectedName, parentRow);
 			if(referenceModule == 'Products') {
 				parentRow.data('quantity-in-stock',recordData.quantityInStock);
 			}
@@ -730,6 +730,32 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		}
 
 		jQuery('.qty',parentRow).trigger('focusout');
+	},
+	
+	
+	/* ED151006
+	 * Lors de la sélection d'un produit pour une nouvellle ligne, vérifie si ce produit existe déjà dans une précédente ligne.
+	 * Si c'est le cas, propose le regroupement
+	 */
+	checkLineWithSameProduct : function(productId, productName, newRow){
+		var thisInstance = this
+		, $existing = newRow.siblings().find('input.selectedModuleId[value="' + productId + '"]');
+		if ($existing.length) {
+			var message = "Une autre ligne contient le même article \"" + productName + "\".<br>Voulez-vous reprendre cette ligne ?";
+			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
+				function(e) {
+					var parentRows = $existing.parents('tr.'+ thisInstance.rowClass)
+					, qty = 0.0;
+					parentRows.find('input.qty').each(function(){ qty += parseFloat(this.value.replace(',', '.')); });
+					parentRows.find('.deleteRow').click();
+					newRow.find('input.qty')
+						.val(qty)
+						.focusout();
+				},
+				function(error, err){
+				}
+			);			
+		}
 	},
 	
 	showPopup : function(params) {
@@ -852,7 +878,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		}
 		this.setDiscountTotal(lineItemRow,discountValue)
 			.calculateTotalAfterDiscount(lineItemRow);
-    },
+	},
 
 	/**
 	 * Function which will calculate line item total after discount
@@ -864,7 +890,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var totalAfterDiscount = productTotal - discountTotal;
 		totalAfterDiscount = totalAfterDiscount.toFixed(2);
 		this.setTotalAfterDiscount(lineItemRow,totalAfterDiscount);
-    },
+	},
 
 	/**
 	 * Function which will calculate tax for the line item total after discount
@@ -1659,7 +1685,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			}
 			thisInstance.updateLineItemElementByOrder();
 			var lineItemTable = thisInstance.getLineItemContentsContainer();
-			jQuery('.discountSave',lineItemTable).trigger('click');
+			//ED151006 adds :visible
+			jQuery('.discountSave:visible',lineItemTable).trigger('click');
 			thisInstance.lineItemToTalResultCalculations();
 			thisInstance.saveProductCount();
 			thisInstance.saveSubTotalValue();

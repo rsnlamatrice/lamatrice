@@ -1412,6 +1412,10 @@ class QueryGenerator {
 	 *
 	 * ED150527 : $search_field, $search_text, $operator may be arrays for sub conditions
 	 * see modules/Contacts/models/ListView.php, function getListViewEntries()
+	 * see modules/Inventory/views/ProductsPopup.php, function initializeListViewContents()
+		$searchKey 	= array(array('productname', '', 'productcode'));
+		$searchValue 	= array(array($searchValue, '', $searchValue));
+		$operator 	= array(array('s', 'OR', 's'));
 	 **/
 	private function addUserSearchConditionUnique($search_field, $search_text, $operator, $startingGroup = null){
 		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator);
