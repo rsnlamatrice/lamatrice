@@ -25,6 +25,25 @@ class Inventory_ServicesPopup_View extends Vtiger_Popup_View {
 		//src_module value is added just to stop showing inactive services
 		$request->set('src_module', $request->getModule());
 
+		//ED151006
+		$searchKey = $request->get('search_key');
+		$searchValue = $request->get('search_value');
+		$operator = $request->get('operator');
+		if((!empty($searchKey)) && (!empty($searchValue))) {
+			if($searchKey === 'servicename'){
+				if(!$operator)
+					$operator = 's';
+				//tableau de tableau pour définir le OR
+				$searchKey = 	array(array($searchKey, '', 'productcode'));
+				$searchValue = 	array(array($searchValue, '', $searchValue));
+				$operator = 	array(array($operator, 'OR', 's'));
+				
+				$request->set('search_key', $searchKey);
+				$request->set('search_value', $searchValue);
+				$request->set('operator', $operator);
+			}
+		}
+		
 		parent::initializeListViewContents($request, $viewer);
 		$viewer->assign('MODULE', $request->getModule());
 		$viewer->assign('GETURL', 'getTaxesURL');

@@ -48,6 +48,7 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		$sourceRecord = $request->get('src_record');
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
+		$operator = $request->get('operator');
 		//$searchInput = $request->get('search_input');
 		$currencyId = $request->get('currency_id');
 
@@ -84,8 +85,18 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 			$listViewModel->set('src_record', $sourceRecord);
 		}
 		if((!empty($searchKey)) && (!empty($searchValue))) {
+			if($searchKey === 'productname'
+			|| $searchKey === 'servicename'){
+				if(!$operator)
+					$operator = 's';
+				//tableau de tableau pour définir le OR
+				$searchKey = 	array(array($searchKey, '', 'productcode'));
+				$searchValue = 	array(array($searchValue, '', $searchValue));
+				$operator = 	array(array($operator, 'OR', 's'));
+			}
 			$listViewModel->set('search_key', $searchKey);
 			$listViewModel->set('search_value', $searchValue);
+			$listViewModel->set('operator', $operator);
 			//$listViewModel->set('search_input', $searchInput);
 		}
 

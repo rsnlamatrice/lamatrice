@@ -177,20 +177,8 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 	 * Liste des templates dans vlayout/modules/RSN/Outils/
 	 */
 	public function getOutilsList(){
-		$list = array(
-			array(
-				'sub' => 'List',
-				'label' => 'Le Moulin'
-			)
-		);
-		
-		$list[] = array(
-				'sub' => 'Import4D',
-				'label' => 'Importation 4D'
-			)
-		;
-		
-		$list[] = array(
+		if(date('Y') == '2015' || (date('Y') == '2016' && date('n') == '1')){
+			$list[] = array(
 				'sub' => 'ImportCogilog',
 				'label' => 'Importation Cogilog',
 				
@@ -223,16 +211,25 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 						)
 					),*/
 				)
-			)
-		;
+			);
 		
-		if(date('Y') == '2015')
 			$list[] = array(
-					'view' => 'GrandePurge',
-					'sub' => 'Purge',
-					'label' => 'Grande purge'
+				'sub' => 'Migration',
+				'label' => 'Migration',
+				
+				'children' => array(
+					array(
+						'view' => 'GrandePurge',
+						'sub' => 'Purge',
+						'label' => 'Grande purge'
+					),
+					array(
+						'sub' => 'Migration/DefinePrelevementsPeriodicites',
+						'label' => 'Périodicités des prélèvements',
+					),
 				)
-			;
+			);
+		}
 		
 		$list[] = array(
 				'sub' => 'EditCustomView',
@@ -253,12 +250,6 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		$list[] = array(
 				'sub' => 'DefineMissingLabels',
 				'label' => 'Affectation des labels manquants'
-			)
-		;
-		
-		$list[] = array(
-				'sub' => 'DefinePrelevementsPeriodicites',
-				'label' => 'Affectation des périodicités des prélèvements'
 			)
 		;
 		
