@@ -47,6 +47,7 @@ class RSN {
 			$this->add_users_default_module_field();
 			$this->add_vendors_fields();
 			$this->add_salesorder_fields();
+			$this->add_purchaseorders_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -321,26 +322,22 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$existingFields = $module->getFields();
 		$newFields = array(
 			'socomment' 	=> array( 'columntype' => 'TEXT', 'uitype' => '19',	),
+			'bill_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_sobillads', 'label' => 'Billing Street 2' ),
+			'bill_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_sobillads', 'label' => 'Billing Street 3' ),
+			'bill_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_sobillads'),
+			'ship_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_soshipads', 'label' => 'Shipping Street 2' ),
+			'ship_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_soshipads', 'label' => 'Shipping Street 3' ),
+			'ship_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_soshipads' ),
 		);
 		$tableName = 'vtiger_salesordercf';
 		foreach($newFields as $newFieldName => $newField){
 			if($existingFields[$newFieldName]){
 				continue;
 			}
-		
-			//Pas sûr que ce soit nécessaire
-			$sql = "ALTER TABLE `$tableName` ADD `$newFieldName` ".$newField['columntype']." NULL ";
-			$db = PearDatabase::getInstance();
-			$result = $db->query($sql);
-			if(!$result){
-				//$db->echoError();
-				//die($sql);
-				continue;
-			}
 			
 			$field3 = new Vtiger_Field();
 			$field3->name = $newFieldName;
-			$field3->label = $newFieldName;
+			$field3->label = $newField['label'] ? $newField['label'] : $newFieldName;
 			$field3->table = $tableName;
 			$field3->column = $newFieldName;
 			$field3->columntype = $newField['columntype'];
@@ -350,6 +347,38 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		}
 	}
 	
+	
+	static function add_purchaseorders_fields() {
+		$module = Vtiger_Module_Model::getInstance('PurchaseOrder');
+		foreach( $module->getBlocks() as $block1)
+			if($block1->get('label') === 'LBL_ADDRESS_INFORMATION')
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'bill_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_pobillads', 'label' => 'Billing Street 2' ),
+			'bill_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_pobillads', 'label' => 'Billing Street 3' ),
+			'bill_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_pobillads'),
+			'ship_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_poshipads', 'label' => 'Shipping Street 2' ),
+			'ship_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_poshipads', 'label' => 'Shipping Street 3' ),
+			'ship_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_poshipads' ),
+		);
+		foreach($newFields as $newFieldName => $newField){
+			if($existingFields[$newFieldName])
+				continue;
+		
+			$tableName = $newField['tablename'];
+			
+			$field3 = new Vtiger_Field();
+			$field3->name = $newFieldName;
+			$field3->label = $newField['label'] ? $newField['label'] : $newFieldName;
+			$field3->table = $tableName;
+			$field3->column = $newFieldName;
+			$field3->columntype = $newField['columntype'];
+			$field3->uitype = $newField['uitype'] ? $newField['uitype'] : 1;
+			$field3->typeofdata = $newField['typeofdata'] ? $newField['typeofdata'] : 'V~O';
+			$block1->addField($field3);
+		}
+	}
 	
 	static function add_mysql_function_levenshtein(){
 		$db = PearDatabase::getInstance();
