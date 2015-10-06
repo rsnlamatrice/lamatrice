@@ -324,10 +324,10 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 			'socomment' 	=> array( 'columntype' => 'TEXT', 'uitype' => '19',	),
 			'bill_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_sobillads', 'label' => 'Billing Street 2' ),
 			'bill_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_sobillads', 'label' => 'Billing Street 3' ),
-			'bill_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_sobillads'),
+			'bill_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_sobillads', 'label' => 'Address format' ),
 			'ship_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_soshipads', 'label' => 'Shipping Street 2' ),
 			'ship_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_soshipads', 'label' => 'Shipping Street 3' ),
-			'ship_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_soshipads' ),
+			'ship_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_soshipads', 'label' => 'Address format' ),
 		);
 		$tableName = 'vtiger_salesordercf';
 		foreach($newFields as $newFieldName => $newField){
@@ -357,10 +357,10 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$newFields = array(
 			'bill_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_pobillads', 'label' => 'Billing Street 2' ),
 			'bill_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_pobillads', 'label' => 'Billing Street 3' ),
-			'bill_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_pobillads'),
+			'bill_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_pobillads', 'label' => 'Address format'),
 			'ship_street2' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_poshipads', 'label' => 'Shipping Street 2' ),
 			'ship_street3' 	=> array( 'columntype' => 'VARCHAR(255)', 'tablename' => 'vtiger_poshipads', 'label' => 'Shipping Street 3' ),
-			'ship_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_poshipads' ),
+			'ship_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_poshipads', 'label' => 'Address format' ),
 		);
 		foreach($newFields as $newFieldName => $newField){
 			if($existingFields[$newFieldName])
