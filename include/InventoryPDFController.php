@@ -347,12 +347,12 @@ class Vtiger_InventoryPDFController {
 		//ED151006
 		if($billStreet3){
 			$address	= $billStreet;
-			$address .= "\n".$this->joinValues(array($billPoBox, $billStreet3), ',');
+			$address .= "\n".$this->joinValues(array($billStreet3, $billPoBox), ', ');
 		}
 		else {
-			$address	= $this->joinValues(array($billPoBox, $billStreet), ' ');
+			$address	= $this->joinValues(array($billStreet, $billPoBox), ', ');
 		}
-		$address .= "\n".$this->joinValues(array($billCity, $billState), ',')." ".$billCode;
+		$address .= "\n".$this->joinValues(array($billCity, $billState), ', ')." ".$billCode;
 		if($billCountry &&  $billCountry!= 'France')//ED151006 // TODO France en constante
 			$address .= "\n".$billCountry;
 		return $address;
@@ -361,13 +361,22 @@ class Vtiger_InventoryPDFController {
 	function buildHeaderShippingAddress() {
 		$shipPoBox	= $this->focusColumnValues(array('ship_pobox'));
 		$shipStreet = $this->focusColumnValues(array('ship_street'));
+		$shipStreet3 = $this->focusColumnValues(array('ship_street3'));
 		$shipCity	= $this->focusColumnValues(array('ship_city'));
 		$shipState	= $this->focusColumnValues(array('ship_state'));
 		$shipCountry = $this->focusColumnValues(array('ship_country'));
 		$shipCode	=  $this->focusColumnValues(array('ship_code'));
-		$address	= $this->joinValues(array($shipPoBox, $shipStreet), ' ');
-		$address .= "\n".$this->joinValues(array($shipCity, $shipState), ',')." ".$shipCode;
-		$address .= "\n".$shipCountry;
+		//ED151006
+		if($shipStreet3){
+			$address	= $shipStreet;
+			$address .= "\n".$this->joinValues(array($shipStreet3, $shipPoBox), ', ');
+		}
+		else {
+			$address	= $this->joinValues(array($shipStreet, $shipPoBox), ', ');
+		}
+		$address .= "\n".$this->joinValues(array($shipCity, $shipState), ', ')." ".$shipCode;
+		if($shipCountry &&  $shipCountry!= 'France')//ED151006 // TODO France en constante
+			$address .= "\n".$shipCountry;
 		return $address;
 	}
 

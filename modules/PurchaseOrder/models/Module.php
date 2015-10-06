@@ -8,5 +8,12 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-class PurchaseOrder_Module_Model extends Inventory_Module_Model{}
+class PurchaseOrder_Module_Model extends Inventory_Module_Model{
+    /**
+     * Function to get Alphabet Search Field 
+     */
+    public function getAlphabetSearchField(){
+            return 'potype';
+    }
+}
 ?>
