@@ -144,6 +144,8 @@ Vtiger_Detail_Js("Accounts_Detail_Js",{
 	 * Function to register Event for Sorting
 	 */
 	registerEventForRelatedList : function(){
+		this._super();
+		
 		var thisInstance = this;
 		var detailContentsHolder = this.getContentHolder();
 	
@@ -178,16 +180,6 @@ Vtiger_Detail_Js("Accounts_Detail_Js",{
 				}
 			);
 		});
-	}
-	
-	,
-	
-	/**
-	 * Function which will register all the events
-	 */
-	registerEvents : function() {
-		this.registerEventForRelatedList();
-		this._super();
-	}
+	},
 
 });

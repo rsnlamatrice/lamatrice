@@ -51,6 +51,8 @@ $languageStrings = array(
         'LBL_DUPLICATE_AS_ORDER' => 'Dupliquer en Commande fournisseur',
         'LBL_DUPLICATE_AS_RECEIPT' => 'Dupliquer en Bon de réception',
         'LBL_DUPLICATE_AS_INVOICE' => 'Dupliquer en Facture fournisseur',
+        
+        'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
 );
 $jsLanguageStrings = array(
         'JS_SUBJECT_AUTO_POTYPE_order' => 'Cmde fourn.',
