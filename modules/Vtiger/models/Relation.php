@@ -126,6 +126,29 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		return $query;
 	}
 
+	/*
+	 * AV151006
+	 */
+	public function getRecords($parentRecord){
+		$records = [];
+		$db = PearDatabase::getInstance();
+
+		$query = $this->getQuery($parentRecord);
+		$result = $db->pquery($query);
+
+		for($i=0; $i<$db->num_rows($result); $i++) {
+			$row = $db->query_result_rowdata($result, $i);
+
+			$focus = CRMEntity::getInstance($this->getRelationModuleName());
+			$recordModelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', $this->getRelationModuleName());
+			$recordModel = new $recordModelClassName();
+			$recordModel->setData($row)->set('id',$row['crmid'])->setModuleFromInstance($this->getRelationModuleModel())->setEntity($focus);
+			$records[] = $recordModel;
+		}
+		
+		return $records;
+	}
+
 	public function addRelation($sourcerecordId, $destinationRecordId) {
 		$sourceModule = $this->getParentModuleModel();
 		$sourceModuleName = $sourceModule->get('name');
