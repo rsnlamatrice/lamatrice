@@ -7,9 +7,13 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  *************************************************************************************/
-define('ROWSEPAR', "\r\n");//'<tr><td>');
-define('COLSEPAR', "\t");//'<td>');
-
+if(false){
+	define('ROWSEPAR', "\r\n");
+	define('COLSEPAR', "\t");
+} else { //debug
+	define('ROWSEPAR', '<tr><td>');
+	define('COLSEPAR', '<td>');
+}
 class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 	function __construct() {
 		parent::__construct();

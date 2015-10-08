@@ -441,15 +441,132 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 			if($this->needValidatingStep())
 				$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_VALIDATING);
-			else
+			else {
 				$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+				$this->postImportData($module);
+			}
+		
 		}
 		catch(Exception $ex){
 			$this->updateStatus(Import_Queue_Action::$IMPORT_STATUS_HALTED);
 			throw ($ex);
 		}
 	}
+	
+	/**
+	 * Function de traitement post-import
+	 * 	A ce moment, il peut rester des données à importer (memory_limit, par exemple)
+	 */
+	public function postImportData($moduleName){
+		$this->logImportDataDone($moduleName);
+	}
+	
+	/**
+	 * Crée un commentaire pour l'import
+	 * Archive les données qui dont l'import a échoués
+	 */
+	public function logImportDataDone($moduleName){
+			
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, $moduleName);
+		$sql = 'SELECT id FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' LIMIT 1';
 
+		$result = $adb->query($sql);
+		if($result){
+			$numberOfRecords = $adb->num_rows($result);
+	
+			if ($numberOfRecords > 0) {
+				//Pas fini
+				return;
+			}
+			
+			$importRecordModel = $this->getRecordModel();
+			if(!$importRecordModel){
+				var_dump("Impossible de trouver le record");
+				return;
+			}
+			
+			$sql = 'SELECT COUNT(*) AS counter, status
+				FROM ' . $tableName
+				.' GROUP BY status
+				HAVING COUNT(*) > 0
+				ORDER BY status';
+	
+			$result = $adb->query($sql);
+			
+			$text = "Importation de [".vtranslate($moduleName, $moduleName)."] terminée depuis $tableName";
+			$numberOfRecords = $adb->num_rows($result);
+			
+			$logFailedOrSkippedPreImport = false;
+			
+			if($numberOfRecords){
+				while($row = $adb->fetch_row($result))
+					if($row['counter']){
+						$text .= "\r\n" . vtranslate('LBL_IMPORT_RECORD_'.$row['status'], 'Import') . ' : ' . $row['counter'];
+						
+						if($row['status'] == Import_Data_Action::$IMPORT_RECORD_FAILED || $row['status'] == Import_Data_Action::$IMPORT_RECORD_SKIPPED)
+							$logFailedOrSkippedPreImport = true;
+					}
+			}
+			else
+				$text .= "\r\nAucune ligne.";
+		}
+		else {
+			$text = "Importation de [".vtranslate($moduleName, $moduleName)."] terminée\r\nLa table $tableName n'existe plus.";
+		}
+		
+		$currentUserModel = Users_Record_Model::getCurrentUserModel();
+		
+		$record = Vtiger_Record_Model::getCleanInstance('ModComments');
+		$record->set('mode', 'create');
+		
+		$record->set('commentcontent', $text);
+		$record->set('related_to', $importRecordModel->getId());
+		
+		$record->set('assigned_user_id', ASSIGNEDTO_ALL);
+		$record->set('userid', $currentUserModel->getId());
+		
+		$record->save();
+		
+		
+		if($logFailedOrSkippedPreImport){
+			$this->logFailedData($tableName);
+		}
+		
+		return $record;
+	}
+	/**
+	 * Crée un commentaire pour l'import
+	 * Archive les données qui dont l'import a échoués
+	 */
+	private function logFailedData($tableName){
+		$adb = PearDatabase::getInstance();
+		
+		global $root_directory;
+		$logFile = str_replace('\\', '/', $root_directory . 'logs/RSNImportSources_' . $tableName . '_' . date('YmdHis') . '.log');
+		
+		$query = 'SELECT *
+			/*INTO OUTFILE \'' . $logFile . '\' */
+			FROM ' . $tableName . '
+			WHERE status IN ( '. RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED . ',  '. RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED . ' )
+			ORDER BY id';
+			
+		$result = $adb->query($query);
+		if(!$result){
+			var_dump($query);
+			$adb->echoError();
+		}
+		
+		$hFile = fopen($logFile, 'w');
+		$nRow = 0;
+		while($row = $adb->fetch_row($result)){
+			if($nRow++ === 0)
+				fputcsv($hFile, array_keys($row), ';');
+			fputcsv($hFile, $row, ';');
+		}
+		fclose($hFile);
+	}
+	
 	/**
 	 * Method to process to the third step (the import step).
 	 *  It check if the import must be scheduled. If not, it trigger the import.
@@ -943,8 +1060,14 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	public function getRecordModel(){
 		if($this->recordModel)
 			return $this->recordModel;
-		$moduleName = $this->request->get('for_module');
-		$className = $this->request->get('ImportSource');
+		
+		if($this->request){
+			$moduleName = $this->request->get('for_module');
+			$className = $this->request->get('ImportSource');
+		} else {
+			$moduleName = '';
+			$className = preg_replace('/^RSNImportSources_(.+)_View$/', '$1', get_class($this));
+		}
 		if($this->checkPreImportInCache($moduleName, 'getRecordModel', $className))
 			return $this->checkPreImportInCache($moduleName, 'getRecordModel', $className);
 		

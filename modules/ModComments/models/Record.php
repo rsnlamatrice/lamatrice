@@ -148,8 +148,9 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 									'assigned_user_id', 'commentcontent', 'creator', 'id', 'customer', 'reasontoedit', 'userid'));
 
 		$query = $queryGenerator->getQuery();
-		$query = $query ." AND related_to = ? ORDER BY vtiger_crmentity.createdtime DESC
-							LIMIT $startIndex, $limit";
+		$query = $query ." AND related_to = ?
+				ORDER BY vtiger_crmentity.createdtime DESC
+				LIMIT $startIndex, $limit";
 
 		$result = $db->pquery($query, array($parentRecordId));
 		$rows = $db->num_rows($result);
@@ -179,7 +180,8 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 
 		//Condition are directly added as query_generator transforms the
 		//reference field and searches their entity names
-		$query = $query ." AND related_to = ? AND parent_comments = '' ORDER BY vtiger_crmentity.createdtime DESC";
+		//ED151008 "IS NULL OR"
+		$query = $query ." AND related_to = ? AND (parent_comments IS NULL OR parent_comments = '') ORDER BY vtiger_crmentity.createdtime DESC";
 
 		$result = $db->pquery($query, array($parentId));
 		$rows = $db->num_rows($result);
@@ -259,5 +261,12 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function isDeletable() {
 		return false;
+	}
+
+	/**
+	 * Function to save the current Record Model
+	 */
+	public function save() {
+		$this->getModule()->saveRecord($this);
 	}
 }

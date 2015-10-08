@@ -591,7 +591,7 @@ function saveInventoryProductDetails(&$focus, $module, $update_prod_stock='false
 		{
 			addToProductStock($prod_id,$qty);
 		}
-		if($module == 'SalesOrder')
+		elseif($module == 'SalesOrder')
 		{	//ED150713 never used
 			if($updateDemand == '-')
 			{
