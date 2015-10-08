@@ -299,7 +299,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 	 *
 	 * TODO : il faudrait que les imports en cours apparaissent si le for_module est lié à n'importe quel RSNImportSources d'après vtiger_rsnimportsources.modules, càd si l'import apparait dans la liste de sélection.
 	 * Pour l'instant, on ne se base que sur la queue et une table d'import de ce module.
-	 * Or, un import disponible depuis Contacts peut ne faire d'importe que dans une autre table, $importController->getImportModules()
+	 * Or, un import disponible depuis Contacts peut ne faire d'importation que dans une autre table, $importController->getImportModules()
 	 * 	il faudrait pouvoir utiliser $importController->getLockModules()
 	 */
 	function checkImportStatus(Vtiger_Request $request) {

@@ -60,7 +60,6 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			WHERE vtiger_invoicecf.sent2compta IS NULL
-			AND vtiger_invoice.total <> 0
 			AND NOT vtiger_invoice.invoicestatus IN (?)
 			LIMIT 200 /*too long URL*/
 		';
@@ -480,7 +479,6 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			SET vtiger_invoicecf.sent2compta = NOW()
 			WHERE vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
 			AND vtiger_invoicecf.sent2compta IS NULL
-			AND vtiger_invoice.total <> 0
 			AND NOT vtiger_invoice.invoicestatus IN (?)
 		';
 		$params = $selectedIds;

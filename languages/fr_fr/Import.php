@@ -79,4 +79,12 @@ $languageStrings = array(
 	'semicolon'                       => 'Point-virgule'              ,
 	
 	'LBL_MEMORY_IS_OVER'		=> 'Dépassement de mémoire',
+        
+        
+	'LBL_IMPORT_RECORD_0' => 'En attente',
+	'LBL_IMPORT_RECORD_1' => 'Créé',
+	'LBL_IMPORT_RECORD_2' => 'Ignoré',
+	'LBL_IMPORT_RECORD_3' => 'Mis à jour',
+	'LBL_IMPORT_RECORD_4' => 'Fusion',
+	'LBL_IMPORT_RECORD_5' => 'Echec',
 );

@@ -166,4 +166,34 @@ class Products_Module_Model extends Vtiger_Module_Model {
 	public function getAlphabetSearchField(){
 		return 'productcategory,productname'; //TODO invoicestatus ne fonctionne pas
 	}
+	
+	/** ED150619
+	 * Function to get relation query for particular module with function name
+	 * Similar to getRelationQuery but overridable.
+	 * @param <record> $recordId
+	 * @param <String> $functionName
+	 * @param Vtiger_Module_Model $relatedModule
+	 * @return <String>
+	 */
+	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
+		
+		
+		switch($relatedModule->getName()){
+		 case 'SalesOrder':
+			$relationQuery = $this->getRelationQuery($recordId, $functionName, $relatedModule);
+
+			//Compte uniquement le Dépôts-vente actifs
+			$relationQuery .= " AND vtiger_salesorder.sostatus NOT IN ('Cancelled', 'Archived')";
+			break;
+		 default:
+			return parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
+		}
+		
+		return 'SELECT COUNT(*) quantity'
+			. ', \'' . $relatedModule->getName() . '\' module'
+			. ', \'' . $functionName . '\' functionName'
+			. ' FROM (' . 
+					$relationQuery .
+			') `' . $relatedModule->getName() . '_' . $functionName . '_query`';
+	}
 }
