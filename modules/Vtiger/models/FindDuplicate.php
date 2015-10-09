@@ -202,7 +202,7 @@ die(__FILE__);*/
 		//$query = $focus->getQueryForDuplicates($moduleName, $tableColumns, '', false, $moduleQuery, $moduleQuery);
 		//echo "<pre>getQueryForDuplicates.Query : $query</pre>";
 		
-		//$moduleQuery .= ' LIMIT 1000';
+		$moduleQuery .= ' LIMIT 1000';
 		
 		$query = 'SELECT crm1.'.$focus->table_index . ', crm2.'.$focus->table_index . '
 			, 0 AS duplicatestatus
@@ -234,6 +234,10 @@ die(__FILE__);*/
 		}
 	}
 	
+	/**
+	 * Retourne une simple requête sur tous les enregistrements de la table.
+	 * Cette requête est utilisée pour effectuer la recherche de doublons.
+	 */
 	function getScheduledSearchBasicQuery($moduleName, $tableColumns){
 		$moduleModel = $this->getModule();
 		$moduleName = $moduleModel->getName();
@@ -244,7 +248,7 @@ die(__FILE__);*/
 		$queryGenerator->initForAllCustomView();
 		
 		$moduleFields = $moduleModel->getFields();
-		//$queryGenerator->setFields(array_keys($fields));
+		
 		$fields = $tableColumns;
 		$fields[] = 'id';
 		$queryGenerator->setFields($fields);
@@ -264,6 +268,7 @@ die(__FILE__);*/
 	}
 	
 	/* Fields to find duplicates
+	 * @returns $tableColumns
 	 */
 	public function getFindDuplicateFields(){
 		return $this->getModule()->getNameFields();
