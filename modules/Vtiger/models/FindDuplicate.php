@@ -192,7 +192,7 @@ die(__FILE__);*/
 			
 		$moduleQuery = $this->getScheduledSearchBasicQuery($moduleName, $tableColumns);
 		
-		echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
+		//echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
 		
 		$focus = CRMEntity::getInstance($moduleName);
 		$fields = $moduleModel->getFields();
@@ -217,7 +217,7 @@ die(__FILE__);*/
 			$query .= " AND crm1.$tableColumn = crm2.$tableColumn";
 		}
 		
-		echo "<pre>$query</pre>";
+		//echo "<pre>$query</pre>";
 		
 		$query = 'INSERT INTO ' . $duplicateTableName . '
 			(`crmid1`, `crmid2`, `duplicatestatus`, `duplicatefields`, `mergeaction`, `checkdate`)
@@ -225,7 +225,7 @@ die(__FILE__);*/
 			ON DUPLICATE KEY UPDATE mergeaction = mergeaction
 		';
 		
-		echo "<pre>$query</pre>";
+		//echo "<pre>$query</pre>";
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->query($query);
@@ -234,6 +234,10 @@ die(__FILE__);*/
 		}
 	}
 	
+	/**
+	 * Retourne une simple requête sur tous les enregistrements de la table.
+	 * Cette requête est utilisée pour effectuer la recherche de doublons.
+	 */
 	function getScheduledSearchBasicQuery($moduleName, $tableColumns){
 		$moduleModel = $this->getModule();
 		$moduleName = $moduleModel->getName();
@@ -244,7 +248,7 @@ die(__FILE__);*/
 		$queryGenerator->initForAllCustomView();
 		
 		$moduleFields = $moduleModel->getFields();
-		//$queryGenerator->setFields(array_keys($fields));
+		
 		$fields = $tableColumns;
 		$fields[] = 'id';
 		$queryGenerator->setFields($fields);
@@ -264,6 +268,7 @@ die(__FILE__);*/
 	}
 	
 	/* Fields to find duplicates
+	 * @returns $tableColumns
 	 */
 	public function getFindDuplicateFields(){
 		return $this->getModule()->getNameFields();
