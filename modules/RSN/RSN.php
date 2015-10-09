@@ -48,6 +48,7 @@ class RSN {
 			$this->add_vendors_fields();
 			$this->add_salesorder_fields();
 			$this->add_purchaseorders_fields();
+			$this->add_duplicateentities_table();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -442,4 +443,18 @@ DELIMITER ;';
 		$result = $db->pquery($sql);
 	}
 	
+	
+	static function add_duplicateentities_table() {
+		
+		$sql = "CREATE TABLE IF NOT EXISTS `vtiger_duplicateentities` (
+			`crmid1` int(19) NOT NULL,
+			`crmid2` int(19) NOT NULL,
+			`duplicatestatus` int(4) NOT NULL DEFAULT '0',
+			`duplicatefields` varchar(255) DEFAULT NULL,
+			`mergeaction` varchar(255) DEFAULT NULL,
+			`checkdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+		      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+		$db = PearDatabase::getInstance();
+		$db->pquery($sql);
+	}
 }

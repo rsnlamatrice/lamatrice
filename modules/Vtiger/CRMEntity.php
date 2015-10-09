@@ -23,7 +23,7 @@ class Vtiger_CRMEntity extends CRMEntity {
 
 	// Callback function list during Importing
 	var $special_functions = Array('set_import_assigned_user');
-
+	
 	function __construct() {
 		global $log;
 		$this->column_fields = getColumnFields(get_class($this));

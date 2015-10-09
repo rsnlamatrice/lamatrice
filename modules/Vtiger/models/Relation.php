@@ -149,6 +149,24 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		return $records;
 	}
 
+	/*
+	 * AV151006
+	 */
+	public function countRecords($parentRecord){
+		$records = [];
+		$db = PearDatabase::getInstance();
+
+		$query = "SELECT COUNT(*) FROM (" . $this->getQuery($parentRecord) . ") recordQuery;";
+		$result = $db->pquery($query);
+
+		if($db->num_rows($result) > 0) {
+			$row = $db->query_result_rowdata($result, $i);
+			return $row[0];
+		}
+		
+		return 0;
+	}
+
 	public function addRelation($sourcerecordId, $destinationRecordId) {
 		$sourceModule = $this->getParentModuleModel();
 		$sourceModuleName = $sourceModule->get('name');

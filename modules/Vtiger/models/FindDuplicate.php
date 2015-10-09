@@ -12,6 +12,7 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 
 	public function setModule($moduleModel) {
 		$this->module = $moduleModel;
+		return $this;
 	}
 
 	public function getModule() {
@@ -124,11 +125,13 @@ die(__FILE__);*/
         return $fieldValues;
     }
 
-	public static function getInstance($module) {
-		$self = new self();
-		$moduleModel = Vtiger_Module_Model::getInstance($module);
-		$self->setModule($moduleModel);
-		return $self;
+	public static function getInstance($moduleName) {
+
+		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'FindDuplicate', $moduleName);
+		$instance = new $modelClassName();
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+
+		return $instance->setModule($moduleModel);
 	}
 
 	public function getRecordCount() {
@@ -170,5 +173,107 @@ die(__FILE__);*/
 
 		}
 		return $rows;
+	}
+
+	/* Modules concernés par la recherche de doublons
+	 */
+	public static function getScheduledSearchModules(){
+		//TODO $modules = Vtiger_Module_Model::getAll();
+		return array('Contacts');
+	}
+	
+	/* Inject duplicated records in vtiger_duplicateentities table
+	 */
+	public function runScheduledSearch(){
+		$moduleModel = $this->getModule();
+		$moduleName = $moduleModel->getName();
+		$duplicateTableName = $this->getDuplicateEntitiesTable();
+		$tableColumns = $this->getFindDuplicateFields();
+			
+		$moduleQuery = $this->getScheduledSearchBasicQuery($moduleName, $tableColumns);
+		
+		echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
+		
+		$focus = CRMEntity::getInstance($moduleName);
+		$fields = $moduleModel->getFields();
+		/*foreach($tableColumns as $n => $tableColumn)
+			$tableColumns[$n] = $fields[$tableColumn]->table . '.' . $tableColumn;
+		var_dump($tableColumns);*/
+		//$query = $focus->getQueryForDuplicates($moduleName, $tableColumns, '', false, $moduleQuery, $moduleQuery);
+		//echo "<pre>getQueryForDuplicates.Query : $query</pre>";
+		
+		//$moduleQuery .= ' LIMIT 1000';
+		
+		$query = 'SELECT crm1.'.$focus->table_index . ', crm2.'.$focus->table_index . '
+			, 0 AS duplicatestatus
+			, \''.implode(',',$tableColumns).'\' AS  duplicatefields
+			, NULL AS mergeaction
+			, NOW() AS checkdate
+			FROM (' . $moduleQuery . ') as crm1
+			INNER JOIN (' . $moduleQuery . ') as crm2
+				ON crm1.'.$focus->table_index.' < crm2.'.$focus->table_index.' /* rend unique le couple */
+		';
+		foreach($tableColumns as $n => $tableColumn){
+			$query .= " AND crm1.$tableColumn = crm2.$tableColumn";
+		}
+		
+		echo "<pre>$query</pre>";
+		
+		$query = 'INSERT INTO ' . $duplicateTableName . '
+			(`crmid1`, `crmid2`, `duplicatestatus`, `duplicatefields`, `mergeaction`, `checkdate`)
+			' . $query . '
+			ON DUPLICATE KEY UPDATE mergeaction = mergeaction
+		';
+		
+		echo "<pre>$query</pre>";
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->query($query);
+		if(!$result){
+			$db->echoError();
+		}
+	}
+	
+	function getScheduledSearchBasicQuery($moduleName, $tableColumns){
+		$moduleModel = $this->getModule();
+		$moduleName = $moduleModel->getName();
+		$focus = CRMEntity::getInstance($moduleName);
+		$currentUser = Users_Record_Model::getCurrentUserModel();
+		
+		$queryGenerator = new QueryGenerator($moduleName, $currentUser);
+		$queryGenerator->initForAllCustomView();
+		
+		$moduleFields = $moduleModel->getFields();
+		//$queryGenerator->setFields(array_keys($fields));
+		$fields = $tableColumns;
+		$fields[] = 'id';
+		$queryGenerator->setFields($fields);
+		
+		$query = $queryGenerator->getQuery();
+		
+		//Pas tous vide
+		$query .= " AND NOT (";
+		foreach($tableColumns as $n => $tableColumn){
+			$columnTable = $moduleFields[$tableColumn]->table;
+			if($n) $query .= " AND ";
+			$query .= "IFNULL($columnTable.$tableColumn,'') = ''";
+		}
+		$query .= ")";
+		
+		return $query;
+	}
+	
+	/* Fields to find duplicates
+	 */
+	public function getFindDuplicateFields(){
+		return $this->getModule()->getNameFields();
+	}
+	
+	/* Inject duplicated records in vtiger_duplicateentities table
+	 */
+	public function getDuplicateEntitiesTable(){
+		$moduleName = $this->getModule()->getName();
+		$focus = CRMEntity::getInstance($moduleName);
+		return $focus->duplicate_entities_table;
 	}
 }

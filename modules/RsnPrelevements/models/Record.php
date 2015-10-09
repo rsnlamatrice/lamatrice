@@ -70,4 +70,30 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 		$date = new DateTime($this->get('sepadatesignature'));
 		return $date->format('d/m/Y');
 	}
+
+	/**
+	 * AV151008
+	 * @return true if there is one ore more related RsnPrelVirement.
+	 */
+	public function hasRelatedPrelVirements() {
+		$relationModel = Vtiger_Relation_Model::getInstance($this->getModule(), Vtiger_Module_Model::getInstance('RsnPrelVirement'));
+
+		return $relationModel->countRecords($this) > 0;
+	}
+
+	/**
+	 * AV151008
+	 * @return false if there is one ore more related RsnPrelVirement.
+	 */
+	public function isEditable() {
+		return !$this->hasRelatedPrelVirements();
+	}
+
+	/**
+	 * AV151008
+	 * @return false if there is one ore more related RsnPrelVirement.
+	 */
+	public function isDeletable() {
+		return !$this->hasRelatedPrelVirements();
+	}
 }
