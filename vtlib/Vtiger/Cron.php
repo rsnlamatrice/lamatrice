@@ -155,6 +155,10 @@ class Vtiger_Cron {
         $runnable = false;
 
         if (!$this->isDisabled()) {
+	    //ED151009 
+	    if($this->getFrequency() == 86400 && date('H') > 5 ) //24 H : avant 5H du mat'
+		return $runnable;
+	    
             // Take care of last time (end - on success, start - if timedout)
             // Take care to start the cron im
             $lastTime = ($this->getLastStart() > 0) ? $this->getLastStart() : $this->getLastEnd();
