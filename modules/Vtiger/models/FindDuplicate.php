@@ -192,7 +192,7 @@ die(__FILE__);*/
 			
 		$moduleQuery = $this->getScheduledSearchBasicQuery($moduleName, $tableColumns);
 		
-		echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
+		//echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
 		
 		$focus = CRMEntity::getInstance($moduleName);
 		$fields = $moduleModel->getFields();
@@ -202,7 +202,7 @@ die(__FILE__);*/
 		//$query = $focus->getQueryForDuplicates($moduleName, $tableColumns, '', false, $moduleQuery, $moduleQuery);
 		//echo "<pre>getQueryForDuplicates.Query : $query</pre>";
 		
-		$moduleQuery .= ' LIMIT 1000';
+		//$moduleQuery .= ' LIMIT 1000';
 		
 		$query = 'SELECT crm1.'.$focus->table_index . ', crm2.'.$focus->table_index . '
 			, 0 AS duplicatestatus
@@ -217,7 +217,7 @@ die(__FILE__);*/
 			$query .= " AND crm1.$tableColumn = crm2.$tableColumn";
 		}
 		
-		echo "<pre>$query</pre>";
+		//echo "<pre>$query</pre>";
 		
 		$query = 'INSERT INTO ' . $duplicateTableName . '
 			(`crmid1`, `crmid2`, `duplicatestatus`, `duplicatefields`, `mergeaction`, `checkdate`)
@@ -225,7 +225,7 @@ die(__FILE__);*/
 			ON DUPLICATE KEY UPDATE mergeaction = mergeaction
 		';
 		
-		echo "<pre>$query</pre>";
+		//echo "<pre>$query</pre>";
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->query($query);
