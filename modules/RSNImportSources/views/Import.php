@@ -548,7 +548,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$query = 'SELECT *
 			/*INTO OUTFILE \'' . $logFile . '\' */
 			FROM ' . $tableName . '
-			WHERE status IN ( '. RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED . ',  '. RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED . ' )
+			WHERE status IN ( '. RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED
+					. ',  '. RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED . ' )
 			ORDER BY id';
 			
 		$result = $adb->query($query);

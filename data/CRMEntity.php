@@ -31,6 +31,11 @@ class CRMEntity {
 
 	var $ownedby;
 
+	// ED151008
+	// table d'enregistrements des enregistrements potentiellement dupliqués
+	var $duplicate_entities_table = 'vtiger_duplicateentities';
+
+
 	/**
 	 * Detect if we are in bulk save mode, where some features can be turned-off
 	 * to improve performance.
