@@ -9,6 +9,16 @@ require_once 'include/QueryGenerator/QueryGenerator.php';
 
 class Vtiger_FindDuplicate_Action extends Vtiger_Action_Controller {
 
+	function checkPermission(Vtiger_Request $request) {
+		$moduleName = $request->getModule();
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		
+		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+		if(!$currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
+			throw new AppException('LBL_PERMISSION_DENIED');
+		}
+	}
+
 	function __construct() {
 		parent::__construct();
 		$this->exposeMethod('runScheduledSearch');

@@ -99,6 +99,9 @@ $languageStrings = array(
 	'LBL_MERGE_ACCOUNTS_ALREADY'		=> 'Les contacts sont déjà en compte-commun.',
 	'LBL_MERGE_ACCOUNTS_NONE'			=> 'Un compte commun va être créer.',
 	'LBL_MERGE_ACCOUNTS_CHOOSE_REF'		=> 'Choisissez le référent du compte.',
+	
+	'LBL_COMMON_ACCOUNT'				=> 'Compte commun',
+	'LBL_RELATIONS' => 'Relations',
         
         'firstname'         => 'prénom',
         'lastname'          => 'nom',

@@ -202,7 +202,7 @@ die(__FILE__);*/
 		//$query = $focus->getQueryForDuplicates($moduleName, $tableColumns, '', false, $moduleQuery, $moduleQuery);
 		//echo "<pre>getQueryForDuplicates.Query : $query</pre>";
 		
-		//$moduleQuery .= ' LIMIT 1000';
+		$moduleQuery .= ' LIMIT 1000';
 		
 		$query = 'SELECT crm1.'.$focus->table_index . ', crm2.'.$focus->table_index . '
 			, 0 AS duplicatestatus

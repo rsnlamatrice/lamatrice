@@ -151,6 +151,16 @@ label > input[type="checkbox"] {
   width: 6em;
 }
 
+tr.listViewEntries.duplicates-group > td {
+  border-top: 2px inset #8855AA;
+}
+tr.listViewEntries.duplicates-group:hover > td {
+  border-color: #8855AA;
+}
+tr.listViewEntries.duplicates-group > td input[type="button"] {
+  margin-bottom: 1em;
+}
+
 /* alignement à droite des colonnes numériques */
 td.listViewEntryValue[data-field-type="currency"]
 , td.listViewEntryValue[data-field-type="double"]{
