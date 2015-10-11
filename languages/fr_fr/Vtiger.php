@@ -776,8 +776,9 @@ $languageStrings = array(
 	'Record Id'                => 'Identifiant',
 	
 	'LBL_DUPLICATES_FOUND'          => 'Doublons trouvés'        ,
-	'LBL_IGNORE' => 'Ignorer',
-	'LBL_LATER' => 'Plus tard',
+	'LBL_DUPLICATES_STATUS_0' => 'A valider',
+	'LBL_DUPLICATES_STATUS_1' => 'Ignorer',
+	'LBL_DUPLICATES_STATUS_2' => 'Plus tard',
 	
 );
 $jsLanguageStrings = array(

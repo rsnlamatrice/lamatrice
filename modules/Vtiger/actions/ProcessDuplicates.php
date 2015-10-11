@@ -10,6 +10,12 @@
 
 //Coming after FindDuplicates and MergeRecord
 class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
+
+	function __construct() {
+		parent::__construct();
+		$this->exposeMethod('saveRelations');
+	}
+	
 	function checkPermission(Vtiger_Request $request) {
 		$module = $request->getModule();
 		$records = $request->get('records');
@@ -24,6 +30,11 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 	}
 
 	function process (Vtiger_Request $request) {
+		$mode = $request->get('mode');
+		if(!empty($mode)) {
+			$this->invokeExposedMethod($mode, $request);
+			return;
+		}
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$records = $request->get('records');

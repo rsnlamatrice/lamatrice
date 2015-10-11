@@ -515,6 +515,15 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 					'grp' => array( 'label' => 'Groupe'),
 				);
 			
+			case 'duplicatestatus':
+				return array(
+					'0' => array( 'label' => vtranslate('LBL_DUPLICATES_STATUS_0')/*'A valider'*/, 'icon' => 'ui-icon ui-icon-alert green' ),
+					'2' => array( 'label' => vtranslate('LBL_DUPLICATES_STATUS_2')/*'Plus tard'*/, 'icon' => 'ui-icon ui-icon-close green'),
+					'1' => array( 'label' => vtranslate('LBL_DUPLICATES_STATUS_1')/*'Ignorer'*/, 'icon' => 'ui-icon ui-icon-close darkred'),
+				);
+			case 'duplicatefields':
+				return array();
+			
 			default:
 				if(strpos($fieldname,'addressformat') >= 0)
 					return array(

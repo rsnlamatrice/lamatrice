@@ -64,8 +64,10 @@
 						{continue}
 					{/if}
 					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} class="{$WIDTHTYPE}">
-						<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
-							&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white">{/if}</a>
+						{if $MODULE == 'Contacts' && $LISTVIEW_HEADER->getName() == "isgroup"}
+						{else}
+							{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
+						{/if}
 					</th>
 					{assign var=IS_BUTTONSET value=$LISTVIEW_HEADER->get('uitype') eq '402'}
 					{if $IS_BUTTONSET}
@@ -81,7 +83,9 @@
 				data-recordUrl='{$LISTVIEW_ENTRY->getDetailViewUrl()}'
 				id="{$MODULE}_listView_row_{$smarty.foreach.listview.index+1}"
 			>
-				{if $LISTVIEW_ENTRY->get('duplicates_group_length')}
+				{assign var=IS_FIRST_OF_GROUP value=$LISTVIEW_ENTRY->get('duplicates_group_length')}
+				{if $IS_FIRST_OF_GROUP}
+					{assign var=GROUP_FIRST_LISTVIEW_ENTRY value=$LISTVIEW_ENTRY}
 					<td  width="5%" class="{$WIDTHTYPE}"
 						rowspan="{$LISTVIEW_ENTRY->get('duplicates_group_length')}"
 						{*if $UICOLOR neq null} style="background-color: {$UICOLOR} !important;"{/if*}>
@@ -89,8 +93,16 @@
 						{if $MODULE eq 'Contacts'}
 							<br><input type="button" value="{vtranslate('LBL_RELATIONS', $MODULE)}" name="merge" data-view="DuplicatesRelations" class="btn btn-success">
 						{/if}
-						<br><a name="merge" data-view="DuplicatesHide"><span class="ui-icon ui-icon-close"></span>{vtranslate('LBL_IGNORE')}</a>
-						<br><a name="merge" data-view="DuplicatesLater"><span class="ui-icon ui-icon-arrowreturn-1-e"></span>{vtranslate('LBL_LATER')}</a>
+						{if $LISTVIEW_ENTRY->get('duplicatestatus') neq 1}
+							<br><a class="updatestatus" data-status="1"><span class="ui-icon ui-icon-close darkred"></span>{vtranslate('LBL_DUPLICATES_STATUS_1')}</a>
+						{else}
+							<br><a class="updatestatus" data-status="0"><span class="ui-icon ui-icon-check darkgreen"></span>{vtranslate('LBL_DUPLICATES_STATUS_0')}</a>
+						{/if}
+						{if $LISTVIEW_ENTRY->get('duplicatestatus') neq 2}
+							<br><a class="updatestatus" data-status="2"><span class="ui-icon ui-icon-arrowreturn-1-e darkred"></span>{vtranslate('LBL_DUPLICATES_STATUS_2')}</a>
+						{else}
+							<br><a class="updatestatus" data-status="0"><span class="ui-icon ui-icon-check darkgreen"></span>{vtranslate('LBL_DUPLICATES_STATUS_0')}</a>
+						{/if}
 					</td>
 				{/if}
 				<!--td>{$LISTVIEW_ENTRY->get('id')}</td>
@@ -107,7 +119,10 @@
 						{assign var=IS_GROUP_FIELD value=$LISTVIEW_HEADERNAME == "isgroup"}
 					{/if}
 					<td class="listViewEntryValue {$WIDTHTYPE}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}"
-					    {if $UICOLOR neq null && $UITYPE eq '401'} style="background-color: {$UICOLOR} !important; min-width:3em;"{/if} nowrap>
+					    {if !$IS_FIRST_OF_GROUP && $GROUP_FIRST_LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME) neq $LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+							style="color:red"
+						{/if}
+						nowrap>
 						{if $LISTVIEW_HEADER->isNameField() eq true or $UITYPE eq '4'}
 							<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
 						{else if $UITYPE eq '72'}
@@ -117,6 +132,7 @@
 								{$LISTVIEW_ENTRY->get('currencySymbol')}{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
 							{/if}
 						{elseif	$UITYPE eq '401'}
+						{*ED140000 Particulier / Structure *}
 						{elseif $IS_GROUP_FIELD}
 							<div style="overflow: hidden; color: transparent;">{* hides text *}
 								{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}

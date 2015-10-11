@@ -22,6 +22,7 @@ class Vtiger_FindDuplicate_Action extends Vtiger_Action_Controller {
 	function __construct() {
 		parent::__construct();
 		$this->exposeMethod('runScheduledSearch');
+		$this->exposeMethod('updateDuplicatesStatus');
 	}
 	public function process(Vtiger_Request $request) {
 		$mode = $request->get('mode');
@@ -39,6 +40,34 @@ class Vtiger_FindDuplicate_Action extends Vtiger_Action_Controller {
 		foreach($moduleNames as $moduleName){
 			$dataModelInstance = Vtiger_FindDuplicate_Model::getInstance($moduleName);
 			$dataModelInstance->runScheduledSearch();
+		}
+	}
+	
+	/** ED151009
+	 */ 
+	function updateDuplicatesStatus (Vtiger_Request $request) {
+		$recordIds = $request->get('records');
+		$status = $request->get('duplicatestatus');
+		$params = array();
+		$query = 'UPDATE vtiger_duplicateentities
+			SET duplicatestatus = ?';
+		$params[] = $status;
+		$query .= ' WHERE crmid1 IN ('.generateQuestionMarks($recordIds).')
+			AND crmid2 IN ('.generateQuestionMarks($recordIds).')';
+		$params = array_merge($params, $recordIds);
+		$params = array_merge($params, $recordIds);
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query,$params);
+		if(!$result){
+			var_dump($query, $params);
+			$db->echoError();
+		}
+		else{
+			$data = array('updated' => $db->getAffectedRowCount($result));
+			$response = new Vtiger_Response();
+			$response->setResult($data);
+			$response->emit();
 		}
 	}
 }

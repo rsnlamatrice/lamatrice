@@ -15,6 +15,9 @@ jQuery.Class("Vtiger_List_Js",{
 
 	massEditPreSave : 'Vtiger.MassEdit.PreSave',
 
+	//ED151009 to be overrided
+	requestViewClass : 'List',
+
 	getInstance: function(){
 		if(Vtiger_List_Js.listInstance == false){
 			var module = app.getModuleName();
@@ -925,7 +928,7 @@ jQuery.Class("Vtiger_List_Js",{
 			var postData = {
 				"module": module,
 				"parent": parent,
-				"view": "ListAjax",
+				"view": this.requestViewClass + "Ajax",
 				"viewname": cvId,
 				"mode": "getRecordsCount"
 			}
@@ -1375,7 +1378,7 @@ jQuery.Class("Vtiger_List_Js",{
 	 */
 	getPageJumpParams : function(){
 		var params = this.getDefaultParams();
-		params['view'] = "ListAjax";
+		params['view'] = this.requestViewClass + "Ajax";
 		params['mode'] = "getPageCount";
 
 		return params;

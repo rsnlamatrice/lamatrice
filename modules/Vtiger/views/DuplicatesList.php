@@ -4,7 +4,7 @@
  ************************************************************************************/
 
 class Vtiger_DuplicatesList_View extends Vtiger_List_View {
-
+	
 	function preProcess(Vtiger_Request $request, $display=true) {
 		parent::preProcess($request, false);
 
@@ -32,7 +32,6 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 	}
 
 	function process (Vtiger_Request $request) {
-		
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
@@ -132,19 +131,6 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 		//ED150904
 		$alphabetFields = $listViewModel->getAlphabetFields($this->listViewHeaders);
 		
-		////ED150903 Définit la valeur du filtre "alaphabet"
-		//if(!empty($operator)) {
-		//	$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
-		//	$moduleAlphabetSearchField = $moduleModel->getAlphabetSearchField();
-		//	$moduleAlphabetSearchFieldModel = $this->listViewHeaders[$moduleAlphabetSearchField];
-		//	if($moduleAlphabetSearchFieldModel){
-		//		//var_dump('$moduleAlphabetSearchFieldModel', $moduleAlphabetSearchFieldModel->get('fieldvalue'));
-		//		$viewer->assign('ALPHABET_SORTING_VALUE', to_html($moduleAlphabetSearchFieldModel->get('fieldvalue')));//to_html pour les accents
-		//	}
-		//}
-		//
-		
-		
 		if(!$this->listViewEntries){
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
 		}
@@ -227,13 +213,7 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 			$cvId = '0';
 		}
 
-		$searchKey = $request->get('search_key');
-		$searchValue = $request->get('search_value');
-
 		$listViewModel = Vtiger_DuplicatesListView_Model::getInstance($moduleName, $cvId);
-		$listViewModel->set('search_key', $searchKey);
-		$listViewModel->set('search_value', $searchValue);
-		$listViewModel->set('operator', $request->get('operator'));
 
 		$count = $listViewModel->getListViewCount($calculatedTotals);
 

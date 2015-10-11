@@ -430,7 +430,11 @@ var_dump($listResult);*/
 		}
 		$controller = new ListViewController($db, $currentUser, $queryGenerator);
 
-		return $instance->set('module', $moduleModel)->set('query_generator', $queryGenerator)->set('listview_controller', $controller);
+		return $instance->set('module', $moduleModel)
+			->set('query_generator', $queryGenerator)
+			->set('listview_controller', $controller)
+			->set('viewname', $viewId)
+		;
 	}
 
     /**

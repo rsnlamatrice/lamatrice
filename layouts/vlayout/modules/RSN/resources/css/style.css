@@ -7,6 +7,11 @@ label {
   color: #444444;
 }
 
+/* bootstrap */
+.table-bordered thead:first-child tr:first-child > * th, .table-bordered tbody:first-child tr:first-child > * th, .table-bordered tbody:first-child tr:first-child > * td {
+    border-top: 1px solid #ddd;
+}
+
 /* placeholder, trop foncé chez certains */
 ::-webkit-input-placeholder { color: #888888; }
 ::-moz-placeholder { color: #888888; }

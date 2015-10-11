@@ -125,14 +125,15 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		$advancedLinks = parent::getAdvancedLinks();
 		
 		$moduleModel = $this->getModule();
-
+		
 		$duplicatePermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'DuplicatesHandling');
 		if($duplicatePermission) {
+			$cvId = $this->get('viewname');
 			$advancedLinks[] = array(
 				'linktype' => 'LISTVIEWMASSACTION',
 				'linklabel' => 'LBL_DUPLICATES_FOUND',
 				'linkurl' => 'index.php?module='.$moduleModel->getName().
-								'&view=DuplicatesList',
+								'&view=DuplicatesList&viewname='.$cvId,
 				'linkicon' => ''
 			);
 		}

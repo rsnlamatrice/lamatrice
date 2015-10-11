@@ -450,16 +450,16 @@ DELIMITER ;';
 		$sql[] = "DROP TABLE IF EXISTS `vtiger_duplicateentities`";
 		
 		$sql[] = "CREATE TABLE IF NOT EXISTS `vtiger_duplicateentities` (
-  `duplicateentitiesid` int(19) unsigned NOT NULL AUTO_INCREMENT,
   `crmid1` int(19) NOT NULL,
   `crmid2` int(19) NOT NULL,
   `duplicatestatus` int(4) NOT NULL DEFAULT '0',
   `duplicatefields` varchar(255) DEFAULT NULL,
   `mergeaction` varchar(255) DEFAULT NULL,
   `checkdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`duplicateentitiesid`),
-  UNIQUE KEY `IDX_DUPLICATESENTITIES_CRMIDS` (`crmid1`,`crmid2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1
+  PRIMARY KEY (`crmid1`,`crmid2`),
+  KEY `duplicatestatus` (`duplicatestatus`),
+  KEY `duplicatefields` (`duplicatefields`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ":
 		
 		$db = PearDatabase::getInstance();

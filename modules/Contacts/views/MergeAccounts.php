@@ -10,7 +10,8 @@ class Contacts_MergeAccounts_View extends Vtiger_MergeRecord_View {
 		
 		//Regroupement familiale
 		$records = $request->get('records');
-		$records = explode(',', $records);
+		if(is_string($records))
+			$records = explode(',', $records);
 		$module = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($module);
 		

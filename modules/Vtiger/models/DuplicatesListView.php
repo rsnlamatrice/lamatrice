@@ -38,14 +38,6 @@ class Vtiger_DuplicatesListView_Model extends Vtiger_ListView_Model {
 		$listViewContoller = $this->get('listview_controller');
 
 		//echo "<br><br><br><br>".__FILE__;
-		
-		$searchKey = $this->get('search_key');
-		$searchValue = $this->get('search_value');
-		$operator = $this->get('operator');
-		if(!empty($searchKey)) {
-			//var_dump(array('search_field' => $searchKey, 'search_text' => array_map(mb_detect_encoding, $searchValue), 'operator' => $operator));
-			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
-		}
 
 		$listQuery = $this->getQuery();
 		//echo("<p style=\"margin-top:6em\"> ICICICI getListViewEntries $listQuery </p>");
@@ -60,7 +52,7 @@ class Vtiger_DuplicatesListView_Model extends Vtiger_ListView_Model {
 
 
 	//echo("<br><br><br>333333333333333333 getListViewEntries <pre>$listQuery</pre> ");
-	
+	//die();
 		$viewid = ListViewSession::getCurrentView($moduleName);
 		ListViewSession::setSessionQuery($moduleName, $listQuery, $viewid);
 
@@ -90,11 +82,18 @@ var_dump($listResult);*/
                     
 		$index = 0;
 		$firstEntityId = 0;
+		$firstEntityId1 = 0;
+		$firstEntityId2 = 0;
 		$groupEntities = array();
+		
+		//echo '<br><br><br><br>';
+		
 		//foreach($listViewEntries as $recordId => $record) {
 		for($index = 0; $index < count($listViewEntries); $index++){
 			$rawData = $db->query_result_rowdata($listResult, $index);
 			$recordId = $rawData['crmid'];
+			if($listViewRecordModels[$recordId] || $groupEntities[$recordId])
+				continue;
 			$record = $listViewEntries[$recordId];
 			$record['id'] = $recordId;
 			$record['crmid1'] = $rawData['crmid1'];
@@ -103,18 +102,23 @@ var_dump($listResult);*/
 			$record['duplicatefields'] = $rawData['duplicatefields'];
 			//$listViewRecordModels[$recordId] = $moduleModel->getRecordFromArray($record, $rawData);
 			$listViewRecordModel = $moduleModel->getRecordFromArray($record, $rawData);
-		
 			//Nouveau groupe
-			if( $firstEntityId != $rawData['crmid1']
-			&& $firstEntityId != $rawData['crmid2']){
+			if( $firstEntityId1 != $rawData['crmid1']
+			&& $firstEntityId2 != $rawData['crmid2']
+			&& $firstEntityId1 != $rawData['crmid2']
+			&& $firstEntityId2 != $rawData['crmid1']){
+				
 				//ajoute les précédents
 				if($firstEntityId){
 					$groupEntities[$firstEntityId]->set('duplicates_group_length', count($groupEntities));
+					//complete list. array_merge does not work to keep order
 					foreach($groupEntities as $id=>$groupEntity)
 						$listViewRecordModels[$id] = $groupEntity;
 				}
 				$groupEntities = array();
 				$firstEntityId = $recordId;
+				$firstEntityId1 = $rawData['crmid1'];
+				$firstEntityId2 = $rawData['crmid2'];
 			}
 			$groupEntities[$recordId] = $listViewRecordModel;
 		}
@@ -123,32 +127,67 @@ var_dump($listResult);*/
 		return $listViewRecordModels;
 	}
 
+	//TODO en théorie, le nom de la table vtiger_duplicateentities dépend du module
 	function getQuery() {
 		$queryGenerator = $this->get('query_generator');
 		$listQuery = $queryGenerator->getQuery();
 		
-		$status = array(0);
-		
+		//status
+		$requestSearchQuery = $this->getRequestSearchQuery();
+		if($requestSearchQuery)
+			$sqlParts[1] .= ' AND ('.$requestSearchQuery.')';
+			
+		//FROM xxx WHERE
 		$sqlParts = explode(' WHERE ', $listQuery);
 		
-		$sqlParts[0] .= ' INNER JOIN vtiger_duplicateentities
-			ON (vtiger_crmentity.crmid = vtiger_duplicateentities.crmid1
-			OR vtiger_crmentity.crmid = vtiger_duplicateentities.crmid2)
-			AND duplicatestatus IN (' . implode(',', $status) . ')
+		
+		//TODO limit query because of very slow query
+		$sqlParts[0] .= ' INNER JOIN (
+				SELECT *
+				FROM vtiger_duplicateentities
+				WHERE '.$requestSearchQuery.'
+				LIMIT 0,21
+			) vtiger_duplicateentities
+			ON vtiger_crmentity.crmid = vtiger_duplicateentities.crmid1
+			OR vtiger_crmentity.crmid = vtiger_duplicateentities.crmid2
 		';
 		
 		$listQuery = implode(' WHERE ', $sqlParts);
+		//SELECT
 		$listQuery = preg_replace('/^\s*SELECT\s/i'
 								  , 'SELECT vtiger_crmentity.crmid
 									, vtiger_duplicateentities.duplicatestatus
 									, vtiger_duplicateentities.duplicatefields
-									, CONCAT(vtiger_duplicateentities.crmid1, \'|\', vtiger_duplicateentities.crmid2) AS duplicatesgroupkey
 									, vtiger_duplicateentities.crmid1
 									, vtiger_duplicateentities.crmid2
 									, '
 								  , $listQuery);
 		
 		return $listQuery;
+	}
+	
+	function getRequestSearchQuery(){
+		
+		$searchKey = $this->get('search_key');
+		$searchValue = $this->get('search_value');
+		if(empty($searchKey)) {
+			$searchKey = array('duplicatestatus');
+			$searchValue = array(0);
+		}
+		elseif(! is_array($searchKey)) {
+			$searchKey = array($searchKey);
+			$searchValue = array($searchValue);
+		}
+		$query = '';
+		for($i = 0; $i < count($searchKey); $i++){
+			if(!$searchValue[$i] && $searchValue[$i] != '0')
+				continue;
+			if($query)
+				$query .= ' AND ';
+			$query .= $searchKey[$i] . '= \'' . str_replace("'", "\\'", $searchValue[$i]) . '\'';
+		}
+		
+		return $query;
 	}
 	
 	/** ED150904
@@ -159,11 +198,14 @@ var_dump($listResult);*/
 		$headerFieldModels = array();
 		$moduleAlphabetFields = array('duplicatestatus', 'duplicatefields');
 		foreach($moduleAlphabetFields as $fieldName) {
-			if(!array_key_exists($fieldName, $listViewHeaders))
-				continue;
-			$fieldModel = $listViewHeaders[$fieldName];
-			if($fieldModel)
-				$headerFieldModels[$fieldName] = $fieldModel;
+			$fieldModel = new Vtiger_Field_Model();
+			$fieldModel->set('name', $fieldName);
+			$fieldModel->set('label', $fieldName);
+			$fieldModel->set('column', $fieldName);
+			$fieldModel->set('table', 'vtiger_duplicateentities');
+			$fieldModel->set('uitype', 402);
+			$fieldModel->set('datatype', 'V~M');
+			$headerFieldModels[$fieldName] = $fieldModel;
 		}
 		return $headerFieldModels;
 	}
