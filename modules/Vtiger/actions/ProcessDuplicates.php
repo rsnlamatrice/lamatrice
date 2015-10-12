@@ -10,11 +10,6 @@
 
 //Coming after FindDuplicates and MergeRecord
 class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
-
-	function __construct() {
-		parent::__construct();
-		$this->exposeMethod('saveRelations');
-	}
 	
 	function checkPermission(Vtiger_Request $request) {
 		$module = $request->getModule();
@@ -56,6 +51,10 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 							$fieldValue = implode(',', $fieldValue);
 							break;
 					}
+				}
+				elseif($moduleName == 'Contacts' && $field->getName() === 'description'
+				       && $primaryRecordModel->get($field->getName())){
+					$fieldValue = $primaryRecordModel->get($field->getName()) . "\r\n" . $fieldValue;
 				}
 				$primaryRecordModel->set($field->getName(), $fieldValue);
 			}

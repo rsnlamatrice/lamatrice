@@ -13,7 +13,7 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 	public function getFindDuplicateFields(){
 		//2 searches
 		return array(  array('email')
-					 , array('lastname', 'firstname', 'mailingzip'));
+				, array('lastname', 'firstname', 'mailingzip'));
 	}
 	
 	/**

@@ -41,7 +41,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		$relatedModuleName = 'Contacts';
 		$parentId = $this->getId();
 		
-		$query = "SELECT vtiger_crmentity.crmid, vtiger_crmentity.label, vtiger_contactdetails.*, vtiger_contactaddress.*
+		$query = "SELECT vtiger_crmentity.crmid, vtiger_crmentity.label, vtiger_contactdetails.*, vtiger_contactscf.*, vtiger_contactaddress.*
 			FROM vtiger_contactdetails
 			JOIN vtiger_crmentity
 				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
@@ -57,7 +57,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		$result = $adb->pquery($query, array($this->getId()));
 		while(!$result->EOF){
 			$row = $adb->fetchByAssoc($result);
-			$record = Vtiger_Record_Model::getCleanInstance($moduleName)->setRawData($row);
+			$record = Vtiger_Record_Model::getCleanInstance($relatedModuleName)->setRawData($row);
 			$entries[$row['crmid']] = $record;
 		}
 		return $entries;

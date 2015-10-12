@@ -41,9 +41,13 @@ Vtiger_List_Js("Vtiger_DuplicatesList_Js",{
 			, url = 'module='+app.getModuleName()+'&view='+view+'&records='+records;
 			thisInstance.showMergePopup(url).then(
 				function(data){
-					alert(JSON.stringify(data));
-				}, function(){
-					alert(JSON.stringify(arguments));
+					var msg;
+					if (data.result.Modifications !== undefined)
+						msg = data.result.Modifications;
+					else
+						msg = JSON.stringify(data.result);
+					Vtiger_Helper_Js.showPnotify(app.vtranslate('Ok (' + msg + ')'));
+				}, function(error, err){
 				}
 			);
 			return false;

@@ -151,5 +151,14 @@ class RSNContactsPanels_Module_Model extends Vtiger_Module_Model {
 		//var_dump($variables);
 		return $variables;
 	}
+	
+	
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'rsncontactspanelsdomains';
+	}
 
 }

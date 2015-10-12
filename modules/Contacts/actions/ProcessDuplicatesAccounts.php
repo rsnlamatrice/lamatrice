@@ -35,8 +35,8 @@ class Contacts_ProcessDuplicatesAccounts_Action extends Vtiger_ProcessDuplicates
 		//Aucun compte existant
 		if( ! $fieldValue && ! $oldValue ){
 			//Création d'un nouveau compte
+			echo '<br>Création du compte de référence '.$primaryRecordModel->getName();
 			$mainAccountModel = $primaryRecordModel->getAccountRecordModel(true);
-			echo '<br>Création du compte de référence '.$mainAccountModel->getName();
 		}
 		//Changement 
 		elseif($fieldValue){
@@ -56,13 +56,16 @@ class Contacts_ProcessDuplicatesAccounts_Action extends Vtiger_ProcessDuplicates
 				
 				$oldValue = $recordModel->get('account_id');
 				if($fieldValue == $oldValue){
+					echo '<br>Contact '.$recordModel->getName().' #'.$recordModel->getId();
 					if($recordModel->getId() == $reference_contactid && !$recordModel->get('reference')){
 						$recordModel->set('mode', 'edit');
 						$recordModel->set('reference', 1);
 						$recordModel->save();
 					}
-					elseif($recordModel->getId() != $reference_contactid && $recordModel->get('reference')){
+					elseif($recordModel->getId() != $reference_contactid
+					   && (!$oldValue || $recordModel->get('reference'))){
 						$recordModel->set('mode', 'edit');
+						$recordModel->set('account_id', $mainAccountModel->getId());
 						$recordModel->set('reference', 0);
 						$recordModel->save();
 					}
@@ -72,8 +75,11 @@ class Contacts_ProcessDuplicatesAccounts_Action extends Vtiger_ProcessDuplicates
 				if($oldValue){
 					$oldAccount = $recordModel->getAccountRecordModel(false);
 					//Etait référent de son compte
-					if($oldAccount && $recordModel->get('reference')){
+					if($oldAccount && $oldAccount->getId()
+					   && $oldAccount->getId() != $mainAccountModel->getId()
+					   && $recordModel->get('reference')){
 						//Merge des Accounts
+						echo '<br>Transfert des élément du compte vers '.$mainAccountModel->getName();
 						$mainAccountModel->transferRelationInfoOfRecords(array($oldAccount->getId()));
 						
 						//below, others contacts of this account change also of account
@@ -85,7 +91,7 @@ class Contacts_ProcessDuplicatesAccounts_Action extends Vtiger_ProcessDuplicates
 					$oldAccount = false;
 					
 				//save account_id and reference flag
-				echo '<br>Mise à jour du contact '.$recordModel->getName();
+				echo '<br>Mise à jour du contact '.$recordModel->getName().' #'.$recordModel->getId();
 				$recordModel->set('mode', 'edit');
 				$recordModel->set('account_id', $mainAccountModel->getId());
 				if($recordModel->getId() == $reference_contactid)
@@ -103,6 +109,7 @@ class Contacts_ProcessDuplicatesAccounts_Action extends Vtiger_ProcessDuplicates
 		}
 		else
 			echo '<br>Pas de compte de référence !';
+		echo '<br>';
 		
 		if(!$request->get('isAjax')){
 			echo "Ok";
@@ -126,6 +133,7 @@ class Contacts_ProcessDuplicatesAccounts_Action extends Vtiger_ProcessDuplicates
 		else{
 			//Contrôle qu'un contact est bien référent
 			$contactReferent = false;
+			
 			foreach($oldAccountContactsRecordModels as $oldAccountContactsRecordModel){
 				if($oldAccountContactsRecordModel->get('reference')){
 					//Un contact est bien référent

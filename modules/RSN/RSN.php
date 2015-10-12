@@ -447,7 +447,7 @@ DELIMITER ;';
 	static function add_duplicateentities_table() {
 		$sql = array();
 		
-		$sql[] = "DROP TABLE IF EXISTS `vtiger_duplicateentities`";
+		//$sql[] = "DROP TABLE IF EXISTS `vtiger_duplicateentities`";
 		
 		$sql[] = "CREATE TABLE IF NOT EXISTS `vtiger_duplicateentities` (
   `crmid1` int(19) NOT NULL,

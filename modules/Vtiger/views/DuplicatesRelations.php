@@ -4,7 +4,14 @@
  **************************************************************************************/
 
 class Vtiger_DuplicatesRelations_View extends Vtiger_Popup_View {
+	
 	function process(Vtiger_Request $request) {
+		
+		$mode = $request->get('mode');
+		if(!empty($mode)) {
+			return $this->invokeExposedMethod($mode, $request);
+		}
+		
 		$records = $request->get('records');
 		$records = explode(',', $records);
 		$module = $request->getModule();
@@ -51,4 +58,10 @@ class Vtiger_DuplicatesRelations_View extends Vtiger_Popup_View {
 		$viewer->assign('MODULE', $module);
 		$viewer->view('DuplicatesRelations.tpl', $module);
 	}
+
+
+
+	
+	
+	
 }
