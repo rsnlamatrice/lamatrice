@@ -459,8 +459,8 @@ DELIMITER ;';
   PRIMARY KEY (`crmid1`,`crmid2`),
   KEY `duplicatestatus` (`duplicatestatus`),
   KEY `duplicatefields` (`duplicatefields`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-":
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+";
 		
 		$db = PearDatabase::getInstance();
 		foreach($sql as $query){
