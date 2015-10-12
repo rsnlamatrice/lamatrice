@@ -7,6 +7,11 @@ label {
   color: #444444;
 }
 
+/* bootstrap */
+.table-bordered thead:first-child tr:first-child > * th, .table-bordered tbody:first-child tr:first-child > * th, .table-bordered tbody:first-child tr:first-child > * td {
+    border-top: 1px solid #ddd;
+}
+
 /* placeholder, trop foncé chez certains */
 ::-webkit-input-placeholder { color: #888888; }
 ::-moz-placeholder { color: #888888; }
@@ -149,6 +154,16 @@ label > input[type="checkbox"] {
 
 #RSNMediaRelations_editView_fieldName_daterelation {
   width: 6em;
+}
+
+tr.listViewEntries.duplicates-group > td {
+  border-top: 2px inset #8855AA;
+}
+tr.listViewEntries.duplicates-group:hover > td {
+  border-color: #8855AA;
+}
+tr.listViewEntries.duplicates-group > td input[type="button"] {
+  margin-bottom: 1em;
 }
 
 /* alignement à droite des colonnes numériques */

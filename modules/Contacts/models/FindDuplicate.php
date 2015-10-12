@@ -8,9 +8,12 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 	
 	/* Fields to find duplicates
 	 * @returns $tableColumns
+	 * 	May be an array of column names or an array of array of column names for multiple search
 	 */
 	public function getFindDuplicateFields(){
-		return array('email');
+		//2 searches
+		return array(  array('email')
+					 , array('lastname', 'firstname', 'mailingzip'));
 	}
 	
 	/**
@@ -18,6 +21,7 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 	 * Cette requête est utilisée pour effectuer la recherche de doublons.
 	 */
 	function getScheduledSearchBasicQuery($moduleName, $tableColumns){
+		
 		$moduleModel = $this->getModule();
 		$moduleName = $moduleModel->getName();
 		$focus = CRMEntity::getInstance($moduleName);
@@ -56,5 +60,26 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 		}
 		
 		return $query;
+	}
+	/**
+	 * Retourne un filtre sur la requête de recherche de doublon.
+	 * Cette requête est utilisée pour effectuer la recherche de doublons.
+	 */
+	function getScheduledSearchJoinQuery($moduleName, $tableColumns){
+		$focus = CRMEntity::getInstance($moduleName);
+		return ' LEFT JOIN vtiger_contactscontrel
+			ON (crm1.'.$focus->table_index . ' = vtiger_contactscontrel.contactid
+				AND crm2.'.$focus->table_index . ' = vtiger_contactscontrel.relcontid
+			) OR (
+				crm2.'.$focus->table_index . ' = vtiger_contactscontrel.contactid
+				AND crm1.'.$focus->table_index . ' = vtiger_contactscontrel.relcontid
+			)';
+	}
+	/**
+	 * Retourne un filtre sur la requête de recherche de doublon.
+	 * Cette requête est utilisée pour effectuer la recherche de doublons.
+	 */
+	function getScheduledSearchWhereQuery($moduleName, $tableColumns){
+		return 'vtiger_contactscontrel.contactid IS NULL';
 	}
 }

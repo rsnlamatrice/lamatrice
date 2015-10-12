@@ -219,6 +219,12 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 					'0' => array( 'label' => 'si, on peut tout faire', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
 					'1' => array( 'label' => 'ne rien faire', 'icon' => 'ui-icon ui-icon-locked darkred' )
 				);
+			
+			case 'duplicatefields':
+				return array(
+					'email' => array( 'label' => 'Email'),
+					'lastname,firstname,mailingzip' => array( 'label' => 'Nom, prénom et code postal'),
+				);
 			default:
 				return parent::getPicklistValuesDetails($fieldname);
 		}

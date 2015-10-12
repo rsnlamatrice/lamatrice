@@ -183,55 +183,82 @@ die(__FILE__);*/
 	}
 	
 	/* Inject duplicated records in vtiger_duplicateentities table
+	 * http://localhost/lamatrice/index.php?module=Contacts&action=FindDuplicate&mode=runScheduledSearch
 	 */
 	public function runScheduledSearch(){
 		$moduleModel = $this->getModule();
 		$moduleName = $moduleModel->getName();
 		$duplicateTableName = $this->getDuplicateEntitiesTable();
 		$tableColumns = $this->getFindDuplicateFields();
+		
+		if(!$tableColumns)
+			return;
+		
+		if(!is_array($tableColumns[0]))
+			$tableColumns = array($tableColumns);
 			
-		$moduleQuery = $this->getScheduledSearchBasicQuery($moduleName, $tableColumns);
-		
-		//echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
-		
-		$focus = CRMEntity::getInstance($moduleName);
-		$fields = $moduleModel->getFields();
-		/*foreach($tableColumns as $n => $tableColumn)
-			$tableColumns[$n] = $fields[$tableColumn]->table . '.' . $tableColumn;
-		var_dump($tableColumns);*/
-		//$query = $focus->getQueryForDuplicates($moduleName, $tableColumns, '', false, $moduleQuery, $moduleQuery);
-		//echo "<pre>getQueryForDuplicates.Query : $query</pre>";
-		
-		//$moduleQuery .= ' LIMIT 1000';
-		
-		$query = 'SELECT crm1.'.$focus->table_index . ', crm2.'.$focus->table_index . '
-			, 0 AS duplicatestatus
-			, \''.implode(',',$tableColumns).'\' AS  duplicatefields
-			, NULL AS mergeaction
-			, NOW() AS checkdate
-			FROM (' . $moduleQuery . ') as crm1
-			INNER JOIN (' . $moduleQuery . ') as crm2
-				ON crm1.'.$focus->table_index.' < crm2.'.$focus->table_index.' /* rend unique le couple */
-		';
-		foreach($tableColumns as $n => $tableColumn){
-			$query .= " AND crm1.$tableColumn = crm2.$tableColumn";
+		for($nTableColumns = 0; $nTableColumns < count($tableColumns); $nTableColumns++){
+			$moduleQuery = $this->getScheduledSearchBasicQuery($moduleName, $tableColumns[$nTableColumns]);
+			
+			//echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
+			
+			$focus = CRMEntity::getInstance($moduleName);
+			$fields = $moduleModel->getFields();
+			/*foreach($tableColumns[$nTableColumns] as $n => $tableColumn)
+				$tableColumns[$nTableColumns][$n] = $fields[$tableColumn]->table . '.' . $tableColumn;
+			var_dump($tableColumns[$nTableColumns]);*/
+			//$query = $focus->getQueryForDuplicates($moduleName, $tableColumns[$nTableColumns], '', false, $moduleQuery, $moduleQuery);
+			//echo "<pre>getQueryForDuplicates.Query : $query</pre>";
+			
+			//$moduleQuery .= ' LIMIT 1000';
+			
+			$query = 'SELECT crm1.'.$focus->table_index . ', crm2.'.$focus->table_index . '
+				, 0 AS duplicatestatus
+				, \''.implode(',',$tableColumns[$nTableColumns]).'\' AS  duplicatefields
+				, NULL AS mergeaction
+				, NOW() AS checkdate
+				FROM (' . $moduleQuery . ') as crm1
+				INNER JOIN (' . $moduleQuery . ') as crm2
+					ON crm1.'.$focus->table_index.' < crm2.'.$focus->table_index.' /* rend unique le couple */
+			';
+			foreach($tableColumns[$nTableColumns] as $n => $tableColumn){
+				$query .= " AND crm1.$tableColumn = crm2.$tableColumn";
+			}
+			
+			$queryJoin = $this->getScheduledSearchJoinQuery($moduleName, $tableColumns[$nTableColumns]);
+			if($queryJoin)
+				$query .= '
+					'.$queryJoin;
+			
+			$queryWhere = $this->getScheduledSearchWhereQuery($moduleName, $tableColumns[$nTableColumns]);
+			if($queryWhere)
+				$query .= '
+					WHERE ' . $queryWhere;
+				
+			//echo "<pre>$query</pre>";
+			
+			$query = 'INSERT INTO ' . $duplicateTableName . '
+				(`crmid1`, `crmid2`, `duplicatestatus`, `duplicatefields`, `mergeaction`, `checkdate`)
+				' . $query . '
+				ON DUPLICATE KEY UPDATE mergeaction = mergeaction
+			';
+			
+			//echo "<pre>$query</pre>";
+			//continue;
+			
+			$db = PearDatabase::getInstance();
+			$result = $db->query($query);
+			if(!$result){
+				$db->echoError();
+			}
 		}
-		
-		//echo "<pre>$query</pre>";
-		
-		$query = 'INSERT INTO ' . $duplicateTableName . '
-			(`crmid1`, `crmid2`, `duplicatestatus`, `duplicatefields`, `mergeaction`, `checkdate`)
-			' . $query . '
-			ON DUPLICATE KEY UPDATE mergeaction = mergeaction
-		';
-		
-		//echo "<pre>$query</pre>";
-		
-		$db = PearDatabase::getInstance();
-		$result = $db->query($query);
-		if(!$result){
-			$db->echoError();
-		}
+	}
+	
+	/**
+	 * Retourne un filtre sur la requête de recherche de doublon.
+	 * Cette requête est utilisée pour effectuer la recherche de doublons.
+	 */
+	function getScheduledSearchWhereQuery($moduleName, $tableColumns){
 	}
 	
 	/**
@@ -239,6 +266,18 @@ die(__FILE__);*/
 	 * Cette requête est utilisée pour effectuer la recherche de doublons.
 	 */
 	function getScheduledSearchBasicQuery($moduleName, $tableColumns){
+		
+		if(is_array($tableColumns[0])){
+			//recherches multiples
+			$query = '';
+			for($i = 0; $i < count($tableColumns); $i++){
+				if($i)
+					$query .= ' UNION ';
+				$query .= $this->getScheduledSearchBasicQuery($moduleName, $tableColumns[$i]);
+			}
+			return $query;
+		}
+		
 		$moduleModel = $this->getModule();
 		$moduleName = $moduleModel->getName();
 		$focus = CRMEntity::getInstance($moduleName);
@@ -269,6 +308,7 @@ die(__FILE__);*/
 	
 	/* Fields to find duplicates
 	 * @returns $tableColumns
+	 * 	May be an array of column names or,  for multiple search, an array of array of column names
 	 */
 	public function getFindDuplicateFields(){
 		return $this->getModule()->getNameFields();

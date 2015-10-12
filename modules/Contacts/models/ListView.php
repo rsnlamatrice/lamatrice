@@ -124,8 +124,21 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 	public function getAdvancedLinks(){
 		$advancedLinks = parent::getAdvancedLinks();
 		
-		//ED150813 Saisie des NPAI et affectation de critères
 		$moduleModel = $this->getModule();
+		
+		$duplicatePermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'DuplicatesHandling');
+		if($duplicatePermission) {
+			$cvId = $this->get('viewname');
+			$advancedLinks[] = array(
+				'linktype' => 'LISTVIEWMASSACTION',
+				'linklabel' => 'LBL_DUPLICATES_FOUND',
+				'linkurl' => 'index.php?module='.$moduleModel->getName().
+								'&view=DuplicatesList&viewname='.$cvId,
+				'linkicon' => ''
+			);
+		}
+		
+		//ED150813 Saisie des NPAI et affectation de critères
 		$createPermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'EditView');
 		if($createPermission) {
 			//NPAI et critères

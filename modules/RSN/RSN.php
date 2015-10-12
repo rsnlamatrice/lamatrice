@@ -445,16 +445,26 @@ DELIMITER ;';
 	
 	
 	static function add_duplicateentities_table() {
+		$sql = array();
 		
-		$sql = "CREATE TABLE IF NOT EXISTS `vtiger_duplicateentities` (
-			`crmid1` int(19) NOT NULL,
-			`crmid2` int(19) NOT NULL,
-			`duplicatestatus` int(4) NOT NULL DEFAULT '0',
-			`duplicatefields` varchar(255) DEFAULT NULL,
-			`mergeaction` varchar(255) DEFAULT NULL,
-			`checkdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-		      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+		$sql[] = "DROP TABLE IF EXISTS `vtiger_duplicateentities`";
+		
+		$sql[] = "CREATE TABLE IF NOT EXISTS `vtiger_duplicateentities` (
+  `crmid1` int(19) NOT NULL,
+  `crmid2` int(19) NOT NULL,
+  `duplicatestatus` int(4) NOT NULL DEFAULT '0',
+  `duplicatefields` varchar(255) DEFAULT NULL,
+  `mergeaction` varchar(255) DEFAULT NULL,
+  `checkdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`crmid1`,`crmid2`),
+  KEY `duplicatestatus` (`duplicatestatus`),
+  KEY `duplicatefields` (`duplicatefields`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+":
+		
 		$db = PearDatabase::getInstance();
-		$db->pquery($sql);
+		foreach($sql as $query){
+			$db->pquery($query);
+		}
 	}
 }

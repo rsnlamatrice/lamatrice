@@ -773,7 +773,12 @@ $languageStrings = array(
 	'LBL_PRINT_RELATIONS'                => 'Imprimer', 
 	'CronTasks'                => 'Tâches planifiées',
 	
-	'Record Id'                => 'Identifiant', 
+	'Record Id'                => 'Identifiant',
+	
+	'LBL_DUPLICATES_FOUND'          => 'Doublons trouvés'        ,
+	'LBL_DUPLICATES_STATUS_0' => 'A valider',
+	'LBL_DUPLICATES_STATUS_1' => 'Ignorer',
+	'LBL_DUPLICATES_STATUS_2' => 'Plus tard',
 	
 );
 $jsLanguageStrings = array(

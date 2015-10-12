@@ -80,6 +80,10 @@
 							&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white"/>{/if}
 						</a>
 					</th>
+					{assign var=IS_BUTTONSET value=$LISTVIEW_HEADER->get('uitype') eq '402'}
+					{if $IS_BUTTONSET}
+					    {assign var=tmp value=$LISTVIEW_HEADER->set('picklist_values',$MODULE_MODEL->getListViewPicklistValues($LISTVIEW_HEADER->getName()))}
+					{/if}
 				{/foreach}
 			</tr>
 			<tr class="listViewHeaders filters">
@@ -112,14 +116,16 @@
 					{continue}
 				{/if}
 				{assign var=IS_GROUP_FIELD value=$LISTVIEW_HEADERNAME == "isgroup"}
+				{assign var=UITYPE value=$LISTVIEW_HEADER->get('uitype')}
+				{assign var=IS_BUTTONSET value=$UITYPE eq '402'}
 				<td class="listViewEntryValue {if !$IS_GROUP_FIELD}{$WIDTHTYPE}{/if}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}" nowrap>
-					{if $LISTVIEW_HEADER->isNameField() eq true or $LISTVIEW_HEADER->get('uitype') eq '4'}
+					{if $LISTVIEW_HEADER->isNameField() eq true or $UITYPE eq '4'}
 						<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
 						{*ED150526*}
 						{if $LISTVIEW_HEADERNAME == 'lastname' && $IS_GROUP && $LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
 							&nbsp;-&nbsp;{$LISTVIEW_ENTRY->getRawDataFieldValue('mailingstreet2')}
 						{/if}</a>
-					{else if $LISTVIEW_HEADER->get('uitype') eq '72'}
+					{else if $UITYPE eq '72'}
 						{assign var=CURRENCY_SYMBOL_PLACEMENT value={$CURRENT_USER_MODEL->get('currency_symbol_placement')}}
 						{if $CURRENCY_SYMBOL_PLACEMENT eq '1.0$'}
 							{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}{$LISTVIEW_ENTRY->get('currencySymbol')}
@@ -137,7 +143,38 @@
 						&& substr($LISTVIEW_ENTRY->get('createdtime'),0,10) neq substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
 							<br>{substr($LISTVIEW_ENTRY->get('modifiedtime'),0,10)}
 						{/if}
+						
 					{else if $LISTVIEW_HEADERNAME == 'modifiedtime' && $SKIP_MODIFIEDTIME}
+						
+					{* ED150000 *}
+					{elseif $IS_BUTTONSET}
+						{assign var=PICKLIST_VALUES value=$LISTVIEW_HEADER->get('picklist_values')}
+						{assign var=FIELD_VALUE value=$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+						{if is_array($FIELD_VALUE)}{assign var=FIELD_VALUE value=$FIELD_VALUE[0]}{/if}
+						{if $FIELD_VALUE eq null}{assign var=FIELD_VALUE value=$LISTVIEW_HEADER->getDefaultFieldValue()}{/if}
+						{if $PICKLIST_VALUES && array_key_exists($FIELD_VALUE, $PICKLIST_VALUES)}
+							{assign var=PICKLIST_ITEM value=$PICKLIST_VALUES[$FIELD_VALUE]}
+						{else}
+							{assign var=PICKLIST_ITEM value=$FIELD_VALUE}
+						{/if}
+						{if is_array($PICKLIST_ITEM)}
+							{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
+							{if isset($PICKLIST_ITEM['class'])}
+							{assign var=PICKLIST_CLASS value=$PICKLIST_ITEM['class']}
+							{else}
+							{assign var=PICKLIST_CLASS value=''}
+							{/if}
+							{assign var=PICKLIST_ICON value=$PICKLIST_ITEM['icon']}
+						{else}
+							{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
+							{assign var=PICKLIST_ICON value=false}
+							{assign var=PICKLIST_CLASS value=false}
+						{/if}
+						<label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}">
+						{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>
+						{else}
+						&nbsp;{$PICKLIST_LABEL}
+						{/if}</label>
 					
 					{else}
 						{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}

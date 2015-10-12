@@ -396,10 +396,13 @@ var_dump($listResult);*/
 	 * au rechargement d'une vue, ok.
 	 */
 	public static function getInstance($moduleName, $viewId='0', $moreFilters = FALSE) {
+		return self::getInstanceWithClassName('ListView', $moduleName, $viewId, $moreFilters);
+	}
+	public static function getInstanceWithClassName($modelClassName, $moduleName, $viewId='0', $moreFilters = FALSE) {
 		$db = PearDatabase::getInstance();
 		$currentUser = vglobal('current_user');
 
-		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'ListView', $moduleName);
+		$modelClassName = Vtiger_Loader::getComponentClassName('Model', $modelClassName, $moduleName);
 		$instance = new $modelClassName();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$queryGenerator = new QueryGenerator($moduleModel->get('name'), $currentUser);
@@ -427,7 +430,11 @@ var_dump($listResult);*/
 		}
 		$controller = new ListViewController($db, $currentUser, $queryGenerator);
 
-		return $instance->set('module', $moduleModel)->set('query_generator', $queryGenerator)->set('listview_controller', $controller);
+		return $instance->set('module', $moduleModel)
+			->set('query_generator', $queryGenerator)
+			->set('listview_controller', $controller)
+			->set('viewname', $viewId)
+		;
 	}
 
     /**
