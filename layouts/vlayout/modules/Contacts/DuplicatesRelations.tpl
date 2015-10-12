@@ -6,17 +6,20 @@
  ********************************************************************************/
 -->*}
 {strip}
-<div style='background: white;'>
+<div id="popupPageContainer" class="popupBackgroundColor">
+
+	<input id="popUpClassName" type="hidden" value="Contacts_DuplicatesRelations_Js"/>
 	<div>
 		<br>
 		<div style='margin-left:10px'><h3>{vtranslate('LBL_DUPLICATES_RELATIONS_IN', $MODULE)} > {$MODULE}</h3></div><br>
 		<div class='alert-info'>{vtranslate('LBL_DUPLICATES_RELATIONS_DESCRIPTION', $MODULE)}</div>
 	</div>
-
+	
 	<form class="form-horizontal contentsBackground" name="massMerge" method="post" action="index.php">
 		<input type="hidden" name=module value="{$MODULE}" />
-		<input type="hidden" name="action" value="ProcessDuplicates" />
+		<input type="hidden" name="view" value="DuplicatesRelations" />
 		<input type="hidden" name="mode" value="saveRelations" />
+		<input type="hidden" class="triggerEventName" value="{$smarty.request.triggerEventName}"/>
 
 	<div>
 		<table class='table table-bordered table-condensed'>

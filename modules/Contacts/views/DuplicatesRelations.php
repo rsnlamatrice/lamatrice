@@ -1,19 +1,31 @@
 <?php
-/*+**********************************************************************************
- * The contents of this file are subject to the vtiger CRM Public License Version 1.1
- * ("License"); You may not use this file except in compliance with the License
- * The Original Code is:  vtiger CRM Open Source
- * The Initial Developer of the Original Code is vtiger.
- * Portions created by vtiger are Copyright (C) vtiger.
- * All Rights Reserved.
- ************************************************************************************/
+/**************************************************************************************
+ * ED151009
+ **************************************************************************************/
 
-//Coming after FindDuplicates and MergeRecord
-class Contacts_ProcessDuplicates_Action extends Vtiger_ProcessDuplicates_Action {
+class Contacts_DuplicatesRelations_View extends Vtiger_DuplicatesRelations_View {
 
 	function __construct() {
 		parent::__construct();
 		$this->exposeMethod('saveRelations');
+	}
+	
+	/**
+	 * Function to get the list of Script models to be included
+	 * @param Vtiger_Request $request
+	 * @return <Array> - List of Vtiger_JsScript_Model instances
+	 */
+	function getHeaderScripts(Vtiger_Request $request) {
+		$headerScriptInstances = parent::getHeaderScripts($request);
+		$moduleName = $request->getModule();
+
+		$jsFileNames = array(
+			"modules.$moduleName.resources.DuplicatesRelations",
+		);
+
+		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
+		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
+		return $headerScriptInstances;
 	}
 	
 	function saveRelations(Vtiger_Request $request){
@@ -91,13 +103,17 @@ class Contacts_ProcessDuplicates_Action extends Vtiger_ProcessDuplicates_Action 
 		}
 		
 		if($mergeRecords){
-				$request->set('records', array_keys($mergeRecords));
-				$view->preProcess($request);
-				$view->process($request);
-				$view->postProcess($request);
+			$request->set('records', array_keys($mergeRecords));
+			$view->preProcess($request);
+			$view->process($request);
+			$view->postProcess($request);
 		}
-		else
-			die('Modifications : '.$updated);
+		else {
+			//die('Modifications : '.$updated);
+			$response = new Vtiger_Response();
+			$response->setResult(array('Modifications' => $updated));
+			$response->emit();
+		}
 		
 	}
 }
