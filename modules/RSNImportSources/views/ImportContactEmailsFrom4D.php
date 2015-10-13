@@ -23,14 +23,6 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 	}
 
 	/**
-	 * Method to get the modules that are concerned by the import.
-	 * @return array - An array containing concerned module names.
-	 */
-	public function getLockModules() {
-		return array_merge($this->getImportModules(), array('ContactEmails'));
-	}
-
-	/**
 	 * Method to default file enconding for this import.
 	 * @return string - the default file encoding.
 	 */
