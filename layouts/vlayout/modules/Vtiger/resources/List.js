@@ -15,9 +15,6 @@ jQuery.Class("Vtiger_List_Js",{
 
 	massEditPreSave : 'Vtiger.MassEdit.PreSave',
 
-	//ED151009 to be overrided
-	requestViewClass : 'List',
-
 	getInstance: function(){
 		if(Vtiger_List_Js.listInstance == false){
 			var module = app.getModuleName();
@@ -2217,6 +2214,9 @@ jQuery.Class("Vtiger_List_Js",{
 //		//});
 //	},
 
+	//ED151009 to be overrided
+	requestViewClass : 'List',
+	
 	/* ED150412
 	 * Function to register change in header filter inputs
 	 */

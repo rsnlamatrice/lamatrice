@@ -176,7 +176,7 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		if ($contactId) {
 			$sourceId = $contactemailsData[0]['email'];
 	
-			//test sur separum == $sourceId
+			//test sur email == $sourceId
 			$query = "SELECT crmid
 				FROM vtiger_contactemails
 				JOIN vtiger_crmentity
@@ -252,21 +252,26 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 									, $contactemailsData[0]['date_creation']
 									, $contactemailsId));
 				
-				//Met à jour l'email du contact
-				$query = "UPDATE vtiger_contactdetails
-					SET emailoptout = ?
-					, email = ?
-					WHERE contactid = ?
-				";
-				$result = $db->pquery($query, array(
-										$record->get('emailoptout'),
-										$record->get('email'),
-										$contactId));
+				//Affectation de l'adresse e-mail principale au contact
+				$fieldName = 'emailaddressorigin';
+				$emailaddressorigin = $record->get($fieldName);
+				if($emailaddressorigin === 'Principale'){
+					//Met à jour l'email du contact
+					$query = "UPDATE vtiger_contactdetails
+						SET emailoptout = ?
+						, email = ?
+						WHERE contactid = ?
+					";
+					$result = $db->pquery($query, array(
+									$record->get('emailoptout'),
+									$record->get('email'),
+									$contactId));
 				
-				$log->debug("" . basename(__FILE__) . " update imported contact (id=" . $contactId . ", email=" . $record->get('email')
-						. ", result=" . ($result ? " true" : "false"). " )");
-				if( ! $result)
-					$db->echoError();
+					$log->debug("" . basename(__FILE__) . " update imported contact (id=" . $contactId . ", email=" . $record->get('email')
+							. ", result=" . ($result ? " true" : "false"). " )");
+					if( ! $result)
+						$db->echoError();
+				}
 					
 					
 				
@@ -312,9 +317,9 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 		
 		
 		$fieldName = 'emailaddressorigin';
-		$value = $this->getEmailOrigine($record->get($fieldName));
+		$emailaddressorigin = $this->getEmailOrigine($record->get($fieldName));
 		RSNImportSources_Utils_Helper::checkPickListValue('ContactEmails', $fieldName, $fieldName, $value);
-		$record->set($fieldName, $value);
+		$record->set($fieldName, $emailaddressorigin);
 		
 		
 		$fieldName = 'rsnmediadocuments';
@@ -339,16 +344,20 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 			$record->set($fieldName, $documents);
 		}
 	
-		//Adresse principale
-		$fieldName = 'email';
-		if($contactemailsData[0]['origine'] === 'Principale'){
-			$contact = $this->getContact($contactemailsData);
-			if(strcasecmp($contact->get($fieldName), $contactemailsData[0][$fieldName]) !== 0){
-				$contact->set('mode', 'edit');
-				$contact->set($fieldName);
-				$contact->save();
-			}
-		}
+		////Adresse principale
+		//$fieldName = 'email';
+		//var_dump($emailaddressorigin);
+		//if($emailaddressorigin === 'Principale'){
+		//	$contact = $this->getContact($contactemailsData);
+		//	var_dump($contact->get($fieldName), $contactemailsData[0][$fieldName], strcasecmp($contact->get($fieldName), $contactemailsData[0][$fieldName]) !== 0);
+		//	if(strcasecmp($contact->get($fieldName), $contactemailsData[0][$fieldName]) !== 0){
+		//		$contact->set('mode', 'edit');
+		//		$contact->set($fieldName, $contactemailsData[0][$fieldName]);
+		//		var_dump("UPDATE", $contact);
+		//	
+		//		$contact->save();
+		//	}
+		//}
 		// copie depuis tout en haut
 		//		
 		//'ref4d' => 'ref4d',
