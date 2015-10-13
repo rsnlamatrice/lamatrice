@@ -1912,14 +1912,36 @@ var_dump($params);*/
 
 		return $return_value;
 	}
+	
+	/** ED151013
+	 * 
+	 * Move the related records of the specified list of id's to the given record.
+	 * @param String This module name
+	 * @param Array List of Entity Id's from which related records need to be transfered
+	 * @param Integer Id of the the Record to which the related records are to be moved
+	 * @return Array If set with an array, count related but does not execute transfer. Returns array of module
+	 * 
+	 */
+	function countTransferRelatedRecords($module, $transferEntityIds, $entityId) {
+		$countingOnly = array();
+		try{
+			$this->transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly);
+		}
+		catch(Exception $ex){
+			parent::transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly);
+		}
+		return $countingOnly;
+	}
 
 	/**
 	 * Move the related records of the specified list of id's to the given record.
 	 * @param String This module name
 	 * @param Array List of Entity Id's from which related records need to be transfered
 	 * @param Integer Id of the the Record to which the related records are to be moved
+	 * //ED151013
+	 * @param Array If set with an array, count related but does not execute transfer. Returns array of module
 	 */
-	function transferRelatedRecords($module, $transferEntityIds, $entityId) {
+	function transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly = false) {
 		global $adb, $log;
 		$log->debug("Entering function transferRelatedRecords ($module, $transferEntityIds, $entityId)");
 		foreach ($transferEntityIds as $transferId) {
@@ -1931,7 +1953,14 @@ var_dump($params);*/
 			for ($i = 0; $i < $numOfRecords; $i++) {
 				$relcrmid = $adb->query_result($relatedRecords, $i, 'relcrmid');
 				$relmodule = $adb->query_result($relatedRecords, $i, 'relmodule');
-				$adb->pquery("UPDATE vtiger_crmentityrel SET crmid=? WHERE relcrmid=? AND relmodule=? AND crmid=? AND module=?", array($entityId, $relcrmid, $relmodule, $transferId, $module));
+				if(is_array($countingOnly)){
+					if(!array_key_exists($relmodule, $countingOnly))
+						$countingOnly[$relmodule] = 1;
+					else
+						$countingOnly[$relmodule]++;
+				}
+				else
+					$adb->pquery("UPDATE vtiger_crmentityrel SET crmid=? WHERE relcrmid=? AND relmodule=? AND crmid=? AND module=?", array($entityId, $relcrmid, $relmodule, $transferId, $module));
 			}
 
 			// Pick the records to which the entity to be transfered is related, but do not pick the once to which current entity is already related.
@@ -1941,19 +1970,61 @@ var_dump($params);*/
 			for ($i = 0; $i < $numOfRecords; $i++) {
 				$parcrmid = $adb->query_result($parentRecords, $i, 'crmid');
 				$parmodule = $adb->query_result($parentRecords, $i, 'module');
-				$adb->pquery("UPDATE vtiger_crmentityrel SET relcrmid=? WHERE crmid=? AND module=? AND relcrmid=? AND relmodule=?", array($entityId, $parcrmid, $parmodule, $transferId, $module));
+				if(is_array($countingOnly)){
+					if(!array_key_exists($parmodule, $countingOnly))
+						$countingOnly[$parmodule] = 1;
+					else
+						$countingOnly[$parmodule]++;
+				}
+				else
+					$adb->pquery("UPDATE vtiger_crmentityrel SET relcrmid=? WHERE crmid=? AND module=? AND relcrmid=? AND relmodule=?", array($entityId, $parcrmid, $parmodule, $transferId, $module));
 			}
-			$adb->pquery("UPDATE vtiger_modcomments SET related_to = ? WHERE related_to = ?", array($entityId, $transferId));
+			
+			if(is_array($countingOnly)){
+				$relmodule = 'Documents';
+				$sel_result =  $adb->pquery("select COUNT(*) AS counter FROM vtiger_modcomments where related_to = ?", array($transferId));
+				$res_cnt = $adb->query_result($sel_result, 0, 0);
+				if($res_cnt > 0) {
+					if(!array_key_exists($relmodule, $countingOnly))
+						$countingOnly[$relmodule] = $res_cnt;
+					else
+						$countingOnly[$relmodule]+=$res_cnt;
+				}
+			}
+			else
+				$adb->pquery("UPDATE vtiger_modcomments SET related_to = ? WHERE related_to = ?", array($entityId, $transferId));
 		}
+		if(!is_array($countingOnly))
+			$this->clearDuplicatesEntities($module, $transferEntityIds, $entityId);
+		
 		$log->debug("Exiting transferRelatedRecords...");
 	}
 
+	/** ED15
+	 *
+	 */
+	function clearDuplicatesEntities($module, $transferEntityIds, $entityId){
+		$table = $this->duplicate_entities_table;
+		global $adb;
+		$query = "DELETE FROM $table
+			WHERE (crmid1 IN (".generateQuestionMarks($transferEntityIds).")
+				AND crmid2 = ?)
+			OR (crmid2 IN (".generateQuestionMarks($transferEntityIds).")
+				AND crmid1 = ?)
+			";
+		$params = array();
+		$params = array_merge($params, $transferEntityIds);
+		$params[] = $entityId;
+		$params = array_merge($params, $transferEntityIds);
+		$params[] = $entityId;
+		$adb->pquery($query, $params);
+	}
+	
 	/*
 	 * Function to get the primary query part of a report for which generateReportsQuery Doesnt exist in module
 	 * @param - $module Primary module name
 	 * returns the query string formed on fetching the related data for report for primary module
 	 */
-
 	function generateReportsQuery($module, $queryPlanner) {
 		global $adb;
 		$primary = CRMEntity::getInstance($module);

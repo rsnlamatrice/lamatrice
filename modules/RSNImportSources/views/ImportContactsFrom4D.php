@@ -673,9 +673,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 
 	/**
 	 * Method that retrieve a contact.
-	 * @param string $firstname : the firstname of the contact.
-	 * @param string $lastname : the lastname of the contact.
-	 * @param string $email : the mail of the contact.
+	 * @param string $ref4d : the ref4D ou le tableau de valeurs du contact
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
 	function getContact($ref4d) {

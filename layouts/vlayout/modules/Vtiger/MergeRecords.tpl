@@ -32,6 +32,8 @@
 				<th>
 					{vtranslate('LBL_RECORD')} #{$smarty.foreach.recordList.index+1} &nbsp;
 					<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio value="{$RECORD->getId()}" name=primaryRecord style='bottom:1px;position:relative;'/>
+					{if count($RECORDMODELS) > 1}
+					<span style="float: right"><a href="#" title="supprimer de la fusion" onclick="alert('TODO suprimer la colonne'); return false;"><span class="ui-icon ui-icon-trash"></span></a></span>{/if}
 				</th>
 			{/foreach}
 			</thead>
@@ -56,6 +58,32 @@
 					{/foreach}
 				</tr>
 				{/if}
+			{/foreach}
+			{foreach item=RELATED_MODULE from=$RELATED_MODULES name=modulesList}
+				{if $smarty.foreach.modulesList.index eq 0}
+					<tr>
+						<td colspan="{count($RECORDMODELS)+1}">
+							<h4>Modules</h4>
+						</td>
+					</tr>
+				{/if}
+				<tr>
+					<td>
+						{vtranslate($RELATED_MODULE, $RELATED_MODULE)}
+					</td>
+					{foreach item=RECORD from=$RECORDMODELS name=recordList}
+						<td>
+							{*ED151012*}
+							{if $RECORD->get('_related_module_'|cat:$RELATED_MODULE)}
+								{if $RECORD->get('_related_module_'|cat:$RELATED_MODULE) > 1}
+									{$RECORD->get('_related_module_'|cat:$RELATED_MODULE)} {vtranslate($RELATED_MODULE, $RELATED_MODULE)}
+								{else}
+									{$RECORD->get('_related_module_'|cat:$RELATED_MODULE)} {vtranslate('SINGLE_'|cat:$RELATED_MODULE, $RELATED_MODULE)}
+								{/if}
+							{/if}
+						</td>
+					{/foreach}
+				</tr>
 			{/foreach}
 		</table>
 	</div>
