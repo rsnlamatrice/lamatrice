@@ -29,6 +29,11 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		return this.parentRecordId;
 	},
 	
+	/* ED151013 */
+	closeAllToolTips : function(){
+		$('button.close:visible').click();
+	},
+	
 	//ED150811 : cette fonction n'est pas appelée lors du premier chargement de liste
 	loadRelatedList : function(params){
 		var aDeferred = jQuery.Deferred();
@@ -42,6 +47,9 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 				'enabled' : true
 			}
 		});
+		
+		thisInstance.closeAllToolTips();
+		
 		var completeParams = this.getCompleteParams();
 		jQuery.extend(completeParams,params);
 		AppConnector.request(completeParams).then(

@@ -300,11 +300,18 @@ jQuery.Class("Vtiger_Detail_Js",{
 	loadCommentsWidget : function() {
 
 	},
+	
+	/* ED151013 */
+	closeAllToolTips : function(){
+		$('button.close:visible').click();
+	},
 
 	loadContents : function(url,data) {
 		var thisInstance = this;
 		var aDeferred = jQuery.Deferred();
 
+		thisInstance.closeAllToolTips();
+		
 		var detailContentsHolder = this.getContentHolder();
 		var params = url;
 		if(typeof data != 'undefined'){
