@@ -15,13 +15,24 @@ class Vtiger_MergeRecord_View extends Vtiger_Popup_View {
 		$module = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($module);
 		$fieldModels =  $moduleModel->getMergeableFields();//ED150910 getMergeableFields instead of getFields
-
+		$focus = CRMEntity::getInstance($module);
+		$relatedModules = array();
+		
 		foreach($records as $record) {
-			$recordModels[] = Vtiger_Record_Model::getInstanceById($record);
+			$recordModel = Vtiger_Record_Model::getInstanceById($record);
+			$recordModels[] = $recordModel;
+			if (method_exists($focus, 'countTransferRelatedRecords')) {
+				$relatedModulesCounter = $focus->countTransferRelatedRecords($module, array($record), array(0));
+				foreach($relatedModulesCounter as $relatedModule => $counter){
+					$relatedModules[$relatedModule] = $relatedModule;
+					$recordModel->set('_related_module_'.$relatedModule, $counter);
+				}
+			}
 		}
 		$viewer = $this->getViewer($request);
 		$viewer->assign('RECORDS', $records);
 		$viewer->assign('RECORDMODELS', $recordModels);
+		$viewer->assign('RELATED_MODULES', $relatedModules);
 		$viewer->assign('FIELDS', $fieldModels);
 		$viewer->assign('MODULE', $module);
 		$viewer->view('MergeRecords.tpl', $module);

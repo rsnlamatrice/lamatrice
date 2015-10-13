@@ -52,8 +52,11 @@ class Vtiger_FindDuplicate_Action extends Vtiger_Action_Controller {
 		$query = 'UPDATE vtiger_duplicateentities
 			SET duplicatestatus = ?';
 		$params[] = $status;
-		$query .= ' WHERE crmid1 IN ('.generateQuestionMarks($recordIds).')
-			AND crmid2 IN ('.generateQuestionMarks($recordIds).')';
+		$query .= ' WHERE crmid1 IN ('.generateQuestionMarks($recordIds).')';
+		if(count($recordIds) === 1)
+			$query .= ' OR';
+		else 	$query .= ' AND';
+		$query .= ' crmid2 IN ('.generateQuestionMarks($recordIds).')';
 		$params = array_merge($params, $recordIds);
 		$params = array_merge($params, $recordIds);
 		
