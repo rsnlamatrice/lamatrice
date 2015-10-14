@@ -244,6 +244,7 @@
 		</td>
 		<td>
 		    <span class="pull-right">
+				
 			{if $MODULE eq 'Invoice'}
                             {$FINAL_DETAILS["received"]}
 			{else}

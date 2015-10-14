@@ -8,7 +8,7 @@
  * All Rights Reserved.
  *************************************************************************************/
 require_once 'modules/Emails/mail.php';
-//die('PAUSE');
+
 class Inventory_Save_Action extends Vtiger_Save_Action {
     public function process(Vtiger_Request $request) {
 		return parent::process($request);

@@ -120,12 +120,8 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		
-		$module = Vtiger_Module_Model::getInstance('PurchaseOrder');
-		foreach( $module->getBlocks() as $block1)
-			if($block1->get('label') === 'LBL_ADDRESS_INFORMATION')
-				break;
-		var_dump($block1);
+		$input = '100.08';
+		var_dump($input, Vtiger_Currency_UIType::convertToDBFormat($input));
 	}
 	
 	

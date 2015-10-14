@@ -325,7 +325,7 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
 }
 
 /* Invoice */
-#shipping_handling_charge_plus, #shipping_handling_charge_minus {
+#shipping_handling_charge_plus, #shipping_handling_charge_minus, #received_set_balance {
   font-size:1.5em; font-weight: bold; padding:6px; cursor: pointer; float:right;
 }
 a.qty_helper_plus, a.qty_helper_minus {

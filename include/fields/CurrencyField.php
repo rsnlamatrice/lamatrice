@@ -97,6 +97,9 @@ class CurrencyField {
 			$this->currencySeparator = html_entity_decode($user->currency_grouping_separator, ENT_QUOTES, $default_charset);
 			$this->decimalSeparator = html_entity_decode($user->currency_decimal_separator, ENT_QUOTES, $default_charset);
 		}
+		//ED151014 sinon x 1000 les saisies avec un point
+		if($this->currencySeparator === '.')
+			$this->currencySeparator = ' ';
 
 		if(!empty($user->currency_id)) {
 			$this->currencyId = $user->currency_id;

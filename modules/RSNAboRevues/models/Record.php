@@ -1,6 +1,10 @@
 <?php
 /*+***********************************************************************************
  * ED150507
+ *
+ * Le champ sourceid doit être défini avec 
+ * UPDATE `vtiger_field` SET `summaryfield` = '1' WHERE `vtiger_field`.`fieldid` = 1087;
+ * 
  *************************************************************************************/
 
 //Valeurs exactes des items de la picklist rsnabotype
@@ -82,7 +86,8 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 * @return <Boolean> - 
 	 */
 	public function isTypeAbo($abotype) {
-		return $this->get('rsnabotype') == to_html($abotype);
+		return $this->get('rsnabotype') == $abotype
+			|| $this->get('rsnabotype') == to_html($abotype);
 	}
 	
 	/**

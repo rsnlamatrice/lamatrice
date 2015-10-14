@@ -92,7 +92,9 @@ class RSNInvoiceHandler extends VTEventHandler {
 				break;
 			}
 		//Sur le critère du montant total de la facture
-		if($invoiceData){
+		if($invoiceData
+		&& $invoice->get('typedossier') !== 'Facture de dépôt-vente'
+		&& $invoice->get('typedossier') !== to_html('Facture de dépôt-vente')){
 			$this->handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems, $account, $totalDons);
 		}
 		$log->debug("OUT handleAfterSaveInvoiceEvent");
