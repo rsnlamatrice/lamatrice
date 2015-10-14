@@ -1912,26 +1912,6 @@ var_dump($params);*/
 
 		return $return_value;
 	}
-	
-	/** ED151013
-	 * 
-	 * Move the related records of the specified list of id's to the given record.
-	 * @param String This module name
-	 * @param Array List of Entity Id's from which related records need to be transfered
-	 * @param Integer Id of the the Record to which the related records are to be moved
-	 * @return Array If set with an array, count related but does not execute transfer. Returns array of module
-	 * 
-	 */
-	function countTransferRelatedRecords($module, $transferEntityIds, $entityId) {
-		$countingOnly = array();
-		try{
-			$this->transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly);
-		}
-		catch(Exception $ex){
-			parent::transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly);
-		}
-		return $countingOnly;
-	}
 
 	/**
 	 * Move the related records of the specified list of id's to the given record.

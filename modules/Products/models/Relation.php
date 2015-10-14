@@ -83,6 +83,14 @@ class Products_Relation_Model extends Vtiger_Relation_Model {
 					   , 'relationTableName' => 'vtiger_inventoryproductrel' // FROM %s JOIN %sub
 					   , 'relatedFieldName' => 'salesorderid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
 					   , 'relatedSourceFieldName' => 'id'),
+			'Documents' => array('fieldName' => 'notesid', 'tableName' => 'vtiger_senotesrel'
+					   , 'sourceFieldName' => 'vtiger_products.productid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_senotesrel.crmid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_senotesrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'notesid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'notesid'
+					   , 'keyDateFieldName' => 'dateapplication'//clé primaire en 3 champs, incluant une date
+					   ),
 		);
 	}
 

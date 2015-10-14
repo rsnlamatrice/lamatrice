@@ -1060,13 +1060,26 @@ class Accounts extends CRMEntity {
 		return $mergeflds;
 	}
 
+	/** ED151013
+	 * Count the related records of the specified list of id's to the given record.
+	 * @param String This module name
+	 * @param Array List of Entity Id's from which related records need to be transfered
+	 * @param Integer Id of the the Record to which the related records are to be moved
+	 * @return Array If set with an array, count related but does not execute transfer. Returns array of module
+	 * 
+	 */
+	function countTransferRelatedRecords($module, $transferEntityIds, $entityId) {
+		$countingOnly = array();
+		$this->transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly);
+		return $countingOnly;
+	}
 	/**
 	 * Move the related records of the specified list of id's to the given record.
 	 * @param String This module name
 	 * @param Array List of Entity Id's from which related records need to be transfered
 	 * @param Integer Id of the the Record to which the related records are to be moved
 	 */
-	function transferRelatedRecords($module, $transferEntityIds, $entityId) {
+	function transferRelatedRecords($module, $transferEntityIds, $entityId, &$countingOnly = false) {
 		global $adb,$log;
 		$log->debug("Entering function transferRelatedRecords ($module, $transferEntityIds, $entityId)");
 
@@ -1100,15 +1113,23 @@ class Accounts extends CRMEntity {
 						array($transferId,$entityId));
 				$res_cnt = $adb->num_rows($sel_result);
 				if($res_cnt > 0) {
-					for($i=0;$i<$res_cnt;$i++) {
-						$id_field_value = $adb->query_result($sel_result,$i,$id_field);
-						$adb->pquery("update $rel_table set $entity_id_field=? where $entity_id_field=? and $id_field=?",
-							array($entityId,$transferId,$id_field_value));
+					if(is_array($countingOnly)){
+						if(!array_key_exists($rel_module, $countingOnly))
+							$countingOnly[$rel_module] = $res_cnt;
+						else
+							$countingOnly[$rel_module] += $res_cnt;
+					}
+					else {
+						for($i=0;$i<$res_cnt;$i++) {
+							$id_field_value = $adb->query_result($sel_result,$i,$id_field);
+							$adb->pquery("update $rel_table set $entity_id_field=? where $entity_id_field=? and $id_field=?",
+								array($entityId,$transferId,$id_field_value));
+						}
 					}
 				}
 			}
 		}
-		parent::transferRelatedRecords($module, $transferEntityIds, $entityId);
+		parent::transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly);
 		$log->debug("Exiting transferRelatedRecords...");
 	}
 

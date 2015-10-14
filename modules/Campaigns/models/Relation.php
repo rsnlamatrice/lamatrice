@@ -62,4 +62,24 @@ class Campaigns_Relation_Model extends Vtiger_Relation_Model {
 			}
 		}
 	}
+	
+	/* 
+	 * ED150124 : $relatedRecordId == '*' : all relations are deleted
+	 */
+	public function deleteRelation($sourceRecordId, $relatedRecordId){
+		$sourceModule = $this->getParentModuleModel();
+		$sourceModuleName = $sourceModule->get('name');
+		$destinationModuleName = $this->getRelationModuleModel()->get('name');
+		$destinationModuleFocus = CRMEntity::getInstance($destinationModuleName);
+		switch($destinationModuleName){
+			case 'RSNAboRevues':
+				//Delete entity
+				DeleteEntity($destinationModuleName, false, $destinationModuleFocus, $relatedRecordId, false);
+				break;
+			default:
+				DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
+				break;
+		}
+		return true;
+	}
 }

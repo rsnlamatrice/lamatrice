@@ -109,8 +109,9 @@ class Campaigns_RelationListView_Model extends Vtiger_RelationListView_Model {
 	/* Retourne les en-têtes des colonnes des contacts
 	 * Ajoute les champs de la relation
 	 * ED140907
+	 * TODO Fonction à refaire
 	 * */
-	public static function get_related_fields($headerFields = false) {
+	public static function get_related_fields($headerFields = false, $relationModel = false) {
 		if(!$headerFields)
 		    $headerFields = array();
 		    

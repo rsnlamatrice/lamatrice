@@ -6,7 +6,8 @@
 ********************************************************************************/
 -->*}
 {strip}
-    <div class="relatedContainer{if $WIDGET_INSIDE} widget-content multidates{/if}">
+    <div class="relatedContainer multidates {if $WIDGET_INSIDE} widget-content critere4d{/if}">
+	<param id="relationIsMultiDates" value="1" />
       {if !$WIDGET_INSIDE}
 	<input type="hidden" name="currentPageNum" value="{$PAGING->getCurrentPage()}" />
         <input type="hidden" name="relatedModuleName" class="relatedModuleName" value="{$RELATED_MODULE->get('name')}" />

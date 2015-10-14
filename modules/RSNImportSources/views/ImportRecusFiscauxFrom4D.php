@@ -1,17 +1,39 @@
 <?php
 
-
 /* Phase de migration
  * Importation des prelevements Web depuis le fichier provenant de 4D
  */
-class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_ImportFromFile_View {
-        
+class RSNImportSources_ImportRecusFiscauxFrom4D_View extends RSNImportSources_ImportFromFile_View {
+
+    var $notesIds = array();
+	private function initNotesIds(){
+		global $adb;
+		$notesIds = array();
+		$query = 'SELECT vtiger_notes.*
+			FROM vtiger_notes
+			JOIN vtiger_crmentity
+				ON vtiger_notes.notesid = vtiger_crmentity.crmid
+			WHERE deleted = false
+			AND folderid = 4
+			AND title LIKE \'Recu_Fiscal_%\'';
+		$result = $adb->query($query);
+		if(!$result)
+			$adb->echoError();
+		while ($row = $adb->fetch_row($result)){
+			$annee = preg_replace('/^.*(20\d+)(_env)?$/', '$1', $row['title']);
+			if(is_numeric($annee)){
+				$notesIds[$annee] = $row['notesid'];
+			}
+		}
+		$this->notesIds = $notesIds;
+	}
+	
 	/**
 	 * Method to get the source import label to display.
 	 * @return string - The label.
 	 */
 	public function getSource() {
-		return 'LBL_LIENSCONTACTS_4D';
+		return 'LBL_RECUSFISCAUX_4D';
 	}
 
 	/**
@@ -69,20 +91,39 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 	function getContactsFieldsMapping() {
 		//laisser exactement les colonnes du fichier, dans l'ordre 
 		return array(
-			'ref4d' => 'ref4d',
-			'ref4d2' => 'ref4d2',
-			'typelien' => 'contreltype',
-			'date_lien' => 'dateapplication',
+			"ref4d" => "",
+			"annee" => "",
+			"montant" => "",
+			"num_ordre" => "",
+			"nonenvoye" => "",
+			"reimpressionmanuelle" => "",
+			"imprimele" => "",
+			"anciennumdordre1" => "",
+			"anciennumdordre2" => "",
+			"aexporter" => "",
+			"nom" => "",
+			"prenom" => "",
+			"complementgeographique" => "",
+			"numeroetlibelledelavoie" => "",
+			"ligne5" => "",
+			"codepostal" => "",
+			"ville" => "",
+			"pays" => "",
+			"associationlong" => "",
+			"adresseligne2" => "",
+			"associationcourt" => "",
+			"nomassoentreprisealaplacedenomp" => "",
 			
 			/* post pré-import */
 			'_contactid' => '',
-			'_relcontid' => '',//relcontid
+			'_notesid' => '',//document
+			'_reldata' => '',//montant, adresse
 		);
 	}
 	
 	function getContactsDateFields(){
 		return array(
-			'date_lien'
+			'imprimele'
 		);
 	}
 	/**
@@ -153,26 +194,26 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 		//TODO check sizeof $relatedcontactsata
 		$sourceId = $relatedcontactsData[0]['ref4d'];
 		$contactId = $relatedcontactsData[0]['_contactid']; // initialisé dans le postPreImportData
-		$relContactId = $relatedcontactsData[0]['_relcontid']; // initialisé dans le postPreImportData
-		if ($contactId && $relContactId) {
+		$noteId = $relatedcontactsData[0]['_notesid']; // initialisé dans le postPreImportData
+		if ($contactId && $noteId) {
 			//test sur email == $sourceId
 			$query = "SELECT 1
-				FROM vtiger_contactscontrel
+				FROM vtiger_senotesrel
 				JOIN vtiger_crmentity
-					ON vtiger_contactscontrel.contactid = vtiger_crmentity.crmid
+					ON vtiger_senotesrel.notesid = vtiger_crmentity.crmid
 				JOIN vtiger_crmentity vtiger_crmentity_rel
-					ON vtiger_contactscontrel.relcontid = vtiger_crmentity_rel.crmid
-				WHERE ((contactid = ?
-					AND relcontid = ?)
-				OR (relcontid = ?
-					AND contactid = ?)
+					ON vtiger_senotesrel.crmid = vtiger_crmentity_rel.crmid
+				WHERE ((notesid = ?
+					AND crmid = ?)
+				OR (crmid = ?
+					AND notesid = ?)
 				)
 				AND vtiger_crmentity.deleted = FALSE
 				AND vtiger_crmentity_rel.deleted = FALSE
 				LIMIT 1
 			";
 			$db = PearDatabase::getInstance();
-			$result = $db->pquery($query, array($contactId, $relContactId, $contactId, $relContactId));
+			$result = $db->pquery($query, array($noteId, $contactId, $contactId, $noteId));
 			if($db->num_rows($result)){
 				//already imported !!
 				$row = $db->fetch_row($result, 0); 
@@ -189,16 +230,23 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 			}
 			else {
 				
-				$query = "INSERT INTO vtiger_contactscontrel (`contactid`, `relcontid`, `contreltype`, `dateapplication`, `data`)
-					VALUES (?,?,?,?, NULL)
+				$query = "INSERT INTO vtiger_senotesrel (`crmid`, `notesid`, `dateapplication`, `data`)
+					VALUES (?,?,?,?)
+					ON DUPLICATE KEY
+						UPDATE dateapplication = ?
+						, data = IF(data = ?, data, IF(data IS NULL OR data = '', ?, CONCAT(data, '\\r\\n', ?)))
 				";
 				$result = $db->pquery($query, array($contactId
-								, $relContactId
-								, $relatedcontactsData[0]['typelien']
-								, $relatedcontactsData[0]['date_lien']
+								, $noteId
+								, $relatedcontactsData[0]['imprimele']
+								, $relatedcontactsData[0]['_reldata']
+								, $relatedcontactsData[0]['imprimele']
+								, $relatedcontactsData[0]['_reldata']
+								, $relatedcontactsData[0]['_reldata']
+								, $relatedcontactsData[0]['_reldata']
 								));
 			
-				$log->debug("" . basename(__FILE__) . " update imported contacts relation (id=" . $contactId . ", " . $relContactId
+				$log->debug("" . basename(__FILE__) . " update imported recus fiscaux (id=" . $contactId . ", " . $noteId
 						. ", result=" . ($result ? " true" : "false"). " )");
 				if( ! $result){
 					$db->echoError();
@@ -209,6 +257,7 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 						);
 						$importDataController->updateImportStatus($relatedcontactsLine[id], $entityInfo);
 					}
+					break;
 				}
 				else {
 					$entryId = $this->getEntryId("Contacts", $contactId);
@@ -237,7 +286,7 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 		}
 
 		return true;
-	}	
+	}
 
 	/**
 	 * Method that pre import an invoice.
@@ -321,14 +370,6 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 			'_contactid',
 			/*$changeStatus*/ false
 		);
-		
-		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
-			$this->user,
-			'Contacts',
-			'ref4d2',
-			'_relcontid',
-			/*$changeStatus*/ false
-		);
 	
 		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
 			$this->user,
@@ -339,7 +380,7 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 		RSNImportSources_Utils_Helper::skipPreImportDataForMissingContactsByRef4D(
 			$this->user,
 			'Contacts',
-			'_relcontid'
+			'_notesid'
 		);
 	}
         
@@ -369,7 +410,7 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 	 * @return boolean - true if the line is a client information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[3])) {
+		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[6])) {
 			return true;
 		}
 
@@ -455,31 +496,58 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 		foreach($this->getContactsDateFields() as $fieldName)
 			$relatedcontactsHeader[$fieldName] = $this->getMySQLDate($relatedcontactsHeader[$fieldName]);
 		
-		$fieldName = 'typelien';
-		$relatedcontactsHeader[$fieldName] = $this->getTypeLien($relatedcontactsHeader[$fieldName]);
+		$fieldName = '_notesid';
+		$relatedcontactsHeader[$fieldName] = $this->getNoteId($relatedcontactsHeader['annee']);
+		
+		$fieldName = '_reldata';
+		
+		$value = 'Montant : ' . $relatedcontactsHeader['montant'] . ' €';
+		$value .= "\r\n" . $relatedcontactsHeader['prenom'] . ' ' . $relatedcontactsHeader['nom'];
+		$value .= "\r\n" . $relatedcontactsHeader['associationlong'];
+		$value .= "\r\n" . $relatedcontactsHeader['adresseligne2'];
+		$value .= "\r\n" . $relatedcontactsHeader['numeroetlibelledelavoie'];
+		$value .= "\r\n" . $relatedcontactsHeader['complementgeographique'];
+		$value .= "\r\n" . $relatedcontactsHeader['ligne5'];
+		$value .= "\r\n" . $relatedcontactsHeader['codepostal'] . ' ' . $relatedcontactsHeader['ville'];
+		$value .= "\r\n" . $relatedcontactsHeader['pays'];
+		$value = preg_replace('/(\r\n)(\s+)|(\r\n)\s*$/', '$1', $value);
+		$relatedcontactsHeader[$fieldName] = $value;
+		
+			//"ref4d" => "",
+			//"annee" => "",
+			//"montant" => "",
+			//"num_ordre" => "",
+			//"nonenvoye" => "",
+			//"reimpressionmanuelle" => "",
+			//"imprimele" => "",
+			//"anciennumdordre1" => "",
+			//"anciennumdordre2" => "",
+			//"aexporter" => "",
+			//"nom" => "",
+			//"prenom" => "",
+			//"complementgeographique" => "",
+			//"numeroetlibelledelavoie" => "",
+			//"ligne5" => "",
+			//"codepostal" => "",
+			//"ville" => "",
+			//"pays" => "",
+			//"associationlong" => "",
+			//"adresseligne2" => "",
+			//"associationcourt" => "",
+			//"nomassoentreprisealaplacedenomp" => "",
+			//
+			///* post pré-import */
+			//'_contactid' => '',
+			//'_notesid' => '',//document
+			//'_reldata' => '',//montant, adresse
 		
 		return $relatedcontactsHeader;
 	}
 	
 	//translate origine
-	function getTypeLien($typelien){
-		switch($typelien){
-			case 'MemeFamille' :
-				return 'Famille';
-			case 'MemeAdresse' :
-				return 'Même adresse';
-			case 'SansLiens' :
-				return 'Sans lien';
-			case 'TransférerRevueVers' :
-				return 'Transférer la revue';
-			case 'TransférerDonVers' :
-				return 'Transférer les dons';
-			case 'MemeFamilleTest' :
-				return 'Test sur la famille';
-			case 'ContactAsso' :
-				return 'Contact de l\'association';
-			default :
-				return $typelien;
-		}
+	function getNoteId($annee){
+		if(! $this->notesIds)
+			$this->initNotesIds();
+		return $this->notesIds[$annee];
 	}
 }

@@ -175,19 +175,10 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	 * fields de la table senotesrel
 	*/
 	public function getRelationHeaders(){
-		$headerFields = array();
-		//Added to support dateapplication
-		$field = new Vtiger_Field_Model();
-		$field->set('name', 'dateapplication');
-		$field->set('column', strtolower( 'dateapplication' ));
-		$field->set('label', 'Date d\'application');
-		$field->set('typeofdata', 'DATETIME');
-		$field->set('uitype', 6);
-		
-		$headerFields[$field->get('name')] = $field;
-		return $headerFields;
+		return Documents_RelationListView_Model::get_related_fields();
 	}
 	
+	//Useless because date and data may be multiple and are initialized in RelationListView->getEntries
 	///**
 	// * Function to get relation query for particular module with function name
 	// * @param <record> $recordId
@@ -198,7 +189,7 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	//public function getRelationQuery($recordId, $functionName, $relatedModule) {
 	//	$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
 	//	//ED150323 : ajout des champs de la relation
-	//	if(strpos($query, 'senotesrel') !== FALSE)
+	//	if(strpos($query, 'vtiger_senotesrel') !== FALSE)
 	//		$query = preg_replace('/^\s*SELECT\s/', 'SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
 	//	//echo('<pre>APRES '.$query . '</pre>');
 	//	

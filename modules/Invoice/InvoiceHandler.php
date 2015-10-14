@@ -178,12 +178,15 @@ class RSNInvoiceHandler extends VTEventHandler {
 		global $log;
 		$log->debug("IN handleAfterSaveInvoiceAbonnementsEvent");
 		
-		//Contrôle si cette facture a déjà généré un abonnement
-		if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoice->getId())){
-			$log->debug("handleAfterSaveInvoiceAdhesionEvent, cette facture a déjà généré un abonnement");
-			return;
+		$invoiceId = $invoice->getId();
+		$rsnAboRevues = $account->getRSNAboRevues();
+		if($rsnAboRevues){
+			//Contrôle si cette facture a déjà généré un abonnement
+			if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoiceId)){
+				$log->debug("handleAfterSaveInvoiceAdhesionEvent, cette facture a déjà généré un abonnement");
+				return;
+			}
 		}
-		
 		$productModel = Vtiger_Module_Model::getInstance('Products');
 		$prochaineRevue = $productModel->getProchaineRevue();
 		if(!$prochaineRevue){
@@ -191,19 +194,12 @@ class RSNInvoiceHandler extends VTEventHandler {
 			//TODO Alert
 			return;
 		}
-		$invoiceId = $invoice->getId();
 		$toDay = new DateTime();
 		$invoiceDate = new DateTime($invoice->get('invoicedate'));
-		$rsnAboRevues = $account->getRSNAboRevues();
 		$abonneAVie = false;
 		$startDateOfNextAbo = false;
 		$rsnAboRevueCourant = false;
 		if($rsnAboRevues){
-			//Contrôle si cette facture a déjà généré un abonnement
-			if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoiceId)){
-				$log->debug("handleAfterSaveInvoiceAbonnementsEvent, cette facture a déjà généré un abonnement");
-				return;
-			}
 			
 			//Parcourt l'historique pour clôturer les en-cours périmés
 			self::check_IsAbonne_vs_DateFin($rsnAboRevues);
@@ -265,17 +261,21 @@ class RSNInvoiceHandler extends VTEventHandler {
 					    . ", dateDebut = " . $dateDebut->format('d/m/Y') . ' (' . ($dateDebut === $dateFin ? "===" : "!!!") . ')'
 					    . ", dateFin = " . $dateFin->format('d/m/Y') . ' (' . get_class($dateFin) . ')');
 				
-				//Puisque le contact paye un abonnement, on arrête son abonnement à vie
 				if($abonneAVie){
+					//Puisque le contact paye un abonnement, on arrête son abonnement à vie
 					$rsnAboRevueCourant->set('mode', 'edit');
 					$rsnAboRevueCourant->set('comment', $rsnAboRevueCourant->get('comment') . '- Fin suite à facture ' . $invoice->get('invoice_no'));
 					$rsnAboRevueCourant->setAbonne(false);
 					$rsnAboRevueCourant->save();
 				}
-				else if($rsnAboRevueCourant
+				elseif($rsnAboRevueCourant
 					&& $rsnAboRevueCourant->isAbonne()
-					&& (   !$rsnAboRevueCourant->getFinAbo()
-					    || $rsnAboRevueCourant->getFinAbo() < $dateDebut)){
+					&& (   $rsnAboRevueCourant->isTypeDecouverte()
+					    || $rsnAboRevueCourant->isTypeMerciSoutien()
+					    || !$rsnAboRevueCourant->getFinAbo()
+					    || $rsnAboRevueCourant->getFinAbo() < $dateDebut)
+					){
+						//Clôture pour laisser la place au payant
 						$rsnAboRevueCourant->set('mode', 'edit');
 						$rsnAboRevueCourant->setAbonne(false);
 						if(!$rsnAboRevueCourant->getFinAbo())
@@ -285,31 +285,40 @@ class RSNInvoiceHandler extends VTEventHandler {
 							    . ", date : " . $rsnAboRevueCourant->getFinAbo()->format('d/m/Y'));
 						$rsnAboRevueCourant->set('comment', $rsnAboRevueCourant->get('comment') . '- Suite à facture ' . $invoice->get('invoice_no'));
 						$rsnAboRevueCourant->save();
+						
+						$dateDebut = $invoiceDate;
+						$dateFin = self::getDateFinAbo($dateDebut, 12);
 					}
 				break;
 			case 'RSGR': //Abonnements groupés
 				//compté au préalable
 				continue;
 			case 'RABOG': //Abonnement gratuit d'un n° à la revue
-				if($abonneAVie)
-					continue;
+				if($abonneAVie){
+					$dateFin = false;
+					continue;//! ne sort pas du foreach
+				}
 				//TODO vérifier si c'est un n° ou 1 an
 				$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
 				$dateDebut = $startDateOfNextAbo ? $startDateOfNextAbo : $invoiceDate;
 				$dateFin = self::getDateFinAbo($toDay, 3);
 				//L'abonnement actuel finit dans plus de 3 mois
-				if($dateDebut > $dateFin)
-					continue;
+				if($dateDebut > $dateFin){
+					$dateFin = false;
+					continue;//! ne sort pas du foreach
+				}
 				break;
 			case 'RPARR': //Abonnement de parrainage d'un an à la revue
 				$addMonths = 12;
 				$aboType = RSNABOREVUES_TYPE_ABO_PARRAINE;
 				//TODO Create Contact + Account + RSNAboRevue
 				//TODO Add Flag "Parrain" to Contact
-				continue;
+				$dateFin = false;
+				continue;//! ne sort pas du foreach
 			default:
 				//TODO What to do ?
-				continue;
+				$dateFin = false;
+				continue;//! ne sort pas du foreach
 			}
 			if($dateFin){
 				$aboRevue = $this->createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, $aboType);
@@ -416,8 +425,8 @@ class RSNInvoiceHandler extends VTEventHandler {
 	}
 	
 	public static function getDateFinAbo($dateDebut, $nbMonths){
-		$dateFin = clone $dateDebut; // $prochaineRevue->get('sales_start_date')
-		$dateFin->modify('first day of this month')->modify( '+' . $nbMonths . ' month' );
+		$dateFin = clone $dateDebut; 
+		$dateFin->modify('first day of this month')->modify( '+' . ($nbMonths + 1) . ' month' );
 		return $dateFin;
 	}
 	
@@ -431,9 +440,9 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$toDay = new DateTime();
 		
 		$country = $account->get('billcountry');
-		$foreigner = $country && $country != 'France';
+		$foreigner = $country && strcasecmp($country, 'France') !== 0;
 		
-		$nbTrimestresGratos = false; //càd, n° de la revue
+		$nbTrimestresGratos = false; //càd, nbre de revues
 		$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
 		
 		//TODO : prélèvement == 1 an
@@ -450,21 +459,25 @@ class RSNInvoiceHandler extends VTEventHandler {
 		elseif($grandTotal >= 48){
 			$nbTrimestresGratos = 4;
 		}
-		// Pour des dons de moins de 10 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
-		elseif($grandTotal < 48 && $totalDons < 10){
-			$nbTrimestresGratos = 1;
-		}
 		// Pour des dons de moins de 48 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
-		elseif($grandTotal < 48 && $totalDons < 48){
+		elseif($grandTotal >= 10 && $grandTotal < 48 && $totalDons >= 10 && $totalDons < 48){
 			$nbTrimestresGratos = 1;
+			//TODO
+		}
+		// Pour des dons de moins de 10 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
+		elseif($grandTotal >= 10 && $grandTotal < 48 && $totalDons < 10){
+			$nbTrimestresGratos = 1;
+			//TODO
 		}
 		// Pour moins de 48 € de commande, un n° de découverte si le dernier n° envoyé date d'un an au moins
-		elseif($grandTotal < 48){
+		elseif($grandTotal >= 10 && $grandTotal < 48){
 			$nbTrimestresGratos = 1;
+			//TODO
 		}
 		// Pour moins de 10 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
 		elseif($grandTotal < 10){
 			$nbTrimestresGratos = 1;
+			//TODO
 		}
 		// Abonnement d'un an
 		else {

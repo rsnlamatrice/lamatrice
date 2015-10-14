@@ -327,6 +327,9 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 
 	/* ED150814 */
 	public function getImportRelationLinks() {
+		//TODO if(permission('importRelation')
+		return array();
+		
 		$relationModel = $this->getRelationModel();
 		$importLinkModel = array();
 		
@@ -463,7 +466,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 				$relatedRecordList[$row['crmid']] = $record;	
 			}
 		}
-		//var_dump($relatedRecordList);
+		//var_dump($relatedColumnFields, $relatedRecordList);
 		/* ED140917
 		 * dans le cas d'une relation (n,n), il y a moins de $relatedRecordList que de lignes dans la table
 		 * ce qui fausse les infos pour la navigation page-suivante

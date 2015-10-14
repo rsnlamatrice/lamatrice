@@ -30,3 +30,12 @@ DROP TRIGGER `TRG_CONTACTDETAILS_BFINSERT`;
 
 ALTER TABLE  `vtiger_contactdetails` DROP COLUMN (  `ref4d` );
 
+/* Relation entre les contacts
+Après l'import 4D, on peut passer une purge des duplicates*/
+DELETE  `vtiger_duplicateentities`
+FROM `vtiger_duplicateentities`
+join vtiger_contactscontrel
+ON (vtiger_contactscontrel.contactid = vtiger_duplicateentities.crmid1
+aND vtiger_contactscontrel.relcontid = vtiger_duplicateentities.crmid2)
+OR (vtiger_contactscontrel.contactid = vtiger_duplicateentities.crmid2
+aND vtiger_contactscontrel.relcontid = vtiger_duplicateentities.crmid1)

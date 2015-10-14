@@ -192,6 +192,18 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			}
 			break;
 		
+		case "Documents" :
+			switch($relatedModuleName){
+			  case "Invoice":
+			  case "Campaigns":
+				$tpl = 'RelatedList.tpl';
+				break;
+			  default:
+				$tpl = "RelatedListMultiDates.tpl";
+				break;
+			}
+			break;
+		
 		default:
 			$tpl = 'RelatedList.tpl';
 			break;

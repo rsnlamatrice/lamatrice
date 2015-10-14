@@ -21,6 +21,9 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 		return array(
 			'Contacts' => array('fieldName' => 'crmid', 'tableName' => 'vtiger_senotesrel'),
 			'Campaigns' => array('fieldName' => 'crmid', 'tableName' => 'vtiger_senotesrel'),
+			'Invoice' => array('fieldName' => 'invoiceid', 'tableName' => 'vtiger_invoice'
+							   , 'relatedFieldName' => 'notesid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   ),
 		);
 	}
 	
@@ -55,58 +58,30 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 	}
 
 
-	/** 
-	 * Function to update the data of relation
-	 * @param <Number> Campaign record id
-	 * @param <array> $values
-	 * 	$values = array(relatedRecordId => array(
-					'dateapplication' => date en table,
-					'value' => valeur))
-	 */
-	public function updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|contreltype') {
-		//var_dump($sourceRecordId, $values, $fieldToUpdate);
-		if ($sourceRecordId && $data) {
+
+	
+	/* Suppression d'une relation Critere4D ou Documents / Contact / Date */
+
+	public function deleteRelationMultiDates($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList = FALSE){
+		$db = PearDatabase::getInstance();
 			
-			$relatedModuleName = $this->getRelationModuleModel()->getName();
-			$modulesInfo = $this->getModulesInfoForDetailView();
-
-			if (array_key_exists($relatedModuleName, $modulesInfo)) {
-				switch($fieldToUpdate){
-					case 'rel_data': $fieldToUpdate = 'data'; break;
-					default: break;
-				}
-				$fieldName = $modulesInfo[$relatedModuleName]['fieldName'];
-				$tableName = $modulesInfo[$relatedModuleName]['tableName'];
-				$db = PearDatabase::getInstance();
-
-				$params = array();
-				
-				foreach ($data as $relatedRecordId => $datum) {
-					$params = array();
-					$updateQuery = "UPDATE $tableName
-						SET $fieldToUpdate = ?
-						WHERE ($fieldName = ?
-						AND notesid = ?)"
-						//AND dateapplication = ?
-					;
-					$params[] = $datum['value'];
-					$params[] = $relatedRecordId;
-					$params[] = $sourceRecordId;
-					if($datum['dateapplication']){
-						$updateQuery .= "
-							AND dateapplication = ?
-						";
-						$params[] = $datum['dateapplication'];
-					}
-					//var_dump($updateQuery, $params);
-					if($db->pquery($updateQuery, $params) === FALSE){
-						$db->echoError();
-						return false;
-					}
-				}
-				return true;
-			}
-		}
+		$tableName = 'vtiger_senotesrel';
+		$fieldName = 'crmid';
+		$params = array();
+		$deleteQuery = "DELETE FROM $tableName
+			WHERE $fieldName = ?
+			AND notesid = ?"
+			. ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?");
+		$params[] = $relatedRecordId;
+		$params[] = $sourceRecordId;
+		if($relatedRecordDateApplicationList !== FALSE )
+			$params[] = $relatedRecordDateApplicationList;
+			
+		//var_dump($deleteQuery, $params);
+		if($db->pquery($deleteQuery, $params) === FALSE)
+			return false;
+		//DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
+		return true;
 	}
 
 }
