@@ -257,7 +257,6 @@ class RSNImportSources_ImportRecusFiscauxFrom4D_View extends RSNImportSources_Im
 						);
 						$importDataController->updateImportStatus($relatedcontactsLine[id], $entityInfo);
 					}
-					break;
 				}
 				else {
 					$entryId = $this->getEntryId("Contacts", $contactId);
