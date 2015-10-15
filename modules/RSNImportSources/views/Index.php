@@ -241,7 +241,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		}
 
 		foreach($modules as $moduleName) {
-			//TOTO : Allow admin to cancel import !
+			//TODO : Allow admin to cancel import !
 			$importInfo = RSNImportSources_Queue_Action::getImportInfo($moduleName, $user);
 			if($importInfo != null) {
 				array_push($importInfos, $importInfo);

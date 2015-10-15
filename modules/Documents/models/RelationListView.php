@@ -57,7 +57,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 			  case "Invoice":
 				return $headerFields;
 			  default:
-				$parentModuleName = $relationModel->getPModuleModel()->getName();
+				$parentModuleName = $relationModel->getParentModuleModel()->getName();
 				switch($parentModuleName){
 				  case "Campaigns":
 				  case "Invoice":
