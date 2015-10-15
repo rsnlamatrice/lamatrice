@@ -587,25 +587,25 @@ class Documents extends CRMEntity {
 	       }
 	       $userNameSql = getSqlForNameInDisplayFormat(array('first_name'=> 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 	       $query = "SELECT vtiger_contactdetails.*,
-		       vtiger_crmentity.crmid,
-		       vtiger_crmentity.smownerid,
-		       vtiger_account.accountname,
-		       case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
-		       FROM vtiger_contactdetails
-		       INNER JOIN vtiger_senotesrel
-				ON vtiger_senotesrel.crmid = vtiger_contactdetails.contactid
+				vtiger_crmentity.crmid,
+				vtiger_crmentity.smownerid,
+				vtiger_account.accountname,
+				case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
+				FROM vtiger_contactdetails
+				INNER JOIN vtiger_senotesrel
+					ON vtiger_senotesrel.crmid = vtiger_contactdetails.contactid
 				
-			
-		       INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
-		       LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
-		       INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
-		       INNER JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid
-		       INNER JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid
-		       INNER JOIN vtiger_contactscf ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
-		       LEFT JOIN vtiger_groups	ON vtiger_groups.groupid = vtiger_crmentity.smownerid
-		       LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
-		       WHERE vtiger_crmentity.deleted = 0
-		       AND vtiger_senotesrel.notesid = ".$id
+				
+				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+				LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
+				INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
+				INNER JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid
+				INNER JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid
+				INNER JOIN vtiger_contactscf ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
+				LEFT JOIN vtiger_groups	ON vtiger_groups.groupid = vtiger_crmentity.smownerid
+				LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_senotesrel.notesid = ".$id
 		;
 		
 	       $return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
@@ -647,18 +647,18 @@ class Documents extends CRMEntity {
 	       $button = '';
 	       $userNameSql = getSqlForNameInDisplayFormat(array('first_name'=> 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 	       $query = "SELECT $other->table_name.*,
-		       vtiger_crmentity.crmid,
-		       vtiger_crmentity.smownerid,
-		       case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
-		       FROM $other->table_name
-		       INNER JOIN vtiger_senotesrel
-				ON vtiger_senotesrel.crmid = $other->table_name.$other->table_index				
-			
-		       INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = $other->table_name.$other->table_index
-		       LEFT JOIN vtiger_groups	ON vtiger_groups.groupid = vtiger_crmentity.smownerid
-		       LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
-		       WHERE vtiger_crmentity.deleted = 0
-		       AND vtiger_senotesrel.notesid = ".$id
+				vtiger_crmentity.crmid,
+				vtiger_crmentity.smownerid,
+				case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
+				FROM $other->table_name
+				INNER JOIN vtiger_senotesrel
+					ON vtiger_senotesrel.crmid = $other->table_name.$other->table_index				
+				
+				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = $other->table_name.$other->table_index
+				LEFT JOIN vtiger_groups	ON vtiger_groups.groupid = vtiger_crmentity.smownerid
+				LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_senotesrel.notesid = ".$id
 		;
 		
 	       $return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);

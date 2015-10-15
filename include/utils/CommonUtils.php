@@ -561,8 +561,8 @@ if(!function_exists('array_swap_assoc')) {
         return $newArray;
     }
 }
+/* Move an item after an other one in an associative array */
 if(!function_exists('array_move_assoc')) {
-	/* Move an item after an other one in an associative array */
     function array_move_assoc($findKey, $keyBefore, $array) {
         $newArray = array ();
 		$found = false;
@@ -581,5 +581,16 @@ if(!function_exists('array_move_assoc')) {
 			$newArray[$findKey] = $array[$findKey];
         return $newArray;
     }
+}
+
+/* is_associative
+*/
+if(!function_exists('is_associative')) {
+	function is_associative($array){
+		if(!is_array($array)) return false;
+		foreach($array as $k=>$v)
+			return $k !== null && $k !== 0;
+		return false;
+	}
 }
 ?>

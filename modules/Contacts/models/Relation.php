@@ -157,9 +157,12 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					   , 'sourceFieldNameInRelation' => 'vtiger_senotesrel.crmid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
 					   , 'relationTableName' => 'vtiger_senotesrel' // FROM %s JOIN %sub
 					   , 'relatedFieldName' => 'notesid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
-					   , 'relatedSourceFieldName' => 'notesid'),
+					   , 'relatedSourceFieldName' => 'notesid'
+					   , 'keyDateFieldName' => 'dateapplication'//clé primaire en 3 champs, incluant une date
+					   ),
 			
-			'Contacts' => array('fieldName' => 'relcontid', 'tableName' => 'vtiger_contactscontrel'),
+			'Contacts' => array('fieldName' => 'relcontid', 'tableName' => 'vtiger_contactscontrel'
+					   , 'keyDateFieldName' => 'dateapplication'),
 			//'Campaigns' => array('fieldName' => 'contactid', 'tableName' => 'vtiger_campaigncontrel'),
 			'Invoice' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_invoice'
 					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
@@ -293,38 +296,49 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					'value' => valeur))
 	 */
 	public function updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|contreltype') {
-		var_dump($sourceRecordId, $values, $fieldToUpdate);
+		//var_dump($sourceRecordId, $data, $fieldToUpdate);
 		if ($sourceRecordId && $data) {
 			
 			$relatedModuleName = $this->getRelationModuleModel()->getName();
 			$modulesInfo = $this->getModulesInfoForDetailView();
-
 			if (array_key_exists($relatedModuleName, $modulesInfo)) {
-				switch($fieldToUpdate){
-					case 'rel_data': $fieldToUpdate = 'data'; break;
-					default: break;
-				}
+				if($relatedModuleName == "Contacts")
+					switch($fieldToUpdate){
+						case 'rel_data':
+						case 'data':
+							$fieldToUpdate = 'contreltype'; break;
+						default: break;
+					}
+				else
+					switch($fieldToUpdate){
+						case 'rel_data': $fieldToUpdate = 'data'; break;
+						default: break;
+					}
+				//var_dump($modulesInfo[$relatedModuleName]);
 				$fieldName = $modulesInfo[$relatedModuleName]['fieldName'];
 				$tableName = $modulesInfo[$relatedModuleName]['tableName'];
+				$sourceFieldNameInRelation = $modulesInfo[$relatedModuleName]['sourceFieldNameInRelation'];
+				if(!$sourceFieldNameInRelation)
+					$sourceFieldNameInRelation = 'contactid';
+				$keyDateFieldName = $modulesInfo[$relatedModuleName]['keyDateFieldName'];
+					
 				$db = PearDatabase::getInstance();
 
 				$params = array();
-				//$updateQuery = "UPDATE $tableName SET $fieldToUpdate = CASE $fieldName ";
-				//foreach ($data as $relatedRecordId => $datum) {
-				//	$updateQuery .= " WHEN $relatedRecordId THEN ? ";
-				//	$params[] = $datum['value'];
-				//}
-				//$updateQuery .= "ELSE $fieldToUpdate END WHERE critere4did = ?";
-				//$params[] = $sourceRecordId;
 				
 				foreach ($data as $relatedRecordId => $datum) {
 					$params = array();
+					
+					//TODO AND dataapplication
 					$updateQuery = "UPDATE $tableName
 						SET $fieldToUpdate = ?
 						WHERE (($fieldName = ?
-						AND contactid = ?)"
-						//
+						AND $sourceFieldNameInRelation = ?"
 					;
+					if($keyDateFieldName && $datum[$keyDateFieldName])
+						$updateQuery .= " AND $keyDateFieldName = ?";
+					$updateQuery .= ")";
+					
 					if($relatedModuleName == "Contacts")
 						$updateQuery .= " OR ($fieldName = ?
 								AND contactid = ?))
@@ -335,21 +349,45 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					$params[] = $datum['value'];
 					$params[] = $relatedRecordId;
 					$params[] = $sourceRecordId;
-					
-					//$params[] = $datum['dateapplication'];
+					if($keyDateFieldName && $datum[$keyDateFieldName])
+						$params[] = $datum[$keyDateFieldName];
 					
 					if($relatedModuleName == "Contacts"){
 						$params[] = $sourceRecordId;
 						$params[] = $relatedRecordId;
 						$params[] = $datum['dateapplication'];
 					}
-					var_dump($updateQuery, $params);
-					if($db->pquery($updateQuery, $params) === FALSE)
+					//	var_dump($updateQuery, $params);
+					if($db->pquery($updateQuery, $params) === FALSE){
+						$db->echoError();
+						var_dump($updateQuery, $params);
+					
 						return false;
+					}
 				}
 				return true;
 			}
 		}
+	}
+
+	/* 
+	 * ED150124 : $relatedRecordId == '*' : all relations are deleted
+	 */
+	public function deleteRelation($sourceRecordId, $relatedRecordId){
+		$sourceModule = $this->getParentModuleModel();
+		$sourceModuleName = $sourceModule->get('name');
+		$destinationModuleName = $this->getRelationModuleModel()->get('name');
+		$destinationModuleFocus = CRMEntity::getInstance($destinationModuleName);
+		switch($destinationModuleName){
+			case 'RSNAboRevues':
+				//Delete entity
+				DeleteEntity($destinationModuleName, false, $destinationModuleFocus, $relatedRecordId, false);
+				break;
+			default:
+				DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
+				break;
+		}
+		return true;
 	}
 
 }

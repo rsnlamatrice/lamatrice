@@ -112,8 +112,6 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 	    return $headerFields;
 	}
 	
-	
-	
 	/**
 	 * Function to get list of record models in this relation
 	 * @param <Vtiger_Paging_Model> $pagingModel
@@ -170,7 +168,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			switch($relatedModuleName){
 			  case "Invoice":
 			  case "RSNAboRevues":
-			 case "SalesOrder":
+			  case "SalesOrder":
 				return $relatedRecordModelsList;
 			
 			  case "Critere4D":
@@ -241,6 +239,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			if($query){
 				array_push($relatedRecordIdsList, $contactId);
 				$result = $db->pquery($query, $relatedRecordIdsList);
+				if(!$result)
+					$db->echoError();
 				$numOfrows = $db->num_rows($result);
 				
 				for($i=0; $i<$numOfrows; $i++) {

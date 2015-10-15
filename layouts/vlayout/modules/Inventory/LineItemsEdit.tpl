@@ -365,11 +365,14 @@
 		    {/if}
                 </td>
                 <td>
+					<span class="pull-right">
                     {if $MODULE eq 'Invoice'}
-                            <span class="pull-right"><input id="received" name="received" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('received') && !($IS_DUPLICATE)}{$RECORD->getDisplayValue('received')}{else}0.00{/if}"></span>
+                        <input id="received" name="received" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('received') && !($IS_DUPLICATE)}{$RECORD->getDisplayValue('received')}{else}0.00{/if}">
                     {else}
-                        <span class="pull-right"><input id="paid" name="paid" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('paid') && !($IS_DUPLICATE)}{$RECORD->getDisplayValue('paid')}{else}0.00{/if}"></span>
+                        <input id="paid" name="paid" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('paid') && !($IS_DUPLICATE)}{$RECORD->getDisplayValue('paid')}{else}0.00{/if}">
                     {/if}
+						<a id="received_set_balance">=</a>
+					</span>
                 </td>
             </tr>
             <tr valign="top">

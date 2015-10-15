@@ -21,7 +21,7 @@
 	- TODO Histo_DonNef 4D
 	- TODO Dons_Adr 4D
 	- TODO Prélèvements_HistoRejets 4D
-	- TODO LiensAdresses
+	- LiensAdresses
 	- Fichier Prélèvements.csv
 		- Exécuter la mise à jour des périodicités depuis le module La Matrice
 	- Fichiers Prélèvements_HistoDétail[-*].csv ( Ordres de virement )

@@ -383,4 +383,64 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 			$fields[$field->getName()] = $field;
 		return $fields;
 	}
+	
+	/** 
+	 * Function to update the data of relation
+	 * @param <Number> Campaign record id
+	 * @param <array> $values
+	 * 	$values = array(relatedRecordId => array(
+					'dateapplication' => date en table,
+					'value' => valeur))
+	 */
+	public function updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|data') {
+		//var_dump($sourceRecordId, $data, $fieldToUpdate);
+		if ($sourceRecordId && $data) {
+			
+			$relatedModuleName = $this->getRelationModuleModel()->getName();
+			$modulesInfo = $this->getModulesInfoForDetailView();
+
+			if (array_key_exists($relatedModuleName, $modulesInfo)) {
+				switch($fieldToUpdate){
+					case 'rel_data': $fieldToUpdate = 'data'; break;
+					default: break;
+				}
+				$fieldName = $modulesInfo[$relatedModuleName]['fieldName'];
+				$tableName = $modulesInfo[$relatedModuleName]['tableName'];
+				$sourceFieldNameInRelation = $modulesInfo[$relatedModuleName]['sourceFieldNameInRelation'];
+				if(!$sourceFieldNameInRelation){
+					$focus = CRMEntity::getInstance($this->getParentModuleModel()->getName());
+					$sourceFieldNameInRelation = $focus->table_index;
+				}
+				$keyDateFieldName = $modulesInfo[$relatedModuleName]['keyDateFieldName'];
+				
+				$db = PearDatabase::getInstance();
+
+				$params = array();
+				
+				foreach ($data as $relatedRecordId => $datum) {
+					$params = array();
+					$updateQuery = "UPDATE $tableName
+						SET $fieldToUpdate = ?
+						WHERE $fieldName = ?
+						AND $sourceFieldNameInRelation = ?"
+					;
+					$params[] = $datum['value'];
+					$params[] = $relatedRecordId;
+					$params[] = $sourceRecordId;
+					if($datum['dateapplication']){
+						$updateQuery .= "
+							AND dateapplication = ?
+						";
+						$params[] = $datum['dateapplication'];
+					}
+					//var_dump($updateQuery, $params);
+					if($db->pquery($updateQuery, $params) === FALSE){
+						$db->echoError();
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+	}
 }

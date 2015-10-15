@@ -151,18 +151,20 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 		var detailContentsHolder = this.getContentHolder();
 		detailContentsHolder.on('click','.relatedListHeaderValues',function(e){
 			var element = jQuery(e.currentTarget);
+			/*
 			var selectedTabElement = thisInstance.getSelectedTab();
 			var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
 			if (widgetHolder.length === 0) 
 			    widgetHolder = false;
 			var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
-			var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+			var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);*/
+			var relatedController = thisInstance.getRelatedListController(e);
 			relatedController.sortHandler(element);
 		});
 		
 		detailContentsHolder.on('click', 'button.selectRelation', function(e){
 			var selectedTabElement = thisInstance.getSelectedTab();
-			var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
+			/*var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
 			if (widgetHolder.length === 0) 
 			    widgetHolder = false;
 			var relatedModuleName = thisInstance.getRelatedModuleName(widgetHolder);
@@ -175,7 +177,9 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			default:
 			      var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			      break;
-			}
+			}*/
+			var relatedController = thisInstance.getRelatedListController();
+			
 			relatedController.showSelectRelationPopup().then(function(data){
 				var emailEnabledModule = jQuery(data).find('[name="emailEnabledModules"]').val();
 				if(emailEnabledModule){
@@ -184,7 +188,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 				/* ED14122
 				 * ré-enregistre les événements des éléments de la liste (sélection de date, saisie du champ de données)
 				 */
-				switch (relatedModuleName ){
+				/*switch (relatedModuleName ){
 				case "Critere4D":
 				case "Documents":
 					relatedController.registerEventsMultiDates();
@@ -194,7 +198,8 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 					break;
 				default:
 				      break;
-				}
+				}*/
+				relatedController.registerEvents();
 			});
 		});
 
@@ -342,48 +347,6 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			break;
 		}
 	},
-	
-	
-	
-	/**
-	 * Function to register Event for Critere4D or Documents
-	 */
-	deleteRelatedListMultiDates_OnClick : function(thisInstance, e){
-		var element = jQuery(e.currentTarget);
-		var instance = Vtiger_Detail_Js.getInstance();
-		var key = instance.getDeleteMessageKey();
-		var message = app.vtranslate(key);
-		var dateapplication = this.getAttribute('dateapplication');
-		Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
-			function(e) {
-				var row = element.closest('tr');
-				var relatedRecordid = row.data('id');
-				var selectedTabElement = thisInstance.getSelectedTab();
-				var relatedModuleName = thisInstance.getRelatedModuleName();
-				var relatedController = new Contacts_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
-				relatedController.deleteRelationMultiDates([relatedRecordid], [dateapplication]).then(function(response){
-					relatedController.loadRelatedList().then(function(data){
-						thisInstance.registerRelatedMultiDatesCntActions(true);
-					});
-				});
-			},
-			function(error, err){
-			}
-		);
-	},
-	
-	/**
-	 * Function to register related actions
-	 * init_fields for datepicker on navigation changes
-	 */
-	registerRelatedMultiDatesCntActions : function(init_fields) {
-		this.registerEventForRelatedList();
-		if (init_fields) { /*ED141007*/
-			app.registerEventForDatePickerFields(this.detailViewContentHolder);
-		}
-	},
-	
-	
 	
 	/**
 	 * Function to register Event for Contacts

@@ -1,6 +1,10 @@
 <?php
 /*+***********************************************************************************
  * ED150507
+ *
+ * Le champ sourceid doit être défini avec 
+ * UPDATE `vtiger_field` SET `summaryfield` = '1' WHERE `vtiger_field`.`fieldid` = 1087;
+ * 
  *************************************************************************************/
 
 //Valeurs exactes des items de la picklist rsnabotype
@@ -42,7 +46,7 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 * @return <Boolean> - 
 	 */
 	public function isTypeAbonneAVie() {
-		return $this->get('abotype') == RSNABOREVUES_TYPE_ABO_A_VIE;
+		return $this->isTypeAbo(RSNABOREVUES_TYPE_ABO_A_VIE);
 	}
 
 	/**
@@ -50,7 +54,7 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 * @return <Boolean> - 
 	 */
 	public function isTypeAboGroupe() {
-		return $this->get('abotype') == RSNABOREVUES_TYPE_ABO_GROUPE;
+		return $this->isTypeAbo(RSNABOREVUES_TYPE_ABO_GROUPE);
 	}
 	
 	/**
@@ -58,7 +62,7 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 * @return <Boolean> - 
 	 */
 	public function isTypeNePasAbonner() {
-		return $this->get('abotype') == RSNABOREVUES_TYPE_NE_PAS_ABONNER;
+		return $this->isTypeAbo(RSNABOREVUES_TYPE_NE_PAS_ABONNER);
 	}
 	
 	/**
@@ -66,7 +70,7 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 * @return <Boolean> - 
 	 */
 	public function isTypeDecouverte() {
-		return $this->get('abotype') == RSNABOREVUES_TYPE_NUM_DECOUVERTE;
+		return $this->isTypeAbo(RSNABOREVUES_TYPE_NUM_DECOUVERTE);
 	}
 	
 	/**
@@ -74,7 +78,16 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 * @return <Boolean> - 
 	 */
 	public function isTypeMerciSoutien() {
-		return $this->get('abotype') == RSNABOREVUES_TYPE_NUM_MERCI;
+		return $this->isTypeAbo(RSNABOREVUES_TYPE_NUM_MERCI);
+	}
+	
+	/**
+	 * Function to test if abotype equals a type
+	 * @return <Boolean> - 
+	 */
+	public function isTypeAbo($abotype) {
+		return $this->get('rsnabotype') == $abotype
+			|| $this->get('rsnabotype') == to_html($abotype);
 	}
 	
 	/**
@@ -143,7 +156,7 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 		if(!$this->isAbonne()
 		|| $this->isTypeAbonneAVie())
 			return $toDay;
-		switch($this->get('abotype')){
+		switch($this->get('rsnabotype')){
 		case RSNABOREVUES_TYPE_NE_PAS_ABONNER:
 		case RSNABOREVUES_TYPE_NON_ABONNE:
 		case RSNABOREVUES_TYPE_NUM_DECOUVERTE:

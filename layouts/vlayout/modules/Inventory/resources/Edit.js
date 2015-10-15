@@ -526,9 +526,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return this.parseFloat(jQuery('#grandTotal').text());
 	},
 	
+	//ED151014
+	getReceivedControlElement : function() {
+		return jQuery('#received');
+	},
 
 	getReceived : function() {
-		return this.parseFloat(jQuery('#received').val());
+		return this.parseFloat(this.getReceivedControlElement().val());
 	},
 	
 	//ED150708 : comma to dot before parseFloat
@@ -897,6 +901,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 */
 	calculateTaxForLineItem : function(lineItemRow) {
 		var totalAfterDiscount = this.getTotalAfterDiscount(lineItemRow);
+		var quantity = this.getQuantityValue(lineItemRow);
 		var taxPercentages = jQuery('.taxPercentage',lineItemRow);
 		//intially make the tax as zero
 		var taxTotal = 0;
@@ -909,7 +914,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			}
 			var individualTaxPercentage = parseFloat(individualTaxPercentage);
 			var individualTaxTotal = (individualTaxPercentage * totalAfterDiscount)/100;
-			individualTaxTotal = individualTaxTotal.toFixed(2);
+			if (quantity <= 1)
+				individualTaxTotal = individualTaxTotal.toFixed(2);
+			else //ED151410 : arrondit le tarif unitaire puis le multiplie par la quantité
+				individualTaxTotal = (Math.round(individualTaxTotal/quantity * 100) * quantity / 100).toFixed(2);
 			jQuery('.taxTotal',individualTaxRow).val(individualTaxTotal);
 			taxTotal += parseFloat(individualTaxTotal);
 		});
@@ -1173,6 +1181,18 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			else
 				value = value + offset;
 			$input.val(value).focusout();
+			return false;		
+		});
+	},
+
+	//ED151014 : bouton = du réglement
+	registerReceivedButtonsEvent : function(container) {
+		var thisInstance = this;
+		container.on('click','#received_set_balance',function(e){
+			var $this=$(this)
+			, $input = thisInstance.getReceivedControlElement()
+			, value = thisInstance.parseFloat($input.val()) + thisInstance.parseFloat(container.find("#balance").val());
+			$input.val(value).change();
 			return false;		
 		});
 	},
@@ -2312,6 +2332,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.registerBlockAnimationEvent(); /*ED150707*/
 		this.registerShippingChargeButtonsEvent(container); /* ED150708 */
 		this.registerQuantityButtonsEvent(container); /* ED150708 */
+		this.registerReceivedButtonsEvent(container); /* ED151014 */
 	},
 	
     registerEvents: function(){
