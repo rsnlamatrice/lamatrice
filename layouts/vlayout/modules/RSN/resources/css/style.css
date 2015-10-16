@@ -265,6 +265,9 @@ td.listViewEntryValue[data-field-type="currency"]
 }
 #detailView #invoice-recu {
   text-align: right;
+  background-color: #F0F7D5;
+  padding: 2px 4px;
+  margin-right: 1em;
 }
 /* sous-tables (reçu) */
 #detailView .table table th, #EditView .table table th, #detailView .table table td, #EditView .table table td ,
