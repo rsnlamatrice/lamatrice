@@ -49,6 +49,7 @@ class RSN {
 			$this->add_salesorder_fields();
 			$this->add_purchaseorders_fields();
 			$this->add_duplicateentities_table();
+			$this->add_products_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -364,21 +365,42 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 			'ship_addressformat' 	=> array( 'columntype' => 'VARCHAR(8)', 'uitype' => '402', 'tablename' => 'vtiger_poshipads', 'label' => 'Address format' ),
 		);
 		foreach($newFields as $newFieldName => $newField){
-			if($existingFields[$newFieldName])
-				continue;
-		
-			$tableName = $newField['tablename'];
-			
-			$field3 = new Vtiger_Field();
-			$field3->name = $newFieldName;
-			$field3->label = $newField['label'] ? $newField['label'] : $newFieldName;
-			$field3->table = $tableName;
-			$field3->column = $newFieldName;
-			$field3->columntype = $newField['columntype'];
-			$field3->uitype = $newField['uitype'] ? $newField['uitype'] : 1;
-			$field3->typeofdata = $newField['typeofdata'] ? $newField['typeofdata'] : 'V~O';
-			$block1->addField($field3);
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
 		}
+	}
+	
+	
+	static function add_products_fields() {
+		$module = Vtiger_Module_Model::getInstance('Products');
+		foreach( $module->getBlocks() as $block1)
+			if($block1->get('label') === 'LBL_PRICING_INFORMATION')
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'purchaseprice' 	=> array( 'columntype' => 'DECIMAL(25,8)', 'uitype' => '72', 'tablename' => 'vtiger_productcf', 'label' => 'Purchase price', 'typeofdata' => 'N~0' ),
+		);
+		foreach($newFields as $newFieldName => $newField){
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
+		}
+	}
+	
+	// fonction générique
+	static function add_new_field($newFieldName, $newField, $block1, $existingFields) {
+		
+		if($existingFields[$newFieldName])
+			return;
+	
+		$tableName = $newField['tablename'];
+		
+		$field3 = new Vtiger_Field();
+		$field3->name = $newFieldName;
+		$field3->label = $newField['label'] ? $newField['label'] : $newFieldName;
+		$field3->table = $tableName;
+		$field3->column = $newFieldName;
+		$field3->columntype = $newField['columntype'];
+		$field3->uitype = $newField['uitype'] ? $newField['uitype'] : 1;
+		$field3->typeofdata = $newField['typeofdata'] ? $newField['typeofdata'] : 'V~O';
+		$block1->addField($field3);
 	}
 	
 	static function add_mysql_function_levenshtein(){

@@ -86,6 +86,7 @@ class RSN_CogilogProduitsEtServices_Import {
 			, "produit"."gererstock" AS "gererstock"
 			, "produit"."stockdivers" AS "stockdivers"
 			, "produit"."prix" AS "prixvente_produit"
+			, "produit"."achat" AS "prixachat_produit"
 			, "produit"."stockqte" AS "stock_produit"
 			, "produit"."compte" AS "compte_produit"
 			, "produit"."section" AS "section_produit"
@@ -111,10 +112,10 @@ class RSN_CogilogProduitsEtServices_Import {
 		';
 			
 		
-		$query .= ' 
-			/*WHERE "produit"."code" = \'LCRAC\'
+		/*$query .= ' 
+			WHERE "produit"."code" = \'LCRAC\'
 			LIMIT 1
-			ORDER BY id_produit*/';
+			ORDER BY id_produit'; */
 		return self::getPGDataRows($query);
     }
         
@@ -194,6 +195,8 @@ class RSN_CogilogProduitsEtServices_Import {
 		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
 		$record->set('taxclass', $srcRow['tva_produit']);
 		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
+		$record->set('purchaseprice', str_replace('.', ',', $srcRow['prixachat_produit'])); //Attention, il faut la virgule...
+		
 	    
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
@@ -247,6 +250,7 @@ class RSN_CogilogProduitsEtServices_Import {
 		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
 		$record->set('taxclass', $srcRow['tva_produit']);
 		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
+		$record->set('purchaseprice', str_replace('.', ',', $srcRow['prixachat_produit'])); //Attention, il faut la virgule...
 	    
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
