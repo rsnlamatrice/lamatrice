@@ -80,6 +80,8 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 			}else{
 				jQuery('input[name='+taxBox+']',formElem).addClass('hide');
 			}
+			//ED151016
+			thisInstance.showTaxedPrice();
 		});
 		return this;
 	},
@@ -92,6 +94,35 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 		, useMultipleTaxes = $useMultipleTaxes.length == 0 || $useMultipleTaxes.val() != 'false'
 		;
 		return useMultipleTaxes;
+	},
+	
+	/** ED151016
+	 * show price with tax amount
+	 */
+	showTaxedPrice : function(){
+		var thisInstance = this
+		, formElem = thisInstance.getForm()
+		, unitPrice = thisInstance.getDataBaseFormatUnitPrice()
+		;
+		formElem.find('.taxes').each(function(){
+			var isChecked = this.checked
+			, $tdInput = $(this).parents('td:first').next()
+			, $label = $tdInput.find('.taxedPrice');
+			if (!isChecked) {
+				$label.hide();
+				return;
+			}
+			var $input = $tdInput.find('input.detailedViewTextBox')
+			, taxRate = parseFloat($input.val().replace(',','.'));
+			if ($label.length === 0) 
+				$label = $('<span class="taxedPrice"/>')
+					.css('margin-left', '1em')
+					.insertAfter($input);
+			else
+				$label.show();
+			$label.html((unitPrice * ( 1 + taxRate / 100)).toFixed(2) + '&nbsp;&euro;');
+			
+		});
 	},
 	
 	/**
@@ -310,6 +341,8 @@ Vtiger_Edit_Js("Products_Edit_Js",{
                 baseCurrencyRow.find('.convertedPrice').val('');
             }
 		})
+		//ED151016
+		this.showTaxedPrice();
 	},
 	
 	/**
@@ -321,6 +354,8 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 		unitPrice.on('change',function(){
 			thisInstance.triggerForBaseCurrencyCalc();
 		})
+		//ED151016 init TTC
+		thisInstance.showTaxedPrice();
 	},
 
 	registerRecordPreSaveEvent : function(form) {
