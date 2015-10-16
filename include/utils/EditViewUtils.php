@@ -376,8 +376,8 @@ function getAssociatedProducts($module,$focus,$seid='')
 	$received = ($focus->column_fields['received'] != '')?$focus->column_fields['received']:'0.00';
 	$received = number_format($received, $no_of_decimal_places,'.','');
 	$product_Detail[1]['final_details']['received'] = $received;
-	if($focus->column_fields['receivedreference'])
-		$receivedcomments = $focus->column_fields['receivedmoderegl'] . ' ' . $focus->column_fields['receivedreference'];
+	if($focus->column_fields['receivedmoderegl'])
+		$receivedcomments = trim($focus->column_fields['receivedmoderegl'] . ' ' . $focus->column_fields['receivedreference']);
 	if($focus->column_fields['receivedcomments']){
 		if($receivedcomments)
 			$receivedcomments .= "<br>";

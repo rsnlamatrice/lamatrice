@@ -238,7 +238,9 @@
 		    *}
 		    {if $MODULE eq 'Invoice'}
 			<span class="pull-right" id="invoice-recu">
-			    {str_replace("\n", "<br>", $FINAL_DETAILS["receivedcomments"])}
+			    {if $FINAL_DETAILS["receivedcomments"]}
+				{str_replace("\n", "<br>", $FINAL_DETAILS["receivedcomments"])}
+			    {/if}
 			</span>
 		    {/if}
 		</td>
