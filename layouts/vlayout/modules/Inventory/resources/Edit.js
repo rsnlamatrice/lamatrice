@@ -707,6 +707,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var selectedName = recordData.name;
 			var unitPrice = recordData.listprice;
 			var taxes = recordData.taxes;
+			//ED151016
+			if (app.getModuleName() === 'PurchaseOrder'
+			&&  recordData.purchaseprice) {
+				unitPrice = recordData.purchaseprice;
+			}
+			
 			//ED150602 discount % from account discount type
 			var discountpc = recordData.discountpc;
 			this.checkLineWithSameProduct(recordId, selectedName, parentRow);

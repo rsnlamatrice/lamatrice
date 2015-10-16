@@ -29,13 +29,20 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 			foreach ($priceDetails as $currencyDetails) {
 				if ($currencyId == $currencyDetails['curid']) {
 					$conversionRate = $currencyDetails['conversionrate'];
+					break;
 				}
 			}
 			$listPrice = (float)$recordModel->get('unit_price') * (float)$conversionRate;
+			if($recordModel->get('purchaseprice'))
+				$purchasePrice = (float)$recordModel->get('purchaseprice') * (float)$conversionRate;
+			else
+				$purchasePrice = $listPrice;
 
 			$data = array(
 				'id'=>$recordId, 'name'=>decode_html($recordModel->getName()),
-				'taxes'=>$taxes, 'listprice'=>$listPrice,
+				'taxes'=>$taxes,
+				'listprice'=>$listPrice,
+				'purchaseprice'=>$purchasePrice,
 				'description' => decode_html($recordModel->get('description')),
 				'quantityInStock' => $recordModel->get('qtyinstock')
 			);
@@ -59,9 +66,15 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				}
 
 				$listPrice = (float)$recordModel->get('unit_price') * (float)$conversionRate;
+				if($recordModel->get('purchaseprice'))
+					$purchasePrice = (float)$recordModel->get('purchaseprice') * (float)$conversionRate;
+				else
+					$purchasePrice = $listPrice;
 				$data = array(
 					'id'=>$id, 'name'=>decode_html($recordModel->getName()),
-					'taxes'=>$taxes, 'listprice'=>$listPrice,
+					'taxes'=>$taxes,
+					'listprice'=>$listPrice,
+					'purchaseprice'=>$purchasePrice,
 					'description' => $recordModel->get('description'),
 					'quantityInStock' => $recordModel->get('qtyinstock')
 				);
