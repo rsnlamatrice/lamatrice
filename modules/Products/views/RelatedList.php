@@ -9,7 +9,14 @@ class Products_RelatedList_View extends Vtiger_RelatedList_View {
 		$orderBy = $request->get('orderby');
 		$sortOrder = $request->get('sortorder');
 		if(empty($orderBy)) {
-			$request->set('orderby', 'sostatus'); //TODO Trier par IF(sostatus = 'Approved' OR sostatus = 'Created', 0, 1)
+			switch($relatedModuleName){
+			case 'SalesOrder':
+				$request->set('orderby', 'sostatus'); //TODO Trier par IF(sostatus = 'Approved' OR sostatus = 'Created', 0, 1)
+				break;
+			case 'Invoice':
+				$request->set('orderby', 'invoicestatus'); 
+				break;
+			}
 		}
 		return parent::process($request);
 	}
