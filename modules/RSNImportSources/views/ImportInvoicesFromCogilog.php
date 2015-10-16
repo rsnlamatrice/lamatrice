@@ -456,7 +456,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 									    , $total
 									    , $total
 									    , 'individual'
-									    , $totalAmount - $invoiceData[0]['solde']
+									    , $total - $invoiceData[0]['solde']
 									    , ASSIGNEDTO_ALL
 									    , $invoiceData[0]['invoicedate']
 									    , $invoiceData[0]['invoicedate']
