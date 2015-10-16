@@ -101,7 +101,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 					$variablesData[] = $variableData;
 				}
 			}
-
+		
 			return $variablesData;
 		}
 
@@ -122,12 +122,16 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 	}
 
 	public function cleanQueryStringVariables() {
-		$query = $this->get('query');
+		$query0 = $query = $this->get('query');
 		foreach ($this->variablesData as $variableData) {
 			//tmp use real type (query, ?, ...)
-			$query = preg_replace('/\[\[(\?{1,2}|\=|QUERY\s|IN\s)\s?' . $variableData['name'] . '((\s.|\|)(.*))?\]\]/', '[[$1 ' . trim($variableData['name']) . ' ]]', $query);
+			$regex = '/\[\[(\?{1,2}|\=|QUERY\s|IN\s)\s?' . $variableData['name'] . '((\s.|\|)(?!\[\[))?\]\]/';
+			$query = preg_replace($regex, '[[$1 ' . trim($variableData['name']) . ' ]]', $query);
+			var_dump('name', $variableData['name'], $regex, $query);
 		}
 //exit;
+//var_dump($query0, $query);
+//		die();
 		$this->set('query', $query);
 	}
 
@@ -259,7 +263,9 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 	}
 
 	public function getRelatedVariablesNames() {
-		$result = [];
+		
+		$result = array();		
+		
 		$relatedVariables = $this->getRelatedVariables();
 
 		foreach ($relatedVariables as $key => $variable) {
@@ -278,8 +284,8 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 			$SQLParam[] = $paramValue;
 		}
 
-		return ['sql' => $sql,
-				'params' => $SQLParam];
+		return array('sql' => $sql,
+				'params' => $SQLParam);
 	}
 	
 // 	public static function queryParams_encode($array){
@@ -310,8 +316,10 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 	 * @param array &$paramsDetails : for each parameter, add details
 	 * @param array &$paramsPriorValues : valeurs de variables à affecter
 	 * @return <type>
+	 *
+	 * TODO
 	 */
-	function getExecutionSQL_tmp(&$params = FALSE, &$paramsDetails = FALSE, &$paramsPriorValues = FALSE, &$callStask = FALSE) {
+	function getExecutionSQL(&$params = FALSE, &$paramsDetails = FALSE, &$paramsPriorValues = FALSE, &$callStask = FALSE) {
 		if(!RSNSQLQueryExecutionController::stack($this)) //do not forget to unstack
 			return null;
 		if(!is_array($params))
