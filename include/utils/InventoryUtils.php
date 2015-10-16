@@ -1109,7 +1109,7 @@ function getPricesForProducts($currencyid, $product_ids, $module='Products') {
 			$product_id = $adb->query_result($result, $i, 'productid');
 			if(getFieldVisibilityPermission($module,$current_user->id,'unit_price') == '0') {
 				$actual_price = (float)$adb->query_result($result, $i, 'actual_price');
-
+				
 				if ($actual_price == null || $actual_price == '') {
 					$unit_price = $adb->query_result($result, $i, 'unit_price');
 					$product_conv_rate = $adb->query_result($result, $i, 'conversion_rate');

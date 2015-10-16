@@ -707,6 +707,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var selectedName = recordData.name;
 			var unitPrice = recordData.listprice;
 			var taxes = recordData.taxes;
+			//ED151016
+			if (app.getModuleName() === 'PurchaseOrder'
+			&&  recordData.purchaseprice) {
+				unitPrice = recordData.purchaseprice;
+			}
+			
 			//ED150602 discount % from account discount type
 			var discountpc = recordData.discountpc;
 			this.checkLineWithSameProduct(recordId, selectedName, parentRow);
@@ -914,10 +920,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			}
 			var individualTaxPercentage = parseFloat(individualTaxPercentage);
 			var individualTaxTotal = (individualTaxPercentage * totalAfterDiscount)/100;
-			if (quantity <= 1)
+			//if (quantity <= 1)
 				individualTaxTotal = individualTaxTotal.toFixed(2);
-			else //ED151410 : arrondit le tarif unitaire puis le multiplie par la quantité
-				individualTaxTotal = (Math.round(individualTaxTotal/quantity * 100) * quantity / 100).toFixed(2);
+			//ED151016 pas nécessaire si le paramétrage Utilisateur est sur 4 chiffres
+			//else //ED151014 : arrondit le tarif unitaire puis le multiplie par la quantité 
+			//	individualTaxTotal = (Math.round(individualTaxTotal/quantity * 100) * quantity / 100).toFixed(2);
 			jQuery('.taxTotal',individualTaxRow).val(individualTaxTotal);
 			taxTotal += parseFloat(individualTaxTotal);
 		});

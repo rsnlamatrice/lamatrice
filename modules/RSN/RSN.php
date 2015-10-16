@@ -377,7 +377,7 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 				break;
 		$existingFields = $module->getFields();
 		$newFields = array(
-			'purchaseprice' 	=> array( 'columntype' => 'DECIMAL(25,8)', 'uitype' => '72', 'tablename' => 'vtiger_productcf', 'label' => 'Purchase price', 'typeofdata' => 'N~0' ),
+			'purchaseprice' 	=> array( 'columntype' => 'DECIMAL(25,8)', 'uitype' => '72', 'tablename' => 'vtiger_products', 'label' => 'Purchase price', 'typeofdata' => 'N~0' ),
 		);
 		foreach($newFields as $newFieldName => $newField){
 			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
