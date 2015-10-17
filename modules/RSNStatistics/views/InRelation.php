@@ -1,11 +1,9 @@
 <?php
 /*+***********************************************************************************
- * The contents of this file are subject to the vtiger CRM Public License Version 1.0
- * ("License"); You may not use this file except in compliance with the License
- * The Original Code is:  vtiger CRM Open Source
- * The Initial Developer of the Original Code is vtiger.
- * Portions created by vtiger are Copyright (C) vtiger.
- * All Rights Reserved.
+ * AV150000
+ *
+ * ED151017
+ * 	La relation RSNStatistics <-> RSNStatistics indique un calcul global par les fonctions d'aggrégation
  *************************************************************************************/
 
 class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
@@ -38,8 +36,8 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 			$relationListView->set('orderby', $orderBy);
 			$relationListView->set('sortorder',$sortOrder);
 		}
-
 		$models = $relationListView->getEntries($pagingModel, $parentId);//tmp do not use that ??
+		
 		//var_dump($models->list_fields);
 		$links = $relationListView->getLinks();
 		$header = $relationListView->getHeaders();
@@ -50,7 +48,7 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$relationField = $relationModel->getRelationField();
 
 		$viewer = $this->getViewer($request);
-		$viewer->assign('CRMID' , $request->get('record'));
+		$viewer->assign('CRMID' , $parentId);
 		$viewer->assign('RELATED_RECORDS' , $models);//tmp rename record to something more explicit !!!
 		$viewer->assign('PARENT_RECORD', $parentRecordModel);
 		$viewer->assign('RELATED_LIST_LINKS', $links);
@@ -58,7 +56,9 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('RELATED_MODULE', $relatedModuleModel);
 		$viewer->assign('RELATED_ENTIRES_COUNT', $noOfEntries);
 		$viewer->assign('RELATION_FIELD', $relationField);
-
+		$viewer->assign('UPDATE_STATS_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : ''));
+		$viewer->assign('UPDATE_STATS_THIS_YEAR_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : '', 'this year'));
+		
 		//if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			$totalCount = $relationListView->getRelatedEntriesCount();
 			$pageLimit = $pagingModel->getPageLimit();
@@ -86,6 +86,13 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
         $viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->assign('VIEW', $request->get('view'));
 
+
+		//var_dump($relatedModuleName);
+		if($relatedModuleName === 'RSNStatistics'){
+			//var_dump($recordModel->get('relmodule'), CustomView_Record_Model::getAllByGroup($recordModel->get('relmodule')));
+			$viewer->assign('CUSTOM_VIEWS', CustomView_Record_Model::getAllByGroup($parentRecordModel->get('relmodule')));
+		}
+		
 		return $viewer->view('RelatedStats.tpl', 'RSNStatistics', 'true');
 	}
 }

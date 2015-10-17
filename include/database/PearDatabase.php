@@ -750,7 +750,16 @@ class PearDatabase{
 		return '';
     }
 
-    function fetchByAssoc(&$result, $rowNum = -1, $encode=true) {
+	/* ED151017 */
+    function fetchAllByAssoc(&$result, $encode=true) {
+		$rows = array();
+		$rowNum = 0;
+		while(!$result->EOF)
+			$rows[] = $this->fetchByAssoc($result, $rowNum++, $encode);
+		return $rows;
+	}
+	
+	function fetchByAssoc(&$result, $rowNum = -1, $encode=true) {
 		if($result->EOF) {
 		    $this->println("ADODB fetchByAssoc return null");
 		    return NULL;

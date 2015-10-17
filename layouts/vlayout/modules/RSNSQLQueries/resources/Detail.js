@@ -7,7 +7,7 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-Vtiger_Detail_Js("RSNContactsPanels_Detail_Js",{},{
+Vtiger_Detail_Js("RSNSQLQueries_Detail_Js",{},{
 		
 	
 	

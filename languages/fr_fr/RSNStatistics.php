@@ -11,13 +11,16 @@
 $languageStrings = array(
 	'RSNStatistics' => 'Statistiques',
 	'SINGLE_RSNStatistics' => 'Statistique',
-	'LBL_BLOCK_GENERAL_INFORMATION' => '',
-	'LBL_BLOCK_SYSTEM_INFORMATION' => '',
+	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
+	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations système',
 	'LBL_STAT_NAME' => 'Nom de la statistique',
 	'LBL_RELMODULE' => 'Module lié',
 	'STAT_FIELDS' => 'Champs statistiques',
 	'STAT_FIELDS' => 'champs statistiques',
 	'LBL_UPDATE_STATS' => 'Mettre à jour',
+	'LBL_THIS_YEAR' => 'cette année',
+	'LBL_CALCULATE_FOR_ALL_RELATED' => 'Mettre à jour tous les calculs',
+	'LBL_CALCULATE_FOR_ALL_RELATED_THIS_YEAR' => 'Mettre à jour cette année',
 );
 
 ?>

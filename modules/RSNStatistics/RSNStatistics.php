@@ -197,4 +197,49 @@ class RSNStatistics extends Vtiger_CRMEntity {
 		
 		$log->debug("Invoking deleteDuplicatesFromPickList(".$pickListName.") method ...DONE");
 	}
+	
+	//TOTALS
+	function get_statistics_data($id, $cur_tab_id, $rel_tab_id, $actions=false) {//tmp (do not put this method here -> need a generic method not depanding to the module!!!!!!!!!!!!
+		global $log, $singlepane_view,$currentModule,$current_user;
+		$log->debug("Entering get_statistics(".$id.") method ...");
+		$this_module = $currentModule;
+
+		$related_module = vtlib_getModuleNameById($rel_tab_id);
+		$singular_modname = vtlib_toSingular($related_module);
+
+		$parenttab = getParentTab();
+
+		if($singlepane_view == 'true')
+			$returnset = '&return_module='.$this_module.'&return_action=DetailView&return_id='.$id;
+		else
+			$returnset = '&return_module='.$this_module.'&return_action=CallRelatedList&return_id='.$id;
+
+		$button = '';
+		
+		$recordModel = Vtiger_Record_Model::getInstanceById($id, $this_module);
+		
+		$relatedStatsTablesNames = RSNStatistics_Utils_Helper::getRelatedStatsTablesNames($recordModel->get('relmodule'));
+
+		$tableName = $relatedStatsTablesNames[0];
+		$query = "SELECT DISTINCT `$tableName`.name, `$tableName`.code";
+		
+		$query .= "
+			FROM `$tableName`
+			INNER JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = `$tableName`.crmid
+			WHERE vtiger_crmentity.deleted = FALSE";
+		$query .= "
+			GROUP BY `$tableName`.name, `$tableName`.code";
+			
+		$query = "SELECT * FROM ($query) _subquery";
+		//echo $query;
+
+		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
+
+		if($return_value == null) $return_value = Array();
+		$return_value['CUSTOM_BUTTON'] = $button;
+
+		$log->debug("Exiting get_invoices method ...");
+		return $return_value;
+	}
 }

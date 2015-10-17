@@ -49,8 +49,9 @@ class RSNStatisticsHandler extends VTEventHandler {
 				  `begin_date` TIMESTAMP NULL DEFAULT NULL,
 				  `end_date` TIMESTAMP NULL DEFAULT NULL,
 				  `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8";
+				  PRIMARY KEY (`id`),
+				  UNIQUE( `crmid`, `code`)
+				) DEFAULT CHARSET=utf8";
 
 			$db = PearDatabase::getInstance();
 			$db->pquery($sql);

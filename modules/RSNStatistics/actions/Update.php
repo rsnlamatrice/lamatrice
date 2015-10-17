@@ -14,15 +14,25 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 
 	public function process(Vtiger_Request $request) {
 		$mode = $request->get('mode');
-		$result = array();
-
-		 if ($mode == 'all') {
-		 	$this->updateAll($request);
-		 } else {
-		 	$this->updateOne($request);
-		 }
+		$relatedModuleName = $request->get('relatedmodule');
+		$moduleName = $request->getModule();
+		$crmids = $request->get('crmid');
+		$statId = $request->get('record');
+		if ($mode == 'all') {
+		   $this->updateAll($request);
+		} else {
+		   $this->updateOne($request);
+		}
+		if(is_numeric($crmids) && $crmids != '0')
+			$url = "index.php?module=" . $relatedModuleName . "&relatedModule=" . $moduleName . "&view=Detail&record=" . $crmids . "&mode=showRelatedList&tab_label=" . $moduleName;
+		else
+			$url = "index.php?module=" . $moduleName . "&relatedModule=" . $moduleName . "&view=Detail&record=" . $statId . "&mode=showRelatedList&tab_label=" . $moduleName;
+		
+		header('Location: ' . $url);
+		
 	}
 
+	// AV150000
 	function initStatsRows($relatedModuleName, $crmid, $beginDate) {
 		$db = PearDatabase::getInstance();
 		$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatistics($relatedModuleName);
@@ -97,68 +107,223 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 
 		//exit;
 	}
+	
+	/** ED151017
+	 * Retourne tous les éléments pour construire les requêtes de mise à jour
+	 *
+	 */
+	function getStatsQueriesPeriods($relatedModuleName, $beginDate) {
+		$db = PearDatabase::getInstance();
+		$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($relatedModuleName);
+		$statistics = array();
+		foreach ($relatedStatistics as $relatedStatistic) {
+			$statTableName = RSNStatistics_Utils_Helper::getStatsTableName($relatedStatistic->getId(), $relatedStatistic);
+			//var_dump($relatedStatistic->getId(), $relatedStatistic->get('rsnstatisticsid'), $relatedStatistic, $statTableName);
+			
+			$periodicities = explode(' |##| ', $relatedStatistic->get('stats_periodicite'));//Annuelle | Mensuelle | Exercice // tmp hardcode !!
 
+			$periods = array();
+			foreach ($periodicities as $periodicity) {
+				if ($periodicity == 'Annuelle') {
+					//tmp begin date !!!!!!
+					$beginYears = (int) date("Y", $beginDate);
+					$endYears = (int) date("Y");
+
+					for ($years = $beginYears; $years <= $endYears; ++$years) {
+						$periods[] = $this->createPeriodParam( $years, 'Annuelle-' . $years, $years . "-01-01 00:00:00", ($years + 1) . "-01-01 00:00:00");
+					}
+				} else if ($periodicity == 'Mensuelle') {
+					$beginYears = (int) date("Y", $beginDate);
+					$endYears = (int) date("Y");
+					$months = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];//tmp hardcode !!!!
+					for ($years = $beginYears; $years <= $endYears; ++$years) {
+						foreach ($months as $monthId => $month) {
+							$end_date = ($monthId == 11) ? ($years + 1) . "-" . "01-01 00:00:00" : $years . "-" . ($monthId + 2) . "-01 00:00:00";
+							$periods[] = $this->createPeriodParam( $month . ' ' . $years, 'Mensuelle-'. $month . $years, $years . "-" . ($monthId+ 1) . "-01 00:00:00", $end_date);
+						}
+					}
+				} else if ($periodicity == 'Exercice') {
+					//tmp todo !!
+				}
+			}
+
+			if (sizeof($periods) > 0) {
+				//Queries
+				$queries = array();
+				$relatedStatisticsFields = RSNStatistics_Utils_Helper::getRelatedStatsFields($relatedStatistic->getId());// tmp get fileds of oll related stats !!
+				//Chaque Champ de stat
+				foreach ($relatedStatisticsFields as $relatedStatisticsField) {
+					$queryId = $relatedStatisticsField['rsnsqlqueriesid'];
+					if(!array_key_exists($queryId, $queries)){
+						$queries[$queryId] = array(
+												   'record' => Vtiger_Record_Model::getInstanceById($queryId),
+													'periods' => $periods,
+													'fields' => array($relatedStatisticsField),
+											);
+					}
+					else
+						$queries[$queryId]['fields'][] = $relatedStatisticsField;
+				}
+				
+				$statistics[] = array(
+					'record' => $relatedStatistic,
+					'table' => $statTableName,
+					'queries' => $queries
+				);
+			}
+		}
+
+		//exit;
+		return $statistics;
+	}
+
+	//AV
 	function createRow($crmid, $name, $code, $begin_date, $end_date) {
 		return array('crmid'=> $crmid, 'name' => $name, 'code' => $code, 'begin_date' => $begin_date, 'end_date' => $end_date);
 	}
 
+	//ED
+	function createPeriodParam($name, $code, $begin_date, $end_date) {
+		return array('name' => $name, 'code' => $code, 'begin_date' => $begin_date, 'end_date' => $end_date);
+	}
+
 	function updateOne(Vtiger_Request $request) {//tmp update for date between - after - ... / existing row / current / ...
+		
+		set_time_limit(2 * 60 * 60); //TODO
+		
 		$db = PearDatabase::getInstance();
-		$crmid = $request->get('crmid');
+		$crmids = $request->get('crmid');
 		$relatedModuleName = $request->get('relatedmodule');
-		$relatedModuleModel = Vtiger_Module_Model::getInstance($relatedModuleName);
-		$relatedModule = CRMEntity::getInstance($relatedModuleName);
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		
-		$this->initStatsRows($relatedModuleName, $crmid, mktime(0, 0, 0, 1, 1, 2009));//TMP !!!
+		$beginDate = $request->get('begin_date');
+		switch($beginDate){
+		case 'this year':
+		case 'year':
+			$beginDate = mktime(0, 0, 0, 1, 1, date('Y'));//TODO Exercice de l'année
+			break;
+		default :
+			$beginDate = mktime(0, 0, 0, 1, 1, 2009); //TODO
+			break;
+		}
 		
-		$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatistics($relatedModuleName);
-		foreach ($relatedStatistics as $relatedStatistic) {
-			$existingStatsRows = RSNStatistics_Utils_Helper::getRelatedStatsValues($relatedStatistic, $crmid);
-
-			$relatedStatisticsFields = RSNStatistics_Utils_Helper::getRelatedStatsFields($relatedStatistic['rsnstatisticsid']);// tmp get fileds of oll related stats !!
-			$statsFieldsValues = array();
-
-			foreach ($relatedStatisticsFields as $relatedStatisticsField) {
-				$sqlquery = Vtiger_Record_Model::getInstanceById($relatedStatisticsField['rsnsqlqueriesid']);
-				foreach ($existingStatsRows as $existingStatsRow) {
-					$executionQuery = $sqlquery->getExecutionQuery(['crmid'=>$crmid, 'begin_date'=>$existingStatsRow['begin_date'], 'end_date'=>$existingStatsRow['end_date']]);
-					$db = PearDatabase::getInstance();
-					$result = $db->pquery($executionQuery['sql'], $executionQuery['params']);
-					$num_rows = $db->num_rows($result);
-
-					if ($num_rows == 1) {
-						$statValue = $db->query_result($result, 0);
-						$statsFieldsValues[$existingStatsRow['id']] = ($statsFieldsValues[$existingStatsRow['id']]) ? array() : $statsFieldsValues[$existingStatsRow['id']];
-						$statsFieldsValues[$existingStatsRow['id']][$relatedStatisticsField['uniquecode']] = $statValue;
-					} else {
-						//error tmp (too much or no row)
+		$statistics = $this->getStatsQueriesPeriods($relatedModuleName, $beginDate);
+		if($crmids === '*'){
+			$crmids = "SELECT crmid FROM vtiger_crmentity WHERE vtiger_crmentity.deleted=0";
+			if($relatedModuleName)
+				$crmids .= " AND vtiger_crmentity.setype='$relatedModuleName'";
+			else {
+				$crmids .= " AND vtiger_crmentity.setype IN (";
+				$relatedModuleNames = array();
+				$nStat = 0;
+				foreach ($statistics as $statistic){
+					$relatedStatistic = $statistic['record'];
+					$relatedModuleName = $relatedStatistic->get('relmodule');
+					if(!array_key_exists($relatedModuleName, $relatedModuleNames)){
+						$relatedModuleNames[$relatedModuleName] = true;
+						if($nStat++ > 0)
+							$crmids .= ", ";
+						$crmids .= "'$relatedModuleName'";
 					}
 				}
-
-				//persist update for one row
-				$statTableName = RSNStatistics_Utils_Helper::getStatsTableName($relatedStatistic['rsnstatisticsid'], $relatedStatistic);
-				foreach($statsFieldsValues as $statRowId => $rowStatsFieldsValues) {
-					$sqlUpdateQuery = "UPDATE " . $statTableName . " SET `last_update` = NOW()";
-					$queryParams = array();
-
-					foreach ($rowStatsFieldsValues as $uniquecode => $value) {
-						$sqlUpdateQuery .= ", `" . $uniquecode . "` = ?";
-						$queryParams[] = $value;
+				$crmids .= ")";
+				$relatedModuleName = array_keys($relatedModuleNames);
+				
+			}
+			//var_dump($relatedModuleName, $crmids);
+		
+		}
+		
+		if($perf = !is_numeric($crmids))
+			$perf = new RSN_Performance_Helper();
+		
+		//$this->initStatsRows($relatedModuleName, $crmid, mktime(0, 0, 0, 1, 1, 2009));//TMP !!!
+		//var_dump($relatedModuleName, $statistics);
+		//exit();
+		//Chaque stat
+		foreach ($statistics as $statistic){
+			$relatedStatistic = $statistic['record'];
+			$statTableName = $statistic['table'];
+			$statisticResults = array();
+			foreach ($statistic['queries'] as $statQuery){
+				$relatedStatisticsFields = $statQuery['fields'];
+				$sqlqueryRecord = $statQuery['record'];
+						
+				//Chaque période
+				foreach ($statQuery['periods'] as $statPeriod){
+					$name = $statPeriod['name'];
+					$code = $statPeriod['code'];
+					$end_date = $statPeriod['end_date'];
+					$begin_date = $statPeriod['begin_date'];
+						
+					$executionQuery = $sqlqueryRecord->getExecutionQuery(['crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date]);
+					
+					$params = array();
+					
+					//Insert
+					$insertQuery = "INSERT INTO $statTableName ( crmid, name, code, begin_date, end_date, last_update";
+					
+					//Stat Fields
+					//Chaque Champ de stat
+					foreach ($relatedStatisticsFields as $relatedStatisticsField) {
+						$insertQuery .= ", `".$relatedStatisticsField['uniquecode']."`";
 					}
-
-					$sqlUpdateQuery .= " WHERE `" . $statTableName . "`.`id` = ?;";
-					$queryParams[] = $statRowId;
-					$db->pquery($sqlUpdateQuery, $queryParams);
+					
+					//Select Données source
+					$insertQuery .= ")
+					/* ".$relatedStatistic->getName()." -> $name */
+					SELECT source.crmid, ?, ?, ?, ?, NOW()";
+					$params[] = $name;
+					$params[] = $code;
+					$params[] = $begin_date;
+					$params[] = $end_date;
+					
+					//Stat Fields
+					//Chaque Champ de stat
+					foreach ($relatedStatisticsFields as $relatedStatisticsField) {
+						$insertQuery .= ", source.`".$relatedStatisticsField['uniquecode']."`";
+					}
+					
+					//From source
+					$insertQuery .= "
+					FROM (" . $executionQuery['sql'] . ") source";
+					$params = array_merge($params, $executionQuery['params']);
+					
+					//ON DUPLICATE (rappel : index unique sur crmid, code)
+					$insertQuery .= "
+					ON DUPLICATE KEY UPDATE last_update = NOW()";
+					//Stat Fields
+					//Chaque Champ de stat
+					foreach ($relatedStatisticsFields as $relatedStatisticsField) {
+						$insertQuery .= ", `".$relatedStatisticsField['uniquecode']."` = source.`".$relatedStatisticsField['uniquecode']."`";
+					}
+					
+					$db = PearDatabase::getInstance();
+					if($perf) $perf->tick();
+					$result = $db->pquery($insertQuery, $params);
+					if($perf) $perf->tick();
+					if(!$result){
+						$db->echoError();
+						echo "<pre>$insertQuery</pre>";
+						var_dump($params);
+						exit;
+					}
+					else{
+						echo "<pre>$insertQuery</pre>";
+						var_dump($params);
+						$affectedRows = $db->getAffectedRowCount($result);
+						var_dump("OK : ".$relatedStatistic->get('name')." -> $name : $affectedRows modification(s).");
+					}
 				}
 			}
 		}
-//		exit;
-		header('Location: ' . "index.php?module=" . $relatedModuleName . "&relatedModule=" . $moduleName . "&view=Detail&record=" . $crmid . "&mode=showRelatedList&tab_label=" . $moduleName);
+		if($perf) $perf->terminate();
+		//exit;
 	}
 
-	function updateAll() {
-
+	function updateAll(Vtiger_Request $request) {
+		$request->set('crmid', '*');
+		return $this->updateOne($request);
 	}
 }

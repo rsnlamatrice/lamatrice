@@ -639,7 +639,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		";
 		echo("\r<h4>Recherche de contacts similaires par \"$updateFieldSourceValue\"</h4>\r");
 		//echo("<pre>$query</pre>");
-		$perf = new RSNImportSources_Utils_Performance(0);
+		$perf = new RSN_Performance_Helper(0);
 		$result = $db->query($query);
 		$perf->terminate();
 		if(!$result){

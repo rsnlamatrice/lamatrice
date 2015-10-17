@@ -11,14 +11,15 @@
 $languageStrings = array(
 	'RSNStatisticsFields' => 'Champs Statistitiques',
 	'SINGLE_RSNStatisticsFields' => 'Champ statistique',
-	'LBL_BLOCK_GENERAL_INFORMATION' => '',
-	'LBL_BLOCK_SYSTEM_INFORMATION' => '',
+	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
+	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations système',
 	'LBL_FIELDNAME' => 'nom du champ',
 	'LBL_FIELDTYPE' => 'type de champ',
-	'LBL_UNIQUECODE' => 'code unique',
+	'LBL_UNIQUECODE' => 'champ retourné de la requête',
 	'LBL_STATISTICPARAMETERS' => 'paramètres',
 	'LBL_RSNSQLQUERIESID' => 'requête SQL',
-
+	'LBL_SEQUENCE' => 'Index de tri',
+	'LBL_AGGREGATE_FUNCTION' => 'Fonction de cumuls',
 );
 
 ?>

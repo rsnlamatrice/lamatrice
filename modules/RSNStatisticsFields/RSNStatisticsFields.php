@@ -86,7 +86,7 @@ class RSNStatisticsFields extends Vtiger_CRMEntity {
 	// Refers to vtiger_field.fieldname values.
 	var $mandatory_fields = Array('uniquecode','assigned_user_id');
 
-	var $default_order_by = 'uniquecode';
+	var $default_order_by = 'sequence';
 	var $default_sort_order='ASC';
 
 	function RSNStatisticsFields() {
