@@ -134,13 +134,15 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		}
 		
 		//ED150628 : for related only
-		if(!empty($request->get('src_viewname')))  {
-			$listViewModel->set('src_viewname', $request->get('src_viewname'));
+		$src_viewname = $request->get('src_viewname');
+		if(!empty($src_viewname))  {
+			$listViewModel->set('src_viewname', $src_viewname);
 			$listViewModel->set('src_selected_ids', $request->get('src_selected_ids'));
 			$listViewModel->set('src_excluded_ids', $request->get('src_excluded_ids'));
 		}
-		if(!empty($request->get('src_search_key')))  {
-			$listViewModel->set('src_search_key', $request->get('src_search_key'));
+		$src_search_key = $request->get('src_search_key');
+		if(!empty($src_search_key))  {
+			$listViewModel->set('src_search_key', $src_search_key);
 			$listViewModel->set('src_search_value', $request->get('src_search_value'));
 			$listViewModel->set('src_search_input', $request->get('src_search_input'));
 			$listViewModel->set('src_operator', $request->get('src_operator'));

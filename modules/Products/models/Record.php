@@ -144,8 +144,12 @@ class Products_Record_Model extends Vtiger_Record_Model {
 
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		$convertedPriceDetails = $this->getModule()->getPricesForProducts($currentUserModel->get('currency_id'), array($productId));
-		$productDetails[1]['listPrice1'] = number_format((int)$convertedPriceDetails[$productId], $currentUserModel->get('no_of_currency_decimals'),'.','');
+		//ED151016 change (int) to (float)
+		$productDetails[1]['listPrice1'] = number_format((float)$convertedPriceDetails[$productId], $currentUserModel->get('no_of_currency_decimals'),'.','');
 
+		//ED151016 TODO if($focus->getModuleName() === 'PurchaseOrder') purchaseprice
+		
+		
 		$totalAfterDiscount = $productDetails[1]['totalAfterDiscount1'];
 		$productTaxes = $productDetails[1]['taxes'];
 		if (!empty ($productDetails)) {
@@ -170,7 +174,8 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		for ($i=1; $i<=count($productDetails); $i++) {
 			$productId = $productDetails[$i]['hdnProductId'.$i];
 			$productPrices = $this->getModule()->getPricesForProducts($currentUser->get('currency_id'), array($productId), $this->getModuleName());
-			$productDetails[$i]['listPrice'.$i] = number_format((int)$productPrices[$productId], $currentUser->get('no_of_currency_decimals'),'.','');
+			//ED151016 change (int) to (float)
+			$productDetails[$i]['listPrice'.$i] = number_format((float)$productPrices[$productId], $currentUser->get('no_of_currency_decimals'),'.','');
 		}
 		
 		if($productDetails[1]['entityType1'] === 'Services')

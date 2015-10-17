@@ -33,7 +33,7 @@ class RSNSQLQueries_Detail_View extends Vtiger_Detail_View {
 		$parentId = $request->get('record');
 		$moduleName = $request->getModule();
 		$recordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
-		
+		//var_dump($recordModel);
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE' , $moduleName);
 		$viewer->assign('RECORD_MODEL' , $recordModel);

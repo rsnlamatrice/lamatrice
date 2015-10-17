@@ -79,6 +79,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			, "produit"."codetva" AS "tva_produit"
 			, "produit"."indisponible" AS "indisponible"
 			, "codetauxtva"."taux" AS "taux_tva"
+			, "facture"."paiementpropose" AS "paiementpropose"
+			, "facture"."solde" AS "solde"
 			FROM gfactu00002 facture
 			JOIN gclien00002 cl
 				ON facture.id_gclien = cl.id
@@ -206,9 +208,11 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'quantity',
 			'prix_unit_ht',
 			'taxrate',
-			
+			'paiementpropose',
+			'solde',
 			
 			/* post pré-import */
+			'_receivedcomments',
 			'_contactid',
 		);
 	}
@@ -359,7 +363,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					$record->set('bill_code', $invoiceData[0]['zip']);
 					$record->set('bill_country', $invoiceData[0]['country']);
 					$record->set('subject', $invoiceData[0]['subject']);
-					//$record->set('receivedcomments', $srcRow['paiementpropose']);
 					//$record->set('description', $srcRow['notes']);
 					$record->set('invoicedate', $invoiceData[0]['invoicedate']);
 					$record->set('duedate', $invoiceData[0]['invoicedate']);
@@ -368,12 +371,17 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('invoicestatus', 'Paid');//TODO
+					if($invoiceData[0]['solde'] == 0)
+						$record->set('invoicestatus', 'Paid');
+					else
+						$record->set('invoicestatus', 'Approved');//TODO
+					$record->set('receivedmoderegl', $invoiceData[0]['paiementpropose']);
+					$record->set('receivedcomments', $srcRow['_receivedcomments']);
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
 		                    
-				    $record->set('sent2compta', $invoiceData[0]['invoicedate']);
+					$record->set('sent2compta', $invoiceData[0]['invoicedate']);//TODO field displaytype === 2
 					
 					//Coupon et campagne
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
@@ -425,7 +433,11 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					
 					$record->set('mode','edit');
 					//This field is not manage by save()
-					$record->set('invoice_no',$sourceId);
+					// et ça fout la merde
+					//$record->set('invoice_no',$sourceId);
+					//$record->set('received', $totalAmount - $invoiceData[0]['solde']);
+					//$record->save();
+					
 					//set invoice_no
 					$query = "UPDATE vtiger_invoice
 						JOIN vtiger_crmentity
@@ -434,6 +446,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 						, total = ?
 						, subtotal = ?
 						, taxtype = ?
+						, received = ?
 						, smownerid = ?
 						, createdtime = ?
 						, modifiedtime = ?
@@ -444,6 +457,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 									    , $total
 									    , $total
 									    , 'individual'
+									    , $total - $invoiceData[0]['solde']
 									    , ASSIGNEDTO_ALL
 									    , $invoiceData[0]['invoicedate']
 									    , $invoiceData[0]['invoicedate']
@@ -960,6 +974,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$invoiceValues = array();
 		$invoiceInformations = $invoice['invoiceInformations'];
 		$date = $this->getMySQLDate($invoiceInformations[$this->columnName_indexes['datepiece']]);
+		$receivedcomments = null;
 		$invoiceHeader = array(
 			'sourceid'		=> 'COG' . substr($date, 2, 2) . str_pad ($invoiceInformations[$this->columnName_indexes['numero']], 5, '0', STR_PAD_LEFT),
 			'reffiche' 		=> $invoiceInformations[$this->columnName_indexes['codeclient']],
@@ -976,6 +991,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'subject'		=> $invoiceInformations[$this->columnName_indexes['nomclient']].' / '. $invoiceInformations[$this->columnName_indexes['datepiece']],
 			'invoicedate'		=> $date,
 			'affaire_code' 	=> $invoiceInformations[$this->columnName_indexes['affaire_code']],
+			'paiementpropose' => $this->getModePaiement($invoiceInformations[$this->columnName_indexes['paiementpropose']], $receivedcomments),
+			'solde'	=> self::str_to_float($invoiceInformations[$this->columnName_indexes['solde']]),
+			'_receivedcomments' => $receivedcomments,
 			
 		);
 		$codeClient = preg_replace('/^0+/', '', $invoiceHeader['reffiche']);
@@ -1009,6 +1027,27 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		return $invoiceValues;
 	}
 
+	function getModePaiement($paiementpropose, &$receivedcomments){
+		if(preg_match('/ch(.{1,2}|&e.+)que/i', $paiementpropose))
+			return 'Chèque';
+		elseif(preg_match('/esp(.{1,2}|&e.+)ce/i', $paiementpropose))
+			return 'Espèces';
+		elseif(preg_match('/PAYBOX/i', $paiementpropose))
+			return 'PayBox';
+		elseif(preg_match('/PAYPAL/i', $paiementpropose))
+			return 'PayPal';
+		elseif(preg_match('/Vir(emen)?t/i', $paiementpropose))
+			return 'Virement';
+		elseif(preg_match('/mandat/i', $paiementpropose))
+			return 'Mandat';
+		else{
+			$receivedcomments = $paiementpropose;
+			return '(autre)';
+		}
+		//$result = RSNImportSources_Utils_Helper::checkPickListValue('Invoice', 'receivedmoderegl', 'receivedmoderegl', $paiementpropose);
+		//return $paiementpropose;
+	}
+	
 	/**
 	 * Method called after the file is processed.
 	 *  This method must be overload in the child class.

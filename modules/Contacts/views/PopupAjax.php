@@ -33,7 +33,7 @@ class Contacts_PopupAjax_View extends Contacts_Popup_View {
 		$search_value = $request->get('search_value');
 		if((empty($mode) || $mode == 'getPageCount')
 		&& $search_key == 'lastname'
-		&& preg_match('/^C\d+/i', $search_value)){
+		&& preg_match('/^C?\d+/i', $search_value)){
 			$request->set('search_key', 'contact_no');
 		}
 		

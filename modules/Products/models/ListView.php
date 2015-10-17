@@ -60,6 +60,15 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
+		if($searchKey === 'productname'
+		|| $searchKey === 'servicename'){
+			if(!$operator)
+				$operator = 's';
+			//tableau de tableau pour définir le OR
+			$searchKey = 	array(array($searchKey, '', 'productcode'));
+			$searchValue = 	array(array($searchValue, '', $searchValue));
+			$operator = 	array(array($operator, 'OR', 's'));
+		}
 		if(!empty($searchKey)) {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
