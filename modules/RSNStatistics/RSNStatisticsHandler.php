@@ -39,7 +39,7 @@ class RSNStatisticsHandler extends VTEventHandler {
 
 	//create a new table
 	function handleAfterSaveRSNStatisticsEvent($entity, $moduleName) {
-		if ($entity->isNew()) {
+		//ED151017 if ($entity->isNew()) {
 			$data = $entity->getData();
 			$sql = "CREATE TABLE IF NOT EXISTS `" . RSNStatistics_Utils_Helper::getStatsTableName($entity->getId(), $data) . "` (
 				  `id` int(19) NOT NULL AUTO_INCREMENT,
@@ -55,7 +55,7 @@ class RSNStatisticsHandler extends VTEventHandler {
 
 			$db = PearDatabase::getInstance();
 			$db->pquery($sql);
-		}
+		//}
 	}
 
 	//remove the table
