@@ -348,7 +348,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			}
 		}
 		if($perf) $perf->terminate();
-		//exit;
+		exit;
 	}
 
 	function updateAll(Vtiger_Request $request) {

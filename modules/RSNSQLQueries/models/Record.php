@@ -274,15 +274,30 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		return $result;
 	}
 
+	public function getRelatedVariableDefaultValue($variableName) {
+		// TODO faster and cache
+		$relatedVariables = $this->getRelatedVariables();
+		
+		foreach ($relatedVariables as $variable) {
+			if($variableName == $variable->get('name'))
+				return $variable->get('defaultvalue');
+		}
+
+		return null;
+	}
+
 	public function getExecutionQuery($paramValues) {//tmp !! 
 		$sql = $this->getQuery();
 		$regex_end = '\s*(\|[^\]|]*)*\]\]/';
 		$SQLParam = array();
-		
 		$queryVariables = $this->getVariablesFromQuery(false);// array() extrait de la requête
 		foreach($queryVariables as $queryVariable){
 			$paramName = $queryVariable['name'];
-			$paramValue = $paramValues[$paramName];
+			if(!array_key_exists($paramName, $paramValues)){
+				$paramValue = $this->getRelatedVariableDefaultValue($paramName);
+			}
+			else
+				$paramValue = $paramValues[$paramName];
 			//var_dump(__FILE__.'.getExecutionQuery()', $paramName, $paramValue);
 			if($paramName === 'crmid'
 			&& is_string($paramValue)
