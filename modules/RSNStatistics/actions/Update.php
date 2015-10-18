@@ -119,7 +119,6 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		foreach ($relatedStatistics as $relatedStatistic) {
 			$statTableName = RSNStatistics_Utils_Helper::getStatsTableName($relatedStatistic->getId(), $relatedStatistic);
 			//var_dump($relatedStatistic->getId(), $relatedStatistic->get('rsnstatisticsid'), $relatedStatistic, $statTableName);
-			
 			$periodicities = explode(' |##| ', $relatedStatistic->get('stats_periodicite'));//Annuelle | Mensuelle | Exercice // tmp hardcode !!
 
 			$periods = array();
@@ -229,15 +228,13 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		$beginDate = $request->get('begin_date');
 		switch($beginDate){
 		case 'this year':
+		case 'this_year':
 		case 'year':
 			$exerciceMonth = $this->getExerciceFirstMonth();
-			if(date('n') > $exerciceMonth)
-				$beginDate = mktime(0, 0, 0, 1, $exerciceMonth, date('Y'));
-			else
-				$beginDate = mktime(0, 0, 0, 1, $exerciceMonth, date('Y')-1);
+			$beginDate = mktime(0, 0, 0, 1, $exerciceMonth, date('Y')-1);
 			break;
 		default :
-			$beginDate = mktime(0, 0, 0, 1, 1, $this->getFirstPeriodYear()); //TODO
+			$beginDate = mktime(0, 0, 0, 1, 1, $this->getFirstPeriodYear()); 
 			break;
 		}
 		
@@ -264,8 +261,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 				$relatedModuleName = array_keys($relatedModuleNames);
 				
 			}
-			//var_dump($relatedModuleName, $crmids);
-		
+			//var_dump($statistics, $relatedModuleName, $crmids);
 		}
 		
 		if($perf = !is_numeric($crmids))
