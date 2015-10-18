@@ -233,10 +233,14 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		
 	}
 
+	var $cache_variables;
 	/**
 	 * Variables lies
 	 */
 	public function getRelatedVariables(Vtiger_Request $request = NULL) {
+		if(!$request && $this->cache_variables)
+			return $this->cache_variables;
+		
 		$pagingModel = new Vtiger_Paging_Model();
 
 		if($request){
@@ -258,7 +262,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		$relationListView->set('sortorder', 'ASC');
 		$variables = $relationListView->getEntries($pagingModel);// Warning, take care of the limite of the pagin model ....
 
-		return $variables;
+		return $this->cache_variables = $variables;
 	}
 
 	public function getRelatedVariablesNames() {
@@ -295,6 +299,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 			$paramName = $queryVariable['name'];
 			if(!array_key_exists($paramName, $paramValues)){
 				$paramValue = $this->getRelatedVariableDefaultValue($paramName);
+				var_dump('Utilisation de la valeur par défaut pour le champ '.$paramName, $paramValue);
 			}
 			else
 				$paramValue = $paramValues[$paramName];
