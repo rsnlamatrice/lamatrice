@@ -372,13 +372,15 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 					$aliasParentRecordId = 'VIEW:' . $this->get('related_viewname');
 				else
 					$aliasParentRecordId = false;
+				$statId = $parentRecordModel->getId();
 			}
 			else{
 				$aliasParentModuleName = $parentModule->getName();
 				$aliasParentRecordId = $parentRecordModel->getId();
+				$statId = 0;
 			}
 			$relatedColumnFields = $relationModule->getRelatedListFields($aliasParentModuleName);
-			$query = RSNStatistics_Utils_Helper::getRelationQuery($aliasParentModuleName, $aliasParentRecordId, $parentRecordModel->getId());
+			$query = RSNStatistics_Utils_Helper::getRelationQuery($aliasParentModuleName, $aliasParentRecordId, $statId);
 			/*global $adb;
 			$adb->setDebug(true);
 			echo "<pre>$query</pre>";*/
@@ -534,7 +536,11 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		
 		//AUR_TMP AV150702
 		case "RSNStatistics":
-			$headerFields = $relatedModuleModel->getRelationHeaders($this->parentRecordModel->getModule()->getName(), $this->parentRecordModel->getId());//array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
+			if($this->parentRecordModel->getModuleName() === $relatedModuleModel->name)
+				$statId = $this->parentRecordModel->getId();
+			else
+				$statId = false;
+			$headerFields = $relatedModuleModel->getRelationHeaders($this->parentRecordModel->getModule()->getName(), $statId);//array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
 			break;
 
 		default:
