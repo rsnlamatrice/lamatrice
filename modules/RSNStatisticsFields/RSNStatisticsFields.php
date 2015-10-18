@@ -57,19 +57,19 @@ class RSNStatisticsFields extends Vtiger_CRMEntity {
 
 	// For Popup listview and UI type support
 	var $search_fields = Array(
-		'LBL_STATISTICPARAMETERS' => array('rsnstatisticsfields', 'statisticparameters'),
-		'LBL_RSNSQLQUERIESID' => array('rsnstatisticsfields', 'rsnsqlqueriesid'),
+		'LBL_FIELDNAME' => array('rsnstatisticsfields', 'fieldname'),
 		'LBL_UNIQUECODE' => array('rsnstatisticsfields', 'uniquecode'),
 		'LBL_FIELDTYPE' => array('rsnstatisticsfields', 'fieldtype'),
-		'LBL_FIELDNAME' => array('rsnstatisticsfields', 'fieldname'),
+		'LBL_RSNSQLQUERIESID' => array('rsnstatisticsfields', 'rsnsqlqueriesid'),
+		'LBL_STATISTICPARAMETERS' => array('rsnstatisticsfields', 'statisticparameters'),
 
 	);
 	var $search_fields_name = Array (
-		'LBL_STATISTICPARAMETERS' => 'statisticparameters',
-		'LBL_RSNSQLQUERIESID' => 'rsnsqlqueriesid',
+		'LBL_FIELDNAME' => 'fieldname',
 		'LBL_UNIQUECODE' => 'uniquecode',
 		'LBL_FIELDTYPE' => 'fieldtype',
-		'LBL_FIELDNAME' => 'fieldname',
+		'LBL_RSNSQLQUERIESID' => 'rsnsqlqueriesid',
+		'LBL_STATISTICPARAMETERS' => 'statisticparameters',
 
 	);
 

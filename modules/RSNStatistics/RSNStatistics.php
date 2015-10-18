@@ -38,11 +38,15 @@ class RSNStatistics extends Vtiger_CRMEntity {
 	var $list_fields = Array (
 		'LBL_STAT_NAME' => array('rsnstatistics', 'stat_name'),
 		'LBL_RELMODULE' => array('rsnstatistics', 'relmodule'),
+		'LBL_STATS_PERIODICITE' => array('rsnstatistics', 'stats_periodicite'),
+		'LBL_DISABLED' => array('rsnstatistics', 'disabled'),
 
 	);
 	var $list_fields_name = Array (
 		'LBL_STAT_NAME' => 'stat_name',
 		'LBL_RELMODULE' => 'relmodule',
+		'LBL_STATS_PERIODICITE' => 'stats_periodicite',
+		'LBL_DISABLED' => 'disabled',
 
 	);
 
