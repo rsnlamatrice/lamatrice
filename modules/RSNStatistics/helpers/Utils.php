@@ -168,26 +168,26 @@ class RSNStatistics_Utils_Helper {
 	}
 
 	public static function getModuleRelatedStatsFieldsCodes($moduleNames) {
-		$relatedStatsFields = array();
+		$statsFields = array();
 		$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatistics($moduleNames);
 		foreach ($relatedStatistics as $relatedStatistic) {
 			$relatedStatFields = RSNStatistics_Utils_Helper::getRelatedStatsFields($relatedStatistic['rsnstatisticsid']);//tmp
 			foreach ($relatedStatFields as $statField) {
-				$relatedStatsFields[] = $statField['uniquecode'];
+				$statsFields[] = $statField['uniquecode'];
 			}
 		}
-
-		return $relatedStatsFields;
+		return $statsFields;
 	}
 
-	public static function getRelatedStatsTablesNames($moduleName) {//tmp use getRelatedStatistics method !
+	public static function getRelatedStatsTablesNames($moduleName, $notDisabledOnly = false) {//tmp use getRelatedStatistics method !
 		$relatedStatistics = self::getRelatedStatistics($moduleName);
 
 		$tableNames = array();
 
-		foreach ($relatedStatistics as $relatedStatistic) {
-			$tableNames[] = self::getStatsTableName($relatedStatistic['rsnstatisticsid'], $relatedStatistic);
-		}
+		foreach ($relatedStatistics as $relatedStatistic)
+			if(!$notDisabledOnly || $relatedStatistic['disabled'] != 1){
+				$tableNames[] = self::getStatsTableName($relatedStatistic['rsnstatisticsid'], $relatedStatistic);
+			}
 
 		return $tableNames;
 	}
@@ -234,11 +234,11 @@ class RSNStatistics_Utils_Helper {
 		return $row['rsnstatisticsfieldsid'];
 	}
 
-	public static function getRelationQuery($parentModuleName, $crmid) {
+	public static function getRelationQuery($parentModuleName, $crmid, $statisticId = false) {
 		$aggregate = !$crmid || !is_numeric($crmid);
 		$rows = "";
 		$first = true;
-		$relatedStatsFieldsRecordModels = self::getRelatedStatsFieldsRecordModels(false, $parentModuleName);
+		$relatedStatsFieldsRecordModels = self::getRelatedStatsFieldsRecordModels($statisticId, $parentModuleName);
 		
 		foreach($relatedStatsFieldsRecordModels as $field) {
 			$code = $field->get('uniquecode');
@@ -259,8 +259,7 @@ class RSNStatistics_Utils_Helper {
 		$query = "";
 		$first = true;
 		$firstTableName = "";
-		$relatedStatsTablesNames = self::getRelatedStatsTablesNames($parentModuleName);
-
+		$relatedStatsTablesNames = self::getRelatedStatsTablesNames($parentModuleName, true);
 		foreach($relatedStatsTablesNames as $mainTable) {
 			if ($first) {
 				$first = false;
