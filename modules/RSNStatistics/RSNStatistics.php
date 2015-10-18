@@ -136,13 +136,29 @@ class RSNStatistics extends Vtiger_CRMEntity {
 
 	//tmp: call an handler to update the field of the tmp table ! (new field stat!!)
 	function save_related_module($module, $crmid, $with_module, $with_crmid) {
-		$tableName = RSNStatistics_Utils_Helper::getStatsTableNameFromId($crmid);
-		//echo "Add a column in the stat field table!! " . $tableName . "<br/>";
-		$sql = "ALTER TABLE `" . $tableName . "` ADD`" . RSNStatistics_Utils_Helper::getFieldUniqueCodeFromId($with_crmid) . "` DOUBLE";//tmp double -> use a specified data type !!
-		$db = PearDatabase::getInstance();
-		$db->pquery($sql);
+		
+		$this->add_statistic_table_field($with_crmid);
 
 		parent::save_related_module($module, $crmid, $with_module, $with_crmid);
+	}
+	
+	//new field stat
+	function add_statistic_table_field($fieldId) {
+		$tableName = RSNStatistics_Utils_Helper::getStatsTableNameFromId($this->id);
+		//echo "Add a column in the stat field table!! " . $tableName . "<br/>";
+		$sql = "ALTER TABLE `" . $tableName . "` ADD `" . RSNStatistics_Utils_Helper::getFieldUniqueCodeFromId($fieldId) . "` DOUBLE";//tmp double -> use a specified data type !!
+		$db = PearDatabase::getInstance();
+		$db->pquery($sql);
+	}
+	
+	//new field stat
+	function check_statistic_table_fields($moduleName) {
+		$statFields = RSNStatistics_Utils_Helper::getRelatedStatsFieldsRecordModels($this->id);
+		//var_dump($statFields);
+		foreach($statFields as $statField){
+			$this->add_statistic_table_field($statField->getId());
+		}
+		die();
 	}
 	
 	/**

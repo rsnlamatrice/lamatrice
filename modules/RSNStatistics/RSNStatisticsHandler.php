@@ -30,16 +30,21 @@ class RSNStatisticsHandler extends VTEventHandler {
 		if (!$entity->isNew()) {
 			$data = $entity->getData();
 			$id = $entity->getId();
-			$sql = "RENAME TABLE `" . RSNStatistics_Utils_Helper::getStatsTableNameFromId($id) . "` TO `" . RSNStatistics_Utils_Helper::getStatsTableName($id, $data) . "`";
-
-			$db = PearDatabase::getInstance();
-			$db->pquery($sql);
+			
+			$oldName = RSNStatistics_Utils_Helper::getStatsTableNameFromId($id);
+			$newName = RSNStatistics_Utils_Helper::getStatsTableName($id, $data);
+			if($oldName != $newName){
+				$sql = "RENAME TABLE `$oldName` TO `$newName`";
+	
+				$db = PearDatabase::getInstance();
+				$db->query($sql);
+			}
 		}
 	}
 
 	//create a new table
 	function handleAfterSaveRSNStatisticsEvent($entity, $moduleName) {
-		if ($entity->isNew()) {
+		//ED151017 if ($entity->isNew()) {
 			$data = $entity->getData();
 			$sql = "CREATE TABLE IF NOT EXISTS `" . RSNStatistics_Utils_Helper::getStatsTableName($entity->getId(), $data) . "` (
 				  `id` int(19) NOT NULL AUTO_INCREMENT,
@@ -54,8 +59,13 @@ class RSNStatisticsHandler extends VTEventHandler {
 				) DEFAULT CHARSET=utf8";
 
 			$db = PearDatabase::getInstance();
-			$db->pquery($sql);
-		}
+			$db->query($sql);
+			//if($result){ IF NOT EXISTS fait qu'on a jamais d'erreur
+				//Add fields
+				$entity->focus->check_statistic_table_fields($moduleName);
+			//}
+		
+		//ED151017 }
 	}
 
 	//remove the table
