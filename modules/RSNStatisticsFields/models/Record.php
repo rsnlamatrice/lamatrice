@@ -15,6 +15,10 @@ class RSNStatisticsFields_Record_Model extends Vtiger_Record_Model {
 			return 'Le champ `'.$this->get('uniquecode').'` n\'existe pas en retour de la requête "'.$queryRecordModel->getName().'".'
 				.' Valeurs possibles : '. implode(', ', array_keys($resultFields));
 		}
+		if( ! array_key_exists('crmid', $resultFields) ){
+			return 'Le champ `crmid` n\'existe pas en retour de la requête "'.$queryRecordModel->getName().'".'
+				.' Inclure systématiquement `vtiger_crmentity`.`crmid` ou `vtiger_contactdetails`.`contactid` AS `crmid` dans les requêtes.';
+		}
 	}
 	
 	public function getQueryRecordModel(){
