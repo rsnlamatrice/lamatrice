@@ -378,7 +378,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 				$aliasParentRecordId = $parentRecordModel->getId();
 			}
 			$relatedColumnFields = $relationModule->getRelatedListFields($aliasParentModuleName);
-			$query = RSNStatistics_Utils_Helper::getRelationQuery($aliasParentModuleName, $aliasParentRecordId);
+			$query = RSNStatistics_Utils_Helper::getRelationQuery($aliasParentModuleName, $aliasParentRecordId, $parentRecordModel->getId());
 			/*global $adb;
 			$adb->setDebug(true);
 			echo "<pre>$query</pre>";*/
@@ -534,7 +534,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		
 		//AUR_TMP AV150702
 		case "RSNStatistics":
-			$headerFields = $relatedModuleModel->getRelationHeaders($this->parentRecordModel->getModule()->getName());//array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
+			$headerFields = $relatedModuleModel->getRelationHeaders($this->parentRecordModel->getModule()->getName(), $this->parentRecordModel->getId());//array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
 			break;
 
 		default:

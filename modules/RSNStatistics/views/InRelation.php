@@ -45,7 +45,7 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		
 		$models = $relationListView->getEntries($pagingModel, $parentId);//tmp do not use that ??
 		
-		//var_dump($models->list_fields);
+		//var_dump($models->list_fields, $models);
 		$links = $relationListView->getLinks();
 		$header = $relationListView->getHeaders();
 		$noOfEntries = count($models);
