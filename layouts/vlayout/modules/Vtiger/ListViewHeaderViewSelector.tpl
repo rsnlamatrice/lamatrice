@@ -15,6 +15,9 @@
 {strip}
 				<span class="customFilterMainSpan btn-group">
 					{if $CUSTOM_VIEWS|@count gt 0}
+						{if !$VIEWID && $RELATED_VIEWNAME}
+							{assign var=VIEWID value=$RELATED_VIEWNAME}
+						{/if}
 						<select id="customFilter" style="width:350px;">
 							{foreach key=GROUP_LABEL item=GROUP_CUSTOM_VIEWS from=$CUSTOM_VIEWS}
 							<optgroup label=' {if $GROUP_LABEL eq 'Mine'} &nbsp; {else if} {vtranslate($GROUP_LABEL)} {/if}' >

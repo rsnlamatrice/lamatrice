@@ -124,16 +124,25 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 
 			$periods = array();
 			foreach ($periodicities as $periodicity) {
-				if ($periodicity == 'Annuelle') {
-					//tmp begin date !!!!!!
-					$beginYears = (int) date("Y", $beginDate);
+				switch ($periodicity) {
+				case 'Annuelle' :
+					//Si on commence après le 1er janvier, on passe à l'année suivante (conséquence de Exercice)
+					if (date("n", $beginDate) > 1 || date("d", $beginDate) > 1)
+						$beginYears = (int) date("Y", $beginDate) + 1;
+					else
+						$beginYears = (int) date("Y", $beginDate);
 					$endYears = (int) date("Y");
 
 					for ($years = $beginYears; $years <= $endYears; ++$years) {
 						$periods[] = $this->createPeriodParam( $years, 'Annuelle-' . $years, $years . "-01-01 00:00:00", ($years + 1) . "-01-01 00:00:00");
 					}
-				} else if ($periodicity == 'Mensuelle') {
-					$beginYears = (int) date("Y", $beginDate);
+					break;
+				case 'Mensuelle' :
+					//Si on commence après le 1er janvier, on passe à l'année suivante (conséquence de Exercice)
+					if (date("n", $beginDate) > 1 || date("d", $beginDate) > 1)
+						$beginYears = (int) date("Y", $beginDate) + 1;
+					else
+						$beginYears = (int) date("Y", $beginDate);
 					$endYears = (int) date("Y");
 					$months = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];//tmp hardcode !!!!
 					for ($years = $beginYears; $years <= $endYears; ++$years) {
@@ -142,8 +151,21 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 							$periods[] = $this->createPeriodParam( $month . ' ' . $years, 'Mensuelle-'. $month . $years, $years . "-" . ($monthId+ 1) . "-01 00:00:00", $end_date);
 						}
 					}
-				} else if ($periodicity == 'Exercice') {
-					//tmp todo !!
+					break;
+				case 'Exercice' :
+					$exerciceMonth = $this->getExerciceFirstMonth();
+					//Si on commence après le 1er jour de l'exercice, on passe à l'année suivante (conséquence de Exercice)
+					if (date("n", $beginDate) > $exerciceMonth || (date("n", $beginDate) == $exerciceMonth && date("d", $beginDate) > 1))
+						$beginYears = (int) date("Y", $beginDate) + 1;
+					else
+						$beginYears = (int) date("Y", $beginDate);
+					$beginYears = (int) date("Y", $beginDate);
+					$endYears = (int) date("Y");
+
+					for ($years = $beginYears; $years <= $endYears; ++$years) {
+						$periods[] = $this->createPeriodParam( $years .'-'.($years+1), 'Exercice-' . $years, $years . "-09-01 00:00:00", ($years + 1) . "-09-01 00:00:00");
+					}
+					break;
 				}
 			}
 
@@ -176,6 +198,13 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		//exit;
 		return $statistics;
 	}
+	
+	function getExerciceFirstMonth(){
+		return 9; //TODO param
+	}
+	function getFirstPeriodYear(){
+		return 2009; //TODO param
+	}
 
 	//AV
 	function createRow($crmid, $name, $code, $begin_date, $end_date) {
@@ -201,10 +230,14 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		switch($beginDate){
 		case 'this year':
 		case 'year':
-			$beginDate = mktime(0, 0, 0, 1, 1, date('Y'));//TODO Exercice de l'année
+			$exerciceMonth = $this->getExerciceFirstMonth();
+			if(date('n') > $exerciceMonth)
+				$beginDate = mktime(0, 0, 0, 1, $exerciceMonth, date('Y'));
+			else
+				$beginDate = mktime(0, 0, 0, 1, $exerciceMonth, date('Y')-1);
 			break;
 		default :
-			$beginDate = mktime(0, 0, 0, 1, 1, 2009); //TODO
+			$beginDate = mktime(0, 0, 0, 1, 1, $this->getFirstPeriodYear()); //TODO
 			break;
 		}
 		

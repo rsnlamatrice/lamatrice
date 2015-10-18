@@ -16,10 +16,13 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		if(empty ($requestedPage)) {
 			$requestedPage = 1;
 		}
+		
+		//CustomView filtrant les records liés
+		$relatedViewName = $request->get('related_viewname');
 
 		$pagingModel = new Vtiger_Paging_Model();
 		$pagingModel->set('page',$requestedPage);
-		$pagingModel->set('limit', 10);//AUR_TMP : not good -> le nombre de page n'est pas correctement calculé si je ne commente pas la cond performancePref...
+		//ED $pagingModel->set('limit', 10);//AUR_TMP : not good -> le nombre de page n'est pas correctement calculé si je ne commente pas la cond performancePref...
 
 		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName, $label);
@@ -36,6 +39,10 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 			$relationListView->set('orderby', $orderBy);
 			$relationListView->set('sortorder',$sortOrder);
 		}
+		if($relatedViewName){ //Filtre sur les éléments liés
+			$relationListView->set('related_viewname', $relatedViewName);
+		}
+		
 		$models = $relationListView->getEntries($pagingModel, $parentId);//tmp do not use that ??
 		
 		//var_dump($models->list_fields);
@@ -86,10 +93,13 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
         $viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->assign('VIEW', $request->get('view'));
 
-
+		if($relatedViewName)
+			$viewer->assign('RELATED_VIEWNAME', $relatedViewName);
+			
 		//var_dump($relatedModuleName);
 		if($relatedModuleName === 'RSNStatistics'){
 			//var_dump($recordModel->get('relmodule'), CustomView_Record_Model::getAllByGroup($recordModel->get('relmodule')));
+			$viewer->assign('RELATED_VIEWNAME', $relatedViewName);
 			$viewer->assign('CUSTOM_VIEWS', CustomView_Record_Model::getAllByGroup($parentRecordModel->get('relmodule')));
 		}
 		

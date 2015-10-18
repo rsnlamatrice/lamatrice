@@ -783,7 +783,7 @@ $languageStrings = array(
 	
 	'LBL_SORRY_SQL_ERROR' => 'Désolé, la formulation de la recherche provoque une erreur.',
 	
-	'LBL_RESULTS' => 'Résulats',
+	'LBL_RESULTS' => 'Résultats',
 	
 );
 $jsLanguageStrings = array(

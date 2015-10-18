@@ -235,7 +235,7 @@ class RSNStatistics_Utils_Helper {
 	}
 
 	public static function getRelationQuery($parentModuleName, $crmid) {
-		$aggregate = !$crmid;
+		$aggregate = !$crmid || !is_numeric($crmid);
 		$rows = "";
 		$first = true;
 		$relatedStatsFieldsRecordModels = self::getRelatedStatsFieldsRecordModels(false, $parentModuleName);
@@ -282,10 +282,40 @@ class RSNStatistics_Utils_Helper {
 
 			if(!$aggregate)
 				$query .= " WHERE `" . $mainTable . "`.crmid=" . $crmid;
-			else
+			else {
+				if($crmid){
+					//provient du parametre &related_viewname= de la requête
+					if(strcasecmp(substr($crmid,0,5), 'VIEW:') === 0){
+						$viewId = substr($crmid,5);
+						global $current_user;
+						$queryGenerator = new QueryGenerator($parentModuleName, $current_user);
+						$queryGenerator->initForCustomViewById($viewId);
+						$queryGenerator->setFields(array('id'));
+						$relatedFieldIdName = explode('.', $queryGenerator->getSQLColumn('id'))[1];
+						$crmid = $queryGenerator->getQuery();
+						//var_dump($crmid);
+					}
+					if(strcasecmp(substr($crmid,0,7), 'SELECT ') === 0){
+						if(empty($relatedFieldIdName)){
+							$relatedFieldIdName = 'crmid';
+							//Teste l'existance de vtiger_crmentity.crmid : TODO non fiable si requête complexe
+							if(!preg_match('/^\s*SELECT\s+[\s\S]*(vtiger_crmentity\.crmid)[\s\S]*\sFROM\s/i')){
+								$crmid = preg_replace('/^\s*SELECT\s+/i', 'SELECT vtiger_crmentity.crmid, ', $crmid);
+							}
+						}
+						$query .= " JOIN ($crmid) _related_source
+							ON `" . $mainTable . "`.crmid = _related_source." . $relatedFieldIdName ;
+					}
+					elseif($crmid){
+						//TODO
+						$query .= " WHERE `" . $mainTable . "`.crmid=" . $crmid;
+					}
+					/*var_dump($query);
+					die();*/
+				}
 				$query .= "
 					GROUP BY `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date";
-			
+			}
 		}
 
 		$query .= " ORDER BY `end_date` DESC";
