@@ -53,6 +53,7 @@ class RSN {
 			$this->add_rsnstatisticsfields_fields();
 			$this->add_isabonnable_rsnabotype();
 			$this->add_rsnsqlqueries_fields();
+			$this->add_rsnstatistics_relatedlist();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -414,7 +415,12 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		foreach($newFields as $newFieldName => $newField){
 			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
 		}
-		
+	}
+	
+	static function add_rsnstatistics_relatedlist() {
+		$module = Vtiger_Module_Model::getInstance('RSNStatistics');
+		$module->setRelatedList($module, 'LBL_RESULTS', Array(), 'get_statistics_data');
+		Vtiger_Module::getInstance('Contacts')->setRelatedList($module, 'RSNStatistics', Array(), 'get_statistics_data');
 	}
 	
 	// fonction générique
