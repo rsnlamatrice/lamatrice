@@ -158,7 +158,6 @@ class RSNStatistics extends Vtiger_CRMEntity {
 		foreach($statFields as $statField){
 			$this->add_statistic_table_field($statField->getId());
 		}
-		die();
 	}
 	
 	/**
