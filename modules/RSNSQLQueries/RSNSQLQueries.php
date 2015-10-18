@@ -36,21 +36,17 @@ class RSNSQLQueries extends Vtiger_CRMEntity {
 	 * Mandatory for Listing (Related listview)
 	 */
 	var $list_fields = Array (
-		'LBL_DESCRIPTION' => array('rsnsqlqueries', 'description'),
-		'LBL_QUERY' => array('rsnsqlqueries', 'query'),
-		'LBL_PRESCRIPT' => array('rsnsqlqueries', 'prescript'),
-		'LBL_POSTSCRIPT' => array('rsnsqlqueries', 'postscript'),
-		'LBL_EXECUTIONTIME' => array('rsnsqlqueries', 'executiontime'),
 		'LBL_NAME' => array('rsnsqlqueries', 'name'),
+		'LBL_QUERY' => array('rsnsqlqueries', 'query'),
+		'LBL_DESCRIPTION' => array('rsnsqlqueries', 'description'),
+		'LBL_EXECUTIONTIME' => array('rsnsqlqueries', 'executiontime'),
 
 	);
 	var $list_fields_name = Array (
-		'LBL_DESCRIPTION' => 'description',
-		'LBL_QUERY' => 'query',
-		'LBL_PRESCRIPT' => 'prescript',
-		'LBL_POSTSCRIPT' => 'postscript',
-		'LBL_EXECUTIONTIME' => 'executiontime',
 		'LBL_NAME' => 'name',
+		'LBL_QUERY' => 'query',
+		'LBL_DESCRIPTION' => 'description',
+		'LBL_EXECUTIONTIME' => 'executiontime',
 
 	);
 
