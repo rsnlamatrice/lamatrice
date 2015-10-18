@@ -64,7 +64,7 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('RELATED_ENTIRES_COUNT', $noOfEntries);
 		$viewer->assign('RELATION_FIELD', $relationField);
 		$viewer->assign('UPDATE_STATS_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : ''));
-		$viewer->assign('UPDATE_STATS_THIS_YEAR_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : '', 'this year'));
+		$viewer->assign('UPDATE_STATS_THIS_YEAR_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : '', 'this_year'));
 		
 		//if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			$totalCount = $relationListView->getRelatedEntriesCount();
