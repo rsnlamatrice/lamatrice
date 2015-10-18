@@ -437,8 +437,9 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			}
 		}
 		$limitQuery = $query .' LIMIT '.$startIndex.','.($pageLimit+1); /* ED140907 + 1 instead of two db query */
-		//echo "<pre>".__FILE__." : $query</pre>";
-		//echo_callstack();
+		/*echo "<pre>".__FILE__." : $query</pre>";
+		echo_callstack();*/
+		
 		$result = $db->query($limitQuery);
 		//ED150704
 		if(!$result){
@@ -459,8 +460,10 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			$newRow = array();
 			foreach($row as $col=>$val){
 			    if(array_key_exists($col,$relatedColumnFields)){
-				$newRow[$relatedColumnFields[$col]] = $val;
+					$newRow[$relatedColumnFields[$col]] = $val;
 			    }
+				elseif($col === 'rsnstatisticsid')
+					$newRow[$col] = $val;
 			}
 
 			//AV150702
