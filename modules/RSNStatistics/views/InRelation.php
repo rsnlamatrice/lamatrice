@@ -42,8 +42,7 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		if($relatedViewName){ //Filtre sur les éléments liés
 			$relationListView->set('related_viewname', $relatedViewName);
 		}
-		
-		$models = $relationListView->getEntries($pagingModel, $parentId);//tmp do not use that ??
+		$models = $relationListView->getEntries($pagingModel);//tmp do not use that ??
 		
 		//var_dump($models->list_fields, $models);
 		$links = $relationListView->getLinks();

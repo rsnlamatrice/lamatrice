@@ -84,12 +84,16 @@ class RSNStatistics_Utils_Helper {
 					AND `vtiger_crmentityrel`.`crmid` IN (".generateQuestionMarks($statisticIds).")";
 				$params = array_merge($params, $statisticIds);
 			}
-			elseif($moduleNames){
-				if(!is_array($moduleNames))
-					$moduleNames = array($moduleNames);
+			else{
 				$sql .= "
-					AND `vtiger_rsnstatistics`.`relmodule` IN (".generateQuestionMarks($moduleNames).")";
-				$params = array_merge($params, $moduleNames);
+					AND `vtiger_rsnstatistics`.`disabled` = 0";
+				if($moduleNames){
+					if(!is_array($moduleNames))
+						$moduleNames = array($moduleNames);
+					$sql .= "
+						AND `vtiger_rsnstatistics`.`relmodule` IN (".generateQuestionMarks($moduleNames).")";
+					$params = array_merge($params, $moduleNames);
+				}
 			}
 			$sql .= "
 				ORDER BY `vtiger_rsnstatisticsfields`.sequence";
@@ -99,16 +103,20 @@ class RSNStatistics_Utils_Helper {
 		if(!$result)
 			$db->echoError();
 		$numberOfRecords = $db->num_rows($result);
+		if($params[0]==569300){
+		var_dump($numberOfRecords, $sql, $params);
+			echo_callstack();
+			var_dump('$statisticIds', $statisticIds);
+		}
 		$relatedStatFields = array();
-
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $db->raw_query_result_rowdata($result, $i);
 			$row['id'] = $row['crmid'];
 			$relatedStatFields[] = $row;
 		}
-
 		return $relatedStatFields;
 	}
+	
 	public static function getRelatedStatsFieldsRecordModels($statisticIds, $moduleName = false) {
 		$relatedStatFields = self::getRelatedStatsFields($statisticIds, $moduleName);
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', 'RSNStatisticsFields');
