@@ -56,8 +56,8 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 	}
 	
 // 	/**
-// 	 * Traitement des variables imbriques dans la requête
-// 	 * 	transforme les lments de la forme [[Title | field/type | defaultValue ]]
+// 	 * Traitement des variables imbriquées dans la requête
+// 	 * 	transforme les éléments de la forme [[Title | field/type | defaultValue ]]
 // 	 * 	en RSNQueriesVariables
 // 	 * @param Boolean $associative : returns an associative array
 // 	 *
@@ -101,7 +101,6 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 					$variablesData[] = $variableData;
 				}
 			}
-		
 			return $variablesData;
 		}
 
@@ -127,7 +126,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 			//tmp use real type (query, ?, ...)
 			$regex = '/\[\[(\?{1,2}|\=|QUERY\s|IN\s)\s?' . $variableData['name'] . '((\s.|\|)(?!\[\[))?\]\]/';
 			$query = preg_replace($regex, '[[$1 ' . trim($variableData['name']) . ' ]]', $query);
-			var_dump('name', $variableData['name'], $regex, $query);
+			//var_dump('name', $variableData['name'], $regex, $query);
 		}
 //exit;
 //var_dump($query0, $query);
@@ -279,11 +278,38 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		$sql = $this->getQuery();
 		$regex_end = '\s*(\|[^\]|]*)*\]\]/';
 		$SQLParam = array();
-		foreach($paramValues as $paramName => $paramValue) {
+		
+		$queryVariables = $this->getVariablesFromQuery(false);// array() extrait de la requête
+		foreach($queryVariables as $queryVariable){
+			$paramName = $queryVariable['name'];
+			$paramValue = $paramValues[$paramName];
+			//var_dump(__FILE__.'.getExecutionQuery()', $paramName, $paramValue);
+			if($paramName === 'crmid'
+			&& is_string($paramValue)
+			&& !is_numeric($paramValue)){
+				if(strcasecmp(substr($paramValue, 0, 7), 'SELECT ') === 0){
+					$replacement = $paramValue;
+				}
+				elseif( strpos($paramValue, ',') !== FALSE){
+					$paramValue = explode(',', $paramValue);
+					$replacement = generateQuestionMarks($paramValue);
+					$SQLParam = array_merge($SQLParam, $paramValue);
+				}
+			}
+			elseif(is_array($paramValue)){
+				$replacement = generateQuestionMarks($paramValue);
+				$SQLParam = array_merge($SQLParam, $paramValue);
+			}
+			else{
+				$replacement = '?';
+				$SQLParam[] = $paramValue;
+			}
+			$sql = preg_replace('/\[\[\?\s*' . preg_quote($paramName) . $regex_end, $replacement, $sql);
+		}
+		/*foreach($paramValues as $paramName => $paramValue) {
 			$sql = preg_replace('/\[\[\?\s*' . preg_quote($paramName) . $regex_end, '?', $sql);
 			$SQLParam[] = $paramValue;
-		}
-
+		}*/
 		return array('sql' => $sql,
 				'params' => $SQLParam);
 	}
@@ -328,7 +354,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 			$paramsDetails = array();
 		
 		$sql = $this->getQuery();
-		$queryVariables = $this->getVariablesFromQuery($sql);// array() extrait de la requête
+		$queryVariables = $this->getVariablesFromQuery(false);// array() extrait de la requête
 		//var_dump($queryVariables);
 		//variables connues et déjà liées
 		$relatedVariables = $this->getRelatedVariables();
@@ -410,9 +436,23 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 			}
 			else {
 				$variable = $variables[$variableName];
-				$value = $variable->get('defaultvalue');
+				$value = decode_html( $variable->get('defaultvalue') );
 				//Variable déjà traitée
 				if(!isset($variablesId[$variable->getId()])){
+					if($queryVariable['name'] === 'crmid'
+					&& is_string($value)
+					&& !is_numeric($value)){
+						if(strcasecmp(substr($value, 0, 7), 'SELECT ') === 0){
+							$queryVariable['operation'] = '=/?';
+						}
+						elseif(strpos($value, ',') !== false){
+							$value = explode(',', $value);
+						}
+						elseif(trim($value) === '*'){
+							$queryVariable['operation'] = '=/?';
+							$value = $this->getSelectAllFromModuleQuery();
+						}
+					}
 					$paramsDetails[] = array(
 						'operation'=> $queryVariable['operation'],
 						'name'=> $queryVariable['name'],
@@ -420,7 +460,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 						'value'=> $value,
 						'depth'=> $thisDepth,
 					);
-					$variablesId[$variable->getId()] = 1;
+					$variablesId[$variable->getId()] = true;
 				}
 			}
 			// commentaire en préfixe
@@ -432,11 +472,18 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 			//selon opération
 			switch(strtoupper($queryVariable['operation'])){
 			case '?':
-				$params[] = $value;
+				if(is_array($value)){
+					$params = array_merge($params, $value);
+					$questionMark = generateQuestionMarks($value);
+				}
+				else{
+					$params[] = $value;
+					$questionMark = '?';
+				}
 				/* injection dans le sql d'un paramètre */
 				$sql = preg_replace('/\[\[\?\s*' . preg_quote($variableName) . $regex_end, 
 						    $comment
-						    . '?', $sql);
+						    . $questionMark, $sql);
 				break;
 			case '??':
 				if($variable)
@@ -510,6 +557,13 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 						    //$comment . pas de commentaire, car peut changer la requête
 						    $value, $sql);
 				break;
+			
+			case '=/?': 
+				/* injection dans le sql à la place d'un paramètre avec l'opérateur ? */
+				$sql = preg_replace('/\[\[\?\s*' . preg_quote($variableName) . $regex_end,
+						    //$comment . pas de commentaire, car peut changer la sous requête
+						    $value, $sql);
+				break;
 			default:
 				/* injection dans le sql */
 				$sql = preg_replace('/\[\[' . preg_quote($queryVariable['operation']) .'\s*' . preg_quote($variableName) . $regex_end,
@@ -519,8 +573,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 			}
 			
 		}
-		//var_dump($sql, $params);
-		
+		//echo "<pre>$sql</pre>"; var_dump($params);
 		// rétablit les valeurs d'orgine aux variables
 		foreach($variablesPrevValues as $variableName => $variablePrevValue){
 			$variables[$variableName]->set('defaultvalue', $variablePrevValue);
@@ -529,7 +582,13 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		return $sql;
 	}
 	
-	
+	function getSelectAllFromModuleQuery(){
+		$relatedModuleName = $this->get('relmodule');
+		return 'SELECT vtiger_crmentity.crmid
+			FROM vtiger_crmentity
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_crmentity.setype = \''.$relatedModuleName.'\'';
+	}
 	
 // 	/** ED150507
 // 	 * Function returns query execution result widget
@@ -609,4 +668,32 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 // 		}
 // 		return $recordModelsList;
 // 	}
+
+	/**
+	 * Returns the fields returned by query
+	 *
+	 */
+	public function getQueryResultFieldsDefinition(){
+		$fields = array();
+		$params = array();
+		$sql = $this->getExecutionSQL($params);
+		$sql = str_replace('?', 'NULL', $sql);
+		$sql = str_replace(' WHERE ', ' WHERE 0 = 1 AND ', $sql);
+		$sql .= ' LIMIT 0';
+		$db = PearDatabase::getInstance();
+		$result = $db->query($sql);
+		if(!$result){
+			echo "<pre>$sql</pre>";
+			$db->echoError();
+		}
+		else{
+			foreach($db->getFieldsDefinition($result) as $field){
+				$fieldName = $field->name;
+				while(array_key_exists($fieldName, $fields))
+					$fieldName .= '+';
+				$fields[$fieldName] = $field;
+			}
+		}
+		return $fields;
+	}
 }

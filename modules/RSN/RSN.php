@@ -50,6 +50,10 @@ class RSN {
 			$this->add_purchaseorders_fields();
 			$this->add_duplicateentities_table();
 			$this->add_products_fields();
+			$this->add_rsnstatisticsfields_fields();
+			$this->add_isabonnable_rsnabotype();
+			$this->add_rsnsqlqueries_fields();
+			$this->add_rsnstatistics_relatedlist();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -102,7 +106,7 @@ class RSN {
 			$thisModuleInstance->deleteLink("HEADERCSS", "rsn.css", "layouts/vlayout/modules/RSN/resources/css/style.css");
 		}
 	}
-
+	
 	/* AV150415
 	 * Add the 'uiclass' field in the field table.
 	 */ 
@@ -369,7 +373,6 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		}
 	}
 	
-	
 	static function add_products_fields() {
 		$module = Vtiger_Module_Model::getInstance('Products');
 		foreach( $module->getBlocks() as $block1)
@@ -384,11 +387,50 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		}
 	}
 	
+	static function add_rsnsqlqueries_fields() {
+		$module = Vtiger_Module_Model::getInstance('RSNSQLQueries');
+		foreach( $module->getBlocks() as $block1)
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'relmodule' 	=> array( 'columntype' => 'VARCHAR(64)', 'uitype' => '86', 'tablename' => 'vtiger_rsnsqlqueries', 'label' => 'LBL_RELMODULE', 'typeofdata' => 'V~M', 'summaryfield' => '1' ),
+		);
+		foreach($newFields as $newFieldName => $newField){
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
+		}
+	}
+	
+	static function add_rsnstatisticsfields_fields() {
+		$module = Vtiger_Module_Model::getInstance('RSNStatisticsFields');
+		foreach( $module->getBlocks() as $block1)
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'sequence' 	=> array( 'columntype' => 'INT(8)', 'uitype' => '1', 'tablename' => 'vtiger_rsnstatisticsfields', 'label' => 'LBL_SEQUENCE', 'typeofdata' => 'N~O', 'default' => '99' ),
+			'aggregatefunction' => array( 'columntype' => 'VARCHAR(255)', 'uitype' => '16', 'tablename' => 'vtiger_rsnstatisticsfields', 'label' => 'LBL_AGGREGATE_FUNCTION', 'typeofdata' => 'V~M'
+										 , 'default' => 'SUM'
+										 , 'picklist_values' => array('SUM', 'COUNT', 'MIN', 'MAX', 'AVG', 'COUNT DISTINCT', 'STD', 'STDDEV'),
+										)
+		);
+		foreach($newFields as $newFieldName => $newField){
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
+		}
+	}
+	
+	static function add_rsnstatistics_relatedlist() {
+		$module = Vtiger_Module_Model::getInstance('RSNStatistics');
+		$module->setRelatedList($module, 'LBL_RESULTS', Array(), 'get_statistics_data');
+		Vtiger_Module::getInstance('Contacts')->setRelatedList($module, 'RSNStatistics', Array(), 'get_statistics_data');
+	}
+	
 	// fonction générique
 	static function add_new_field($newFieldName, $newField, $block1, $existingFields) {
-		
-		if($existingFields[$newFieldName])
+			
+		if($existingFields[$newFieldName]){
+			if($newField['picklist_values'] && is_array($newField['picklist_values']))
+				$existingFields[$newFieldName]->setPicklistValues($newField['picklist_values']);
 			return;
+		}
 	
 		$tableName = $newField['tablename'];
 		
@@ -400,7 +442,11 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$field3->columntype = $newField['columntype'];
 		$field3->uitype = $newField['uitype'] ? $newField['uitype'] : 1;
 		$field3->typeofdata = $newField['typeofdata'] ? $newField['typeofdata'] : 'V~O';
+		$field3->summaryfield = $newField['summaryfield'] ? $newField['summaryfield'] : '0';
+		$field3->defaultvalue = $newField['defaultvalue'] ? $newField['defaultvalue'] : '';
 		$block1->addField($field3);
+		if($newField['picklist_values'] && is_array($newField['picklist_values']))
+			$field3->setPicklistValues($newField['picklist_values']);
 	}
 	
 	static function add_mysql_function_levenshtein(){
@@ -488,5 +534,21 @@ DELIMITER ;';
 		foreach($sql as $query){
 			$db->pquery($query);
 		}
+	}
+	
+	/* ED151017
+	 * Champ isabonnable des types d'abonnement
+	 */ 
+	static function add_isabonnable_rsnabotype(){
+		
+		$db = PearDatabase::getInstance();
+		
+		$sql = "ALTER TABLE `vtiger_rsnabotype` ADD `isabonnable` BOOLEAN NULL DEFAULT TRUE , ADD INDEX (`isabonnable`) ;";
+		$db->pquery($sql);
+		
+		$sql = "UPDATE `vtiger_rsnabotype`
+			SET `isabonnable` = 0
+			WHERE rsnabotype IN ('Dépôt', 'Ne pas abonner', 'Non abonné')";
+		$db->pquery($sql);
 	}
 }

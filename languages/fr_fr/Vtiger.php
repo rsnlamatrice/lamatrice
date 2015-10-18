@@ -779,6 +779,11 @@ $languageStrings = array(
 	'LBL_DUPLICATES_STATUS_0' => 'A valider',
 	'LBL_DUPLICATES_STATUS_1' => 'Ignorer',
 	'LBL_DUPLICATES_STATUS_2' => 'Plus tard',
+	'VARIABLES' => 'Variables',
+	
+	'LBL_SORRY_SQL_ERROR' => 'Désolé, la formulation de la recherche provoque une erreur.',
+	
+	'LBL_RESULTS' => 'Résultats',
 	
 );
 $jsLanguageStrings = array(

@@ -8,6 +8,11 @@
  * All Rights Reserved.
  ************************************************************************************/
 
+ /**
+  * ED151017 : dans la table rsnabotype (valeurs du picklist), ajout du champ isabonnable
+  *
+  */
+ 
 include_once 'modules/Vtiger/CRMEntity.php';
 
 class RSNAboRevues extends Vtiger_CRMEntity {

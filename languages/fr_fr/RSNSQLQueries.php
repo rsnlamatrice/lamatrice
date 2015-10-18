@@ -11,9 +11,9 @@
 $languageStrings = array(
 	'RSNSQLQueries' => 'Requêtes SQL',
 	'SINGLE_RSNSQLQueries' => 'Requête SQL',
-	'LBL_BLOCK_GENERAL_INFORMATION' => '',
-	'LBL_BLOCK_QUERY' => '',
-	'LBL_BLOCK_SYSTEM_INFORMATION' => '',
+	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
+	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations système',
+	'LBL_BLOCK_QUERY' => 'Requête',
 	'LBL_DESCRIPTION' => 'description',
 	'LBL_QUERY' => 'requête',
 	'LBL_PRESCRIPT' => 'script avant',
@@ -21,7 +21,7 @@ $languageStrings = array(
 	'LBL_EXECUTIONTIME' => 'durée d\'exécution',
 	'LBL_NAME' => 'nom',
 	'VARIABLES' => 'variables',
-
+	'LBL_RELMODULE' => 'Module lié',
 );
 
 ?>

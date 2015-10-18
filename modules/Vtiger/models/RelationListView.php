@@ -366,9 +366,22 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		//AV150702
 		switch($relationModule->getName()) {
 		case "RSNStatistics":
-			//AUR_TMP
-			$relatedColumnFields = $relationModule->getRelatedListFields($parentModule->getName());
-			$query = RSNStatistics_Utils_Helper::getRelationQuery($parentModule->getName(), $parentRecordModel->getId());
+			if($parentModule->getName() == "RSNStatistics"){
+				$aliasParentModuleName = $parentRecordModel->get('relmodule');
+				if($this->get('related_viewname'))
+					$aliasParentRecordId = 'VIEW:' . $this->get('related_viewname');
+				else
+					$aliasParentRecordId = false;
+			}
+			else{
+				$aliasParentModuleName = $parentModule->getName();
+				$aliasParentRecordId = $parentRecordModel->getId();
+			}
+			$relatedColumnFields = $relationModule->getRelatedListFields($aliasParentModuleName);
+			$query = RSNStatistics_Utils_Helper::getRelationQuery($aliasParentModuleName, $aliasParentRecordId);
+			/*global $adb;
+			$adb->setDebug(true);
+			echo "<pre>$query</pre>";*/
 			break;
 		default:
 			$relatedColumnFields = $relationModule->getConfigureRelatedListFields();
@@ -427,7 +440,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		$result = $db->query($limitQuery);
 		//ED150704
 		if(!$result){
-			echo "<code>Désolé, la formulation de la recherche provoque une erreur.</code>";
+			echo '<code>'.vtranslate('LBL_SORRY_SQL_ERROR').'</code>';
 			/*echo "<pre>".__FILE__."
 				crmid = ".$this->getParentRecordModel()->getId()."
 				SQL = $limitQuery</pre>";*/

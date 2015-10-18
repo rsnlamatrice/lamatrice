@@ -24,6 +24,6 @@
 			<div id="toggleButton" class="toggleButton" title="Left Panel Show/Hide"> 
 				<i id="tButtonImage" class="{if $LEFTPANELHIDE neq '1'}icon-chevron-left{else}icon-chevron-right{/if}"></i>
 			</div>
-				{include file="DetailViewHeader.tpl"|vtemplate_path:$MODULE_NAME}
+			{include file="DetailViewHeader.tpl"|vtemplate_path:$MODULE_NAME}
 
 {/strip}

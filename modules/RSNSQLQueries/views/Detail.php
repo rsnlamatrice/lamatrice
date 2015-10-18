@@ -33,29 +33,36 @@ class RSNSQLQueries_Detail_View extends Vtiger_Detail_View {
 		$parentId = $request->get('record');
 		$moduleName = $request->getModule();
 		$recordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
+		$relatedModuleName = $request->get('related_module');
+		if(!$relatedModuleName)
+			$relatedModuleName = $recordModel->get('relmodule');
+			
 		//var_dump($recordModel);
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE' , $moduleName);
+		$viewer->assign('RELATED_MODULE' , $relatedModuleName);
 		$viewer->assign('RECORD_MODEL' , $recordModel);
 		
 		$params = array();
 		$paramsDetails = array();
 		
-		$sql = "SELECT COUNT(*) FROM (
-			" . $recordModel->getExecutionSQL($params, $paramsDetails) . "
-		) _panel_";// tmp _panel_ use for what ????
+		$sql = $recordModel->getExecutionSQL($params, $paramsDetails) . "
+			LIMIT 12";
 		
 		$viewer->assign('QUERY' , $sql);
 		$viewer->assign('QUERY_PARAMS_VALUES' , $params);
 		$viewer->assign('QUERY_PARAMS' , $paramsDetails);
 		
 		$db = PearDatabase::getInstance();
+		
 		//$db->setDebug(true);
 		$result = $db->pquery($sql, $params);
 		//print_r('<pre>' .$sql .  '</pre>');
 		//var_dump($sql, $params);
-		if(is_object($result))
-			$viewer->assign('RESULT' , $result->fields[0]);
+		if(is_object($result)){
+			$viewer->assign('RESULT' , $db->fetchAllByAssoc($result));
+			$viewer->assign('RESULT_FIELDS' , $db->getFieldsDefinition($result));
+		}
 		else
 			$viewer->assign('ERROR' , 'Erreur dans la requête ' . $db->database->ErrorMsg());
 				

@@ -206,7 +206,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 		$previousSalesOrderSubjet = $row['subject'];//tmp subject, use salesorder_no ???
 		$salesorderData = array($row);
 
-		$perf = new RSNImportSources_Utils_Performance($numberOfRecords);
+		$perf = new RSN_Performance_Helper($numberOfRecords);
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$salesorderSubject = $row['subject'];
@@ -224,7 +224,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
 				$this->skipNextScheduledImports = true;
 				$keepScheduledImport = true;
-				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
+				$size = RSN_Performance_Helper::getMemoryUsage();
 				echo '
 <pre>
 	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>

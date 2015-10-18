@@ -9,22 +9,30 @@
     <input type='hidden' value="{$TOTAL_ENTRIES}" id='totalCount'>
     <div class="relatedHeader ">
         <div class="btn-toolbar row-fluid">
-            <div class="span8">
-                &nbsp;
+            <div class="span6">
+				{if $RELATED_MODULE->get('name') === $MODULE}
+					<span class="btn-toolbar span4">
+						{include file='ListViewHeaderViewSelector.tpl'|@vtemplate_path}
+					</span>
+				{else}
+					&nbsp;
+				{/if}
             </div>
-            <div class="span4">
+            <div class="span6">
                 <span class="row-fluid">
                     <span class="span7 pushDown">
-                        <a class="btn" id="UpdateStatistics" type="button" href="index.php?action=Update&module=RSNStatistics&crmid={$CRMID}&relatedmodule={$MODULE}">{vtranslate('LBL_UPDATE_STATS', $RELATED_MODULE->get('name'))}</a>
+                        <a class="btn" id="UpdateStatistics" type="button" href="{$UPDATE_STATS_URL}">{vtranslate('LBL_UPDATE_STATS', $RELATED_MODULE->get('name'))}</a>
+                        &nbsp;
+						<a class="btn" id="UpdateStatistics" type="button" href="{$UPDATE_STATS_THIS_YEAR_URL}">{vtranslate('LBL_THIS_YEAR', $RELATED_MODULE->get('name'))}</a>
                         <span class="pull-right pageNumbers alignTop" data-placement="bottom" data-original-title="" style="margin-top: -5px">
                         {*ED140907 if !empty($RELATED_RECORDS)} {$PAGING->getRecordStartRange()} {vtranslate('LBL_to', $RELATED_MODULE->get('name'))} {$PAGING->getRecordEndRange()}{/if*}
-            	    {if !empty($RELATED_RECORDS)}
-            		{assign var=START_RANGE value=$PAGING->getRecordStartRange()}
-            		{if $START_RANGE gt 1}
-            		    {$START_RANGE}&nbsp;{vtranslate('LBL_to', $RELATED_MODULE->get('name'))}&nbsp;
-            		{/if}
-            		{$PAGING->getRecordEndRange()}
-            	    {/if}
+						{if !empty($RELATED_RECORDS)}
+							{assign var=START_RANGE value=$PAGING->getRecordStartRange()}
+							{if $START_RANGE gt 1}
+								{$START_RANGE}&nbsp;{vtranslate('LBL_to', $RELATED_MODULE->get('name'))}&nbsp;
+							{/if}
+							{$PAGING->getRecordEndRange()}
+						{/if}
                     </span>
                 </span>
                 <span class="span5 pull-right">

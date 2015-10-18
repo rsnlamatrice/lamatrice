@@ -120,7 +120,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			$this->keepScheduledImport = true;
 		}
 
-		$perf = new RSNImportSources_Utils_Performance($numberOfRecords);
+		$perf = new RSN_Performance_Helper($numberOfRecords);
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
 			$this->importOneCritere4D(array($row), $importDataController);
@@ -128,7 +128,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
 				$this->skipNextScheduledImports = true;
 				$keepScheduledImport = true;
-				$size = RSNImportSources_Utils_Performance::getMemoryUsage();
+				$size = RSN_Performance_Helper::getMemoryUsage();
 				echo '
 <pre>
 	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>

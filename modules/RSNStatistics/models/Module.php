@@ -2,6 +2,19 @@
 
 class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 
+
+	public function getUpdateValuesUrl($crmid, $relmodule, $statId, $begin_date = false){
+		$url = "index.php?action=Update&module=".$this->getName()
+			."&record=".$statId
+			."&crmid=".$crmid
+		;
+		if($relmodule !== 'RSNStatistics' )
+			$url .= "&relatedmodule=".$relmodule;
+		if($begin_date )
+			$url .= "&begin_date=$begin_date";
+		return $url;
+	}
+	
 	//AUR_TMP check row in db !!!!!
 	public function getRelatedListFields($parentModuleName) {
 		$relatedListFields['name'] = 'name';
@@ -16,8 +29,8 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		return $relatedListFields;
 	}
 
-	public function getConfigureRelatedListFields(){
-		return $this->getRelatedListFields();
+	public function getConfigureRelatedListFields($parentModuleName = false){
+		return $this->getRelatedListFields($parentModuleName);
 	}
 
 	public function getRelationHeaders($parentModuleName){
@@ -25,7 +38,13 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		$headerFields['name'] = self::getFieldModelFromName('name');
 		$headerFields['begin_date'] = self::getFieldModelFromName('begin_date');
 		$headerFields['end_date'] = self::getFieldModelFromName('end_date');
-		$headerFields = array_merge($headerFields, $this->getRelatedStatsFieldsModels($parentModuleName));
+		if($parentModuleName == $this->getName()){
+			$variableFields = $this->getRelatedStatsFieldsModels($parentModuleName);
+		}
+		else {
+			$variableFields = $this->getRelatedStatsFieldsModels($parentModuleName);
+		}
+		$headerFields = array_merge($headerFields, $variableFields);
 
 		return $headerFields;
 	}
@@ -74,6 +93,11 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 			$typeOfData = 'N~M';
 			$uiType = 72;
 			break;
+		case 'VARCHAR':
+		case 'STRING':
+			$typeOfData = 'V~M';
+			$uiType = 1;
+			break;
 		default:
 			$typeOfData = 'N~M';
 			$uiType = 6;
@@ -86,14 +110,14 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 	public function getRelatedStatsFieldsModels($parentModuleName) {
 		$fieldModels = array();
 		$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatistics($parentModuleName);
-
+		$statIds = array();
 		foreach ($relatedStatistics as $relatedStatistic) {
-			$statId = $relatedStatistic['rsnstatisticsid'];
-			$relatedStatFields = RSNStatistics_Utils_Helper::getRelatedStatsFields($statId);//tmp
+			$statIds[] = $relatedStatistic['rsnstatisticsid'];
+		}
+		$relatedStatFields = RSNStatistics_Utils_Helper::getRelatedStatsFields($statIds);//tmp
 
-			foreach ($relatedStatFields as $statField) {
-				$fieldModels[$statField['uniquecode']] = self::getStatFieldModel($statField);
-			}
+		foreach ($relatedStatFields as $statField) {
+			$fieldModels[$statField['uniquecode']] = self::getStatFieldModel($statField);
 		}
 
 		return $fieldModels;
