@@ -67,7 +67,8 @@ class RSNStatistics_Utils_Helper {
 		if($statisticIds && !is_array($statisticIds))
 			$statisticIds = array($statisticIds);
 		$params = array();
-		$sql = "SELECT DISTINCT `vtiger_rsnstatisticsfields`.*, `vtiger_crmentity`.*
+		//Pas sûr que le `vtiger_rsnstatistics`.`rsnstatisticsid` ne fasse pas foirer le DISTINCT dans le cas où un champ apparait dans plusieurs stats lié au même module
+		$sql = "SELECT DISTINCT `vtiger_rsnstatisticsfields`.*, `vtiger_crmentity`.*, `vtiger_rsnstatistics`.`rsnstatisticsid`
 				FROM `vtiger_rsnstatisticsfields`
 				INNER JOIN `vtiger_crmentity`
 					ON `vtiger_crmentity`.`crmid` = `vtiger_rsnstatisticsfields`.`rsnstatisticsfieldsid`
@@ -103,11 +104,7 @@ class RSNStatistics_Utils_Helper {
 		if(!$result)
 			$db->echoError();
 		$numberOfRecords = $db->num_rows($result);
-		if($params[0]==569300){
-		var_dump($numberOfRecords, $sql, $params);
-			echo_callstack();
-			var_dump('$statisticIds', $statisticIds);
-		}
+		
 		$relatedStatFields = array();
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $db->raw_query_result_rowdata($result, $i);
@@ -268,13 +265,16 @@ class RSNStatistics_Utils_Helper {
 		$first = true;
 		$firstTableName = "";
 		$relatedStatsTablesNames = self::getRelatedStatsTablesNames($parentModuleName, true);
+		//foreach($relatedStatsTablesNames as $mainTable) {
+		//	if ($first) {
+		//		$first = false;
+		//	} else {
+		//		$query .= " UNION ";
+		//	}
 		foreach($relatedStatsTablesNames as $mainTable) {
-			if ($first) {
-				$first = false;
-			} else {
-				$query .= " UNION ";
-			}
-
+			break;
+		}
+		if($mainTable){
 			$query .= "SELECT " .
 					"`" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, " . $rows .
 					" FROM `" . $mainTable . "`";
@@ -282,7 +282,7 @@ class RSNStatistics_Utils_Helper {
 			foreach($relatedStatsTablesNames as $relatedStatsTableName) {
 				if ($relatedStatsTableName != $mainTable) {
 					$query .= " LEFT OUTER JOIN `" . $relatedStatsTableName .
-								"` ON `" . $relatedStatsTableName . "`.`name` = `" . $mainTable . "`.`name`" . 
+								"` ON `" . $relatedStatsTableName . "`.`code` = `" . $mainTable . "`.`code`" . 
 								" AND `" . $relatedStatsTableName . "`.`crmid` = `" . $mainTable . "`.`crmid`";
 				}
 			}

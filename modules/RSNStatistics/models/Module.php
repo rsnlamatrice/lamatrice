@@ -48,13 +48,15 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		return $headerFields;
 	}
 
-	public static function getFieldModel($name, $label, $typeOfData, $uiType) {
+	public static function getFieldModel($name, $label, $typeOfData, $uiType, $statId = false) {
 		$field = new Vtiger_Field_Model();
 		$field->set('name', $name);
 		$field->set('column', strtolower($name));
 		$field->set('label', $label);
 		$field->set('typeofdata', $typeOfData);
 		$field->set('uitype', $uiType);
+		if($statId)
+			$field->set('rsnstatisticsid', $statId);
 
 		return $field;
 	}
@@ -103,7 +105,7 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		}
 
 		VTCacheUtils::updateStatsFieldInfo($statField['uniquecode'], $statField['fieldname'], $uiType, $typeOfData);
-		return self::getFieldModel($statField['uniquecode'], $statField['fieldname'], $typeOfData, $uiType);
+		return self::getFieldModel($statField['uniquecode'], $statField['fieldname'], $typeOfData, $uiType, $statField['rsnstatisticsid']);
 	}
 
 	public function getRelatedStatsFieldsModels($parentModuleName, $statIds = false) {
