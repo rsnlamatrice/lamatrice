@@ -198,11 +198,12 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		return $statistics;
 	}
 	
+	// Mois du début d'un exercice
 	function getExerciceFirstMonth(){
-		return 9; //TODO param
+		return 9; //Septembre TODO param
 	}
-	function getFirstPeriodYear(){
-		return 2009; //TODO param
+	function getDefaultBeginYear(){
+		return date('Y') - 6; //TODO param
 	}
 
 	//AV
@@ -234,7 +235,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			$beginDate = mktime(0, 0, 0, 1, $exerciceMonth, date('Y')-1);
 			break;
 		default :
-			$beginDate = mktime(0, 0, 0, 1, 1, $this->getFirstPeriodYear()); 
+			$beginDate = mktime(0, 0, 0, 1, 1, $this->getDefaultBeginYear()); 
 			break;
 		}
 		
@@ -336,7 +337,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 						$db->echoError();
 						echo "<pre>$insertQuery</pre>";
 						var_dump($params);
-						exit;
+						die("ERREUR D'EXECUTION DE LA REQUETE DE STATISTIQUE");
 					}
 					else{
 						echo "<pre>$insertQuery</pre>";

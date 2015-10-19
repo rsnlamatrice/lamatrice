@@ -67,7 +67,8 @@ class RSNStatistics_Utils_Helper {
 		if($statisticIds && !is_array($statisticIds))
 			$statisticIds = array($statisticIds);
 		$params = array();
-		$sql = "SELECT DISTINCT `vtiger_rsnstatisticsfields`.*, `vtiger_crmentity`.*
+		//Pas sûr que le `vtiger_rsnstatistics`.`rsnstatisticsid` ne fasse pas foirer le DISTINCT dans le cas où un champ apparait dans plusieurs stats lié au même module
+		$sql = "SELECT DISTINCT `vtiger_rsnstatisticsfields`.*, `vtiger_crmentity`.*, `vtiger_rsnstatistics`.`rsnstatisticsid`
 				FROM `vtiger_rsnstatisticsfields`
 				INNER JOIN `vtiger_crmentity`
 					ON `vtiger_crmentity`.`crmid` = `vtiger_rsnstatisticsfields`.`rsnstatisticsfieldsid`
@@ -84,12 +85,16 @@ class RSNStatistics_Utils_Helper {
 					AND `vtiger_crmentityrel`.`crmid` IN (".generateQuestionMarks($statisticIds).")";
 				$params = array_merge($params, $statisticIds);
 			}
-			elseif($moduleNames){
-				if(!is_array($moduleNames))
-					$moduleNames = array($moduleNames);
+			else{
 				$sql .= "
-					AND `vtiger_rsnstatistics`.`relmodule` IN (".generateQuestionMarks($moduleNames).")";
-				$params = array_merge($params, $moduleNames);
+					AND `vtiger_rsnstatistics`.`disabled` = 0";
+				if($moduleNames){
+					if(!is_array($moduleNames))
+						$moduleNames = array($moduleNames);
+					$sql .= "
+						AND `vtiger_rsnstatistics`.`relmodule` IN (".generateQuestionMarks($moduleNames).")";
+					$params = array_merge($params, $moduleNames);
+				}
 			}
 			$sql .= "
 				ORDER BY `vtiger_rsnstatisticsfields`.sequence";
@@ -99,16 +104,16 @@ class RSNStatistics_Utils_Helper {
 		if(!$result)
 			$db->echoError();
 		$numberOfRecords = $db->num_rows($result);
+		
 		$relatedStatFields = array();
-
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $db->raw_query_result_rowdata($result, $i);
 			$row['id'] = $row['crmid'];
 			$relatedStatFields[] = $row;
 		}
-
 		return $relatedStatFields;
 	}
+	
 	public static function getRelatedStatsFieldsRecordModels($statisticIds, $moduleName = false) {
 		$relatedStatFields = self::getRelatedStatsFields($statisticIds, $moduleName);
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', 'RSNStatisticsFields');
@@ -168,26 +173,26 @@ class RSNStatistics_Utils_Helper {
 	}
 
 	public static function getModuleRelatedStatsFieldsCodes($moduleNames) {
-		$relatedStatsFields = array();
+		$statsFields = array();
 		$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatistics($moduleNames);
 		foreach ($relatedStatistics as $relatedStatistic) {
 			$relatedStatFields = RSNStatistics_Utils_Helper::getRelatedStatsFields($relatedStatistic['rsnstatisticsid']);//tmp
 			foreach ($relatedStatFields as $statField) {
-				$relatedStatsFields[] = $statField['uniquecode'];
+				$statsFields[] = $statField['uniquecode'];
 			}
 		}
-
-		return $relatedStatsFields;
+		return $statsFields;
 	}
 
-	public static function getRelatedStatsTablesNames($moduleName) {//tmp use getRelatedStatistics method !
+	public static function getRelatedStatsTablesNames($moduleName, $notDisabledOnly = false) {//tmp use getRelatedStatistics method !
 		$relatedStatistics = self::getRelatedStatistics($moduleName);
 
 		$tableNames = array();
 
-		foreach ($relatedStatistics as $relatedStatistic) {
-			$tableNames[] = self::getStatsTableName($relatedStatistic['rsnstatisticsid'], $relatedStatistic);
-		}
+		foreach ($relatedStatistics as $relatedStatistic)
+			if(!$notDisabledOnly || $relatedStatistic['disabled'] != 1){
+				$tableNames[] = self::getStatsTableName($relatedStatistic['rsnstatisticsid'], $relatedStatistic);
+			}
 
 		return $tableNames;
 	}
@@ -234,11 +239,11 @@ class RSNStatistics_Utils_Helper {
 		return $row['rsnstatisticsfieldsid'];
 	}
 
-	public static function getRelationQuery($parentModuleName, $crmid) {
+	public static function getRelationQuery($parentModuleName, $crmid, $statisticId = false) {
 		$aggregate = !$crmid || !is_numeric($crmid);
 		$rows = "";
 		$first = true;
-		$relatedStatsFieldsRecordModels = self::getRelatedStatsFieldsRecordModels(false, $parentModuleName);
+		$relatedStatsFieldsRecordModels = self::getRelatedStatsFieldsRecordModels($statisticId, $parentModuleName);
 		
 		foreach($relatedStatsFieldsRecordModels as $field) {
 			$code = $field->get('uniquecode');
@@ -259,15 +264,17 @@ class RSNStatistics_Utils_Helper {
 		$query = "";
 		$first = true;
 		$firstTableName = "";
-		$relatedStatsTablesNames = self::getRelatedStatsTablesNames($parentModuleName);
-
+		$relatedStatsTablesNames = self::getRelatedStatsTablesNames($parentModuleName, true);
+		//foreach($relatedStatsTablesNames as $mainTable) {
+		//	if ($first) {
+		//		$first = false;
+		//	} else {
+		//		$query .= " UNION ";
+		//	}
 		foreach($relatedStatsTablesNames as $mainTable) {
-			if ($first) {
-				$first = false;
-			} else {
-				$query .= " UNION ";
-			}
-
+			break;
+		}
+		if($mainTable){
 			$query .= "SELECT " .
 					"`" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, " . $rows .
 					" FROM `" . $mainTable . "`";
@@ -275,7 +282,7 @@ class RSNStatistics_Utils_Helper {
 			foreach($relatedStatsTablesNames as $relatedStatsTableName) {
 				if ($relatedStatsTableName != $mainTable) {
 					$query .= " LEFT OUTER JOIN `" . $relatedStatsTableName .
-								"` ON `" . $relatedStatsTableName . "`.`name` = `" . $mainTable . "`.`name`" . 
+								"` ON `" . $relatedStatsTableName . "`.`code` = `" . $mainTable . "`.`code`" . 
 								" AND `" . $relatedStatsTableName . "`.`crmid` = `" . $mainTable . "`.`crmid`";
 				}
 			}

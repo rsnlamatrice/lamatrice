@@ -69,15 +69,16 @@
     </div>
     <div class="relatedContents contents-bottomscroll">
         <div class="bottomscroll-div">
-    	{assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
-            <table class="table table-bordered listViewEntriesTable">
+			{assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
+			<table class="table table-bordered listViewEntriesTable">
+            {foreach item=RELATED_STATISTIC from=$RELATED_STATISTICS}
                 <thead>
                     <tr class="listViewHeaders">
-                        <th {if $HEADER_FIELD@last} colspan="2" {/if} nowrap class="{$WIDTHTYPE}">
-                            {vtranslate($RELATED_MODULE->get('name'), $RELATED_MODULE->get('name'))}
+                        <th nowrap class="{$WIDTHTYPE}">
+                            {vtranslate($RELATED_STATISTIC->getName(), $RELATED_MODULE->get('name'))}
                         </th>
                         {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
-                            <th {if $HEADER_FIELD@last} colspan="2" {/if} nowrap class="{$WIDTHTYPE}">
+                            <th nowrap class="{$WIDTHTYPE}">
                                 {$RELATED_RECORD->getDisplayValue('name', false, $UNKNOWN_FIELD_RETURNS_VALUE)} 
                                 {*({$RELATED_RECORD->getDisplayValue('begin_date', false, $UNKNOWN_FIELD_RETURNS_VALUE)} / {$RELATED_RECORD->getDisplayValue('end_date', false, $UNKNOWN_FIELD_RETURNS_VALUE)})*}
                             </th>
@@ -86,7 +87,8 @@
                 </thead>
                 {foreach item=HEADER_FIELD from=$RELATED_HEADERS}
                     {assign var=HEADERNAME value=$HEADER_FIELD->get('name')}
-                    {if $HEADERNAME neq 'name' and $HEADERNAME neq 'begin_date' and $HEADERNAME neq 'end_date'}
+					{if $HEADER_FIELD->get('rsnstatisticsid') && ($RELATED_STATISTIC->getId() eq $HEADER_FIELD->get('rsnstatisticsid'))}
+                    {*if $HEADERNAME neq 'name' and $HEADERNAME neq 'begin_date' and $HEADERNAME neq 'end_date'*}
                         <tr class="listViewEntries" data-id='{$HEADER_FIELD->getId()}' data-recordUrl='{RSNStatistics_Record_Model::getStatFieldDetailViewUrl($HEADER_FIELD->get("name"))}'>
                             <td class="{$WIDTHTYPE}" data-field-type="{$HEADER_FIELD->getFieldDataType()}" nowrap>
                                 {vtranslate($HEADER_FIELD->get('label'), $RELATED_MODULE->get('name'))}
@@ -99,7 +101,8 @@
                         </tr>
                     {/if}
                 {/foreach}
-            </table>
+            {/foreach}
+			</table>
         </div>
     </div>
 </div>

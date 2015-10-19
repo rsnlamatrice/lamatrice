@@ -25,7 +25,6 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		foreach($relatedStatsFieldsCode as $code) {
 			$relatedListFields[$code] = $code;
 		}
-
 		return $relatedListFields;
 	}
 
@@ -33,29 +32,31 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		return $this->getRelatedListFields($parentModuleName);
 	}
 
-	public function getRelationHeaders($parentModuleName){
+	public function getRelationHeaders($parentModuleName, $statIds = false){
 		$headerFields = array();
 		$headerFields['name'] = self::getFieldModelFromName('name');
 		$headerFields['begin_date'] = self::getFieldModelFromName('begin_date');
 		$headerFields['end_date'] = self::getFieldModelFromName('end_date');
 		if($parentModuleName == $this->getName()){
-			$variableFields = $this->getRelatedStatsFieldsModels($parentModuleName);
+			$variableFields = $this->getRelatedStatsFieldsModels($parentModuleName, $statIds);
 		}
 		else {
-			$variableFields = $this->getRelatedStatsFieldsModels($parentModuleName);
+			$variableFields = $this->getRelatedStatsFieldsModels($parentModuleName, $statIds);
 		}
 		$headerFields = array_merge($headerFields, $variableFields);
 
 		return $headerFields;
 	}
 
-	public static function getFieldModel($name, $label, $typeOfData, $uiType) {
+	public static function getFieldModel($name, $label, $typeOfData, $uiType, $statId = false) {
 		$field = new Vtiger_Field_Model();
 		$field->set('name', $name);
 		$field->set('column', strtolower($name));
 		$field->set('label', $label);
 		$field->set('typeofdata', $typeOfData);
 		$field->set('uitype', $uiType);
+		if($statId)
+			$field->set('rsnstatisticsid', $statId);
 
 		return $field;
 	}
@@ -104,15 +105,17 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		}
 
 		VTCacheUtils::updateStatsFieldInfo($statField['uniquecode'], $statField['fieldname'], $uiType, $typeOfData);
-		return self::getFieldModel($statField['uniquecode'], $statField['fieldname'], $typeOfData, $uiType);
+		return self::getFieldModel($statField['uniquecode'], $statField['fieldname'], $typeOfData, $uiType, $statField['rsnstatisticsid']);
 	}
 
-	public function getRelatedStatsFieldsModels($parentModuleName) {
+	public function getRelatedStatsFieldsModels($parentModuleName, $statIds = false) {
 		$fieldModels = array();
-		$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatistics($parentModuleName);
-		$statIds = array();
-		foreach ($relatedStatistics as $relatedStatistic) {
-			$statIds[] = $relatedStatistic['rsnstatisticsid'];
+		if(!$statIds){
+			$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatistics($parentModuleName);
+			$statIds = array();
+			foreach ($relatedStatistics as $relatedStatistic) {
+				$statIds[] = $relatedStatistic['rsnstatisticsid'];
+			}
 		}
 		$relatedStatFields = RSNStatistics_Utils_Helper::getRelatedStatsFields($statIds);//tmp
 

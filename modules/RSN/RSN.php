@@ -418,6 +418,7 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 	}
 	
 	static function add_rsnstatistics_relatedlist() {
+		return;//TODO test is exists already
 		$module = Vtiger_Module_Model::getInstance('RSNStatistics');
 		$module->setRelatedList($module, 'LBL_RESULTS', Array(), 'get_statistics_data');
 		Vtiger_Module::getInstance('Contacts')->setRelatedList($module, 'RSNStatistics', Array(), 'get_statistics_data');

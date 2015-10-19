@@ -41,7 +41,8 @@ class RSNStatistics_Record_Model extends Vtiger_Record_Model {
 				$errors[] = $error;
 			if( ! array_key_exists($statisticField->get('uniquecode'), $existingTableFieldsDefinition) ){
 				$errors[] = 'Le champ `'.$statisticField->get('uniquecode').'` n\'existe pas dans la table de cette statistique "'.$this->getName().'".'
-					.' Valeurs possibles : '. implode(', ', array_keys($existingTableFieldsDefinition));
+					.($existingTableFieldsDefinition ? ' Valeurs possibles : '. implode(', ', array_keys($existingTableFieldsDefinition)) : '').'.'
+					. ' Eventuellement, éditez et ré-enregistrez la statistique pour recréer les champs.';
 			}
 		}
 		return $errors;

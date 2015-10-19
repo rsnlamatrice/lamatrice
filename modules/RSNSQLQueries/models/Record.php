@@ -233,10 +233,14 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		
 	}
 
+	var $cache_variables;
 	/**
 	 * Variables lies
 	 */
 	public function getRelatedVariables(Vtiger_Request $request = NULL) {
+		if(!$request && $this->cache_variables)
+			return $this->cache_variables;
+		
 		$pagingModel = new Vtiger_Paging_Model();
 
 		if($request){
@@ -258,7 +262,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		$relationListView->set('sortorder', 'ASC');
 		$variables = $relationListView->getEntries($pagingModel);// Warning, take care of the limite of the pagin model ....
 
-		return $variables;
+		return $this->cache_variables = $variables;
 	}
 
 	public function getRelatedVariablesNames() {
@@ -274,15 +278,31 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 		return $result;
 	}
 
+	public function getRelatedVariableDefaultValue($variableName) {
+		// TODO faster and cache
+		$relatedVariables = $this->getRelatedVariables();
+		
+		foreach ($relatedVariables as $variable) {
+			if($variableName == $variable->get('name'))
+				return $variable->get('defaultvalue');
+		}
+
+		return null;
+	}
+
 	public function getExecutionQuery($paramValues) {//tmp !! 
 		$sql = $this->getQuery();
 		$regex_end = '\s*(\|[^\]|]*)*\]\]/';
 		$SQLParam = array();
-		
 		$queryVariables = $this->getVariablesFromQuery(false);// array() extrait de la requête
 		foreach($queryVariables as $queryVariable){
 			$paramName = $queryVariable['name'];
-			$paramValue = $paramValues[$paramName];
+			if(!array_key_exists($paramName, $paramValues)){
+				$paramValue = $this->getRelatedVariableDefaultValue($paramName);
+				var_dump('Utilisation de la valeur par défaut pour le champ '.$paramName, $paramValue);
+			}
+			else
+				$paramValue = $paramValues[$paramName];
 			//var_dump(__FILE__.'.getExecutionQuery()', $paramName, $paramValue);
 			if($paramName === 'crmid'
 			&& is_string($paramValue)

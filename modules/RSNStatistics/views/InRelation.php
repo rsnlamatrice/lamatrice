@@ -42,12 +42,11 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		if($relatedViewName){ //Filtre sur les éléments liés
 			$relationListView->set('related_viewname', $relatedViewName);
 		}
-		
-		$models = $relationListView->getEntries($pagingModel, $parentId);//tmp do not use that ??
-		
-		//var_dump($models->list_fields);
+		$models = $relationListView->getEntries($pagingModel);//tmp do not use that ??
+		//var_dump($models);
+		//var_dump($models->list_fields, $models);
 		$links = $relationListView->getLinks();
-		$header = $relationListView->getHeaders();
+		$relatedHeaders = $relationListView->getHeaders();//stats fields
 		$noOfEntries = count($models);
 
 		$relationModel = $relationListView->getRelationModel();
@@ -59,12 +58,20 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('RELATED_RECORDS' , $models);//tmp rename record to something more explicit !!!
 		$viewer->assign('PARENT_RECORD', $parentRecordModel);
 		$viewer->assign('RELATED_LIST_LINKS', $links);
-		$viewer->assign('RELATED_HEADERS', $header);
+		$viewer->assign('RELATED_HEADERS', $relatedHeaders);
+		
+		//$viewer->assign('RELATED_GROUPED_HEADERS', $this->groupFieldsByStatistic($relatedHeaders, 'rsnstatisticsid'));
+		
 		$viewer->assign('RELATED_MODULE', $relatedModuleModel);
 		$viewer->assign('RELATED_ENTIRES_COUNT', $noOfEntries);
 		$viewer->assign('RELATION_FIELD', $relationField);
 		$viewer->assign('UPDATE_STATS_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : ''));
 		$viewer->assign('UPDATE_STATS_THIS_YEAR_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : '', 'this_year'));
+		
+		if($moduleName === 'RSNStatistics')
+			$viewer->assign('RELATED_STATISTICS', array($parentRecordModel->getId() => $parentRecordModel));
+		else
+			$viewer->assign('RELATED_STATISTICS', RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName));
 		
 		//if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			$totalCount = $relationListView->getRelatedEntriesCount();
@@ -104,5 +111,27 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		}
 		
 		return $viewer->view('RelatedStats.tpl', 'RSNStatistics', 'true');
+	}
+	
+	//function groupFieldsByStatistic($fields, $groupFieldName){
+	//	$groups = array();
+	//	foreach($fields as $fieldKey => $field){
+	//		$fieldName = $field->get($groupFieldName);
+	//		if(!$groups[$fieldName])
+	//			$groups[$fieldName] = array(
+	//													 );
+	//		$groups[$fieldName][$fieldKey] = $field;
+	//	}
+	//	return $groups;
+	//}
+	
+	function getStatisticsModels(){
+		$groups = array();
+		foreach($fields as $fieldKey => $field){
+			if(!array_key_exists($field[$groupFieldName], $groups))
+				$groups[$field[$groupFieldName]] = array();
+			$groups[$field[$groupFieldName]][$fieldKey] = $field;
+		}
+		return $groups;
 	}
 }
