@@ -1,6 +1,6 @@
 <?php
 
-require_once('modules/RSNImportSources/helpers/Performance.php');
+require_once('modules/RSN/helpers/Performance.php');
 
 class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 
