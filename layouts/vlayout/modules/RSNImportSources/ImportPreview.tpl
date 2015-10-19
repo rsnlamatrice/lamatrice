@@ -9,7 +9,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 {assign var=ROW_STATUS_COLORS value=array('inherit', 'green', 'yellow', 'green', 'green', '#FFC0A0')}
 <div class="marginLeftZero" style="overflow: scroll;width:95%;">
 	{if sizeof($PREVIEW_DATA) gt 0}
-		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="searchUIBasic well">
+		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
 			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
 				<tr>
 					<td class="font-x-large" align="left" colspan="2">

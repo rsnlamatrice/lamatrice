@@ -16,7 +16,7 @@ class RSN_CogilogProduitsEtServices_Import {
 		if(stripos($table_name, 'SELECT ') === 0){
 			$query = $table_name;
 			if(!preg_match('/\sLIMIT\s/i', $query))
-				$query .= ' LIMIT 99';
+				$query .= ' LIMIT 999';
 		}
 		else
 			$query = 'SELECT * FROM ' . $table_name . ' LIMIT 50';
@@ -97,11 +97,7 @@ class RSN_CogilogProduitsEtServices_Import {
 			, "produit"."tssaisie" AS "createdtime"
 			, "produit"."tsmod" AS "modifiedtime"
 	
-			FROM gfactu00002 facture
-			JOIN gclien00002 cl
-				ON facture.id_gclien = cl.id
-			JOIN glfact00002 ligne_fact
-				ON ligne_fact.id_piece = facture.id
+			FROM glfact00002 ligne_fact
 			INNER JOIN "gprodu00002" AS "produit"
 				ON "ligne_fact"."id_gprodu" = "produit"."id"
 			INNER JOIN "gtprod00002" AS "famille"

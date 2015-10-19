@@ -60,9 +60,11 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$query = 'SELECT cl.code AS CodeClient, cl.nom2 AS NomClient,
 			facture.*,
 			affaire.code AS affaire_code, affaire.nom AS affaire_nom
-			, "ligne_fact"."prix" AS "prix_unit_ht"
+			'/*, "ligne_fact"."prix" AS "prix_unit_ht"*/.'
+			, CASE WHEN ( "produit"."codetva" = 0 ) THEN "ligne_fact"."prixttc" ELSE "ligne_fact"."prixttc" / ( 1 + "codetauxtva"."taux"/100) END  AS "prix_unit_ht"
 			, "ligne_fact"."ht2" AS "total_ligne_ht"
-			, ROUND( CAST( ( "ligne_fact"."quantite" * "ligne_fact"."prixttc" * ( 100 - "ligne_fact"."remise" ) / 100 ) AS NUMERIC ), 2 ) AS "montant_ligne"
+			, "ligne_fact"."remise" AS "remise_ligne"
+			'/*, ROUND( CAST( ( "ligne_fact"."quantite" * "ligne_fact"."prixttc" * ( 100 - "ligne_fact"."remise" ) / 100 ) AS NUMERIC ), 2 ) AS "montant_ligne"*/.'
 			, ROUND( CAST( ( "ligne_fact"."quantite" * ( CASE WHEN ( "produit"."codetva" = 0 ) THEN "produit"."achat" ELSE "produit"."achat" * ( 1 + ( "codetauxtva"."taux" / 100 ) ) END ) ) AS NUMERIC ), 2 ) AS "montant_achat"
 			, ( "ligne_fact"."quantite" ) AS "quantite", CASE WHEN ( "produit"."codetva" = 0 ) THEN "produit"."achat" ELSE "produit"."achat" * ( 1 + ( "codetauxtva"."taux" / 100 ) ) END AS "prixachatttc"
 			, "famille"."nom" AS "produit_famille"
@@ -96,7 +98,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
 		if(FALSE)
-			$query .= ' WHERE facture.numero = 6769
+			$query .= ' WHERE facture.numero = 2
 				AND annee = 2015
 			';
 		else {
@@ -210,6 +212,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'taxrate',
 			'paiementpropose',
 			'solde',
+			'remise_ligne',
 			
 			/* post pré-import */
 			'_receivedcomments',
@@ -289,25 +292,33 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			return;
 		
 		$discount_amount = 0;
+		$discount_percent = self::str_to_float($invoiceLine['remise_ligne']);
+		$amountHT = $qty * $listprice;
 		$tax = self::getTax($invoiceLine['taxrate']);
 		if($tax){
 			$taxName = $tax['taxname'];
 			$taxValue = $tax['percentage'];
-			$totalTax += $qty * $listprice * ($taxValue/100);
+			$amountTTC = $amountHT * (1 + $taxValue/100);
+			$taxAmount = $amountTTC - $amountHT;
 			//var_dump('$totalTax', $totalTax, "$qty * $listprice * ($taxValue/100)");
 		}
 		else {
 			$taxName = 'tax1';
 			$taxValue = null;
+			$taxAmount = 0.0;
+			$amountTTC = $amountHT;
 		}
-		$totalAmountHT += $qty * $listprice;
+		$totalTax += $taxAmount * (1 - $discount_percent/100);
+		$totalAmountHT += $amountHT * (1 - $discount_percent/100);
+		$listprice = ($amountTTC - $taxAmount) / $qty;
 		//var_dump('$totalAmountHT', $totalAmountHT, "$qty * $listprice", $invoiceLine['taxrate']);
 		
 		$incrementOnDel = $invoiceLine['isproduct'] ? 1 : 0;
 		
 		$db = PearDatabase::getInstance();
-		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel, $taxName) VALUES(?,?,?,?,?,?,?,?)";
-		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $qty, $listprice, $discount_amount, $incrementOnDel, $taxValue);
+		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_percent, discount_amount, incrementondel, $taxName)
+			VALUES(?,?,?,?,?,?,?,?,?)";
+		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $qty, $listprice, $discount_percent, $discount_amount, $incrementOnDel, $taxValue);
 		//$db->setDebug(true);
 		$db->pquery($query, $qparams);
 	}
@@ -440,6 +451,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					
 					//set invoice_no
 					$query = "UPDATE vtiger_invoice
+						JOIN vtiger_invoicecf
+							ON vtiger_invoice.invoiceid = vtiger_invoicecf.invoiceid
 						JOIN vtiger_crmentity
 							ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
 						SET invoice_no = ?
@@ -447,17 +460,19 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 						, subtotal = ?
 						, taxtype = ?
 						, received = ?
+						, sent2compta = ?
 						, smownerid = ?
 						, createdtime = ?
 						, modifiedtime = ?
-						WHERE invoiceid = ?
+						WHERE vtiger_crmentity.crmid = ?
 					";
-					$total = $totalAmount + $totalTax;
+					$total = round($totalAmount + $totalTax,2);
 					$result = $db->pquery($query, array($sourceId
 									    , $total
 									    , $total
 									    , 'individual'
 									    , $total - $invoiceData[0]['solde']
+									    , $invoiceData[0]['invoicedate']
 									    , ASSIGNEDTO_ALL
 									    , $invoiceData[0]['invoicedate']
 									    , $invoiceData[0]['invoicedate']
@@ -467,7 +482,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 						    . ", result=" . ($result ? " true" : "false"). " )");
 					if( ! $result)
 						$db->echoError();
-						
 						
 					//raise trigger instead of ->save() whose need invoice rows
 					/* ED150831 Migration : is bulk mode
@@ -959,6 +973,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'qtyinstock' => $product[$this->columnName_indexes['stock_produit']],
 			'glacct' => $product[$this->columnName_indexes['glacct']],
 			'discontinued' => $product[$this->columnName_indexes['indisponible']], //TODO n'est ce pas l'inverse ?
+			'remise_ligne'	=> self::str_to_float($product[$this->columnName_indexes['remise_ligne']]),
 		);
 		return $product;
 	}
@@ -1017,9 +1032,10 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				'productid'	=> $this->getProductId($product[$this->columnName_indexes['code_produit']], $isProduct, $product_name),
 				'quantity'	=> $qty,
 				'article'	=> $product_name,
-				'prix_unit_ht'	=> self::str_to_float($product[$this->columnName_indexes['total_ligne_ht']]) / $qty /* / (1 + $taxrate) */,
+				'prix_unit_ht'	=> self::str_to_float($product[$this->columnName_indexes['prix_unit_ht']]),
 				'isproduct'	=> $isProduct,
 				'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['taux_tva']]),
+				'remise_ligne'	=> self::str_to_float($product[$this->columnName_indexes['remise_ligne']]),
             
 			)));
 		}

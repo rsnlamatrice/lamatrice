@@ -203,7 +203,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		return 9; //Septembre TODO param
 	}
 	function getDefaultBeginYear(){
-		return date('Y') - 6; //TODO param
+		return date('Y') - 5; //TODO param
 	}
 
 	//AV
