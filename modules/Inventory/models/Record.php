@@ -68,6 +68,8 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	function getProducts() {
+		$no_of_decimal_places = 2;//getCurrencyDecimalPlaces();
+		
 		$relatedProducts = getAssociatedProducts($this->getModuleName(), $this->getEntity());
 		$productsCount = count($relatedProducts);
 
@@ -76,13 +78,13 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 						+ (float)$relatedProducts[1]['final_details']['shipping_handling_charge']
 						- (float)$relatedProducts[1]['final_details']['discountTotal_final'];
 
-		$relatedProducts[1]['final_details']['preTaxTotal'] = number_format($preTaxTotal, getCurrencyDecimalPlaces(),'.','');
+		$relatedProducts[1]['final_details']['preTaxTotal'] = number_format($preTaxTotal, $no_of_decimal_places,'.','');
 		
 		//Updating Total After Discount
 		$totalAfterDiscount = (float)$relatedProducts[1]['final_details']['hdnSubTotal']
 								- (float)$relatedProducts[1]['final_details']['discountTotal_final'];
 		
-		$relatedProducts[1]['final_details']['totalAfterDiscount'] = number_format($totalAfterDiscount, getCurrencyDecimalPlaces(),'.','');
+		$relatedProducts[1]['final_details']['totalAfterDiscount'] = number_format($totalAfterDiscount, $no_of_decimal_places,'.','');
 		
 		//Updating Tax details
 		$taxtype = $relatedProducts[1]['final_details']['taxtype'];
@@ -103,16 +105,31 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 					$taxAmount = $totalAfterDiscount * $taxValue / 100;
 					$taxTotal = $taxTotal + $taxAmount;
 
-					$relatedProducts[$i]['taxes'][$j]['amount'] = $taxAmount;
-					$relatedProducts[$i]['taxTotal'.$i] = $taxTotal;
+					$relatedProducts[$i]['taxes'][$j]['amount'] = number_format($taxAmount, $no_of_decimal_places,'.','');
+					$relatedProducts[$i]['taxTotal'.$i] = number_format($taxTotal, $no_of_decimal_places,'.','');
 				}
 				$netPrice = $totalAfterDiscount + $taxTotal;
-				$relatedProducts[$i]['netPrice'.$i] = $netPrice;
+				$relatedProducts[$i]['netPrice'.$i] = number_format($netPrice, $no_of_decimal_places,'.','');
 			}
+			
+			// ED151019 2 decimals
+			foreach(array('productTotal', 'discountTotal', 'totalAfterDiscount', 'taxTotal') as $fieldName)
+				if(!array_key_exists($fieldName.$i, $relatedProducts[$i]))
+					var_dump("Le champ $fieldName.$i n'existe pas");
+				else
+					$relatedProducts[$i][$fieldName.$i] = number_format($relatedProducts[$i][$fieldName.$i], $no_of_decimal_places,'.','');
 		}
 		
 		//ED150129
-		$relatedProducts[1]['final_details']['balance'] = $this->get('balance');
+		$relatedProducts[1]['final_details']['balance'] = number_format($this->get('balance'), $no_of_decimal_places,'.','');
+		
+	
+		// ED151019 2 decimals
+		foreach(array('hdnSubTotal', 'discountTotal_final', 'shipping_handling_charge', 'adjustment', 'grandTotal') as $fieldName)
+			if(!array_key_exists($fieldName, $relatedProducts[1]['final_details']))
+				var_dump("Le champ $fieldName n'existe pas");
+			else
+				$relatedProducts[1]['final_details'][$fieldName] = number_format($relatedProducts[1]['final_details'][$fieldName], $no_of_decimal_places,'.','');
 		
 		return $relatedProducts;
 	}

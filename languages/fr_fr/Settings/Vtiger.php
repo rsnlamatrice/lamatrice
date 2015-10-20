@@ -206,6 +206,12 @@ $languageStrings = array(
         
         'RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES' => 'Plusieurs taxes utilisables par produit et service',
         'RSN_PRODUCT_ALLOW_DUPLICATE' => 'Les produits et services peuvent être dupliqués',
+        
+        'inventory_header_text' => 'Texte à imprimer sous l\'organisation',
+        'inventory_lastpage_footer_text' => 'Texte à imprimer en fin de facture',
+	'LBL_COMPANY_PRINT_LOGO'             => 'Logo pour impression', 
+	'LBL_PRINT_LOGO_RECOMMENDED_MESSAGE' => 'Taille recommandée 340X120 pixels( .jpeg , .jpg , .png , .gif , .pjpeg , .x-png format ).', 
+        
 );
 $jsLanguageStrings = array(
 	'JS_PLEASE_SELECT_ATLEAST_ONE_MEMBER_FOR_A_GROUP' => 'Veuillez choisir au moins un collaborateur pour le groupe', 

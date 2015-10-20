@@ -54,6 +54,7 @@ class RSN {
 			$this->add_isabonnable_rsnabotype();
 			$this->add_rsnsqlqueries_fields();
 			$this->add_rsnstatistics_relatedlist();
+			$this->add_organizationdetails_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -552,4 +553,20 @@ DELIMITER ;';
 			WHERE rsnabotype IN ('Dépôt', 'Ne pas abonner', 'Non abonné')";
 		$db->pquery($sql);
 	}
+	
+	/* ED151020
+	 * Champs supplémentaires de paramétrage de l'entreprise
+	 */ 
+	static function add_organizationdetails_fields(){
+		
+		$db = PearDatabase::getInstance();
+		
+		$sql = "ALTER TABLE `vtiger_organizationdetails`
+			ADD `print_logoname` VARCHAR(255) NULL ,
+			ADD `inventory_header_text` TEXT NULL ,
+			ADD `inventory_lastpage_footer_text` TEXT NULL;";
+		$db->query($sql);
+	}
+	
+	
 }

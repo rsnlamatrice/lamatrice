@@ -15,6 +15,7 @@ class Vtiger_PDF_ContentViewer extends Vtiger_PDF_Viewer {
 	
 	protected $contentModels = array();
 	protected $contentSummaryModel;
+	protected $afterSummaryModel;//ED151020
 	protected $watermarkModel;
 	
 	function addContentModel($m) {
@@ -28,6 +29,11 @@ class Vtiger_PDF_ContentViewer extends Vtiger_PDF_Viewer {
 	
 	function setSummaryModel($m) {
 		$this->contentSummaryModel = $m;
+	}
+	
+	//ED151020
+	function setAfterSummaryModel($m) {
+		$this->afterSummaryModel = $m;
 	}
 
 	function setWatermarkModel($m) {

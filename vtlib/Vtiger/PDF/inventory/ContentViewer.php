@@ -46,7 +46,7 @@ class Vtiger_PDF_InventoryContentViewer extends Vtiger_PDF_ContentViewer {
 		$pdf->SetFont('','B');
 		foreach($this->cells as $cellName => $cellWidth) {
 			$cellLabel = ($this->labelModel)? $this->labelModel->get($cellName, $cellName) : $cellName;
-			$pdf->MultiCell($cellWidth, $this->headerRowHeight, $cellLabel, 1, 'L', 0, 1, $contentFrame->x+$offsetX, $contentFrame->y);
+			$pdf->MultiCell($cellWidth, $this->headerRowHeight, $cellLabel, 1, 'C', 0, 1, $contentFrame->x+$offsetX, $contentFrame->y);
 			$offsetX += $cellWidth;
 		}
 		$pdf->SetFont('','');
@@ -73,6 +73,9 @@ class Vtiger_PDF_InventoryContentViewer extends Vtiger_PDF_ContentViewer {
 
 	function display($parent) {
 		$this->displayPreLastPage($parent);
+		
+		$this->displayAfterSummaryContent($parent);
+		
 		$this->displayLastPage($parent);
 	}
 
@@ -113,7 +116,9 @@ class Vtiger_PDF_InventoryContentViewer extends Vtiger_PDF_ContentViewer {
 
 			$offsetX = 0;
 			foreach($this->cells as $cellName => $cellWidth) {
-				$pdf->MultiCell($cellWidth, $contentHeight, $model->get($cellName), 0, 'L', 0, 1, $contentLineX+$offsetX, $contentLineY);
+				$contentString = $model->get($cellName);
+				$alignment = is_numeric($contentString[0]) ? 'R' : 'L';
+				$pdf->MultiCell($cellWidth, $contentHeight, $contentString, 0, $alignment, 0, 1, $contentLineX+$offsetX, $contentLineY);
 				$offsetX += $cellWidth;
 			}
 			
@@ -149,7 +154,13 @@ class Vtiger_PDF_InventoryContentViewer extends Vtiger_PDF_ContentViewer {
 		
 			$summaryCellLabelWidth = $this->cells['Quantity'] + $this->cells['Price'] + $this->cells['Discount'] + $this->cells['Tax'];
 			$summaryCellHeight = $pdf->GetStringHeight("TEST", $summaryCellLabelWidth); // Pre-calculate cell height
-		
+			
+			//ED151019 ajoute l'espace pour des TVA multiples
+			foreach($summaryCellKeys as $key) {	
+				$contentString = $this->contentSummaryModel->get($key);
+				$summaryCellCount += substr_count($contentString, "\n");
+			}
+			
 			$summaryTotalHeight = ceil(($summaryCellHeight * $summaryCellCount));
 	
 			if (($contentFrame->h+$contentFrame->y) - ($contentLineY+$overflowOffsetH)  < $summaryTotalHeight) { //$overflowOffsetH is added so that last Line Item is not overlapping
@@ -185,6 +196,41 @@ class Vtiger_PDF_InventoryContentViewer extends Vtiger_PDF_ContentViewer {
 		// Add last page to take care of footer display
 		if($parent->createLastPage()) {
 			$this->onSummaryPage = false;
+		}
+	}
+
+	//ED151020
+	function displayAfterSummaryContent($parent) {
+		
+		if ($this->afterSummaryModel) {
+			$pdf = $parent->getPDF();
+			$contentFrame = $parent->getContentFrame();
+			
+			$originalFontSize = $pdf->getFontSize();
+			$pdf->SetFont(PDF_FONT_NAME,'I', $originalFontSize * 0.8);
+			$y = 297 - 5;
+			
+			$contentStrings = array();
+			foreach($this->afterSummaryModel->keys() as $key) {	
+				$text = $this->afterSummaryModel->get($key);
+				if(!$text)
+					continue;
+				$contentStrings = array_merge($contentStrings, explode("\n", decode_html($text)));
+				
+			}
+			foreach($contentStrings as $contentString){
+				$h += $pdf->GetStringHeight($contentString, $contentFrame->w);
+			}
+			$y -= $h;
+			$pdf->SetY($y);
+			foreach($contentStrings as $contentString){
+				//$h = $pdf->GetStringHeight($contentString, $contentFrame->w);
+				//var_dump($contentFrame->w, $h, $contentString, 0, 'L', 0, 1, $contentFrame->x, $y - $h);
+				//$pdf->MultiCell($contentFrame->w, $h, $contentString, 0, 'L', 0, 1, $contentFrame->x, $y - $h, true);
+				$pdf->Text($contentFrame->x, $y, $contentString);
+				$y += $pdf->GetStringHeight($contentString, $contentFrame->w);
+			}
+			$pdf->SetFont(PDF_FONT_NAME,'', $originalFontSize);
 		}
 	}
 

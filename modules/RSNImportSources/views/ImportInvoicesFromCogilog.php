@@ -97,8 +97,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			LEFT JOIN "gtvacg00002" AS "codetauxtva"
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
-		if(FALSE)
-			$query .= ' WHERE facture.numero = 2
+		if(false)
+			$query .= ' WHERE facture.numero = 3957
 				AND annee = 2015
 			';
 		else {

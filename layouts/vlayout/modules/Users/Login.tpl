@@ -41,7 +41,7 @@
 		<div class="container-fluid login-container">
 			<div class="row-fluid">
 				<div class="span3">
-					<div class="logo"><a target="_blank" href="https://www.sortirdunucleaire.org/"><img src="test/logo/logo-sdn.gif"/></a>
+					<div class="logo"><a target="_blank" href="https://www.sortirdunucleaire.org/"><img src="test/logo/logo480.png"/></a>
 					</div>
 				</div>
 				<div class="span9">

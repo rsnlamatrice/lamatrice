@@ -42,7 +42,7 @@
 					</thead>
 					<tbody>
 						{foreach from=$MODULE_MODEL->getFields() item=FIELD_TYPE key=FIELD}
-							{if $FIELD neq 'logoname' && $FIELD neq 'logo' }
+							{if $FIELD neq 'logoname' && $FIELD neq 'logo' && $FIELD neq 'print_logoname' && $FIELD neq 'print_logo' }
 								<tr>
 									<td>{vtranslate($FIELD,$QUALIFIED_MODULE)}</td>
 									<td>{$MODULE_MODEL->get($FIELD)}</td>
@@ -75,14 +75,31 @@
 				{/if}
 			</div>
 		</div>
+		<div class="control-group">
+			<div class="control-label">{vtranslate('LBL_COMPANY_PRINT_LOGO',$QUALIFIED_MODULE)}</div>
+			<div class="controls">
+				<div class="companyLogo">
+					<img src="{$MODULE_MODEL->getLogoPath('print_')}" class="alignMiddle" />
+				</div>
+				<input type="file" name="print_logo" id="print_logoFile" />&nbsp;&nbsp;
+				<span class="alert alert-info">
+					{vtranslate('LBL_PRINT_LOGO_RECOMMENDED_MESSAGE',$QUALIFIED_MODULE)}
+				</span>
+				{if !empty($ERROR_MESSAGE)}
+					<br><br><div class="marginLeftZero span9 alert alert-error">
+						{vtranslate($ERROR_MESSAGE,$QUALIFIED_MODULE)}
+					</div>
+				{/if}
+			</div>
+		</div>
 		{foreach from=$MODULE_MODEL->getFields() item=FIELD_TYPE key=FIELD}
-			{if $FIELD neq 'logoname' && $FIELD neq 'logo' }
+			{if $FIELD neq 'logoname' && $FIELD neq 'logo' && $FIELD neq 'print_logoname' && $FIELD neq 'print_logo' }
 				<div class="control-group">
 					<div class="control-label">
 						{vtranslate($FIELD,$QUALIFIED_MODULE)}{if $FIELD eq 'organizationname'}<span class="redColor">*</span>{/if}
 					</div>
 					<div class="controls">
-						{if $FIELD eq 'address'}
+						{if $FIELD eq 'address' || $FIELD eq 'inventory_header_text' || $FIELD eq 'inventory_lastpage_footer_text'}
 							<textarea name="{$FIELD}" style="width: 30.5%">{$MODULE_MODEL->get($FIELD)}</textarea>
 						{else}
 							<input type="text" {if $FIELD eq 'organizationname'} data-validation-engine="validate[required]" {/if} class="input-xlarge" name="{$FIELD}" value="{$MODULE_MODEL->get($FIELD)}"/>
