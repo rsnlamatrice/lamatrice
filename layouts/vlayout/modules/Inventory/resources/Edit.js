@@ -301,7 +301,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : current instance;
 	 */
 	setLineItemTotal : function(lineItemRow, lineItemTotalValue) {
-		jQuery('.productTotal', lineItemRow).text(lineItemTotalValue);
+		var strValue = parseFloat(lineItemTotalValue).toFixed(2);
+		jQuery('.productTotal', lineItemRow).text(strValue);
 		return this;
 	},
 
@@ -359,7 +360,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : current instance;
 	 */
 	setDiscountTotal : function(lineItemRow, discountValue) {
-		jQuery('.discountTotal',lineItemRow).text(discountValue);
+		var strValue = parseFloat(discountValue).toFixed(2);
+		jQuery('.discountTotal',lineItemRow).text(strValue);
 		return this;
 	},
 
@@ -433,7 +435,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	setNetTotal : function(netTotalValue){
-		jQuery('#netTotal').text(netTotalValue);
+		var strValue = parseFloat(netTotalValue).toFixed(2);
+		jQuery('#netTotal').text(strValue);
 		return this;
 	},
 
@@ -445,7 +448,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * Function to set the final discount total
 	 */
 	setFinalDiscountTotal : function(finalDiscountValue){
-		jQuery('#discountTotal_final').text(finalDiscountValue);
+		var strValue = parseFloat(finalDiscountValue).toFixed(2);
+		jQuery('#discountTotal_final').text(strValue);
 		return this;
 	},
 
@@ -454,7 +458,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 	
 	setGroupTaxTotal : function(groupTaxTotalValue) {
-		jQuery('#tax_final').text(groupTaxTotalValue);
+		var strValue = parseFloat(groupTaxTotalValue).toFixed(2);
+		jQuery('#tax_final').text(strValue);
 	},
 
 	getGroupTaxTotal : function() {
@@ -518,7 +523,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	setGrandTotal : function(grandTotalValue) {
-		jQuery('#grandTotal').text(grandTotalValue);
+		var strValue = parseFloat(grandTotalValue).toFixed(2);
+		jQuery('#grandTotal').text(strValue);
 		return this;
 	},
 
@@ -874,7 +880,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		rowPercentageField.addClass('hide');
 		rowAmountField.addClass('hide');
 
-		var discountValue = discountRow.find('.discountVal').val();
+		var discountValue = this.parseFloat(discountRow.find('.discountVal').val());
 		if(discountValue == ""){
 			discountValue = 0;
 		}
@@ -906,6 +912,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * Function which will calculate tax for the line item total after discount
 	 */
 	calculateTaxForLineItem : function(lineItemRow) {
+		var thisInstance = this;
 		var totalAfterDiscount = this.getTotalAfterDiscount(lineItemRow);
 		var quantity = this.getQuantityValue(lineItemRow);
 		var taxPercentages = jQuery('.taxPercentage',lineItemRow);
@@ -914,7 +921,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		jQuery.each(taxPercentages,function(index,domElement){
 			var taxPercentage = jQuery(domElement);
 			var individualTaxRow = taxPercentage.closest('tr');
-			var individualTaxPercentage = taxPercentage.val();
+			var individualTaxPercentage = thisInstance.parseFloat(taxPercentage.val());
 			if(individualTaxPercentage == ""){
 				individualTaxPercentage = "0.00";
 			}
@@ -974,7 +981,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		rowPercentageField.addClass('hide');
 		rowAmountField.addClass('hide');
 
-		var discountValue = discountRow.find('.discountVal').val();
+		var discountValue = this.parseFloat(discountRow.find('.discountVal').val());
 		if(discountValue == ""){
 			discountValue = 0;
 		}
@@ -992,6 +999,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
     },
 	
 	calculateGroupTax : function() {
+		var thisInstance = this
 		var netTotal = this.getNetTotal();
 		var finalDiscountValue = this.getFinalDiscountTotal();
 		var amount = netTotal - finalDiscountValue;
@@ -1001,7 +1009,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		groupTaxContainer.find('.groupTaxPercentage').each(function(index,domElement){
 			var groupTaxPercentageElement = jQuery(domElement);
 			var groupTaxRow = groupTaxPercentageElement.closest('tr');
-			var groupTaxValue = (amount * groupTaxPercentageElement.val())/100;
+			var groupTaxValue = (amount * thisInstance.parseFloat(groupTaxPercentageElement.val()))/100;
 			groupTaxValue = parseFloat(groupTaxValue).toFixed(2);
 			groupTaxRow.find('.groupTaxTotal').val(groupTaxValue);
 			groupTaxTotal += parseFloat(groupTaxValue);
@@ -1126,7 +1134,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerShippingAndHandlingChargesChange : function(){
 		var thisInstance = this;
 		this.getShippingAndHandlingControlElement().on('focusout', function(e){
-			var value = jQuery(e.currentTarget).val();
+			var value = thisInstance.parseFloat(jQuery(e.currentTarget).val());
 			if(value == ""){
 				jQuery(e.currentTarget).val("0.00");
 			}
@@ -1159,7 +1167,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerAdjustmentValueChange : function() {
 		var thisInstance = this;
 		this.getAdjustmentTextElement().on('focusout',function(e){
-			var value = jQuery(e.currentTarget).val();
+			var value = thisInstance.parseFloat(jQuery(e.currentTarget).val());
 			if(value == ""){
 				jQuery(e.currentTarget).val("0.00");
 			}
@@ -1428,7 +1436,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var lineItemRow = element.closest('tr.'+thisInstance.rowClass);
 			var quantityInStock = lineItemRow.data('quantityInStock');
 			if(typeof quantityInStock  != 'undefined') {
-				if(parseFloat(element.val()) > parseFloat(quantityInStock)) {
+				if(thisInstance.parseFloat(element.val()) > parseFloat(quantityInStock)) {
 					lineItemRow.find('.stockAlert').removeClass('hide').find('.maxQuantity').text(quantityInStock);
 				}else{
 					lineItemRow.find('.stockAlert').addClass('hide');

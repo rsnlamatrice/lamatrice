@@ -37,7 +37,7 @@ class Vtiger_SalesOrderPDFController extends Vtiger_InventoryPDFController{
 		$purchaseOrder = $this->focusColumnValue('vtiger_purchaseorder');
 		$quoteName = $this->resolveReferenceLabel($this->focusColumnValue('quote_id'), 'Quotes');
 		
-		$subjectLabel = getTranslatedString('Subject', $this->moduleName);
+		$subjectLabel = getTranslatedString('LBL_LABEL', $this->moduleName);
 		$quoteNameLabel = getTranslatedString('Quote Name', $this->moduleName);
 		$customerNameLabel = getTranslatedString('Customer Name', $this->moduleName);
 		$contactNameLabel = getTranslatedString('Contact Name', $this->moduleName);

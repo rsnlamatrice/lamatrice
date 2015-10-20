@@ -1789,6 +1789,12 @@ function getCurrencyDecimalPlaces() {
 	}
 }
 
+// ED151019 in case of PDF or screen destination
+//returns NumberOfCurrencyDecimals === 2
+function getCurrencyDecimalPlacesForOutput() {
+	return 2;
+}
+
 function getInventoryModules() {
 	$inventoryModules = array('Invoice','Quotes','PurchaseOrder','SalesOrder');
 	return $inventoryModules;

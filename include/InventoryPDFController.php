@@ -22,7 +22,7 @@ class Vtiger_InventoryPDFController {
 
 	protected $module;
 	protected $focus = null;
-
+	
 	function __construct($module) {
 		$this->moduleName = $module;
 	}
@@ -48,6 +48,7 @@ class Vtiger_InventoryPDFController {
 		}
 		$contentViewer->setContentModels($this->buildContentModels());
 		$contentViewer->setSummaryModel($this->buildSummaryModel());
+		$contentViewer->setAfterSummaryModel($this->buildAfterSummaryModel());//ED151020
 		$contentViewer->setLabelModel($this->buildContentLabelModel());
 		$contentViewer->setWatermarkModel($this->buildWatermarkModel());
 		return $contentViewer;
@@ -61,7 +62,10 @@ class Vtiger_InventoryPDFController {
 
 	function getFooterViewer() {
 		$footerViewer = new Vtiger_PDF_InventoryFooterViewer();
-		$footerViewer->setModel($this->buildFooterModel());
+		$model = $this->buildFooterModel();
+		if(!$model)
+			return false;
+		$footerViewer->setModel($model);
 		$footerViewer->setLabelModel($this->buildFooterLabelModel());
 		$footerViewer->setOnLastPage();
 		return $footerViewer;
@@ -94,7 +98,8 @@ class Vtiger_InventoryPDFController {
 		$contentModels = array();
 		$productLineItemIndex = 0;
 		$totaltaxes = 0;
-		$no_of_decimal_places = getCurrencyDecimalPlaces();
+		$totalPerTax = array();
+		$no_of_decimal_places = getCurrencyDecimalPlacesForOutput();
 		foreach($associated_products as $productLineItem) {
 			++$productLineItemIndex;
 
@@ -119,11 +124,19 @@ class Vtiger_InventoryPDFController {
 					$total_tax_percent += $tax_percent;
 					$tax_amount = (($taxable_total*$tax_percent)/100);
 					$producttotal_taxes += $tax_amount;
+					//ED151019
+					if($tax_amount){
+						$tax_name = $productLineItem['taxes'][$tax_count]['taxname'];
+						if(!$totalPerTax[$tax_name])
+							$totalPerTax[$tax_name] = 0.0;
+						$totalPerTax[$tax_name] += $tax_amount;
+					}
 				}
 			}
 
 			$producttotal_taxes = number_format($producttotal_taxes, $no_of_decimal_places,'.','');
 			$producttotal = $taxable_total+$producttotal_taxes;
+			$unitTaxedPrice = $quantity ? $producttotal / $quantity : $listPrice + $taxable_total;
 			$producttotal = number_format($producttotal, $no_of_decimal_places,'.','');
 			$tax = $producttotal_taxes;
 			$totaltaxes += $tax;
@@ -140,16 +153,22 @@ class Vtiger_InventoryPDFController {
 			$contentModel->set('Name', $productName);
 			$contentModel->set('Code', decode_html($productLineItem["hdnProductcode{$productLineItemIndex}"]));
 			$contentModel->set('Quantity', $quantity);
-			$contentModel->set('Price',     $this->formatPrice($listPrice));
-			$contentModel->set('Discount',  $this->formatPrice($discount)."\n ($discountPercentage%)");
-			$contentModel->set('Tax',       $this->formatPrice($tax)."\n ($total_tax_percent%)");
+			//ED151020 tarif unitaire TTC ˆ a place de $listPrice
+			$contentModel->set('Price',     $this->formatPrice($unitTaxedPrice));
+			if((float)$discount)
+				$contentModel->set('Discount',  $this->formatPrice($discount)."\n ($discountPercentage %)");
+				
+			//ED151019
+			$contentModel->set('Tax',       "$total_tax_percent %");
+			//$contentModel->set('Tax',       $this->formatPrice($tax)."\n ($total_tax_percent%)");
+			
 			$contentModel->set('Total',     $this->formatPrice($producttotal));
 			$contentModel->set('Comment',   decode_html($productLineItem["comment{$productLineItemIndex}"]));
 
 			$contentModels[] = $contentModel;
 		}
 		$this->totaltaxes = $totaltaxes; //will be used to add it to the net total
-
+		$this->totalPerTax = $totalPerTax;
 		return $contentModels;
 	}
 
@@ -158,44 +177,51 @@ class Vtiger_InventoryPDFController {
 		$labelModel->set('Code',	  getTranslatedString('Product Code',$this->moduleName));
 		$labelModel->set('Name',	  getTranslatedString('Product Name',$this->moduleName));
 		$labelModel->set('Quantity',  getTranslatedString('Quantity',$this->moduleName));
-		$labelModel->set('Price',     getTranslatedString('Price',$this->moduleName));
+		$labelModel->set('Price',     getTranslatedString('Unit price',$this->moduleName));
 		$labelModel->set('Discount',  getTranslatedString('Discount',$this->moduleName));
-		$labelModel->set('Tax',       getTranslatedString('Tax',$this->moduleName));
+		$labelModel->set('Tax',       getTranslatedString('VAT',$this->moduleName));
 		$labelModel->set('Total',     getTranslatedString('Total',$this->moduleName));
 		$labelModel->set('Comment',   getTranslatedString('Comment'),$this->moduleName);
 		return $labelModel;
 	}
 
 	function buildSummaryModel() {
+		$no_of_decimal_places = getCurrencyDecimalPlacesForOutput();
 		$associated_products = $this->associated_products;
 		$final_details = $associated_products[1]['final_details'];
 
 		$summaryModel = new Vtiger_PDF_Model();
 
 		$netTotal = $discount = $handlingCharges =  $handlingTaxes = 0;
-		$adjustment = $grandTotal = 0;
-
+		$adjustment = 0;
+		$grandTotal = $final_details['grandTotal'];
+		
 		$productLineItemIndex = 0;
 		$sh_tax_percent = 0;
 		foreach($associated_products as $productLineItem) {
 			++$productLineItemIndex;
-			$netTotal += $productLineItem["netPrice{$productLineItemIndex}"];
+			$netTotal += round($productLineItem["netPrice{$productLineItemIndex}"], 2); //ED151019 round 2
 		}
-		$netTotal = number_format(($netTotal + $this->totaltaxes), getCurrencyDecimalPlaces(),'.', '');
-		$summaryModel->set(getTranslatedString("Net Total", $this->moduleName), $this->formatPrice($netTotal));
+		$netTotal = number_format(($netTotal + $this->totaltaxes), $no_of_decimal_places,'.', '');
+		if($netTotal != $grandTotal)
+			$summaryModel->set(getTranslatedString("Net Total", $this->moduleName), $this->formatPrice($netTotal));
 
 		$discount_amount = $final_details["discount_amount_final"];
 		$discount_percent = $final_details["discount_percentage_final"];
 
 		$discount = 0.0;
-        $discount_final_percent = '0.00';
+		$discount_final_percent = '0.00';
 		if($final_details['discount_type_final'] == 'amount') {
 			$discount = $discount_amount;
 		} else if($final_details['discount_type_final'] == 'percentage') {
-            $discount_final_percent = $discount_percent;
+			$discount_final_percent = $discount_percent;
 			$discount = (($discount_percent*$final_details["hdnSubTotal"])/100);
 		}
-		$summaryModel->set(getTranslatedString("Discount", $this->moduleName)."($discount_final_percent%)", $this->formatPrice($discount));
+		if((float)$discount)
+			$summaryModel->set(getTranslatedString("Discount", $this->moduleName)." ($discount_final_percent %)", $this->formatPrice($discount));
+
+		if($grandTotal && $this->totaltaxes);
+			$summaryModel->set(getTranslatedString("Total HT", $this->moduleName), $this->formatPrice($grandTotal - $this->totaltaxes));
 
 		$group_total_tax_percent = '0.00';
 		//To calculate the group tax amount
@@ -204,7 +230,23 @@ class Vtiger_InventoryPDFController {
 			for($i=0;$i<count($group_tax_details);$i++) {
 				$group_total_tax_percent += $group_tax_details[$i]['percentage'];
 			}
-			$summaryModel->set(getTranslatedString("Tax:", $this->moduleName)."($group_total_tax_percent%)", $this->formatPrice($final_details['tax_totalamount']));
+			$summaryModel->set(getTranslatedString("Tax:", $this->moduleName)." ($group_total_tax_percent %)", $this->formatPrice($final_details['tax_totalamount']));
+		} else {
+			//ED151019
+			//Cumuls par taux de TVA
+			$group_tax_details = $final_details['taxes'];
+			$taxNames = array();
+			$taxValues = array();
+			for($i=0;$i<count($group_tax_details);$i++){
+				$tax_name = $group_tax_details[$i]['taxname'];
+				if($this->totalPerTax[$tax_name]){
+					$taxNames[] = decode_html($group_tax_details[$i]['taxlabel']) . ' ' . (float)$group_tax_details[$i]['percentage'] . ' %';
+					$taxValues[] = $this->formatPrice(number_format($this->totalPerTax[$tax_name], $no_of_decimal_places,'.', ''));
+				}
+			}
+			//var_dump($group_tax_details, $this->totalPerTax, implode("\r\n", $taxNames), implode("\r\n", $taxValues));
+			$summaryModel->set(implode("\r\n", $taxNames), implode("\r\n", $taxValues));
+			
 		}
 		//Shipping & Handling taxes
 		$sh_tax_details = $final_details['sh_taxes'];
@@ -214,19 +256,26 @@ class Vtiger_InventoryPDFController {
 		//obtain the Currency Symbol
 		$currencySymbol = $this->buildCurrencySymbol();
 
-		$summaryModel->set(getTranslatedString("Shipping & Handling Charges", $this->moduleName), $this->formatPrice($final_details['shipping_handling_charge']));
-		$summaryModel->set(getTranslatedString("Shipping & Handling Tax:", $this->moduleName)."($sh_tax_percent%)", $this->formatPrice($final_details['shtax_totalamount']));
-		$summaryModel->set(getTranslatedString("Adjustment", $this->moduleName), $this->formatPrice($final_details['adjustment']));
-		$summaryModel->set(getTranslatedString("Grand Total:", $this->moduleName)."(in $currencySymbol)", $this->formatPrice($final_details['grandTotal'])); // TODO add currency string
+		if((float)$final_details['shipping_handling_charge'])
+			$summaryModel->set(getTranslatedString("Shipping & Handling Charges", $this->moduleName), $this->formatPrice($final_details['shipping_handling_charge']));
+		if((float)$final_details['shtax_totalamount'])
+			$summaryModel->set(getTranslatedString("Shipping & Handling Tax:", $this->moduleName)." ($sh_tax_percent%)", $this->formatPrice($final_details['shtax_totalamount']));
+		if((float)$final_details['adjustment'])
+			$summaryModel->set(getTranslatedString("Adjustment", $this->moduleName), $this->formatPrice($final_details['adjustment']));
+		$summaryModel->set(getTranslatedString("Total", $this->moduleName)." ( $currencySymbol )", $this->formatPrice($grandTotal)); // TODO add currency string
 
 		if ($this->moduleName == 'Invoice') {
+			$receivedLabel = getTranslatedString("Received", $this->moduleName);
 			$receivedVal = $this->focusColumnValue("received");
 			if (!$receivedVal) {
 				$this->focus->column_fields["received"] = 0;
 			}
+			else {
+				$receivedLabel .= ' (' . getTranslatedString($this->focusColumnValue("receivedmoderegl"), $this->moduleName) . ')';
+			}
 			//If Received value is exist then only Recieved, Balance details should present in PDF
 			if ($this->formatPrice($this->focusColumnValue("received")) > 0) {
-				$summaryModel->set(getTranslatedString("Received", $this->moduleName), $this->formatPrice($this->focusColumnValue("received")));
+				$summaryModel->set($receivedLabel, $this->formatPrice($this->focusColumnValue("received")));
 				$summaryModel->set(getTranslatedString("Balance", $this->moduleName), $this->formatPrice($this->focusColumnValue("balance")));
 			}
 		}
@@ -238,6 +287,9 @@ class Vtiger_InventoryPDFController {
 		$headerModel->set('title', $this->buildHeaderModelTitle());
 		$modelColumns = array($this->buildHeaderModelColumnLeft(), $this->buildHeaderModelColumnCenter(), $this->buildHeaderModelColumnRight());
 		$headerModel->set('columns', $modelColumns);
+		
+		$modelAddress = $this->buildHeaderDestinationAddress();
+		$headerModel->set('destinationAddress', $modelAddress);
 
 		return $headerModel;
 	}
@@ -254,24 +306,44 @@ class Vtiger_InventoryPDFController {
 		$num_rows = $adb->num_rows($result);
 		if($num_rows) {
 			$resultrow = $adb->fetch_array($result);
+			//ED151020
+			$this->organizationDetails = $resultrow;
 
 			$addressValues = array();
 			$addressValues[] = $resultrow['address'];
-			if(!empty($resultrow['city'])) $addressValues[]= "\n".$resultrow['city'];
-			if(!empty($resultrow['state'])) $addressValues[]= ",".$resultrow['state'];
-			if(!empty($resultrow['code'])) $addressValues[]= $resultrow['code'];
+			if(!empty($resultrow['code'])) $addressValues[]= "\n".$resultrow['code'];
+			if(!empty($resultrow['city'])) $addressValues[]= $resultrow['city'];
+			//if(!empty($resultrow['state'])) $addressValues[]= ",".$resultrow['state'];
 			if(!empty($resultrow['country'])) $addressValues[]= "\n".$resultrow['country'];
 
 
+			if(!empty($resultrow['inventory_header_text']))		$additionalCompanyInfo[]= "\n".$resultrow['inventory_header_text'];
+			
 			if(!empty($resultrow['phone']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Phone: ", $this->moduleName). $resultrow['phone'];
 			if(!empty($resultrow['fax']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Fax: ", $this->moduleName). $resultrow['fax'];
 			if(!empty($resultrow['website']))	$additionalCompanyInfo[]= "\n".getTranslatedString("Website: ", $this->moduleName). $resultrow['website'];
 
+			//ED151020 Test a file name with -print pre-extension
+			/*$logoFile = "test/logo/". pathinfo($resultrow['logoname'], PATHINFO_FILENAME) . '-print.' . pathinfo($resultrow['logoname'], PATHINFO_EXTENSION);
+			global $root_directory;
+			if(!file_exists($root_directory . $logoFile))
+				$logoFile = "test/logo/".$resultrow['logoname'];*/
+			if($resultrow['print_logoname'])
+				$logoFile = "test/logo/".$resultrow['print_logoname'];
+			else
+				$logoFile = "test/logo/".$resultrow['logoname'];
 			$modelColumnLeft = array(
-					'logo' => "test/logo/".$resultrow['logoname'],
+					'logo' => $logoFile,
 					'summary' => decode_html($resultrow['organizationname']),
 					'content' => decode_html($this->joinValues($addressValues, ' '). $this->joinValues($additionalCompanyInfo, ' '))
 			);
+			
+		}
+		else
+			$modelColumnLeft = array();
+		if($this->hasShippingAddress()){
+			$shippingAddressLabel = getTranslatedString('Shipping Address', $this->moduleName);
+			$modelColumnLeft[$shippingAddressLabel] = $this->buildHeaderShippingAddress();
 		}
 		return $modelColumnLeft;
 	}
@@ -292,23 +364,34 @@ class Vtiger_InventoryPDFController {
 	function buildHeaderModelColumnRight() {
 		$issueDateLabel = getTranslatedString('Issued Date', $this->moduleName);
 		$validDateLabel = getTranslatedString('Valid Date', $this->moduleName);
-		$billingAddressLabel = getTranslatedString('Billing Address', $this->moduleName);
-		$shippingAddressLabel = getTranslatedString('Shipping Address', $this->moduleName);
 
 		$modelColumnRight = array(
 				'dates' => array(
 						$issueDateLabel  => $this->formatDate(date("Y-m-d")),
 						$validDateLabel  => $this->formatDate($this->focusColumnValue('validtill')),
 				),
-				$billingAddressLabel  => $this->buildHeaderBillingAddress(),
-				$shippingAddressLabel => $this->buildHeaderShippingAddress()
 		);
 		return $modelColumnRight;
 	}
+	
+	/** ED151020
+	 * Bloc fixe contenant l'adresse de destination
+	 */
+	function buildHeaderDestinationAddress(){
+		$billingAddressLabel = getTranslatedString('Billing Address', $this->moduleName);
+		$model = array(
+			$billingAddressLabel  => $this->buildHeaderBillingAddress(),
+		);
+		return $model;
+	}
 
 	function buildFooterModel() {
+		$description = $this->focusColumnValue('description');
+		$terms_conditions = $this->focusColumnValue('terms_conditions');
+		if(!$description && !$terms_conditions)
+			return false;
 		$footerModel = new Vtiger_PDF_Model();
-		$footerModel->set(Vtiger_PDF_InventoryFooterViewer::$DESCRIPTION_DATA_KEY, from_html($this->focusColumnValue('description')));
+		$footerModel->set(Vtiger_PDF_InventoryFooterViewer::$DESCRIPTION_DATA_KEY, from_html($description));
 		$footerModel->set(Vtiger_PDF_InventoryFooterViewer::$TERMSANDCONDITION_DATA_KEY, from_html($this->focusColumnValue('terms_conditions')));
 		return $footerModel;
 	}
@@ -335,27 +418,59 @@ class Vtiger_InventoryPDFController {
 		$watermarkModel->set('content', $this->getWatermarkContent());
 		return $watermarkModel;
 	}
-
+	//ED151020
+	function getAfterSummaryContent(){
+		return $this->organizationDetails['inventory_lastpage_footer_text'];
+	}
+	function buildAfterSummaryModel() {
+		$model = new Vtiger_PDF_Model();
+		$model->set('content', $this->getAfterSummaryContent());
+		return $model;
+	}
+	
 	function buildHeaderBillingAddress() {
-		$billPoBox	= $this->focusColumnValues(array('bill_pobox'));
-		$billStreet = $this->focusColumnValues(array('bill_street'));
-		$billStreet3 = $this->focusColumnValues(array('bill_street3'));
-		$billCity	= $this->focusColumnValues(array('bill_city'));
-		$billState	= $this->focusColumnValues(array('bill_state'));
-		$billCountry = $this->focusColumnValues(array('bill_country'));
-		$billCode	=  $this->focusColumnValues(array('bill_code'));
+		$contactName = $this->resolveReferenceLabel($this->focusColumnValue('contact_id'), 'Contacts');
+		$street2 = $this->focusColumnValues(array('bill_street2'));
+		$addressFormat = $this->focusColumnValues(array('bill_addressformat'));
+		$poBox	= $this->focusColumnValues(array('bill_pobox'));
+		$street = $this->focusColumnValues(array('bill_street'));
+		$street3 = $this->focusColumnValues(array('bill_street3'));
+		$zipCode =  $this->focusColumnValues(array('bill_code')); 
+		$city	= $this->focusColumnValues(array('bill_city'));
+		$state	= $this->focusColumnValues(array('bill_state'));
+		$country = $this->focusColumnValues(array('bill_country'));   
+		
+		return $this->buildAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress);
+	}
+
+	//ED151020
+	function buildAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress) {
+		$address = '';
+		switch($formatAddress){
+		case 'CN1' : //street2 + name
+			$address = $street2 . "\n" . $contactName;
+			break;
+		case 'C1' : //street2 without name
+			$address = $street2;
+			break;
+		case 'N1' : //name without street2
+			$address = $contactName;
+			break;
+		case 'NC1' ://name + street2
+		default:
+			$address = $contactName . "\n" . $street2;
+			break;
+		}
 		//ED151006
-		if($billStreet3){
-			$address	= $billStreet;
-			$address .= "\n".$this->joinValues(array($billStreet3, $billPoBox), ', ');
-		}
-		else {
-			$address	= $this->joinValues(array($billStreet, $billPoBox), ', ');
-		}
-		$address .= "\n".$this->joinValues(array($billCity, $billState), ', ')." ".$billCode;
-		if($billCountry &&  $billCountry!= 'France')//ED151006 // TODO France en constante
-			$address .= "\n".$billCountry;
-		return $address;
+		if($street3 && $pobox)
+			$street3 .= $this->joinValues(array($street3, $pobox), ', ');
+		elseif(!$street3 && $pobox)
+			$street3 .= $this->joinValues(array($street3, $pobox), ', ');
+		
+		$address .= "\n$street\n$street3\n$zipCode $city";
+		if($country && $country != 'France')//ED151006 // TODO France en constante	
+			$address .= "\n".$country;
+		return preg_replace('/^\s+|\s*(\n)\s*|\s+$/', "\n", $address);
 	}
 
 	function buildHeaderShippingAddress() {
@@ -363,7 +478,7 @@ class Vtiger_InventoryPDFController {
 		$shipStreet = $this->focusColumnValues(array('ship_street'));
 		$shipStreet3 = $this->focusColumnValues(array('ship_street3'));
 		$shipCity	= $this->focusColumnValues(array('ship_city'));
-		$shipState	= $this->focusColumnValues(array('ship_state'));
+		//$shipState	= $this->focusColumnValues(array('ship_state'));
 		$shipCountry = $this->focusColumnValues(array('ship_country'));
 		$shipCode	=  $this->focusColumnValues(array('ship_code'));
 		//ED151006
@@ -374,10 +489,24 @@ class Vtiger_InventoryPDFController {
 		else {
 			$address	= $this->joinValues(array($shipStreet, $shipPoBox), ', ');
 		}
-		$address .= "\n".$this->joinValues(array($shipCity, $shipState), ', ')." ".$shipCode;
-		if($shipCountry &&  $shipCountry!= 'France')//ED151006 // TODO France en constante
+		//$address .= "\n$shipCode ".$this->joinValues(array($shipCity, $shipState), ', ');
+		if($shipCountry && $shipCountry!= 'France'){//ED151006 // TODO France en constante
+			$address .= "\n ".$this->joinValues(array($shipCity, $shipState), ', ') . ' ' . $shipCode;
 			$address .= "\n".$shipCountry;
+		}
+		else
+			$address .= "\n$shipCode ".$this->joinValues(array($shipCity, $shipState), ', ');
+		
 		return $address;
+	}
+
+	//ED151020
+	function hasShippingAddress() {
+		$shipCode	=  $this->focusColumnValues(array('ship_code'));
+		if(!$shipCode) return false;
+		$shipCity	= $this->focusColumnValues(array('ship_city'));
+		if(!$shipCity) return false;
+		return true;
 	}
 
 	function buildCurrencySymbol() {
@@ -423,6 +552,18 @@ class Vtiger_InventoryPDFController {
 		return decode_html($label[$id]);
 	}
 
+	//ED151020
+	function resolveReferenceFieldValue($id, $module=false, $fieldName) {
+		if(empty($id)) {
+			return '';
+		}
+		if($module === false) {
+			$module = getSalesEntityType($id);
+		}
+		$recordModel = Vtiger_Record_Model::getInstanceById($id, $module);
+		return decode_html($recordModel->getDisplayValue($fieldName));
+	}
+
 	function joinValues($values, $delimeter= "\n") {
 		$valueString = '';
 		foreach($values as $value) {
@@ -437,8 +578,11 @@ class Vtiger_InventoryPDFController {
 	}
 
 	function formatPrice($value, $decimal=2) {
+		global $current_user;
+		return number_format((float)$value, $decimal, $current_user->currency_decimal_separator, ' ');
+		/*ED151019
 		$currencyField = new CurrencyField($value);
-		return $currencyField->getDisplayValue(null, true);
+		return $currencyField->getDisplayValue(null, true);*/
 	}
 
 	function formatDate($value) {

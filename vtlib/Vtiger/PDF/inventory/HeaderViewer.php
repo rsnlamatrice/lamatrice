@@ -23,40 +23,48 @@ class Vtiger_PDF_InventoryHeaderViewer extends Vtiger_PDF_HeaderViewer {
 		$pdf = $parent->getPDF();
 		$headerFrame = $parent->getHeaderFrame();
 		if($this->model) {
-			$headerColumnWidth = $headerFrame->w/3.0;
-			
+			$headerColumnWidths = array(
+						    80,
+						    40,
+						    $headerFrame->w/3,
+						);
 			$modelColumns = $this->model->get('columns');
 			
 			// Column 1
 			$offsetX = 5;
 			
-			$modelColumn0 = $modelColumns[0];
+			$nColumn = 0;
+			$headerColumnWidth = $headerColumnWidths[$nColumn];
+			$modelColumn0 = $modelColumns[$nColumn];
 
 			list($imageWidth, $imageHeight, $imageType, $imageAttr) = $parent->getimagesize(
 					$modelColumn0['logo']);
 			//division because of mm to px conversion
 			$w = $imageWidth/3;
-			if($w > 60) {
-				$w=60;
+			if($w > $headerColumnWidth) {
+				$w = $headerColumnWidth;
 			}
-			$h = $imageHeight/3;
+			$h = $imageHeight * $w / $imageWidth;
 			if($h > 30) {
 				$h = 30;
+				$w = $imageWidth * $h / $imageHeight;
 			}
 			$pdf->Image($modelColumn0['logo'], $headerFrame->x, $headerFrame->y, $w, $h);
-			$imageHeightInMM = 30;
+			$imageHeightInMM = $h;
 			
-			$pdf->SetFont('freeserif', 'B');
+			$pdf->SetFont(PDF_FONT_NAME, 'B');
 			$contentHeight = $pdf->GetStringHeight( $modelColumn0['summary'], $headerColumnWidth);
 			$pdf->MultiCell($headerColumnWidth, $contentHeight, $modelColumn0['summary'], 0, 'L', 0, 1, 
 				$headerFrame->x, $headerFrame->y+$imageHeightInMM+2);
 			
-			$pdf->SetFont('freeserif', '');
+			$pdf->SetFont(PDF_FONT_NAME, '');
 			$contentHeight = $pdf->GetStringHeight( $modelColumn0['content'], $headerColumnWidth);			
 			$pdf->MultiCell($headerColumnWidth, $contentHeight, $modelColumn0['content'], 0, 'L', 0, 1, 
 				$headerFrame->x, $pdf->GetY());
 				
 			// Column 2
+			$nColumn = 1;
+			$headerColumnWidth = $headerColumnWidths[$nColumn];
 			$offsetX = 5;
 			$pdf->SetY($headerFrame->y);
 
@@ -66,39 +74,43 @@ class Vtiger_PDF_InventoryHeaderViewer extends Vtiger_PDF_HeaderViewer {
 			foreach($modelColumn1 as $label => $value) {
 
 				if(!empty($value)) {
-					$pdf->SetFont('freeserif', 'B');
+					$pdf->SetFont(PDF_FONT_NAME, 'B');
 					$pdf->SetFillColor(205,201,201);
 					$pdf->MultiCell($headerColumnWidth-$offsetX, 7, $label, 1, 'C', 1, 1, $headerFrame->x+$headerColumnWidth+$offsetX, $pdf->GetY()+$offsetY);
 
-					$pdf->SetFont('freeserif', '');
+					$pdf->SetFont(PDF_FONT_NAME, '');
 					$pdf->MultiCell($headerColumnWidth-$offsetX, 7, $value, 1, 'C', 0, 1, $headerFrame->x+$headerColumnWidth+$offsetX, $pdf->GetY());
 					$offsetY = 2;
 				}
 			}
 			
 			// Column 3
+			$nColumn = 2;
+			$headerColumnWidth = $headerColumnWidths[$nColumn];
 			$offsetX = 10;
 			
 			$modelColumn2 = $modelColumns[2];
 			
-			$contentWidth = $pdf->GetStringWidth($this->model->get('title'));
-			$contentHeight = $pdf->GetStringHeight($this->model->get('title'), $contentWidth);
+			$title = $this->model->get('title');
+			$titleRows = explode("\n", $title);
+			$contentWidth = $pdf->GetStringWidth($titleRows[0]);
+			$contentHeight = $pdf->GetStringHeight($titleRows[0], $contentWidth) * count($titleRows);
 			
 			$roundedRectX = $headerFrame->w+$headerFrame->x-$contentWidth*2.0;
 			$roundedRectW = $contentWidth*2.0;
-			
-			$pdf->RoundedRect($roundedRectX, 10, $roundedRectW, 10, 3, '1111', 'DF', array(), array(205,201,201));
+			$roundedRectH = 10 + (6 * (count($titleRows) -1));
+			$pdf->RoundedRect($roundedRectX, 10, $roundedRectW, $roundedRectH, 3, '1111', 'DF', array(), array(205,201,201));
 			
 			$contentX = $roundedRectX + (($roundedRectW - $contentWidth)/2.0);
-			$pdf->SetFont('freeserif', 'B');
+			$pdf->SetFont(PDF_FONT_NAME, 'B');
 			$pdf->MultiCell($contentWidth*2.0, $contentHeight, $this->model->get('title'), 0, 'R', 0, 1, $contentX-$contentWidth,
 				 $headerFrame->y+2);
 
-			$offsetY = 4;
+			$offsetY = 0;//4
 
 			foreach($modelColumn2 as $label => $value) {
 				if(is_array($value)) {
-					$pdf->SetFont('freeserif', '');
+					$pdf->SetFont(PDF_FONT_NAME, '');
 					foreach($value as $l => $v) {
 						$pdf->MultiCell($headerColumnWidth-$offsetX, 7, sprintf('%s: %s', $l, $v), 1, 'C', 0, 1, 
 							$headerFrame->x+$headerColumnWidth*2.0+$offsetX, $pdf->GetY()+$offsetY);
@@ -107,22 +119,58 @@ class Vtiger_PDF_InventoryHeaderViewer extends Vtiger_PDF_HeaderViewer {
 				} else {
 					$offsetY = 1;
 					
-				$pdf->SetFont('freeserif', 'B');
+				$pdf->SetFont(PDF_FONT_NAME, 'B');
 				$pdf->SetFillColor(205,201,201);
 				$pdf->MultiCell($headerColumnWidth-$offsetX, 7, $label, 1, 'L', 1, 1, $headerFrame->x+$headerColumnWidth*2.0+$offsetX,
 					$pdf->GetY()+$offsetY);
 					
-				$pdf->SetFont('freeserif', '');
+				$pdf->SetFont(PDF_FONT_NAME, '');
 				$pdf->MultiCell($headerColumnWidth-$offsetX, 7, $value, 1, 'L', 0, 1, $headerFrame->x+$headerColumnWidth*2.0+$offsetX, 
 					$pdf->GetY());
 				}
 			}
-			$pdf->setFont('freeserif', '');
+			$pdf->setFont(PDF_FONT_NAME, '');
 
 			// Add the border cell at the end
 			// This is required to reset Y position for next write
 			$pdf->MultiCell($headerFrame->w, $headerFrame->h-$headerFrame->y, "", 0, 'L', 0, 1, $headerFrame->x, $headerFrame->y);
+			
+			$this->displayDestinationAddress($parent);
 		}	
+		
+	}
+	
+	/**
+	 * ED151020
+	 * Adresse du destinataire dans un bloc fixe et sans bordure
+	 */
+	function displayDestinationAddress($parent){
+		$pdf = $parent->getPDF();
+		$headerFrame = $parent->getHeaderFrame();
+		if($this->model) {
+			
+			$pdf->SetFont(PDF_FONT_NAME, '');
+				
+			$location = array(
+					'x' => 210 * (100 / 210),
+					'y' => 297 * (50 / 297),
+					'w' => 210 * (80 / 210),
+					'h' => 297 * (35 / 297),
+				);
+			
+			//rectangle $pdf->MultiCell($location['w'], $location['h'], ' ', 1/*border*/, 'L', 0, 1, $location['x'], $location['y']);
+			
+			$location['x'] += 5;
+			$location['y'] += 10;
+			$model = $this->model->get('destinationAddress');
+			//var_dump($location, $headerFrame, $model);
+			foreach($model as $label => $value) {//first only
+				$pdf->SetFont(PDF_FONT_NAME, '');
+				$h = $location['h'];
+				$pdf->MultiCell($location['w'], $h, $value, 0/*border*/, 'L', 0, 1, $location['x'], $location['y']);
+				break;
+			}	
+		}
 		
 	}
 	

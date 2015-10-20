@@ -22,6 +22,8 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 			'organizationname' => 'text',
 			'logoname' => 'text',
 			'logo' => 'file',
+			'print_logoname' => 'text',
+			'print_logo' => 'file',
 			'address' => 'textarea',
 			'city' => 'text',
 			'state' => 'text',
@@ -29,7 +31,9 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 			'country' => 'text',
 			'phone' => 'text',
 			'fax' => 'text',
-			'website' => 'text'
+			'website' => 'text',
+			'inventory_header_text' => 'text',
+			'inventory_lastpage_footer_text' => 'text',
 	);
 
 	/**
@@ -70,10 +74,10 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 	 * Function to get Logo path to display
 	 * @return <String> path
 	 */
-	public function getLogoPath() {
+	public function getLogoPath($logoPrefix = '') {
 		$logoPath = $this->logoPath;
 		$handler = @opendir($logoPath);
-		$logoName = $this->get('logoname');
+		$logoName = $this->get($logoPrefix.'logoname');
 		if ($logoName && $handler) {
 			while ($file = readdir($handler)) {
 				if($logoName === $file && in_array(str_replace('.', '', strtolower(substr($file, -4))), self::$logoSupportedFormats) && $file != "." && $file!= "..") {
@@ -88,10 +92,10 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 	/**
 	 * Function to save the logoinfo
 	 */
-	public function saveLogo() {
+	public function saveLogo($logoPrefix = '') {
 		$uploadDir = vglobal('root_directory'). '/' .$this->logoPath;
-		$logoName = $uploadDir.$_FILES["logo"]["name"];
-		move_uploaded_file($_FILES["logo"]["tmp_name"], $logoName);
+		$logoName = $uploadDir.$_FILES[$logoPrefix."logo"]["name"];
+		move_uploaded_file($_FILES[$logoPrefix."logo"]["tmp_name"], $logoName);
 		copy($logoName, $uploadDir.'application.ico');
 	}
 
@@ -103,6 +107,7 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 		$id = $this->get('id');
 		$fieldsList = $this->getFields();
 		unset($fieldsList['logo']);
+		unset($fieldsList['print_logo']);
 		$tableName = $this->baseTable;
 
 		if ($id) {

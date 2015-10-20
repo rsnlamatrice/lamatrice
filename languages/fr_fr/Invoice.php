@@ -77,6 +77,7 @@ $languageStrings = array(
 	'Service Category'              => 'Catégorie',
         
         'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
+        'Unit price' => 'Prix U.',
 );
 
 $jsLanguageStrings = array(

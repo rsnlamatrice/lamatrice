@@ -7,6 +7,9 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
+
+define('PDF_FONT_NAME', 'helvetica'); //ED151020
+
 abstract class Vtiger_PDF_Viewer {
 	
 	protected $labelModel;
