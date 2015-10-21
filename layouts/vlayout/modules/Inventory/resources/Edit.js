@@ -1206,7 +1206,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		container.on('click','#received_set_balance',function(e){
 			var $this=$(this)
 			, $input = thisInstance.getReceivedControlElement()
-			, value = thisInstance.parseFloat($input.val()) + thisInstance.parseFloat(container.find("#balance").val());
+			, value = (thisInstance.parseFloat($input.val()) + thisInstance.parseFloat(container.find("#balance").val())).toFixed(2);
 			$input.val(value).change();
 			return false;		
 		});

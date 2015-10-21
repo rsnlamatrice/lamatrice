@@ -594,7 +594,7 @@ $languageStrings = array(
 	
 	//Translations used for Export to Pdf
 	'Valid Date' => 'date de validité',
-	'Phone: ' => 'téléphone: ',
+	'Phone: ' => 'téléphone : ',
 	'Issued Date' => "date d'émission",
 	'Shipping & Handling Charges' => 'Expédition et frais de manutention',
 	'Shipping & Handling Tax:' => 'Expédition et de manutention impôt:',
@@ -603,11 +603,11 @@ $languageStrings = array(
 	'Product Code' => 'Code de produit',
 	'Customer Name' => 'Nom du client',
 	'Price' => 'prix',
-	'Tax:' => 'Taxe:',
+	'Tax:' => 'Taxe :',
 	'Contact Name' => 'Nom du contact',
-	'Grand Total:' => 'Total:',
-	'Fax: ' => 'Fax: ',
-	'Website: ' => 'Site: ',
+	'Grand Total:' => 'Total :',
+	'Fax: ' => 'Fax : ',
+	'Website: ' => 'Site : ',
 	'Tax' => 'Tax',
 	'VAT' => 'TVA',
         

@@ -219,7 +219,7 @@ class Vtiger_PDF_InventoryContentViewer extends Vtiger_PDF_ContentViewer {
 				
 			}
 			foreach($contentStrings as $contentString){
-				$h += $pdf->GetStringHeight($contentString, $contentFrame->w);
+				$h += $pdf->GetStringHeight($contentString, $contentFrame->w) - 2;
 			}
 			$y -= $h;
 			$pdf->SetY($y);
@@ -228,7 +228,7 @@ class Vtiger_PDF_InventoryContentViewer extends Vtiger_PDF_ContentViewer {
 				//var_dump($contentFrame->w, $h, $contentString, 0, 'L', 0, 1, $contentFrame->x, $y - $h);
 				//$pdf->MultiCell($contentFrame->w, $h, $contentString, 0, 'L', 0, 1, $contentFrame->x, $y - $h, true);
 				$pdf->Text($contentFrame->x, $y, $contentString);
-				$y += $pdf->GetStringHeight($contentString, $contentFrame->w);
+				$y += $pdf->GetStringHeight($contentString, $contentFrame->w) - 2;
 			}
 			$pdf->SetFont(PDF_FONT_NAME,'', $originalFontSize);
 		}

@@ -289,9 +289,12 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 						
 					$executionQuery = $sqlqueryRecord->getExecutionQuery(['crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date]);
 					
-					$params = array();
 					
+					//Delete
+					$deleteParams = array();
+					$deleteQuery = "DELETE FROM $statTableName";
 					//Insert
+					$params = array();
 					$insertQuery = "INSERT INTO $statTableName ( crmid, name, code, begin_date, end_date, last_update";
 					
 					//Stat Fields
@@ -308,6 +311,9 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 					$params[] = $code;
 					$params[] = $begin_date;
 					$params[] = $end_date;
+					
+					$deleteQuery .= " WHERE code = ?";
+					$deleteParams[] = $code;
 					
 					//Stat Fields
 					//Chaque Champ de stat

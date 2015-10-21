@@ -40,19 +40,19 @@ $languageStrings = array(
 	
 	//Translations used for Export to Pdf
 	'Valid Date' => 'Date de validité',
-	'Phone: ' => 'Téléphone: ',
+	'Phone: ' => 'Téléphone : ',
 	'Issued Date' => 'Date d\'émission',
 	'Shipping & Handling Charges' => 'Frais d\'expédition',
-	'Shipping & Handling Tax:' => 'Taxe d\'expédition:',
+	'Shipping & Handling Tax:' => 'Taxe d\'expédition :',
 	'Discount' => 'Remise',
 	'Net Total' => 'Total Net',
 	'Product Code' => 'Ref',
 	'Customer Name' => 'Nom client',
 	'Price' => 'Prix',
-	'Tax:' => 'Taxe:',
+	'Tax:' => 'Taxe :',
 	'Tax' => 'Taxe',
 	'Contact Name' => 'Nom du contact',
-	'Grand Total:' => 'Total:',
+	'Grand Total:' => 'Total :',
 	
 	'Recurring Invoice Information' => 'Génération périodique de facture',
         

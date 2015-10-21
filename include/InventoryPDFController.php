@@ -115,6 +115,7 @@ class Vtiger_InventoryPDFController {
 			$quantity	= $productLineItem["qty{$productLineItemIndex}"];
 			$listPrice	= $productLineItem["listPrice{$productLineItemIndex}"];
 			$discount	= $productLineItem["discountTotal{$productLineItemIndex}"];
+			$taxed_discount = $discount;
 			$taxable_total = $quantity * $listPrice - $discount;
 			$taxable_total = number_format($taxable_total, $no_of_decimal_places,'.','');
 			$producttotal = $taxable_total;
@@ -123,6 +124,7 @@ class Vtiger_InventoryPDFController {
 					$tax_percent = $productLineItem['taxes'][$tax_count]['percentage'];
 					$total_tax_percent += $tax_percent;
 					$tax_amount = (($taxable_total*$tax_percent)/100);
+					$taxed_discount *= (1 + $tax_percent/100);
 					$producttotal_taxes += $tax_amount;
 					//ED151019
 					if($tax_amount){
@@ -136,7 +138,7 @@ class Vtiger_InventoryPDFController {
 
 			$producttotal_taxes = number_format($producttotal_taxes, $no_of_decimal_places,'.','');
 			$producttotal = $taxable_total+$producttotal_taxes;
-			$unitTaxedPrice = $quantity ? $producttotal / $quantity : $listPrice + $taxable_total;
+			$unitTaxedPrice = $quantity ? (($producttotal + $taxed_discount) / $quantity) : ($listPrice);
 			$producttotal = number_format($producttotal, $no_of_decimal_places,'.','');
 			$tax = $producttotal_taxes;
 			$totaltaxes += $tax;
@@ -155,8 +157,8 @@ class Vtiger_InventoryPDFController {
 			$contentModel->set('Quantity', $quantity);
 			//ED151020 tarif unitaire TTC ˆ a place de $listPrice
 			$contentModel->set('Price',     $this->formatPrice($unitTaxedPrice));
-			if((float)$discount)
-				$contentModel->set('Discount',  $this->formatPrice($discount)."\n ($discountPercentage %)");
+			if((float)$taxed_discount)
+				$contentModel->set('Discount',  $this->formatPrice($taxed_discount)."\n ($discountPercentage %)");
 				
 			//ED151019
 			$contentModel->set('Tax',       "$total_tax_percent %");
@@ -314,10 +316,10 @@ class Vtiger_InventoryPDFController {
 			if(!empty($resultrow['code'])) $addressValues[]= "\n".$resultrow['code'];
 			if(!empty($resultrow['city'])) $addressValues[]= $resultrow['city'];
 			//if(!empty($resultrow['state'])) $addressValues[]= ",".$resultrow['state'];
-			if(!empty($resultrow['country'])) $addressValues[]= "\n".$resultrow['country'];
+			//if(!empty($resultrow['country'])) $addressValues[]= "\n".$resultrow['country'];
 
 
-			if(!empty($resultrow['inventory_header_text']))		$additionalCompanyInfo[]= "\n".$resultrow['inventory_header_text'];
+			if(!empty($resultrow['inventory_header_text']))		$additionalCompanyInfo[]= "\n\n".$resultrow['inventory_header_text'];
 			
 			if(!empty($resultrow['phone']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Phone: ", $this->moduleName). $resultrow['phone'];
 			if(!empty($resultrow['fax']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Fax: ", $this->moduleName). $resultrow['fax'];
