@@ -361,11 +361,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$immediateImportRecordLimit = $configReader->get('immediateImportLimit');
 
 		if($numberOfRecordsToImport === false)
-			$numberOfRecordsToImport = $this->getNumberOfRecords(false);
+			$numberOfRecordsToImport = $this->getNumberOfRecords();
 
 		if($numberOfRecordsToImport > $immediateImportRecordLimit) {
 			$this->request->set('is_scheduled', true);
 		}
+		return $this->request->get('is_scheduled');
 	}
 
 	/**

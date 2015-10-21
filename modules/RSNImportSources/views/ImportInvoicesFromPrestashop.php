@@ -559,7 +559,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 *  It cache the value in the $this->coupon attribute.
 	 * @return the coupon.
 	 */
-	private function getCoupon(){
+	protected function getCoupon(){
 		if ($this->coupon == null) {
 			$codeAffaire='BOUTIQUE';
 			$query = "SELECT vtiger_crmentity.crmid
