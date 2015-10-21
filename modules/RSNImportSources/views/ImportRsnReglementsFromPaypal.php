@@ -558,7 +558,12 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					$record->set('bill_city', $invoiceData[0]['city']);
 					$record->set('bill_code', $invoiceData[0]['zip']);
 					$record->set('bill_country', $invoiceData[0]['country']);
-					$record->set('subject', $invoiceData[0]['subject']);
+					$record->set('subject', substr($invoiceData[0]['subject']
+									. ' ' . $contact->get('contact_no')
+									. ' ' . $contact->getName()
+									. '/' . $invoiceData[0]['zip']
+									. ' / ' . $invoiceData[0]['invoicedate'])
+								 , 0, 100);
 					//$record->set('receivedcomments', $srcRow['paiementpropose']);
 					//$record->set('description', $srcRow['notes']);
 					$record->set('invoicedate', $invoiceData[0]['invoicedate']);
