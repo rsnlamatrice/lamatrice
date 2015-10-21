@@ -536,7 +536,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 *  It cache the value in the $this->coupon attribute.
 	 * @return the coupon.
 	 */
-	function getCoupon($reglement){
+	protected function getCoupon($reglement){
 		$typeregl = $this->getInvoiceType($reglement['reference']);
 		switch($typeregl){
 		 case 'DR':

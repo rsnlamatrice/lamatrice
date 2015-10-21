@@ -954,7 +954,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 *  It cache the value in the $this->coupon attribute.
 	 * @return the coupon.
 	 */
-	function getCoupon($codeAffaire){
+	protected function getCoupon($codeAffaire){
 		
 		$coupon = parent::getCoupon($codeAffaire);
 		if($coupon)
