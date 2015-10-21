@@ -139,7 +139,7 @@ class Import_Queue_Action extends Vtiger_Action_Controller {
 	static function getImportInfoFromResult($rowData) {
 		return array(
 			'id' => $rowData['importid'],
-			'module' => getTabModuleName($rowData['tabid']),
+			'module' => $rowData['tabid'] ? getTabModuleName($rowData['tabid']) : $rowData['module'],
 			'field_mapping' => Zend_Json::decode($rowData['field_mapping']),
 			'default_values' => Zend_Json::decode($rowData['default_values']),
 			'merge_type' => $rowData['merge_type'],

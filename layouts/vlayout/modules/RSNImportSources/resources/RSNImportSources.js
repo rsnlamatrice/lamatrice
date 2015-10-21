@@ -160,8 +160,11 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 		
 		//Les sources disposent d'une description dans leur balise option
 		showSelectedSourceDescription: function(view){
-			var descr = $('#SelectSourceDropdown option=[value="' + view + '"][title]').attr('title')
+			var $select = $('#SelectSourceDropdown')
+			, $option = $select.children('option=[value="' + view + '"][title]')
+			, descr = $option.attr('title')
 			, $descr = $('#data-import-selected-description').html(descr)
+			, for_module = RSNImportSourcesJs.getForModuleName()
 			;
 			if (!descr || descr == '<br>')
 				$descr.hide();
@@ -169,7 +172,9 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 				$descr
 					.show()
 					.append($('<span class="pull-right"/>')
-						.append($('<a href="#">?</a>')
+						.append($('<a>?</a>')
+								.attr('href', '?for_module='+for_module+'&module='+app.getModuleName()
+											+'&view=Index&mode=showImportStatus&ImportSource='+view)
 							.click(function(e){
 							})
 						)

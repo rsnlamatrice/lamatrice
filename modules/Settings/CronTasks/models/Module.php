@@ -12,7 +12,11 @@ class Settings_CronTasks_Module_Model extends Settings_Vtiger_Module_Model {
 
 	var $baseTable = 'vtiger_cron_task';
 	var $baseIndex = 'id';
-	var $listFields = array('sequence' => 'Sequence', 'name' => 'Cron Job', 'frequency' => 'Frequency(H:M)', 'status' => 'Status', 'laststart' => 'Last Start', 'lastend' => 'Last End');
+	var $listFields = array('sequence' => 'Sequence', 'name' => 'Cron Job'
+							, 'frequency' => 'Frequency(H:M)'
+							, 'start_hour' => 'Start hour'
+							, 'status' => 'Status', 'laststart' => 'Last Start', 'lastend' => 'Last End'
+							/*, 'description' => 'description'*/);
 	var $nameFields = array('');
 	var $name = 'CronTasks';
 
@@ -21,7 +25,7 @@ class Settings_CronTasks_Module_Model extends Settings_Vtiger_Module_Model {
 	 * @return <Array> List of fieldNames
 	 */
 	public function getEditableFieldsList() {
-		return array('frequency', 'status');
+		return array('frequency', 'status', 'start_hour', 'description');
 	}
 
 	/**

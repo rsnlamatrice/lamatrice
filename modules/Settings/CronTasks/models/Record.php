@@ -143,6 +143,13 @@ class Settings_CronTasks_Record_Model extends Settings_Vtiger_Record_Model {
 									  $fieldValue = '';
 								  }
 								  break;
+			case 'start_hour'	: if ($fieldValue) {
+									  $fieldValue = str_pad((int)$fieldValue, 2, '0', STR_PAD_LEFT)
+												. ':' . str_pad((int)(fmod($fieldValue, 1) * 100 / 60), 2, '0', STR_PAD_LEFT);
+								  } else {
+									  $fieldValue = '00:00';
+								  }
+								  break;
 		}
 		return $fieldValue;
 	}
@@ -160,9 +167,23 @@ class Settings_CronTasks_Record_Model extends Settings_Vtiger_Record_Model {
 	public function save() {
 		$db = PearDatabase::getInstance();
 
-		$updateQuery = "UPDATE vtiger_cron_task SET frequency = ?, status = ? WHERE id = ?";
-		$params = array($this->get('frequency'), $this->get('status'), $this->getId());
+		$updateQuery = "UPDATE vtiger_cron_task
+			SET frequency = ?
+			, status = ?
+			, start_hour = ?
+			, description = ?
+			WHERE id = ?";
+		$params = array($this->get('frequency')
+						, $this->get('status')
+						, self::parseStartHour($this->get('start_hour'))
+						, $this->get('description')
+						, $this->getId());
 		$db->pquery($updateQuery, $params);
+	}
+	
+	protected static function parseStartHour($str){
+		$str = explode(':', $str);
+		return $str[0] + ($str[1] ? ((float)$str[1])/60 : 0);
 	}
 
 	/**

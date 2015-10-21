@@ -33,5 +33,6 @@ $languageStrings = array(
 	'SendReminder' => 'Rappels par email', 
 	'RecurringInvoice' => 'Facturation récurente', 
 	'MailScanner' => 'Réception des emails', 
-	'' => '', 	
+	'Start hour' => 'Heure de démarrage',
+	'LBL_START_HOUR_HELP_MSG' => 'Laisser à \'00:00\' pour ignorer',
 );

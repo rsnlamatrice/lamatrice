@@ -739,4 +739,41 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		return $zipCode;
 	}
+	
+	/* Supprime les Id des lignes en doublons dans une table pré-import, où Status = 0
+	 */
+	public static function clearDuplicatesInTable($tableName, $duplicatesFieldNames){
+		//Extrait les Id des lignes en doublons
+		$db = PearDatabase::getInstance();
+		$query = "SELECT GROUP_CONCAT(id) AS ids, COUNT(*), ".implode(',', $duplicatesFieldNames)."
+			FROM $tableName
+			WHERE status = ".Import_Queue_Action::$IMPORT_STATUS_NONE."
+			GROUP BY ".implode(',', $duplicatesFieldNames)."
+			HAVING COUNT(*) > 1";
+
+		$result = $db->query($query);
+		if(!$result){
+			$db->echoError('clearDuplicatesInTable');
+			return;
+		}
+		$num_rows = $db->num_rows($result);
+		$deleteIds = array();
+		for($i = 0; $i < $num_rows; $i++){
+			$first = true;
+			//explose le GROUP_CONCAT et vérifie qu'il n'y a pas de valeur vide. Saute le 1er id
+			foreach(explode(',', $db->query_result($result, $i, 0)) as $id)
+				if($id)
+					if($first)
+						$first = false;
+					else
+						$deleteIds[] = $id;
+		}
+		if($deleteIds){
+			$query = "DELETE FROM $tableName
+				WHERE id IN (".generateQuestionMarks($deleteIds).")";
+		}
+		$result = $db->pquery($query, $deleteIds);
+		if(!$result)
+			$db->echoError('clearDuplicatesInTable');
+	}
 }

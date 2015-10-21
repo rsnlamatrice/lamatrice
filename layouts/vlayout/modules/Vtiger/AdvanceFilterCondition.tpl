@@ -12,6 +12,7 @@
 {strip}
 <div class="row-fluid conditionRow marginBottom10px">
 	<span class="span4">
+		
 		<select class="{if empty($NOCHOSEN)}chzn-select{/if} row-fluid" name="columnname">
 			<option value="none">{vtranslate('LBL_SELECT_FIELD',$MODULE)}</option>
 			{foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE}
@@ -78,6 +79,7 @@
 					<option value="{$COLUMN_NAME}" data-fieldtype="VW" data-field-name="(exists)"
 						{if $COLUMN_NAME eq $SELECTED_VIEW
 						|| $COLUMN_NAME eq $SELECTED_VIEW_ESC}
+							{assign var=FIELD_TYPE value='VW'}
 							selected="selected"
 						{/if}
 						data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
@@ -128,6 +130,7 @@
 					{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
 					<option value="{$COLUMN_NAME}" data-fieldtype="PANEL" data-field-name="(exists)"
 						{if $COLUMN_NAME eq $CONDITION_INFO['columnname']}
+							{assign var=FIELD_TYPE value='VW'}
 							selected="selected"
 						{/if}
 						data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
@@ -213,7 +216,8 @@
 		</select>
 	</span>
 	<span class="span3">
-		<select class="{if empty($NOCHOSEN)}chzn-select{/if} row-fluid" name="comparator">
+		{if !$FIELD_TYPE}<span class="ui-icon ui-icon-alert"></span>!{/if}{*ED151021*}
+		<select class="{if empty($NOCHOSEN)}chzn-select{/if} row-fluid" name="comparator" value="{$CONDITION_INFO['comparator']}">
 			 <option value="none">{vtranslate('LBL_NONE',$MODULE)}</option>
 			{assign var=ADVANCE_FILTER_OPTIONS value=$ADVANCED_FILTER_OPTIONS_BY_TYPE[$FIELD_TYPE]}
 			{if $FIELD_TYPE eq 'D' || $FIELD_TYPE eq 'DT'}
@@ -223,7 +227,7 @@
 			{foreach item=ADVANCE_FILTER_OPTION from=$ADVANCE_FILTER_OPTIONS}
 				<option value="{$ADVANCE_FILTER_OPTION}"
 				{if $ADVANCE_FILTER_OPTION eq $CONDITION_INFO['comparator']}
-						selected
+						selected="selected"
 				{/if}
 				>{vtranslate($ADVANCED_FILTER_OPTIONS[$ADVANCE_FILTER_OPTION])}</option>
 			{/foreach}

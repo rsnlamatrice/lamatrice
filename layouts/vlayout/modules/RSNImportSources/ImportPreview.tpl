@@ -29,15 +29,21 @@ $IMPORT_RECORD_FAILED = 5;*}
 									</tr></thead>
 								{/if}
 								<tbody>
+								{if $PREVIEW_DATA@last}
+									{assign var=MODULE_ROW_OFFSET value=$ROW_OFFSET + 1}
+								{else}
+									{assign var=MODULE_ROW_OFFSET value=0}
+								{/if}
 								{foreach item=ROW key=ROW_INDEX from=$MODULE_DATA}
-									{assign var=ROW_OFFSET value=$ROW_OFFSET + 1}
+									{assign var=MODULE_ROW_OFFSET value=$MODULE_ROW_OFFSET + 1}
 									<tr style="background-color: {$ROW_STATUS_COLORS[$ROW['status']]};">
-										<th style="color: gray;">{$ROW_OFFSET}</th>
+										<th style="color: gray;">{$MODULE_ROW_OFFSET}</th>
 										{foreach key=FIELD_NAME item=VALUE from=$ROW}
 											<td>{$VALUE}</td>
 										{/foreach}
 									</tr>
 								{/foreach}
+								{if $PREVIEW_DATA@last}{assign var=ROW_OFFSET value=$MODULE_ROW_OFFSET}{/if}
 								</tbody>
 							</table>
 						{else}
@@ -76,7 +82,16 @@ $IMPORT_RECORD_FAILED = 5;*}
 				<input type="hidden" name="view" value="Index" />
 				<input type="hidden" name="mode" value="import" /><!--TMP Import Module ???? -->
 				<input type="hidden" name="ImportSource" value="{$IMPORT_SOURCE}" />
+				
 				{include file='PreviewButtons.tpl'|@vtemplate_path:'RSNImportSources'}<!-- TMP -->
+				
+				<span class="span4">
+					Importation
+					<label style="display: inline; margin-left: 4px; margin-right: 2px;">
+						<input type="radio" name="is_scheduled" value="0" {if ! $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>maintenant</label>
+					<label style="display: inline; margin-left: 4px; margin-right: 2px;">
+						<input type="radio" name="is_scheduled" value="1" {if $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>programmée</label>
+				</span>
 			</form>
 		</div>
 	{else}

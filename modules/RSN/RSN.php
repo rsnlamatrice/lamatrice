@@ -55,6 +55,8 @@ class RSN {
 			$this->add_rsnsqlqueries_fields();
 			$this->add_rsnstatistics_relatedlist();
 			$this->add_organizationdetails_fields();
+			$this->add_crontasks_fields();
+			$this->add_rsnreglements_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -401,6 +403,22 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		}
 	}
 	
+	static function add_rsnreglements_fields() {
+		$module = Vtiger_Module_Model::getInstance('RsnReglements');
+		foreach( $module->getBlocks() as $block1)
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'contactname' 	=> array( 'columntype' => 'VARCHAR(255)', 'uitype' => '1', 'tablename' => 'vtiger_rsnreglements', 'label' => 'LBL_CONTACT_NAME', 'typeofdata' => 'V~O' ),
+			'origine' 	=> array( 'columntype' => 'VARCHAR(32)', 'uitype' => '1', 'tablename' => 'vtiger_rsnreglements', 'label' => 'LBL_ORIGIN', 'typeofdata' => 'V~O', 'summaryfield' => 1 ),
+			'error' 	=> array( 'columntype' => 'INT(1)', 'uitype' => '56', 'tablename' => 'vtiger_rsnreglements', 'label' => 'LBL_ERROR', 'typeofdata' => 'I~O', 'default' => '0' ),
+			'errormsg' 	=> array( 'columntype' => 'VARCHAR(255)', 'uitype' => '1', 'tablename' => 'vtiger_rsnreglements', 'label' => 'LBL_ERROR_MESSAGE', 'typeofdata' => 'V~O'),
+		);
+		foreach($newFields as $newFieldName => $newField){
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
+		}
+	}
+	
 	static function add_rsnstatisticsfields_fields() {
 		$module = Vtiger_Module_Model::getInstance('RSNStatisticsFields');
 		foreach( $module->getBlocks() as $block1)
@@ -565,6 +583,18 @@ DELIMITER ;';
 			ADD `print_logoname` VARCHAR(255) NULL ,
 			ADD `inventory_header_text` TEXT NULL ,
 			ADD `inventory_lastpage_footer_text` TEXT NULL;";
+		$db->query($sql);
+	}
+	
+	/* ED151021
+	 * Champs supplémentaires de paramétrage des cron
+	 */ 
+	static function add_crontasks_fields(){
+		
+		$db = PearDatabase::getInstance();
+		
+		$sql = "ALTER TABLE `vtiger_cron_task`
+			ADD `start_hour` FLOAT NULL COMMENT 'Start hour for daily task ' AFTER `frequency`;";
 		$db->query($sql);
 	}
 	

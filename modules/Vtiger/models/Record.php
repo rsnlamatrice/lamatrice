@@ -493,10 +493,21 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	 */
 	public function getPicklistValuesDetails($fieldname){
 		switch($fieldname){
+			case 'error'://rsnreglements
+				return array(
+					'0' => array( 'label' => ' ', 'icon' => 'ui-icon ui-icon-check green' ),
+					'1' => array( 'label' => 'Erreur', 'icon' => 'ui-icon ui-icon-close red' ),
+				);
+			case 'enabled':
+				return array(
+					'0' => array( 'label' => 'Erreur', 'icon' => 'ui-icon ui-icon-locked red' ),
+					'1' => array( 'label' => 'Ok', 'icon' => 'ui-icon ui-icon-unlocked green' ),
+					'on' => array( 'label' => 'Ok', 'icon' => 'ui-icon ui-icon-unlocked green' ),
+				);
 			case 'emailoptout'://contacts, rsnmediacontacts
 				return array(
 					'0' => array( 'label' => 'si, on peut', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
-					'1' => array( 'label' => 'Pas d\'email', 'icon' => 'ui-icon ui-icon-locked darkred' )
+					'1' => array( 'label' => 'Pas d\'email', 'icon' => 'ui-icon ui-icon-locked darkred' ),
 				);
 			case 'rsnnpai':
 				return array(
