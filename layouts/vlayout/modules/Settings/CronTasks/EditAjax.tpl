@@ -63,7 +63,26 @@
 					</select>
 				</div>	
 			</div>
-			<div class="alert alert-info">{vtranslate($RECORD_MODEL->get('description'),$QUALIFIED_MODULE)}</div>
+			<div class="control-group">
+				<div class="control-label">
+					{vtranslate('Start hour',$QUALIFIED_MODULE)}
+				</div>
+				<div class="controls row-fluid">
+					{assign var=FIELD_VALUE value=$RECORD_MODEL->getDisplayValue('start_hour')}
+					<input type="text" class="span2" value="{$FIELD_VALUE}" id="start_hourValue" name="start_hour"/>
+					<i>&nbsp;{vtranslate('LBL_START_HOUR_HELP_MSG',$QUALIFIED_MODULE)}</i>
+				</div>	
+			</div>
+			{*<div class="alert alert-info">{vtranslate($RECORD_MODEL->get('description'),$QUALIFIED_MODULE)}</div>*}
+			<div class="control-group">
+				<div class="control-label">
+					{vtranslate('LBL_DESCRIPTION',$QUALIFIED_MODULE)}
+				</div>
+				<div class="controls row-fluid">
+					{assign var=FIELD_VALUE value=vtranslate($RECORD_MODEL->get('description'),$QUALIFIED_MODULE)}
+					<textarea name="description" rows="4">{$FIELD_VALUE}</textarea>
+				</div>	
+			</div>
 		</div>
 		{include file='ModalFooter.tpl'|@vtemplate_path:$MODULE}
 	</form>

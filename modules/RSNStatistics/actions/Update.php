@@ -240,7 +240,8 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		}
 		
 		$statistics = $this->getStatsQueriesPeriods($relatedModuleName, $beginDate);
-		if($crmids === '*'){
+		$isAllEntities = $crmids === '*';
+		if($isAllEntities){
 			$crmids = "SELECT crmid FROM vtiger_crmentity WHERE vtiger_crmentity.deleted=0";
 			if($relatedModuleName)
 				$crmids .= " AND vtiger_crmentity.setype='$relatedModuleName'";
@@ -275,6 +276,10 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		foreach ($statistics as $statistic){
 			$relatedStatistic = $statistic['record'];
 			$statTableName = $statistic['table'];
+
+			if($isAllEntities)
+				$this->cleanStatTable($statTableName);
+			
 			$statisticResults = array();
 			foreach ($statistic['queries'] as $statQuery){
 				$relatedStatisticsFields = $statQuery['fields'];
@@ -289,9 +294,18 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 						
 					$executionQuery = $sqlqueryRecord->getExecutionQuery(['crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date]);
 					
-					$params = array();
+					//Delete
+					$deleteParams = array();
+					$deleteQuery = "DELETE $statTableName
+						FROM $statTableName
+						JOIN (" . $executionQuery['sql'] . ") source
+							ON $statTableName.crmid = source.crmid
+						WHERE `$statTableName`.code = ?";
+					$deleteParams[] = $code;
+					$deleteParams = array_merge($deleteParams, $executionQuery['params']);
 					
 					//Insert
+					$params = array();
 					$insertQuery = "INSERT INTO $statTableName ( crmid, name, code, begin_date, end_date, last_update";
 					
 					//Stat Fields
@@ -317,7 +331,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 					
 					//From source
 					$insertQuery .= "
-					FROM (" . $executionQuery['sql'] . ") source";
+						FROM (" . $executionQuery['sql'] . ") source";
 					$params = array_merge($params, $executionQuery['params']);
 					
 					//ON DUPLICATE (rappel : index unique sur crmid, code)
@@ -330,6 +344,14 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 					}
 					
 					$db = PearDatabase::getInstance();
+					if($perf) $perf->tick();
+					$result = $db->pquery($deleteQuery, $deleteParams);
+					if(!$result){
+						$db->echoError();
+						echo "<pre>$insertQuery</pre>";
+						var_dump($params);
+						die("ERREUR D'EXECUTION DE LA REQUETE DE PURGE DE STATISTIQUE");
+					}
 					if($perf) $perf->tick();
 					$result = $db->pquery($insertQuery, $params);
 					if($perf) $perf->tick();
@@ -355,5 +377,23 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 	function updateAll(Vtiger_Request $request) {
 		$request->set('crmid', '*');
 		return $this->updateOne($request);
+	}
+	
+	//Supprime les éléments de stats relatifs à des entités qui n'existent plus
+	function cleanStatTable($tableName){
+		//Delete
+		$deleteQuery = "DELETE $tableName
+			FROM $tableName
+			LEFT JOIN vtiger_crmentity
+				ON $tableName.crmid = vtiger_crmentity.crmid
+			WHERE IFNULL(vtiger_crmentity.deleted, 1) = 1";
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->query($deleteQuery);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$deleteQuery</pre>";
+			die("ERREUR D'EXECUTION DE LA REQUETE DE NETTOYAGE DE STATISTIQUE");
+		}
 	}
 }

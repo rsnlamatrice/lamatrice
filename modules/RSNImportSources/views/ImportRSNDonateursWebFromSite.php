@@ -82,6 +82,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'mobile',
 			'accounttype',
 			'leadsource',
+			'isgroup',
 		);
 	}
 
@@ -301,20 +302,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 */
 	function preImportRSNDonateursWeb($rsndonateurswebData) {
 		$rsndonateurswebValues = $this->getRSNDonateursWebValues($rsndonateurswebData);
-		////TODO : cache
-		//$query = "SELECT 1
-		//	FROM vtiger_rsndonateursweb
-		//	JOIN vtiger_crmentity
-		//		ON vtiger_crmentity.crmid = vtiger_rsndonateursweb.rsndonateurswebid
-		//	WHERE vtiger_crmentity.deleted = 0
-		//	AND externalid = ?
-		//	LIMIT 1
-		//";
-		//$sourceId = $rsndonateurswebData[0]['externalid'];
-		//$db = PearDatabase::getInstance();
-		//$result = $db->pquery($query, array($sourceId));//$rsndonateurswebData[0]['subject']
-		//if($db->num_rows($result))
-		//	return true;
 		
 		$rsndonateursweb = new RSNImportSources_Preimport_Model($rsndonateurswebValues, $this->user, 'RSNDonateursWeb');
 		$rsndonateursweb->save();
@@ -412,7 +399,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 */
 	function getMySQLDateAboEnd($string) {
 		if(!$string)
-			return '';
+			return null;
 		return '20' . substr($string, 0,2) . '-' . substr($string, 2, 2) . '-01';
 	}
 
@@ -426,7 +413,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[11])) {
 			return true;
 		}
-
 		return false;
 	}
 
@@ -519,6 +505,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'mobile'		=> isset($mobile) ? $mobile : '',
 			'accounttype'		=> 'Donateur Web',
 			'leadsource'		=> $this->getContactOrigine($rsndonateurswebInformations),
+			'isgroup'			=> 0,
 		);
 		return $contactMapping;
 	}
@@ -595,6 +582,10 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'ipaddress' 		=> $rsndonateursweb['donInformations'][10],
 			'isvalid' 		=> 1,
 		);
+		if($rsndonateurswebHeader['frequency'] == '')
+			$rsndonateurswebHeader['frequency'] = 0;
+		if($rsndonateurswebHeader['paiementerror'] == '')
+			$rsndonateurswebHeader['paiementerror'] = 0;
 		if($rsndonateurswebHeader['modepaiement'] == 'cb'
 		&& $rsndonateurswebHeader['paiementerror'] != '0')
 			$rsndonateurswebHeader['isvalid'] = 0;

@@ -112,7 +112,7 @@ class Vtiger_PDF_InventoryHeaderViewer extends Vtiger_PDF_HeaderViewer {
 				if(is_array($value)) {
 					$pdf->SetFont(PDF_FONT_NAME, '');
 					foreach($value as $l => $v) {
-						$pdf->MultiCell($headerColumnWidth-$offsetX, 7, sprintf('%s: %s', $l, $v), 1, 'C', 0, 1, 
+						$pdf->MultiCell($headerColumnWidth-$offsetX, 7, sprintf('%s : %s', $l, $v), 0, 'R', 0, 1, 
 							$headerFrame->x+$headerColumnWidth*2.0+$offsetX, $pdf->GetY()+$offsetY);
 						$offsetY = 0;
 					}

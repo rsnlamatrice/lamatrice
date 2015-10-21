@@ -17,4 +17,11 @@ class RsnReglements_Module_Model extends Vtiger_Module_Model {
     public function isQuickCreateMenuVisible() {
         return false ;
     }
+	
+	/**
+	 * Function to get Alphabet Search Field 
+	 */
+	public function getAlphabetSearchField(){
+		return 'typeregl,rsnmoderegl';
+	}
 }

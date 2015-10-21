@@ -22,7 +22,9 @@ $languageStrings = array(
 	'LBL_DATEOPERATION' => 'Date de l\'opération',
 	'LBL_RSNBANQUE' => 'Banque',
 	'LBL_FACTURES' => 'Factures',
-
+	'LBL_ORIGIN' => 'Origine',
+	'LBL_ERROR_MESSAGE' => 'Message d\'erreur',
+	'LBL_CONTACT_NAME' => 'Nom du contact',
 );
 
 ?>

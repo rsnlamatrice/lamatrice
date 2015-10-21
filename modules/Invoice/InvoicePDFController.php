@@ -20,7 +20,7 @@ class Vtiger_InvoicePDFController extends Vtiger_InventoryPDFController{
 		$singularContactsNameKey = 'SINGLE_Contacts';
 		$translatedSingularContactsLabel = getTranslatedString($singularContactsNameKey, 'Contacts');
 		$contactNo = $this->resolveReferenceFieldValue($this->focusColumnValue('contact_id'), 'Contacts', 'contact_no');
-		return sprintf("%s: %s\n%s: %s"
+		return sprintf("%s : %s\n%s : %s"
 			       , $translatedSingularModuleLabel, $this->focusColumnValue('invoice_no')
 			       , $translatedSingularContactsLabel, $contactNo
 			       );

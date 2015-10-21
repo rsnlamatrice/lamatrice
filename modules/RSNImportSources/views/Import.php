@@ -322,7 +322,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$moduleName = $this->request->get('for_module');
 		
 		//ED150826 Show rows count
-		$viewer->assign('SOURCE_ROWS_COUNT', $this->getNumberOfRecords(false));
+		$nbRecordsToImport = $this->getNumberOfRecords(false);
+		$viewer->assign('SOURCE_ROWS_COUNT', $nbRecordsToImport);
 		$viewer->assign('IMPORTABLE_ROWS_COUNT', $this->getNumberOfRecords(Import_Data_Action::$IMPORT_RECORD_NONE));
 		
 		//ED150906 get more data
@@ -337,6 +338,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('IMPORT_SOURCE', $this->request->get('ImportSource'));
 		$viewer->assign('ERROR_MESSAGE', $this->request->get('error_message'));
 
+		$viewer->assign('IS_SCHEDULED', $this->checkImportIsScheduled($nbRecordsToImport));
+		
 		//ED150906 get more data
 		$viewer->assign('ROW_OFFSET', $offset);
 		$thisModuleName = $this->request->getModule();
@@ -353,11 +356,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * Method to check if the import must be scheduled.
 	 *  It schedule import if the number of pre-imported record is greater than the imediat import limit (in the config model file).
 	 */
-	function checkImportIsScheduled() {
+	function checkImportIsScheduled($numberOfRecordsToImport = false) {
 		$configReader = new RSNImportSources_Config_Model();
 		$immediateImportRecordLimit = $configReader->get('immediateImportLimit');
 
-		$numberOfRecordsToImport = $this->getNumberOfRecords();
+		if($numberOfRecordsToImport === false)
+			$numberOfRecordsToImport = $this->getNumberOfRecords(false);
 
 		if($numberOfRecordsToImport > $immediateImportRecordLimit) {
 			$this->request->set('is_scheduled', true);
@@ -574,7 +578,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 */
 	public function import() {
 		$importModules = $this->getImportModules();
-		$this->checkImportIsScheduled();
+		if($this->request->get('is_scheduled') !== null && $this->request->get('is_scheduled') !== '')
+			$this->checkImportIsScheduled();
 		$isImportScheduled = $this->request->get('is_scheduled');
 
 		foreach($importModules as $module) {
@@ -1176,6 +1181,106 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$this->request->set('auto_preimport', 'done');
 	}
 	
+	
+
+	/* coupon d'après code affaire d'un document de type Coupon
+	 */
+	protected function getCoupon($codeAffaire){
+		if(!$codeAffaire)
+			return false;
+		$couponId = $this->checkPreImportInCache("Coupon", 'codeAffaire', $codeAffaire);
+		if($couponId === 'false')
+			return false;
+		if(is_numeric($couponId))
+			return Vtiger_Record_Model::getInstanceById($couponId, 'Documents');;
+		
+		$query = "SELECT vtiger_crmentity.crmid
+			FROM vtiger_notes
+			JOIN vtiger_notescf
+				ON vtiger_notescf.notesid = vtiger_notes.notesid
+			JOIN vtiger_crmentity
+				ON vtiger_notes.notesid = vtiger_crmentity.crmid
+			WHERE codeaffaire = ?
+			AND folderid  =?
+			AND vtiger_crmentity.deleted = 0
+			LIMIT 1
+		";
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
+		if(!$result)
+			$db->echoError();
+		if($db->num_rows($result)){
+			$row = $db->fetch_row($result, 0);
+			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
+		}
+		else
+			$coupon = false;
+		$this->setPreImportInCache($coupon ? $coupon->getId() : 'false', "Coupon", 'codeAffaire', $codeAffaire);
+		return $coupon;
+	}
+	
+	
+	/* campagne d'après code affaire / Coupon
+	 */
+	protected function getCampaign($codeAffaire, $coupon){
+		
+		$campaign = $this->checkPreImportInCache("Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $codeAffaire);
+		if($campaign)
+			return $campaign === 'false' ? null : $campaign;
+		
+		if(!is_object($coupon)){
+			
+			$codeAffaire=$codeAffaire;
+			if(!$codeAffaire){
+				$this->setPreImportInCache('false', "Campaigns", 'Coupon', '' , 'codeAffaire', '');
+				return false;
+			}
+			
+			$query = "SELECT vtiger_crmentity.crmid
+				FROM vtiger_campaignscf
+				JOIN vtiger_crmentity
+				    ON vtiger_campaignscf.campaignid = vtiger_crmentity.crmid
+				WHERE codeaffaire = ?
+				AND vtiger_crmentity.deleted = 0
+				LIMIT 1
+			";
+			$db = PearDatabase::getInstance();
+			$result = $db->pquery($query, array($codeAffaire));
+			if(!$result)
+				$db->echoError();
+			if($db->num_rows($result)){
+				$row = $db->fetch_row($result, 0);
+				$campaign = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Campaigns');
+				$this->setPreImportInCache($campaign, "Campaigns", 'Coupon', '' , 'codeAffaire', $codeAffaire);
+				return $campaign;
+			}
+			return;
+		}
+		//Campagnes liées au coupon
+		$campaigns = $coupon->getRelatedCampaigns();
+		
+		//Pas de campagne, on cherche sans le coupon
+		if(count($campaigns) === 0)
+			return $this->getCampaign($srcRow, null);
+		
+		//Cherche celui qui aurait le même ode affaire
+		foreach($campaigns as $campaign){
+			if($codeAffaire == $campaign->get('affaire_code')){
+				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $codeAffaire);
+				return $campaign;
+			}
+		}
+		
+		//si il n'y en a qu'un, on prend celui-ci
+		if(count($campaigns) === 1)
+			foreach($campaigns as $campaign){		
+				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $codeAffaire);
+				return $campaign;
+			}
+			
+		var_dump('Plusieurs campagnes correspondent au coupon', "Campaigns".', Coupon',$coupon->getId() .", 'codeAffaire' = ". $codeAffaire);
+		$this->setPreImportInCache('false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $codeAffaire);
+	}
 }
 
 ?>

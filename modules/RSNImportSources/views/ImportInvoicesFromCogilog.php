@@ -398,7 +398,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
 					if($coupon){
 						$record->set('notesid', $coupon->getId());
-						$campagne = $this->getCampaign($invoiceData[0], $coupon);
+						$campagne = $this->getCampaign($invoiceData[0]['affaire_code'], $coupon);
 						if($campagne)
 							$record->set('campaign_no', $campagne->getId());
 						
@@ -733,106 +733,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				echo "Des produits manquants empêchent l'importation des factures.";
 		
 		return false;
-	}
-
-	
-	/* coupon d'après code affaire d'un document de type Coupon
-	 */
-	private function getCoupon($codeAffaire){
-		if(!$codeAffaire)
-			return false;
-		$couponId = $this->checkPreImportInCache("Coupon", 'codeAffaire', $codeAffaire);
-		if($couponId === 'false')
-			return false;
-		if(is_numeric($couponId))
-			return Vtiger_Record_Model::getInstanceById($couponId, 'Documents');;
-		
-		$query = "SELECT vtiger_crmentity.crmid
-			FROM vtiger_notes
-			JOIN vtiger_notescf
-				ON vtiger_notescf.notesid = vtiger_notes.notesid
-			JOIN vtiger_crmentity
-				ON vtiger_notes.notesid = vtiger_crmentity.crmid
-			WHERE codeaffaire = ?
-			AND folderid  =?
-			AND vtiger_crmentity.deleted = 0
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
-		if(!$result)
-			$db->echoError();
-		if($db->num_rows($result)){
-			$row = $db->fetch_row($result, 0);
-			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
-		}
-		else
-			$coupon = false;
-		$this->setPreImportInCache($coupon ? $coupon->getId() : 'false', "Coupon", 'codeAffaire', $codeAffaire);
-		return $coupon;
-	}
-	
-	
-	/* campagne d'après code affaire / Coupon
-	 */
-	private function getCampaign($srcRow, $coupon){
-		
-		$campaign = $this->checkPreImportInCache("Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
-		if($campaign)
-			return $campaign === 'false' ? null : $campaign;
-		
-		if(!is_object($coupon)){
-			
-			$codeAffaire=$srcRow['affaire_code'];
-			if(!$codeAffaire){
-				$this->setPreImportInCache('false', "Campaigns", 'Coupon', '' , 'codeAffaire', '');
-				return false;
-			}
-			
-			$query = "SELECT vtiger_crmentity.crmid
-				FROM vtiger_campaignscf
-				JOIN vtiger_crmentity
-				    ON vtiger_campaignscf.campaignid = vtiger_crmentity.crmid
-				WHERE codeaffaire = ?
-				AND vtiger_crmentity.deleted = 0
-				LIMIT 1
-			";
-			$db = PearDatabase::getInstance();
-			$result = $db->pquery($query, array($codeAffaire));
-			if(!$result)
-				$db->echoError();
-			if($db->num_rows($result)){
-				$row = $db->fetch_row($result, 0);
-				$campaign = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Campaigns');
-				$this->setPreImportInCache($campaign, "Campaigns", 'Coupon', '' , 'codeAffaire', $srcRow['affaire_code']);
-				return $campaign;
-			}
-			return;
-		}
-		//Campagnes liées au coupon
-		$campaigns = $coupon->getRelatedCampaigns();
-		
-		//Pas de campagne, on cherche sans le coupon
-		if(count($campaigns) === 0)
-			return $this->getCampaign($srcRow, null);
-		
-		//Cherche celui qui aurait le même ode affaire
-		foreach($campaigns as $campaign){
-			if($srcRow['affaire_code'] == $campaign->get('affaire_code')){
-				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
-				return $campaign;
-			}
-		}
-		
-		//si il n'y en a qu'un, on prend celui-ci
-		if(count($campaigns) === 1)
-			foreach($campaigns as $campaign){		
-				$this->setPreImportInCache($campaign, "Campagne", 'Coupon', $coupon->getId() , 'codeAffaire', $srcRow['affaire_code']);
-				return $campaign;
-			}
-			
-		var_dump('Plusieurs campagnes correspondent au coupon', "Campaigns".', Coupon',$coupon->getId() .", 'codeAffaire' = ". $srcRow['affaire_code']);
-		$this->setPreImportInCache('false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $srcRow['affaire_code']);
 	}
         
 	/**

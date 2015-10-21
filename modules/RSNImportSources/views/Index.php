@@ -17,6 +17,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		$this->exposeMethod('continueHaltedImport');
 		$this->exposeMethod('validatePreImportData');
 		$this->exposeMethod('getPreviewData');
+		$this->exposeMethod('showImportStatus');
 	}
 
 	/**
@@ -270,9 +271,15 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		$importId = $request->get('import_id');
 		if ($importController->needValidatingStep())
 			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_VALIDATING);
-		else
-			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
-
+		else{	
+			$user = Users_Record_Model::getCurrentUserModel();
+			if(RSNImportSources_Queue_Action::getUserCurrentImportInfos($user)){
+				RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+			} else {
+				$forModule = $request->get('for_module');
+				RSNImportSources_Queue_Action::add($request, $user, $forModule, null, null, Import_Queue_Action::$IMPORT_STATUS_SCHEDULED);
+			}
+		}
 		$request->set('mode', false);
 		$this->checkImportStatus($request);
 	}
@@ -291,6 +298,33 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		$importController->displayDataPreview();
 	}
 
+	function showImportStatus(Vtiger_Request $request) {
+		
+		$forModule = $request->get('for_module');
+		
+		$user = Users_Record_Model::getCurrentUserModel();
+		$importInfos = RSNImportSources_Queue_Action::getUserCurrentImportInfos($user);
+		if(!$importInfos){
+			$importSource = $request->get('ImportSource');
+			$importController = $this->getImportController($request);
+			$modules = $importController->getImportModules();
+			$importInfos = array();
+			foreach($modules as $moduleName) {
+				$importInfos[] = RSNImportSources_Queue_Action::getImportInfoFromResult(array(
+						'importid' => $importController->getRecordModel()->getId(),
+						'module' => $moduleName,
+						'userid' => $user->id,
+						'importsourceclass' => $importSource
+					)
+				);
+			}
+		}
+		if($importInfos)
+			RSNImportSources_Import_View::showImportStatus($importInfos, $user, $forModule);
+		else
+			echo "<code>Aucune importation en cours</code>";
+	}
+	
 	/**
 	 * Method to check if there is no import currently running or cortrupted data in the temporary import table.
 	 *  It display the right template ifthere is corrupted data or locked table.

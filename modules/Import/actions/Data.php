@@ -74,14 +74,19 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 		$moduleFields = $moduleMeta->getModuleFields();
 		$moduleMandatoryFields = $moduleMeta->getMandatoryFields();
 		foreach ($moduleMandatoryFields as $mandatoryFieldName) {
-			if (empty($defaultValues[$mandatoryFieldName])) {
+			if (empty($defaultValues[$mandatoryFieldName]) && !is_numeric($defaultValues[$mandatoryFieldName])) {
 				$fieldInstance = $moduleFields[$mandatoryFieldName];
 				if($fieldInstance->getFieldDataType() == 'owner') {
 					$defaultValues[$mandatoryFieldName] = $this->user->id;
 				} elseif($fieldInstance->getFieldDataType() != 'datetime'
-						&& $fieldInstance->getFieldDataType() != 'date'
-						&& $fieldInstance->getFieldDataType() != 'time' && $fieldInstance->getFieldDataType() != 'reference') {
-					$defaultValues[$mandatoryFieldName] = '????';
+					&& $fieldInstance->getFieldDataType() != 'date'
+					&& $fieldInstance->getFieldDataType() != 'time'
+					&& $fieldInstance->getFieldDataType() != 'reference') {
+					$fieldDefaultValue = $fieldInstance->getDefault();
+					if($fieldDefaultValue || is_numeric($fieldDefaultValue)) //'0'
+						$defaultValues[$mandatoryFieldName] = $fieldDefaultValue;
+					else
+						$defaultValues[$mandatoryFieldName] = '????';
 				}
 			}
 		}
@@ -90,7 +95,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			if(empty ($defaultValues[$fieldName])) {
 				if($fieldInstance->getUIType() == '52') {
 					$defaultValues[$fieldName] = $this->user->id;
-				} elseif(!empty($fieldDefaultValue)) {
+				} elseif(!empty($fieldDefaultValue) || is_numeric($fieldDefaultValue)) {
 					$defaultValues[$fieldName] = $fieldDefaultValue;
 				}
 			}
@@ -213,15 +218,14 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 				$entityInfo = $focus->importRecord($this, $fieldData);
 			} else {
 				if (!empty($mergeType) && $mergeType != Import_Utils_Helper::$AUTO_MERGE_NONE) {
-
 					$queryGenerator = new QueryGenerator($moduleName, $this->user);
 					$queryGenerator->initForDefaultCustomView();
 					$fieldsList = array('id');
 					$queryGenerator->setFields($fieldsList);
 					
 					/* ED140827
-					* Erreur SQL, manque un AND car dj initialis avec un premier filtre (import de contacts)
-					* Les imports rutilisent le filtre en-cours.
+					* Erreur SQL, manque un AND car déjà initialisé avec un premier filtre (import de contacts)
+					* Les imports réutilisent le filtre en-cours.
 					*/
 					$counter = $queryGenerator->conditionInstanceCount;
 					
@@ -528,7 +532,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
                 
 		if ($fieldData != null && $checkMandatoryFieldValues) {
 			foreach ($moduleFields as $fieldName => $fieldInstance) {
-				if(empty($fieldData[$fieldName]) && $fieldInstance->isMandatory()) {
+				if(empty($fieldData[$fieldName]) && !is_numeric($fieldData[$fieldName]) && $fieldInstance->isMandatory()) {
 					return null;
 				}
 			}
@@ -553,7 +557,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			}
 		}
 		foreach ($mandatoryFields as $mandatoryField) {
-			if (empty($fieldData[$mandatoryField])) {
+			if (empty($fieldData[$mandatoryField]) && !is_numeric($fieldData[$mandatoryField])) {
 				$fieldInstance = $moduleFields[$mandatoryField];
 				if ($fieldInstance->getFieldDataType() == 'owner') {
 					$fieldData[$mandatoryField] = $this->user->id;
@@ -574,38 +578,42 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 		$adb = PearDatabase::getInstance();
 
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, $this->module);
-		$result = $adb->query('SELECT status FROM '.$tableName);
+		$result = $adb->query('SELECT status, COUNT(*) AS counter
+							  FROM '.$tableName.'
+							  GROUP BY status');
 
 		$statusCount = array('TOTAL' => 0, 'IMPORTED' => 0, 'FAILED' => 0, 'PENDING' => 0,
 								'CREATED' => 0, 'SKIPPED' => 0, 'UPDATED' => 0, 'MERGED' => 0);
 
 		if($result) {
 			$noOfRows = $adb->num_rows($result);
-			$statusCount['TOTAL'] = $noOfRows;
 			for($i=0; $i<$noOfRows; ++$i) {
-				$status = $adb->query_result($result, $i, 'status');
+					$status = $adb->query_result($result, $i, 'status');
+				$counter = $adb->query_result($result, $i, 'counter');
+				$statusCount['TOTAL'] += $counter;
 				if(self::$IMPORT_RECORD_NONE == $status) {
-					$statusCount['PENDING']++;
+					$statusCount['PENDING']+=$counter;
 
 				} elseif(self::$IMPORT_RECORD_FAILED == $status) {
-					$statusCount['FAILED']++;
+					$statusCount['FAILED']+=$counter;
 
 				} else {
-					$statusCount['IMPORTED']++;
+					$statusCount['IMPORTED']+=$counter;
 					switch($status) {
-						case self::$IMPORT_RECORD_CREATED	:	$statusCount['CREATED']++;
+						case self::$IMPORT_RECORD_CREATED	:	$statusCount['CREATED']+=$counter;
 																break;
-						case self::$IMPORT_RECORD_SKIPPED	:	$statusCount['SKIPPED']++;
+						case self::$IMPORT_RECORD_SKIPPED	:	$statusCount['SKIPPED']+=$counter;
 																break;
-						case self::$IMPORT_RECORD_UPDATED	:	$statusCount['UPDATED']++;
+						case self::$IMPORT_RECORD_UPDATED	:	$statusCount['UPDATED']+=$counter;
 																break;
-						case self::$IMPORT_RECORD_MERGED	:	$statusCount['MERGED']++;
+						case self::$IMPORT_RECORD_MERGED	:	$statusCount['MERGED']+=$counter;
 																break;
 					}
 				}
 
 			}
 		}
+				
 		return $statusCount;
 	}
 

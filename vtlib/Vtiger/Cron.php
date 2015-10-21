@@ -148,6 +148,20 @@ class Vtiger_Cron {
         return $this->data['description'];
     }
 
+    /** ED151021
+     * get the start hour of cron
+     */
+    function getStartHour(){
+        return $this->data['start_hour'];
+    }
+
+    /** ED151021
+     * get the current hour to compare to start_hour
+     */
+    function getCurrentHour(){
+        return (float)date('H') + (float)date('i') / 60;
+    }
+
     /**
      * Check if task is right state for running.
      */
@@ -155,10 +169,18 @@ class Vtiger_Cron {
 		$runnable = false;
 
 		if (!$this->isDisabled()) {
-			//ED151009 
+			/*//ED151009
 			if($this->getFrequency() >= 86400 && date('H') > 5 ) // >= 24 H : avant 5H du mat'
+				return false;*/
+			//ED151021
+			$currentHour = $this->getCurrentHour();
+			if($this->getStartHour()
+			&& ($this->getStartHour() < $currentHour
+			 || $this->getStartHour() >= $currentHour + 1)){
+				//echo "Ce n'est pas encore l'heure, configuré pour ".$this->getStartHour();
 				return false;
-	    
+			 }
+			
 			// Take care of last time (end - on success, start - if timedout)
 			// Take care to start the cron im
 			$lastTime = ($this->getLastStart() > 0) ? $this->getLastStart() : $this->getLastEnd();
@@ -281,8 +303,10 @@ class Vtiger_Cron {
                 Vtiger_Utils::CreateTable('vtiger_cron_task',
                         '(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 					name VARCHAR(100) UNIQUE KEY, handler_file VARCHAR(100) UNIQUE KEY,
-					frequency int, laststart int(11) unsigned, lastend int(11) unsigned, status int,module VARCHAR(100),
-                                        sequence int,description TEXT )',true);
+					frequency int,
+					/*ED151021*/ start_hour FLOAT NULL COMMENT \'Start hour for daily task\',
+					laststart int(11) unsigned, lastend int(11) unsigned, status int,module VARCHAR(100),
+                    sequence int,description TEXT )',true);
             }
             self::$schemaInitialized = true;
         }
