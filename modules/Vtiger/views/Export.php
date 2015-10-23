@@ -45,6 +45,36 @@ class Vtiger_Export_View extends Vtiger_Index_View {
 			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
 			$viewer->assign('SEARCH_KEY',is_array($searchKey) ? htmlspecialchars(json_encode($searchKey)) : $searchKey);
 		}
+
+		//AV151023 : Count the number of rows
+		if(empty($viewId)) {
+			$viewId = '0';
+		}
+		$listViewModel = Vtiger_ListView_Model::getInstance($source_module, $viewId);
+		$listViewModel->set('search_key', $searchKey);
+		$listViewModel->set('search_value', $searchValue);
+		$listViewModel->set('operator', $operator);
+
+		$count_all = $listViewModel->getListViewCount($calculatedTotals);
+
+		$viewer->assign('COUNT_ALL', $count_all);
+		if (empty($selectedIds)) {
+			$viewer->assign('COUNT_SELECTED', 0);
+		} else if ($selectedIds == 'all') {
+			$viewer->assign('COUNT_SELECTED', $count_all - count($excludedIds));
+		} else {
+			$viewer->assign('COUNT_SELECTED', count($selectedIds));
+		}
+
+		$pagingModel = new Vtiger_Paging_Model();
+		$limit = $pagingModel->getPageLimit();
+		$currentPage = $request->get('page');
+		if(empty($currentPage)) $currentPage = 1;
+		$currentPageStart = ($currentPage - 1) * $limit;
+		if ($currentPageStart < 0) $currentPageStart = 0;
+		if ($currentPageStart + $limit > $count_all) $limit = ($count_all - $currentPageStart);
+		
+		$viewer->assign('COUNT_CURRENT_PAGE', $limit);//TMP !!!get real number an take care of the last page !!
 		
 		$viewer->view('Export.tpl', $source_module);
 	}
