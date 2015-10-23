@@ -86,11 +86,11 @@ $IMPORT_RECORD_FAILED = 5;*}
 				{include file='PreviewButtons.tpl'|@vtemplate_path:'RSNImportSources'}<!-- TMP -->
 				
 				<span class="span4">
-					Importation
+					Importation 
 					<label style="display: inline; margin-left: 4px; margin-right: 2px;">
-						<input type="radio" name="is_scheduled" value="0" {if ! $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>maintenant</label>
+						<input type="radio" name="is_scheduled" value="0" {if ! $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>&nbsp;maintenant</label>
 					<label style="display: inline; margin-left: 4px; margin-right: 2px;">
-						<input type="radio" name="is_scheduled" value="1" {if $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>programmée</label>
+						<input type="radio" name="is_scheduled" value="1" {if $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>&nbsp;programmée</label>
 				</span>
 			</form>
 		</div>

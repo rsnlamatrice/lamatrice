@@ -32,6 +32,9 @@
 				{if $RECORD->get('sent2compta')}
 					<br><span style="color: red;">{vtranslate('LBL_ALREADY_SENT_2_COMPTA')}</span>
 				{/if}
+				{if $RECORD->get('invoicestatus') === 'Cancelled'}
+					<br><span style="color: red;">{vtranslate($RECORD->get('invoicestatus'), $MODULE )}</span>
+				{/if}
 				
 				{assign var=CODE_AFFAIRE value=""}
 				{if $RECORD->getCampaign()}

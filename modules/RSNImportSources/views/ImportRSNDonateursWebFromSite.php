@@ -83,6 +83,8 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'accounttype',
 			'leadsource',
 			'isgroup',
+			
+			'_contactid',
 		);
 	}
 
@@ -122,6 +124,8 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'country',
 			'phone',
 			'isvalid',
+			
+			'_contactid',
 		);
 	}
 
@@ -171,7 +175,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		global $log;
 		
 		//TODO check sizeof $rsndonateurswebata
-		$contact = $this->getContact($rsndonateurswebData[0]['firstname'], $rsndonateurswebData[0]['lastname'], $rsndonateurswebData[0]['email']);
+		$contact = $this->getContact($rsndonateurswebData);
 		if ($contact != null) {
 			$account = $contact->getAccountRecordModel();
 
@@ -314,8 +318,11 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @param string $email : the mail of the contact.
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
-	function getContact($firstname, $lastname, $email) {
-		$id = $this->getContactId($firstname, $lastname, $email);
+	function getContact($rsndonateurswebData) {
+		$id = $rsndonateurswebData[0]['_contactid'];
+		if(!$id){
+			$id = $this->getContactId($rsndonateurswebData[0]['firstname'], $rsndonateurswebData[0]['lastname'], $rsndonateurswebData[0]['email']);
+		}
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
@@ -336,7 +343,9 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
 		
-		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		/* recherche massive
+		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);*/
+		$id = false;
 		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
 		if(!$id){
@@ -470,6 +479,58 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		}
 
 		return null;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		$this->postPreImportRSNDonateursWebData();
+		$this->postPreImportContactsData();
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportRSNDonateursWebData() {
+		$db = PearDatabase::getInstance();
+				
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByNameAndEmail(
+			$this->user,
+			'RSNDonateursWeb',
+			'_contactid',
+			array(
+				'lastname' => 'lastname',
+				'firstname' => 'firstname',
+				'email' => 'email',
+			     ), 
+			false
+		);
+		
+		return true;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportContactsData() {
+		$db = PearDatabase::getInstance();
+				
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByNameAndEmail(
+			$this->user,
+			'Contacts',
+			'_contactid',
+			array(
+				'lastname' => 'lastname',
+				'firstname' => 'firstname',
+				'email' => 'email',
+			     ), 
+			RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
+		);
+		return true;
 	}
 
 	/**

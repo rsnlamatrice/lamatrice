@@ -9,7 +9,6 @@
 			<input type="hidden" class="validateconfiguration" value="validateFile" />
 			<input type="hidden" class="onLoad" value="registerFileConfigurationEvent" />
 			<input type="hidden" id="curent_file_type" name="type" value="csv" />
-			<input type="hidden" name="is_scheduled" value="1" />
 			<input type="radio"  id="import_file_mode_upload" name="import_file_src_mode" value="upload" checked="checked"/>&nbsp;
 				<input type="file" name="import_file[]" id="import_file" multiple
 					onchange="if(this.value) $('#import_file_mode_upload').get(0).checked = true;"/>

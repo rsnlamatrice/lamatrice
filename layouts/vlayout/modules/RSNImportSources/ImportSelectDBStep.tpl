@@ -10,7 +10,6 @@
 			<input type="hidden" class="validateconfiguration" value="validateFile" />
 			<input type="hidden" class="onLoad" value="registerFileConfigurationEvent" />
 			<input type="hidden" id="curent_file_type" name="type" value="csv" />
-			<input type="hidden" name="is_scheduled" value="1" />
 			<input type="hidden" name="import_file" id="import_file" value="-"/>
 		</td>
 	</tr>

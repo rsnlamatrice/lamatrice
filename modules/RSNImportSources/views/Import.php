@@ -362,7 +362,6 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 		if($numberOfRecordsToImport === false)
 			$numberOfRecordsToImport = $this->getNumberOfRecords();
-
 		if($numberOfRecordsToImport > $immediateImportRecordLimit) {
 			$this->request->set('is_scheduled', true);
 		}
@@ -838,44 +837,70 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @param $productcode : the code of the product.
 	 * @return int - the product id | null.
 	 */
-	function getProductId($productcode, &$isProduct = NULL, &$name = NULL) {
+	function getProductId(&$productcode, &$isProduct = NULL, &$name = NULL) {
         //TODO cache
-        
+		
 		$db = PearDatabase::getInstance();
 		if($isProduct !== TRUE){
-			$query = 'SELECT serviceid, label
+			if($productcode){
+				$searchKey = 'productcode';
+				$searchValue = $productcode;
+			} else {
+				$searchKey = 'servicename';
+				$searchValue = $name;
+				if(!$searchValue){
+					echo "\nProduit sans code ni nom !";
+					return false;
+				}
+			}
+			$query = 'SELECT serviceid, servicename AS label, productcode
 				FROM vtiger_service s
 				JOIN vtiger_crmentity e
 					ON s.serviceid = e.crmid
-				WHERE s.productcode = ?
+				WHERE s.'.$searchKey.' = ?
 				AND e.deleted = FALSE
 				ORDER BY discontinued DESC
 				LIMIT 1';
-			$result = $db->pquery($query, array($productcode));
-	
-			if ($db->num_rows($result) == 1) {
+			$result = $db->pquery($query, array($searchValue));
+			if(!$result)
+				$db->echoError();
+			elseif ($db->num_rows($result) === 1) {
 				$row = $db->fetch_row($result, 0);
 				$isProduct = false;
 				$name = $row['label'];
+				$productcode = $row['productcode'];
 				return $row['serviceid'];
 			}
 		}
 		//produits
 		if($isProduct !== FALSE){
-			$query = 'SELECT productid, label
+			if($productcode){
+				$searchKey = 'productcode';
+				$searchValue = $productcode;
+			} else {
+				$searchKey = 'productname';
+				$searchValue = $name;
+				if(!$searchValue){
+					echo "\nProduit sans code ni nom !";
+					return false;
+				}
+			}
+			$query = 'SELECT productid, productname AS label, productcode
 				FROM vtiger_products p
 				JOIN vtiger_crmentity e
 					ON p.productid = e.crmid
-				WHERE p.productcode = ?
+				WHERE p.'.$searchKey.' = ?
 				AND e.deleted = FALSE
 				ORDER BY discontinued DESC
 				LIMIT 1';
-			$result = $db->pquery($query, array($productcode));
-	
-			if ($db->num_rows($result) == 1) {
+			$result = $db->pquery($query, array($searchValue));
+			if(!$result)
+				$db->echoError();
+			elseif ($db->num_rows($result) === 1) {
 				$row = $db->fetch_row($result, 0);
 				$isProduct = true;
 				$name = $row['label'];
+				$productcode = $row['productcode'];
 				return $row['productid'];
 			}
 		}
@@ -885,17 +910,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	
 	//TODO replace call with global function str_to_float defined in include/utils/CommonUtils.php
 	static function str_to_float($str){
-		if(!is_string($str))
-			return $str;
-		try {
-			if(!is_numeric($str[0]) && $str[0] != '-' && $str[0] != '+')//TODO ".50"
-				return false;
-			return (float)str_replace(',', '.', $str);
-		}
-		catch(Exception $ex){
-			var_dump($ex, $str);
-			die("str_to_float");
-		}
+		return RSNImportSources_Utils_Helper::str_to_float($str);
 	}
 	
 	/** ABSTRACT
@@ -935,12 +950,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			FROM vtiger_contactdetails
                         JOIN vtiger_crmentity
                             ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			LEFT JOIN vtiger_contactemails
+			    ON vtiger_contactemails.contactemailsid = vtiger_crmentity.crmid
 			WHERE deleted = FALSE
 			AND ((UPPER(firstname) = ?
 				AND UPPER(lastname) = ?)
 			    OR UPPER(lastname) IN (?,?)
 			)
-			AND LOWER(email) = ?
+			AND (	LOWER(vtiger_contactdetails.email) = ?
+				OR LOWER(vtiger_contactemails.email) = ?)
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
@@ -959,8 +977,26 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$result = $db->pquery($query, array(strtoupper($firstname), strtoupper(remove_accent($lastname))
 						    , $fullName
 						    , $fullNameReverse
+						    , strtolower($email)
 						    , strtolower($email)));
 
+		//Recherche de l'email seul
+		if(!$db->num_rows($result)){
+			$query = "SELECT crmid
+				FROM vtiger_contactdetails
+				JOIN vtiger_crmentity
+				    ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_contactemails
+				    ON vtiger_contactemails.contactemailsid = vtiger_crmentity.crmid
+				WHERE deleted = FALSE
+				AND (	LOWER(vtiger_contactdetails.email) = ?
+					OR LOWER(vtiger_contactemails.email) = ?)
+				LIMIT 1
+			";
+			$result = $db->pquery($query, array(strtolower($email), strtolower($email)));
+			
+		}
+		
 		if($db->num_rows($result)){
 			$id = $db->query_result($result, 0, 0);
 			
@@ -1171,8 +1207,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 */
 	function prepareAutoPreImportData(){
 		$this->request->set('auto_preimport', true);
-		if(!$this->request->get('for_module'))
-			$this->request->set('for_module', $this->getImportModules()[0]);
+		if(!$this->request->get('for_module')){
+			$modules = $this->getImportModules();
+			$this->request->set('for_module', $modules[0]);
+		}
 		return true;
 	}
 	/** Méthode appelée après un pré-import automatique
