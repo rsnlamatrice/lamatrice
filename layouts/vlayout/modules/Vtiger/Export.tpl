@@ -36,19 +36,25 @@
                                     <div class="span8">{vtranslate('LBL_EXPORT_SELECTED_RECORDS',$MODULE)}&nbsp;</div>
                                     <div class="span3"><input type="radio" name="mode" value="ExportSelectedRecords" {if !empty($SELECTED_IDS)} checked="checked" {else} disabled="disabled"{/if}/></div>
                                 </div>
-                            {if empty($SELECTED_IDS)}&nbsp; <span class="redColor">{vtranslate('LBL_NO_RECORD_SELECTED',$MODULE)}</span>{/if}
+                            {*<!-- AV151023 : Display the nunber of rows -->*}
+                            {if empty($SELECTED_IDS)}&nbsp; <span class="redColor">{vtranslate('LBL_NO_RECORD_SELECTED',$MODULE)}</span>
+                            {else} <span >({$COUNT_SELECTED})</span>{/if}
                         </div>
                         <div class="row-fluid" style="height:30px">
                             <div class="span6 textAlignRight row-fluid">
                                 <div class="span8">{vtranslate('LBL_EXPORT_DATA_IN_CURRENT_PAGE',$MODULE)}&nbsp;</div>
                                 <div class="span3"><input type="radio" name="mode" value="ExportCurrentPage" /></div>
                             </div>
+                            {*<!-- AV151023 : Display the nunber of rows -->*}
+                            <span >({$COUNT_CURRENT_PAGE})</span>
                         </div>
                         <div class="row-fluid" style="height:30px">
                             <div class="span6 textAlignRight row-fluid">
                                 <div class="span8">{vtranslate('LBL_EXPORT_ALL_DATA',$MODULE)}&nbsp;</div>
                                 <div class="span3"><input type="radio"  name="mode" value="ExportAllData"  {if empty($SELECTED_IDS)} checked="checked" {/if} /></div>
                             </div>
+                            {*<!-- AV151023 : Display the nunber of rows -->*}
+                            <span >({$COUNT_ALL})</span>
                         </div>
                     </div>
                     <br> 
