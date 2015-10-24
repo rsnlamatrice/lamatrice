@@ -888,7 +888,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 				'lastname' => 'lastname',
 				'firstname' => 'firstname',
 				'email' => 'email',
-			     ), 
+			), 
 			RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
 		);
 		return true;
@@ -902,14 +902,13 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$db = PearDatabase::getInstance();
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$invoiceTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
-		
 					
 		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
 		*/
 		$query = "UPDATE $contactsTableName
 		JOIN  $invoiceTableName
 			ON ($invoiceTableName.sourceid = `$contactsTableName`.sourceid
-				OR (
+				OR ( /* comme on a supprimé les doublons de contacts correspondant à +ieurs factures, on doit chercher par nom et email*/
 					$invoiceTableName.lastname = `$contactsTableName`.lastname AND
 					$invoiceTableName.firstname = `$contactsTableName`.firstname AND
 					$invoiceTableName.email = `$contactsTableName`.email AND

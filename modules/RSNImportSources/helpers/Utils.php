@@ -672,7 +672,12 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$grouped_TableName = $moduleName."_grouped_by_fields";
 			foreach($tables as $tableName => $fields){
 				foreach($fields as $fieldName => $fieldModel){
-					$query .= ", `$tableName`.`$fieldName`";
+					$fieldModel = $moduleFields[$fieldName];
+					if($fieldModel)
+						$columnName = $fieldModel->get('column');
+					else
+						$columnName = $fieldName;
+					$query .= ", `$tableName`.`$columnName`";
 				}
 			}
 			$query .= "
@@ -701,9 +706,14 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$nField = 0;
 			foreach($tables as $tableName => $fields){
 				foreach($fields as $fieldName => $fieldModel){
+					$fieldModel = $moduleFields[$fieldName];
+					if($fieldModel)
+						$columnName = $fieldModel->get('column');
+					else
+						$columnName = $fieldName;
 					if($nField++)
 						$query .= ",";
-					$query .= "`$tableName`.`$fieldName`";
+					$query .= "`$tableName`.`$columnName`";
 				}
 			}
 		
@@ -718,7 +728,12 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				else				
 					$query .= " AND ";
 				$importFieldName = $fieldsMapping[$fieldName];
-				$query .= "`$importTableName`.`$importFieldName` = `$grouped_TableName`.`$fieldName`";
+				$fieldModel = $moduleFields[$fieldName];
+				if($fieldModel)
+					$columnName = $fieldModel->get('column');
+				else
+					$columnName = $fieldName;
+				$query .= "`$importTableName`.`$importFieldName` = `$grouped_TableName`.`$columnName`";
 			}
 		}
 		//Concatenation de l'id trouvé
@@ -980,5 +995,64 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$reglement->save();
 		
 		return true;
+	}
+
+
+	/**
+	 * Complete import->getPreviewData with contacts referenced in _contactid field
+	 * Used for validating pre-import Contacts (Pétitions, Donateur web, ...)
+	 * @return array - the pre-imported values group by module.
+	 */
+	public static function getPreviewDataWithMultipleContacts($data) {
+		
+		$db = PearDatabase::getInstance();
+		
+		/* Ajoute une propriété '_contact_rows' dont la valeur est un tableau des contacts similaires */
+		
+		//Référencement des contacts
+		$moduleName = 'Contacts';
+		$rowsByContactId = array();
+		foreach($data[$moduleName] as $rowId => $importRow){
+			$contactId = preg_replace('/(^,+|,+$|,(,+))/', '$2', $importRow['_contactid']);
+			if($contactId){
+				foreach( explode(',', $contactId) as $contactId)
+					if($contactId){
+						if(!$rowsByContactId[$contactId])
+							$rowsByContactId[$contactId] = array();
+						$rowsByContactId[$contactId][] = $rowId;
+					}
+			}
+		}
+		if($rowsByContactId){
+			$query = 'SELECT vtiger_crmentity.crmid
+				, vtiger_contactdetails.contact_no, vtiger_contactdetails.isgroup
+				, vtiger_contactdetails.firstname, vtiger_contactdetails.lastname, vtiger_contactdetails.email
+				, vtiger_contactaddress.*
+				FROM vtiger_contactdetails
+				JOIN vtiger_contactaddress
+					ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
+				JOIN vtiger_crmentity
+					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_crmentity.crmid IN ('.generateQuestionMarks($rowsByContactId).')
+			';
+			$params = array_keys($rowsByContactId);
+			$result = $db->pquery($query, $params);
+			if(!$result){
+				echo '<br><br><br><br>';
+				$db->echoError();
+				echo("<pre>$query</pre>");
+				die();
+			}
+			while($contact = $db->fetch_row($result)){
+				$contactId = $contact['crmid'];
+				foreach($rowsByContactId[$contactId] as $rowId){
+					if(!$data[$moduleName][$rowId]['_contact_rows'])
+						$data[$moduleName][$rowId]['_contact_rows'] = array();
+					$data[$moduleName][$rowId]['_contact_rows'][$contactId] = $contact;
+				}
+			}
+		}
+		return $data;
 	}
 }

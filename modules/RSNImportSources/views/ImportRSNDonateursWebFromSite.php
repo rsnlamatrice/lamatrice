@@ -31,6 +31,43 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	public function getImportModules() {
 		return array('Contacts', 'RSNDonateursWeb');
 	}
+	
+	/**
+	 * Function that returns if the import controller has a validating step of pre-import data
+	 */
+	public function hasValidatingStep(){
+		return true;
+	}
+	
+	/**
+	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
+	 */
+	public function needValidatingStep(){
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT * FROM ' . $tableName . '
+			WHERE ( _contactid_status = '.RSNImportSources_Import_View::$RECORDID_STATUS_NONE.'
+			OR _contactid_status >= '.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')
+			AND status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE .'
+			LIMIT 1';
+
+		$result = $adb->query($sql);
+		if(!$result){
+			echo "<pre>$sql</pre>";
+			$adb->echoError('needValidatingStep');
+			return true;
+		}
+		$numberOfRecords = $adb->num_rows($result);
+		return $numberOfRecords;
+	}
+
+	function getImportPreviewTemplateName($moduleName){
+		if($this->request->get('mode') === 'validatePreImportData'
+		|| $this->request->get('mode') === 'getPreviewData'
+		|| $this->needValidatingStep())//$moduleName === 'Contacts' && 
+			return 'ImportPreviewContacts.tpl';
+		return parent::getImportPreviewTemplateName($moduleName);
+	}
 
 	/**
 	 * Method to get the suported file delimiters for this import.
@@ -63,29 +100,70 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	public function getDefaultFileEncoding() {
 		return 'macintosh';
 	}
-
+	
 	/**
-	 * Method to get the imported fields for the contact module.
-	 * @return array - the imported fields for the contact module.
+	 * Method to get the imported fields for the contacts module.
+	 * @return array - the imported fields for the contacts module.
 	 */
-	public function getContactsFields() {
+	function getContactsFieldsMapping() {
 		return array(
-			'lastname',
-			'firstname',
-			'email',
-			'mailingstreet',
-			'mailingstreet3',
-			'mailingzip',
-			'mailingcity',
-			'mailingcountry',
-			'phone',
-			'mobile',
-			'accounttype',
-			'leadsource',
-			'isgroup',
+			'externalid' => 'externalid',
 			
-			'_contactid',
+			"firstname" => "firstname",
+			"lastname" => "lastname",
+			"mailingstreet3" => "mailingstreet3",
+			"mailingstreet" => "mailingstreet",
+			"mailingzip" => "mailingzip",
+			"mailingcity" => "mailingcity",
+			"mailingcountry" => "mailingcountry",
+			"email" => "email",
+			'phone' => 'phone',
+			'mobile' => 'mobile',
+			'accounttype' => 'accounttype',
+			'leadsource' => 'leadsource',
+			'isgroup' => 'isgroup',
+			
+			"date" => "",//format MySQL
+			
+			//champ supplémentaire
+			"mailingstreet2" => "mailingstreet2",
+			"mailingpobox" => "mailingpobox",
+			"rsnnpai" => "rsnnpai",
+			
+			'_contactid' => '',
+			'_contactid_status' => '', //Type de reconnaissance automatique. Massively updated after preImport
+			'_contactid_source' => '', //Source de la reconnaissance automatique. Massively updated after preImport
 		);
+	}
+	function getContactsDateFields(){
+		return array();
+	}
+	function getContactsFieldsMappingForPreview(){
+		$fields = $this->getContactsFieldsMapping();
+		unset($fields['externalid']);
+		unset($fields['isgroup']);
+		unset($fields['accounttype']);
+		unset($fields['leadsource']);
+		unset($fields['phone']);
+		unset($fields['mobile']);
+		unset($fields['date']);
+		$fields = array_move_assoc('mailingstreet2', 'lastname', $fields);
+		$fields = array_move_assoc('mailingstreet3', 'mailingstreet', $fields);
+		$fields = array_move_assoc('mailingpobox', 'mailingstreet3', $fields);
+		$fields = array_move_assoc('rsnnpai', 'lastname', $fields);
+		$fields = array_move_assoc('isgroup', 'email', $fields);
+		
+		return $fields;
+	}
+	
+	
+	/**
+	 * Method to get the imported fields for the contacts module.
+	 * @return array - the imported fields for the contacts module.
+	 */
+	function getContactsFields() {
+		//laisser exactement les colonnes du fichier
+		return array_keys($this->getContactsFieldsMapping());
 	}
 
 	/**
@@ -130,10 +208,162 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	}
 
 	/**
+	 * Method to process to the import of the Contacts module.
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importContacts($importDataController) {
+
+		$this->identifyContacts();
+		if($this->needValidatingStep()){
+			$this->skipNextScheduledImports = true;
+			$this->keepScheduledImport = true;
+			return;
+		}
+		
+		$config = new RSNImportSources_Config_Model();
+		
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT * FROM ' . $tableName . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND _contactid_status IN ('.RSNImportSources_Import_View::$RECORDID_STATUS_SELECT.'
+									, '.RSNImportSources_Import_View::$RECORDID_STATUS_CREATE.'
+									, '.RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE.')
+			ORDER BY id';
+
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+
+		if ($numberOfRecords <= 0) {
+			return;
+		}
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = true;
+		}
+
+		$perf = new RSN_Performance_Helper($numberOfRecords);
+		for ($i = 0; $i < $numberOfRecords; ++$i) {
+			$row = $adb->raw_query_result_rowdata($result, $i);
+			$this->importOneContacts(array($row), $importDataController);
+			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh(true)){
+				$keepScheduledImport = true;
+				break;
+			}
+		}
+		$perf->terminate();
+		
+		if(isset($keepScheduledImport))
+			$this->keepScheduledImport = $keepScheduledImport;
+		elseif($numberOfRecords == $config->get('importBatchLimit'))
+			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
+		
+		if($this->keepScheduledImport)
+			$this->skipNextScheduledImports = true;
+	}
+
+	/**
+	 * Method to process to the import of a one contact.
+	 * @param $contactsData : the data of the contact to import
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importOneContacts($contactsData, $importDataController) {
+					
+		global $log;
+		
+		$entryId = $contactsData[0]['_contactid']; // initialisé dans le postPreImportData
+		if($entryId){
+			//clean up concatened ids
+			$entryId = preg_replace('/(^,+|,+$|,(,+))/', '$2', $entryId);
+			if(strpos($entryId, ',')){
+				//Contacts multiples : non validable
+				return false;
+			}
+		}
+		if(is_numeric($entryId)){
+			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
+			
+			//already imported !!
+			foreach ($contactsData as $contactsLine) {
+				$entityInfo = array(
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_UPDATED,
+					'id'		=> $entryId
+				);
+				
+				//TODO update all with array
+				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+			}
+		}
+		else {
+			$record = Vtiger_Record_Model::getCleanInstance('Contacts');
+			$record->set('mode', 'create');
+			
+			$this->updateContactRecordModelFromData($record, $contactsData);
+			
+			//$db->setDebug(true);
+			$record->save();
+			$contactId = $record->getId();
+			
+			if(!$contactId){
+				//TODO: manage error
+				echo "<pre><code>Impossible d'enregistrer le contact</code></pre>";
+				foreach ($contactsData as $contactsLine) {
+					$entityInfo = array(
+						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+					);
+					
+					//TODO update all with array
+					$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+				}
+
+				return false;
+			}
+			
+			$entryId = $this->getEntryId("Contacts", $contactId);
+			foreach ($contactsData as $contactsLine) {
+				$entityInfo = array(
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
+					'id'		=> $entryId
+				);
+				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+			}
+			
+			$record->set('mode','edit');
+			$db = PearDatabase::getInstance();
+			$query = "UPDATE vtiger_crmentity
+				SET smownerid = ?
+				, createdtime = ?
+				WHERE vtiger_crmentity.crmid = ?
+			";
+			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
+								, $contactsData[0]['date']
+								, $contactId));
+			
+			$log->debug("" . basename(__FILE__) . " update imported contacts (id=" . $record->getId() . ", date=" . $contactsData[0]['date']
+					. ", result=" . ($result ? " true" : "false"). " )");
+			if( ! $result){
+				$db->echoError(__FILE__.'::importOneContacts');
+			}
+			return $record;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Method to process to the import of the RSNDonateursWeb module.
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRSNDonateursWeb($importDataController) {
+
+		if($this->needValidatingStep()){
+			$this->skipNextScheduledImports = true;
+			$this->keepScheduledImport = true;
+			return;
+		}
+		
+		$this->beforeImportRSNDonateursWeb();		
+
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
@@ -288,6 +518,34 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		}
 
 		return true;
+	}
+	
+	
+	
+
+	//Mise à jour des données du record model nouvellement créé à partir des données d'importation
+	private function updateContactRecordModelFromData($record, $contactsData){
+		
+		$fieldsMapping = $this->getContactsFieldsMapping();
+		foreach($contactsData[0] as $fieldName => $value)
+			if(!is_numeric($fieldName) && $fieldName != 'id'){
+				$vField = $fieldsMapping[$fieldName];
+				if($vField)
+					$record->set($vField, $value);
+			}
+					
+		//cast des DateTime
+		foreach($this->getContactsDateFields() as $fieldName){
+			$value = $record->get($fieldName);
+			if( is_object($value) )
+				$record->set($fieldsMapping[$fieldName], $value->format('Y-m-d'));
+		}
+		
+		$fieldName = 'isgroup';
+		$record->set('isgroup', 0);
+		$record->set('leadsource', 'PETITION');//TODO
+		
+		
 	}
 	
 	/**
@@ -481,55 +739,43 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		return null;
 	}
 
+	
 	/**
-	 * Method called after the file is processed.
+	 * Method called before the data are really imported.
 	 *  This method must be overload in the child class.
+	 *
+	 * Note : pas de postPreImportData() à cause de la validation du pre-import
 	 */
-	function postPreImportData() {
-		$this->postPreImportRSNDonateursWebData();
-		$this->postPreImportContactsData();
-	}
-
-	/**
-	 * Method called after the file is processed.
-	 *  This method must be overload in the child class.
-	 */
-	function postPreImportRSNDonateursWebData() {
+	function beforeImportRSNDonateursWeb() {
 		$db = PearDatabase::getInstance();
-				
-		RSNImportSources_Utils_Helper::setPreImportDataContactIdByNameAndEmail(
-			$this->user,
-			'RSNDonateursWeb',
-			'_contactid',
-			array(
-				'lastname' => 'lastname',
-				'firstname' => 'firstname',
-				'email' => 'email',
-			     ), 
-			false
-		);
-		
-		return true;
-	}
-
-	/**
-	 * Method called after the file is processed.
-	 *  This method must be overload in the child class.
-	 */
-	function postPreImportContactsData() {
-		$db = PearDatabase::getInstance();
-				
-		RSNImportSources_Utils_Helper::setPreImportDataContactIdByNameAndEmail(
-			$this->user,
-			'Contacts',
-			'_contactid',
-			array(
-				'lastname' => 'lastname',
-				'firstname' => 'firstname',
-				'email' => 'email',
-			     ), 
-			RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
-		);
+		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$rsndonateurswebTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');
+							
+		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
+		*/
+		$query = "UPDATE $contactsTableName
+		JOIN  $rsndonateurswebTableName
+			ON ($rsndonateurswebTableName.externalid = `$contactsTableName`.externalid
+				OR (
+					$rsndonateurswebTableName.email = `$contactsTableName`.email AND
+					NOT($rsndonateurswebTableName.email IS NULL OR $rsndonateurswebTableName.email = '')
+				)
+			)
+		";
+		$query .= " SET `$rsndonateurswebTableName`._contactid = `$contactsTableName`.recordid
+		/* affecte le status FAILED si contactid est inconnu */
+		, `$rsndonateurswebTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$rsndonateurswebTableName`.status)";
+		$query .= "
+			WHERE `$rsndonateurswebTableName`._contactid IS NULL
+			AND `$rsndonateurswebTableName`.status = ? 
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
 		return true;
 	}
 
@@ -551,9 +797,11 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			$prenom = ucfirst( mb_strtolower($prenom) );
 		else
 			$prenom = ucfirst( $prenom );
+		$date = $this->getMySQLDate($rsndonateurswebInformations[11]);
 		
 					
 		$contactMapping = array(
+			'externalid'		=> $rsndonateurswebInformations[0],
 			'lastname'		=> mb_strtoupper($rsndonateurswebInformations[2]),
 			'firstname'		=> $prenom,
 			'email'			=> $rsndonateurswebInformations[8],
@@ -567,6 +815,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'accounttype'		=> 'Donateur Web',
 			'leadsource'		=> $this->getContactOrigine($rsndonateurswebInformations),
 			'isgroup'			=> 0,
+			'date'				=> $date,
 		);
 		return $contactMapping;
 	}
@@ -658,4 +907,85 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			return "ACAR+30";
 		return $clickSource;
 	}
+	
+	
+	function displayDataPreview() {
+		$viewer = $this->getViewer($this->request);
+		//$moduleName = $this->request->get('for_module');
+		$moduleName = 'Contacts';
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		$thisModuleName = $this->request->getModule();
+		$thisModule = Vtiger_Module_Model::getInstance($thisModuleName);
+		
+		$viewer->assign('CONTACTS_FIELDS_MAPPING', $this->getContactsFieldsMappingForPreview());
+		$viewer->assign('CONTACTS_MODULE_MODEL', $moduleModel);
+		
+		$viewer->assign('VALIDATE_PREIMPORT_URL', $thisModule->getValidatePreImportRowsUrl( $this->request->get('ImportSource'), $moduleName, 0, $limit));
+		
+		$viewer->assign('RSNNPAI_VALUES', $moduleModel->getPicklistValuesDetails( 'rsnnpai' ));
+		
+		//Décompte des statuts du contactid
+		$counters = $this->getPreImportCountersByField($moduleName, '_contactid_status');
+		$statusGroups = array(
+			'' => array(
+				'' => '(tous)',
+			),
+			'A vérifier' => array(
+				RSNImportSources_Import_View::$RECORDID_STATUS_NONE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_CHECK => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_MULTI => '',
+			),
+			'Prêts à importer' => array(
+				RSNImportSources_Import_View::$RECORDID_STATUS_SELECT => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_CREATE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_SKIP => '',
+			),
+		);
+		$total = 0;
+		foreach($statusGroups as $statusGroupKey => $status)
+			foreach($status as $statusKey => $statusValue){
+				$counter = $counters[$statusKey] ? $counters[$statusKey] : 0;
+				$total += $counter;
+				$statusGroups[$statusGroupKey][$statusKey] = vtranslate('LBL_RECORDID_STATUS_'.$statusKey, $thisModuleName)
+					. ' (' . $counter . ')';
+			}
+		$statusGroups[''][''] = '(tous) (' . $total . ')';
+		$viewer->assign('CONTACTID_STATUS_GROUPS', $statusGroups);
+		$viewer->assign('VALIDABLE_CONTACTS_COUNT', $total);
+		
+		//Décompte des sources
+		$counters = $this->getPreImportCountersByField($moduleName, '_contactid_source');
+		$sources = array( '' => '(tous)', '(null)' => '(inconnu)');
+		$total = 0;
+		foreach($counters as $sourceKey => $counter){
+			$total += $counter;
+			if($sourceKey === '(null)')
+				$sourceLabel = '(inconnu)';
+			else
+				$sourceLabel = $sourceKey;
+			$sources[$sourceKey] = $sourceLabel . ' (' . $counter . ')';
+		}
+		$sources[''] = '(tous) (' . $total . ')';
+		$viewer->assign('CONTACTID_SOURCES', $sources);
+		
+		return parent::displayDataPreview();
+	}
+	
+	/**
+	 * Method to get the pre Imported data in order to preview them.
+	 *  By default, it return the values in the pre-imported table.
+	 *  This method can be overload in the child class.
+	 * @return array - the pre-imported values group by module.
+	 */
+	public function getPreviewData($request, $offset = 0, $limit = 24, $importModules = false) {
+		if(!$importModules
+		&& $this->needValidatingStep())
+			$importModules =array('Contacts');
+		$data = parent::getPreviewData($request, $offset, $limit, $importModules);
+		return RSNImportSources_Utils_Helper::getPreviewDataWithMultipleContacts($data);
+	}
+	
+
 }

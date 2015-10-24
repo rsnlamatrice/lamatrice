@@ -1,8 +1,12 @@
 <table width="100%" cellspacing="0" cellpadding="2">
 	<tr>
+		<td colspan="3" style="text-align: right;">
+			<code style="color:black; white-space: nowrap;">{$CONTROLLER_NAME}</code>
+		</td>
+	</tr>
+	<tr>
 		<td><strong>{'LBL_IMPORT_STEP_2'|@vtranslate:$MODULE}:</strong></td>
-		<td class="big">{'LBL_SELECT_FILE_STEP_DESCRIPTION'|@vtranslate:$MODULE}</td>
-		<td>&nbsp;</td>
+		<td class="big" colspan="2">{'LBL_SELECT_FILE_STEP_DESCRIPTION'|@vtranslate:$MODULE}</td>
 	</tr>
 	<tr>
 		<td colspan="3" data-import-upload-size="{$IMPORT_UPLOAD_SIZE}" style="padding-left: 1em;"> 

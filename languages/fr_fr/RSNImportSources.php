@@ -123,7 +123,7 @@ $languageStrings = array(
 	'LBL_RECORDID_STATUS_11' => 'Une proposition fiable',
 	'LBL_RECORDID_STATUS_12' => 'Plusieurs propositions',
 	
-	'LBL_VALIDATE_SELECTED_ROWS' => 'Valider les lignes sélectionnées',
+	'LBL_VALIDATE_SELECTED_CONTACT_ROWS' => 'Valider les contacts sélectionnés',
 );
 
 ?>

@@ -84,6 +84,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	function initConfiguration(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE', $request->getModule());
+		$viewer->assign('CONTROLLER_NAME', $this->getRecordModel()->get('title'));
 		return $viewer;
 	}
 		
@@ -195,9 +196,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 *  This method can be overload in the child class.
 	 * @return array - the pre-imported values group by module.
 	 */
-	public function getPreviewData($request, $offset = 0, $limit = 24) {
+	public function getPreviewData($request, $offset = 0, $limit = 24, $importModules = false) {
 		$adb = PearDatabase::getInstance();
-		$importModules = $this->getImportModules();
+		if(!$importModules)
+			$importModules = $this->getImportModules();
 		$previewData = array();
 
 		foreach($importModules as $module) {
@@ -316,6 +318,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	/**
 	 * Method to display the preview of the preimported data.
 	 *  this method can be overload in the child class.
+	 *
+	 *  displayDataPreview est appelé après le pré-import et pendant la phase de validation du pré-import (des contacts)
 	 */
 	function displayDataPreview() {
 		$viewer = $this->getViewer($this->request);
@@ -338,7 +342,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$viewer->assign('IMPORT_SOURCE', $this->request->get('ImportSource'));
 		$viewer->assign('ERROR_MESSAGE', $this->request->get('error_message'));
 
-		$viewer->assign('IS_SCHEDULED', $this->checkImportIsScheduled($nbRecordsToImport));
+		$viewer->assign('IS_SCHEDULED', $this->hasValidatingStep()
+										|| $this->checkImportIsScheduled($nbRecordsToImport));
 		
 		//ED150906 get more data
 		$viewer->assign('ROW_OFFSET', $offset);
@@ -348,7 +353,26 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$limit = min(200, max($offset, 24));
 		$viewer->assign('PREVIEW_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, 0, $limit));
 		$viewer->assign('MORE_DATA_URL', $thisModule->getPreviewDataViewUrl( $this->request->get('ImportSource'), $moduleName, $offset, $limit));
-						
+		
+		if($this->hasValidatingStep){
+			$viewer->assign('PREIMPORT_VALIDATING_FORM_URL', $thisModule->getPreImportValidatingFormUrl());
+		}
+		
+		if($this->request->get('search_key')){
+			$searches = array();
+			$search_key = $this->request->get('search_key');
+			$search_value = $this->request->get('search_value');
+			if(!is_array($search_key)){
+				$search_key = array($search_key);
+				$search_value = array($search_value);
+			}
+			$nCondition = 0;
+			for($i = 0; $i < count($search_key); $i++)
+				if($search_value[$i] || $search_value[$i] === '0'){
+					$searches[$search_key[$i]] = $search_value[$i];
+				}
+			$viewer->assign('HEADER_FILTERS', $searches);
+		}
 		return $viewer->view($this->getImportPreviewTemplateName($moduleName), $thisModuleName);
 	}
 
@@ -380,6 +404,13 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		}
 	}
 
+	/**
+	 * Function that returns if the import controller has a validating step of pre-import data
+	 */
+	public function hasValidatingStep(){
+		return false;
+	}
+	
 	/**
 	 * After preImport validation, and before real import, does the controller need a validation step of pre-imported data ?
 	 */
@@ -1319,6 +1350,118 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			
 		var_dump('Plusieurs campagnes correspondent au coupon', "Campaigns".', Coupon',$coupon->getId() .", 'codeAffaire' = ". $codeAffaire);
 		$this->setPreImportInCache('false', "Campaigns", 'Coupon', $coupon ? $coupon->getId() : '' , 'codeAffaire', $codeAffaire);
+	}
+	
+	/**
+	 * Exécute des requêtes longues d'identification des contacts
+	 * Doit être déclenché par le cron
+	 * Seulement au premier appel du cron on ne devrait exécuter cette fonction.
+	 * On peut réactiver la recherche sur certaines lignes en mettant à NULL _contactid_status
+	 *
+	 * Utilisé pour préparer les données de validation des pré-imports de Contacts (import Pétitions, Donateurs Web, ...)
+	 */
+	function identifyContacts() {
+		
+		//Teste si il y a des lignes à analyser
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT 1 FROM ' . $tableName . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND _contactid_status IS NULL
+			LIMIT 1
+		';
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+		if ($numberOfRecords === 0) {
+			return;
+		}
+		if(true){//debug
+			// Pré-identifie les contacts
+			
+			$fields = array_flip($this->getContactsFieldsMapping());//Remplace les clés par les valeurs, et les valeurs par les clés
+			unset($fields['']);
+			
+			RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+				$this->user,
+				'Contacts',
+				'_contactid',
+				$fields,
+				'_contactid_status',
+				'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE.')',
+				'_contactid_source',
+				'Tout pareil'
+			);
+	
+			/* pas très intéressant et aussi long que le précédent */
+			//$partialFields = $fields;
+			//unset($partialFields['mailingstreet']);
+			//unset($partialFields['mailingstreet2']);
+			//RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+			//	$this->user,
+			//	'Contacts',
+			//	'_contactid',
+			//	$partialFields,
+			//	'_contactid_status',
+			//	'Tout sauf adresse1 et adresse2'
+			//);
+			
+			$partialFields = array('email' => $fields['email'], 'lastname' => $fields['lastname'], 'firstname' => $fields['firstname'], 'mailingzip' => $fields['mailingzip']);
+			RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+				$this->user,
+				'Contacts',
+				'_contactid',
+				$partialFields,
+				'_contactid_status',
+				'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
+				'_contactid_source',
+				'Email, nom, prénom et code postal'
+			);
+			
+			unset($partialFields['mailingzip']);
+			RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+				$this->user,
+				'Contacts',
+				'_contactid',
+				$partialFields,
+				'_contactid_status',
+				'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
+				'_contactid_source',
+				'Email, nom et prénom'
+			);
+			
+			$partialFields = array('lastname' => $fields['lastname'], 'firstname' => $fields['firstname'], 'mailingzip' => $fields['mailingzip']);
+			RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+				$this->user,
+				'Contacts',
+				'_contactid',
+				$partialFields,
+				'_contactid_status',
+				'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
+				'_contactid_source',
+				'Nom, prénom et code postal'
+			);
+			
+			$partialFields = array('email' => $fields['email']);
+			RSNImportSources_Utils_Helper::setPreImportDataContactIdByFields(
+				$this->user,
+				'Contacts',
+				'_contactid',
+				$partialFields,
+				'_contactid_status',
+				'IF(crmids LIKE "%,%,%", '.RSNImportSources_Import_View::$RECORDID_STATUS_MULTI.','.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')',
+				'_contactid_source',
+				'Email seul'
+			);
+		}
+		//Marque tous les autres enregistrements
+		$sql = 'UPDATE ' . $tableName . '
+			SET _contactid_status = '. RSNImportSources_Import_View::$RECORDID_STATUS_NONE . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND _contactid_status IS NULL
+		';
+		$result = $adb->query($sql);
+		
+		return true;
 	}
 }
 

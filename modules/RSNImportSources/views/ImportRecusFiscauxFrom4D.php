@@ -162,14 +162,7 @@ class RSNImportSources_ImportRecusFiscauxFrom4D_View extends RSNImportSources_Im
 			$this->importOneContacts(array($row), $importDataController);
 			$perf->tick();
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
-				$this->skipNextScheduledImports = true;
 				$keepScheduledImport = true;
-				$size = RSN_Performance_Helper::getMemoryUsage();
-				echo '
-<pre>
-	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
-</pre>
-';
 				break;
 			}
 		}
@@ -180,6 +173,8 @@ class RSNImportSources_ImportRecusFiscauxFrom4D_View extends RSNImportSources_Im
 		elseif($numberOfRecords == $config->get('importBatchLimit')){
 			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
 		}
+		if($this->keepScheduledImport)
+			$this->skipNextScheduledImports = true;
 	}
 
 	/**
