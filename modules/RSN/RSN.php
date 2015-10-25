@@ -606,7 +606,7 @@ DELIMITER ;';
 		$MODULENAME = 'RSNStatisticsResults';
 		
 		$moduleInstance = Vtiger_Module::getInstance($MODULENAME);
-		if ($moduleInstance || file_exists(dirname(__FILE__).'/../'.$MODULENAME)) {
+		if ($moduleInstance){// || file_exists(dirname(__FILE__).'/../'.$MODULENAME)) {
 		   echo "Module already present - choose a different name.";
 		} else {
 		   $moduleInstance = new Vtiger_Module();
