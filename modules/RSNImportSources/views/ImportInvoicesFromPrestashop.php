@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * Les données de Prestashop sont à relier aux réglements PayBox.
+ * Aucun lien avec DonateursWeb, qui ne concerne que PayPal.
+ *
+ * Prestashop fournit un champ BOUnnn-<NumCart>
+ * PayBox fournit un champ <NumCart>;CP;nnn;nnn...
+ *
+ * Lors de l'import Prestashop, tous les règlements PayBox ne sont pas forcément présents.
+ * 
+ */ 
+
 
 //TODO : end the implementation of this import!
 class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSources_ImportFromFile_View {
@@ -68,6 +79,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	public function getContactsFields() {
 		return array(
+			'sourceid',
 			'lastname',
 			'firstname',
 			'email',
@@ -81,6 +93,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'mobile',
 			'accounttype',
 			'leadsource',
+			
+			'_contactid',
 		);
 	}
 
@@ -92,6 +106,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		return array(
 			//header
 			'sourceid',
+			'numcart',
+			'num_ligne',//n° de ligne (0 pour l'en-tête). Sert à détecter les doublons de factures quand on importe plusieurs fichiers à la fois
 			'lastname',
 			'firstname',
 			'email',
@@ -106,11 +122,14 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			//lines
 			'productcode',
 			'productid',
-			'article',
+			'productname',
 			'isproduct',
 			'quantity',
 			'prix_unit_ht',
 			'taxrate',
+			
+			'_rsnreglementsid',
+			'_contactid',
 		);
 	}
 
@@ -163,7 +182,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
-		&& $invoiceLine['productcode'] == 'ZFPORT')
+		&& $invoiceLine['productcode'] === 'ZFPORT')
 			return;
 		
 		$discount_amount = 0;
@@ -200,7 +219,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		global $log;
 		
 		//TODO check sizeof $invoiceata
-		$contact = $this->getContact($invoiceData[0]['firstname'], $invoiceData[0]['lastname'], $invoiceData[0]['email']);
+		$contact = $this->getContact($invoiceData);
 		if ($contact != null) {
 			$account = $contact->getAccountRecordModel();
 
@@ -250,7 +269,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('invoicestatus', 'Approuvée');//TODO
+					$record->set('invoicestatus', 'Approved');//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
@@ -299,7 +318,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					
 					$record->set('mode','edit');
 					//This field is not manage by save()
-					$record->set('invoice_no',$sourceId);
+					$record->set('invoice_no', $sourceId);
 					//set invoice_no
 					$query = "UPDATE vtiger_invoice
 						JOIN vtiger_crmentity
@@ -311,6 +330,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 						, smownerid = ?
 						, createdtime = ?
 						, modifiedtime = ?
+						, balance = total - received
+						, invoicestatus = IF(balance = 0, 'Paid', invoicestatus)
 						WHERE invoiceid = ?
 					";
 					$total = $totalAmount + $totalTax;
@@ -328,39 +349,14 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					if( ! $result)
 						$db->echoError();
 						
-						
+					RSNImportSources_Utils_Helper::addInvoiceReglementRelation($record, $invoiceData[0]['_rsnreglementsid'], 'Import Boutique');
+					
 					//raise trigger instead of ->save() whose need invoice rows
 					
 					$log->debug("BEFORE " . basename(__FILE__) . " raise event handler(" . $record->getId() . ", " . $record->get('mode') . " )");
 					//raise event handler
 					$record->triggerEvent('vtiger.entity.aftersave');
 					$log->debug("AFTER " . basename(__FILE__) . " raise event handler");
-					
-					////This field is not manage by save()
-					//$query = "UPDATE vtiger_invoice
-					//	JOIN vtiger_crmentity
-					//		ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
-					//	SET smownerid = ?
-					//	WHERE invoiceid = ?
-					//";// TODO: invoice_no = ?, total = ?
-					//$result = $db->pquery($query, array(ASSIGNEDTO_ALL, $invoiceId));
-					//
-					//if( ! $result)
-					//	$db->echoError();
-					//
-					//$entryId = $this->getEntryId("Invoice", $invoiceId);
-					//$sequence = 0;
-					//
-					//foreach ($invoiceData as $invoiceLine) {
-					//	$this->importInvoiceLine($record, $invoiceLine, ++$sequence);
-					//	$entityInfo = array(
-					//		'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
-					//		'id'		=> $entryId
-					//	);
-					//	
-					//	$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
-					//}
-					//
 					return $record;//tmp 
 				}
 			} else {
@@ -389,17 +385,47 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	function productExist($product) {
 		$db = PearDatabase::getInstance();
-		$query = 'SELECT productid FROM vtiger_products p JOIN vtiger_crmentity e on p.productid = e.crmid WHERE p.productcode = ? AND e.deleted = FALSE LIMIT 1';
-		$result = $db->pquery($query, array($product['productcode']));
-
+		if($product['productcode']){
+			$searchKey = 'productcode';
+			$searchValue = $product['productcode'];
+		} else {
+			$searchKey = 'productname';
+			$searchValue = $product['productname'];
+			if(!$searchValue){
+				echo "\nProduit sans code ni nom !";
+				return false;
+			}
+		}
+		$query = 'SELECT productid
+			FROM vtiger_products p
+			JOIN vtiger_crmentity e on p.productid = e.crmid
+			WHERE p.'.$searchKey.' = ?
+			AND e.deleted = FALSE
+			ORDER BY discontinued
+			LIMIT 1';
+		$result = $db->pquery($query, array($searchValue));
+		
 		if ($db->num_rows($result) == 1) {
 			return true;
 		}
-
-		$query = 'SELECT * FROM vtiger_service s JOIN vtiger_crmentity e on s.serviceid = e.crmid WHERE s.productcode = ? AND e.deleted = FALSE LIMIT 1';
-		$result = $db->pquery($query, array($product['productcode']));
-
-        return ($db->num_rows($result) == 1);
+		
+		if($product['productcode']){
+			$searchKey = 'productcode';
+			$searchValue = $product['productcode'];
+		} else {
+			$searchKey = 'servicename';
+			$searchValue = $product['productname'];
+		}
+		$query = 'SELECT *
+			FROM vtiger_service s
+			JOIN vtiger_crmentity e on s.serviceid = e.crmid
+			WHERE s.'.$searchKey.' = ?
+			AND e.deleted = FALSE
+			ORDER BY discontinued
+			LIMIT 1';
+		$result = $db->pquery($query, array($searchValue));
+		
+		return ($db->num_rows($result) === 1);
 	}
 
 	/**
@@ -431,8 +457,11 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 * @param string $email : the mail of the contact.
 	 * @return the row data of the contact | null if the contact is not found.
 	 */
-	function getContact($firstname, $lastname, $email) {
-		$id = $this->getContactId($firstname, $lastname, $email);
+	function getContact($invoiceData) {
+		$id = $invoiceData[0]['_contactid'];
+		if(!$id){
+			$id = $this->getContactId($invoiceData[0]['firstname'], $invoiceData[0]['lastname'], $invoiceData[0]['email']);
+		}
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Contacts');
 		}
@@ -450,7 +479,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
 		
-		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		/* recherche massive
+		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);*/
+		$id = false;
 		
 		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
@@ -467,7 +498,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 */
 	function productIsInArray($product, $productArray) {
 		for ($i = 0; $i < sizeof($productArray); ++$i) {
-			if ($product['productcode'] == $productArray[$i]['productcode']) {
+			if (($product['productcode'] && $product['productcode'] == $productArray[$i]['productcode']) 
+			|| (!$product['productcode'] && $product['productname'] == $productArray[$i]['productname'])) {
 				return true;
 			}
 		}
@@ -504,6 +536,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			$fileReader->close();
 
 			if (sizeof($newProducts) > 0) {
+				
 				global $HELPDESK_SUPPORT_NAME;
 				$viewer = new Vtiger_Viewer();
 				$viewer->assign('FOR_MODULE', 'Invoice');
@@ -656,7 +689,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
 				if (!$this->isRecordHeaderInformationLine($nextLine)) {
-					if ($nextLine[1] != null && $nextLine[1] != '') {
+					if (!$nextLine[0] && $nextLine[2]) {
 						array_push($invoice['detail'], $nextLine);
 					}
 				} else {
@@ -681,7 +714,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 * @return array : the formated data of the contact.
 	 */
 	function getContactValues($invoiceInformations) {
+		$sourceId = $invoiceInformations[41];
 		$contactMapping = array(
+			'sourceid'		=> $sourceId,
 			'lastname'		=> $invoiceInformations[46],
 			'firstname'		=> $invoiceInformations[45],
 			'email'			=> $invoiceInformations[22],
@@ -726,8 +761,16 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	//TODO end implementation of this method
 		$invoiceValues = array();
 		$date = $this->getMySQLDate($invoice['invoiceInformations'][0]);
+		$sourceId = $invoice['invoiceInformations'][41];
+		$numcart = explode('-',$sourceId);
+		if(count($numcart) == 2)
+			$numcart = $numcart[1];
+		else	$numcart = null;
+		$numLigne = 0;
 		$invoiceHeader = array(
-			'sourceid'		=> $invoice['invoiceInformations'][41],
+			'sourceid'		=> $sourceId,
+			'numcart'		=> $numcart,
+			'num_ligne'		=> $numLigne++,
 			'lastname'		=> $invoice['invoiceInformations'][46],
 			'firstname'		=> $invoice['invoiceInformations'][45],
 			'email'			=> $invoice['invoiceInformations'][22],
@@ -742,20 +785,151 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		);
 		foreach ($invoice['detail'] as $product) {
 			$isProduct = null;
-			$product_name = '';
+			$productCode = $product[1];
+			$productName = $product[2];
+			$productId = $this->getProductId($productCode, $isProduct, $productName);
 			$taxrate = self::str_to_float($product[8])/100;
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
-				'productcode'	=> $product[1],
-				'productid'	=> $this->getProductId($product[1], $isProduct, $product_name),
-				'quantity'	=> self::str_to_float($product[5]),
-				'article'	=> $product_name,
-				'prix_unit_ht'	=> self::str_to_float($product[3]) / (1 + $taxrate),
+				'num_ligne'	=> $numLigne++,
+				'productid'	=> $productId,
+				'productcode'	=> $productCode,
+				'productname'	=> $productName,
 				'isproduct'	=> $isProduct,
+				'quantity'	=> self::str_to_float($product[5]),
+				'prix_unit_ht'	=> self::str_to_float($product[3]) / (1 + $taxrate),
 				'taxrate'	=> self::str_to_float($product[8]),
             
 			)));
 		}
-
 		return $invoiceValues;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		
+		$this->postPreImportContactsData();
+		$this->postPreImportInvoiceData();
+		$this->postPreImportContactsInvoicesData();
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportInvoiceData() {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
+		
+		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('sourceid', 'num_ligne'));
+		
+		/* Annule les factures déjà importées
+		*/
+		$query = "UPDATE $tableName
+		JOIN  vtiger_invoice
+			ON  vtiger_invoice.invoice_no = `$tableName`.sourceid
+		JOIN vtiger_crmentity
+			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+		";
+		$query .= " SET `$tableName`.status = ?
+		, _contactid = vtiger_invoice.contactid";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+					
+		/* Affecte l'id du règlement
+		vtiger_rsnreglements.numpiece LIKE <numcart>;CP;15-09-15-23:33:44
+		*/
+		$query = "UPDATE $tableName
+		JOIN  vtiger_rsnreglements
+			ON  vtiger_rsnreglements.numpiece LIKE CONCAT(`$tableName`.numcart, ';%')
+		JOIN vtiger_crmentity
+			ON vtiger_rsnreglements.rsnreglementsid = vtiger_crmentity.crmid
+		";
+		$query .= " SET `_rsnreglementsid` = vtiger_crmentity.crmid";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array());
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportContactsData() {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+				
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByNameAndEmail(
+			$this->user,
+			'Contacts',
+			'_contactid',
+			array(
+				'lastname' => 'lastname',
+				'firstname' => 'firstname',
+				'email' => 'email',
+			), 
+			RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
+		);
+		return true;
+	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportContactsInvoicesData() {
+		$db = PearDatabase::getInstance();
+		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$invoiceTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
+					
+		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
+		*/
+		$query = "UPDATE $contactsTableName
+		JOIN  $invoiceTableName
+			ON ($invoiceTableName.sourceid = `$contactsTableName`.sourceid
+				OR ( /* comme on a supprimé les doublons de contacts correspondant à +ieurs factures, on doit chercher par nom et email*/
+					$invoiceTableName.lastname = `$contactsTableName`.lastname AND
+					$invoiceTableName.firstname = `$contactsTableName`.firstname AND
+					$invoiceTableName.email = `$contactsTableName`.email AND
+					NOT($invoiceTableName.email IS NULL OR $invoiceTableName.email = '')
+				)
+			)
+		";
+		$query .= " SET `$contactsTableName`._contactid = IFNULL(`$contactsTableName`.`_contactid`,`$invoiceTableName`._contactid)
+		, `$invoiceTableName`._contactid = IFNULL(`$invoiceTableName`.`_contactid`,`$contactsTableName`._contactid)
+		/* affecte le status SKIP si contactid est connu et status = 0 */
+		, `$contactsTableName`.status = IF(`$contactsTableName`.status = ? AND `$contactsTableName`._contactid IS NULL, `$contactsTableName`.status, ?)";
+		$query .= "
+			WHERE NOT (`$invoiceTableName`._contactid IS NULL AND `$contactsTableName`._contactid IS NULL)
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_NONE, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		return true;
 	}
 }

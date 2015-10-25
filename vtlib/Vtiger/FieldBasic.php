@@ -71,7 +71,7 @@ class Vtiger_FieldBasic {
 		$this->sequence = $valuemap['sequence'];
 		$this->summaryfield = $valuemap['summaryfield'];
 		$this->uiclass = $valuemap['uiclass']; // AV150415: add the uiclass attribute
-		$this->block= $blockInstance? $blockInstance : Vtiger_Block::getInstance($valuemap['block'], $moduleInstance);
+		$this->block= $blockInstance || !$valuemap['block'] ? $blockInstance : Vtiger_Block::getInstance($valuemap['block'], $moduleInstance);//ED151025 ||!$valuemap['block']
 	}
 
 	/** Cache (Record) the schema changes to improve performance */

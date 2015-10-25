@@ -41,16 +41,22 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			var $thisElement = e.jquery ? e : $(e.target)
 			, $destTablePage = $thisElement.parents('table.importPreview:first')
 			, $destTableData = $destTablePage.find('table.importContents:first')
+			, $moduleName = $destTableData.data('module')
+			, $destToolboxRows = $destTablePage.find('tr.importContents-toolbox[data-module="'+$moduleName+'"]')
+			, $destHeaderFilters = $destTableData.find('.header-filters > th:first')
 			, url = $destTableData.find('param[name="PREVIEW_DATA_URL"]').attr('value')
 			, params = $.param(this.getPreviewDataRequestParams(e));
 			AppConnector.request(url + '&' + params).then(
 				function(data){
 					var $data = $(data)
-					, $trs = $data.find('table.importContents > tbody > tr')
-					, $tfootRows = $data.find('table.searchUIBasic > tfoot > tr')
+					, $trs = $data.find('table.importContents[data-module="'+$moduleName+'"] > tbody > tr')
+					, $toolboxRows = $data.find('tr.importContents-toolbox[data-module="'+$moduleName+'"]')
+					, $headerFilters = $data.find('.header-filters > th:first')
 					;
 					$destTableData.children('tbody').html($trs);//replace rows
-					$destTablePage.children('tfoot').html($tfootRows);//replace table foot for next link
+					$destToolboxRows.replaceWith($toolboxRows);//replace table row for next link
+					if ($headerFilters.length)
+						$destHeaderFilters.replaceWith($headerFilters);//replace 
 					
 				},
 				function(error){
@@ -64,15 +70,21 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			, $thisElement = $(e.target)
 			, $destTablePage = $thisElement.parents('table.importPreview:first')
 			, $destTableData = $destTablePage.find('table.importContents:first')
+			, $moduleName = $destTableData.data('module')
+			, $destToolboxRows = $destTablePage.find('tr.importContents-toolbox[data-module="'+$moduleName+'"]')
+			, $destHeaderFilters = $destTableData.find('.header-filters > th:first')
 			, params = $.param(this.getPreviewDataRequestParams(e));
 			AppConnector.request(url + '&' + params).then(
 				function(data){
 					var $data = $(data)
-					, $trs = $data.find('table.importContents > tbody > tr')
-					, $tfootRows = $data.find('table.searchUIBasic > tfoot > tr')
+					, $trs = $data.find('table.importContents[data-module="'+$moduleName+'"] > tbody > tr')
+					, $toolboxRows = $data.find('tr.importContents-toolbox[data-module="'+$moduleName+'"]')
+					, $headerFilters = $data.find('.header-filters > th:first')
 					;
 					$destTableData.children('tbody').append($trs);//append rows
-					$destTablePage.children('tfoot').html($tfootRows);//replace table foot for next link
+					$destToolboxRows.replaceWith($toolboxRows);//replace table row for next link
+					if ($headerFilters.length)
+						$destHeaderFilters.replaceWith($headerFilters);//replace 
 					
 				},
 				function(error){

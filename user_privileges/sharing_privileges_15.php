@@ -114,17 +114,9 @@ $ModComments_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $ModComments_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
-$ProjectMilestone_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$ProjectMilestone_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
 $Critere4D_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $Critere4D_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnDons_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnDons_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RsnPrelevements_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
@@ -141,14 +133,6 @@ $RsnTODO_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 $RsnReglements_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RsnReglements_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnAdhesions_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnAdhesions_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnAbonnements_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnAbonnements_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNMedias_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
@@ -209,5 +193,21 @@ $SCINEvents_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 $RSNSysControls_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNSysControls_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNStatistics_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNStatistics_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNQueriesVariables_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNQueriesVariables_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNSQLQueries_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNSQLQueries_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNStatisticsFields_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNStatisticsFields_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 ?>

@@ -220,13 +220,11 @@ class RSNStatistics extends Vtiger_CRMEntity {
 	//TOTALS
 	function get_statistics_data($id, $cur_tab_id, $rel_tab_id, $actions=false) {//tmp (do not put this method here -> need a generic method not depanding to the module!!!!!!!!!!!!
 		global $log, $singlepane_view,$currentModule,$current_user;
-		$log->debug("Entering get_statistics(".$id.") method ...");
+		$log->debug("Entering get_statistics_data(".$id.") method ...");
 		$this_module = $currentModule;
 
 		$related_module = vtlib_getModuleNameById($rel_tab_id);
 		$singular_modname = vtlib_toSingular($related_module);
-
-		$parenttab = getParentTab();
 
 		if($singlepane_view == 'true')
 			$returnset = '&return_module='.$this_module.'&return_action=DetailView&return_id='.$id;
@@ -258,7 +256,7 @@ class RSNStatistics extends Vtiger_CRMEntity {
 		if($return_value == null) $return_value = Array();
 		$return_value['CUSTOM_BUTTON'] = $button;
 
-		$log->debug("Exiting get_invoices method ...");
+		$log->debug("Exiting get_statistics_data method ...");
 		return $return_value;
 	}
 }

@@ -130,7 +130,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 	 * AV151006
 	 */
 	public function getRecords($parentRecord){
-		$records = [];
+		$records = array();
 		$db = PearDatabase::getInstance();
 
 		$query = $this->getQuery($parentRecord);
@@ -153,7 +153,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 	 * AV151006
 	 */
 	public function countRecords($parentRecord){
-		$records = [];
+		$records = array();
 		$db = PearDatabase::getInstance();
 
 		$query = "SELECT COUNT(*) FROM (" . $this->getQuery($parentRecord) . ") recordQuery;";

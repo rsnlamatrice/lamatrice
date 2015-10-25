@@ -1,15 +1,18 @@
 <table width="100%" cellspacing="0" cellpadding="2">
 	<tr>
+		<td colspan="3" style="text-align: right;">
+			<code style="color:black; white-space: nowrap;">{$CONTROLLER_NAME}</code>
+		</td>
+	</tr>
+	<tr>
 		<td><strong>{'LBL_IMPORT_STEP_2'|@vtranslate:$MODULE}:</strong></td>
-		<td class="big">{'LBL_SELECT_FILE_STEP_DESCRIPTION'|@vtranslate:$MODULE}</td>
-		<td>&nbsp;</td>
+		<td class="big" colspan="2">{'LBL_SELECT_FILE_STEP_DESCRIPTION'|@vtranslate:$MODULE}</td>
 	</tr>
 	<tr>
 		<td colspan="3" data-import-upload-size="{$IMPORT_UPLOAD_SIZE}" style="padding-left: 1em;"> 
 			<input type="hidden" class="validateconfiguration" value="validateFile" />
 			<input type="hidden" class="onLoad" value="registerFileConfigurationEvent" />
 			<input type="hidden" id="curent_file_type" name="type" value="csv" />
-			<input type="hidden" name="is_scheduled" value="1" />
 			<input type="radio"  id="import_file_mode_upload" name="import_file_src_mode" value="upload" checked="checked"/>&nbsp;
 				<input type="file" name="import_file[]" id="import_file" multiple
 					onchange="if(this.value) $('#import_file_mode_upload').get(0).checked = true;"/>

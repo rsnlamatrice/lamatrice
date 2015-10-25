@@ -141,6 +141,36 @@
 				{/foreach}
 				</optgroup>
 			{/if}
+			
+			{* ED151025 - Statistiques *}
+			{if isset($RELATED_STATISTICS)}
+				{assign var=RELATED_MODULE_NAME value='RSNStatisticsResults'}
+				{* each panel *}
+				{foreach key=STAT_ID item=STAT_DATA from=$RELATED_STATISTICS}
+					{assign var=RECORD_MODEL value=$STAT_DATA['recordModel']}
+					{assign var=STAT_LABEL value=$RECORD_MODEL->getName()}
+					<optgroup label='* {$STAT_LABEL} *'>
+					{foreach item=FIELD_MODEL from=$STAT_DATA['fields']}
+						{assign var=STATFIELD_ID value=$FIELD_MODEL->get('id')}
+						{assign var=STATFIELD_COLUMN_NAME value=$FIELD_MODEL->get('column')}
+						{assign var=STATFIELD_LABEL value=$FIELD_MODEL->get('label')}
+						{assign var=CV_COLUMN_NAME value="["|cat:$RELATED_MODULE_NAME|cat:":"|cat:$STATFIELD_COLUMN_NAME|cat:":"|cat:$STAT_ID|cat:":"|cat:$STATFIELD_ID|cat:"]"}
+						{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfoForCustomView()}
+						<option value="{$CV_COLUMN_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$STATFIELD_COLUMN_NAME}"
+							{if $CV_COLUMN_NAME eq $CONDITION_INFO['columnname']}
+								{assign var=FIELD_TYPE value=$FIELD_MODEL->getFieldType()}
+								{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
+								{$FIELD_INFO['value'] = decode_html($CONDITION_INFO['value'])}
+								selected="selected"
+							{/if}
+							data-fieldinfo='{Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))}'
+						>
+						{$STATFIELD_LABEL}
+						</option>
+					{/foreach}
+					</optgroup>
+				{/foreach}
+			{/if}
 		</select>
 	</span>
 	<span class="hide">
@@ -216,7 +246,7 @@
 		</select>
 	</span>
 	<span class="span3">
-		{if !$FIELD_TYPE}<span class="ui-icon ui-icon-alert"></span>!{/if}{*ED151021*}
+		{if empty($NOCHOSEN) && !$FIELD_TYPE}<span class="ui-icon ui-icon-alert"></span>!{/if}{*ED151021*}
 		<select class="{if empty($NOCHOSEN)}chzn-select{/if} row-fluid" name="comparator" value="{$CONDITION_INFO['comparator']}">
 			 <option value="none">{vtranslate('LBL_NONE',$MODULE)}</option>
 			{assign var=ADVANCE_FILTER_OPTIONS value=$ADVANCED_FILTER_OPTIONS_BY_TYPE[$FIELD_TYPE]}

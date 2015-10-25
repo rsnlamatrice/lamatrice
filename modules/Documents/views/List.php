@@ -66,7 +66,8 @@ class Documents_List_View extends Vtiger_List_View {
 			$pageNumber = '1';
 		}
 
-		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
+		if(!($listViewModel = $this->listViewModel))//ED151025
+			$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'), 'CVID'=>$cvId);
 		$linkModels = $listViewModel->getListViewMassActions($linkParams);

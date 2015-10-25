@@ -1,10 +1,10 @@
 <?php
 /**
- * Importation des réglements effectués sur Paybox, c'est à dire la boutique Prestashop
+ * Importation des réglements effectués sur Paybox, c'est à dire la boutique Prestashop, mais aussi des paiements de dons réguliers
  * Cet import s'effectue après l'importation des Donateurs web (qui fournit les coordonnées des contacts)
  * et après l'import Boutique qui référencent les factures de la boutique.
- * Les écritures DR et DP correspondent aux données RSNDonateursWeb et génèrent des factures de dons, les autres correspondent aux factures boutique.
- * Les factures peuvent ne pas encore exister, l'association réglement/facture doit donc se faire ultérieurement TODO.
+ * Les écritures DR et DP correspondent aux données RSNDonateursWeb et génèrent des factures de dons, les autres correspondent aux factures Boutique/Prestashop.
+ * Les factures peuvent ne pas encore exister, l'association réglement/facture doit donc se faire ultérieurement.
  */
 
 class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSources_ImportFromFile_View {
@@ -77,6 +77,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		return array(
 			//header
 			'numpiece',
+			'numcart',
 			'rank',
 			'dateregl',
 			'dateoperation',
@@ -92,6 +93,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'typeregl',
 			'rsnmoderegl',
 			
+			'_invoiceid',
 		);
 	}	
 
@@ -224,7 +226,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			
 			//Relation Facture/Réglement
 			if($invoice)
-				$this->addInvoiceReglementRelation($record, $invoice);
+				RSNImportSources_Utils_Helper::addInvoiceReglementRelation($invoice, $record, 'Import PayBox');
 			
 			$entryId = $this->getEntryId("RsnReglements", $reglementId);
 			foreach ($reglementData as $reglementLine) {
@@ -242,67 +244,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		return true;
 	}
 	
-	/**
-	 * Associe le réglement à la facture.
-	 * Met à jour la facture
-	 */
-	function addInvoiceReglementRelation($reglement, $invoice){
-		global $adb;
-		$query = 'INSERT INTO vtiger_crmentityrel (crmid, module, relcrmid, relmodule)
-			VALUES ( ?, \'RsnReglements\', ?, \'Invoice\')';
-		$params = array($reglement->getId(), $invoice->getId());
-		$result = $adb->pquery($query, $params);
-		if(!$result) {//duplicate
-			$adb->echoError();
-			return false;
-		}
-		
-		//mise à jour de la facture
-		$query = 'UPDATE vtiger_invoice
-			SET received = IFNULL(received,0) + ?
-			, balance = received - total
-			, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)
-			WHERE invoiceid = ?';
-			
-		$amount = self::str_to_float($reglement->get('amount'));
-		
-		$params = array(
-			  $amount
-			, $invoice->getId()
-		);
-		
-		$result = $adb->pquery($query, $params);
-		
-		if(!$result) {
-			var_dump(/*$query,*/ $params);
-			$adb->echoError();
-			return false;
-		}
-		
-		//mise à jour de la facture
-		$query = 'UPDATE vtiger_invoicecf
-			SET receivedreference = IF(receivedreference IS NULL OR receivedreference = \'\', ?, CONCAT(receivedreference, \', \', ?))
-			, receivedcomments = IF(receivedcomments IS NULL OR receivedcomments = \'\', ?, CONCAT(receivedcomments, \'\\n\', ?))
-			, receivedmoderegl = IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', ?, CONCAT(receivedmoderegl, \', \', ?))
-			WHERE invoiceid = ?';
-		
-		$params = array(
-			$reglement->get('numpiece'), $reglement->get('numpiece')
-			, 'Import PayBox', 'Import PayBox'
-			, $reglement->get('rsnmoderegl'), $reglement->get('rsnmoderegl')
-			, $invoice->getId()
-		);
-		
-		$result = $adb->pquery($query, $params);
-		
-		if(!$result) {
-			var_dump(/*$query,*/ $params);
-			$adb->echoError();
-			return false;
-		}
-		return true;
-	}
-	
 	
 	/**
 	 * Method that returns the invoice associated with data.
@@ -310,6 +251,9 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @return invoice record
 	 */
 	function getInvoice($reglement) {
+		if($reglement['_invoiceid'])
+			return Vtiger_Record_Model::getInstanceById($reglement['_invoiceid'], 'Invoice');
+		
 		$invoiceData = $this->getInvoiceValues($reglement);
 		$query = "SELECT crmid
 			FROM vtiger_invoice
@@ -561,7 +505,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('numpiece', 'autorisation'));
 		
-		/* Affecte l'id du règlement */
+		/* Affecte l'id du règlement déjà connu */
 		$query = "UPDATE $tableName
 		JOIN  vtiger_rsnreglements
 			ON  vtiger_rsnreglements.numpiece = `$tableName`.numpiece
@@ -578,6 +522,30 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
 		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+					
+		/* Affecte l'id de la facture
+		vtiger_rsnreglements.numpiece LIKE <numcart>;CP;15-09-15-23:33:44
+		*/
+		$query = "UPDATE $tableName
+		JOIN  vtiger_invoice
+			ON  vtiger_invoice.invoice_no = `$tableName`.numcart
+			OR vtiger_invoice.invoice_no = CONCAT('FAC', `$tableName`.numcart)
+			OR vtiger_invoice.invoice_no LIKE CONCAT('BOU%-', `$tableName`.numcart)
+		JOIN vtiger_crmentity
+			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+		";
+		$query .= " SET `_invoiceid` = vtiger_crmentity.crmid";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array());
 		if(!$result){
 			echo '<br><br><br><br>';
 			$db->echoError($query);
@@ -791,8 +759,19 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$typeregl = $this->getTypeRegl($reference);
 		$numpiece = $reference;
 		$rank = (int)$reglement[3];
+		
+		if($numpiece){
+			if(strpos($numpiece, ';') !== FALSE)
+				$referenceParts = explode( ';', $numpiece);
+			else
+				$referenceParts = explode( '_', $numpiece);
+			$numcart = $referenceParts[0];
+		}
+		
+		
 		$reglementValues = array(
 			'numpiece'		=> $numpiece,
+			'numcart'			=> $numcart,
 			'rank'			=> $rank,
 			'dateregl'		=> $date,
 			'dateoperation'		=> $dateoperation,

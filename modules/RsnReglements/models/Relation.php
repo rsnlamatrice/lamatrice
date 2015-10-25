@@ -20,10 +20,10 @@ class RsnReglements_Relation_Model extends Vtiger_Relation_Model {
 			'Invoice' => array('fieldName' => 'crmid', 'tableName' => 'vtiger_crmentityrel'
 									 
 					   , 'sourceFieldName' => 'vtiger_rsnreglements.rsnreglementsid' //WHERE %s IN
-					   , 'sourceFieldNameInRelation' => 'vtiger_crmentityrel.crmid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'sourceFieldNameInRelation' => 'vtiger_crmentityrel.relcrmid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
 					   , 'relationTableName' => 'vtiger_crmentityrel' // FROM %s JOIN %sub
 					   , 'relatedFieldName' => 'invoiceid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
-					   , 'relatedSourceFieldName' => 'relcrmid'),
+					   , 'relatedSourceFieldName' => 'crmid'),
 		);
 	}
 }

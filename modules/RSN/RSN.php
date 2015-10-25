@@ -57,6 +57,7 @@ class RSN {
 			$this->add_organizationdetails_fields();
 			$this->add_crontasks_fields();
 			$this->add_rsnreglements_fields();
+			$this->add_RSNStatisticsResults_Extension();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -596,6 +597,31 @@ DELIMITER ;';
 		$sql = "ALTER TABLE `vtiger_cron_task`
 			ADD `start_hour` FLOAT NULL COMMENT 'Start hour for daily task ' AFTER `frequency`;";
 		$db->query($sql);
+	}
+	
+	/* ED151025
+	 * Crée le module d'extension RSNStatisticsResults
+	 */ 
+	static function add_RSNStatisticsResults_Extension(){
+		$MODULENAME = 'RSNStatisticsResults';
+		
+		$moduleInstance = Vtiger_Module::getInstance($MODULENAME);
+		if ($moduleInstance){// || file_exists(dirname(__FILE__).'/../'.$MODULENAME)) {
+		   echo "Module already present - choose a different name.";
+		} else {
+		   $moduleInstance = new Vtiger_Module();
+		   $moduleInstance->name = $MODULENAME;
+		   $moduleInstance->parent= 'Analytics';
+		   $moduleInstance->isentitytype = true;
+		   $moduleInstance->version = '1.0.0';
+		   $moduleInstance->save();
+		
+		   mkdir(dirname(__FILE__).'/../'.$MODULENAME);
+
+			$db = PearDatabase::getInstance();
+			$sql = "INSERT INTO `vtiger_ws_entity` (`id`, `name`, `handler_path`, `handler_class`, `ismodule`, `uicolorfield`) VALUES (NULL, 'RSNStatisticsResults', 'include/Webservices/VtigerModuleOperation.php', 'VtigerModuleOperation', '1', NULL);";
+			$db->query($sql);
+		}
 	}
 	
 	

@@ -32,7 +32,8 @@ class RSNImportSources_Module_Model extends Vtiger_Module_Model {
 	 */
 	public function getPreviewDataViewUrl($importSource, $module, $offset = 0, $limit = 12){
 		return 'index.php?module='.$this->get('name')
-			.'&view=Index&mode=getPreviewData'
+			.'&view=Index'
+			.'&mode=getPreviewData'
 			.'&for_module='.$module
 			.'&ImportSource='.$importSource
 			.'&page_offset='.$offset.'&page_limit='.$limit
@@ -43,6 +44,17 @@ class RSNImportSources_Module_Model extends Vtiger_Module_Model {
 	 * Url pour valider les données de pré-importations
 	 */
 	public function getValidatePreImportRowsUrl($importSource, $module, $offset = 0, $limit = 12){
+		return 'index.php?module='.$this->get('name')
+			.'&action=PreImport'
+			.'&mode=validateRows'
+			.'&for_module='.$module
+			.'&ImportSource='.$importSource
+		;
+	}
+	/**
+	 * Url pour afficher l'interface de pré-validations les données (contacts) de pré-importations
+	 */
+	public function getPreImportValidatingFormUrl($importSource, $module, $offset = 0, $limit = 12){
 		return 'index.php?module='.$this->get('name')
 			.'&action=PreImport'
 			.'&mode=validateRows'

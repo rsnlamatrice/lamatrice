@@ -329,7 +329,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					$record->set('mode','edit');
 					
 					//Relation Facture/Réglement
-					$this->addInvoiceReglementRelation($record, $invoice);
+					RSNImportSources_Utils_Helper::addInvoiceReglementRelation($invoice, $record, 'Import PayPal');
 					
 					$entryId = $this->getEntryId("RsnReglements", $reglementId);
 					foreach ($reglementData as $reglementLine) {
@@ -363,67 +363,6 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			return false;
 		}
 
-		return true;
-	}
-	
-	/**
-	 * Associe le réglement à la facture.
-	 * Met à jour la facture
-	 */
-	function addInvoiceReglementRelation($reglement, $invoice){
-		global $adb;
-		$query = 'INSERT INTO vtiger_crmentityrel (crmid, module, relcrmid, relmodule)
-			VALUES ( ?, \'RsnReglements\', ?, \'Invoice\')';
-		$params = array($reglement->getId(), $invoice->getId());
-		$result = $adb->pquery($query, $params);
-		if(!$result) {//duplicate
-			$adb->echoError();
-			return false;
-		}
-		
-		//mise à jour de la facture
-		$query = 'UPDATE vtiger_invoice
-			SET received = IFNULL(received,0) + ?
-			, balance = received - total
-			, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)
-			WHERE invoiceid = ?';
-			
-		$amount = self::str_to_float($reglement->get('amount'));
-		
-		$params = array(
-			  $amount
-			, $invoice->getId()
-		);
-		
-		$result = $adb->pquery($query, $params);
-		
-		if(!$result) {
-			var_dump(/*$query,*/ $params);
-			$adb->echoError();
-			return false;
-		}
-		
-		//mise à jour de la facture
-		$query = 'UPDATE vtiger_invoicecf
-			SET receivedreference = IF(receivedreference IS NULL OR receivedreference = \'\', ?, CONCAT(receivedreference, \', \', ?))
-			, receivedcomments = IF(receivedcomments IS NULL OR receivedcomments = \'\', ?, CONCAT(receivedcomments, \'\\n\', ?))
-			, receivedmoderegl = IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', ?, CONCAT(receivedmoderegl, \', \', ?))
-			WHERE invoiceid = ?';
-		
-		$params = array(
-			$reglement->get('numpiece'), $reglement->get('numpiece')
-			, 'Import PayPal', 'Import PayPal'
-			, $reglement->get('rsnmoderegl'), $reglement->get('rsnmoderegl')
-			, $invoice->getId()
-		);
-		
-		$result = $adb->pquery($query, $params);
-		
-		if(!$result) {
-			var_dump(/*$query,*/ $params);
-			$adb->echoError();
-			return false;
-		}
 		return true;
 	}
 	
@@ -573,7 +512,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('invoicestatus', 'Approuvée');//TODO
+					$record->set('invoicestatus', 'Approved');//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');

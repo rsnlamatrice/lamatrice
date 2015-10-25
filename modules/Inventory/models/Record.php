@@ -352,4 +352,11 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	public function getCoupon(){
 		return Vtiger_Cache::getRecordModel('Documents', 'notesid', $this->get('notesid'));
 	}
+	
+	/**
+	 * ED151022
+	 * Mise à jour des éléments de réglements d'après les RsnReglements liés (cf Invoice)
+	 */
+	public function updateReceivedFromRelated(){		
+	}
 }

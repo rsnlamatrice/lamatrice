@@ -440,13 +440,22 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 			, params = $.param({rows: rowsData})
 			, url = $destTablePage.find('param[name="VALIDATE_PREIMPORT_URL"]').attr('value');
 			
+			
+			var progressIndicatorElement = jQuery.progressIndicator({});
+			
 			AppConnector.request(url + '&' + params).then(
 				function(data){
 					RSNImportSourcesJs.reloadPreviewData($destTableData);
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
 				},
 				function(error){
 					//on peut arriver ici si des espaces seuls sont retournés
 					//vu alors que le fichier modules\Contacts\ContactsHandler.php contenait des espaces après le "?>" final
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
 				}
 			);
 			

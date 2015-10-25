@@ -17,7 +17,7 @@ class RSN_Performance_Helper {
 		$perfPC = $this->maxItems ? (int)($this->tickCounter/$this->maxItems * 100) . ' %' : $this->nItem++;
 		if($this->prevPercent != $perfPC){
 			$perfNow = new DateTime();
-			$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%s');
+			$perfElapsed = date_diff($this->startTime, $perfNow)->format('%h:%i:%s');
 			echo "\n import $this->tickCounter"
 				.($this->maxItems ? '/'.$this->maxItems : '')
 				."( $perfPC, $perfElapsed, "
@@ -29,10 +29,10 @@ class RSN_Performance_Helper {
 	public function terminate(){
 		$perfPC = $this->maxItems ? (int)($this->tickCounter/$this->maxItems * 100) : 0;
 		$perfNow = new DateTime();
-		$perfElapsed = date_diff($this->startTime, $perfNow)->format('%H:%i:%s');
+		$perfElapsed = date_diff($this->startTime, $perfNow)->format('%h:%i:%s');
 		echo "\n Importation terminée";
 		if($this->maxItems > 1)
-			echo " pour $this->tickCounter/$this->maxItems "
+			echo " pour $this->tickCounter/$this->maxItems"
 				."( $perfPC %, $perfElapsed, "
 				.", memoire : ". self::getMemoryUsage()
 				." ) "

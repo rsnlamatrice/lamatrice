@@ -162,12 +162,6 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
 				$this->skipNextScheduledImports = true;
 				$keepScheduledImport = true;
-				$size = RSN_Performance_Helper::getMemoryUsage();
-				echo '
-<pre>
-	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
-</pre>
-';
 				break;
 			}
 		}

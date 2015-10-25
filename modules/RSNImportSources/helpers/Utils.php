@@ -530,7 +530,107 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	
 	
 	/**
+	 * Méthode qui affecte le contactid pour tous ceux qu'on trouve d'après leur nom, prénom, email, zip
+	 * @param $user
+	 * @param $moduleName
+	 * @param $contactIdField
+	 * @param $fieldsMapping : array(contactdetailsField => importField)
+	 */
+	public static function setPreImportDataContactIdByNameAndEmail($user, $moduleName, $contactIdField, $fieldsMapping, $changeStatus = true) {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
+		
+		if($changeStatus === true)
+			$changeStatus = RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED;
+			
+		// Pré-identifie les contacts
+		$fieldTables = array();
+		$queryNotEmpty = '';
+		foreach($fieldsMapping as $vtFieldName => $importFieldName){
+			switch($vtFieldName){
+			case 'firstname':
+			case 'laststname':
+				$joinTableName = 'vtiger_contactdetails';
+				break;
+			case 'email':
+				$joinTableName = 'vtiger_contactdetails';
+				
+				//TODO email seul dans vtiger_contactemails
+				break;
+			case 'mailingzip':
+				$joinTableName = 'vtiger_contactaddress';
+				//TODO dans vtiger_contactaddresses
+				break;
+			}
+			if($joinTableName){
+				if(!$fieldTables[$joinTableName])
+					$fieldTables[$joinTableName] = array();
+				$fieldTables[$joinTableName][$vtFieldName] = $importFieldName;
+				if($queryNotEmpty)
+					$queryNotEmpty .= ' AND ';
+				$queryNotEmpty .= " IFNULL(`$tableName`.`$importFieldName`, '') != ''";
+			}
+		}
+		if(!$fieldTables['vtiger_contactdetails']){
+			var_dump("TODO sans vtiger_contactdetails");
+			return;
+		}
+		/* Affecte la réf du contact d'après la ref 4D */
+		$query = "UPDATE $tableName
+			JOIN vtiger_contactdetails
+		";
+		$nField = 0;
+		foreach($fieldTables['vtiger_contactdetails'] as $vtFieldName => $importFieldName){
+			if($nField++)
+				$query .= " AND ";
+			else	$query .= " ON ";
+			$query .= "vtiger_contactdetails.$vtFieldName = `$tableName`.`$importFieldName`";
+		}
+		$query .= "
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+		";
+		//vtiger_contactaddress
+		if($fieldTables['vtiger_contactaddress']){
+			$nField = 0;
+			foreach($fieldTables['vtiger_contactaddress'] as $vtFieldName => $importFieldName){
+				if($nField++ === 0)
+					$query .= "
+						JOIN vtiger_contactaddress
+						ON vtiger_contactaddress.contactaddressid = vtiger_crmentity.crmid";
+				$query .= " AND vtiger_contactaddress.$vtFieldName = `$tableName`.`$importFieldName`";
+			}
+		}
+		
+		$query .= " SET `$tableName`.`$contactIdField` = vtiger_crmentity.crmid";
+		
+		if($changeStatus !== false)
+			$query .= ", `$tableName`.status = ".$changeStatus;
+			
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND `$tableName`._contactid IS NULL
+			AND $queryNotEmpty
+		";
+		$result = $db->query($query);
+	//echo("<pre>setPreImportDataContactIdByNameAndEmail $query</pre>");
+		if(!$result)
+			$db->echoError($query);
+		else {
+			// Teste avec le seul champ email
+			if(count($fieldsMapping) > 1 && $fieldsMapping['email']){
+				$fieldsMapping = array('email' => $fieldsMapping['email']);
+				self::setPreImportDataContactIdByNameAndEmail($user, $moduleName, $contactIdField, $fieldsMapping, $changeStatus);
+			}
+		}
+		return !!$result;
+	}
+	
+	
+	/**
 	 * Méthode qui affecte le contactid pour tous ceux qu'on trouve d'après les champs
+	 * Utilisée pour les pétitions
 	 * @param $user
 	 * @param $moduleName
 	 * @param $contactIdField
@@ -572,7 +672,12 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$grouped_TableName = $moduleName."_grouped_by_fields";
 			foreach($tables as $tableName => $fields){
 				foreach($fields as $fieldName => $fieldModel){
-					$query .= ", `$tableName`.`$fieldName`";
+					$fieldModel = $moduleFields[$fieldName];
+					if($fieldModel)
+						$columnName = $fieldModel->get('column');
+					else
+						$columnName = $fieldName;
+					$query .= ", `$tableName`.`$columnName`";
 				}
 			}
 			$query .= "
@@ -601,9 +706,14 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$nField = 0;
 			foreach($tables as $tableName => $fields){
 				foreach($fields as $fieldName => $fieldModel){
+					$fieldModel = $moduleFields[$fieldName];
+					if($fieldModel)
+						$columnName = $fieldModel->get('column');
+					else
+						$columnName = $fieldName;
 					if($nField++)
 						$query .= ",";
-					$query .= "`$tableName`.`$fieldName`";
+					$query .= "`$tableName`.`$columnName`";
 				}
 			}
 		
@@ -618,7 +728,12 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				else				
 					$query .= " AND ";
 				$importFieldName = $fieldsMapping[$fieldName];
-				$query .= "`$importTableName`.`$importFieldName` = `$grouped_TableName`.`$fieldName`";
+				$fieldModel = $moduleFields[$fieldName];
+				if($fieldModel)
+					$columnName = $fieldModel->get('column');
+				else
+					$columnName = $fieldName;
+				$query .= "`$importTableName`.`$importFieldName` = `$grouped_TableName`.`$columnName`";
 			}
 		}
 		//Concatenation de l'id trouvé
@@ -775,5 +890,169 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$result = $db->pquery($query, $deleteIds);
 		if(!$result)
 			$db->echoError('clearDuplicatesInTable');
+	}
+	
+	//TODO replace call with global function str_to_float defined in include/utils/CommonUtils.php
+	static function str_to_float($str){
+		if(!is_string($str))
+			return $str;
+		try {
+			if(!is_numeric($str[0]) && $str[0] != '-' && $str[0] != '+')//TODO ".50"
+				return false;
+			return (float)str_replace(',', '.', $str);
+		}
+		catch(Exception $ex){
+			var_dump($ex, $str);
+			die("str_to_float");
+		}
+	}
+	
+	/**
+	 * Associe le réglement à la facture.
+	 * Met à jour la facture
+	 */
+	public static function addInvoiceReglementRelation($invoiceId, $rsnReglementsId, $receivedComments){
+		if(!$rsnReglementsId)
+			return;
+		if(is_numeric($rsnReglementsId))
+			$reglement = Vtiger_Record_Model::getInstanceById($rsnReglementsId, 'RsnReglements');
+		else{
+			$reglement = $rsnReglementsId;
+			$rsnReglementsId = $reglement->getId();
+		}
+		if(!$reglement){
+			echo("\nImpossible de retrouver le règlement " . $rsnReglementsId);
+			return;
+		}
+		if(is_numeric($invoiceId))
+			$invoice = Vtiger_Record_Model::getInstanceById($invoiceId, 'Invoice');
+		else{
+			$invoice = $invoiceId;
+			$invoiceId = $invoice->getId();
+		}
+		if(!$reglement){
+			echo("\nImpossible de retrouver la facture " . $invoiceId);
+			return;
+		}
+		
+		global $adb;
+		$query = 'INSERT INTO vtiger_crmentityrel (crmid, module, relcrmid, relmodule)
+			VALUES ( ?, \'Invoice\', ?, \'RsnReglements\')';
+		$params = array($invoice->getId(), $reglement->getId());
+		$result = $adb->pquery($query, $params);
+		if(!$result) {//duplicate
+			$adb->echoError();
+			return false;
+		}
+		
+		//mise à jour de la facture
+		$query = 'UPDATE vtiger_invoice
+			SET received = IFNULL(received,0) + ?
+			, balance = received - total
+			, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)
+			WHERE invoiceid = ?';
+			
+		$amount = self::str_to_float($reglement->get('amount'));
+		
+		$params = array(
+			  $amount
+			, $invoice->getId()
+		);
+		
+		$result = $adb->pquery($query, $params);
+		
+		if(!$result) {
+			var_dump(/*$query,*/ $params);
+			$adb->echoError();
+			return false;
+		}
+		
+		//mise à jour de la facture
+		$query = 'UPDATE vtiger_invoicecf
+			SET receivedreference = IF(receivedreference IS NULL OR receivedreference = \'\', ?, CONCAT(receivedreference, \', \', ?))
+			, receivedcomments = IF(receivedcomments IS NULL OR receivedcomments = \'\', ?, CONCAT(receivedcomments, \'\\n\', ?))
+			, receivedmoderegl = IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', ?, CONCAT(receivedmoderegl, \', \', ?))
+			WHERE invoiceid = ?';
+		
+		$params = array(
+			$reglement->get('numpiece'), $reglement->get('numpiece')
+			, $receivedComments, $receivedComments
+			, $reglement->get('rsnmoderegl'), $reglement->get('rsnmoderegl')
+			, $invoice->getId()
+		);
+		
+		$result = $adb->pquery($query, $params);
+		
+		if(!$result) {
+			var_dump(/*$query,*/ $params);
+			$adb->echoError();
+			return false;
+		}
+		
+		//Affectation du compte
+		$reglement->set('account_id', $invoice->get('account_id'));
+		$reglement->set('mode', 'edit');
+		$reglement->save();
+		
+		return true;
+	}
+
+
+	/**
+	 * Complete import->getPreviewData with contacts referenced in _contactid field
+	 * Used for validating pre-import Contacts (Pétitions, Donateur web, ...)
+	 * @return array - the pre-imported values group by module.
+	 */
+	public static function getPreviewDataWithMultipleContacts($data) {
+		
+		$db = PearDatabase::getInstance();
+		
+		/* Ajoute une propriété '_contact_rows' dont la valeur est un tableau des contacts similaires */
+		
+		//Référencement des contacts
+		$moduleName = 'Contacts';
+		$rowsByContactId = array();
+		foreach($data[$moduleName] as $rowId => $importRow){
+			$contactId = preg_replace('/(^,+|,+$|,(,+))/', '$2', $importRow['_contactid']);
+			if($contactId){
+				foreach( explode(',', $contactId) as $contactId)
+					if($contactId){
+						if(!$rowsByContactId[$contactId])
+							$rowsByContactId[$contactId] = array();
+						$rowsByContactId[$contactId][] = $rowId;
+					}
+			}
+		}
+		if($rowsByContactId){
+			$query = 'SELECT vtiger_crmentity.crmid
+				, vtiger_contactdetails.contact_no, vtiger_contactdetails.isgroup
+				, vtiger_contactdetails.firstname, vtiger_contactdetails.lastname, vtiger_contactdetails.email
+				, vtiger_contactaddress.*
+				FROM vtiger_contactdetails
+				JOIN vtiger_contactaddress
+					ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
+				JOIN vtiger_crmentity
+					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_crmentity.crmid IN ('.generateQuestionMarks($rowsByContactId).')
+			';
+			$params = array_keys($rowsByContactId);
+			$result = $db->pquery($query, $params);
+			if(!$result){
+				echo '<br><br><br><br>';
+				$db->echoError();
+				echo("<pre>$query</pre>");
+				die();
+			}
+			while($contact = $db->fetch_row($result)){
+				$contactId = $contact['crmid'];
+				foreach($rowsByContactId[$contactId] as $rowId){
+					if(!$data[$moduleName][$rowId]['_contact_rows'])
+						$data[$moduleName][$rowId]['_contact_rows'] = array();
+					$data[$moduleName][$rowId]['_contact_rows'][$contactId] = $contact;
+				}
+			}
+		}
+		return $data;
 	}
 }

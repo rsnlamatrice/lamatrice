@@ -347,7 +347,16 @@ class Import_Utils_Helper {
 		
 		if($percentMax > 1)
 			$percentMax /= 100;
-		return memory_get_usage() > self::$php_memory_limit * $percentMax;
+		if( memory_get_usage() > self::$php_memory_limit * $percentMax){		
+				$size = RSN_Performance_Helper::getMemoryUsage();
+				echo '
+<pre>
+	<b> '.vtranslate('LBL_MEMORY_IS_OVER', 'Import').' : '.$size.' </b>
+</pre>
+';
+			return true;
+		}
+		
 	}
 	/** ED150829
 	 * Retourne la limite d'utilisation mémoire paramétrée dans php

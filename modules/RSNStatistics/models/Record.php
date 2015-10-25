@@ -2,6 +2,10 @@
 
 class RSNStatistics_Record_Model extends Vtiger_Record_Model {
 
+	public function getResultsModuleNames(){
+		return explode(' |##| ', $this->get('relmodule'));
+	}
+
 	public function getUpdateValuesUrl($crmid = '*', $begin_date = false){
 		return $this->getModule()->getUpdateValuesUrl($crmid, $this->get('relmodule'), $this->getId(), $begin_date);
 	}

@@ -55,6 +55,7 @@ class RsnReglements extends Vtiger_CRMEntity {
 
 	// For Popup listview and UI type support
 	var $search_fields = Array(
+		'LBL_CONTACT_NAME' => array('rsnreglements', 'contactname'),
 		'LBL_AMOUNT' => array('rsnreglements', 'amount'),
 		'LBL_DATEREGL' => array('rsnreglements', 'dateregl'),
 		'LBL_ACCOUNT' => array('rsnreglements', 'account'),
@@ -62,6 +63,7 @@ class RsnReglements extends Vtiger_CRMEntity {
 
 	);
 	var $search_fields_name = Array (
+		'LBL_CONTACT_NAME' => 'contactname',
 		'LBL_AMOUNT' => 'amount',
 		'LBL_DATEREGL' => 'dateregl',
 		'LBL_ACCOUNT' => 'account',

@@ -365,8 +365,10 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		
 		//AV150702
 		switch($relationModule->getName()) {
-		case "RSNStatistics":
-			if($parentModule->getName() == "RSNStatistics"){
+		case "RSNStatisticsResults":
+		case "RSNStatistics"://TODO supprimer
+			if($parentModule->getName() == "RSNStatistics"//TODO supprimer
+			|| $parentModule->getName() == "RSNStatisticsResults"){
 				$aliasParentModuleName = $parentRecordModel->get('relmodule');
 				if($this->get('related_viewname'))
 					$aliasParentRecordId = 'VIEW:' . $this->get('related_viewname');

@@ -11,51 +11,16 @@ $IMPORT_RECORD_FAILED = 5;*}
 	{if sizeof($PREVIEW_DATA) gt 0}
 		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
 			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
-				<tr>
-					<td class="font-x-large" align="left" colspan="2">
-						<span class="big">{'LBL_IMPORT_PREVIEW_FOR_MODULE'|@vtranslate:$MODULE} <b>{$MODULE_NAME|@vtranslate:$MODULE_NAME}</b> :</span>
-					</td>
-				</tr>
-				<tr>
-					<td valign="top">
-						{if sizeof($MODULE_DATA) gt 0}
-							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents">
-								{if $ROW_OFFSET === 0}
-									<thead><tr>
-										<th></th>
-										{foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE}
-											<th class="redColor">{$FIELD_NAME}</th>
-										{/foreach}
-									</tr></thead>
-								{/if}
-								<tbody>
-								{if $PREVIEW_DATA@last}
-									{assign var=MODULE_ROW_OFFSET value=$ROW_OFFSET + 1}
-								{else}
-									{assign var=MODULE_ROW_OFFSET value=0}
-								{/if}
-								{foreach item=ROW key=ROW_INDEX from=$MODULE_DATA}
-									{assign var=MODULE_ROW_OFFSET value=$MODULE_ROW_OFFSET + 1}
-									<tr style="background-color: {$ROW_STATUS_COLORS[$ROW['status']]};">
-										<th style="color: gray;">{$MODULE_ROW_OFFSET}</th>
-										{foreach key=FIELD_NAME item=VALUE from=$ROW}
-											<td>{$VALUE}</td>
-										{/foreach}
-									</tr>
-								{/foreach}
-								{if $PREVIEW_DATA@last}{assign var=ROW_OFFSET value=$MODULE_ROW_OFFSET}{/if}
-								</tbody>
-							</table>
-						{else}
-							<span class="big font-x-large">{'LBL_NO_DATA'|@vtranslate:$MODULE}:</span>
-						{/if}
-					</td>
-				</tr>
+				{include file='ImportPreviewModuleContents.tpl'|@vtemplate_path:'RSNImportSources'}
+				{if $PREVIEW_DATA@last}{assign var=ROW_OFFSET value=count($MODULE_DATA)}{/if}
 			{/foreach}
 			<tfoot>
 				{if $IMPORTABLE_ROWS_COUNT}
 					<tr>
 						<td class="style1" align="left" colspan="2">
+							{if $PREIMPORT_VALIDATING_FORM_URL}
+								<a class="showPreImportValidatingForm" href="{$PREIMPORT_VALIDATING_FORM_URL}" style="margin-left: 2em">afficher la validations des contacts</a>
+							{/if}
 							Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}{if true || $SOURCE_ROWS_COUNT neq $IMPORTABLE_ROWS_COUNT}&nbsp;/&nbsp;{$SOURCE_ROWS_COUNT}{/if}
 							{if $ROW_OFFSET < $SOURCE_ROWS_COUNT}
 								<a class="getMorePreviewData" href="{$MORE_DATA_URL}" style="margin-left: 2em">voir plus de lignes</a>
@@ -84,14 +49,6 @@ $IMPORT_RECORD_FAILED = 5;*}
 				<input type="hidden" name="ImportSource" value="{$IMPORT_SOURCE}" />
 				
 				{include file='PreviewButtons.tpl'|@vtemplate_path:'RSNImportSources'}<!-- TMP -->
-				
-				<span class="span4">
-					Importation
-					<label style="display: inline; margin-left: 4px; margin-right: 2px;">
-						<input type="radio" name="is_scheduled" value="0" {if ! $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>maintenant</label>
-					<label style="display: inline; margin-left: 4px; margin-right: 2px;">
-						<input type="radio" name="is_scheduled" value="1" {if $IS_SCHEDULED}checked="checked"{/if} style="display: inline"/>programmée</label>
-				</span>
 			</form>
 		</div>
 	{else}

@@ -367,7 +367,7 @@ jQuery.Class("Vtiger_List_Js",{
 						function() {
 							progressIndicatorElement.progressIndicator({
 								'mode' : 'hide'
-							})
+							});
 							listInstance.postMassDeleteRecords();
 						}
 					);

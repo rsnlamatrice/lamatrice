@@ -15,11 +15,14 @@ class RSNStatistics_Module_Model extends Vtiger_Module_Model {
 		return $url;
 	}
 	
+	//ED devrait disparaitre au profit de Results
 	//AUR_TMP check row in db !!!!!
 	public function getRelatedListFields($parentModuleName) {
-		$relatedListFields['name'] = 'name';
-		$relatedListFields['begin_date'] = 'begin_date';
-		$relatedListFields['end_date'] = 'end_date';
+		$relatedListFields = array(
+			'name' => 'name',
+			'begin_date' => 'begin_date',
+			'end_date' => 'end_date',
+		);
 		
 		$relatedStatsFieldsCode = RSNStatistics_Utils_Helper::getModuleRelatedStatsFieldsCodes($parentModuleName);
 		foreach($relatedStatsFieldsCode as $code) {

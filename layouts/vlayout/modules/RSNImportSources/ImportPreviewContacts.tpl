@@ -11,6 +11,10 @@ $IMPORT_RECORD_FAILED = 5;*}
 		<param id="rsnnpai-picklistvalues" value="{htmlspecialchars (json_encode($RSNNPAI_VALUES))}"/>
 		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
 			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
+			{if $MODULE_NAME neq 'Contacts'}
+				{include file='ImportPreviewModuleContents.tpl'|@vtemplate_path:'RSNImportSources'}
+				{if $PREVIEW_DATA@last}{assign var=ROW_OFFSET value=count($MODULE_DATA)}{/if}
+			{else}
 				<tr>
 					<td class="font-x-large" align="left" colspan="2">
 						<span class="big">{'LBL_IMPORT_PREVIEW_FOR_MODULE'|@vtranslate:$MODULE} <b>{$MODULE_NAME|@vtranslate:$MODULE_NAME}</b> :</span>
@@ -19,8 +23,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 				<tr>
 					<td valign="top" colspan="2">
 						{if sizeof($MODULE_DATA) gt 0}
-							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents"
-								data-module="Contacts">
+							<table cellpadding="10" cellspacing="0" class="dvtSelectedCell thickBorder importContents" data-module="{$MODULE_NAME}">
 								{if $ROW_OFFSET === 0}
 									<thead><tr class="header-filters">
 										<th colspan="3">
@@ -34,7 +37,9 @@ $IMPORT_RECORD_FAILED = 5;*}
 														{if $GROUP_LABEL}<optgroup label="{$GROUP_LABEL}">{/if}
 														{foreach item=LABEL key=STATUS_ID from=$CONTACTID_STATUS}
 															{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$STATUS_ID}
-															<option class="{$ROW_CLASS}" value="{$STATUS_ID}">{$LABEL}</option>
+															<option class="{$ROW_CLASS}" value="{$STATUS_ID}"
+															{if $HEADER_FILTERS && $HEADER_FILTERS['_contactid_status'] == $STATUS_ID}selected="selected"{/if}>
+																{$LABEL}</option>
 														{/foreach}
 														{if $GROUP_LABEL}</optgroup>{/if}
 													{/foreach}
@@ -45,7 +50,9 @@ $IMPORT_RECORD_FAILED = 5;*}
 											<input type="hidden" name="operator[]" value="e"/>
 											<select name="search_value[]">
 												{foreach item=LABEL key=STATUS_ID from=$CONTACTID_SOURCES}
-													<option value="{$STATUS_ID}">{$LABEL}</option>
+													<option value="{$STATUS_ID}"
+														{if $HEADER_FILTERS && $HEADER_FILTERS['_contactid_source'] == $STATUS_ID}selected="selected"{/if}>
+														{$LABEL}</option>
 												{/foreach}
 											</select>
 											</div>
@@ -62,6 +69,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 								{/if}
 								<tbody>
 								{foreach item=ROW key=ROW_INDEX from=$MODULE_DATA}
+									{assign var=MODULE_ROW_OFFSET value=$MODULE_ROW_OFFSET + 1}
 									{assign var=ROW_OFFSET value=$ROW_OFFSET + 1}
 									{if $ROW['status']}
 										{assign var=ROW_CLASS value='ROW_STATUS ROW_STATUS_COLORS_'|cat:$ROW['status']}
@@ -205,35 +213,39 @@ $IMPORT_RECORD_FAILED = 5;*}
 						{/if}
 					</td>
 				</tr>
-			{/foreach}
-			<tfoot>
+				
 				{if $IMPORTABLE_ROWS_COUNT}
-					<tr>
-						{if $VALIDABLE_CONTACTS_COUNT}
-							<td class="style1" align="left">
-								<label><input class="all-rows-selection" type="checkbox"
-									{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
-										checked="checked"
-									{/if}>sélectionner toutes les lignes</label>
-							{if $VALIDATE_PREIMPORT_URL}
-								<param name="VALIDATE_PREIMPORT_URL" value="{$VALIDATE_PREIMPORT_URL}"/>
-								<button type="submit" name="validate-preimport-rows" class="btn btn-success">
-									<strong>{'LBL_VALIDATE_SELECTED_ROWS'|@vtranslate:$MODULE}</strong>
-								</button>
+					<tr class="importContents-toolbox" data-module="{$MODULE_NAME}">
+						<td class="style1" align="left" colspan="2"
+								{if ! $PREVIEW_DATA@last}style="padding-bottom: 4em;"{/if}>
+							{if $VALIDABLE_CONTACTS_COUNT}
+								<span class="span8">
+									<label><input class="all-rows-selection" type="checkbox"
+										{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE}
+											checked="checked"
+										{/if}>sélectionner toutes les lignes</label>
+								{if $VALIDATE_PREIMPORT_URL}
+									<param name="VALIDATE_PREIMPORT_URL" value="{$VALIDATE_PREIMPORT_URL}"/>
+									<button type="submit" name="validate-preimport-rows" class="btn btn-success">
+										<strong>{'LBL_VALIDATE_SELECTED_CONTACT_ROWS'|@vtranslate:$MODULE}</strong>
+									</button>
+								{/if}
+								</span>
 							{/if}
-							</td>
-						{/if}
-						<td class="style1" align="left">
-							Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}{if true || $SOURCE_ROWS_COUNT neq $IMPORTABLE_ROWS_COUNT}&nbsp;/&nbsp;{$SOURCE_ROWS_COUNT}{/if}
-							&nbsp;-&nbsp;Affichée{if $ROW_OFFSET > 1}s{/if} : {$ROW_OFFSET} 
-							
-							{if $ROW_OFFSET < $SOURCE_ROWS_COUNT}
-								<a class="getMorePreviewData" href="{$MORE_DATA_URL}" style="margin-left: 2em">voir plus de lignes</a>
-							{/if}	
+							<span class="span6" style="padding-left: 2em;">
+								Nombre de lignes à importer : {$IMPORTABLE_ROWS_COUNT}{if true || $SOURCE_ROWS_COUNT neq $IMPORTABLE_ROWS_COUNT}&nbsp;/&nbsp;{$SOURCE_ROWS_COUNT}{/if}
+								&nbsp;-&nbsp;Affichée{if $MODULE_ROW_OFFSET > 1}s{/if} : {$MODULE_ROW_OFFSET} 
+								
+								{if $MODULE_ROW_OFFSET < $SOURCE_ROWS_COUNT}
+									<a class="getMorePreviewData" href="{$MORE_DATA_URL}" style="margin-left: 2em">voir plus de lignes</a>
+								{/if}
+							</span>
 						</td>
 					</tr>
 				{/if}
-			</tfoot>
+				{if $PREVIEW_DATA@last}{assign var=ROW_OFFSET value=$MODULE_ROW_OFFSET}{/if}
+			{/if}
+			{/foreach}
 		</table>
 		<div style="padding-left: 4em;">
 			<form onsubmit="" action="index.php" enctype="multipart/form-data" method="POST" name="selectImportSource">

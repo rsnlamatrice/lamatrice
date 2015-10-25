@@ -495,14 +495,13 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		switch($fieldname){
 			case 'error'://rsnreglements
 				return array(
-					'0' => array( 'label' => ' ', 'icon' => 'ui-icon ui-icon-check green' ),
+					'0' => array( 'label' => 'non', 'icon' => 'ui-icon ui-icon-check green' ),
 					'1' => array( 'label' => 'Erreur', 'icon' => 'ui-icon ui-icon-close red' ),
 				);
 			case 'enabled':
 				return array(
 					'0' => array( 'label' => 'Erreur', 'icon' => 'ui-icon ui-icon-locked red' ),
 					'1' => array( 'label' => 'Ok', 'icon' => 'ui-icon ui-icon-unlocked green' ),
-					'on' => array( 'label' => 'Ok', 'icon' => 'ui-icon ui-icon-unlocked green' ),
 				);
 			case 'emailoptout'://contacts, rsnmediacontacts
 				return array(
@@ -536,7 +535,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				return array();
 			
 			default:
-				if(strpos($fieldname,'addressformat') >= 0)
+				if(strpos($fieldname,'addressformat') !== false)
 					return array(
 						'NC1' => array( 'title' => 'Normal', 'icon' => 'icon-rsn-small-formataddress-NC1' ),
 						'CN1' => array( 'title' => 'Groupe avant', 'icon' => 'icon-rsn-small-formataddress-CN1' ),

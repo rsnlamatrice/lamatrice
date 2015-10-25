@@ -85,7 +85,7 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 		foreach ($currencyFieldsList as $fieldName) {
 			$finalDetails[$fieldName] = Vtiger_Currency_UIType::transformDisplayValue($finalDetails[$fieldName], null, true);
 		}
-
+		
 		$relatedProducts[1]['final_details'] = $finalDetails;
 		//##Final details convertion ended
 
@@ -119,6 +119,7 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 		$viewer->assign('RELATED_PRODUCTS', $relatedProducts);
 		$viewer->assign('RECORD', $recordModel);
 		$viewer->assign('MODULE_NAME',$moduleName);
+		$viewer->assign('MODULE',$moduleName);
 
 		$viewer->view('LineItemsDetail.tpl', 'Inventory');
 	}
