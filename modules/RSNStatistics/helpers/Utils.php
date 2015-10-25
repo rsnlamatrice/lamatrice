@@ -8,10 +8,13 @@ class RSNStatistics_Utils_Helper {
 				AND `vtiger_rsnstatistics`.`disabled` = 0";
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($sql, array($id));
+		if(!$result)
+			$db->echoError('Error in getStatsTableNameFromId');
 		$numberOfRecords = $db->num_rows($result);
 
 		if ($numberOfRecords <= 0) {
-			echo "nothing...<br/>";//tmp
+			//echo_callstack();
+			//echo "$id : nothing...<br/>";//tmp
 			return "";
 		}
 
@@ -51,6 +54,7 @@ class RSNStatistics_Utils_Helper {
 	public static function getRelatedStatisticsRecordModels($moduleNames) {
 		$relatedStats = self::getRelatedStatistics($moduleNames);
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', 'RSNStatistics');
+		$moduleModel = Vtiger_Module_Model::getInstance('RSNStatistics');
 		foreach($relatedStats as $index => $rowData){
 			$recordInstance = new $modelClassName();
 			$relatedStats[$index] = $recordInstance->setData($rowData)->setModuleFromInstance($moduleModel);
@@ -117,9 +121,25 @@ class RSNStatistics_Utils_Helper {
 	public static function getRelatedStatsFieldsRecordModels($statisticIds, $moduleName = false) {
 		$relatedStatFields = self::getRelatedStatsFields($statisticIds, $moduleName);
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', 'RSNStatisticsFields');
+		$moduleModel = Vtiger_Module_Model::getInstance('RSNStatisticsFields');
 		foreach($relatedStatFields as $index => $rowData){
 			$recordInstance = new $modelClassName();
 			$relatedStatFields[$index] =$recordInstance->setData($rowData)->setModuleFromInstance($moduleModel);
+		}
+		return $relatedStatFields;
+	}
+	
+	/**
+	 * Retourne les champs statistiques sous la forme de Vtiger_Field_Model
+	 */
+	public static function getRelatedStatsFieldsVtigerFieldModels($statisticIds, $moduleName = false) {
+		$relatedStatFields = self::getRelatedStatsFields($statisticIds, $moduleName);
+		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', 'RSNStatisticsFields');
+		$moduleModel = Vtiger_Module_Model::getInstance('RSNStatisticsFields');
+		foreach($relatedStatFields as $index => $rowData){
+			$fieldInstance = RSNStatisticsFields_Field_Model::getInstanceFromRowData($rowData);
+			$fieldInstance->setModule($moduleModel);
+			$relatedStatFields[$index] = $fieldInstance;
 		}
 		return $relatedStatFields;
 	}
@@ -215,7 +235,8 @@ class RSNStatistics_Utils_Helper {
 		$numberOfRecords = $db->num_rows($result);
 
 		if ($numberOfRecords <= 0) {
-			echo "nothing...<br/>";//tmp
+			//echo_callstack();
+			//echo "$id : nothing...<br/>";//tmp
 			return "";
 		}
 
@@ -231,7 +252,8 @@ class RSNStatistics_Utils_Helper {
 		$numberOfRecords = $db->num_rows($result);
 
 		if ($numberOfRecords <= 0) {
-			echo "nothing...<br/>";//tmp
+			//echo_callstack();
+			//echo "$id : nothing...<br/>";//tmp
 			return 0;
 		}
 
@@ -276,11 +298,11 @@ class RSNStatistics_Utils_Helper {
 		}
 		if($mainTable){
 			$query .= "SELECT " .
-					"`" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, " . $rows .
+					"`" . $mainTable . "`.id, `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, " . $rows .
 					" FROM `" . $mainTable . "`";
 
 			foreach($relatedStatsTablesNames as $relatedStatsTableName) {
-				if ($relatedStatsTableName != $mainTable) {
+				if ($relatedStatsTableName != $mainTable) { 
 					$query .= " LEFT OUTER JOIN `" . $relatedStatsTableName .
 								"` ON `" . $relatedStatsTableName . "`.`code` = `" . $mainTable . "`.`code`" . 
 								" AND `" . $relatedStatsTableName . "`.`crmid` = `" . $mainTable . "`.`crmid`";

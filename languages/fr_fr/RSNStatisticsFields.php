@@ -20,6 +20,7 @@ $languageStrings = array(
 	'LBL_RSNSQLQUERIESID' => 'requête SQL',
 	'LBL_SEQUENCE' => 'Index de tri',
 	'LBL_AGGREGATE_FUNCTION' => 'Fonction de cumuls',
+	'LBL_STATS_PERIODICITE' => 'Période',
 );
 
 ?>

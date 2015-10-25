@@ -876,7 +876,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		if(!$moduleModels){
 		    $presence = array(0, 2);
 		    $moduleModels = self::getAll($presence);
-		    $restrictedModules = array('Webmails', 'Emails', 'Integration', 'Dashboard');
+		    $restrictedModules = array('Webmails', 'Emails', 'Integration', 'Dashboard'); //? TODO ? RSNStatisticsResults
 		    foreach($moduleModels as $key => $moduleModel){
 			if(in_array($moduleModel->getName(),$restrictedModules) || $moduleModel->get('isentitytype') != 1){
 			    unset($moduleModels[$key]); 
@@ -1026,7 +1026,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	public function getDefaultCustomFilter() {
 		$db = PearDatabase::getInstance();
 
-		$result = $db->pquery("SELECT cvid FROM vtiger_customview WHERE setdefault = 1 AND entitytype = ?",
+		$result = $db->pquery("SELECT cvid FROM vtiger_customview WHERE setdefault = 1 AND entitytype = ? LIMIT 1",
 					array($this->getName()));
 		if ($db->num_rows($result)) {
 			return $db->query_result($result, 0, 'cvid');

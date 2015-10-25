@@ -11,7 +11,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 	{if sizeof($PREVIEW_DATA) gt 0}
 		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
 			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
-				{include file='ImportPreviewModuleContent.tpl'|@vtemplate_path:'RSNImportSources'}
+				{include file='ImportPreviewModuleContents.tpl'|@vtemplate_path:'RSNImportSources'}
 				{if $PREVIEW_DATA@last}{assign var=ROW_OFFSET value=count($MODULE_DATA)}{/if}
 			{/foreach}
 			<tfoot>

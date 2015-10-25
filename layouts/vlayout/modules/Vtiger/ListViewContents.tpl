@@ -66,7 +66,7 @@
 					{else if $LISTVIEW_HEADER->getName() == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
 						{continue}
 					{/if}
-					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} class="{$WIDTHTYPE}">
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} class="{$WIDTHTYPE} {if $LISTVIEW_HEADER->get('hide')}hide{/if}">
 						<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
 							&nbsp;&nbsp;{if $COLUMN_NAME eq $LISTVIEW_HEADER->get('column')}<img class="{$SORT_IMAGE} icon-white">{/if}</a>
 					</th>
@@ -83,7 +83,7 @@
 					{if $LISTVIEW_HEADER->getName() == 'modifiedtime' && $SKIP_MODIFIEDTIME && !$LISTVIEW_HEADER@last}
 						{continue}
 					{/if}
-					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if}>
+					<th nowrap {if $LISTVIEW_HEADER@last} colspan="2" {/if} {if $LISTVIEW_HEADER->get('hide')}class="hide"{/if}>
 						{include file=vtemplate_path($LISTVIEW_HEADER->getUITypeModel()->getHeaderFilterTemplateName(),$MODULE)}
 					</th>
 				{/foreach}
@@ -106,7 +106,8 @@
 					{/if}
 					{assign var=UITYPE value=$LISTVIEW_HEADER->get('uitype')}
 					{assign var=IS_BUTTONSET value=$UITYPE eq '402'}
-					<td class="listViewEntryValue {$WIDTHTYPE}" data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}"
+					<td class="listViewEntryValue {$WIDTHTYPE} {if $LISTVIEW_HEADER->get('hide')}hide{/if}"
+						data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}"
 					    {if $UICOLOR neq null && $UITYPE eq '401'} style="background-color: {$UICOLOR} !important; min-width:3em;"{/if} nowrap>
 						{if $LISTVIEW_HEADER->isNameField() eq true or $UITYPE eq '4'}
 							<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>

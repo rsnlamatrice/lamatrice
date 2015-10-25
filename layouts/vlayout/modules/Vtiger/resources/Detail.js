@@ -860,7 +860,9 @@ jQuery.Class("Vtiger_Detail_Js",{
 					    row = element.closest('li');
 					}
 					var relatedRecordid = row.data('id');
-					relatedController.deleteRelation([relatedRecordid]);
+					relatedController.deleteRelation([relatedRecordid]).then(function(response){
+						relatedController.loadRelatedList();
+					});
 				},
 				function(error, err){
 				}

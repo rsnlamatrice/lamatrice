@@ -277,6 +277,7 @@ class QueryGenerator {
 	}
 
 	public function parseAdvFilterList($advFilterList, $glue=''){
+		echo '<br><br><br><br>';
 		if(!empty($glue)) $this->addConditionGlue($glue);
 
 		$customView = new CustomView($this->module);
@@ -286,6 +287,7 @@ class QueryGenerator {
 		$dateSpecificConditions = $customView->getStdFilterConditions();
 		foreach ($advFilterList as $groupindex=>$groupcolumns) {
 			$filtercolumns = $groupcolumns['columns'];
+		//var_dump('parseAdvFilterList', $filtercolumns);
 			if(count($filtercolumns) > 0) {
 				$this->startGroup('');
 				$skipNextIndex = -1;
@@ -303,124 +305,129 @@ class QueryGenerator {
 						$pos = strpos($filter['columnname'], ']', 1);
 						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
 						$filter['relatedmodulename'] = $viewName[0];
-						$filter['viewid'] = $viewName[2];
-						$filter['viewname'] = $viewName[1];
-						$filter['relatedmodule'] = Vtiger_Module_Model::getInstance($filter['relatedmodulename']);
-						
-						$columnInfo = trim(substr($filter['columnname'], $pos + 1));
-						$filter['columnname'] = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
-						if(!$filter['columnname']){
-							//echo '<br><br><br><br>'.__FILE__;
-							$relationModel = false;
-							//RSNContactsPanels
-							if($filter['relatedmodulename'] == 'RSNContactsPanels'){
-								$sourceFieldName = $this->getSQLColumn('id');
-								$viewFilters = false; //TODO sure ?
-								$panelRecord = Vtiger_Record_Model::getInstanceById($filter['viewid'], $filter['relatedmodulename']);
-								$relatedSql  = $panelRecord->getExecutionSQLWithIntegratedParams();
-		
-							}
-							else { //"normal" relation
-								foreach($relationModels as $model)
-									if($model->getRelationModuleName() == $filter['relatedmodulename']){
-										$relationModel = $model;
-										break;
+						if($viewName[0] === 'RSNStatisticsResults'){//RSNStatisticsResults
+							echo "<code>TODO</code>";
+						}
+						else { //CustomView
+							$filter['viewid'] = $viewName[2];
+							$filter['viewname'] = $viewName[1];
+							$filter['relatedmodule'] = Vtiger_Module_Model::getInstance($filter['relatedmodulename']);
+							
+							$columnInfo = trim(substr($filter['columnname'], $pos + 1));
+							$filter['columnname'] = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
+							if(!$filter['columnname']){
+								//echo '<br><br><br><br>'.__FILE__;
+								$relationModel = false;
+								//RSNContactsPanels
+								if($filter['relatedmodulename'] == 'RSNContactsPanels'){
+									$sourceFieldName = $this->getSQLColumn('id');
+									$viewFilters = false; //TODO sure ?
+									$panelRecord = Vtiger_Record_Model::getInstanceById($filter['viewid'], $filter['relatedmodulename']);
+									$relatedSql  = $panelRecord->getExecutionSQLWithIntegratedParams();
+			
+								}
+								else { //"normal" relation
+									foreach($relationModels as $model)
+										if($model->getRelationModuleName() == $filter['relatedmodulename']){
+											$relationModel = $model;
+											break;
+										}
+									if($relationModel){
+										$relationsInfos = $relationModel->getModulesInfoForDetailView();
+										//var_dump($relationsInfos);
 									}
-								if($relationModel){
-									$relationsInfos = $relationModel->getModulesInfoForDetailView();
-									//var_dump($relationsInfos);
-								}
-								if(!$relationModel
-								|| !isset($relationsInfos[$filter['relatedmodulename']])){
-									$relationInfos = array('fieldName' => $this->getSQLColumn('id')
-											       , 'tableName' => ' vtiger_crmentityrel');
-								}
-								else
-									$relationInfos = $relationsInfos[$filter['relatedmodulename']];
-								
-								//var_dump($relationInfos);
-								//$relationModel = Vtiger_Relation_Model::getInstance($this->module, $filter['relatedmodulename']);
-								//$value = $relationModel->getQuery();
-								//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $value, 'IN');
-								
-								/*next conditions*/
-								$viewFilters = array();
-								for($iNext = $index+1; $iNext < count($filtercolumns); $iNext++) {
-									$nextFilter = $filtercolumns[$iNext];
-									//same view, memorize and skip
-									if(substr($nextFilter['columnname'], 0, strlen($filter['relatedmodulename']) + 2) == '['.$filter['relatedmodulename'].':'){
-										$nextFilter['columnname'] = preg_replace('/^[^\]]+\]::(.+)$/', '$1', $nextFilter['columnname']);
-										$nextFilter['relatedmodulename'] = $filter['relatedmodulename'];
-										$nextFilter['viewid'] = $filter['viewid'];
-										$nextFilter['viewname'] = $filter['viewname'];
-										$nextFilter['relatedmodule'] = $filter['relatedmodule'];
-										$viewFilters[] = $nextFilter;
-										$skipNextIndex = $iNext;
+									if(!$relationModel
+									|| !isset($relationsInfos[$filter['relatedmodulename']])){
+										$relationInfos = array('fieldName' => $this->getSQLColumn('id')
+													   , 'tableName' => ' vtiger_crmentityrel');
 									}
 									else
-										break;
+										$relationInfos = $relationsInfos[$filter['relatedmodulename']];
+									
+									//var_dump($relationInfos);
+									//$relationModel = Vtiger_Relation_Model::getInstance($this->module, $filter['relatedmodulename']);
+									//$value = $relationModel->getQuery();
+									//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $value, 'IN');
+									
+									/*next conditions*/
+									$viewFilters = array();
+									for($iNext = $index+1; $iNext < count($filtercolumns); $iNext++) {
+										$nextFilter = $filtercolumns[$iNext];
+										//same view, memorize and skip
+										if(substr($nextFilter['columnname'], 0, strlen($filter['relatedmodulename']) + 2) == '['.$filter['relatedmodulename'].':'){
+											$nextFilter['columnname'] = preg_replace('/^[^\]]+\]::(.+)$/', '$1', $nextFilter['columnname']);
+											$nextFilter['relatedmodulename'] = $filter['relatedmodulename'];
+											$nextFilter['viewid'] = $filter['viewid'];
+											$nextFilter['viewname'] = $filter['viewname'];
+											$nextFilter['relatedmodule'] = $filter['relatedmodule'];
+											$viewFilters[] = $nextFilter;
+											$skipNextIndex = $iNext;
+										}
+										else
+											break;
+									}
+									
+									//sub view
+									$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
+									//get view query, adding filters
+									$relatedSql = $listView->getQuery();
+									//SELECT `id`  only
+									$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
+									if(strpos($relationInfos['fieldName'], '.') === FALSE)
+										$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. $relationInfos['fieldName'];
+									else
+										$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. substr($relationInfos['fieldName'], strpos($relationInfos['fieldName'], '.')+1);
+									
+									if(isset($relationInfos['relationTableName'])){
+										//salement fait pour Invoice / RsnReglements. cf modules/Inventory/models/Relation.php
+										$subQueryTable = uniqid('subq_');
+										$subQueryField =  $subQueryTable . '.' . $relationInfos['relatedFieldName'];
+										$relSourceFieldName = isset($relationInfos['sourceFieldNameInRelation']) ? $relationInfos['sourceFieldNameInRelation'] : $relationInfos['fieldName'];
+										$relatedSql = 'SELECT ' . $relSourceFieldName
+											. ' FROM ' . $relationInfos['relationTableName']
+											. ' JOIN (' . $relatedSql . ') ' . $subQueryTable
+											. ' 	ON ' . $relationInfos['relationTableName'] . '.' . $relationInfos['relatedSourceFieldName']
+											. '		= ' . $subQueryField
+											;
+									}
+									else {
+										$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
+										$newQuery[0] = $selectColumnSql.' ';
+										
+										$relatedSql = implode("\nFROM ", $newQuery);
+										
+									}
+									
+									//echo '<br><br><br><br><pre>'; print_r($relatedSql); echo '</pre>';
+									
+									
+									$sourceFieldName = isset($relationInfos['sourceFieldName']) ? $relationInfos['sourceFieldName'] : $this->getSQLColumn('id');
 								}
 								
-								//sub view
-								$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
-								//get view query, adding filters
-								$relatedSql = $listView->getQuery();
-								//SELECT `id`  only
-								$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
-								if(strpos($relationInfos['fieldName'], '.') === FALSE)
-									$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. $relationInfos['fieldName'];
+								//print_r('<pre>$this->getSQLColumn(id) : '.$this->getSQLColumn('id').'</pre>');
+								//print_r('<pre>$relatedSql : '.$relatedSql.'</pre>');
+								//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $relatedSql, 'IN');
+								//echo str_repeat('<br>',5).__FILE__.'<br>';
+								//var_dump($this->getSQLColumn('id'), "/*BEGIN ".$filter['viewname']."*/\n\t$relatedSql\n\t/*END ".$filter['viewname']."*/", 'IN', 'AND');
+								//TODO $field =	var_dump($this->meta->getFieldByColumnName("contact_id"));
+								
+								//TODO bugg vu avec un filtre juste avant
+								
+								$this->startGroup('', $filter['comparator'] . ' [' . $filter['viewname'] . ']');
+								$this->addCondition($sourceFieldName
+											, $relatedSql
+											, $filter['comparator']);
+								$this->endGroup($filter['viewname']);
+								
+								//column_condition
+								//must use the last filter, even if skipped
+								if(count($viewFilters))
+									$columncondition = $viewFilters[count($viewFilters)-1]['column_condition'];
 								else
-									$relationInfos['fieldName'] = $relationInfos['tableName'] .'.'. substr($relationInfos['fieldName'], strpos($relationInfos['fieldName'], '.')+1);
-								
-								if(isset($relationInfos['relationTableName'])){
-									//salement fait pour Invoice / RsnReglements. cf modules/Inventory/models/Relation.php
-									$subQueryTable = uniqid('subq_');
-									$subQueryField =  $subQueryTable . '.' . $relationInfos['relatedFieldName'];
-									$relSourceFieldName = isset($relationInfos['sourceFieldNameInRelation']) ? $relationInfos['sourceFieldNameInRelation'] : $relationInfos['fieldName'];
-									$relatedSql = 'SELECT ' . $relSourceFieldName
-										. ' FROM ' . $relationInfos['relationTableName']
-										. ' JOIN (' . $relatedSql . ') ' . $subQueryTable
-										. ' 	ON ' . $relationInfos['relationTableName'] . '.' . $relationInfos['relatedSourceFieldName']
-										. '		= ' . $subQueryField
-										;
+									$columncondition = $filter['column_condition'];
+								if(!empty($columncondition)) {
+									$this->addConditionGlue($columncondition);
 								}
-								else {
-									$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
-									$newQuery[0] = $selectColumnSql.' ';
-									
-									$relatedSql = implode("\nFROM ", $newQuery);
-									
-								}
-								
-								//echo '<br><br><br><br><pre>'; print_r($relatedSql); echo '</pre>';
-								
-								
-								$sourceFieldName = isset($relationInfos['sourceFieldName']) ? $relationInfos['sourceFieldName'] : $this->getSQLColumn('id');
-							}
-							
-							//print_r('<pre>$this->getSQLColumn(id) : '.$this->getSQLColumn('id').'</pre>');
-							//print_r('<pre>$relatedSql : '.$relatedSql.'</pre>');
-							//$this->addRelatedModuleCondition($filter['relatedmodulename'], $this->getSQLColumn('id'), $relatedSql, 'IN');
-							//echo str_repeat('<br>',5).__FILE__.'<br>';
-							//var_dump($this->getSQLColumn('id'), "/*BEGIN ".$filter['viewname']."*/\n\t$relatedSql\n\t/*END ".$filter['viewname']."*/", 'IN', 'AND');
-							//TODO $field =	var_dump($this->meta->getFieldByColumnName("contact_id"));
-							
-							//TODO bugg vu avec un filtre juste avant
-							
-							$this->startGroup('', $filter['comparator'] . ' [' . $filter['viewname'] . ']');
-							$this->addCondition($sourceFieldName
-									    , $relatedSql
-									    , $filter['comparator']);
-							$this->endGroup($filter['viewname']);
-							
-							//column_condition
-							//must use the last filter, even if skipped
-							if(count($viewFilters))
-								$columncondition = $viewFilters[count($viewFilters)-1]['column_condition'];
-							else
-								$columncondition = $filter['column_condition'];
-							if(!empty($columncondition)) {
-								$this->addConditionGlue($columncondition);
 							}
 							continue;
 						}

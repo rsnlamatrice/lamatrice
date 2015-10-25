@@ -292,6 +292,13 @@ class Vtiger_Field_Model extends Vtiger_Field {
 
 		return null;
     }
+	/**
+	 * Function to get all the available picklist values for the current field in a CustomView context
+	 * @return <Array> List of picklist values if the field is of type picklist or multipicklist, null otherwise.
+	 */
+	public function getPicklistValuesForCustomView(&$picklistvaluesdata = FALSE){
+		return $this->getPicklistValuesForCustomView($picklistvaluesdata);
+	}
 
 	/**
 	 * Function to check if the current field is mandatory or not
@@ -520,11 +527,30 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		return $this->get('workflow_columnname');
 	}
 
+	
 	/**
 	 * Function to get the field details
 	 * @return <Array> - array of field values
 	 */
 	public function getFieldInfo() {
+		return $this->getFieldInfoForContext();
+	}
+	
+	/** ED151025
+	 * Function to get the field details for custom view context
+	 * @return <Array> - array of field values
+	 *
+	 * First use with RSNStatisticsFields, editing CustomView
+	 * Used to change PickListValues
+	 */
+	public function getFieldInfoForCustomView() {
+		return $this->getFieldInfoForContext('CustomView');
+	}
+	/** ED151025
+	 * Function to get the field details
+	 * @return <Array> - array of field values
+	 */
+	public function getFieldInfoForContext($context = false) {
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 		$fieldDataType = $this->getFieldDataType();
 		$this->fieldInfo['mandatory'] = $this->isMandatory();
@@ -535,13 +561,18 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		$this->fieldInfo['type'] = $fieldDataType;
 		$this->fieldInfo['name'] = $this->get('name');
 		$this->fieldInfo['label'] = vtranslate($this->get('label'), $this->getModuleName());
-
-
+		if($context)
+			$this->fieldInfo['context'] = $context;
+			
 		switch($fieldDataType){
 		case 'picklist':
 		case 'multipicklist':
 		case 'buttonSet'://ED140000
-		    $pickListValues = $this->getPicklistValues();
+			if($context === 'CustomView')
+				$pickListValues = $this->getPicklistValuesForCustomView();
+			else
+				$pickListValues = $this->getPicklistValues();
+				
 		    if(!empty($pickListValues)) {
 			$this->fieldInfo['picklistvalues'] = $pickListValues;
 		    }
