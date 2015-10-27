@@ -13,6 +13,7 @@
   */
 -->*}
 {strip}
+	{if !$CURRENT_USER_MODEL}{assign var=CURRENT_USER_MODEL value=$USER_MODEL}{/if}
 				<span class="customFilterMainSpan btn-group">
 					{if $CUSTOM_VIEWS|@count gt 0}
 						{if !$VIEWID && $RELATED_VIEWNAME}
