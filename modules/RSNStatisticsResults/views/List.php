@@ -15,31 +15,31 @@ class RSNStatisticsResults_List_View extends Vtiger_List_View {
 	}
 	function initializeListViewContents (Vtiger_Request $request, $viewer) {
 		
-		if(!($listViewModel = $this->listViewModel)){
-			$moduleName = $request->getModule();
-			$cvId = $this->viewName;
+		//TODO tester si double initialisation
 		
-			$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
+		$moduleName = $request->getModule();
+		$cvId = $this->viewName;
+	
+		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
+	
 		
-			
-		
-			$searchKey = $request->get('search_key');
-			$searchValue = $request->get('search_value');
-			$searchInput = $request->get('search_input');
-			$operator = $request->get('operator');
-			if(!empty($searchKey) && (!empty($searchValue) || ($searchValue == '0'))) {
-				if($searchKey === 'statisticsid'){
-					$statisticsIds = array($searchValue);
-				} elseif( is_array($searchKey) && in_array('rsnstatisticsid', $searchKey)){
-					$statisticsIds = $searchValue[array_search('rsnstatisticsid', $searchKey)] ;
-				}
-				$listViewModel->set('rsnstatisticsid', $statisticsIds);
+	
+		$searchKey = $request->get('search_key');
+		$searchValue = $request->get('search_value');
+		$searchInput = $request->get('search_input');
+		$operator = $request->get('operator');
+		if(!empty($searchKey) && (!empty($searchValue) || ($searchValue == '0'))) {
+			if($searchKey === 'statisticsid'){
+				$statisticsIds = array($searchValue);
+			} elseif( is_array($searchKey) && in_array('rsnstatisticsid', $searchKey)){
+				$statisticsIds = $searchValue[array_search('rsnstatisticsid', $searchKey)] ;
 			}
-			if(!empty($searchKey)){
-				$listViewModel->set('search_key', $searchKey);
-				$listViewModel->set('search_value', $searchValue);
-				$listViewModel->set('search_input', $searchInput);
-			}
+			$listViewModel->set('rsnstatisticsid', $statisticsIds);
+		}
+		if(!empty($searchKey)){
+			$listViewModel->set('search_key', $searchKey);
+			$listViewModel->set('search_value', $searchValue);
+			$listViewModel->set('search_input', $searchInput);
 		}
 		
 		return parent::initializeListViewContents ($request, $viewer);

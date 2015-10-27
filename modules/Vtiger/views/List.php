@@ -9,7 +9,6 @@
  ************************************************************************************/
 
 class Vtiger_List_View extends Vtiger_Index_View {
-	protected $listViewModel = false;//ED151025
 	protected $listViewEntries = false;
 	protected $listViewCount = false;
 	protected $listViewLinks = false;
@@ -25,7 +24,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$moduleName = $request->getModule();
 		
 		$this->viewName = $request->get('viewname');
-		$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $this->viewName);
+		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $this->viewName);
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'));
 		$viewer->assign('CUSTOM_VIEWS', CustomView_Record_Model::getAllByGroup($moduleName));
 		if(empty($this->viewName)){
@@ -130,8 +129,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 			$pageNumber = '1';
 		}
 
-		//if(!($listViewModel = $this->listViewModel))//ED151025
-			$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
+		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 			
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'), 'CVID'=>$cvId);
 		$linkModels = $listViewModel->getListViewMassActions($linkParams);
@@ -260,8 +258,7 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
 
-		if(!($listViewModel = $this->listViewModel))//ED151025
-			$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
+		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 		$listViewModel->set('search_key', $searchKey);
 		$listViewModel->set('search_value', $searchValue);
 		$listViewModel->set('operator', $request->get('operator'));
