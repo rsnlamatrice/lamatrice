@@ -23,16 +23,22 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$viewer = $this->getViewer ($request);
 		$moduleName = $request->getModule();
 		
-		$this->viewName = $request->get('viewname');
-		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $this->viewName);
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'));
 		$viewer->assign('CUSTOM_VIEWS', CustomView_Record_Model::getAllByGroup($moduleName));
+		$this->viewName = $request->get('viewname');
 		if(empty($this->viewName)){
 			//If not view name exits then get it from custom view
 			//This can return default view id or view id present in session
 			$customView = new CustomView();
 			$this->viewName = $customView->getViewId($moduleName);
 		}
+		var_dump("
+			 
+			 
+			 
+			 
+			 ", $this->viewName);
+		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $this->viewName);
 
 		$quickLinkModels = $listViewModel->getSideBarLinks($linkParams);
 		$viewer->assign('QUICK_LINKS', $quickLinkModels);
@@ -128,7 +134,6 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		if(empty ($pageNumber)){
 			$pageNumber = '1';
 		}
-
 		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 			
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'), 'CVID'=>$cvId);
