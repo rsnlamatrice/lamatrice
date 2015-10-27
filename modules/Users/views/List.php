@@ -57,8 +57,7 @@ class Users_List_View extends Settings_Vtiger_List_View {
 			$pageNumber = '1';
 		}
 
-		if(!($listViewModel = $this->listViewModel))//ED151025
-			$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
+		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'), 'CVID'=>$cvId);
 		$linkModels = $listViewModel->getListViewMassActions($linkParams);
@@ -173,8 +172,7 @@ class Users_List_View extends Settings_Vtiger_List_View {
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
 
-		if(!($listViewModel = $this->listViewModel))//ED151025
-			$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
+		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $cvId);
 		$listViewModel->set('search_key', $searchKey);
 		$listViewModel->set('search_value', $searchValue);
 		$listViewModel->set('operator', $request->get('operator'));
