@@ -28,16 +28,19 @@
 
     <table class="table table-bordered blockContainer lineItemTable" id="lineItemTab">
         <tr>
-            <th><span class="inventoryLineItemHeader">{vtranslate('LBL_ITEM_DETAILS', $MODULE)}</span></th>
-			{* ED1506022 remise type *}
-				<th>{assign var=FIELD_MODEL value=$RECORD->getField('accountdiscounttype')}
-			{if $FIELD_MODEL}
-				<a id="inventory_accountdiscounttype_setter">{vtranslate('LBL_ACCOUNT_DISCOUNT_TYPE')}</a>
-				<div id="inventory_accountdiscounttype_holder">
-				{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE)}
-				</div>
-			{/if}
-			</th>
+            <th><span class="inventoryLineItemHeader">{vtranslate('LBL_ITEM_DETAILS', $MODULE)}</span>
+		{* ED1506022 remise type *}
+			</th><th>{assign var=FIELD_MODEL value=$RECORD->getField('accountdiscounttype')}
+		{if $FIELD_MODEL}
+			<a id="inventory_accountdiscounttype_setter">{vtranslate('LBL_ACCOUNT_DISCOUNT_TYPE')}</a>
+			<div id="inventory_accountdiscounttype_holder">
+			{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE)}
+			</div>
+		{/if}
+		{if $RECORD->get('typedossier') === 'Avoir'}
+		    </th><th><b style="border: 1px solid red; padding: 1px 2px;">Ceci est un {vtranslate($RECORD->get('typedossier'), $MODULE)}</b>
+		{/if}				
+	    </th>
             <td colspan="1" class="chznDropDown">
 			{if ! $SHOW_ITEMS_HEADER_DETAILS}<div class="hide">{* ED150906 hide *}{/if}
                 <b>{$APP.LBL_CURRENCY}</b>&nbsp;&nbsp;

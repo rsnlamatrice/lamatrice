@@ -19,6 +19,5 @@
  */
  
 include('config.inc.php');
-//ED150500
 include('config.RSN.inc.php');
 ?>

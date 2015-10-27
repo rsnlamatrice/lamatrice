@@ -11,34 +11,34 @@
 -->*}
 {strip}
 	{assign var="deleted" value="deleted"|cat:$row_no}
-    {assign var="hdnProductId" value="hdnProductId"|cat:$row_no}
-    {assign var="productName" value="productName"|cat:$row_no}
-    {assign var="productCode" value="hdnProductcode"|cat:$row_no}
-    {assign var="comment" value="comment"|cat:$row_no}
-    {assign var="productDescription" value="productDescription"|cat:$row_no}
-    {assign var="qtyInStock" value="qtyInStock"|cat:$row_no}
-    {assign var="qty" value="qty"|cat:$row_no}
-    {assign var="listPrice" value="listPrice"|cat:$row_no}
-    {assign var="productTotal" value="productTotal"|cat:$row_no}
-    {assign var="subproduct_ids" value="subproduct_ids"|cat:$row_no}
-    {assign var="subprod_names" value="subprod_names"|cat:$row_no}
-    {assign var="entityIdentifier" value="entityType"|cat:$row_no}
-    {assign var="entityType" value=$data.$entityIdentifier}
-
-    {assign var="discount_type" value="discount_type"|cat:$row_no}
-    {assign var="discount_percent" value="discount_percent"|cat:$row_no}
-    {assign var="checked_discount_percent" value="checked_discount_percent"|cat:$row_no}
-    {assign var="style_discount_percent" value="style_discount_percent"|cat:$row_no}
-    {assign var="discount_amount" value="discount_amount"|cat:$row_no}
-    {assign var="checked_discount_amount" value="checked_discount_amount"|cat:$row_no}
-    {assign var="style_discount_amount" value="style_discount_amount"|cat:$row_no}
-    {assign var="checked_discount_zero" value="checked_discount_zero"|cat:$row_no}
-
-    {assign var="discountTotal" value="discountTotal"|cat:$row_no}
-    {assign var="totalAfterDiscount" value="totalAfterDiscount"|cat:$row_no}
-    {assign var="taxTotal" value="taxTotal"|cat:$row_no}
-    {assign var="netPrice" value="netPrice"|cat:$row_no}
-    {assign var="FINAL" value=$RELATED_PRODUCTS.1.final_details}
+	{assign var="hdnProductId" value="hdnProductId"|cat:$row_no}
+	{assign var="productName" value="productName"|cat:$row_no}
+	{assign var="productCode" value="hdnProductcode"|cat:$row_no}
+	{assign var="comment" value="comment"|cat:$row_no}
+	{assign var="productDescription" value="productDescription"|cat:$row_no}
+	{assign var="qtyInStock" value="qtyInStock"|cat:$row_no}
+	{assign var="qty" value="qty"|cat:$row_no}
+	{assign var="listPrice" value="listPrice"|cat:$row_no}
+	{assign var="productTotal" value="productTotal"|cat:$row_no}
+	{assign var="subproduct_ids" value="subproduct_ids"|cat:$row_no}
+	{assign var="subprod_names" value="subprod_names"|cat:$row_no}
+	{assign var="entityIdentifier" value="entityType"|cat:$row_no}
+	{assign var="entityType" value=$data.$entityIdentifier}
+	
+	{assign var="discount_type" value="discount_type"|cat:$row_no}
+	{assign var="discount_percent" value="discount_percent"|cat:$row_no}
+	{assign var="checked_discount_percent" value="checked_discount_percent"|cat:$row_no}
+	{assign var="style_discount_percent" value="style_discount_percent"|cat:$row_no}
+	{assign var="discount_amount" value="discount_amount"|cat:$row_no}
+	{assign var="checked_discount_amount" value="checked_discount_amount"|cat:$row_no}
+	{assign var="style_discount_amount" value="style_discount_amount"|cat:$row_no}
+	{assign var="checked_discount_zero" value="checked_discount_zero"|cat:$row_no}
+	
+	{assign var="discountTotal" value="discountTotal"|cat:$row_no}
+	{assign var="totalAfterDiscount" value="totalAfterDiscount"|cat:$row_no}
+	{assign var="taxTotal" value="taxTotal"|cat:$row_no}
+	{assign var="netPrice" value="netPrice"|cat:$row_no}
+	{assign var="FINAL" value=$RELATED_PRODUCTS.1.final_details}
 	
 	{assign var="productDeleted" value="productDeleted"|cat:$row_no}
 	<td>
@@ -82,15 +82,15 @@
 			<div><br><textarea id="{$comment}" name="{$comment}" class="lineItemCommentBox">{$data.$comment}</textarea>
 		{/if}
 	</td>
-	<td>
-		<input id="{$qty}" name="{$qty}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_GreaterThanZero_Validator_Js.invokeValidation]]"
+	<td>	{* ED151026 il est désormais possible de saisir des quantités négatives *}
+		<input id="{$qty}" name="{$qty}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_Integer_Validator_Js.invokeValidation]]"
 			   value="{if !empty($data.$qty) || $data.$qty === 0}{$data.$qty}{else}1{/if}"
 		 class="qty tinyInputBox" onfocus="$(this).select()"/>
 		<a class="qty_helper_plus">+</a>
 		<a class="qty_helper_minus">-</a>
 		{if $MODULE neq 'PurchaseOrder'}
 		<br>
-		<span class="stockAlert redColor {if $data.$qty <= $data.$qtyInStock}hide{/if}" >
+		<span class="stockAlert redColor {if !is_numeric($data.$qtyInStock) || ($data.$qty < 0) || ($data.$qty <= $data.$qtyInStock)}hide{/if}" >
 			{vtranslate('LBL_STOCK_NOT_ENOUGH',$MODULE)}
 			<br>
 			{vtranslate('LBL_MAX_QTY_SELECT',$MODULE)}&nbsp;<span class="maxQuantity">{$data.$qtyInStock}</span>
