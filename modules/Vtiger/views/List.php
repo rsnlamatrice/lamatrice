@@ -24,10 +24,10 @@ class Vtiger_List_View extends Vtiger_Index_View {
 		$viewer = $this->getViewer ($request);
 		$moduleName = $request->getModule();
 		
-		$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName);
+		$this->viewName = $request->get('viewname');
+		$listViewModel = $this->listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $this->viewName);
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'));
 		$viewer->assign('CUSTOM_VIEWS', CustomView_Record_Model::getAllByGroup($moduleName));
-		$this->viewName = $request->get('viewname');
 		if(empty($this->viewName)){
 			//If not view name exits then get it from custom view
 			//This can return default view id or view id present in session
@@ -138,7 +138,8 @@ class Vtiger_List_View extends Vtiger_Index_View {
 
 		$pagingModel = new Vtiger_Paging_Model();
 		$pagingModel->set('page', $pageNumber);
-
+		
+		
 		//ED150622
 		if(empty($orderBy) && $cvId) {
 			$customView = CustomView_Record_Model::getInstanceById($cvId);
