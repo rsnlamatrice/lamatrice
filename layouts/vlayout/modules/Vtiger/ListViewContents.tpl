@@ -107,8 +107,8 @@
 					{assign var=UITYPE value=$LISTVIEW_HEADER->get('uitype')}
 					{assign var=IS_BUTTONSET value=$UITYPE eq '402'}
 					<td class="listViewEntryValue {$WIDTHTYPE} {if $LISTVIEW_HEADER->get('hide')}hide{/if}"
-						data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}"
-					    {if $UICOLOR neq null && $UITYPE eq '401'} style="background-color: {$UICOLOR} !important; min-width:3em;"{/if} nowrap>
+					data-field-type="{$LISTVIEW_HEADER->getFieldDataType()}" data-field-name="{$LISTVIEW_HEADER->getFieldName()}"
+					{if $UICOLOR neq null && $UITYPE eq '401'} style="background-color: {$UICOLOR} !important; min-width:3em;"{/if} nowrap>
 						{if $LISTVIEW_HEADER->isNameField() eq true or $UITYPE eq '4'}
 							<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}">{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}</a>
 						{else if $UITYPE eq '72'}
