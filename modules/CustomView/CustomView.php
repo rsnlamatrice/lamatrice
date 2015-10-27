@@ -98,16 +98,18 @@ class CustomView extends CRMEntity {
 		$now_action = vtlib_purify($_REQUEST['action']);
 		if (!$viewname && empty($_REQUEST['viewname'])) {
 			//ED150507 : Attention, bad record occured
+			//ED151027 Il faut se dŽconnecter/reconnecter pour prendre en compte la nouvelle vue par dŽfaut
 			if (isset($_SESSION['lvs'][$module]["viewname"]) && $_SESSION['lvs'][$module]["viewname"] != '') {
 				$viewid = $_SESSION['lvs'][$module]["viewname"];
-			} elseif ($this->setdefaultviewid != "") {
+			} elseif ($this->setdefaultviewid) {
 				$viewid = $this->setdefaultviewid;
 			} else {
-				$defcv_result = $adb->pquery("select default_cvid from vtiger_user_module_preferences where userid = ? and tabid =?", array($current_user->id, getTabid($module)));
+				$defcv_result = $adb->pquery("select default_cvid from vtiger_user_module_preferences where userid = ? and tabid =? LIMIT 1", array($current_user->id, getTabid($module)));
 				if ($adb->num_rows($defcv_result) > 0) {
 					$viewid = $adb->query_result($defcv_result, 0, 'default_cvid');
+					var_dump('vtiger_user_module_preferences', $viewid);
 				} else {
-					$query = "select cvid from vtiger_customview where setdefault=1 and entitytype=?";
+					$query = "select cvid from vtiger_customview where setdefault=1 and entitytype=? LIMIT 1";
 					$cvresult = $adb->pquery($query, array($module));
 					if ($adb->num_rows($cvresult) > 0) {
 						$viewid = $adb->query_result($cvresult, 0, 'cvid');
