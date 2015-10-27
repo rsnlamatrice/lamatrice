@@ -32,12 +32,6 @@ class Vtiger_List_View extends Vtiger_Index_View {
 			$customView = new CustomView();
 			$this->viewName = $customView->getViewId($moduleName);
 		}
-		var_dump("
-			 
-			 
-			 
-			 
-			 ", $this->viewName);
 		$listViewModel = Vtiger_ListView_Model::getInstance($moduleName, $this->viewName);
 
 		$quickLinkModels = $listViewModel->getSideBarLinks($linkParams);
