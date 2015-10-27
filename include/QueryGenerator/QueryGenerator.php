@@ -305,7 +305,7 @@ class QueryGenerator {
 						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
 						$filter['relatedmodulename'] = $viewName[0];
 						if($viewName[0] === 'RSNStatisticsResults'){//RSNStatisticsResults
-							echo "<code>TODO</code>";
+							echo "<code>TODO parseAdvFilterList for statistics</code>";
 						}
 						else { //CustomView
 							$filter['viewid'] = $viewName[2];
