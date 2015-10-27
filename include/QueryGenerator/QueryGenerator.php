@@ -277,7 +277,6 @@ class QueryGenerator {
 	}
 
 	public function parseAdvFilterList($advFilterList, $glue=''){
-		echo '<br><br><br><br>';
 		if(!empty($glue)) $this->addConditionGlue($glue);
 
 		$customView = new CustomView($this->module);
