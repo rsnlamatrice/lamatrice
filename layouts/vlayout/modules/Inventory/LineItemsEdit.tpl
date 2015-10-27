@@ -339,7 +339,11 @@
                 <td width="83%" >
                     <div class="pull-right">
                         {if $MODULE eq 'Invoice'}
-                            <b>{vtranslate('LBL_RECEIVED',$MODULE)}</b>
+			    {if $RECORD->get('typedossier') eq 'Avoir'}
+			        <b>{vtranslate('LBL_REFUND',$MODULE)}</b>
+			    {else}
+			        <b>{vtranslate('LBL_RECEIVED',$MODULE)}</b>
+			    {/if}
                         {else}
                             <b>{vtranslate('LBL_PAID',$MODULE)}</b>
                         {/if}

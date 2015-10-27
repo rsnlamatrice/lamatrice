@@ -231,7 +231,11 @@
 	    <tr>
 		<td width="83%">
 		    <span class="pull-right">
-			<b>Reçu</b>
+			{if $RECORD->get('typedossier') eq 'Avoir'}
+			    <b>{vtranslate('LBL_REFUND',$MODULE)}</b>
+			{else}
+			    <b>{vtranslate('LBL_RECEIVED',$MODULE)}</b>
+			{/if}
 		    </span>
 		    {* ED150127
 		    * ajout des champs complémentaires du règlement

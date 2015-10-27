@@ -143,6 +143,14 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 			$recordModel->set('account_id', $accountRecordModel->getId());
 		}
 		
+		/** ED151027
+		* Approved invoice with balance === 0 becomes Paid
+		*/        
+		if($_REQUEST['invoicestatus'] === 'Approved'
+		&& $recordModel->get('invoicestatus') === 'Approved'
+		&& (float)str_replace(',', '.', $recordModel->get('balance')) == 0.0){
+			$recordModel->set('invoicestatus', 'Paid');
+		}
 		return parent::saveRecord($recordModel);
 	}
 	

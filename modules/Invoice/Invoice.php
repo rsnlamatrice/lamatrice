@@ -160,7 +160,7 @@ class Invoice extends CRMEntity {
 	function save_module($module) {
 		global $updateInventoryProductRel_deduct_stock;
 		$updateInventoryProductRel_deduct_stock = true;
-
+				
 		//in ajax save we should not call this function, because this will delete all the existing product values
 		if(isset($this->_recurring_mode) && $this->_recurring_mode == 'recurringinvoice_from_so' && isset($this->_salesorderid) && $this->_salesorderid!='') {
 			// We are getting called from the RecurringInvoice cron service!
@@ -168,10 +168,12 @@ class Invoice extends CRMEntity {
 
 		} else if(isset($_REQUEST)) {
 			if($_REQUEST['action'] != 'InvoiceAjax' && $_REQUEST['ajxaction'] != 'DETAILVIEW'
-					&& $_REQUEST['action'] != 'MassEditSave' && $_REQUEST['action'] != 'ProcessDuplicates'
-					&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false) {
+			&& $_REQUEST['action'] != 'MassEditSave' && $_REQUEST['action'] != 'ProcessDuplicates'
+			&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false) {
 				//Based on the total Number of rows we will save the product relationship with this entity
+				//Ici la gestion de stock
 				saveInventoryProductDetails($this, 'Invoice');
+				
 			} else if($_REQUEST['action'] == 'InvoiceAjax' || $_REQUEST['action'] == 'MassEditSave') {
 				$updateInventoryProductRel_deduct_stock = false;
 			}
@@ -182,7 +184,7 @@ class Invoice extends CRMEntity {
 		$update_params = array($this->column_fields['currency_id'], $this->column_fields['conversion_rate'], $this->id);
 		$this->db->pquery($update_query, $update_params);
 	}
-
+	
 	/**
 	 * Customizing the restore procedure.
 	 */
