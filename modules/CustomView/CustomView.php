@@ -107,7 +107,6 @@ class CustomView extends CRMEntity {
 				$defcv_result = $adb->pquery("select default_cvid from vtiger_user_module_preferences where userid = ? and tabid =? LIMIT 1", array($current_user->id, getTabid($module)));
 				if ($adb->num_rows($defcv_result) > 0) {
 					$viewid = $adb->query_result($defcv_result, 0, 'default_cvid');
-					var_dump('vtiger_user_module_preferences', $viewid);
 				} else {
 					$query = "select cvid from vtiger_customview where setdefault=1 and entitytype=? LIMIT 1";
 					$cvresult = $adb->pquery($query, array($module));
