@@ -830,8 +830,7 @@ class QueryGenerator {
 						$sqlOperator = " NOT IN ";
 						break;
 					}
-					//ED151028
-					$fieldGlue = ''; //on est dans entre ( )
+					$fieldGlue = ''; //ED151028 on est dans entre ( ) A voir si il ne faut pas le faire aussi ci-dessous
 					
 					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
 				}

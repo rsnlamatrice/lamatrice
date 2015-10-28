@@ -109,7 +109,7 @@ class RSN_CogilogAffairesRSN_Import {
 	 */
 	private static function importDocument($srcRow){
 		
-		$query = "SELECT notesid, vtiger_crmentity.deleted
+		$query = "SELECT vtiger_notes.notesid, vtiger_crmentity.deleted
 			FROM vtiger_notes
                         JOIN vtiger_crmentity
                             ON vtiger_notes.notesid = vtiger_crmentity.crmid
@@ -120,7 +120,9 @@ class RSN_CogilogAffairesRSN_Import {
 			ORDER BY deleted ASC
 		";
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($srcRow['id']));
+		$result = $db->pquery($query, array($srcRow['code']));
+		if(!$result)
+			$db->echoError();
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
                         if($srcRow['archive'] == 'f' && $row['deleted'] == 1){
