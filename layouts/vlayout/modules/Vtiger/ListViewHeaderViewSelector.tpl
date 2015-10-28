@@ -49,7 +49,7 @@
 										<option data-foldername="{$FOLDER->getName()}"
 										{if decode_html($FOLDER->getName()) eq $FOLDER_NAME} selected="selected"{/if}
 										data-folderid="{$FOLDER->get('folderid')}"
-										data-deletable="{!($FOLDER->hasDocuments())}"
+										data-deletable="{$FOLDER->isDeletable()}"
 										class="filterOptionId_folder{$FOLDER->get('folderid')} folderOption{if $FOLDER->getName() eq 'Default'} defaultFolder {/if}"
 										id="filterOptionId_folder{$FOLDER->get('folderid')}"
 										data-id="{$DEFAULT_CUSTOM_FILTER_ID}"
