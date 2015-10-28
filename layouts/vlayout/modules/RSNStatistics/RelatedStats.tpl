@@ -1,5 +1,5 @@
 {strip}
-<div class="relatedContainer">
+<div class="relatedContainer rsnstatistics">
     <input type="hidden" name="currentPageNum" value="{$PAGING->getCurrentPage()}" />
     <input type="hidden" name="relatedModuleName" class="relatedModuleName" value="{$RELATED_MODULE->get('name')}" />
     <input type="hidden" value="{$ORDER_BY}" id="orderBy">
@@ -69,8 +69,8 @@
     </div>
     <div class="relatedContents contents-bottomscroll">
         <div class="bottomscroll-div">
-			{assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
-			<table class="table table-bordered listViewEntriesTable">
+	    {assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
+	    <table class="table table-bordered listViewEntriesTable">
             {foreach item=RELATED_STATISTIC from=$RELATED_STATISTICS}
                 <thead>
                     <tr class="listViewHeaders">
@@ -102,7 +102,7 @@
                     {/if}
                 {/foreach}
             {/foreach}
-			</table>
+	    </table>
         </div>
     </div>
 </div>
