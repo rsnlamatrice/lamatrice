@@ -18,6 +18,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		$moduleName = $request->getModule();
 		$crmids = $request->get('crmid');
 		$statId = $request->get('record');
+		ob_start();
 		if ($mode == 'all') {
 		   $this->updateAll($request);
 		} else {
@@ -27,6 +28,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			$url = "index.php?module=" . $relatedModuleName . "&relatedModule=" . $moduleName . "&view=Detail&record=" . $crmids . "&mode=showRelatedList&tab_label=" . $moduleName;
 		else
 			$url = "index.php?module=" . $moduleName . "&relatedModule=" . $moduleName . "&view=Detail&record=" . $statId . "&mode=showRelatedList&tab_label=" . $moduleName;
+		ob_end_clean ();
 		
 		header('Location: ' . $url);
 		
