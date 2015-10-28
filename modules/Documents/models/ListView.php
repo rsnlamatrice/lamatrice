@@ -75,19 +75,6 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		$linkTypes = array('LISTVIEWMASSACTION');
 		$links = Vtiger_Link_Model::getAllByType($moduleModel->getId(), $linkTypes, $linkParams);
 		
-		//ED151028
-		if ($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
-			$massActionLink = array(
-				'linktype' => 'LISTVIEWMASSACTION',
-				'linklabel' => 'LBL_EDIT',
-				'linkurl' => 'javascript:Vtiger_List_Js.triggerMassEdit("index.php?module='.$moduleModel->get('name').'&view=MassActionAjax&mode=showMassEditForm");',
-				'linkicon' => ''
-			);
-
-			$links['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
-		}
-
-		
 		if ($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'Delete')) {
 			$massActionLink = array(
 				'linktype' => 'LISTVIEWMASSACTION',
