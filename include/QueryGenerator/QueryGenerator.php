@@ -830,6 +830,9 @@ class QueryGenerator {
 						$sqlOperator = " NOT IN ";
 						break;
 					}
+					//ED151028
+					$fieldGlue = ''; //on est dans entre ( )
+					
 					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
 				}
 				elseif($conditionInfo['operator'] == 'IN' && $fieldName == 'id'){
@@ -1262,8 +1265,9 @@ class QueryGenerator {
 	public function addCondition($fieldname,$value,$operator,$glue= null,$newGroup = false,
 		$newGroupType = null, $ignoreComma = false) {
 		$conditionNumber = $this->conditionInstanceCount++;
-		if($glue != null && $conditionNumber > 0)
+		if($glue != null && $conditionNumber > 0){
 			$this->addConditionGlue ($glue);
+		}
 		//else
 		//	var_dump($conditionNumber, $fieldname, $glue, $operator, $value);
 		$this->groupInfo .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/
