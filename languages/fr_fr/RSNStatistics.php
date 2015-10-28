@@ -21,6 +21,10 @@ $languageStrings = array(
 	'LBL_THIS_YEAR' => 'cette année',
 	'LBL_CALCULATE_FOR_ALL_RELATED' => 'Mettre à jour tous les calculs',
 	'LBL_CALCULATE_FOR_ALL_RELATED_THIS_YEAR' => 'Mettre à jour cette année',
+        
+        'INT' => 'Nombre entier',
+        'DOUBLE' => 'Nombre',
+        'CURRENCY' => 'Monétaire',
 );
 
 ?>

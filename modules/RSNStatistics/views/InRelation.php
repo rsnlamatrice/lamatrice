@@ -7,6 +7,7 @@
  *************************************************************************************/
 
 class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
+	
 	function process(Vtiger_Request $request) {
 		$moduleName = $request->getModule();
 		$relatedModuleName = $request->get('relatedModule');
