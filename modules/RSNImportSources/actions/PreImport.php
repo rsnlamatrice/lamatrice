@@ -5,6 +5,7 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 	public function __construct() {
 		parent::__construct();
 		$this->exposeMethod('validateRows');
+		$this->exposeMethod('addContactRelation');
 	}
 	
 	public function process(Vtiger_Request $request) {
@@ -130,6 +131,45 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 			return $importController;
 		}
 		return null;
+	}
+
+	/* Complète le champ _contactid avec une nouvelle proposition */
+	public function addContactRelation(Vtiger_Request $request){
+		
+		$db = PearDatabase::getInstance();
+		
+		global $current_user;
+		
+		//$importController = $this->getImportController($request);
+			
+		$moduleName = $request->get('for_module');
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($current_user, $moduleName);
+		$importRowId = $request->get('importRowId');
+		$relatedIdList = $request->get('relatedIdList');
+		
+		$params = array();
+		$query = 'UPDATE '.$tableName.'
+				SET _contactid = CONCAT(IFNULL(_contactid, ""), ",", ?)
+				, _contactid_status = IF(_contactid LIKE "%_,_%", ?, ?)
+				/*, _contactid_source = "Recherche manuelle"*/
+				WHERE id = ?';
+		$params[] = implode(',', $relatedIdList);
+		$params[] = RSNImportSources_Import_View::$RECORDID_STATUS_MULTI;
+		$params[] = RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE;
+		$params[] = $importRowId;
+			
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			//var_dump($query, $params);
+			$response = new Vtiger_Response();
+			$response->setError($db->echoError('Erreur de mise à jour', true));
+			$response->emit();
+			break;
+		}	
+		
+		$response = new Vtiger_Response();
+		$response->setResult(true);
+		$response->emit();
 	}
 }
 

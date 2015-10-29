@@ -119,6 +119,7 @@ $languageStrings = array(
 	'LBL_RECORDID_STATUS_2' => 'A créer',
 	'LBL_RECORDID_STATUS_3' => 'A mettre à jour',
 	'LBL_RECORDID_STATUS_4' => 'Annulé',
+	'LBL_RECORDID_STATUS_5' => 'Plus tard',
 	'LBL_RECORDID_STATUS_10' => 'Une proposition à vérifier',
 	'LBL_RECORDID_STATUS_11' => 'Une proposition fiable',
 	'LBL_RECORDID_STATUS_12' => 'Plusieurs propositions',

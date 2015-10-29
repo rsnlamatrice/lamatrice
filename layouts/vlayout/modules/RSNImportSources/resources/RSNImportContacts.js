@@ -26,9 +26,39 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		
 		getCell: function(e) {
 			var $target = e.jquery ? e : e.target ? $(e.target) : $(e);
-    		return $target.is('td,th') ? $target : $target.parents('td:first,th:first');
+    		return $target.is('td,th') ? $target : $target.parents('td:first,th:first').first();
     	},
 		
+		//trouve le 1er TR d'une ligne d'import
+		getImportRow: function(e){
+			var thisInstance = this
+			, $td = this.getCell(e)
+			, $tr = $td.parent();
+			while ($tr.is('.contact-row'))
+				$tr = $tr.prev();
+			return $tr;
+		},
+		
+		//trouve les TR consécutives d'une ligne d'import et correspondant à un contact
+		getContactRows: function(e){
+			var thisInstance = this
+			, $tr = thisInstance.getImportRow(e).next()
+			, $trs = $();
+			while ($tr.is('.contact-row:not(.tools-row)')){
+				$trs = $trs.add($tr);
+				$tr = $tr.next();
+			}
+			return $trs;
+		},
+		//retourne la ligne d'un contact
+		getContactRow: function(e){
+			var thisInstance = this
+			, $tr = thisInstance.getCell(e).parent();
+			if($tr.is('.contact-row:not(.tools-row)')){
+				return $tr;
+			}
+			return $();
+		},
 	/* registers */
 		
     	//Sélection d'un contact ou "annuler" ou "créer"
@@ -146,13 +176,212 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		
 		// Sélection d'un contact
 		selectContact: function(e){
-			alert('TODO');
+			var aDeferred = jQuery.Deferred();
+			var popupInstance = Vtiger_Popup_Js.getInstance();
+			
+			var thisInstance = this
+			, $tr = this.getCell(e).parent().prevAll('.preimport-row:first')
+			, importRowId = $tr.data('rowid')
+			, ImportSource = this.getPageContainer().find('input[name="ImportSource"]').val()
+			, lastname = thisInstance.getCellValue($tr.find('td[data-fieldname="lastname"]'))
+			var popupParams = {
+				'module' : 'Contacts',
+				'search_key' : 'lastname',
+				'search_value' : lastname,
+				'multi_select' : true
+			}
+			popupInstance.show(popupParams, function(responseString){
+					var responseData = JSON.parse(responseString);
+					var relatedIdList = Object.keys(responseData);
+					thisInstance.addContactRelation(ImportSource, importRowId, relatedIdList).then(
+						function(data){
+							thisInstance.reloadImportRow(ImportSource, importRowId, relatedIdList).then(function(data){
+								aDeferred.resolve(data);
+							});
+						}
+					);
+				}
+			);
+			return aDeferred.promise();
+		},
+		
+		//Complète le champ _contactid avec de nouvelles valeurs de contactid
+		addContactRelation: function(ImportSource, importRowId, relatedIdList){
+			var aDeferred = jQuery.Deferred();
+			var params = {
+				'module' : 'RSNImportSources',
+				'for_module' : 'Contacts',
+				'action' : 'PreImport',
+				'mode' : 'addContactRelation',
+				'ImportSource' : ImportSource,
+				'importRowId' : importRowId,
+				'relatedIdList' : relatedIdList,
+			};
+			
+			AppConnector.request(params).then(
+				function(responseData){
+					aDeferred.resolve(responseData);
+				},
+				function(textStatus, errorThrown){
+					aDeferred.reject(textStatus, errorThrown);
+				}
+			);
+			return aDeferred.promise();
+		},
+		
+		//Recharge les données d'une seule ligne d'import
+		reloadImportRow: function(ImportSource, importRowId, relatedIdList){
+			var thisInstance = this;
+			var aDeferred = jQuery.Deferred();
+			var params = {
+				'module' : 'RSNImportSources',
+				'for_module' : 'Contacts',
+				'view' : 'Index',
+				'ImportSource' : ImportSource,
+				'search_key' : 'id',
+				'search_value' : importRowId,
+				'mode' : 'validatePreImportData',
+			};
+		
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			
+			AppConnector.request(params).then(
+				function(data){
+					var $data = $(data);
+					var $newTr = $data.find('tr.preimport-row[data-rowid="' + importRowId + '"]:first')
+					, $tr = thisInstance.getContainer().find('tr.preimport-row[data-rowid="' + importRowId + '"]:first');
+					$newTr.nextAll().each(function(){
+						if (/preimport-row/.test(this.className)) 
+							return false;
+						$newTr = $newTr.add(this);
+						return true;
+					});
+					$tr.nextAll().each(function(){
+						if (/preimport-row/.test(this.className)) 
+							return false;
+						$tr = $tr.add(this);
+						return true;
+					});
+					$tr.replaceWith($newTr);
+					relatedIdList = relatedIdList[0];
+					$newTr.filter('[data-contactid="'+relatedIdList+'"]').find('input[type="radio"].contact-mode-selection').attr('checked', 'checked');
+					aDeferred.resolve($newTr);
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
+				},
+				function(textStatus, errorThrown){
+				progressIndicatorElement.progressIndicator({
+					'mode' : 'hide'
+				});
+					aDeferred.reject(textStatus, errorThrown);
+				}
+			);
+			return aDeferred.promise();
 		},
 		
 		// Contrôle de l'adresse fournie par le SNA
 		checkSNA: function(e){
-			alert('TODO');
+			var thisInstance = this;
+			var $tr = this.getCell(e).parent()
+			, importRowId = $tr.data('rowid')
+			, values = thisInstance.getAddressBlockValuesForAddressCheck($tr);
+			
+			var params = {
+				url : "index.php?module="+app.getModuleName()
+					+ "&view=AddressCheckAjax",
+				data : values
+			};
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			AppConnector.request(params).then(
+				function(data){
+					progressIndicatorElement.progressIndicator({'mode': 'hide'});
+					if (typeof data !== 'string') 
+						data = JSON.stringify(data);	
+					$div = $('<div></div>')
+						.html(data)
+						.dialog({
+							title: 'Contrôle externe de l\'adresse',
+							width: 'auto',
+							height: 'auto',
+						});
+					thisInstance.registerAddressCheckFormEvents($div, $tr);
+				},
+				function(error){
+					progressIndicatorElement.progressIndicator({'mode': 'hide'});
+					Vtiger_Helper_Js.showPnotify(error)
+				}
+			);
 		},
+		/** ED150713
+		 * Function to register the SNA button click event
+		 */
+		getAddressBlockValuesForAddressCheck : function($block){
+			var values = {};
+			$block.find('td[data-fieldname]:visible').each(function(){
+				var fieldName = this.getAttribute('data-fieldname')
+				, value = $(this).text();
+				if (value && value !== '0'
+				&& /^mailing|lastname|firstname/.test(fieldName))
+					values['address_' + fieldName] = value;
+			});
+			return values;
+		},
+		/**
+		 * Function which will register basic events which will be used in quick create as well
+		 *
+		 */
+		registerAddressCheckFormEvents : function(container, $sourceBlock) {
+			var thisInstance = this
+			, $form = container.find('form:first');
+			$form
+				.find('input[type="radio"]')
+					.click(function(e){
+						var $radio = $(this)
+						, $tr = $radio.parents('tr:first')
+						, $fieldName = $radio.attr('name')
+						, newValue = $tr.find('.address-value.' + $radio.val() + '-value:first').text()
+						, $input = $tr.find('input.address-result:first')
+						;
+						$input.val(newValue)
+					})
+					.end()
+				.submit(function(e){
+					var $form = $(e.target);
+					thisInstance.setAddressBlockValuesFromAddressCheck($sourceBlock, $form);
+					
+					container.dialog('close');
+					return false;
+				})
+				.end()
+			;
+		},
+		
+		/** ED150713
+		 * Function to set the new address values
+		 */
+		setAddressBlockValuesFromAddressCheck : function($sourceBlock, $form){
+			$form.find('input.address-result[name]:visible').each(function(){
+				var newValue = this.value;
+				$sourceBlock.find('td[data-fieldname="' + this.getAttribute('name') + '"] .value').each(function(){
+					var $this = $(this);
+					if ($this.text() != newValue)
+						$this.html(newValue).click();
+				});
+			});
+		},
+	
+		/* FIN du SNA */
 		
 		/* remplace l'affichage de valeur par un input */
 		editCellValue: function(e){
@@ -397,6 +626,7 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 				,$radio = $tr.find('th input[type="radio"][name="contact_related_to_'+rowId+'"]');
 				if ($radio.length)
 					$radio[0].checked = true;
+				$tr.addClass('selected-contact');
 			}
 			thisInstance.checkValidateRow(e);
 		},
@@ -404,13 +634,16 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		//Coche la ligne pour mise à jour
 		checkValidateRow: function(e){
 			var thisInstance = this
-			, $td = this.getCell(e)
-			, $tr = $td.parent();
-			while ($tr.is('.contact-row'))
-				$tr = $tr.prev();
-			var $checkbox = $tr.find('input.row-selection[type="checkbox"]');
-			if ($checkbox.length)
+			, $tr = thisInstance.getImportRow(e)
+			, $checkbox = $tr.find('input.row-selection[type="checkbox"]');
+			
+			thisInstance.getContactRows(e)
+				.removeClass('selected-contact');
+			if ($checkbox.length){
 				$checkbox[0].checked = true;
+				thisInstance.getContactRow(e)
+					.addClass('selected-contact');
+			}
 		},
 		
 		//Coche la ligne pour mise à jour
@@ -507,8 +740,9 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 					}
 					//Contact inconnu (Créer ou Annuler)
 					else if($contactChecked.length) {
-						//Ne conserve la référence au contact que dans le rétablissement de l'état "A vérififer"
-						if($contactChecked.data('status') != RSNImportSourcesJs.RECORDID_STATUS_CHECK)
+						//Ne conserve la référence au contact que dans le rétablissement de l'état "A vérififer" ou "Plus tard"
+						if($contactChecked.data('status') != RSNImportSourcesJs.RECORDID_STATUS_CHECK
+						&& $contactChecked.data('status') != RSNImportSourcesJs.RECORDID_STATUS_LATER)
 							proposedContactIds = '';
 						rowsData[rowId].update = {
 							'_contactid_status' : $contactChecked.data('status'),//RSNImportSourcesJs.RECORDID_STATUS_CREATE | SKIP | CHECK,

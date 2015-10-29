@@ -24,6 +24,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	static $RECORDID_STATUS_CREATE = 2;
 	static $RECORDID_STATUS_UPDATE = 3;
 	static $RECORDID_STATUS_SKIP = 4;
+	static $RECORDID_STATUS_LATER = 5;
 	static $RECORDID_STATUS_CHECK = 10;
 	static $RECORDID_STATUS_SINGLE = 11;
 	static $RECORDID_STATUS_MULTI = 12;
@@ -191,6 +192,72 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	}
 
 	/**
+	 * Initialise les données de validation des Contacts
+	 */
+	function initDisplayPreviewContactsData() {
+		$viewer = $this->getViewer($this->request);
+		//$moduleName = $this->request->get('for_module');
+		$moduleName = 'Contacts';
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		$thisModuleName = $this->request->getModule();
+		$thisModule = Vtiger_Module_Model::getInstance($thisModuleName);
+		
+		$viewer->assign('CONTACTS_FIELDS_MAPPING', $this->getContactsFieldsMappingForPreview());
+		$viewer->assign('CONTACTS_MODULE_MODEL', $moduleModel);
+		
+		$viewer->assign('VALIDATE_PREIMPORT_URL', $thisModule->getValidatePreImportRowsUrl( $this->request->get('ImportSource'), $moduleName, 0, $limit));
+		
+		$viewer->assign('RSNNPAI_VALUES', $moduleModel->getPicklistValuesDetails( 'rsnnpai' ));
+		
+		//Décompte des statuts du contactid
+		$counters = $this->getPreImportCountersByField('Contacts', '_contactid_status');
+		$statusGroups = array(
+			'' => array(
+				'' => '(tous)',
+			),
+			'A vérifier' => array(
+				RSNImportSources_Import_View::$RECORDID_STATUS_NONE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_CHECK => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_MULTI => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_LATER => '',
+			),
+			'Prêts à importer' => array(
+				RSNImportSources_Import_View::$RECORDID_STATUS_SELECT => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_CREATE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE => '',
+				RSNImportSources_Import_View::$RECORDID_STATUS_SKIP => '',
+			),
+		);
+		$total = 0;
+		foreach($statusGroups as $statusGroupKey => $status)
+			foreach($status as $statusKey => $statusValue){
+				$counter = $counters[$statusKey] ? $counters[$statusKey] : 0;
+				$total += $counter;
+				$statusGroups[$statusGroupKey][$statusKey] = vtranslate('LBL_RECORDID_STATUS_'.$statusKey, $thisModuleName)
+					. ' (' . $counter . ')';
+			}
+		$statusGroups[''][''] = '(tous) (' . $total . ')';
+		$viewer->assign('CONTACTID_STATUS_GROUPS', $statusGroups);
+		$viewer->assign('VALIDABLE_CONTACTS_COUNT', $total);
+		
+		//Décompte des sources
+		$counters = $this->getPreImportCountersByField($moduleName, '_contactid_source');
+		$sources = array( '' => '(toutes recherches)', '(null)' => '(introuvables)');
+		$total = 0;
+		foreach($counters as $sourceKey => $counter){
+			$total += $counter;
+			if($sourceKey === '(null)')
+				$sourceLabel = '(introuvables)';
+			else
+				$sourceLabel = $sourceKey;
+			$sources[$sourceKey] = $sourceLabel . ' (' . $counter . ')';
+		}
+		$sources[''] = '(toutes recherches) (' . $total . ')';
+		$viewer->assign('CONTACTID_SOURCES', $sources);
+	}
+	
+	/**
 	 * Method to get the pre Imported data in order to preview them.
 	 *  By default, it return the values in the pre-imported table.
 	 *  This method can be overload in the child class.
@@ -260,7 +327,6 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				for($j = 0; $j < sizeof($fields); ++$j) {
 					$data[$fields[$j]] = $adb->query_result($result, $i, $fields[$j]);
 				}
-
 				array_push($previewData[$module], $data);
 			}
 		}
@@ -282,6 +348,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$counters = array();
 		$result = $adb->query($sql);
 		if(!$result){
+			echo "<pre>$sql</pre>";
 			$adb->echoError('Erreur dans getPreImportCountersByField');
 		}
 		$numberOfRecords = $adb->num_rows($result);
@@ -322,6 +389,8 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 *  displayDataPreview est appelé après le pré-import et pendant la phase de validation du pré-import (des contacts)
 	 */
 	function displayDataPreview() {
+		$this->initDisplayPreviewData();
+		
 		$viewer = $this->getViewer($this->request);
 		$moduleName = $this->request->get('for_module');
 		
@@ -375,7 +444,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		}
 		return $viewer->view($this->getImportPreviewTemplateName($moduleName), $thisModuleName);
 	}
-
+	
+	function initDisplayPreviewData() {
+	}
+	
 	/**
 	 * Method to check if the import must be scheduled.
 	 *  It schedule import if the number of pre-imported record is greater than the imediat import limit (in the config model file).
@@ -979,17 +1051,18 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		
 		$query = "SELECT crmid
 			FROM vtiger_contactdetails
-                        JOIN vtiger_crmentity
-                            ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 			LEFT JOIN vtiger_contactemails
 			    ON vtiger_contactemails.contactemailsid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
+			WHERE vtiger_crmentity.deleted = FALSE
 			AND ((UPPER(firstname) = ?
 				AND UPPER(lastname) = ?)
 			    OR UPPER(lastname) IN (?,?)
 			)
 			AND (	LOWER(vtiger_contactdetails.email) = ?
 				OR LOWER(vtiger_contactemails.email) = ?)
+			ORDER BY crmid DESC
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
@@ -1019,9 +1092,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				    ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 				LEFT JOIN vtiger_contactemails
 				    ON vtiger_contactemails.contactemailsid = vtiger_crmentity.crmid
-				WHERE deleted = FALSE
+				WHERE vtiger_crmentity.deleted = FALSE
 				AND (	LOWER(vtiger_contactdetails.email) = ?
 					OR LOWER(vtiger_contactemails.email) = ?)
+				ORDER BY crmid DESC
 				LIMIT 1
 			";
 			$result = $db->pquery($query, array(strtolower($email), strtolower($email)));
@@ -1054,6 +1128,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
 			WHERE vtiger_crmentity.deleted = 0
 			AND vtiger_contactdetails.ref4d = ?
+			ORDER BY crmid DESC
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();

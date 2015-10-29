@@ -142,8 +142,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		$fields = array_move_assoc('rsnnpai', 'lastname', $fields);
 		
 		return $fields;
-	}
-	
+	}	
 	
 	/**
 	 * Method to get the imported fields for the contacts module.
@@ -561,6 +560,9 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		//nom en majuscules
 		// mb_strtoupper fonctionne pour les accents grace au paramétrage ini_set('mbstring',) dans modules\RSN\RSN.php
 		$contactsHeader['lastname'] = mb_strtoupper($contactsHeader['lastname']);
+		
+		$contactsHeader['firstname'] = ucfirst($contactsHeader['firstname']);
+		
 		//ville en majuscules
 		$contactsHeader['mailingcity'] = mb_strtoupper($contactsHeader['mailingcity']);
 		//email en minuscules
@@ -604,67 +606,10 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		return parent::preImportData($this->request);
 	}
 	
-	function displayDataPreview() {
-		$viewer = $this->getViewer($this->request);
-		$moduleName = $this->request->get('for_module');
-		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
-		$thisModuleName = $this->request->getModule();
-		$thisModule = Vtiger_Module_Model::getInstance($thisModuleName);
-		
-		$viewer->assign('CONTACTS_FIELDS_MAPPING', $this->getContactsFieldsMappingForPreview());
-		$viewer->assign('CONTACTS_MODULE_MODEL', $moduleModel);
-		
-		$viewer->assign('VALIDATE_PREIMPORT_URL', $thisModule->getValidatePreImportRowsUrl( $this->request->get('ImportSource'), $moduleName, 0, $limit));
-		
-		$viewer->assign('RSNNPAI_VALUES', $moduleModel->getPicklistValuesDetails( 'rsnnpai' ));
-		
-		//Décompte des statuts du contactid
-		$counters = $this->getPreImportCountersByField($moduleName, '_contactid_status');
-		$statusGroups = array(
-			'' => array(
-				'' => '(tous)',
-			),
-			'A vérifier' => array(
-				RSNImportSources_Import_View::$RECORDID_STATUS_NONE => '',
-				RSNImportSources_Import_View::$RECORDID_STATUS_CHECK => '',
-				RSNImportSources_Import_View::$RECORDID_STATUS_SINGLE => '',
-				RSNImportSources_Import_View::$RECORDID_STATUS_MULTI => '',
-			),
-			'Prêts à importer' => array(
-				RSNImportSources_Import_View::$RECORDID_STATUS_SELECT => '',
-				RSNImportSources_Import_View::$RECORDID_STATUS_CREATE => '',
-				RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE => '',
-				RSNImportSources_Import_View::$RECORDID_STATUS_SKIP => '',
-			),
-		);
-		$total = 0;
-		foreach($statusGroups as $statusGroupKey => $status)
-			foreach($status as $statusKey => $statusValue){
-				$counter = $counters[$statusKey] ? $counters[$statusKey] : 0;
-				$total += $counter;
-				$statusGroups[$statusGroupKey][$statusKey] = vtranslate('LBL_RECORDID_STATUS_'.$statusKey, $thisModuleName)
-					. ' (' . $counter . ')';
-			}
-		$statusGroups[''][''] = '(tous) (' . $total . ')';
-		$viewer->assign('CONTACTID_STATUS_GROUPS', $statusGroups);
-		$viewer->assign('VALIDABLE_CONTACTS_COUNT', $total);
-		
-		//Décompte des sources
-		$counters = $this->getPreImportCountersByField($moduleName, '_contactid_source');
-		$sources = array( '' => '(tous)', '(null)' => '(inconnu)');
-		$total = 0;
-		foreach($counters as $sourceKey => $counter){
-			$total += $counter;
-			if($sourceKey === '(null)')
-				$sourceLabel = '(inconnu)';
-			else
-				$sourceLabel = $sourceKey;
-			$sources[$sourceKey] = $sourceLabel . ' (' . $counter . ')';
-		}
-		$sources[''] = '(tous) (' . $total . ')';
-		$viewer->assign('CONTACTID_SOURCES', $sources);
-		
-		return parent::displayDataPreview();
+	
+	function initDisplayPreviewData() {
+		$this->initDisplayPreviewContactsData();
+		return parent::initDisplayPreviewData();
 	}
 
 	/**

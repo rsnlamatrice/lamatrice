@@ -413,7 +413,12 @@ jQuery.Class("Vtiger_Edit_Js",{
 					+ "&view=AddressCheckAjax",
 				data : values
 			};
-			var progressIndicatorElement = jQuery.progressIndicator({});
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
 			AppConnector.request(params).then(
 				function(data){
 					progressIndicatorElement.progressIndicator({'mode': 'hide'});

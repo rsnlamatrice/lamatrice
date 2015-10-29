@@ -32,6 +32,9 @@
 .RECORDID_STATUS_COLORS_4 {
   background-color : #7fab6a;
 }
+.RECORDID_STATUS_COLORS_5 {
+  background-color : #BB8787;
+}
 .RECORDID_STATUS_COLORS_10 {
   background-color : yellow;
 }
@@ -101,6 +104,18 @@
   padding: 3px 10px;
   border-bottom: 1px solid gray;
 }
+/* cellules des lignes de contacts existants et sélectionnés */
+.importContents tr.contact-row.selected-contact > :not(.tools-row):not(.contact-source) {
+  background-color: #F8F9B8;
+}
+/* label des bouton radio de contact sélectioné */
+th.enlarge-click-container {
+  padding: 0px !important;
+}
+th.enlarge-click-container > * {
+  padding: 8px 10px;
+}
+
 .importContents tr.preimport-row td {
   border-left: 1px solid #CCCCCC;
   min-width: 5em;/*toolbox no-wrap*/
@@ -150,8 +165,7 @@ a.address-sna-check:active {
 }
 
 .importContents td.selected-value {
-  border: 2px inset gray;
-  border-radius: 3px;
+  border: 3px inset gray;
   font-weight: bold;
 }
 .importContents td.not-selected-value {

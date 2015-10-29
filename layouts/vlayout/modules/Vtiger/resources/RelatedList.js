@@ -56,7 +56,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 			function(responseData){
 				progressIndicatorElement.progressIndicator({
 					'mode' : 'hide'
-				})
+				});
 				thisInstance.relatedTabsContainer.find('li').removeClass('active');
 				thisInstance.selectedRelatedTabElement.addClass('active');
 				thisInstance.relatedContentContainer.html(responseData);
@@ -75,6 +75,9 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 			},
 			
 			function(textStatus, errorThrown){
+				progressIndicatorElement.progressIndicator({
+					'mode' : 'hide'
+				});
 				aDeferred.reject(textStatus, errorThrown);
 			}
 		);

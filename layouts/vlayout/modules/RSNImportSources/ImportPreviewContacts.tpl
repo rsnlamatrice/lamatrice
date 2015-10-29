@@ -10,7 +10,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 	{if sizeof($PREVIEW_DATA) gt 0}
 		<param id="rsnnpai-picklistvalues" value="{htmlspecialchars (json_encode($RSNNPAI_VALUES))}"/>
 		<table style="margin-left:auto;margin-right:auto;margin-top:10px;" cellpadding="10" class="importPreview searchUIBasic well">
-			{foreach from=$PREVIEW_DATA key=MODULE_NAME item=MODULE_DATA}
+			{foreach key=MODULE_NAME item=MODULE_DATA from=$PREVIEW_DATA}
 			{if $MODULE_NAME neq 'Contacts'}
 				{include file='ImportPreviewModuleContents.tpl'|@vtemplate_path:'RSNImportSources'}
 				{if $PREVIEW_DATA@last}{assign var=ROW_OFFSET value=count($MODULE_DATA)}{/if}
@@ -32,13 +32,14 @@ $IMPORT_RECORD_FAILED = 5;*}
 											<div>
 												<input type="hidden" name="search_key[]" value="_contactid_status"/>
 												<input type="hidden" name="operator[]" value="e"/>
-												<select name="search_value[]">
+												<select name="search_value[]" title="Contacts à vérifier ou prêts à être importés" style="font-size: 16px;">
 													{foreach item=CONTACTID_STATUS key=GROUP_LABEL from=$CONTACTID_STATUS_GROUPS}
 														{if $GROUP_LABEL}<optgroup label="{$GROUP_LABEL}">{/if}
 														{foreach item=LABEL key=STATUS_ID from=$CONTACTID_STATUS}
 															{assign var=ROW_CLASS value='RECORDID_STATUS_COLORS_'|cat:$STATUS_ID}
 															<option class="{$ROW_CLASS}" value="{$STATUS_ID}"
-															{if $HEADER_FILTERS && $HEADER_FILTERS['_contactid_status'] == $STATUS_ID}selected="selected"{/if}>
+															{if $HEADER_FILTERS && $HEADER_FILTERS['_contactid_status'] !== null
+															&& $HEADER_FILTERS['_contactid_status'] == $STATUS_ID}selected="selected"{/if}>
 																{$LABEL}</option>
 														{/foreach}
 														{if $GROUP_LABEL}</optgroup>{/if}
@@ -48,7 +49,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 											<div>
 											<input type="hidden" name="search_key[]" value="_contactid_source"/>
 											<input type="hidden" name="operator[]" value="e"/>
-											<select name="search_value[]">
+											<select name="search_value[]" title="Méthodes de reconnaissance des contacts" style="font-size: 16px;">
 												{foreach item=LABEL key=STATUS_ID from=$CONTACTID_SOURCES}
 													<option value="{$STATUS_ID}"
 														{if $HEADER_FILTERS && $HEADER_FILTERS['_contactid_source'] == $STATUS_ID}selected="selected"{/if}>
@@ -114,9 +115,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 													class="no-swap-value-left"
 												{/if}
 											>
-											{if $FIELD_NAME eq '_contactid_status'}
-												{vtranslate('LBL_RECORDID_STATUS_'|cat:$ROW[$FIELD_NAME], $MODULE)}
-											{elseif $FIELD_NAME eq 'rsnnpai' && ($ROW[$FIELD_NAME] || $ROW[$FIELD_NAME] === '0')}
+											{if $FIELD_NAME eq 'rsnnpai' && ($ROW[$FIELD_NAME] || $ROW[$FIELD_NAME] === '0')}
 												<span class="value">
 													<input type="hidden" value="{$ROW[$FIELD_NAME]}"/>
 													<span class="{$RSNNPAI_VALUES[$ROW[$FIELD_NAME]]['icon']}"></span>
@@ -132,18 +131,19 @@ $IMPORT_RECORD_FAILED = 5;*}
 									{if $CONTACT_ROWS}
 										{assign var=CONTACT_ROW_INDEX value=0}
 										{foreach item=CONTACT_ROW key=CONTACT_ID from=$CONTACT_ROWS}
-											<tr class="contact-row"  data-rowid="{$ROW['id']}" data-contactid="{$CONTACT_ID}">
+											<tr class="contact-row {if $CONTACT_ROW_INDEX === 0}selected-contact{/if}"
+												data-rowid="{$ROW['id']}" data-contactid="{$CONTACT_ID}">
 												{if $CONTACT_ROW_INDEX === 0}
 													<th class="contact-source" rowspan="{count($CONTACT_ROWS) + 1}">
 														{$ROW['_contactid_source']}
 													</th>
 												{/if}
-												<th>
+												<th class="enlarge-click-container"><label>
 													<input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}"
 															{if $CONTACT_ROW_INDEX === 0}checked="checked"{/if}
-													/>
+													/></label>
 												</th>
-												<th>
+												<th class="enlarge-click-container">
 													<a href="{$CONTACTS_MODULE_MODEL->getDetailViewUrl($CONTACT_ID)}" target="_blank">
 														<span class="icon-rsn-small-isgroup{$CONTACT_ROW['isgroup']}"></span>
 													</a>
@@ -179,17 +179,23 @@ $IMPORT_RECORD_FAILED = 5;*}
 										{/foreach}
 									{/if}
 									{if $ROW['status'] == 0 && $ROW['_contactid_status'] !== null}
-										<tr class="contact-row" data-contactid="">
+										<tr class="contact-row tools-row" data-contactid="">
 											{if ! $CONTACT_ROWS}
-												<th class="contact-source">&nbsp;</th>
+												<th class="contact-source" colspan="2">&nbsp;</th>
+											{else}
+												<th class="contact-source" >&nbsp;</th>
 											{/if}
-											<td colspan="3" class="select-contact">
+											<td colspan="2" class="select-contact">
 												<input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" disabled="disabled"/>
 												<a href="#"><i>&nbsp;sélectionner...</i></a></td>
 											<td colspan="1" class="create-contact">
 												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_CREATE}"
 													{if ! $CONTACT_ROWS}checked="checked"{/if}/>
 													<i>&nbsp;créer</i></label></td>
+											<td colspan="1" class="create-contact">
+												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_LATER}"
+													{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_LATER}checked="checked"{/if}/>
+													<i>&nbsp;plus tard</i></label></td>
 											<td colspan="1" class="skip-row">
 												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}"
 													{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SKIP}checked="checked"{/if}/>
@@ -197,7 +203,8 @@ $IMPORT_RECORD_FAILED = 5;*}
 											{if $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SKIP
 											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE
 											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_CREATE
-											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SELECT}
+											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_SELECT
+											|| $ROW['_contactid_status'] == RSNImportSources_Import_View::$RECORDID_STATUS_LATER}
 											<td colspan="1" class="restore-check-row">
 												<label><input type="radio" class="contact-mode-selection" name="contact_related_to_{$ROW['id']}" data-status="{RSNImportSources_Import_View::$RECORDID_STATUS_CHECK}"
 													title="remettre cette ligne en attente de validation"/>
