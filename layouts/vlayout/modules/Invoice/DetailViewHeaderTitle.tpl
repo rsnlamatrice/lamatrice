@@ -32,7 +32,8 @@
 				{if $RECORD->get('sent2compta')}
 					<br><span style="color: red;">{vtranslate('LBL_ALREADY_SENT_2_COMPTA')}</span>
 				{/if}
-				{if $RECORD->get('typedossier') === 'Avoir'}
+				{if $RECORD->get('typedossier') === 'Avoir'
+				|| $RECORD->get('typedossier') === 'Remboursement'}
 					<br><span style="color: red;">{vtranslate($RECORD->get('typedossier'), $MODULE )}</span>
 				{/if}
 				

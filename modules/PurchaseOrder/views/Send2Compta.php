@@ -419,12 +419,14 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 		switch(strtoupper($invoiceData['status'])){
 		case 'PAID' :
 			return '511200';
-		case 'CREDIT INVOICE' ://Avoir
-			return '511200';//TODO
 		default:
 			switch($invoiceData['typedossier']){
 			case 'Facture de dépôt-vente' :
 				return '411DEP';
+			case 'CREDIT INVOICE' ://Avoir
+			case 'Avoir' :
+			case 'Remboursement' :
+				return '511200';//TODO
 			default:
 				return '411000';
 			}

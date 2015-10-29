@@ -47,7 +47,8 @@
 				</span>
 			{elseif $RECORD_ID neq ''}
 				<h3>{vtranslate('LBL_EDITING', $MODULE)}&nbsp;
-				{if $RECORD->get('typedossier') === 'Avoir'}
+				{if $RECORD->get('typedossier') === 'Avoir'
+				|| $RECORD->get('typedossier') === 'Remboursement'}
 					<b>{vtranslate($RECORD->get('typedossier'), $MODULE )}</b>
 				{else}
 					{vtranslate($SINGLE_MODULE_NAME, $MODULE)}
@@ -55,7 +56,8 @@
 				&nbsp;- {$RECORD_STRUCTURE_MODEL->getRecordName()}
 			{else}
 				<h3>{vtranslate('LBL_CREATING_NEW', $MODULE)}&nbsp;
-				{if $RECORD->get('typedossier') === 'Avoir'}
+				{if $RECORD->get('typedossier') === 'Avoir'
+				|| $RECORD->get('typedossier') === 'Remboursement'}
 					{vtranslate($RECORD->get('typedossier'), $MODULE )}
 				{else}
 					{vtranslate($SINGLE_MODULE_NAME, $MODULE)}
@@ -223,7 +225,7 @@
 					<td class="fieldValue {$WIDTHTYPE}" {if $FIELD_MODEL->get('uitype') eq '19'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if} {if $FIELD_MODEL->get('uitype') eq '20'} colspan="3"{/if}>
 						{* empêche l'enregistrement du type
 						ED151026
-						if $FIELD_MODEL->getName() === 'typedossier' && $RECORD->get('typedossier') === 'Avoir'}
+						if $FIELD_MODEL->getName() === 'typedossier' && ($RECORD->get('typedossier') === 'Avoir' || $RECORD->get('typedossier') === 'Remboursement')}
 							{if $FIELD_MODEL->set('disabled', true)}{/if}
 						{/if*}
 						{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS}

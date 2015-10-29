@@ -440,13 +440,15 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				return '511101';
 			}
 			return '511200';//LBP
-		
-		case 'CREDIT INVOICE' ://Avoir
-			return '511200';//TODO
 		default:
 			switch($invoiceData['typedossier']){
 			case 'Facture de dépôt-vente' :
 				return '411DEP';
+		
+			case 'CREDIT INVOICE' ://Avoir
+			case 'Avoir' :
+			case 'Remboursement' :
+				return '511200';//TODO
 			default:
 				return '411000';
 			}

@@ -231,7 +231,8 @@
 	    <tr>
 		<td width="83%">
 		    <span class="pull-right">
-			{if $RECORD->get('typedossier') eq 'Avoir'}
+			{if $RECORD->get('typedossier') === 'Avoir'
+			|| $RECORD->get('typedossier') === 'Remboursement'}
 			    <b>{vtranslate('LBL_REFUND',$MODULE)}</b>
 			{else}
 			    <b>{vtranslate('LBL_RECEIVED',$MODULE)}</b>
