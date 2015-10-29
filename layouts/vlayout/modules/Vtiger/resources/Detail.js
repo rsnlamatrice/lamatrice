@@ -2107,7 +2107,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 	/** ED150713
 	 */
 	setBrowserTitle : function(){
-		var title = $('.detailViewTitle .recordLabel').text();
+		var title = $('.detailViewTitle .recordLabel:first').text();
 		if (title)
 			document.title = title;
 	},
