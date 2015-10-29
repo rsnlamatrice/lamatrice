@@ -145,11 +145,19 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 		
 		/** ED151027
 		* Approved invoice with balance === 0 becomes Paid
-		*/        
-		if($_REQUEST['invoicestatus'] === 'Approved'
-		&& $recordModel->get('invoicestatus') === 'Approved'
-		&& (float)str_replace(',', '.', $recordModel->get('balance')) == 0.0){
+		*/
+		$approvedStatus = array('Approved', 'Created', 'AutoCreated');
+		$balance = (float)str_replace(',', '.', $recordModel->get('balance'));
+		if(in_array($_REQUEST['invoicestatus'], $approvedStatus)
+		&& $recordModel->get('invoicestatus') == $_REQUEST['invoicestatus']
+		&& abs($balance) < 0.01){
 			$recordModel->set('invoicestatus', 'Paid');
+		}
+		elseif($_REQUEST['invoicestatus'] === 'Paid'
+		&& $recordModel->get('invoicestatus') == $_REQUEST['invoicestatus']
+		&& abs($balance) >= 0.01){
+			//TODO alerter l'utilisateur
+			//$recordModel->set('invoicestatus', 'Approved');
 		}
 		return parent::saveRecord($recordModel);
 	}

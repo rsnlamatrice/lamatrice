@@ -32,7 +32,9 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$viewer->assign('IS_DUPLICATE_FROM', $record);
 			
 			//ED151026
-			if($request->get('typedossier') === 'Avoir'){
+			if($request->get('typedossier') === 'Avoir'
+			|| $request->get('typedossier') === 'Remboursement'){
+				//Inverse les quantités et montants
 				foreach($relatedProducts as $index => $relatedProduct){
 					foreach(array('qty', 'discount_amount', 'discountTotal', 'totalAfterDiscount', 'taxTotal', 'netPrice') as $fieldName)
 						$relatedProducts[$index][$fieldName.$index] = -1 * (float)$relatedProduct[$fieldName.$index];

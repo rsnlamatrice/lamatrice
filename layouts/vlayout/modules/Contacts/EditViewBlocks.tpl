@@ -39,7 +39,7 @@
 		{assign var=SINGLE_MODULE_NAME value='SINGLE_'|cat:$MODULE}
 		{if $RECORD_ID neq ''}
 			<h3 class="span8 textOverflowEllipsis" title="{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} {$RECORD_STRUCTURE_MODEL->getRecordName()}">
-				{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} - {$RECORD_STRUCTURE_MODEL->getRecordName()}
+				{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} - {$RECORD_STRUCTURE_MODEL->getRecordName()} - {$RECORD_MODEL->get('contact_no')}
 			
 				{if $RECORD_MODEL->get('isgroup') neq '0' && $RECORD_MODEL->get('mailingstreet2')}
 				       <span class="mailingstreet2-synchronized" style="margin-left: 1em;">{htmlentities($RECORD_MODEL->get('mailingstreet2'))}</span>

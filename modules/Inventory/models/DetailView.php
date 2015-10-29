@@ -23,12 +23,21 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 		$moduleName = $recordModel->getmoduleName();
 
 		if($recordModel->isDuplicatable()
-		&& $recordModel->get('typedossier') !== 'Avoir') {
+		&& $recordModel->get('typedossier') !== 'Avoir'
+		&& $recordModel->get('typedossier') !== 'Remboursement') {
 			//ED151026
 			$duplicateLinkModel = array(
 						'linktype' => 'DETAILVIEWBASIC',
 						'linklabel' => 'LBL_DUPLICATE_AS_CREDIT_INVOICE',
-						'linkurl' => $recordModel->getDuplicateRecordUrl() . '&reverseQuantities=true&typedossier=Avoir',
+						'linkurl' => $recordModel->getDuplicateRecordUrl() . '&typedossier=Avoir',
+						'linkicon' => ''
+				);
+			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($duplicateLinkModel);
+			//ED151026
+			$duplicateLinkModel = array(
+						'linktype' => 'DETAILVIEWBASIC',
+						'linklabel' => 'LBL_DUPLICATE_AS_REFUND',
+						'linkurl' => $recordModel->getDuplicateRecordUrl() . '&typedossier=Remboursement',
 						'linkicon' => ''
 				);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($duplicateLinkModel);

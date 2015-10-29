@@ -676,7 +676,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
 		
-		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		/* recherche massive
+		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);*/
+		$id = false;
 		
 		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
@@ -698,7 +700,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			$mobile = $reglement['phone'];
 		else
 			$phone = $reglement['phone'];
-		$contactMapping = array(
+		$contactsHeader = array(
 			'sourceid'		=> $invoice['sourceid'],
 			'lastname'		=> $invoice['lastname'],
 			'firstname'		=> $invoice['firstname'],
@@ -713,9 +715,20 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'mobile'		=> $mobile,
 			'accounttype'		=> 'Donateur Web',
 			'leadsource'		=> 'PAYPAL',
-			);
+		);
+		
+		//numérique
+		$contactsHeader['_contactid_status'] = null;
+		
+		//TODO 'France' en constante de config
+		if(strcasecmp($contactsHeader['mailingcountry'], 'France') === 0)
+			$contactsHeader['mailingcountry'] = '';
+			
+		//Ajout du code de pays en préfixe du code postal
+		$contactsHeader['mailingzip'] = RSNImportSources_Utils_Helper::checkZipCodePrefix($contactsHeader['mailingzip'], $contactsHeader['mailingcountry']);
 
-		return $contactMapping;
+
+		return $contactsHeader;
 	}
 
 	/**
@@ -1220,7 +1233,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'numpiece'		=> $numpiece,
 			'refdonateurweb'	=> $refdonateurweb,
 			'dateregl'		=> $date,
-			'email'			=> $reglement[10],
+			'email'			=> mb_strtolower($reglement[10]),
 			'phone'			=> $reglement[39],
 			'amount'		=> self::str_to_float($reglement[7]),
 			'commission'		=> self::str_to_float($reglement[8]),

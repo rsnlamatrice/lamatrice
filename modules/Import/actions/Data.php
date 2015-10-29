@@ -57,7 +57,6 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 
 	public function getDefaultFieldValues($moduleMeta) {
 		static $cachedDefaultValues = array();
-
 		if (isset($cachedDefaultValues[$this->module])) {
 			return $cachedDefaultValues[$this->module];
 		}

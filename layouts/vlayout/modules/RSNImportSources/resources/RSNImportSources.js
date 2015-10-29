@@ -10,6 +10,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 		RECORDID_STATUS_CREATE : 2,
 		RECORDID_STATUS_UPDATE : 3,
 		RECORDID_STATUS_SKIP : 4,
+		RECORDID_STATUS_LATER : 5,
 		RECORDID_STATUS_CHECK : 10,
 		RECORDID_STATUS_SINGLE : 11,
 		RECORDID_STATUS_MULTI : 12,
@@ -46,6 +47,14 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			, $destHeaderFilters = $destTableData.find('.header-filters > th:first')
 			, url = $destTableData.find('param[name="PREVIEW_DATA_URL"]').attr('value')
 			, params = $.param(this.getPreviewDataRequestParams(e));
+			
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			
 			AppConnector.request(url + '&' + params).then(
 				function(data){
 					var $data = $(data)
@@ -58,8 +67,14 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 					if ($headerFilters.length)
 						$destHeaderFilters.replaceWith($headerFilters);//replace 
 					
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
 				},
 				function(error){
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
 				}
 			);
 		},
@@ -74,6 +89,14 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			, $destToolboxRows = $destTablePage.find('tr.importContents-toolbox[data-module="'+$moduleName+'"]')
 			, $destHeaderFilters = $destTableData.find('.header-filters > th:first')
 			, params = $.param(this.getPreviewDataRequestParams(e));
+		
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
+			
 			AppConnector.request(url + '&' + params).then(
 				function(data){
 					var $data = $(data)
@@ -86,8 +109,14 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 					if ($headerFilters.length)
 						$destHeaderFilters.replaceWith($headerFilters);//replace 
 					
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
 				},
 				function(error){
+					progressIndicatorElement.progressIndicator({
+						'mode' : 'hide'
+					});
 				}
 			);
 		},
@@ -471,8 +500,8 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			}
 		
 			var popupInstance =Vtiger_Popup_Js.getInstance();
-			popupInstance.show(params,function(data){
-				var responseData = JSON.parse(data);
+			popupInstance.show(params,function(responseData){
+				responseData = JSON.parse(responseData);
 				var dataList = new Array();
 				for(var id in responseData){
 					var data = {

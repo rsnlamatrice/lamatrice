@@ -413,7 +413,12 @@ jQuery.Class("Vtiger_Edit_Js",{
 					+ "&view=AddressCheckAjax",
 				data : values
 			};
-			var progressIndicatorElement = jQuery.progressIndicator({});
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
 			AppConnector.request(params).then(
 				function(data){
 					progressIndicatorElement.progressIndicator({'mode': 'hide'});
@@ -549,6 +554,9 @@ jQuery.Class("Vtiger_Edit_Js",{
 		this.registerEventStatusChangeEvent(container);
 		this.registerRecordAccessCheckEvent(container);
 		this.registerEventForPicklistDependencySetup(container);
+
+		//ED151029
+		this.setBrowserTitle();
 	},
 
 	/**
@@ -747,5 +755,15 @@ jQuery.Class("Vtiger_Edit_Js",{
 		editViewForm.validationEngine(app.validationEngineOptions);
 		this.registerReferenceCreate(editViewForm);
 		//this.triggerDisplayTypeEvent();
-	}
+	},
+	
+	
+	
+	/** ED150713
+	 */
+	setBrowserTitle : function(){
+		var title = $('.contentHeader h3:first').text();
+		if (title)
+			document.title = title;
+	},
 });

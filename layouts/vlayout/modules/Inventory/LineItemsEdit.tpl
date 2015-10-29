@@ -37,7 +37,8 @@
 			{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE)}
 			</div>
 		{/if}
-		{if $RECORD->get('typedossier') === 'Avoir'}
+		{if $RECORD->get('typedossier') === 'Avoir'
+		 || $RECORD->get('typedossier') === 'Remboursement'}
 		    </th><th><b style="border: 1px solid red; padding: 1px 2px;">Ceci est un {vtranslate($RECORD->get('typedossier'), $MODULE)}</b>
 		{/if}				
 	    </th>
@@ -339,7 +340,8 @@
                 <td width="83%" >
                     <div class="pull-right">
                         {if $MODULE eq 'Invoice'}
-			    {if $RECORD->get('typedossier') eq 'Avoir'}
+			    {if $RECORD->get('typedossier') === 'Avoir'
+				|| $RECORD->get('typedossier') === 'Remboursement'}
 			        <b>{vtranslate('LBL_REFUND',$MODULE)}</b>
 			    {else}
 			        <b>{vtranslate('LBL_RECEIVED',$MODULE)}</b>

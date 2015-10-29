@@ -35,8 +35,7 @@ class RSNImportSources_Preimport_Model extends Vtiger_Base_Model {
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, $this->module);
 		$data = $this->getAllValues();
-
-        	$columnNames = array_keys($data);
+        $columnNames = array_keys($data);
 		$columnValues = array_values($data);
 		if(count($data) > 0) {
 			$result = $db->pquery('INSERT INTO '.$tableName.' ('. implode(',',$columnNames).') VALUES ('. generateQuestionMarks($columnValues).')', array($columnValues));
