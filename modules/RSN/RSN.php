@@ -619,7 +619,8 @@ DELIMITER ;';
 		   mkdir(dirname(__FILE__).'/../'.$MODULENAME);
 
 			$db = PearDatabase::getInstance();
-			$sql = "INSERT INTO `vtiger_ws_entity` (`id`, `name`, `handler_path`, `handler_class`, `ismodule`, `uicolorfield`) VALUES (NULL, 'RSNStatisticsResults', 'include/Webservices/VtigerModuleOperation.php', 'VtigerModuleOperation', '1', NULL);";
+			$sql = "INSERT INTO `vtiger_ws_entity` (`id`, `name`, `handler_path`, `handler_class`, `ismodule`, `uicolorfield`)
+				VALUES (NULL, 'RSNStatisticsResults', 'include/Webservices/VtigerModuleOperation.php', 'VtigerModuleOperation', '1', NULL);";
 			$db->query($sql);
 		}
 	}
