@@ -277,7 +277,6 @@ class QueryGenerator {
 	}
 
 	public function parseAdvFilterList($advFilterList, $glue=''){
-		echo '<br><br><br><br>';
 		if(!empty($glue)) $this->addConditionGlue($glue);
 
 		$customView = new CustomView($this->module);
@@ -306,7 +305,7 @@ class QueryGenerator {
 						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
 						$filter['relatedmodulename'] = $viewName[0];
 						if($viewName[0] === 'RSNStatisticsResults'){//RSNStatisticsResults
-							echo "<code>TODO</code>";
+							echo "<code>TODO parseAdvFilterList for statistics</code>";
 						}
 						else { //CustomView
 							$filter['viewid'] = $viewName[2];
@@ -831,6 +830,8 @@ class QueryGenerator {
 						$sqlOperator = " NOT IN ";
 						break;
 					}
+					$fieldGlue = ''; //ED151028 on est dans entre ( ) A voir si il ne faut pas le faire aussi ci-dessous
+					
 					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
 				}
 				elseif($conditionInfo['operator'] == 'IN' && $fieldName == 'id'){
@@ -1263,8 +1264,9 @@ class QueryGenerator {
 	public function addCondition($fieldname,$value,$operator,$glue= null,$newGroup = false,
 		$newGroupType = null, $ignoreComma = false) {
 		$conditionNumber = $this->conditionInstanceCount++;
-		if($glue != null && $conditionNumber > 0)
+		if($glue != null && $conditionNumber > 0){
 			$this->addConditionGlue ($glue);
+		}
 		//else
 		//	var_dump($conditionNumber, $fieldname, $glue, $operator, $value);
 		$this->groupInfo .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/

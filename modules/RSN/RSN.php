@@ -441,7 +441,9 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		return;//TODO test is exists already
 		$module = Vtiger_Module_Model::getInstance('RSNStatistics');
 		$module->setRelatedList($module, 'LBL_RESULTS', Array(), 'get_statistics_data');
+		//TODO ne semble pas fonctionner
 		Vtiger_Module::getInstance('Contacts')->setRelatedList($module, 'RSNStatistics', Array(), 'get_statistics_data');
+		Vtiger_Module::getInstance('Documents')->setRelatedList($module, 'RSNStatistics', Array(), 'get_statistics_data');
 	}
 	
 	// fonction générique
@@ -606,8 +608,8 @@ DELIMITER ;';
 		$MODULENAME = 'RSNStatisticsResults';
 		
 		$moduleInstance = Vtiger_Module::getInstance($MODULENAME);
-		if ($moduleInstance || file_exists(dirname(__FILE__).'/../'.$MODULENAME)) {
-		   echo "Module already present - choose a different name.";
+		if ($moduleInstance){// || file_exists(dirname(__FILE__).'/../'.$MODULENAME)) {
+		   //echo "Module already present - choose a different name.";
 		} else {
 		   $moduleInstance = new Vtiger_Module();
 		   $moduleInstance->name = $MODULENAME;

@@ -78,6 +78,8 @@ $languageStrings = array(
         
         'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
         'Unit price' => 'Prix U.',
+        'LBL_DUPLICATE_AS_CREDIT_INVOICE' => 'Générer un avoir',
+        'LBL_REFUND' => 'Remboursement',
 );
 
 $jsLanguageStrings = array(

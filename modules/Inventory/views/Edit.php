@@ -31,6 +31,23 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$viewer->assign('MODE', '');
 			$viewer->assign('IS_DUPLICATE_FROM', $record);
 			
+			//ED151026
+			if($request->get('typedossier') === 'Avoir'){
+				foreach($relatedProducts as $index => $relatedProduct){
+					foreach(array('qty', 'discount_amount', 'discountTotal', 'totalAfterDiscount', 'taxTotal', 'netPrice') as $fieldName)
+						$relatedProducts[$index][$fieldName.$index] = -1 * (float)$relatedProduct[$fieldName.$index];
+						
+					if($index == 1){
+						foreach(array('hdnSubTotal', 'discount_amount_final', 'discountTotal_final', 'tax_totalamount', 'shipping_handling_charge'
+							      , 'shtax_totalamount', 'adjustment', 'grandTotal', 'preTaxTotal', 'totalAfterDiscount') as $fieldName)
+							$relatedProducts[$index]['final_details'][$fieldName] = -1 * (float)$relatedProduct['final_details'][$fieldName];
+							
+						foreach(array('received', 'receivedcomments', 'receivedmoderegl') as $fieldName)
+							$relatedProducts[$index]['final_details'][$fieldName] = null;
+					}
+				}
+			}
+			
 		} elseif (!empty($record)) {
                
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);

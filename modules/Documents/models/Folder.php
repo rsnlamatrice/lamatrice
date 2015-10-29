@@ -46,6 +46,17 @@ class Documents_Folder_Model extends Vtiger_Base_Model {
 		return $db->run_query_allrecords($query);
 	}
 	
+	public function isDeletable(){
+		$currentUserModel = Users_Record_Model::getCurrentUserModel();
+		$currentUserId = $currentUserModel->getId();
+		if($this->hasDocuments()
+		|| $this->getName() === 'Default'
+		|| (!$currentUserModel->isAdminUser() && $this->get('createdby') != $currentUserId)
+		)
+			return false;
+		return true;
+	}
+	
 	/**
 	 * Function returns whether documents are exist or not in that folder
 	 * @return true if exists else false

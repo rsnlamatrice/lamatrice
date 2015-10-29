@@ -20,6 +20,4 @@
  
 include('config.inc.php');
 include('config.RSN.inc.php');
-//ED150500
-include('config.RSN.inc.php');
 ?>

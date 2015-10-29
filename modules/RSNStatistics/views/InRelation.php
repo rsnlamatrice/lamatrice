@@ -7,6 +7,7 @@
  *************************************************************************************/
 
 class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
+	
 	function process(Vtiger_Request $request) {
 		$moduleName = $request->getModule();
 		$relatedModuleName = $request->get('relatedModule');
@@ -68,7 +69,8 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('UPDATE_STATS_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : ''));
 		$viewer->assign('UPDATE_STATS_THIS_YEAR_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : '', 'this_year'));
 		
-		if($moduleName === 'RSNStatistics')
+		if($moduleName === 'RSNStatistics' //TODO un des deux
+		|| $moduleName === 'RSNStatisticsResults')
 			$viewer->assign('RELATED_STATISTICS', array($parentRecordModel->getId() => $parentRecordModel));
 		else
 			$viewer->assign('RELATED_STATISTICS', RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName));
@@ -97,7 +99,6 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->assign('IS_EDITABLE', $relationModel->isEditable());
 		$viewer->assign('IS_DELETABLE', $relationModel->isDeletable());
-        $viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->assign('VIEW', $request->get('view'));
 
 		if($relatedViewName)

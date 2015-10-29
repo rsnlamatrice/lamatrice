@@ -30,6 +30,7 @@
 			<input type="hidden" name="isDuplicateFrom" value="{$IS_DUPLICATE_FROM}" />
 		{/if}
 		<div class="contentHeader row-fluid">
+				
 			{assign var=SINGLE_MODULE_NAME value='SINGLE_'|cat:$MODULE}
 			{* ED150629 PurchaseOrder *}
 			{if isset($POTYPE_FIELD_MODEL)}
@@ -45,9 +46,26 @@
 					{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$MODULE) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE RECORD=$RECORD RECORD_MODEL=$RECORD}
 				</span>
 			{elseif $RECORD_ID neq ''}
-				<h3 title="{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} {$RECORD_STRUCTURE_MODEL->getRecordName()}">{vtranslate('LBL_EDITING', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)} - {$RECORD_STRUCTURE_MODEL->getRecordName()}
+				<h3>{vtranslate('LBL_EDITING', $MODULE)}&nbsp;
+				{if $RECORD->get('typedossier') === 'Avoir'}
+					<b>{vtranslate($RECORD->get('typedossier'), $MODULE )}</b>
+				{else}
+					{vtranslate($SINGLE_MODULE_NAME, $MODULE)}
+				{/if}
+				&nbsp;- {$RECORD_STRUCTURE_MODEL->getRecordName()}
 			{else}
-				<h3>{vtranslate('LBL_CREATING_NEW', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)}
+				<h3>{vtranslate('LBL_CREATING_NEW', $MODULE)}&nbsp;
+				{if $RECORD->get('typedossier') === 'Avoir'}
+					{vtranslate($RECORD->get('typedossier'), $MODULE )}
+				{else}
+					{vtranslate($SINGLE_MODULE_NAME, $MODULE)}
+				{/if}
+			{/if}
+			{if $RECORD->get('invoicestatus') === 'Cancelled'}
+				<br><span style="color: red;">{vtranslate($RECORD->get('invoicestatus'), $MODULE )}</span>
+			{/if}
+			{if $RECORD->get('sent2compta')}
+				<br><span style="color: red;">{vtranslate('LBL_ALREADY_SENT_2_COMPTA')}</span>
 			{/if}
 			</h3><hr>
 		
@@ -203,6 +221,11 @@
 				</td>
 				{if $FIELD_MODEL->get('uitype') neq "83"}
 					<td class="fieldValue {$WIDTHTYPE}" {if $FIELD_MODEL->get('uitype') eq '19'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if} {if $FIELD_MODEL->get('uitype') eq '20'} colspan="3"{/if}>
+						{* empêche l'enregistrement du type
+						ED151026
+						if $FIELD_MODEL->getName() === 'typedossier' && $RECORD->get('typedossier') === 'Avoir'}
+							{if $FIELD_MODEL->set('disabled', true)}{/if}
+						{/if*}
 						{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS}
 					</td>
 				{/if}

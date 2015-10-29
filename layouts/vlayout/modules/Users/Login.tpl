@@ -41,7 +41,7 @@
 		<div class="container-fluid login-container">
 			<div class="row-fluid">
 				<div class="span3">
-					<div class="logo"><a target="_blank" href="https://www.sortirdunucleaire.org/"><img src="test/logo/logo480.png"/></a>
+					<div class="logo"><a target="_blank" href="https://www.sortirdunucleaire.org/"><img src="test/logo/logo-sdn480.png"/></a>
 					</div>
 				</div>
 				<div class="span9">
@@ -49,6 +49,8 @@
 						<a href="http://www.sortirdunucleaire.org/">Sortir du Nucl&eacute;aire</a> | 
 						<a href="https://groupware.sortirdunucleaire.org/">Groupware</a> | 
 						<a href="https://echanges.sortirdunucleaire.org">Intranet</a> | 
+						<a href="https://echanges.sortirdunucleaire.org/lemoulin">Le Moulin</a> | 
+						<a href="https://lune.sortirdunucleaire.fr/lemoulin">Le Mouldeux</a> | 
 						<a href="https://webmail.gandi.net/">Webmail</a>
 					</div>
 				</div>
