@@ -747,7 +747,7 @@ jQuery.Class("Vtiger_Edit_Js",{
 			return;
 		}
 
-		this.registerBasicEvents(this.getForm());
+		this.registerBasicEvents(editViewForm);
 		this.registerEventForImageDelete();
 		this.registerSubmitEvent();
 

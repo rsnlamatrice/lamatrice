@@ -56,7 +56,7 @@
 		</div>
 		{foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE name="EditViewBlockLevelLoop"}
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
-			<table class="table table-bordered blockContainer showInlineTable">
+			<table class="table table-bordered blockContainer showInlineTable block-{$BLOCK_LABEL}">
 			<tr>
 				<th class="blockHeader" colspan="4">{vtranslate($BLOCK_LABEL, $MODULE)}</th>
 			</tr>
@@ -165,9 +165,11 @@
 						<table style="width:100%">
 							<tr>
 								<td class="fieldLabel {$WIDTHTYPE}"></td>
-								<td><div class="text-center" style="width:50px;margin:0px 5px;display:inline-block;">Pays</div>
-								<div class="text-center" style="width:50px;margin:0px 5px;display:inline-block;">Clé</div>
-								<div class="text-center" style="width:220px;margin:0px 5px;display:inline-block;">BBAN</div></td>
+								<td>
+									<div class="text-center" style="width:50px;margin:0px 5px;display:inline-block;">Pays</div>
+									<div class="text-center" style="width:210px;margin:0px 5px;display:inline-block;">BBAN</div>
+									<div class="text-center" style="width:50px;margin:0px 5px;display:inline-block;">Clé</div>
+								</td>
 							</tr>
 							<tr>
 								<td class="fieldLabel {$WIDTHTYPE}">
@@ -181,19 +183,19 @@
 									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-small'}
 
-									{* Clé *}
-									{assign var=TITLE value='Clé'}
-									{assign var=FIELD_NAME value='sepaibancle'}
-									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-small'}
-
 									{* BBAN *}
 									{assign var=TITLE value='BBAN'}
 									{assign var=FIELD_NAME value='sepaibanbban'}
 									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
 									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+
+									{* Clé *}
+									{assign var=TITLE value='Clé'}
+									{assign var=FIELD_NAME value='sepaibancle'}
+									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-small'}
 								</td>
 							</tr>
 							<tr>
