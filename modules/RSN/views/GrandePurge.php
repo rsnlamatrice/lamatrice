@@ -267,7 +267,7 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			$queriesParams[$tab_name] = $params;
 		}
 		
-		if($moduleModel && ($moduleModel->getName() === 'Contacts' || $moduleModel->getName() === 'Critere4D')){
+		if($moduleModel && ($moduleModel->getName() === 'Contacts')){
 			$tab_name = 'vtiger_contactscontrel';
 			$params = array();
 			$query = 'SELECT vtiger_contactscontrel.contactid
@@ -281,7 +281,35 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 				
 			$queries[$tab_name] = $query;
 			$queriesParams[$tab_name] = $params;
+			
+			$tab_name = 'vtiger_duplicateentities';
+			$params = array();
+			$query = 'SELECT vtiger_duplicateentities.crmid1
+				FROM vtiger_duplicateentities
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_duplicateentities.crmid1 = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_duplicateentities.crmid2 = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
 		}
+		
+		if($moduleModel && ($moduleModel->getName() === 'Invoice')){
+			$tab_name = 'vtiger_inventoryshippingrel';
+			$params = array();
+			$query = 'SELECT vtiger_inventoryshippingrel.id
+				FROM vtiger_inventoryshippingrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_inventoryshippingrel.id = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		
 		if(!$moduleModel){		
 			$tab_name = 'vtiger_crmentityrel';
 			$params = array();
