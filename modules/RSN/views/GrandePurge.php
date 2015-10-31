@@ -349,7 +349,10 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			FROM vtiger_modtracker_basic
 			LEFT JOIN vtiger_crmentity
 				ON vtiger_modtracker_basic.crmid = vtiger_crmentity.crmid
-			WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1';
+			LEFT JOIN vtiger_modtracker_detail
+				ON vtiger_modtracker_basic.id = vtiger_modtracker_detail.id
+			WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+			OR vtiger_modtracker_detail.id IS NULL';
 			
 		$queries[$tab_name] = $query;
 		$queriesParams[$tab_name] = $params;
