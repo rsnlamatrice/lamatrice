@@ -353,7 +353,7 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 		$statistics = RSNStatistics_Utils_Helper::getRelatedStatistics(false, true);
 		foreach($statistics as $statistic){
 			$tab_name = RSNStatistics_Utils_Helper::getStatsTableNameFromId($statistic['id']);
-			if(!RSNStatistics_Utils_Helper::getTableInfo($tab_name))
+			if(!$tab_name || !RSNStatistics_Utils_Helper::getTableInfo($tab_name))
 				continue;
 			$query = 'SELECT id FROM '.$tab_name;
 			$queries[$tab_name] = $query;
