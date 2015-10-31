@@ -93,18 +93,39 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 					}
 					break;
 				}
-		
+		switch($action){
+		 case 'Count':
+			if(!$this->doPurgeModule(false, false)){
+				return;
+			}
+			break;
+		 case 'PurgeModules':
+			if(!$this->doPurgeModule(false, true)){
+				return;
+			}
+			break;
+		}
 	}
 	
 	function doPurgeModule($moduleModel, $delete_records = false){
 		global $adb;
 		
-		$moduleName = $moduleModel->getName();
-		$focus = CRMEntity::getInstance($moduleName);
-		echo '<li><h4>' . vtranslate($moduleName, $moduleName) . ' ( ' . $moduleName . ' )</h4>';
-		echo '<ul>';
 		$queriesParams = array();
-		$queries = $this->getModuleQueries($moduleModel, $focus, $queriesParams);
+		
+		if($moduleModel){
+			$moduleName = $moduleModel->getName();
+			$focus = CRMEntity::getInstance($moduleName);
+			echo '<li><h4>' . vtranslate($moduleName, $moduleName) . ' ( ' . $moduleName . ' )</h4>';
+			echo '<ul>';
+			$queries = $this->getModuleQueries($moduleModel, $focus, $queriesParams);
+		}
+		else {
+			$queries = array();
+			echo '<li><h4>Relations</h4>';
+			echo '<ul>';
+		}
+		$relatedQueries = $this->getRelationsQueries($moduleModel, $queriesParams);
+		$queries = array_merge($queries, $relatedQueries);
 		$nTable = 0;
 		foreach($queries as $tab_name => $query){
 			$params = $queriesParams[$tab_name];
@@ -117,7 +138,10 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			$nRowsCount = $adb->getRowCount($result);
 			if($nRowsCount){
 				$counter = $adb->query_result($result, 0);
-				echo '<li>' . $tab_name . ' : ' . $counter;
+				if($counter
+				|| !$delete_records
+				|| !array_key_exists($tab_name, $relatedQueries))
+					echo '<li>' . $tab_name . ' : ' . $counter;
 			}
 			
 			if($delete_records){
@@ -132,10 +156,13 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 					$query = 'DELETE FROM '.$tab_name
 						. ' WHERE setype = ?';
 				}
-				elseif($moduleName == 'ModTracker'){
-					$query = preg_replace('/^.*\sFROM\s/i', 'DELETE FROM ', $queries[$tab_name]);
+				elseif($moduleName == 'ModTracker'
+					|| array_key_exists($tab_name, $relatedQueries)){
+					$params = array();
+					$query = preg_replace('/^[\s\S]+\sFROM\s/i', 'DELETE '.$tab_name.' FROM ', $queries[$tab_name]);
 				}
 				elseif($moduleName == 'RSNStatisticsResults'){
+					$params = array();
 					$query = 'DELETE FROM '.$tab_name;
 				}
 				else {
@@ -202,6 +229,73 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			$queries[$tab_name] = $query;
 			$queriesParams[$tab_name] = $params;
 			
+		}
+		return $queries;
+	}
+	
+	function getRelationsQueries($moduleModel, &$queriesParams){
+		$queries = array();
+		
+		if(!$moduleModel){
+			$tab_name = 'vtiger_senotesrel';
+			$params = array();
+			$query = 'SELECT vtiger_senotesrel.crmid
+				FROM vtiger_senotesrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_senotesrel.crmid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_senotesrel.notesid = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		if($moduleModel && ($moduleModel->getName() === 'Contacts' || $moduleModel->getName() === 'Critere4D')){
+			$tab_name = 'vtiger_critere4dcontrel';
+			$params = array();
+			$query = 'SELECT vtiger_critere4dcontrel.contactid
+				FROM vtiger_critere4dcontrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_critere4dcontrel.contactid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_critere4dcontrel.critere4did = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		
+		if($moduleModel && ($moduleModel->getName() === 'Contacts' || $moduleModel->getName() === 'Critere4D')){
+			$tab_name = 'vtiger_contactscontrel';
+			$params = array();
+			$query = 'SELECT vtiger_contactscontrel.contactid
+				FROM vtiger_contactscontrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_contactscontrel.contactid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_contactscontrel.relcontid = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		if(!$moduleModel){		
+			$tab_name = 'vtiger_crmentityrel';
+			$params = array();
+			$query = 'SELECT vtiger_crmentityrel.crmid
+				FROM vtiger_crmentityrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_crmentityrel.crmid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_crmentityrel.relcrmid = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
 		}
 		return $queries;
 	}

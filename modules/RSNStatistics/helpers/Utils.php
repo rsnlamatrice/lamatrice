@@ -229,7 +229,8 @@ class RSNStatistics_Utils_Helper {
 	}
 	public static function getTableInfo($table_name){
 		global $adb;
-		return $adb->query("SHOW TABLES LIKE '$table_name'");
+		$result = $adb->query("SHOW TABLES LIKE '$table_name'");
+		return $adb->raw_query_result_rowdata($result, 0);
 	}
 
 	public static function getFieldUniqueCodeFromId($id) {//tmp do not put that here !!
