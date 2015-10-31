@@ -23,13 +23,14 @@ class RSNStatistics_Utils_Helper {
 		return self::getStatsTableName($id, $row);
 	}
 
-	public static function getRelatedStatistics($moduleNames) {
+	public static function getRelatedStatistics($moduleNames, $includeDisabled = false) {
 		$sql = "SELECT *
 				FROM `vtiger_rsnstatistics`
 				INNER JOIN `vtiger_crmentity`
 					ON `vtiger_crmentity`.`crmid` = `vtiger_rsnstatistics`.`rsnstatisticsid`
-				WHERE `vtiger_crmentity`.`deleted` = 0
-				AND `vtiger_rsnstatistics`.`disabled` = 0";
+				WHERE `vtiger_crmentity`.`deleted` = 0";
+		if(!$includeDisabled)
+				$sql .= " AND `vtiger_rsnstatistics`.`disabled` = 0";
 		if($moduleNames){
 			if(!is_array($moduleNames))
 				$moduleNames = array($moduleNames);
@@ -225,6 +226,11 @@ class RSNStatistics_Utils_Helper {
 		}
 		$relmodule = is_object($data) ? $data->get('relmodule') : $data['relmodule'];
 		return "vtiger_stats_" . str_replace(" ", "_", $stat_name) . "_" . $relmodule . "_" . $id;
+	}
+	public static function getTableInfo($table_name){
+		global $adb;
+		$result = $adb->query("SHOW TABLES LIKE '$table_name'");
+		return $adb->raw_query_result_rowdata($result, 0);
 	}
 
 	public static function getFieldUniqueCodeFromId($id) {//tmp do not put that here !!

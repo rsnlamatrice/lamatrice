@@ -27,11 +27,11 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			'Quotes' => true,
 			'Vendors' => true,
 			'PurchaseOrder' => true,
-			'Potentials' => true,
+			'Potentials' => false,
 			'Products' => false,
 			'Services' => false,
 			
-			'Critere4D' => true,
+			'Critere4D' => false,
 			'RsnPrelevements' => true,
 			'RsnPrelVirement' => true,
 			'RsnReglements' => true,
@@ -40,8 +40,8 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			//never 'RSNMediaRelations' => false,
 			//never 'RSNContactsPanels' => false,
 			//never 'RSNPanelsVariables' => false,
-			'RSNBanques' => true,
-			'RSNBanqAgences' => true,
+			'RSNBanques' => false,
+			'RSNBanqAgences' => false,
 			'RSNAboRevues' => true,
 			'RSNDonateursWeb' => true,
 			
@@ -52,13 +52,15 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			'Leads' => false,
 			'PriceBooks' => false,
 			//never 'Campaigns' => false,
-			//not standard 'ModTracker' => true,
 			'ServiceContracts' => false,
 			'Assets' => false,
 			'ProjectMilestone' => false,
 			'ProjectTask' => false,
 			'Project' => false,
-			'ModComments' => false,
+			'ModComments' => true,
+			
+			'ModTracker' => true,//not standard 
+			'RSNStatisticsResults' => true,//not standard 
 		);
 		if($request->get('doAction')){
 			foreach($purgeables as $module_name=>$value)
@@ -91,18 +93,39 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 					}
 					break;
 				}
-		
+		switch($action){
+		 case 'Count':
+			if(!$this->doPurgeModule(false, false)){
+				return;
+			}
+			break;
+		 case 'PurgeModules':
+			if(!$this->doPurgeModule(false, true)){
+				return;
+			}
+			break;
+		}
 	}
 	
 	function doPurgeModule($moduleModel, $delete_records = false){
 		global $adb;
 		
-		$moduleName = $moduleModel->getName();
-		$focus = CRMEntity::getInstance($moduleName);
-		echo '<li><h4>' . vtranslate($moduleName, $moduleName) . ' ( ' . $moduleName . ' )</h4>';
-		echo '<ul>';
 		$queriesParams = array();
-		$queries = $this->getModuleQueries($moduleModel, $focus, $queriesParams);
+		
+		if($moduleModel){
+			$moduleName = $moduleModel->getName();
+			$focus = CRMEntity::getInstance($moduleName);
+			echo '<li><h4>' . vtranslate($moduleName, $moduleName) . ' ( ' . $moduleName . ' )</h4>';
+			echo '<ul>';
+			$queries = $this->getModuleQueries($moduleModel, $focus, $queriesParams);
+		}
+		else {
+			$queries = array();
+			echo '<li><h4>Relations</h4>';
+			echo '<ul>';
+		}
+		$relatedQueries = $this->getRelationsQueries($moduleModel, $queriesParams);
+		$queries = array_merge($queries, $relatedQueries);
 		$nTable = 0;
 		foreach($queries as $tab_name => $query){
 			$params = $queriesParams[$tab_name];
@@ -115,7 +138,10 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			$nRowsCount = $adb->getRowCount($result);
 			if($nRowsCount){
 				$counter = $adb->query_result($result, 0);
-				echo '<li>' . $tab_name . ' : ' . $counter;
+				if($counter
+				|| !$delete_records
+				|| !array_key_exists($tab_name, $relatedQueries))
+					echo '<li>' . $tab_name . ' : ' . $counter;
 			}
 			
 			if($delete_records){
@@ -129,6 +155,15 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 					$params = array($moduleName);
 					$query = 'DELETE FROM '.$tab_name
 						. ' WHERE setype = ?';
+				}
+				elseif($moduleName == 'ModTracker'
+					|| array_key_exists($tab_name, $relatedQueries)){
+					$params = array();
+					$query = preg_replace('/^[\s\S]+\sFROM\s/i', 'DELETE '.$tab_name.' FROM ', $queries[$tab_name]);
+				}
+				elseif($moduleName == 'RSNStatisticsResults'){
+					$params = array();
+					$query = 'DELETE FROM '.$tab_name;
 				}
 				else {
 					$params = $queriesParams['vtiger_crmentity'];
@@ -157,9 +192,14 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 		return true;
 	}
 	function getModuleQueries($moduleModel, $focus, &$queriesParams){
-		$queries = array();
 		
 		$moduleName = $moduleModel->getName();
+		
+		$methodName = 'get'.$moduleName.'Queries';
+		if(method_exists($this, $methodName))
+			return $this->$methodName($moduleModel, $focus, $queriesParams);
+		
+		$queries = array();
 		
 		//reverse order for deleting to finish with vtiger_crmentity
 		for($nTable = count($focus->tab_name) - 1; $nTable >= 0; $nTable--){
@@ -190,6 +230,177 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			$queriesParams[$tab_name] = $params;
 			
 		}
+		return $queries;
+	}
+	
+	function getRelationsQueries($moduleModel, &$queriesParams){
+		$queries = array();
+		
+		if(!$moduleModel){
+			$tab_name = 'vtiger_senotesrel';
+			$params = array();
+			$query = 'SELECT vtiger_senotesrel.crmid
+				FROM vtiger_senotesrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_senotesrel.crmid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_senotesrel.notesid = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		if($moduleModel && ($moduleModel->getName() === 'Contacts' || $moduleModel->getName() === 'Critere4D')){
+			$tab_name = 'vtiger_critere4dcontrel';
+			$params = array();
+			$query = 'SELECT vtiger_critere4dcontrel.contactid
+				FROM vtiger_critere4dcontrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_critere4dcontrel.contactid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_critere4dcontrel.critere4did = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		
+		if($moduleModel && ($moduleModel->getName() === 'Contacts')){
+			$tab_name = 'vtiger_contactscontrel';
+			$params = array();
+			$query = 'SELECT vtiger_contactscontrel.contactid
+				FROM vtiger_contactscontrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_contactscontrel.contactid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_contactscontrel.relcontid = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+			
+			$tab_name = 'vtiger_duplicateentities';
+			$params = array();
+			$query = 'SELECT vtiger_duplicateentities.crmid1
+				FROM vtiger_duplicateentities
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_duplicateentities.crmid1 = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_duplicateentities.crmid2 = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		
+		if($moduleModel && ($moduleModel->getName() === 'Invoice')){
+			$tab_name = 'vtiger_inventoryproductrel';
+			$params = array();
+			$query = 'SELECT vtiger_inventoryproductrel.id
+				FROM vtiger_inventoryproductrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_inventoryproductrel.id = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+			$tab_name = 'vtiger_inventoryshippingrel';
+			$params = array();
+			$query = 'SELECT vtiger_inventoryshippingrel.id
+				FROM vtiger_inventoryshippingrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_inventoryshippingrel.id = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		
+		if(!$moduleModel){		
+			$tab_name = 'vtiger_crmentityrel';
+			$params = array();
+			$query = 'SELECT vtiger_crmentityrel.crmid
+				FROM vtiger_crmentityrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_crmentityrel.crmid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_crmentityrel.relcrmid = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		return $queries;
+	}
+	
+	function getModTrackerQueries($moduleModel, $focus, &$queriesParams){
+		$queries = array();
+		
+		$moduleName = $moduleModel->getName();
+		
+		$tab_name = 'vtiger_modtracker_basic';
+		$params = array();
+		$query = 'SELECT vtiger_modtracker_basic.id
+			FROM vtiger_modtracker_basic
+			LEFT JOIN vtiger_crmentity
+				ON vtiger_modtracker_basic.crmid = vtiger_crmentity.crmid
+			LEFT JOIN vtiger_modtracker_detail
+				ON vtiger_modtracker_basic.id = vtiger_modtracker_detail.id
+			WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+			OR vtiger_modtracker_detail.id IS NULL';
+			
+		$queries[$tab_name] = $query;
+		$queriesParams[$tab_name] = $params;
+			
+		$tab_name = 'vtiger_modtracker_relations';
+		$params = array();
+		$query = 'SELECT vtiger_modtracker_relations.id
+			FROM vtiger_modtracker_relations
+			LEFT JOIN vtiger_modtracker_basic
+				ON vtiger_modtracker_relations.id = vtiger_modtracker_basic.id
+			LEFT JOIN vtiger_crmentity
+				ON vtiger_modtracker_relations.targetid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+			OR vtiger_modtracker_basic.id IS NULL';
+			
+		$queries[$tab_name] = $query;
+		$queriesParams[$tab_name] = $params;
+			
+		$tab_name = 'vtiger_modtracker_detail';
+		$params = array();
+		$query = 'SELECT vtiger_modtracker_detail.id
+			FROM vtiger_modtracker_detail
+			LEFT JOIN vtiger_modtracker_basic
+				ON vtiger_modtracker_detail.id = vtiger_modtracker_basic.id
+			LEFT JOIN vtiger_crmentity
+				ON vtiger_modtracker_basic.id = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+			OR vtiger_modtracker_basic.id IS NULL';
+			
+		$queries[$tab_name] = $query;
+		$queriesParams[$tab_name] = $params;
+			
+		
+		return $queries;
+	}
+	function getRSNStatisticsResultsQueries($moduleModel, $focus, &$queriesParams){
+		$queries = array();
+		
+		$statistics = RSNStatistics_Utils_Helper::getRelatedStatistics(false, true);
+		foreach($statistics as $statistic){
+			$tab_name = RSNStatistics_Utils_Helper::getStatsTableNameFromId($statistic['id']);
+			if(!$tab_name || !RSNStatistics_Utils_Helper::getTableInfo($tab_name))
+				continue;
+			$query = 'SELECT id FROM '.$tab_name;
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = array();
+		}
+		
 		return $queries;
 	}
 }
