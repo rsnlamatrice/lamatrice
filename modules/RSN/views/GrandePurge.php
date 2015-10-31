@@ -298,6 +298,16 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 		}
 		
 		if($moduleModel && ($moduleModel->getName() === 'Invoice')){
+			$tab_name = 'vtiger_inventoryproductrel';
+			$params = array();
+			$query = 'SELECT vtiger_inventoryproductrel.id
+				FROM vtiger_inventoryproductrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_inventoryproductrel.id = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
 			$tab_name = 'vtiger_inventoryshippingrel';
 			$params = array();
 			$query = 'SELECT vtiger_inventoryshippingrel.id
