@@ -46,6 +46,12 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 	public function hasValidatingStep(){
 		return false;
 	}
+	/**
+	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
+	 */
+	public function needValidatingStep(){
+		return false;
+	}
 
 	/**
 	 * Method that check if a line of the file is a client information line.
