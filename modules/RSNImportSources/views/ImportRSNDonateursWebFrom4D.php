@@ -285,4 +285,12 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 			$rsndonateurswebHeader['isvalid'] = 0;
 		return $rsndonateurswebHeader;
 	}
+	
+	/**
+	 * Method called before the data are really imported.
+	 *  This method must be overload in the child class.
+	 *
+	 */
+	function beforeImportRSNDonateursWeb() {
+	}
 }
