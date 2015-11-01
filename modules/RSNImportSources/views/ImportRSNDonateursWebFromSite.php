@@ -748,6 +748,8 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * Note : pas de postPreImportData() à cause de la validation du pre-import
 	 */
 	function beforeImportRSNDonateursWeb() {
+		if(!$this->hasValidatingStep())
+			return;
 		$db = PearDatabase::getInstance();
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$rsndonateurswebTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');
@@ -924,6 +926,8 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @return array - the pre-imported values group by module.
 	 */
 	public function getPreviewData($request, $offset = 0, $limit = 24, $importModules = false) {
+		if(!$this->hasValidatingStep())
+			return parent::getPreviewData($request, $offset, $limit, $importModules);
 		if(!$importModules
 		&& $this->needValidatingStep())
 			$importModules =array('Contacts');
