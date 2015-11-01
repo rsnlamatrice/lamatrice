@@ -249,6 +249,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
             $columnType = $fieldTypes[$fieldObject->get('column')];
 			if(strcasecmp($columnType, 'datetime'))
 				$columnType .= ' DEFAULT NULL';//ED151029 0 -> NULL
+			elseif(strcasecmp($columnType, 'timestamp'))
+				$columnType .= ' DEFAULT CURRENT_TIMESTAMP';
             $columnsListQuery .= ','.$fieldName.' '.$columnType;
         }
         
