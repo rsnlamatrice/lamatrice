@@ -4,7 +4,7 @@
  * Importation des donateurs Web depuis le fichier provenant du site en ligne.
  * Permet de créer les contacts et de référencer les références de transactions.
  */
-class RSNImportSources_ _View extends RSNImportSources_ImportFromFile_View {
+class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSources_ImportFromFile_View {
 
 	private $coupon = null;
 
