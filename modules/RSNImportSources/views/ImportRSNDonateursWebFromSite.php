@@ -36,7 +36,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * Function that returns if the import controller has a validating step of pre-import data
 	 */
 	public function hasValidatingStep(){
-		return array_in('Contacts', $this->getImportModules());
+		return in_array('Contacts', $this->getImportModules());//héritage From4D
 	}
 	
 	/**
