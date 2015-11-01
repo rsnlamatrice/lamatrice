@@ -77,7 +77,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			'iban',
 			'bic',
 			
-			/* post pré import */
+			/* post prÃ© import */
 			'_contactid',
 		);
 	}
@@ -93,7 +93,8 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '
 			. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE
 			. ' ORDER BY id'
-			. ' LIMIT 0, ' . $config->get('importBatchLimit');
+			//. ' LIMIT 0, ' . $config->get('importBatchLimit')
+		;
 
 		$result = $adb->query($sql);
 		$numberOfRecords = $adb->num_rows($result);
@@ -117,7 +118,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		}
 		$perf->terminate();
 		
-		//ED150826 : d'autres données sont disponibles, empêche la suppression de l'import programmé
+		//ED150826 : d'autres donnÃ©es sont disponibles, empÃªche la suppression de l'import programmÃ©
 		/*var_dump("\n\n\n\n\n\n\n\n\nnumberOfRecords\n\n\n\n\n\n\n\n\n\n\n", $numberOfRecords, $config->get('importBatchLimit')
 				, '$this->getNumberOfRecords()', $this->getNumberOfRecords());*/
 		if($numberOfRecords == $config->get('importBatchLimit')){
@@ -190,14 +191,14 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				
 				$oldPeriodicite = $this->getPeriodiciteFrom4D($prelevement->get('periodicite'), $record->get('dateexport'));
 				if($prelevement->get('periodicite') != $oldPeriodicite){
-					$comments = 'Dans 4D, la périodicité était ' . $oldPeriodicite . ', maintenant c\'est '.$prelevement->get('periodicite').'.';
+					$comments = 'Dans 4D, la pÃ©riodicitÃ© Ã©tait ' . $oldPeriodicite . ', maintenant c\'est '.$prelevement->get('periodicite').'.';
 				}
 				
 				if(strlen($prelevement->get('separum')) > 3){
 					$oldRUM = $record->get('separum');
 					if($prelevement->get('separum') != $oldRUM){
 						if($comments) $comments .= "\r\n";
-						$comments .= 'Dans 4D, la RUM était ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
+						$comments .= 'Dans 4D, la RUM Ã©tait ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
 					}
 				}
 				
@@ -216,7 +217,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 
 				if(!$rsnprelvirementsId){
 					//TODO: manage error
-					echo "<pre><code>Impossible d'enregistrer l'ordre de prélèvement</code></pre>";
+					echo "<pre><code>Impossible d'enregistrer l'ordre de prÃ©lÃ¨vement</code></pre>";
 					foreach ($rsnprelvirementsData as $rsnprelvirementsLine) {
 						$entityInfo = array(
 							'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
@@ -316,12 +317,12 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			$contact = Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
 			
 		if(!$contact){
-			var_dump("Impossible de trouver le contact du pr�l�vement.", $rsnprelvirementsData[0]);
+			var_dump("Impossible de trouver le contact du prélèvement.", $rsnprelvirementsData[0]);
 			return false;
 		}
 		$account = $contact->getAccountRecordModel();
 		if(!$account){
-			var_dump("Impossible de trouver le compte du prélèvement. ContactId=", $contact->getId());
+			var_dump("Impossible de trouver le compte du prÃ©lÃ¨vement. ContactId=", $contact->getId());
 			return false;
 		}
 		
@@ -353,12 +354,12 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
 		if(!$db->num_rows($result)){
-			var_dump("Impossible de trouver le prélèvement. SEPARUM = $separum. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
+			var_dump("Impossible de trouver le prÃ©lÃ¨vement. SEPARUM = $separum. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
 			return false;
 		}
 		
 		$id = $db->query_result($result, 0, 0);
-		//var_dump("Prélèvement", $id);
+		//var_dump("PrÃ©lÃ¨vement", $id);
 		return Vtiger_Record_Model::getInstanceById($id, 'RsnPrelevements');
 		
 	}
@@ -413,7 +414,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			return true;
 		} else {
 			//TODO: manage error
-			echo "<code>le fichier n'a pas pu être ouvert...</code>";
+			echo "<code>le fichier n'a pas pu Ãªtre ouvert...</code>";
 		}
 		return false;
 	}
@@ -423,7 +424,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 *  This method must be overload in the child class.
 	 */
 	function postPreImportData() {
-		// Pré-identifie les contacts
+		// PrÃ©-identifie les contacts
 		
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,
