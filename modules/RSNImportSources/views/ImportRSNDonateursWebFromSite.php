@@ -43,6 +43,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
 	 */
 	public function needValidatingStep(){
+
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$sql = 'SELECT * FROM ' . $tableName . '
@@ -361,7 +362,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			$this->keepScheduledImport = true;
 			return;
 		}
-		
+
 		$this->beforeImportRSNDonateursWeb();		
 
 		$adb = PearDatabase::getInstance();
