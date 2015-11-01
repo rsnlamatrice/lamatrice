@@ -4,7 +4,7 @@
  * Importation des donateurs Web depuis le fichier provenant du site en ligne.
  * Permet de créer les contacts et de référencer les références de transactions.
  */
-class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSources_ImportFromFile_View {
+class RSNImportSources_ _View extends RSNImportSources_ImportFromFile_View {
 
 	private $coupon = null;
 
@@ -36,14 +36,15 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * Function that returns if the import controller has a validating step of pre-import data
 	 */
 	public function hasValidatingStep(){
-		return true;
+		return array_in('Contacts', $this->getImportModules());
 	}
 	
 	/**
 	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
 	 */
 	public function needValidatingStep(){
-
+		if(!$this->hasValidatingStep())
+			return false;
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$sql = 'SELECT * FROM ' . $tableName . '
