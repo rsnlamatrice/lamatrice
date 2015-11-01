@@ -39,6 +39,13 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 	public function getDefaultFileEncoding() {
 		return 'ISO-8859-1';
 	}
+	
+	/**
+	 * Function that returns if the import controller has a validating step of pre-import data
+	 */
+	public function hasValidatingStep(){
+		return false;
+	}
 
 	/**
 	 * Method that check if a line of the file is a client information line.
