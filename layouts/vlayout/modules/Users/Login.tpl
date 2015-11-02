@@ -50,7 +50,7 @@
 						<a href="https://groupware.sortirdunucleaire.org/">Groupware</a> | 
 						<a href="https://echanges.sortirdunucleaire.org">Intranet</a> | 
 						<a href="https://echanges.sortirdunucleaire.org/lemoulin">Le Moulin</a> | 
-						<a href="https://lune.sortirdunucleaire.fr/lemoulin">Le Mouldeux</a> | 
+						<a href="https://lune.sortirdunucleaire.fr/lemoulin">Le Moulune</a> | 
 						<a href="https://webmail.gandi.net/">Webmail</a>
 					</div>
 				</div>
