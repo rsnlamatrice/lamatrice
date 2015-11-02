@@ -156,6 +156,10 @@ label > input[type="checkbox"] {
   width: 6em;
 }
 
+tr.listViewEntries.duplicates-group:hover > td:first-of-type {
+  background-color: transparent;
+  background-image: none;
+}
 tr.listViewEntries.duplicates-group > td {
   border-top: 2px inset #8855AA;
 }

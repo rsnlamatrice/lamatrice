@@ -44,7 +44,7 @@ class Vtiger_DuplicatesRelations_View extends Vtiger_Popup_View {
 		$headerFields['createdtime'] = array('class'=>'span2');
 		$headerFields['modifiedtime'] = array('class'=>'span2');
 		
-		$reldataValues = array('Famille', 'Adhérent', 'Membre du CA', 'Relation', 'Aucune relation', 'Sans relation', 'Salarié', 'Ancien');
+		$reldataValues = array_keys($recordModel->getPicklistValuesDetails('relationtype'));
 		
 		$viewer = $this->getViewer($request);
 		$viewer->assign('RECORDS', $records);

@@ -12,7 +12,7 @@
 {strip}
 <div class="relatedContainer">
     <input type="hidden" name="relatedModuleName" class="relatedModuleName" value="{$RELATED_MODULE}" />
-</div>
+</div>	
 	{foreach item=RELATED_RECORD from=$RELATED_RECORDS}
 		<div class="contactsContainer">
 			<ul class="unstyled">
@@ -23,7 +23,11 @@
 								{if $RELATED_RECORD->get('isgroup') eq '0'}
 								    <span class="icon-rsn-small-contact"></span>
 								{else}<span class="icon-rsn-small-collectif"></span>
-								{/if}&nbsp;{$RELATED_RECORD->getName()}
+								{/if}
+								&nbsp;{$RELATED_RECORD->getName()}
+								{if $RELATED_RECORD->get('isgroup') neq '0' && $RELATED_RECORD->get('mailingstreet2')}
+								    &nbsp;-&nbsp;{$RELATED_RECORD->get('mailingstreet2')}
+								{/if}
 							</a>
 						</div>
 						<div class="span4 textOverflowEllipsis">
