@@ -835,6 +835,8 @@ class QueryGenerator {
 					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
 				}
 				elseif($conditionInfo['operator'] == 'IN' && $fieldName == 'id'){
+					$fieldGlue = ''; //ED151028 on est dans entre ( ) A voir si il ne faut pas le faire aussi ci-dessous
+					
 					$fieldName = $this->getSQLColumn('id');
 					$valueSql = $conditionInfo['value'];
 					if($valueSql[0] != '(')

@@ -254,7 +254,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 				ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_crmentity.crmid 
 			WHERE deleted = 0
 			AND vtiger_rsnprelevements.periodicite <> "Mensuel"
-			AND vtiger_rsnprelevements.periodicite NOT LIKE "Trimestriel%"
+			/*AND vtiger_rsnprelevements.periodicite NOT LIKE "Trimestriel%"*/
 			GROUP BY vtiger_crmentity.crmid, vtiger_rsnprelevements.periodicite';
 		
 		//TODO contrôler les Trimestriel
@@ -290,6 +290,18 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		echo "<pre>";
 		print_r($updated);
 		echo "</pre>";
+		
+		$query = "UPDATE `vtiger_rsnprelevements` 
+JOIN (SELECT `rsnprelevementsid`, MIN(`dateexport`) as dateexport
+FROM `vtiger_rsnprelvirement`
+GROUP BY `rsnprelevementsid`) vir
+ON vir.`rsnprelevementsid` = vtiger_rsnprelevements.`rsnprelevementsid`
+JOIN vtiger_rsnprelvirement
+ON vtiger_rsnprelvirement.`rsnprelevementsid` = vtiger_rsnprelevements.`rsnprelevementsid`
+AND vtiger_rsnprelvirement.dateexport = vir.dateexport
+SET  `vtiger_rsnprelevements`.`dejapreleve` = vir.dateexport
+, `is_first` = 1";
+		$db->pquery($query);
 		
 	}
 }

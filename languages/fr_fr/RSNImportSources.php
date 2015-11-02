@@ -76,7 +76,9 @@ $languageStrings = array(
 	'LBL_ERROR'                    => 'Erreur',
 	'LBL_CLEAR_DATA'               => 'Effacer les données', 
 	'ERR_UNIMPORTED_RECORDS_EXIST' => 'Il existe des données non traités dans le processus d\'import, vous empéchant d\'importer des données pour ce module. <br>
-										Purger les données non importées pour relancer un nouvel import', 
+					    Purger les données non importées pour relancer un nouvel import. <br>
+					    Attention, peut-être qu\'une importation est en cours dans un autre module ou en cours de préparation, dans une phase intermédiaire : rafraichissez cette page d\'ici une minute. <br>
+					    Si ce message persiste, c\'est qu\'il y a effectivement un problème.', 
 	'ERR_IMPORT_INTERRUPTED'       => 'L\'import courant a été interrompu. Essayez plus tard.', 
 	'ERR_FAILED_TO_LOCK_MODULE'    => 'Impossible de vérouiller ce module pour l\'import. Essayez plus tard', 
 	'LBL_SELECT_SAVED_MAPPING'     => 'Select Saved Mapping', 

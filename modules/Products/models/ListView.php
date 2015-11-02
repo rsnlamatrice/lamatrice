@@ -55,23 +55,12 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
 		$queryGenerator = $this->get('query_generator');
+		
+		$this->setListViewSearchConditions($pagingModel);
+	
 		$listViewContoller = $this->get('listview_controller');
 
-		$searchKey = $this->get('search_key');
-		$searchValue = $this->get('search_value');
-		$operator = $this->get('operator');
-		if($searchKey === 'productname'
-		|| $searchKey === 'servicename'){
-			if(!$operator)
-				$operator = 's';
-			//tableau de tableau pour définir le OR
-			$searchKey = 	array(array($searchKey, '', 'productcode'));
-			$searchValue = 	array(array($searchValue, '', $searchValue));
-			$operator = 	array(array($operator, 'OR', 's'));
-		}
-		if(!empty($searchKey)) {
-			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
-		}
+		
 		$orderBy = $this->getForSql('orderby');
 		$sortOrder = $this->getForSql('sortorder');
 
@@ -168,6 +157,34 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 			$listViewRecordModels[$recordId] = $moduleModel->getRecordFromArray($record, $rawData);
 		}
 		return $listViewRecordModels;
+	}
+	
+	/** 
+	 * Function to set the list view search conditions.
+	 * @param Vtiger_Paging_Model $pagingModel
+	 */
+	protected function setListViewSearchConditions($pagingModel = false) {
+		$queryGenerator = $this->get('query_generator');
+		
+		$searchKey = $this->get('search_key');
+		$searchValue = $this->get('search_value');
+		$operator = $this->get('operator');
+		if($searchKey === 'productname'
+		|| $searchKey === 'servicename'){
+			if(!$operator)
+				$operator = 's';
+			//tableau de tableau pour définir le OR
+			$searchKey = 	array(array($searchKey, '', 'productcode'));
+			$searchValue = 	array(array($searchValue, '', $searchValue));
+			$operator = 	array(array($operator, 'OR', 's'));
+		}
+		if(!empty($searchKey)) {
+			$this->set('search_key', $searchKey);
+			$this->set('search_value', $searchValue);
+			$this->set('operator', $operator);
+		}
+		
+		return parent::setListViewSearchConditions($pagingModel);
 	}
 
 	public function addSubProductsQuery($listQuery){

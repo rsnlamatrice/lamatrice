@@ -39,29 +39,30 @@ class Critere4D_ListView_Model extends Vtiger_ListView_Model {
 		return $massActionLinks;
 	}
 	
-	/**
-	 * Function to get the list view entries
+	/** 
+	 * Function to set the list view search conditions.
 	 * @param Vtiger_Paging_Model $pagingModel
-	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
 	 */
-	public function getListViewEntries($pagingModel) {
+	protected function setListViewSearchConditions($pagingModel = false) {
 		
 		$sourceModule = $this->get('src_module');
-		if(!empty($sourceModule))
+		if(!empty($sourceModule)){
 			switch($sourceModule){
-				case 'Contacts':
-					//ED150628 : related to view
-					if(!empty($this->get('src_viewname'))){
-						$queryGenerator = $this->get('query_generator');
-						$viewQuery = $this->getRecordsQueryFromRequest();
-						$viewQuery = 'SELECT vtiger_critere4dcontrel.critere4did
-							FROM vtiger_critere4dcontrel
-							JOIN (' . $viewQuery . ') source_contacts
-								ON vtiger_critere4dcontrel.contactid = source_contacts.contactid';
-						$queryGenerator->addUserSearchConditions(array('search_field' => 'id', 'search_text' => $viewQuery, 'operator' => 'vwi'));
-					}
-					break;
+			case 'Contacts':
+				//ED150628 : related to view
+				$src_viewname = $this->get('src_viewname');
+				if(!empty($src_viewname)){
+					$queryGenerator = $this->get('query_generator');
+					$viewQuery = $this->getRecordsQueryFromRequest();
+					$viewQuery = 'SELECT vtiger_critere4dcontrel.critere4did
+						FROM vtiger_critere4dcontrel
+						JOIN (' . $viewQuery . ') source_contacts
+							ON vtiger_critere4dcontrel.contactid = source_contacts.contactid';
+					$queryGenerator->addUserSearchConditions(array('search_field' => 'id', 'search_text' => $viewQuery, 'operator' => 'vwi'));
+				}
+				break;
 			}
-		return parent::getListViewEntries($pagingModel);
+		}
+		return parent::setListViewSearchConditions($pagingModel);
 	}
 }

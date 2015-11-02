@@ -201,13 +201,13 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 	}
 
 	/** 
-	 * Function to get the list view entries
+	 * Function to set the list view search conditions.
 	 * @param Vtiger_Paging_Model $pagingModel
-	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
 	 *
 	 * ED150424 : add module prefix char ('C') when searching on 'contact_no' field
+	 * ED150424 : add module prefix char ('C') when searching on 'contact_no' field
 	 */
-	public function getListViewEntries($pagingModel) {
+	protected function setListViewSearchConditions($pagingModel = false) {
 		//TODO add mailingstreet2
 		
 		$searchKey = $this->get('search_key');
@@ -233,13 +233,31 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 					$this->set('search_value', $searchValue);
 					$this->set('operator', $operators);
 				}
+				//une recherche sur le nom s'effectue aussi sur le mailingstreet2 si c'est un groupe
+				// lastname LIKE % OR (mailingstreet2 LIKE % OR isgroup == 0 )
+				else if($searchKey[$i] == 'email' && $searchValue[$i]){
+					/* un sous-tableau pour chercher aussi dans vtiger_contactemails
+					*/
+					$subQuery = 'SELECT contactid
+						FROM vtiger_contactemails
+						JOIN vtiger_crmentity
+							ON vtiger_crmentity.crmid = vtiger_contactemails.contactemailsid
+						WHERE vtiger_crmentity.deleted = 0
+						AND email LIKE "%'.$searchValue[$i].'%"';
+					$searchKey[$i] = array('email', null, 'id');
+					$searchValue[$i] = array( $searchValue[$i], null, $subQuery);
+					$operators[$i] = array( $operators[$i], 'OR', 'IN');
+					$this->set('search_key', $searchKey);
+					$this->set('search_value', $searchValue);
+					$this->set('operator', $operators);
+				}
 			}
 		}
 		elseif($searchKey == 'contact_no' && $searchValue && is_numeric($searchValue[0])){
 			//add module prefix char ('C') when searching on 'contact_no' field
 			$this->set('search_value', $this->getModuleCustomNumberingPrefix() . $searchValue);
 		}
-		return parent::getListViewEntries($pagingModel);
+		return parent::setListViewSearchConditions($pagingModel);
 	}
 	
 	/* ED150424 */

@@ -199,13 +199,8 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 
 		//echo "<br><br><br><br>".__FILE__;
 		
-		$searchKey = $this->get('search_key');
-		$searchValue = $this->get('search_value');
-		$operator = $this->get('operator');
-		if(!empty($searchKey)) {
-			//var_dump(array('search_field' => $searchKey, 'search_text' => array_map(mb_detect_encoding, $searchValue), 'operator' => $operator));
-			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
-		}
+		$this->setListViewSearchConditions($pagingModel);
+		
 		$orderBy = $this->getForSql('orderby');
 		$sortOrder = $this->getForSql('sortorder');
 
@@ -325,13 +320,15 @@ var_dump($listResult);*/
 		return $listViewRecordModels;
 	}
 
-	/**
-	 * Function to get the list view entries
+
+	
+	/** ED151102 extracted from getListViewEntries and getListViewCount
+	 * Function to set the list view search conditions to query generator.
 	 * @param Vtiger_Paging_Model $pagingModel
-	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
+	 *
+	 * 
 	 */
-	public function getListViewCount() {
-		$db = PearDatabase::getInstance();
+	protected function setListViewSearchConditions($pagingModel = false) {
 
 		$queryGenerator = $this->get('query_generator');
 
@@ -341,7 +338,20 @@ var_dump($listResult);*/
 		if(!empty($searchKey)) {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
+	}
+	
+	/**
+	 * Function to get the list view entries
+	 * @param Vtiger_Paging_Model $pagingModel
+	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
+	 */
+	public function getListViewCount() {
+		$db = PearDatabase::getInstance();
 
+		$queryGenerator = $this->get('query_generator');
+		
+		$this->setListViewSearchConditions();
+		
 		$listQuery = $this->getQuery();
 
 		$sourceModule = $this->get('src_module');

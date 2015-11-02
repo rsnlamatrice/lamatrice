@@ -98,7 +98,26 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		return $links;
 	}
 
-    /**
+	/** 
+	 * Function to set the list view search conditions.
+	 * @param Vtiger_Paging_Model $pagingModel
+	 *
+	 * add folder filter
+	 */
+	protected function setListViewSearchConditions($pagingModel = false) {
+
+		$queryGenerator = $this->get('query_generator');
+
+		$folderKey = $this->get('folder_id');
+		$folderValue = $this->get('folder_value');
+		if(!empty($folderValue)) {
+		    $queryGenerator->addCondition($folderKey,$folderValue,'e'); //ED141018 Ici bug vtiger_attachmentsfolderfolderid		    
+		}
+
+		parent::setListViewSearchConditions($pagingModel);
+	}
+	
+	/**
 	 * Function to get the list view entries
 	 * @param Vtiger_Paging_Model $pagingModel
 	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
@@ -110,25 +129,11 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		$moduleName = $this->getModule()->get('name');
 		$moduleFocus = CRMEntity::getInstance($moduleName);
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
-
-		$queryGenerator = $this->get('query_generator');
-		$listViewContoller = $this->get('listview_controller');
-
-		$folderKey = $this->get('folder_id');
-		$folderValue = $this->get('folder_value');
-		if(!empty($folderValue)) {
-		    $queryGenerator->addCondition($folderKey,$folderValue,'e'); //ED141018 Ici bug vtiger_attachmentsfolderfolderid		    
-		}
-
-		//echo "<br><br><br><br>".__FILE__;
 		
-		$searchKey = $this->get('search_key');
-		$searchValue = $this->get('search_value');
-		$operator = $this->get('operator');
-		if(!empty($searchKey)) {
-			//var_dump(array('search_field' => $searchKey, 'search_text' => array_map(mb_detect_encoding, $searchValue), 'operator' => $operator));
-			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
-		}
+		$listViewContoller = $this->get('listview_controller');
+		
+		$this->setListViewSearchConditions($pagingModel);
+		
 		$orderBy = $this->getForSql('orderby');
 		$sortOrder = $this->getForSql('sortorder');
 
