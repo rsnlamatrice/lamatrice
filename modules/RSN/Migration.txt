@@ -14,6 +14,7 @@
 	- TODO Emails_liste 4D
 	- Fichier LienRef4DdonateursWeb.csv ( Liens des Donateurs Web )
 	- Fichier InscriptionDonateurWeb.csv
+		! désactiver temporairement ImportRSNDonateursWebFromSite, sinon réclame une pré-validation
 	- TODO LienRef4DCommandeBoutique 4D
 	- TODO Banques 4D
 	- TODO Agences bancaires 4D

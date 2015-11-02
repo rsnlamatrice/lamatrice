@@ -36,13 +36,15 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * Function that returns if the import controller has a validating step of pre-import data
 	 */
 	public function hasValidatingStep(){
-		return true;
+		return in_array('Contacts', $this->getImportModules());//héritage From4D
 	}
 	
 	/**
 	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
 	 */
 	public function needValidatingStep(){
+		if(!$this->hasValidatingStep())
+			return false;
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$sql = 'SELECT * FROM ' . $tableName . '
@@ -746,6 +748,8 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * Note : pas de postPreImportData() à cause de la validation du pre-import
 	 */
 	function beforeImportRSNDonateursWeb() {
+		if(!$this->hasValidatingStep())
+			return;
 		$db = PearDatabase::getInstance();
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$rsndonateurswebTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');
@@ -922,6 +926,8 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * @return array - the pre-imported values group by module.
 	 */
 	public function getPreviewData($request, $offset = 0, $limit = 24, $importModules = false) {
+		if(!$this->hasValidatingStep())
+			return parent::getPreviewData($request, $offset, $limit, $importModules);
 		if(!$importModules
 		&& $this->needValidatingStep())
 			$importModules =array('Contacts');

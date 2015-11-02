@@ -39,6 +39,19 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 	public function getDefaultFileEncoding() {
 		return 'ISO-8859-1';
 	}
+	
+	/**
+	 * Function that returns if the import controller has a validating step of pre-import data
+	 */
+	public function hasValidatingStep(){
+		return false;
+	}
+	/**
+	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
+	 */
+	public function needValidatingStep(){
+		return false;
+	}
 
 	/**
 	 * Method that check if a line of the file is a client information line.
@@ -271,5 +284,13 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 		&& $rsndonateurswebHeader['paiementerror'] != '0')
 			$rsndonateurswebHeader['isvalid'] = 0;
 		return $rsndonateurswebHeader;
+	}
+	
+	/**
+	 * Method called before the data are really imported.
+	 *  This method must be overload in the child class.
+	 *
+	 */
+	function beforeImportRSNDonateursWeb() {
 	}
 }
