@@ -9,8 +9,8 @@
  ************************************************************************************/
 
 $languageStrings = array(
-	'RsnPrelVirement' => 'Ordres de virement',
-	'SINGLE_RsnPrelVirement' => 'Ordre de virement',
+	'RsnPrelVirement' => 'Ordres de prélèvement',
+	'SINGLE_RsnPrelVirement' => 'Ordre de prélèvement',
 	'LBL_BLOCK_GENERAL_INFORMATION' => 'INFORMATIONS GENERALES',
 	'LBL_BLOCK_SYSTEM_INFORMATION' => 'INFORMATIONS TECHNIQUES',
 	'LBL_DATEEXPORT' => 'Date de l\'export',

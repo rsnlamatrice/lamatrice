@@ -177,10 +177,14 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 					'1' => array( 'label' => 'Ne pas appeler', 'icon' => 'ui-icon ui-icon-locked darkred' )
 				);
 			case 'donotrelanceabo':
+				return array(
+					'0' => array( 'label' => 'si, on peut', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
+					'1' => array( 'label' => 'Ne pas relancer abo', 'icon' => 'ui-icon ui-icon-locked darkred' )
+				);
 			case 'donotrelanceadh':
 				return array(
 					'0' => array( 'label' => 'si, on peut', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
-					'1' => array( 'label' => 'Ne pas relancer', 'icon' => 'ui-icon ui-icon-locked darkred' )
+					'1' => array( 'label' => 'Ne pas relancer adh', 'icon' => 'ui-icon ui-icon-locked darkred' )
 				);
 			case 'donotappeldonweb':
 			case 'donotappeldoncourrier':

@@ -375,6 +375,11 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			$value = TYPEABONNE_RECUFISCALSEUL;
 			$record->set($fieldName, $value);
 		}
+		elseif($typeAbonne == _4D_TYPEABONNE_NEPASABONNER){
+			/* "ne pas" partout */
+			$fieldName = 'donotrelanceabo';
+			$record->set($fieldName, 1);
+		}
 		
 		//nomassoentreprisealaplacedenomp => mailingaddressformat
 		//'associationcourt' => 'grpnomllong',
@@ -535,7 +540,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		$typeAbonne = $contactsData[0]['typeabonne'];
 		
 		$doNotAbonnerToDay = $typeAbonne == _4D_TYPEABONNE_NEPASABONNER
-							|| $typeAbonne == _4D_TYPEABONNE_RECUFISCALSEUL;
+				|| $typeAbonne == _4D_TYPEABONNE_RECUFISCALSEUL;
 		$isAbonne = !$doNotAbonnerToDay && $contactsData[0]['abonne_rezo'];
 		
 		if($contactsData[0]['date_abn_rezo']){
@@ -854,7 +859,11 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		
 		$fieldName = 'remarque';
 		if($contactsHeader[$fieldName])
-			$contactsHeader[$fieldName] = str_replace("\\r", "\r", $contactsHeader[$fieldName]);
+			$contactsHeader[$fieldName] = str_replace(array("\\r", "\\t"), array("\r", "\t"), $contactsHeader[$fieldName]);
+		
+		$fieldName = 'datecreation';
+		if(!$contactsHeader[$fieldName])
+			$contactsHeader[$fieldName] = '2000-01-01';
 		
 		return $contactsHeader;
 	}

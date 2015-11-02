@@ -82,10 +82,10 @@ class RsnPrelevements_GenererPrelVirements_View extends Vtiger_Index_View {
 		$params = array();
 		$query = $moduleModel->getPrelevementsToGenerateVirntsQuery($dateVir, $params);
 		
-		$query = 'SELECT IF(vtiger_rsnprelevements.dejapreleve IS NULL, 0, 1) AS dejapreleve, COUNT(*) AS nombre, SUM(montant) AS `montant`
+		$query = 'SELECT IF(vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = \'0000-00-00\', 0, 1) AS dejapreleve, COUNT(*) AS nombre, SUM(montant) AS `montant`
 			FROM vtiger_rsnprelevements
 			WHERE vtiger_rsnprelevements.rsnprelevementsid IN (' . $query . ')
-			GROUP BY IF(vtiger_rsnprelevements.dejapreleve IS NULL, 0, 1)';
+			GROUP BY IF(vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = \'0000-00-00\', 0, 1)';
 		$result = $db->pquery($query, $params);
 		if(!$result){
 			$db->echoError($query);
