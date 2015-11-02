@@ -70,7 +70,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 				} else if ($periodicity == 'Mensuelle') {
 					$beginYears = (int) date("Y", $beginDate);
 					$endYears = (int) date("Y");
-					$months = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];//tmp hardcode !!!!
+					$months = array('Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre');//tmp hardcode !!!!
 					for ($years = $beginYears; $years <= $endYears; ++$years) {
 						foreach ($months as $monthId => $month) {
 							if (! in_array($month . $years, $existingStatsRowsCodes[$periodicity])) {
@@ -381,6 +381,13 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 	function updateAll(Vtiger_Request $request) {
 		$request->set('crmid', '*');
 		return $this->updateOne($request);
+	}
+	
+	public static function runScheduledUpdate(){
+		$controler = new self();
+		$request = new Vtiger_Request();
+		$request->set('crmid', '*');
+		$controler->updateOne($request);
 	}
 	
 	//Supprime les éléments de stats relatifs à des entités qui n'existent plus

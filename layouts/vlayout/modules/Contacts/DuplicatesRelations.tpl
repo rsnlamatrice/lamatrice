@@ -25,6 +25,7 @@
 		<table class='table table-bordered table-condensed'>
 			<tbody>
 			{foreach item=RECORD from=$RECORDMODELS name=recordList}
+			{if $smarty.foreach.recordList.last}{break}{/if}
 			<tr>
 				{* Affecte les valeurs du record courant à la propriété fiedlvalue de chaque field *}
 				{foreach item=FIELD_MODEL key=FIELD_NAME from=$FIELDS}

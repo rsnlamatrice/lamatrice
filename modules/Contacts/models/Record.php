@@ -229,6 +229,16 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 					'email' => array( 'label' => 'Email'),
 					'lastname,firstname,mailingzip' => array( 'label' => 'Nom, prénom et code postal'),
 				);
+			
+			case 'relationtype':
+				return array(
+					'Famille' => array( 'label' => 'Email'),
+					'Contact de l\'association' => array( 'label' => 'Contact de l\'association'),
+					'Même adresse' => array( 'label' => 'Même adresse'),
+					'Sans lien' => array( 'label' => 'Sans lien'),
+					'Transférer la revue' => array( 'label' => 'Transférer la revue'),
+					'Transférer les dons' => array( 'label' => 'Transférer les dons'),
+				);
 			default:
 				return parent::getPicklistValuesDetails($fieldname);
 		}

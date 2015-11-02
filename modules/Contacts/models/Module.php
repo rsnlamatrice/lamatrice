@@ -293,7 +293,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
 			//echo('<pre>'.$query . '</pre>');
 			
-			break;			
+			break;
 		}
 
 		return $query;
