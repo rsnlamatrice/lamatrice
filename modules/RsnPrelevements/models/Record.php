@@ -45,7 +45,7 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 	public function createPrelVirement($dateVir){
 		$recordModel = Vtiger_Record_Model::getCleanInstance('RsnPrelVirement');
 		$recordModel->set('rsnprelevementsid', $this->getId());
-		$recordModel->set('is_first', !$this->get('dejapreleve') ? 1 : 0);
+		$recordModel->set('is_first', !$this->get('dejapreleve') || $this->get('dejapreleve') === '0000-00-00' ? 1 : 0);
 		$recordModel->set('dateexport', $dateVir->format('d-m-Y'));
 		$recordModel->set('montant', str_replace('.', ',', ($this->get('montant'))));
 		$recordModel->set('separum', $this->get('separum'));

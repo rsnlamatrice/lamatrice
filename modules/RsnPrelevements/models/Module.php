@@ -104,9 +104,12 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 			$day = (int)$dateVir->format('d') ;
 			if($day > 15){
 				$dateVir->modify( '+1 month' );
+				$day = 6;
 			}
+			else
+				$day += 6;
 			$dateVir->modify( 'first day of this month');
-			$dateVir->modify( '+5 day' );//au 6 du mois
+			$dateVir->modify( '+'.$day.' day' );//au 6 du mois
 		}
 		elseif(is_string($dateVir))
 			$dateVir = new DateTime($dateVir);//TODO US format
