@@ -514,9 +514,9 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			case '3':
 				return 'Trimestriel 3';
 			case '4':
-				return 'Annuel 1';//TODO en fonction de l'historique existant
+				return 'Annuel 10';//TODO en fonction de l'historique existant
 			case '5':
-				return 'Semestriel 1';//TODO en fonction de l'historique existant
+				return 'Semestriel 4';//TODO en fonction de l'historique existant
 			default:
 				return $period4D;
 		}
