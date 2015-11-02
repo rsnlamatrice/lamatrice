@@ -174,7 +174,7 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 			";
 			$db = PearDatabase::getInstance();
 			$result = $db->pquery($query, array($sourceId, $contactId));
-			if($db->num_rows($result)){
+			if(!$result || $db->num_rows($result)){
 				//already imported !!
 				$row = $db->fetch_row($result, 0); 
 				$entryId = $this->getEntryId("ContactEmails", $row['crmid']);

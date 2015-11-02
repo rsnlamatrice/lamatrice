@@ -274,7 +274,11 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 		var thisInstance = this;
 		var pageLimit = jQuery('#pageLimit').val();
 		var noOfEntries = jQuery('#noOfEntries').val();
-		if(noOfEntries == pageLimit){
+		/*ED151102
+		 * Le test "if(noOfEntries == pageLimit)" n'est pas valable dans le cas des relations avec dates multiples
+		 */
+		//if(noOfEntries == pageLimit){
+		if ($('#relatedListNextPageButton:not([disabled])').length){
 			var pageNumber = this.getCurrentPageNum();
 			var nextPage = parseInt(pageNumber) + 1;
 			var nextPageParams = {

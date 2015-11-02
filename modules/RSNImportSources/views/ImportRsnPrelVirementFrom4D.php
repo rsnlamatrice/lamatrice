@@ -217,7 +217,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 
 				if(!$rsnprelvirementsId){
 					//TODO: manage error
-					echo "<pre><code>Impossible d'enregistrer l'ordre de prÃ©lÃ¨vement</code></pre>";
+					echo "<pre><code>Impossible d'enregistrer l'ordre de prélèvement</code></pre>";
 					foreach ($rsnprelvirementsData as $rsnprelvirementsLine) {
 						$entityInfo = array(
 							'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
@@ -322,7 +322,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		}
 		$account = $contact->getAccountRecordModel();
 		if(!$account){
-			var_dump("Impossible de trouver le compte du prÃ©lÃ¨vement. ContactId=", $contact->getId());
+			var_dump("Impossible de trouver le compte du prélèvement. ContactId=", $contact->getId());
 			return false;
 		}
 		
@@ -343,23 +343,21 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			$params[] = $separum;
 		}
 		$query .= "
-			AND montant = ?
 			AND DATE(vtiger_crmentity.createdtime) <= ?
-			ORDER BY etat ASC
+			ORDER BY etat ASC, vtiger_crmentity.createdtime DESC
 			LIMIT 1
 		";
-		$params[] = $rsnprelvirementsData[0]['montant'];
 		$params[] = $rsnprelvirementsData[0]['dateexport'];
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
 		if(!$db->num_rows($result)){
-			var_dump("Impossible de trouver le prÃ©lÃ¨vement. SEPARUM = $separum. ContactId=", $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
+			var_dump("Impossible de trouver le prélèvement. SEPARUM = $separum. ContactId=". $contact->getId(), array($account->getId(), $sourceId), $rsnprelvirementsData[0]);
 			return false;
 		}
 		
 		$id = $db->query_result($result, 0, 0);
-		//var_dump("PrÃ©lÃ¨vement", $id);
+		//var_dump("prélèvement", $id);
 		return Vtiger_Record_Model::getInstanceById($id, 'RsnPrelevements');
 		
 	}

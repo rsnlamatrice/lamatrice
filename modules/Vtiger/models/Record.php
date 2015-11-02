@@ -338,10 +338,15 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				FROM vtiger_crmentity
 				JOIN vtiger_contactdetails
 					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
-				WHERE vtiger_contactdetails.email ' .
+				LEFT JOIN vtiger_contactemails
+					ON vtiger_contactemails.contactid = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.deleted = 0
+				AND (vtiger_contactdetails.email ' .
 					(strpos($searchKey, '%') !== FALSE ? ' LIKE CONCAT(\'%\', ?, \'%\')' : '= ?') .'
-				AND vtiger_crmentity.deleted = 0';
-			$params = array(trim($searchKey));
+				   OR vtiger_contactemails.email ' .
+					(strpos($searchKey, '%') !== FALSE ? ' LIKE CONCAT(\'%\', ?, \'%\')' : '= ?') .')
+				';
+			$params = array(trim($searchKey), trim($searchKey));
 		}
 		else {	/* requête générale sur le champ label */
 			$query = 'SELECT label, crmid, setype, createdtime
