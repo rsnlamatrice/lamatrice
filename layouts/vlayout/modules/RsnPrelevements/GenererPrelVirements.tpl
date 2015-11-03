@@ -41,9 +41,9 @@
 			<label class="muted pull-right marginRight10px">Date du virement</label>
 		</td>
 		<td class="fieldValue medium">
-		<div class="row-fluid"><span class="span9 dateField">
-			<input name="date_virements" value="{$DATE_VIREMENTS->format('d-m-Y')}"/>
-		</span></div>
+			<div class="row-fluid date">
+				<input name="date_virements" value="{$DATE_VIREMENTS->format('d-m-Y')}" class="dateField" data-date-format="dd-mm-yyyy"/>
+			</div>
 		</td>
 	</tr>
 	<tr>
@@ -103,6 +103,37 @@
 			<!--pre>{print_r($AVAILABLE_VIREMENTS, true)}</pre-->
 		</div>
 	{/if}
+	{if $DUPLICATES_VIREMENTS}
+		<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
+			<h3><span class="ui-icon ui-icon-alert"></span>
+				Attention, {if count($DUPLICATES_VIREMENTS) === 1}un contact a{else}des contacts ont{/if} plusieurs ordres de prélèvements déjà générés
+			</h3>
+			{foreach item=ITEM key=CONTACT_ID from=$DUPLICATES_VIREMENTS}
+				<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
+					<h4><a href="{$ITEM['url']}" target="_blank">{$ITEM['contactname']} ({$ITEM['contact_no']})</a></h4>
+					&nbsp;<b>{$ITEM['nombre']}</b> prélèvements
+				</div>
+			{/foreach}
+		</div>
+	{/if}
+	{if $DUPLICATES_PRELVIREMENTS}
+		<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
+			<h3><span class="ui-icon ui-icon-alert"></span>
+				Attention, {if count($DUPLICATES_PRELVIREMENTS) === 1}un contact a{else}des contacts ont{/if} plusieurs ordres de prélèvements déjà générés
+			</h3>
+			{foreach item=ITEM key=CONTACT_ID from=$DUPLICATES_PRELVIREMENTS}
+				<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
+					<h4><a href="{$ITEM['url']}" target="_blank">{$ITEM['contactname']} ({$ITEM['contact_no']})</a></h4>
+					&nbsp;<b>{$ITEM['nombre']}</b> ordres de prélèvements
+				</div>
+			{/foreach}
+		</div>
+	{/if}
 	</form>
+	<script>
+		$(document.body).ready(function(){
+			app.registerEventForDatePickerFields($('.detailViewContainer'));
+		});
+	</script>
 </div>
 {/strip}

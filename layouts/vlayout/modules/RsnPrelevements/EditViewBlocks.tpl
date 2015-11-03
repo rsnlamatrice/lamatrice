@@ -80,7 +80,8 @@
 				|| $FIELD_NAME eq 'sepaibanbban'
 				|| $FIELD_NAME eq 'sepabic'
 				|| $FIELD_NAME eq 'sepaibancle'
-				|| $FIELD_NAME eq 'sepadatesignature'}
+				|| $FIELD_NAME eq 'sepadatesignature'
+				|| $FIELD_NAME eq 'separum'}
 					{continue}
 				{/if}
 
@@ -177,8 +178,8 @@
 								<td class="fieldLabel {$WIDTHTYPE}"></td>
 								<td>
 									<div class="text-center" style="width:50px;margin:0px 5px;display:inline-block;">Pays</div>
-									<div class="text-center" style="width:210px;margin:0px 5px;display:inline-block;">BBAN</div>
 									<div class="text-center" style="width:50px;margin:0px 5px;display:inline-block;">Clé</div>
+									<div class="text-center" style="width:210px;margin:0px 5px;display:inline-block;">BBAN</div>
 								</td>
 							</tr>
 							<tr>
@@ -193,19 +194,19 @@
 									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-small'}
 
-									{* BBAN *}
-									{assign var=TITLE value='BBAN'}
-									{assign var=FIELD_NAME value='sepaibanbban'}
-									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
-									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
-
 									{* Clé *}
 									{assign var=TITLE value='Clé'}
 									{assign var=FIELD_NAME value='sepaibancle'}
 									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
 									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-small'}
+
+									{* BBAN *}
+									{assign var=TITLE value='BBAN'}
+									{assign var=FIELD_NAME value='sepaibanbban'}
+									{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+									{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
 								</td>
 							</tr>
 							<tr>
@@ -225,6 +226,8 @@
 								</td>
 							</tr>
 							<tr>
+								{assign var=FIELD_NAME value='sepadatesignature'}
+								{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
 								<td class="fieldLabel {$WIDTHTYPE}">
 									<label class="muted pull-right marginRight10px">
 									{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}
@@ -235,8 +238,24 @@
 									<div style="width:300px;">
 										{* Date de signature *}
 										{assign var=TITLE value=''}
-										{assign var=FIELD_NAME value='sepadatesignature'}
-										{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
+										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+									</div>
+								</td>
+							</tr>
+							<tr>
+								{assign var=FIELD_NAME value='separum'}
+								{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
+								<td class="fieldLabel {$WIDTHTYPE}">
+									<label class="muted pull-right marginRight10px">
+									{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}
+										RUM
+									</label>
+								</td>
+								<td>
+									<div style="width:300px;">
+										{* SEPA RUM *}
+										{assign var=TITLE value=''}
 										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
 										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
 									</div>

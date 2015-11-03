@@ -389,6 +389,8 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 * @return string - formated date.
 	 */
 	function getMySQLDate($string) {
+		if($string == '00/00/00')
+			return '1999-12-31';
 		$dateArray = preg_split('/[-\/]/', $string);
 		return '20'.$dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
 	}
