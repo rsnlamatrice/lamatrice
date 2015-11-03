@@ -19,6 +19,10 @@ Class RsnPrelevements_Edit_View extends Vtiger_Edit_View {
 			$accountRecordModel = $sourceRecordModel->getAccountRecordModel();
 			$request->setGlobal('accountid', $accountRecordModel->getId());     
 		}
+		if($request->get('isDuplicate')){
+			$request->set('separum', null);
+			$request->set('dejapreleve', null);
+		}
 		
 		parent::process($request);
 

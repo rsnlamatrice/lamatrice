@@ -38,7 +38,9 @@ class RsnPrelevementsHandler extends VTEventHandler {
 			}
 
 			$mainContactRecord = $accountsRecord->getRelatedMainContact();
-			$this->updateSeparum($prelevementId, "RSDN-" . $mainContactRecord->get('contact_no'));
+			$periodicite = preg_replace('/^(\w)\D+(\d*)$/', '$1$2', $prelevement->get('periodicite'));
+			$separum = 'RSDN-' . $mainContactRecord->get('contact_no') . '-' . $periodicite;
+			$this->updateSeparum($prelevementId, $separum);
 
 		}
 	}
