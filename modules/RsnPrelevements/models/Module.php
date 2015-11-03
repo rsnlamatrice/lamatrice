@@ -213,8 +213,19 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 				ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_rsnprelvirement.rsnprelevementsid
 			JOIN vtiger_crmentity rsnprelevements_crmentity
 				ON vtiger_rsnprelevements.rsnprelevementsid = rsnprelevements_crmentity.crmid
-			WHERE vtiger_crmentity.deleted  = 0
-			AND rsnprelevements_crmentity.deleted  = 0
+			JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_rsnprelevements.accountid
+			JOIN vtiger_crmentity AS vtiger_crmentity_account
+				ON vtiger_crmentity_account.crmid = vtiger_account.accountid
+			JOIN vtiger_contactdetails
+				ON vtiger_account.accountid = vtiger_contactdetails.accountid
+				AND vtiger_contactdetails.reference = 1
+			JOIN vtiger_crmentity AS vtiger_crmentity_contact
+				ON vtiger_crmentity_contact.crmid = vtiger_contactdetails.contactid
+			WHERE vtiger_crmentity.deleted = FALSE
+			AND rsnprelevements_crmentity.deleted = FALSE
+			AND vtiger_crmentity_account.deleted = FALSE
+			AND vtiger_crmentity_contact.deleted = FALSE
 			AND vtiger_rsnprelevements.prelvtype IN (' . generateQuestionMarks($prelvtypes) . ')
 			AND vtiger_rsnprelvirement.dateexport
 				BETWEEN DATE_SUB(?, INTERVAL 7 DAY)
@@ -239,14 +250,25 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 				ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_rsnprelvirement.rsnprelevementsid
 			JOIN vtiger_crmentity rsnprelevements_crmentity
 				ON vtiger_rsnprelevements.rsnprelevementsid = rsnprelevements_crmentity.crmid
-			WHERE vtiger_crmentity.deleted  = 0
-			AND rsnprelevements_crmentity.deleted  = 0
+			JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_rsnprelevements.accountid
+			JOIN vtiger_crmentity AS vtiger_crmentity_account
+				ON vtiger_crmentity_account.crmid = vtiger_account.accountid
+			JOIN vtiger_contactdetails
+				ON vtiger_account.accountid = vtiger_contactdetails.accountid
+				AND vtiger_contactdetails.reference = 1
+			JOIN vtiger_crmentity AS vtiger_crmentity_contact
+				ON vtiger_crmentity_contact.crmid = vtiger_contactdetails.contactid
+			WHERE vtiger_crmentity.deleted = FALSE
+			AND rsnprelevements_crmentity.deleted = FALSE
+			AND vtiger_crmentity_account.deleted = FALSE
+			AND vtiger_crmentity_contact.deleted = FALSE
 			AND vtiger_rsnprelevements.prelvtype IN (' . generateQuestionMarks($prelvtypes) . ')
 			AND vtiger_rsnprelvirement.dateexport 
 				BETWEEN DATE_SUB( ?, INTERVAL 7 DAY)
 				AND DATE_ADD( ?, INTERVAL 7 DAY)
 		';
-		if($recur_first)
+		if($recur_first !== false)
 			$query .= ' AND IFNULL(vtiger_rsnprelvirement.is_first, 0) = ?';
 			
 		if(!$params)

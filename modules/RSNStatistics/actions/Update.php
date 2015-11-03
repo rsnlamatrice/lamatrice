@@ -383,6 +383,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		return $this->updateOne($request);
 	}
 	
+	// from cron task
 	public static function runScheduledUpdate(){
 		$controler = new self();
 		$request = new Vtiger_Request();

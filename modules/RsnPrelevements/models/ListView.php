@@ -30,7 +30,7 @@ class RsnPrelevements_ListView_Model extends Vtiger_ListView_Model {
 			);
 			$advancedLinks[] = array(
 							'linktype' => 'LISTVIEW',
-							'linklabel' => 'Générer les virements du mois',
+							'linklabel' => 'Générer les prélèvements du mois',
 							'linkurl' => $moduleModel->getGenererPrelVirementsUrl() ,
 							'linkicon' => ''
 			);
