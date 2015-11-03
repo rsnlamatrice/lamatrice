@@ -191,6 +191,8 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importSalesOrder($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'SalesOrder');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';

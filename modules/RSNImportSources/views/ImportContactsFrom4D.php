@@ -173,6 +173,8 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importContacts($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
 		$config = new RSNImportSources_Config_Model();
 		
 		$adb = PearDatabase::getInstance();
@@ -536,6 +538,8 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @param $contactsData : the data of the abonnement revue to import
 	 */
 	function importRSNAboRevuesForContact($contact, $contactsData) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
 		
 		$typeAbonne = $contactsData[0]['typeabonne'];
 		

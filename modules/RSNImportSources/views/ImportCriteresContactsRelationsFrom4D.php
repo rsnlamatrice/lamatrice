@@ -104,6 +104,8 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importCritere4D($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
 		$config = new RSNImportSources_Config_Model();
 		
 		$adb = PearDatabase::getInstance();

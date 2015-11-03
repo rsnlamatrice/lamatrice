@@ -87,6 +87,9 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRsnPrelVirement($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
+		
 		$config = new RSNImportSources_Config_Model();
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnPrelVirement');

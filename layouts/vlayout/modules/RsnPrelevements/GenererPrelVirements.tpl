@@ -104,7 +104,7 @@
 		</div>
 	{/if}
 	{if $DUPLICATES_VIREMENTS}
-		<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
+		<div class="detailViewInfo row-fluid" style="margin-top: 2em; padding-left: 1em;">
 			<h3><span class="ui-icon ui-icon-alert"></span>
 				Attention, {if count($DUPLICATES_VIREMENTS) === 1}un contact a{else}des contacts ont{/if} plusieurs ordres de prélèvements déjà générés
 			</h3>
@@ -117,7 +117,7 @@
 		</div>
 	{/if}
 	{if $DUPLICATES_PRELVIREMENTS}
-		<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
+		<div class="detailViewInfo row-fluid" style="margin-top: 2em; padding-left: 1em;">
 			<h3><span class="ui-icon ui-icon-alert"></span>
 				Attention, {if count($DUPLICATES_PRELVIREMENTS) === 1}un contact a{else}des contacts ont{/if} plusieurs ordres de prélèvements déjà générés
 			</h3>

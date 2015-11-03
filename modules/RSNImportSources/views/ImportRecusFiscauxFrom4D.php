@@ -140,6 +140,8 @@ class RSNImportSources_ImportRecusFiscauxFrom4D_View extends RSNImportSources_Im
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importContacts($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
 		$config = new RSNImportSources_Config_Model();
 		
 		$adb = PearDatabase::getInstance();

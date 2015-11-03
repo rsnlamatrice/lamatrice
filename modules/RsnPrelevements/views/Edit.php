@@ -20,6 +20,7 @@ Class RsnPrelevements_Edit_View extends Vtiger_Edit_View {
 			$request->setGlobal('accountid', $accountRecordModel->getId());     
 		}
 		if($request->get('isDuplicate')){
+			//sera rŽaffectŽ si on a conservŽ les mmes infos de RIB et IBAN (cf modules/RsnPrelevements/RsnPrelevementsHandler.php)
 			$request->set('separum', null);
 			$request->set('dejapreleve', null);
 		}
