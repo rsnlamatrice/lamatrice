@@ -138,6 +138,8 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importVendors($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
 		$config = new RSNImportSources_Config_Model();
 		
 		$adb = PearDatabase::getInstance();

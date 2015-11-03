@@ -170,6 +170,8 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
 			'RSNAboRevues' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_rsnaborevues'
 					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
+			'RsnPrelevements' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_rsnprelevements'
+					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),
 		);
 	}
 

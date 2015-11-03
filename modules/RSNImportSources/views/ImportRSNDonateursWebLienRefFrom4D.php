@@ -92,6 +92,8 @@ class RSNImportSources_ImportRSNDonateursWebLienRefFrom4D_View extends RSNImport
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOneRSNDonateursWeb($rsndonateurswebData, $importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
 					
 		global $log;
 		

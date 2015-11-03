@@ -17,6 +17,7 @@
 // 2nd method : handler
 // Method registered as EntityMethod. See modules\RSN\RSN.php->add_invoice_handler()
 require_once 'include/events/VTEventHandler.inc';
+require_once 'modules/RSNAboRevues/models/Module.php';
 require_once 'modules/RSNAboRevues/models/Record.php';
 class RSNInvoiceHandler extends VTEventHandler {
 
@@ -155,23 +156,8 @@ class RSNInvoiceHandler extends VTEventHandler {
 	 * Création d'un abonnement
 	 */
 	public function createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, $aboType){
-		global $log;
-		$toDay = new DateTime();
-		
-		$aboRevue = Vtiger_Record_Model::getCleanInstance('RSNAboRevues');
-		$aboRevue->set('mode', 'create');
-		$aboRevue->set('account_id', $account->getId());
-		$aboRevue->set('sourceid', $invoice->getId());
-		$aboRevue->setAbonne(!$dateFin || ($dateFin > $toDay && $dateFin > $dateDebut));
-		$aboRevue->setDebutAbo($dateDebut);
-		$aboRevue->setFinAbo($dateFin);
-		$aboRevue->set('rsnabotype', $aboType);
-		$aboRevue->set('nbexemplaires', $nbExemplaires);
-		
-		$aboRevue->save();
-		$aboRevue->set('mode', '');
-		$log->debug("handleAfterSaveInvoiceAdhesionEvent 'nouveau $aboRevue->getLabel()'");
-		return $aboRevue;
+		$aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
+		return $aboRevueModuleModel->createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, $aboType);
 	}
 	
 	/* ED150507 Règles de gestion lors de la validation d'une facture, article d'abonnement
@@ -396,39 +382,23 @@ class RSNInvoiceHandler extends VTEventHandler {
 		return $aboRevue;
 	}
 	
-	
 	/**
 	 * Déjà traité
 	 */
 	public static function isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoiceId){
-		//Contrôle si cette facture a déjà généré un abonnement
-		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
-			if($rsnAboRevue->get('sourceid') == $invoiceId){
-				return true;
-			}
-		}
-		return false;
+		$aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
+		return $aboRevueModuleModel->isRecordAlreadyRelatedWithAboRevue($rsnAboRevues, $invoiceId);
 	}
 	
 	//Parcourt l'historique pour clôturer les en-cours périmés
 	public static function check_IsAbonne_vs_DateFin($rsnAboRevues){
-		global $log;
-		$toDay = new DateTime();
-		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
-			if( $rsnAboRevue->isAbonne()
-			&& $rsnAboRevue->getFinAbo()
-			&& $rsnAboRevue->getFinAbo() < $toDay){
-				$log->debug("handleAfterSaveInvoiceAbonnementsEvent rsnAboRevue abonnement périmé");
-				$rsnAboRevue->setAbonne(false);
-				$rsnAboRevue->set('mode', 'edit');
-				$rsnAboRevue->save();
-			}
-		}
+		$aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
+		$aboRevueModuleModel->check_IsAbonne_vs_DateFin($rsnAboRevues);
 	}
 	
 	public static function getDateFinAbo($dateDebut, $nbMonths){
 		$dateFin = clone $dateDebut; 
-		$dateFin->modify('first day of this month')->modify( '+' . ($nbMonths + 1) . ' month' );
+		$dateFin->modify('first day of this month')->modify( '+' . ($nbMonths) . ' month' );
 		return $dateFin;
 	}
 	

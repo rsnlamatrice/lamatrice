@@ -106,6 +106,9 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRsnPrelevements($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
+		
 		$config = new RSNImportSources_Config_Model();
 
 		$adb = PearDatabase::getInstance();
