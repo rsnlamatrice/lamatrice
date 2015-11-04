@@ -17,7 +17,12 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 	var $listFields = array('organizationname');
 	var $nameFields = array('organizationname');
 	var $logoPath = 'test/logo/';
+	
+	/*ED151104*/
+	var $subTable = 'vtiger_organizationsubdetails';
 
+	/*ED151104	Note : $fields are extended in getInstance()*/
+	
 	var $fields = array(
 			'organizationname' => 'text',
 			'logoname' => 'text',
@@ -30,14 +35,14 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 			'code'  => 'text',
 			'country' => 'text',
 			'phone' => 'text',
-			'rsnprelevements_phone' => 'text',
+			//'rsnprelevements_phone' => 'text',
 			'fax' => 'text',
 			'website' => 'text',
-			'lettertoaccount_header_text' => 'text',
+			/*'lettertoaccount_header_text' => 'text',
 			'rsnprelevements_header_text' => 'text',
 			'lettertoaccount_lastpage_footer_text' => 'text',
 			'inventory_header_text' => 'text',
-			'inventory_lastpage_footer_text' => 'text',
+			'inventory_lastpage_footer_text' => 'text',*/
 	);
 
 	/**
@@ -113,30 +118,57 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 		unset($fieldsList['logo']);
 		unset($fieldsList['print_logo']);
 		$tableName = $this->baseTable;
-
+			
 		if ($id) {
 			$params = array();
 
 			$query = "UPDATE $tableName SET ";
-			foreach ($fieldsList as $fieldName => $fieldType) {
-				$query .= " $fieldName = ?, ";
-				array_push($params, $this->get($fieldName));
+			foreach ($fieldsList as $fieldName => $fieldType){
+				if(strpos($fieldName, '::') === false){
+					$query .= " $fieldName = ?, ";
+					array_push($params, $this->get($fieldName));
+				}
 			}
 			$query .= " logo = NULL WHERE organization_id = ?";
-
 			array_push($params, $id);
+			
 		} else {
-			$params = $this->getData();
-
+			$allParams = $this->getData();
+			$params = array();
 			$query = "INSERT INTO $tableName (";
-			foreach ($fieldsList as $fieldName => $fieldType) {
-				$query .= " $fieldName,";
+			foreach ($fieldsList as $fieldName => $fieldType){
+				if(strpos($fieldName, '::') === false){
+					$query .= " $fieldName,";
+					array_push($params, $this->get($fieldName));
+				}
 			}
-			$query .= " organization_id) VALUES (". generateQuestionMarks($params). ", ?)";
-
-			array_push($params, $db->getUniqueID($this->baseTable));
+			$query .= " organization_id)";
+			$id = $db->getUniqueID($this->baseTable);
+			array_push($params, $id);
+			$query .= " VALUES (". generateQuestionMarks($params). ", ?)";
 		}
 		$db->pquery($query, $params);
+		
+		/* ED151104*/
+		$tableName = $this->subTable;
+		$params = array();
+		$query = "UPDATE $tableName SET value = CASE ";
+		foreach ($fieldsList as $fieldName => $fieldType){
+			if(strpos($fieldName, '::') !== false){
+				$parts = explode('::', $fieldName);
+				$query .= "\r\n WHEN context = ? AND parameter = ? THEN ?";
+				array_push($params, $parts[0], $parts[1], $this->get($fieldName));
+			}
+		}
+		$query .= " END WHERE organization_id = ?";
+		array_push($params, $id);
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$db->echoError();
+			die();
+		}
 	}
 
 	/**
@@ -147,13 +179,36 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 		$moduleModel = new self();
 		$db = PearDatabase::getInstance();
 
-		$result = $db->pquery("SELECT * FROM vtiger_organizationdetails", array());
+		$result = $db->pquery("SELECT * FROM ".$moduleModel->baseTable, array());
 		if ($db->num_rows($result) == 1) {
 			$moduleModel->setData($db->query_result_rowdata($result));
-			$moduleModel->set('id', $moduleModel->get('organization_id'));
+			$moduleModel->set('id', $moduleModel->get($moduleModel->baseIndex));
+		}
+		
+		/* ED151104 */
+		$result = $db->pquery("SELECT * FROM ".$moduleModel->subTable."
+							  WHERE ".$moduleModel->baseIndex." = ?
+							  ORDER BY sequence, context"
+							  , array($moduleModel->get('id')));
+		if(!$result)
+			$db->echoError();
+		$nbRows = $db->num_rows($result);
+		for($nRow = 0; $nRow < $nbRows; $nRow++) {
+			$param = $db->query_result_rowdata($result, $nRow);
+			$fieldName = $param['context'] . '::' . $param['parameter'];
+			$moduleModel->set($fieldName, $param['value']);
+			if($param['visible'])
+				$moduleModel->fields[$fieldName] = self::getUITypeName($param['uitype']);
 		}
 
-		$moduleModel->getFields();
 		return $moduleModel;
+	}
+	private static function getUITypeName($uitype){
+		switch($uitype){
+		case 19:
+			return 'textarea';
+		default:
+			return 'text';
+		}
 	}
 }

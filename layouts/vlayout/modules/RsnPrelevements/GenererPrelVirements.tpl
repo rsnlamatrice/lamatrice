@@ -46,20 +46,22 @@
 			</div>
 		</td>
 	</tr>
-	<tr>
-		<td class="fieldLabel medium">
-			<label class="muted pull-right marginRight10px">Message aux donateurs</label>
-		</td>
-		<td class="fieldValue medium">
-		<div class="row-fluid"><span class="span10">
-			<input id="msg_virements" name="msg_virements" value="{$MSG_VIREMENTS}" onchange="this.value = this.value.toUpperCase();"/>
-		</span></div>
-		</td>
-	</tr>
+	{if $EXISTING_PRELVIREMENTS}
+		<tr>
+			<td class="fieldLabel medium">
+				<label class="muted pull-right marginRight10px">Message aux donateurs</label>
+			</td>
+			<td class="fieldValue medium">
+			<div class="row-fluid"><span class="span10">
+				<input id="msg_virements" name="msg_virements" value="{$MSG_VIREMENTS}" onchange="this.value = this.value.toUpperCase();"/>
+			</span></div>
+			</td>
+		</tr>
+	{/if}
 	</table>
 	{if $EXISTING_PRELVIREMENTS}
 		<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
-			<h3>Virements déjà générés</h3>
+			<h3>Ordres de prélèvements prêts pour la banque</h3>
 			{foreach item=ITEM key=RECUR_FIRST from=$EXISTING_PRELVIREMENTS}
 				<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
 					<h4>{if $RECUR_FIRST eq 'FIRST'}Premiers prélèvements (FIRST)
@@ -90,7 +92,7 @@
 	{/if}
 	{if $AVAILABLE_VIREMENTS}
 		<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
-			<h3>Virements à générer ({implode(', ', $TYPES_PRLVNTS)} / {implode(', ', $PERIODICITES)})</h3>
+			<h3 title="Utiliser le bouton Générer">Ordres de prélèvements à générer ({implode(', ', $TYPES_PRLVNTS)} / {implode(', ', $PERIODICITES)})</h3>
 			{foreach item=ITEM key=RECUR_FIRST from=$AVAILABLE_VIREMENTS}
 				<div class="detailViewInfo row-fluid" style="margin-top: 1em; padding-left: 1em;">
 					<h4>{if $RECUR_FIRST eq 'FIRST'}Premiers prélèvements (FIRST)
@@ -104,8 +106,8 @@
 		</div>
 	{/if}
 	{if $DUPLICATES_VIREMENTS}
-		<div class="detailViewInfo row-fluid" style="margin-top: 2em; padding-left: 1em;">
-			<h3><span class="ui-icon ui-icon-alert"></span>
+		<div class="detailViewInfo row-fluid" style="margin-top: 3em; padding-left: 1em;">
+			<h3><span class="ui-icon ui-icon-alert"></span>&nbsp;
 				Attention, {if count($DUPLICATES_VIREMENTS) === 1}un contact a{else}des contacts ont{/if} plusieurs ordres de prélèvements déjà générés
 			</h3>
 			{foreach item=ITEM key=CONTACT_ID from=$DUPLICATES_VIREMENTS}
@@ -117,8 +119,8 @@
 		</div>
 	{/if}
 	{if $DUPLICATES_PRELVIREMENTS}
-		<div class="detailViewInfo row-fluid" style="margin-top: 2em; padding-left: 1em;">
-			<h3><span class="ui-icon ui-icon-alert"></span>
+		<div class="detailViewInfo row-fluid" style="margin-top: 3em; padding-left: 1em;">
+			<h3><span class="ui-icon ui-icon-alert"></span>&nbsp;
 				Attention, {if count($DUPLICATES_PRELVIREMENTS) === 1}un contact a{else}des contacts ont{/if} plusieurs ordres de prélèvements déjà générés
 			</h3>
 			{foreach item=ITEM key=CONTACT_ID from=$DUPLICATES_PRELVIREMENTS}
