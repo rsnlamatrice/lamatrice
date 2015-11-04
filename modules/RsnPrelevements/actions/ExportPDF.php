@@ -34,10 +34,36 @@ class RsnPrelevements_ExportPDF_Action extends Vtiger_Action_Controller {
 			}
 			$outputFileName = $filesPath . '/' . 'Prelevements FIRST du ' . $dateVir->format('Y-m-d') . '.pdf';
 			$outputFileName = Vtiger_PDF_Generator::mergeFiles($files, $outputFileName);
-			//clear temp files
-			//foreach($files as $fileName)
-			//	unlink($fileName);
-			var_dump('outputFileName', $outputFileName, file_exists($outputFileName));
+			if(file_exists($outputFileName)){
+				if ($fd = fopen ($outputFileName, "r")) {
+					$fsize = filesize($outputFileName);
+					$path_parts = pathinfo($outputFileName);
+					$ext = strtolower($path_parts["extension"]);
+					switch ($ext) {
+					case "pdf":
+						header("Content-type: application/pdf");
+						header("Content-Disposition: attachment; filename=\"".$path_parts["basename"]."\""); // use 'attachment' to force a file download
+						break;
+						// add more headers for other content types here
+					default;
+						header("Content-type: application/octet-stream");
+						header("Content-Disposition: filename=\"".$path_parts["basename"]."\"");
+						break;
+					}
+					header("Content-length: $fsize");
+					header("Cache-control: private"); //use this to open files directly
+					while(!feof($fd)) {
+						$buffer = fread($fd, 2048);
+						echo $buffer;
+					}
+				}
+				fclose ($fd);
+				
+				unlink($outputFileName);
+				
+				exit;
+			}
+			echo "<code>Désolé, le fichier n'a pas pu être généré</code>";
 		}
 	}
 }
