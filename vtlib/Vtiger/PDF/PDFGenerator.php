@@ -198,14 +198,12 @@ class Vtiger_PDF_Generator {
 	public static function mergeFiles($fileNames, $outputName = false){
 		if(!$outputName)
 			$outputName = tempnam(sys_get_temp_dir(), 'mrg') . '.pdf';
-		
 		if(file_exists($outputFileName))
 			unlink($outputFileName);
 			
 		$cmd = "gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=$outputName ";
 		//Add each pdf file to the end of the command
 		$cmd .= implode(' ', $fileNames);
-		
 		try {
 			$result = shell_exec($cmd);
 			var_dump("shell_exec", $result);
