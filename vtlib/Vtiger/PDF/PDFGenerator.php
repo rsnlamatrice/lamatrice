@@ -197,10 +197,12 @@ class Vtiger_PDF_Generator {
 	 */
 	public static function mergeFiles($fileNames, $outputName = false){
 		if(!$outputName)
-			$outputName = tempnam(sys_get_temp_dir(), 'mrg') . '.pdf';
+			$outputName = tempnam(sys_get_temp_dir(), 'mrg_'.count($fileNames).'_pdf') . '.pdf';
 		
-		if(file_exists($outputFileName))
-			unlink($outputFileName);
+		$outputName = str_replace(' ', '_', $outputName);
+		
+		if(file_exists($outputName))
+			unlink($outputName);
 			
 		$cmd = "gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=$outputName ";
 		//Add each pdf file to the end of the command
@@ -216,7 +218,7 @@ class Vtiger_PDF_Generator {
 					exit("Impossible d'ouvrir le fichier <$outputName>\n");
 				}
 				foreach($fileNames as $fileName)
-					$zip->addFile($fileName);
+					$zip->addFile($fileName, '/'.basename($fileName));
 				$zip->close();
 			}
 		}

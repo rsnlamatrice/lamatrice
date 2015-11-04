@@ -32,13 +32,13 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 		$controller->loadRecord($recordId);
 
 		if($filePath){
-			$fileName = $filePath . '/' . remove_accent(vtranslate('SINGLE_'.$moduleName, $moduleName)).'_'.$recordId;
-			$controller->Output($fileName.'.pdf', 'F');
+			$fileName = $filePath . '/' . remove_accent(vtranslate('SINGLE_'.$moduleName, $moduleName)).'_'.$recordId.'.pdf';
+			$controller->Output($fileName, 'F');
 			return $fileName;
 		}
 		else{
-			$fileName = remove_accent(vtranslate('SINGLE_'.$moduleName, $moduleName)).'_'.$recordId;
-			$controller->Output($fileName.'.pdf', 'D');
+			$fileName = remove_accent(vtranslate('SINGLE_'.$moduleName, $moduleName)).'_'.$recordId.'.pdf';
+			$controller->Output($fileName, 'D');
 		}
 	}
 	

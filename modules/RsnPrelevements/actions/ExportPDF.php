@@ -40,7 +40,7 @@ class RsnPrelevements_ExportPDF_Action extends Vtiger_Action_Controller {
 			//clear temp files
 			//foreach($files as $fileName)
 			//	unlink($fileName);
-			var_dump($outputFileName);
+			var_dump('outputFileName', $outputFileName, file_exists($outputFileName));
 		}
 	}
 }
