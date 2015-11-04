@@ -6,8 +6,41 @@
 /**
  * RsnReglements Entity Record Model Class
  */
-class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
+class RsnPrelevements_Record_Model extends Vtiger_Record_Model {	
 
+	/**
+	 * Function to get URL for Export the record as PDF
+	 * @return <type>
+	 */
+	public function getExportPDFUrl() {
+		return "index.php?module=".$this->getModuleName()."&action=ExportPDF&record=".$this->getId();
+	}
+
+	/**
+	 * Function to get this record and details as PDF
+	 */
+	public function getPDF($filePath = false) {
+		
+		include_once('include/RsnPrelevementsPDFController.php');
+		
+		$recordId = $this->getId();
+		$moduleName = $this->getModuleName();
+
+		$controllerClassName = "Vtiger_". $moduleName ."PDFController";
+		
+		$controller = new $controllerClassName($moduleName);
+		$controller->loadRecord($recordId);
+
+		if($filePath){
+			$fileName = $filePath . '/' . remove_accent(vtranslate('SINGLE_'.$moduleName, $moduleName)).'_'.$recordId.'.pdf';
+			$controller->Output($fileName, 'F');
+			return $fileName;
+		}
+		else{
+			$fileName = remove_accent(vtranslate('SINGLE_'.$moduleName, $moduleName)).'_'.$recordId.'.pdf';
+			$controller->Output($fileName, 'D');
+		}
+	}
 	
 	/**
 	 * ED141109
@@ -53,6 +86,16 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 		$recordModel->set('bic', $this->get('sepabic'));
 		$recordModel->set('rsnprelvirstatus', 'Ok');
 		$recordModel->save();
+		
+		if(!$this->get('dejapreleve')){
+			$this->set('mode', 'edit');
+			$this->set('dejapreleve', date('d-m-Y'));
+			$this->set('montant', str_replace('.', ',', $prelvnt->get('montant')));//bug de prise en compte de la virgule comme séparateur de millier
+			$this->save();
+		}
+		//S'assure de l'abonnement à la revue
+		$this->ensureAboRevue();
+		
 		return $recordModel;
 	}
 	
@@ -95,5 +138,34 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function isDeletable() {
 		return !$this->hasRelatedPrelVirements();
+	}
+	
+	//Vérifie que le contact a bien un abonnement actif en remerciement
+	function ensureAboRevue(){
+		if($this->get('etat') == 0){
+			$aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
+			$periodicite = preg_replace('/^(\D+)(\s\d+)?$/', '$1', $this->get('periodicite'));
+			switch($periodicite){
+			case 'Annuel':
+				$months = 12;
+				break;
+			case 'Mensuel':
+				$months = 3;
+				break;
+			case 'Une seule fois':
+				//TODO arbitraire...
+				if((float)$this->get('montant') >= 48)
+					$months = 12;
+				elseif((float)$this->get('montant') >= 12)
+					$months = 6;
+				else
+					$months = 3;
+				break;
+			default:
+				$months = 6;
+				break;
+			}
+			$aboRevueModuleModel->ensureAboRevue($this->get('accountid'), $months, RSNABOREVUES_TYPE_NUM_MERCI, $this);
+		}
 	}
 }

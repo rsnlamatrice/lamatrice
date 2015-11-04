@@ -44,7 +44,7 @@ class Vtiger_InvoicePDFController extends Vtiger_InventoryPDFController{
 				$purchaseOrderLabel 	=>	$purchaseOrder,
 				//$contactNameLabel	=>	$contactName,
 				$salesOrderLabel	=>	$salesOrder,
-				//ED151020 passŽ en 'destinationAddress' $billingAddressLabel  	=> 	$this->buildHeaderBillingAddress($contactName),
+				//ED151020 passÅ½ en 'destinationAddress' $billingAddressLabel  	=> 	$this->buildHeaderBillingAddress($contactName),
 			);
 		return $modelColumnCenter;
 	}
@@ -61,7 +61,7 @@ class Vtiger_InvoicePDFController extends Vtiger_InventoryPDFController{
 					$invoiceDateLabel => $this->formatDate($this->focusColumnValue('invoicedate')),
 				),
 			);
-		/*Date d'Ždition : masquŽe
+		/*Date d'Å½dition : masquÅ½e
 		 if($this->formatDate(date("Y-m-d")) != $this->formatDate($this->focusColumnValue('invoicedate')))
 			$modelColumnRight['dates'][$issueDateLabel] = $this->formatDate(date("Y-m-d"));*/
 		if($this->focusColumnValue('duedate'))

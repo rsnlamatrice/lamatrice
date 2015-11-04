@@ -52,8 +52,8 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
 		
-		$controler = new Vtiger_MassSave_Action();
-		$query = $controler->getRecordsQueryFromRequest($request);
+		$controller = new Vtiger_MassSave_Action();
+		$query = $controller->getRecordsQueryFromRequest($request);
 		//$query retourne autant de lignes que de lignes de factures
 		$query = 'SELECT DISTINCT purchaseorderid
 				FROM ('.$query.') _source_';

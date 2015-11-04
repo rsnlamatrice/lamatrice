@@ -49,7 +49,7 @@ class RsnPrelevementsHandler extends VTEventHandler {
 			$separum = $this->getNewRUM($prelevement, $accountsRecord, $existingPrelevements);
 			$this->updateSeparum($prelevement, $separum);
 		}
-		$this->ensureAboRevue($prelevement);
+		$prelevement->ensureAboRevue();
 	}
 	
 	function getNewRUM($prelevement, $accountsRecord, $existingPrelevements){
@@ -65,25 +65,6 @@ class RsnPrelevementsHandler extends VTEventHandler {
 				break;
 		}
 		return $separum;
-	}
-	
-	function ensureAboRevue($prelevement){
-		$aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
-		if($prelevement->get('etat') == 0){
-			$periodicite = preg_replace('/^(\D+)\s\d*$/', '$1', $prelevement->get('periodicite'));
-			switch($periodicite){
-			case 'Annuel':
-				$months = 12;
-				break;
-			case 'Mensuel':
-				$months = 3;
-				break;
-			default:
-				$months = 6;
-				break;
-			}
-			$aboRevueModuleModel->ensureAboRevue($prelevement->get('accountid'), $months, RSNABOREVUES_TYPE_NUM_MERCI, $prelevement);
-		}
 	}
 
 	function updateSeparum($prelevement, $newSeparum, $dejapreleve = null) {

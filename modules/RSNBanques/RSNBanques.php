@@ -8,8 +8,6 @@
  * All Rights Reserved.
  ************************************************************************************/
 
-include_once 'modules/Vtiger/CRMEntity.php';
-
 class RSNBanques extends Vtiger_CRMEntity {
 	var $table_name = 'vtiger_rsnbanques';
 	var $table_index= 'rsnbanquesid';
@@ -224,4 +222,19 @@ class RSNBanques extends Vtiger_CRMEntity {
 		return true;
 		
 	}
+	
+	public static function getEntityNameFromCode($codeBanque){
+		global $adb;
+		$query = 'SELECT name
+			FROM vtiger_rsnbanques
+			WHERE codebanque = ?
+			ORDER BY disabled ASC
+			LIMIT 1';
+		$result = $adb->pquery($query, array($codeBanque));
+		
+		while($row = $adb->fetchByAssoc($result))
+			return $row['name'];
+		break;
+	}
+	
 }

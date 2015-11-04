@@ -1658,6 +1658,32 @@ jQuery.Class("Vtiger_List_Js",{
 		}
 	},
 
+	/* ED151104
+	 * Function to register the click event for edit selected filter
+	 * (petit crayon à côté de la liste des customviews)
+	 */
+	registerEditSelectedFilterClickEvent : function(){
+		var thisInstance = this;
+		var topMenu = this.getListViewTopMenuContainer();
+		if(topMenu != false){
+			topMenu.on('click','#customFilter-edit',function(event){
+				//to close the dropdown
+				var cvId = thisInstance.getCurrentCvId();
+				var currentOptionElement = thisInstance.getFilterSelectElement().find('#filterOptionId_' + cvId);
+				if (currentOptionElement.data('editable')) {
+					var editUrl = currentOptionElement.data('editurl');
+					Vtiger_CustomView_Js.loadFilterView(editUrl);
+				}
+				else{
+					var message = "Cette vue n'est pas modifiable";//TODO translate
+					Vtiger_Helper_Js.showMessage(message);					
+				}
+				event.stopPropagation();
+				return false;
+			});
+		}
+	},
+
 	/*
 	 * Function to register the click event for delete filter
 	 */
@@ -2090,6 +2116,7 @@ jQuery.Class("Vtiger_List_Js",{
 		this.registerChangeCustomFilterEvent();
 		this.registerCreateFilterClickEvent();
 		this.registerEditFilterClickEvent();
+		this.registerEditSelectedFilterClickEvent();//ED151104
 		this.registerDeleteFilterClickEvent();
 		this.registerApproveFilterClickEvent();
 		this.registerDenyFilterClickEvent();

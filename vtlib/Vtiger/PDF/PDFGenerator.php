@@ -187,6 +187,45 @@ class Vtiger_PDF_Generator {
 		return $imsize;
 	}
 
+	/** ED151004
+	 * Merge PDF files into one
+	 * Needs ghostscript package
+	 * If failed, returns a zip file, extending $outputName with ".zip" extension
+	 * @params $fileNames : file names array
+	 * @param $outputName : desired output file name
+	 * @return output file name
+	 */
+	public static function mergeFiles($fileNames, $outputName = false){
+		if(!$outputName)
+			$outputName = tempnam(sys_get_temp_dir(), 'mrg_'.count($fileNames).'_pdf') . '.pdf';
+		
+		$outputName = str_replace(' ', '_', $outputName);
+		
+		if(file_exists($outputName))
+			unlink($outputName);
+			
+		$cmd = "gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=$outputName ";
+		//Add each pdf file to the end of the command
+		$cmd .= implode(' ', $fileNames);
+		
+		try {
+			$result = shell_exec($cmd);
+			if(!file_exists($outputName)){
+				$outputName .= '.zip';
+				$zip = new ZipArchive();
+				if ($zip->open($outputName, ZipArchive::CREATE)!==TRUE) {
+					exit("Impossible d'ouvrir le fichier <$outputName>\n");
+				}
+				foreach($fileNames as $fileName)
+					$zip->addFile($fileName, '/'.basename($fileName));
+				$zip->close();
+			}
+		}
+		catch(Exception $ex){
+			throw($ex);
+		}
+		return $outputName;
+	}
 }
 
 ?>

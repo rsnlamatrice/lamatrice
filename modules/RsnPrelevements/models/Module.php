@@ -36,7 +36,7 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 
 	function getPrintRemerciementsUrl($dateVir = false){
 		$dateVir = $this->getNextDateToGenerateVirnts($dateVir);
-		return 'index.php?module='.$this->getName() .'&view=PrintRemerciements&date_virements=' . $dateVir->format('d-m-Y');
+		return "index.php?module=".$this->getName()."&action=ExportPDF&date_virements=" . $dateVir->format('d-m-Y');
 	}
 	
 	/**
@@ -121,7 +121,7 @@ class RsnPrelevements_Module_Model extends Vtiger_Module_Model {
 	 * Types de prélèvements concernés pour la génération des prochains virements
 	 */
 	function getTypesPrelvntsToGenerateVirnts(){
-		return array('Virement périodique');
+		return array('Prélèvement périodique');
 	}
 	
 	/*

@@ -594,7 +594,7 @@ $languageStrings = array(
 	
 	//Translations used for Export to Pdf
 	'Valid Date' => 'date de validité',
-	'Phone: ' => 'téléphone : ',
+	'Phone: ' => 'Téléphone : ',
 	'Issued Date' => "date d'émission",
 	'Shipping & Handling Charges' => 'Expédition et frais de manutention',
 	'Shipping & Handling Tax:' => 'Expédition et de manutention impôt:',
