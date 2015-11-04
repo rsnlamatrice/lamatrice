@@ -210,7 +210,6 @@ class Vtiger_PDF_Generator {
 		
 		try {
 			$result = shell_exec($cmd);
-			var_dump("shell_exec", $result);
 			if(!file_exists($outputName)){
 				$outputName .= '.zip';
 				$zip = new ZipArchive();
