@@ -11,6 +11,7 @@ include_once 'vtlib/Vtiger/PDF/LetterToAccount/ContentViewer.php';
 include_once 'vtlib/Vtiger/PDF/viewers/PagerViewer.php';
 include_once 'vtlib/Vtiger/PDF/PDFGenerator.php';
 include_once 'data/CRMEntity.php';
+include_once 'modules/Settings/Vtiger/models/CompanyDetails.php';
 
 class Vtiger_LetterToAccountPDFController {
 
@@ -195,13 +196,16 @@ class Vtiger_LetterToAccountPDFController {
 		global $adb;
 
 		// Company information
-		$result = $adb->pquery("SELECT * FROM vtiger_organizationdetails", array());
-		$num_rows = $adb->num_rows($result);
-		if($num_rows) {
-			$resultrow = $adb->fetch_array($result);
-			//ED151020
-			$this->organizationDetails = $resultrow;
-
+		$organization = Settings_Vtiger_CompanyDetails_Model::getInstance();
+		//$result = $adb->pquery("SELECT * FROM vtiger_organizationdetails", array());
+		//$num_rows = $adb->num_rows($result);
+		//if($num_rows) {
+		//	$resultrow = $adb->fetch_array($result);
+		//	//ED151020
+		//	$this->organizationDetails = $resultrow;
+			//ED151104
+			$this->organizationDetails = $resultrow = $organization->getData();
+			
 			$addressValues = array();
 			$addressValues[] = $resultrow['address'];
 			if(!empty($resultrow['code'])) $addressValues[]= "\n".$resultrow['code'];
@@ -210,10 +214,10 @@ class Vtiger_LetterToAccountPDFController {
 			//if(!empty($resultrow['country'])) $addressValues[]= "\n".$resultrow['country'];
 
 
-			if(!empty($resultrow[strtolower($this->moduleName).'_header_text']))		$additionalCompanyInfo[]= "\n\n".$resultrow[strtolower($this->moduleName).'_header_text'];
-			elseif(!empty($resultrow['lettertoaccount_header_text']))		$additionalCompanyInfo[]= "\n\n".$resultrow['lettertoaccount_header_text'];
+			if(!empty($resultrow[strtolower($this->moduleName).'::header_text']))		$additionalCompanyInfo[]= "\n\n".$resultrow[strtolower($this->moduleName).'::header_text'];
+			elseif(!empty($resultrow['lettertoaccount::header_text']))		$additionalCompanyInfo[]= "\n\n".$resultrow['lettertoaccount::header_text'];
 			
-			if(!empty($resultrow[strtolower($this->moduleName).'_phone']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Phone: ", $this->moduleName). $resultrow[strtolower($this->moduleName).'_phone'];
+			if(!empty($resultrow[strtolower($this->moduleName).'::phone']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Phone: ", $this->moduleName). $resultrow[strtolower($this->moduleName).'::phone'];
 			elseif(!empty($resultrow['phone']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Phone: ", $this->moduleName). $resultrow['phone'];
 			if(!empty($resultrow['fax']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Fax: ", $this->moduleName). $resultrow['fax'];
 			if(!empty($resultrow['website']))	$additionalCompanyInfo[]= "\n".getTranslatedString("Website: ", $this->moduleName). $resultrow['website'];
@@ -233,9 +237,9 @@ class Vtiger_LetterToAccountPDFController {
 					'content' => decode_html($this->joinValues($addressValues, ' '). $this->joinValues($additionalCompanyInfo, ' '))
 			);
 			
-		}
-		else
-			$modelColumnLeft = array();
+		//}
+		//else
+		//	$modelColumnLeft = array();
 		return $modelColumnLeft;
 	}
 
@@ -285,10 +289,10 @@ class Vtiger_LetterToAccountPDFController {
 	}
 	//ED151020
 	function getAfterSummaryContent(){
-		$text = $this->organizationDetails[strtolower($this->moduleName).'_lastpage_footer_text'];
+		$text = $this->organizationDetails[strtolower($this->moduleName).'::lastpage_footer_text'];
 		if($text)
 			return $text;
-		return $this->organizationDetails['lettertoaccount_lastpage_footer_text'];
+		return $this->organizationDetails['lettertoaccount::lastpage_footer_text'];
 	}
 	function buildAfterSummaryModel() {
 		$model = new Vtiger_PDF_Model();

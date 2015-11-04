@@ -54,7 +54,7 @@ class RSN {
 			$this->add_isabonnable_rsnabotype();
 			$this->add_rsnsqlqueries_fields();
 			$this->add_rsnstatistics_relatedlist();
-			$this->add_organizationdetails_fields();
+			$this->add_organizationparams_table();
 			$this->add_crontasks_fields();
 			$this->add_rsnreglements_fields();
 			$this->add_RSNStatisticsResults_Extension();
@@ -578,14 +578,50 @@ DELIMITER ;';
 	/* ED151020
 	 * Champs supplémentaires de paramétrage de l'entreprise
 	 */ 
-	static function add_organizationdetails_fields(){
+	static function add_organizationparams_table(){
 		
 		$db = PearDatabase::getInstance();
 		
-		$sql = "ALTER TABLE `vtiger_organizationdetails`
-			ADD `print_logoname` VARCHAR(255) NULL ,
-			ADD `inventory_header_text` TEXT NULL ,
-			ADD `inventory_lastpage_footer_text` TEXT NULL;";
+		$sql = "
+
+CREATE TABLE IF NOT EXISTS `vtiger_organizationsubdetails` (
+  `organization_id` int(11) NOT NULL DEFAULT '1',
+  `parameter` varchar(64) NOT NULL,
+  `context` varchar(32) NOT NULL,
+  `label` varchar(128) DEFAULT NULL,
+  `value` text,
+  `uitype` int(11) NOT NULL DEFAULT '1',
+  `description` text NOT NULL,
+  `uiclass` varchar(255) DEFAULT NULL,
+  `visible` tinyint(4) NOT NULL DEFAULT '1',
+  `sequence` int(11) NOT NULL DEFAULT '0',
+  `createdtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifieduser` int(11) DEFAULT NULL,
+  PRIMARY KEY (`organization_id`,`parameter`,`context`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Contenu de la table `vtiger_organizationsubdetails`
+--
+
+INSERT INTO `vtiger_organizationsubdetails` (`organization_id`, `parameter`, `context`, `label`, `value`, `uitype`, `description`, `uiclass`, `visible`, `sequence`, `createdtime`, `modifiedtime`, `modifieduser`) VALUES
+(1, 'bic', 'sepa', 'BIC', 'CCOPFRPPXXX', 1, '', NULL, 1, 103, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'compte', 'sepa', 'N° de compte', '21029208904', 1, '', NULL, 1, 107, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'emetteur', 'sepa', 'Emetteur', 'RES. SORTIR DU NUCLEAIRE', 1, '', NULL, 1, 100, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'etablissement', 'sepa', 'Etablissement', '76', 1, '', NULL, 1, 105, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'guichet', 'sepa', 'Guichet', '11', 1, '', NULL, 1, 106, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'header_text', 'inventory', 'En-tête d''impression de factures, devis, ..., sous l''adresse', 'Fédération de plus de 930 associations,\r\nagréée pour la protection de l''environnement.\r\n\r\nContact : nadia.boukacem@sortirdunucleaire.fr', 19, '', NULL, 1, 200, '2015-11-04 17:13:43', '2015-11-04 17:13:43', 1),
+(1, 'header_text', 'lettertoaccount', 'En-tête d''impression, sous l''adresse', 'Fédération de plus de 930 associations,\r\nagréée pour la protection de l''environnement.\r\n\r\nContact : nadia.boukacem@sortirdunucleaire.fr', 19, '', NULL, 1, 210, '2015-11-04 17:13:43', '2015-11-04 17:13:43', 1),
+(1, 'header_text', 'rsnprelevements', 'En-tête d''impression des lettres de remerciements pour nouveaux prélèvements, sous l''adresse', 'Fédération de plus de 930 associations,\r\nagréée pour la protection de l''environnement.\r\n\r\nContact : annie.orenga@sortirdunucleaire.fr', 19, '', NULL, 1, 220, '2015-11-04 17:13:43', '2015-11-04 17:13:43', 1),
+(1, 'ibancle', 'sepa', 'IBAN - Cle', '76', 1, '', NULL, 1, 102, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'ibanpays', 'sepa', 'IBAN - Pays', 'FR', 1, '', NULL, 1, 101, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'ics', 'sepa', 'N° ICS', 'FR72ZZZ434147', 1, '', NULL, 1, 104, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1),
+(1, 'lastpage_footer_text', 'inventory', 'Bas de page d''impression de factures, devis, ...', 'Association \"loi de 1901\", organisme à but non lucratif partiellement assujetti à la TVA.\r\nSiret : 418 092 094 00014 - TVA intracommunautaire : FR43 418092094', 19, '', NULL, 1, 201, '2015-11-04 17:13:43', '2015-11-04 17:13:43', 1),
+(1, 'lastpage_footer_text', 'lettertoaccount', 'Bas de page d''impression de courriers aux contacts', 'Association \"loi de 1901\", organisme à but non lucratif. Siret : 418 092 094 00014 ', 19, '', NULL, 1, 210, '2015-11-04 17:13:43', '2015-11-04 17:13:43', 1),
+(1, 'phone', 'rsnprelevements', 'Téléphone de la compta', '04 82 53 38 58', 1, '', NULL, 1, 221, '2015-11-04 17:13:43', '2015-11-04 17:13:43', 1),
+(1, 'ribcle', 'sepa', 'Clé', '7', 1, '', NULL, 1, 108, '2015-11-04 17:23:08', '2015-11-04 17:23:08', 1);
+";
 		$db->query($sql);
 	}
 	
