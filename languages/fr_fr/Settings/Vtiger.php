@@ -207,8 +207,15 @@ $languageStrings = array(
         'RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES' => 'Plusieurs taxes utilisables par produit et service',
         'RSN_PRODUCT_ALLOW_DUPLICATE' => 'Les produits et services peuvent être dupliqués',
         
-        'inventory_header_text' => 'Texte à imprimer sous l\'organisation',
-        'inventory_lastpage_footer_text' => 'Texte à imprimer en fin de facture',
+        'lettertoaccount_header_text' => 'En entête de courrier, texte à imprimer sous l\'organisation',
+		'rsnprelevements_header_text' => 'En entête de courrier de remerciement pour prélèvement, texte à imprimer sous l\'organisation',
+        
+		'lettertoaccount_lastpage_footer_text' => 'En fin de courrier, texte à imprimer',
+		
+        'inventory_header_text' => 'En entête de facture, texte à imprimer sous l\'organisation',
+        'inventory_lastpage_footer_text' => 'En fin de facture, texte à imprimer',
+		'rsnprelevements_phone' => 'Ligne directe de la compta',
+		
 	'LBL_COMPANY_PRINT_LOGO'             => 'Logo pour impression', 
 	'LBL_PRINT_LOGO_RECOMMENDED_MESSAGE' => 'Taille recommandée 340X120 pixels( .jpeg , .jpg , .png , .gif , .pjpeg , .x-png format ).', 
         

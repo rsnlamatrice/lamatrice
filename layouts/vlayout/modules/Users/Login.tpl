@@ -46,11 +46,11 @@
 				</div>
 				<div class="span9">
 					<div class="helpLinks">
-						<a href="http://www.sortirdunucleaire.org/">Sortir du Nucl&eacute;aire</a> | 
+						<a href="http://www.sortirdunucleaire.org/">Sortir du nucl&eacute;aire</a> | 
 						<a href="https://groupware.sortirdunucleaire.org/">Groupware</a> | 
 						<a href="https://echanges.sortirdunucleaire.org">Intranet</a> | 
 						<a href="https://echanges.sortirdunucleaire.org/lemoulin">Le Moulin</a> | 
-						<a href="https://lune.sortirdunucleaire.fr/lemoulin">Le Moulune</a> | 
+						<a href="https://lune.sortirdunucleaire.fr/lemoulin">La Moulune</a> | 
 						<a href="https://webmail.gandi.net/">Webmail</a>
 					</div>
 				</div>

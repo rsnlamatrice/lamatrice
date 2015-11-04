@@ -30,8 +30,12 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 			'code'  => 'text',
 			'country' => 'text',
 			'phone' => 'text',
+			'rsnprelevements_phone' => 'text',
 			'fax' => 'text',
 			'website' => 'text',
+			'lettertoaccount_header_text' => 'text',
+			'rsnprelevements_header_text' => 'text',
+			'lettertoaccount_lastpage_footer_text' => 'text',
 			'inventory_header_text' => 'text',
 			'inventory_lastpage_footer_text' => 'text',
 	);

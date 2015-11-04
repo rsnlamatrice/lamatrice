@@ -155,7 +155,7 @@ class Vtiger_InventoryPDFController {
 			$contentModel->set('Name', $productName);
 			$contentModel->set('Code', decode_html($productLineItem["hdnProductcode{$productLineItemIndex}"]));
 			$contentModel->set('Quantity', $quantity);
-			//ED151020 tarif unitaire TTC ˆ a place de $listPrice
+			//ED151020 tarif unitaire TTC Ë† a place de $listPrice
 			$contentModel->set('Price',     $this->formatPrice($unitTaxedPrice));
 			if((float)$taxed_discount)
 				$contentModel->set('Discount',  $this->formatPrice($taxed_discount)."\n ($discountPercentage %)");

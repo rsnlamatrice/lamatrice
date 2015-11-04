@@ -99,7 +99,13 @@
 						{vtranslate($FIELD,$QUALIFIED_MODULE)}{if $FIELD eq 'organizationname'}<span class="redColor">*</span>{/if}
 					</div>
 					<div class="controls">
-						{if $FIELD eq 'address' || $FIELD eq 'inventory_header_text' || $FIELD eq 'inventory_lastpage_footer_text'}
+						{if $FIELD eq 'address'
+						|| $FIELD eq 'lettertoaccount_header_text'
+						|| $FIELD eq 'rsnprelevements_header_text'
+						|| $FIELD eq 'inventory_header_text'
+						|| $FIELD eq 'lettertoaccount_lastpage_footer_text'
+						|| $FIELD eq 'inventory_lastpage_footer_text'
+						}
 							<textarea name="{$FIELD}" style="width: 30.5%">{$MODULE_MODEL->get($FIELD)}</textarea>
 						{else}
 							<input type="text" {if $FIELD eq 'organizationname'} data-validation-engine="validate[required]" {/if} class="input-xlarge" name="{$FIELD}" value="{$MODULE_MODEL->get($FIELD)}"/>

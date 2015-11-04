@@ -22,12 +22,6 @@ class RsnPrelevements_Generate_Action extends Vtiger_Action_Controller {
 		$prelevements = $moduleModel->getPrelevementsToGenerateVirnts( $dateVir );
 		foreach($prelevements as $prelvnt){
 			$prelVirnt = $prelvnt->createPrelVirement($dateVir);
-			if(!$prelvnt->get('dejapreleve')){
-				$prelvnt->set('mode', 'edit');
-				$prelvnt->set('dejapreleve', date('d-m-Y'));
-				$prelvnt->set('montant', str_replace('.', ',', $prelvnt->get('montant')));//bug de prise en compte de la virgule comme séparateur de millier
-				$prelvnt->save();
-			}
 			//break;//debug
 		}
 		$loadUrl = $moduleModel->getGenererPrelVirementsUrl();

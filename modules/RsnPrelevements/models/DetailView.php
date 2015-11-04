@@ -3,7 +3,7 @@
  * 
  *************************************************************************************/
 
-class RSNStatistics_DetailView_Model extends Vtiger_DetailView_Model {
+class RsnPrelevements_DetailView_Model extends Vtiger_DetailView_Model {
     /**
 	 * Function to get the detail view links (links and widgets)
 	 * @param <array> $linkParams - parameters which will be used to calculate the params
@@ -18,15 +18,8 @@ class RSNStatistics_DetailView_Model extends Vtiger_DetailView_Model {
 
 		if(Users_Privileges_Model::isPermitted($moduleName, 'DetailView', $recordModel->getId())) {
 			$detailViewLinks = array(
-				'linklabel' => vtranslate('LBL_CALCULATE_FOR_ALL_RELATED', $moduleName),
-				'linkurl' => $recordModel->getUpdateValuesUrl(),
-				'linkicon' => ''
-			);
-			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($detailViewLinks);
-			
-			$detailViewLinks = array(
-				'linklabel' => vtranslate('LBL_CALCULATE_FOR_ALL_RELATED_THIS_YEAR', $moduleName),
-				'linkurl' => $recordModel->getUpdateValuesUrl() . "&begin_date=year",
+				'linklabel' => vtranslate('LBL_EXPORT_TO_PDF', $moduleName),
+				'linkurl' => $recordModel->getExportPDFUrl(),
 				'linkicon' => ''
 			);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($detailViewLinks);

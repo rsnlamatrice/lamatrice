@@ -30,8 +30,8 @@
 										id="filterOptionId_{$CUSTOM_VIEW->get('cvid')}"
 										value="{$CUSTOM_VIEW->get('cvid')}"
 										data-id="{$CUSTOM_VIEW->get('cvid')}"
-										{if $VIEWID neq '' && $VIEWID neq '0'  && $VIEWID == $CUSTOM_VIEW->getId()} selected="selected"
-										{elseif ($VIEWID == '' or $VIEWID == '0')&& $CUSTOM_VIEW->isDefault() eq 'true'} selected="selected" {/if}
+										{if $VIEWID neq '' && $VIEWID neq '0' && $VIEWID == $CUSTOM_VIEW->getId()} selected="selected"
+										{elseif ($VIEWID == '' or $VIEWID == '0')&& $CUSTOM_VIEW->isDefault() eq 'true'} selected="selected"{/if}
 										class="filterOptionId_{$CUSTOM_VIEW->get('cvid')}">
 											{if $CUSTOM_VIEW->get('viewname') eq 'All'}
 												{*vtranslate($CUSTOM_VIEW->get('viewname'), $MODULE)*}
@@ -59,6 +59,8 @@
 								</optgroup>
 							{/if}
 						</select>
+						{* ED151104 *}
+						<a id="customFilter-edit" href="" style="opacity:0.7;"><span class="ui-icon ui-icon-pencil"></span></a>
 						<span class="filterActionsDiv hide">
 							<hr>
 							<ul class="filterActions">

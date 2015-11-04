@@ -40,6 +40,7 @@ $languageStrings = array(
 	'LBL_ORIGINE' => 'origine',
 	'COMMENTS' => 'Commentaires',
 	'LBL_PRELVTYPE' => 'Type de prélèvnt',
+	'LBL_EXPORT_TO_PDF' => 'Lettre de remerciement', 
 
 );
 
