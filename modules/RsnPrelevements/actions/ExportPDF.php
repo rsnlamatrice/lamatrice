@@ -31,16 +31,13 @@ class RsnPrelevements_ExportPDF_Action extends Vtiger_Action_Controller {
 				$recordId = $prelVirement->get('rsnprelevementsid');
 				$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleModel->getName());
 				$files[] = $recordModel->getPDF($filesPath);
-				
-				
-				break;//debug
 			}
 			$outputFileName = $filesPath . '/' . 'Prelevements FIRST du ' . $dateVir->format('Y-m-d') . '.pdf';
 			$outputFileName = Vtiger_PDF_Generator::mergeFiles($files, $outputFileName);
 			//clear temp files
 			//foreach($files as $fileName)
 			//	unlink($fileName);
-			var_dump($outputFileName);
+			var_dump('outputFileName', $outputFileName, file_exists($outputFileName));
 		}
 	}
 }
