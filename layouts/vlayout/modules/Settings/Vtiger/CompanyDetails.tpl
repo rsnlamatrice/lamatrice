@@ -43,6 +43,13 @@
 					<tbody>
 						{foreach from=$MODULE_MODEL->getFields() item=FIELD_TYPE key=FIELD}
 							{if $FIELD neq 'logoname' && $FIELD neq 'logo' && $FIELD neq 'print_logoname' && $FIELD neq 'print_logo' }
+								{if strpos($FIELD, '::') !== false && strpos($FIELD, $CONTEXT|cat:'::') !== 0}
+									{assign var=PARTS value=explode('::', $FIELD)}
+									{assign var=CONTEXT value=$PARTS[0]}
+									<tr class="blockHeader">
+										<th colspan="2"><strong>{vtranslate($CONTEXT,$QUALIFIED_MODULE)}</strong></th>
+									</tr>
+								{/if}
 								<tr>
 									<td>{vtranslate($FIELD,$QUALIFIED_MODULE)}</td>
 									<td>{$MODULE_MODEL->get($FIELD)}</td>
@@ -94,21 +101,23 @@
 		</div>
 		{foreach from=$MODULE_MODEL->getFields() item=FIELD_TYPE key=FIELD}
 			{if $FIELD neq 'logoname' && $FIELD neq 'logo' && $FIELD neq 'print_logoname' && $FIELD neq 'print_logo' }
+				{if strpos($FIELD, '::') !== false && strpos($FIELD, $CONTEXT|cat:'::') !== 0}
+					{assign var=PARTS value=explode('::', $FIELD)}
+					{assign var=CONTEXT value=$PARTS[0]}
+					
+					<div class="control-group">
+						<div class="blockHeader"><strong>&nbsp;{vtranslate($CONTEXT,$QUALIFIED_MODULE)}</strong></div>
+					</div>
+				{/if}
 				<div class="control-group">
 					<div class="control-label">
 						{vtranslate($FIELD,$QUALIFIED_MODULE)}{if $FIELD eq 'organizationname'}<span class="redColor">*</span>{/if}
 					</div>
 					<div class="controls">
-						{if $FIELD eq 'address'
-						|| $FIELD eq 'lettertoaccount_header_text'
-						|| $FIELD eq 'rsnprelevements_header_text'
-						|| $FIELD eq 'inventory_header_text'
-						|| $FIELD eq 'lettertoaccount_lastpage_footer_text'
-						|| $FIELD eq 'inventory_lastpage_footer_text'
-						}
-							<textarea name="{$FIELD}" style="width: 30.5%">{$MODULE_MODEL->get($FIELD)}</textarea>
+						{if $FIELD_TYPE eq 'textarea'}
+							<textarea name="{$FIELD}" style="width: 40.5%" rows="3">{$MODULE_MODEL->get($FIELD)}</textarea>
 						{else}
-							<input type="text" {if $FIELD eq 'organizationname'} data-validation-engine="validate[required]" {/if} class="input-xlarge" name="{$FIELD}" value="{$MODULE_MODEL->get($FIELD)}"/>
+							<input type="text" {if $FIELD eq 'organizationname'} data-validation-engine="validate[required]" {/if} style="width: 40.5%" name="{$FIELD}" value="{$MODULE_MODEL->get($FIELD)}"/>
 						{/if}
 					</div>
 				</div>

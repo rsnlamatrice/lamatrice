@@ -87,7 +87,10 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 	}
 		
 	function writerSEPAHeader($xml, $dateVir, $recur_first, $nbVirnts, $sumMontants ){
-		include('config.RSN.inc.php');
+		//include('config.RSN.inc.php');
+		
+		include_once 'modules/Settings/Vtiger/models/CompanyDetails.php';
+		$organization = Settings_Vtiger_CompanyDetails_Model::getInstance();
 		
 		$today = new DateTime();
 				
@@ -128,7 +131,7 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		$xml->startElement('InitgPty');
 		//$tTexte:=$tTexte+"<Nm>"+[Emetteur]Nom+"</Nm>"  `+Caractere(Retour chariot )
 		$xml->startElement('Nm');
-		$xml->text($RSN_PRELVIRNTS_EMETTEUR);//'RES.SORTIR DU NUCLEAIRE');
+		$xml->text($organization->get('sepa::emetteur'));//'RES.SORTIR DU NUCLEAIRE');
 		$xml->endElement();
 		//$tTexte:=$tTexte+"</InitgPty>"  `+Caractere(Retour chariot )
 		$xml->endElement();
@@ -205,7 +208,7 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		//$tTexte:=$tTexte+"<Cdtr><Nm>"+[Emetteur]Nom+"</Nm></Cdtr>"  `+Caractere(Retour chariot )
 		$xml->startElement('Cdtr');
 		$xml->startElement('Nm');
-		$xml->text($RSN_PRELVIRNTS_EMETTEUR);//'RES.SORTIR DU NUCLEAIRE');
+		$xml->text($organization->get('sepa::emetteur'));//'RES.SORTIR DU NUCLEAIRE');
 		$xml->endElement();
 		$xml->endElement();
 		
@@ -214,7 +217,7 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		//$tTexte:=$tTexte+"<Id><IBAN>"+[Emetteur]SEPAibanPays+[Emetteur]SEPAibanClé+[Emetteur]Etablissement+[Emetteur]Guichet+[Emetteur]NuméroCC+[Emetteur]RIBclé+"</IBAN></Id>"  `+Caractere(Retour chariot )
 		$xml->startElement('Id');
 		$xml->startElement('IBAN');
-		$xml->text($RSN_PRELVIRNTS_SEPAIBANPAYS . $RSN_PRELVIRNTS_SEPAIBANCLE . $RSN_PRELVIRNTS_ETABLISSEMENT . $RSN_PRELVIRNTS_GUICHET . $RSN_PRELVIRNTS_NUMEROCC . str_pad($RSN_PRELVIRNTS_RIBCLE, 2, '0', STR_PAD_LEFT));
+		$xml->text($organization->get('sepa::ibanpays') . $organization->get('sepa::ibancle') . $organization->get('sepa::etablissement') . $organization->get('sepa::guichet') . $organization->get('sepa::compte') . str_pad($organization->get('sepa::ribcle'), 2, '0', STR_PAD_LEFT));
 		$xml->endElement();
 		$xml->endElement();
 		//$tTexte:=$tTexte+"</CdtrAcct>"  `+Caractere(Retour chariot )
@@ -225,7 +228,7 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		//$tTexte:=$tTexte+"<FinInstnId><BIC>"+[Emetteur]SEPAbic+"</BIC></FinInstnId>"
 		$xml->startElement('FinInstnId');
 		$xml->startElement('BIC');
-		$xml->text($RSN_PRELVIRNTS_SEPABIC);
+		$xml->text($organization->get('sepa::bic'));
 		$xml->endElement();
 		$xml->endElement();
 		//$tTexte:=$tTexte+"</CdtrAgt>"  `+Caractere(Retour chariot )
@@ -240,14 +243,14 @@ class RsnPrelevements_Download_Action extends Vtiger_Action_Controller {
 		$xml->startElement('CdtrSchmeId');
 		//$tTexte:=$tTexte+"<Nm>"+[Emetteur]Nom+"</Nm>"  `+Caractere(Retour chariot )
 		$xml->startElement('Nm');
-		$xml->text($RSN_PRELVIRNTS_EMETTEUR);
+		$xml->text($organization->get('sepa::emetteur'));
 		$xml->endElement();
 		//$tTexte:=$tTexte+"<Id><PrvtId><Othr><Id>"+[Emetteur]NuméroICS+"</Id><SchmeNm><Prtry>SEPA</Prtry></SchmeNm></Othr></Prv"+"tId></Id>"  `+Caractere(Retour chariot )
 		$xml->startElement('Id');
 		$xml->startElement('PrvtId');
 		$xml->startElement('Othr');
 		$xml->startElement('Id');
-		$xml->text($RSN_PRELVIRNTS_NUMEROICS);
+		$xml->text($organization->get('sepa::ics'));
 		$xml->endElement();
 		$xml->startElement('SchmeNm');
 		$xml->startElement('Prtry');

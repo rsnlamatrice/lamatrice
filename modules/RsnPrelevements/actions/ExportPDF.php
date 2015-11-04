@@ -22,16 +22,19 @@ class RsnPrelevements_ExportPDF_Action extends Vtiger_Action_Controller {
 			$recordModel->getPDF();
 		}
 		else{
+			//Prélèvements d'après la date
 			$moduleModel = Vtiger_Module_Model::getInstance('RsnPrelevements');
 			$dateVir = $moduleModel->getNextDateToGenerateVirnts($request->get('date_virements'));
 			$prelVirements = $moduleModel->getExistingPrelVirements( $dateVir, 'FIRST' );
 			$files = array();
 			$filesPath = sys_get_temp_dir();
+			//Génère chaque PDF
 			foreach($prelVirements as $prelVirement){
 				$recordId = $prelVirement->get('rsnprelevementsid');
 				$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleModel->getName());
 				$files[] = $recordModel->getPDF($filesPath);
 			}
+			//Fusion en un seul PDF (ou un zip si ghostscript n'est pas installé)
 			$outputFileName = $filesPath . '/' . 'Prelevements FIRST du ' . $dateVir->format('Y-m-d') . '.pdf';
 			$outputFileName = Vtiger_PDF_Generator::mergeFiles($files, $outputFileName);
 			if(file_exists($outputFileName)){
@@ -45,7 +48,7 @@ class RsnPrelevements_ExportPDF_Action extends Vtiger_Action_Controller {
 						header("Content-Disposition: attachment; filename=\"".$path_parts["basename"]."\""); // use 'attachment' to force a file download
 						break;
 						// add more headers for other content types here
-					default;
+					default: //zip
 						header("Content-type: application/octet-stream");
 						header("Content-Disposition: filename=\"".$path_parts["basename"]."\"");
 						break;
@@ -53,12 +56,15 @@ class RsnPrelevements_ExportPDF_Action extends Vtiger_Action_Controller {
 					header("Content-length: $fsize");
 					header("Cache-control: private"); //use this to open files directly
 					while(!feof($fd)) {
-						$buffer = fread($fd, 2048);
-						echo $buffer;
+						echo fread($fd, 4096);
 					}
 				}
 				fclose ($fd);
 				
+				//Supprime les fichiers temporaires
+				foreach($files as $fileName)
+					unlink($fileName);
+					
 				unlink($outputFileName);
 				
 				exit;

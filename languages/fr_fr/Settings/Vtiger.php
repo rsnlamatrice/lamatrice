@@ -204,18 +204,32 @@ $languageStrings = array(
 	'LBL_CONFIGRSN_FILE'            => 'config.RSN.inc.php',   
 	'LBL_CONFIGRSN_EDITOR_DESCRIPTION'     => 'Définition des règles de gestion du Réseau SdN',  
         
-        'RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES' => 'Plusieurs taxes utilisables par produit et service',
-        'RSN_PRODUCT_ALLOW_DUPLICATE' => 'Les produits et services peuvent être dupliqués',
+	'RSN_PRODUCTS_ALLOW_MULTIPLE_TAXES' => 'Plusieurs taxes utilisables par produit et service',
+	'RSN_PRODUCT_ALLOW_DUPLICATE' => 'Les produits et services peuvent être dupliqués',
         
-        'lettertoaccount_header_text' => 'En entête de courrier, texte à imprimer sous l\'organisation',
-		'rsnprelevements_header_text' => 'En entête de courrier de remerciement pour prélèvement, texte à imprimer sous l\'organisation',
-        
-		'lettertoaccount_lastpage_footer_text' => 'En fin de courrier, texte à imprimer',
+	'rsnprelevements' => 'Prélèvements',
+	'rsnprelevements::phone' => 'Ligne directe de la compta',
+	'rsnprelevements::header_text' => 'En entête de courrier de remerciement pour prélèvement, texte à imprimer sous l\'organisation',
+	
+	'lettertoaccount' => 'Courriers',
+	'lettertoaccount::header_text' => 'En entête de courriers, texte à imprimer sous l\'organisation',
+	'lettertoaccount::lastpage_footer_text' => 'En fin de courrier, texte à imprimer',
+	
+	'inventory' => 'Factures, devis, ...',
+	'inventory::header_text' => 'En entête de facture, texte à imprimer sous l\'organisation',
+	'inventory::lastpage_footer_text' => 'En fin de facture, texte à imprimer',
 		
-        'inventory_header_text' => 'En entête de facture, texte à imprimer sous l\'organisation',
-        'inventory_lastpage_footer_text' => 'En fin de facture, texte à imprimer',
-		'rsnprelevements_phone' => 'Ligne directe de la compta',
-		
+	'sepa' => 'SEPA',
+	'sepa::emetteur' => 'Emetteur',
+	'sepa::ibanpays' => 'IBAN : Pays',
+	'sepa::ibancle' => 'IBAN : Clé',
+	'sepa::bic' => 'BIC',
+	'sepa::ics' => 'ICS',
+	'sepa::etablissement' => 'Etablissement',
+	'sepa::guichet' => 'Guichet',
+	'sepa::compte' => 'Compte',
+	'sepa::ribcle' => 'Clé du RIB',
+	
 	'LBL_COMPANY_PRINT_LOGO'             => 'Logo pour impression', 
 	'LBL_PRINT_LOGO_RECOMMENDED_MESSAGE' => 'Taille recommandée 340X120 pixels( .jpeg , .jpg , .png , .gif , .pjpeg , .x-png format ).', 
         
