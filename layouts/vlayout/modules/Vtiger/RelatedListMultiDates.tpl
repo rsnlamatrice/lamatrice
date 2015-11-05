@@ -130,13 +130,17 @@
 				    {foreach item=DATE_ID from=$DATE_IDS}
 					<div class="row-fluid date">
 						{if $WIDGET_INSIDE}
-						    {$DATE_ID->format('d/m/Y')}
+						    {if is_object($DATE_ID)}
+								{$DATE_ID->format('d/m/Y')}
+							{else}
+								{$DATE_ID}
+							{/if}
 						{else}
 						<input id="{$MODULE}_editView_fieldName_{$FIELD_NAME}_{$I}" type="text"
 						    class="span5 dateField"
 						    name="{$HEADER_FIELD->getFieldName()}" data-date-format="{$DATE_FORMAT}" 
-						    value="{$DATE_ID->format('d/m/Y')}"
-						    dateapplication="{$DATE_ID->format('Y-m-d H:i:s')}"
+						    value="{if is_object($DATE_ID)}{$DATE_ID->format('d/m/Y')}{else}{$DATE_ID}{/if}"
+						    dateapplication="{if is_object($DATE_ID)}{$DATE_ID->format('Y-m-d H:i:s')}{else}{$DATE_ID}{/if}"
 						    data-validation-engine="validate[required,funcCall[Vtiger_Base_Validator_Js.invokeValidation]]" 
 						/>
 						<span class="add-on"><i class="icon-calendar"></i></span>
@@ -163,7 +167,7 @@
 					    <input id="{$MODULE}_editView_fieldName_{$FIELD_NAME}_{$I}"
 					    class="span4 rel_data"
 					    value="{$DATA}"
-					    dateapplication="{$DATE_IDS[$I]->format('Y-m-d H:i:s')}"/>
+					    dateapplication="{if is_object($DATE_IDS[$I])}{$DATE_IDS[$I]->format('Y-m-d H:i:s')}{else}{$DATE_IDS[$I]}{/if}"/>
 					{/if}
 				    </div>
 				    {assign var=I value=$I+1}
@@ -187,7 +191,7 @@
 					    {foreach item=DATA from=$RELATED_RECORD->get($FIELD_NAME)}
 						<div>
 						<a class="relationDelete"
-						    dateapplication="{$DATE_IDS[$I]->format('Y-m-d H:i:s')}">
+						    dateapplication="{if is_object($DATE_IDS[$I])}{$DATE_IDS[$I]->format('Y-m-d H:i:s')}{else}{$DATE_IDS[$I]}{/if}">
 						    <i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>
 						    {if $IS_EDITABLE && $I==0}
 							&nbsp;&nbsp;<a class="relationAdd"><i title="Ajoute une nouvelle application du crit&eacute;re" class="icon-plus alignMiddle"></i></a>

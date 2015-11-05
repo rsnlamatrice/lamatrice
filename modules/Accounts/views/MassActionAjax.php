@@ -36,7 +36,10 @@ class Accounts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		$listViewModel->set('operator', array('e', array('c', 'OR', 'c', 'OR', 'c')));
 		$listViewModel->set('search_key', array('folderid', array('notes_title', null, 'notes_title', null, 'notes_title')));
 		$listViewModel->set('search_value', array('Reçus fiscaux', array($year, null, $year - 1, null, $year - 2)));
-			
+		
+		$listViewModel->set('orderby', 'title');
+		$listViewModel->set('sortorder','DESC');
+		
 		$pagingModel = new Vtiger_Paging_Model();
 		$pagingModel->set('page', 1);
 		$listViewEntries = $listViewModel->getListViewEntries($pagingModel);
