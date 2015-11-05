@@ -64,6 +64,8 @@ class Documents extends CRMEntity {
 	var $search_fields = Array(
 					'Title' => Array('notes'=>'notes_title'),
 					'Folder Name' => Array('attachmentsfolder'=>'foldername'),
+					'Code affaire' => Array('notes'=>'codeaffaire'),
+					'Created time' => Array('crmentity'=>'createdtime'),
 					//'File Name' => Array('notes'=>'filename'),
 					//'Assigned To' => Array('crmentity'=>'smownerid'),
 		);
@@ -71,6 +73,8 @@ class Documents extends CRMEntity {
 	var $search_fields_name = Array(
 					'Title' => 'notes_title',
 					'Folder Name' => 'folderid',
+					'Code affaire' => 'codeaffaire',
+					'Created time' => 'createdtime',
 					//'File Name' => 'filename',
 					//'Assigned To' => 'assigned_user_id',
 	);
@@ -592,12 +596,11 @@ class Documents extends CRMEntity {
 				vtiger_account.accountname,
 				case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
 				FROM vtiger_contactdetails
+				LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
 				INNER JOIN vtiger_senotesrel
 					ON vtiger_senotesrel.crmid = vtiger_contactdetails.contactid
-				
-				
+					OR (vtiger_account.accountid IS NOT NULL AND vtiger_senotesrel.crmid = vtiger_account.accountid)
 				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
-				LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
 				INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
 				INNER JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid
 				INNER JOIN vtiger_customerdetails ON vtiger_contactdetails.contactid = vtiger_customerdetails.customerid

@@ -52,6 +52,10 @@
             </span>
             <span class="paddingLeft10px cursorPointer help-inline" id="popupSearchButton"><img src="{vimage_path('search.png')}" alt="{vtranslate('LBL_SEARCH_BUTTON')}" title="{vtranslate('LBL_SEARCH_BUTTON')}" /></span>
         </div>
+
+        {foreach item=ALPHABET_FIELD from=$ALPHABET_FIELDS}
+            {include file=vtemplate_path($ALPHABET_FIELD->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
+        {/foreach}
     </form>
     {if $SOURCE_MODULE neq 'PriceBooks'}
         <div class="popupPaging">

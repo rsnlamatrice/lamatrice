@@ -211,4 +211,199 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 				break;
 		return $entries;
 	}
+	
+	//Génération du PDF du reçu fiscal
+	public function getRecuFiscalPDF($filePath, $documentRecordModel, $contactRecordModel = false){
+		$year = preg_replace('/^.*(20\d+).*$/', '$1', $documentRecordModel->get('notes_title'));
+		
+		if(!$contactRecordModel)
+			$contactRecordModel = $this->getRelatedMainContact();
+		
+		$infos = $this->getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel);
+		if(!$infos)
+			return $infos;
+		
+		include_once('modules/Accounts/pdf/RecuFiscal/PDFController.php');
+		
+		$recordId = $this->getId();
+		$moduleName = $this->getModuleName();
+
+		$controllerClassName = "Vtiger_RecuFiscal_PDFController";
+		
+		$controller = new $controllerClassName($moduleName);
+		$controller->loadRecord($recordId);
+		$controller->setColumnValue('year', $year);
+		$controller->setColumnValue('contactid', $contactRecordModel->getId());
+		
+		$controller->setColumnValue('montant', $infos['montant']);
+		$controller->setColumnValue('recu_fiscal_num', $infos['recu_fiscal_num']);
+		$controller->setColumnValue('recu_fiscal_date', $infos['date_edition']);
+		
+		$fileName = preg_replace('/\W/', '_', remove_accent($this->getName()));
+		$fileName = 'RecuFiscal_'.$year.'_'.$fileName.'_'.$contactRecordModel->get('contact_no') . '.pdf';
+		if($filePath){
+			$fileName = $filePath . '/' . $fileName;
+			$controller->Output($fileName, 'F');
+			return $fileName;
+		}
+		else{
+			$controller->Output($fileName, 'D');
+		}
+		return $fileName;
+	}
+	
+	function getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel){
+		
+		global $adb;
+		$query = "SELECT dateapplication, data
+			FROM vtiger_senotesrel
+			WHERE notesid = ?
+			AND crmid IN ( ?, ?)
+			AND IFNULL(data, '') LIKE '%Montant : %'
+			ORDER BY dateapplication DESC
+			LIMIT 1";
+		$params = array($documentRecordModel->getId(), $this->getId(), $contactRecordModel->getId());
+		$result = $adb->pquery($query, $params);
+		
+		if($adb->num_rows($result) === 0){
+			return $this->createRecuFiscalRelation($year, $documentRecordModel);
+		}
+		$row = $adb->fetchByAssoc($result, 0, false);
+		$dateApplication = preg_replace('/^(\d+)\-(\d+)\-(\d+)(\s.*)?$/', '$3/$2/$1', $row['dateapplication']);
+		$data = $row['data'];
+		
+		//Montant : 
+		$matches = array();
+		if(! preg_match_all('/Montant : (?<montant>\d+([,\.]\d+)?)(\D|$)/', $data, $matches)){
+			die('Erreur regex Montant');
+		}
+		$montant = $matches['montant'][0];
+		
+		//Reçu n° : n'existe pas sur les anciens
+		//je n'ai pas réussi à ne faire qu'un seul regex pour <montant> et <num>
+		$matches = array();
+		if(preg_match_all('/'.preg_quote('Reçu n° : ').'(?<num>\d+)/', $data, $matches))
+			$numRecu = $matches['num'][0];
+		else
+			$numRecu = '';
+		return array(
+			'montant' => $montant,
+			'recu_fiscal_num' => $numRecu,
+			'date_edition' => $dateApplication,
+		);
+	}
+	
+	/**
+	 * Calcul du reçu fiscal et création de la relation
+	 *
+	 * @return true if needed (> 3€) and exists
+	 */
+	function createRecuFiscalRelation($year, $documentRecordModel){
+		
+		global $adb;
+		$query = "
+		SELECT SUM(montant) AS montant
+		FROM (
+			SELECT SUM(vtiger_inventoryproductrel.quantity * vtiger_inventoryproductrel.listprice) AS montant
+				FROM vtiger_inventoryproductrel
+				JOIN vtiger_invoice
+					ON vtiger_invoice.invoiceid = vtiger_inventoryproductrel.id
+				JOIN vtiger_crmentity as vtiger_crmentity_invoice
+					ON vtiger_invoice.invoiceid = vtiger_crmentity_invoice.crmid
+				JOIN vtiger_service
+					ON vtiger_service.serviceid = vtiger_inventoryproductrel.productid
+				JOIN vtiger_crmentity as vtiger_crmentity_service
+					ON vtiger_service.serviceid = vtiger_crmentity_service.crmid
+				WHERE vtiger_crmentity_invoice.deleted = false
+				AND vtiger_crmentity_service.deleted = false
+				AND vtiger_service.servicecategory = 'Dons'
+				AND vtiger_invoice.accountid = ?
+				AND vtiger_invoice.invoicedate BETWEEN ? AND ?
+			UNION
+				SELECT SUM(vtiger_rsnprelvirement.montant)
+				FROM vtiger_rsnprelvirement
+				JOIN vtiger_crmentity as vtiger_crmentity_prelvir
+					ON vtiger_rsnprelvirement.rsnprelvirementid = vtiger_crmentity_prelvir.crmid
+				JOIN vtiger_rsnprelevements
+					ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_rsnprelevements.rsnprelevementsid
+				JOIN vtiger_crmentity as vtiger_crmentity_prelevements
+					ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_crmentity_prelevements.crmid
+				WHERE vtiger_crmentity_prelvir.deleted = false
+				AND vtiger_crmentity_prelevements.deleted = false
+				AND vtiger_rsnprelvirement.rsnprelvirstatus = 'Ok'
+				AND vtiger_rsnprelevements.prelvtype = 'Prélèvement périodique'
+				AND vtiger_rsnprelevements.accountid = ?
+				AND vtiger_rsnprelvirement.dateexport BETWEEN ? AND ?
+		) _source
+		";
+		$params = array(
+				$this->getId(),
+				"$year-01-01",
+				"$year-12-31 23:59:59",
+				$this->getId(),
+				"$year-01-01",
+				"$year-12-31 23:59:59",
+		);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError();
+			return false;
+		}
+		$montant = $adb->query_result($result, 0, 0);
+		if(!$montant){ // || $montant < 3 on génère quand même le reçu, on ne l'envoie pas 
+			return false;
+		}
+		$montant = round($montant, 2);
+		
+		//get num reçu fiscal
+		$query = "SELECT COUNT(*)
+			FROM vtiger_senotesrel
+			WHERE notesid = ?
+			AND IFNULL(data, '') LIKE '%Montant : %'";
+		$params = array(
+			$documentRecordModel->getId(),
+		);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError();
+			return false;
+		}
+		
+		$numRecu = $adb->query_result($result, 0, 0);
+		if(!$numRecu){
+			$numRecu = 1;
+		}
+		else
+			$numRecu++;
+													  
+		//create relation
+		
+		$data = "Montant : $montant €, Reçu n° : $numRecu";
+		
+		$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
+			VALUES(?, ?, CURRENT_DATE, ?)
+			ON DUPLICATE KEY UPDATE data = ?";
+		$params = array(
+			$documentRecordModel->getId(),
+			$this->getId(),
+			$data,
+			$data,
+		);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError();
+			return false;
+		}
+		return array(
+			'montant' => $montant,
+			'recu_fiscal_num' => $numRecu,
+			'date_edition' => date('d-m-Y'),
+		);
+	}
 }

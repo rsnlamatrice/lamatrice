@@ -34,17 +34,27 @@ Class Documents_Edit_View extends Vtiger_Edit_View {
 	 * Intercepte les valeurs par défaut
 	 */
 	public function process(Vtiger_Request $request) {
-	    
+		
+		//Code affaire
 		$fieldName = 'codeaffaire';
 		$value = $request->get($fieldName);
 	    if($value)
 			$request->set($fieldName, strtoupper($value));
 		
+		//Dossier par défaut
 		$fieldName = 'folderid';
-		$value = $request->get($fieldName);
-	    if($value && !is_numeric($value)){
-			$document = Documents_Folder_Model::getInstanceByName($value);
-			$request->set($fieldName, $document->getId());
+		$folder = $request->get($fieldName);
+	    $isRelationOperation = $request->get('relationOperation');
+		if(!$folder && $isRelationOperation){
+			if($request->get('sourceModule') === 'Contacts')
+				$folder = '(Gestion des adresses)';
+			elseif(substr($request->get('sourceModule'), 0, strlen('RSNMedia')) === 'RSNMedia')
+				$folder = '(Presse-Média)';
+		}
+	    if($folder && !is_numeric($folder)){
+			$document = Documents_Folder_Model::getInstanceByName($folder);
+			if($document)
+				$request->set($fieldName, $document->getId());
 	    }
 		
 		return parent::process($request);

@@ -22,7 +22,8 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 		$recordModel = $this->getRecord();
 		$moduleName = $recordModel->getmoduleName();
 
-		if($recordModel->isDuplicatable()
+		if($moduleName === 'Invoice'
+		&& $recordModel->isDuplicatable()
 		&& $recordModel->get('typedossier') !== 'Avoir'
 		&& $recordModel->get('typedossier') !== 'Remboursement') {
 			//ED151026

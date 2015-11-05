@@ -49,4 +49,11 @@ class Services_Module_Model extends Products_Module_Model {
 	public function getAlphabetSearchField(){
 		return 'servicecategory,servicename'; 
 	}
+	
+	/**
+	 * Function to get Alphabet Search Field for popup
+	 */
+	public function getAlphabetSearchFieldForPopup(){
+		return 'servicecategory';
+	}
 }

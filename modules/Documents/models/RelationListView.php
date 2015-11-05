@@ -131,7 +131,23 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 
 			$db = PearDatabase::getInstance();
 			//$db->setDebug(true);
-			$relatedRecordIdsList = array_keys($relatedRecordModelsList);
+			if($relationModel->getRelationModuleModel()->getName() === 'Contacts'){
+				
+				/* cf Documents.php get_contacts
+				 * getEntries a retourné des Contacts qui ne sont pas dans vtiger_senotesrel mais dont le Compte y est.
+				 * On construit donc un mapping $relatedRecordModelsList[accountid|contactid] = contactid
+				 */
+				
+				$relatedRecordIdsList = array();
+				foreach($relatedRecordModelsList as $relatedRecordModel){
+					$relatedRecordIdsList[$relatedRecordModel->getId()] = $relatedRecordModel->getId();
+					if($relatedRecordModel->get('accountid'))
+						$relatedRecordIdsList[$relatedRecordModel->get('accountid')] = $relatedRecordModel->getId();
+				}
+			}
+			else
+				$relatedRecordIdsList = array_combine(array_keys($relatedRecordModelsList), array_keys($relatedRecordModelsList));
+			
 			$query = "SELECT dateapplication,
 				data AS rel_data, $fieldName
 				FROM $tableName
@@ -140,13 +156,15 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 			
 			$fieldRels = self::get_related_fields();
 			
-			array_push($relatedRecordIdsList, $notesId);
-			$result = $db->pquery($query, $relatedRecordIdsList);
+			$params = array_keys($relatedRecordIdsList);
+			array_push($params, $notesId);
+			$result = $db->pquery($query, $params);
 			if(!$result)
 				$db->echoError();
 			$numOfrows = $db->num_rows($result);
 			for($i=0; $i<$numOfrows; $i++) {
-				$recordId = $db->query_result($result, $i, $fieldName);
+				$relatedId = $db->query_result($result, $i, $fieldName);
+				$recordId = $relatedRecordIdsList[$relatedId];
 				$relatedRecordModel = $relatedRecordModelsList[$recordId];
 				if($relatedRecordModel)
 				foreach($fieldRels as $fieldRel){

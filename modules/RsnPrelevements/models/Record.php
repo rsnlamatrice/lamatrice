@@ -21,12 +21,12 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function getPDF($filePath = false) {
 		
-		include_once('include/RsnPrelevementsPDFController.php');
+		include_once('modules/RsnPrelevements/pdf/PDFController.php');
 		
 		$recordId = $this->getId();
 		$moduleName = $this->getModuleName();
 
-		$controllerClassName = "Vtiger_". $moduleName ."PDFController";
+		$controllerClassName = "Vtiger_RsnPrelevements_PDFController";
 		
 		$controller = new $controllerClassName($moduleName);
 		$controller->loadRecord($recordId);
@@ -40,6 +40,7 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 			$fileName = remove_accent(vtranslate('SINGLE_'.$moduleName, $moduleName)).'_'.$recordId.'.pdf';
 			$controller->Output($fileName, 'D');
 		}
+		return $fileName;
 	}
 	
 	/**

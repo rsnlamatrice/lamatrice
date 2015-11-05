@@ -74,32 +74,34 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		return $overRideQuery;
 	}
 
-	/**
-	 * Funtion that returns fields that will be showed in the record selection popup
-	 * @return <Array of fields>
-	 */
-	public function getPopupFields() {
-		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		$popupFileds = parent::getPopupFields();
-
-		foreach ($popupFileds as $fieldLabel => $fieldName) {
-			if ($fieldName === 'folderid' || $fieldName === 'modifiedtime') {
-				unset($popupFileds[$fieldLabel]);
-			}
-		}
-
-		$reqPopUpFields = array('File Status' => 'filestatus',
-								'File Size' => 'filesize',
-								'File Location Type' => 'filelocationtype');
-
-		foreach ($reqPopUpFields as $fieldLabel => $fieldName) {
-            $fieldModel = Vtiger_Field_Model::getInstance($fieldName,$this);
-			if ($fieldModel->getPermissions('readwrite')) {
-				$popupFileds[$fieldLabel] = $fieldName;
-			}
-		}
-		return $popupFileds;
-	}
+	
+	//ED151105 comments
+//	/**
+//	 * Funtion that returns fields that will be showed in the record selection popup
+//	 * @return <Array of fields>
+//	 */
+//	public function getPopupFields() {
+//		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+//		$popupFileds = parent::getPopupFields();
+//
+//		foreach ($popupFileds as $fieldLabel => $fieldName) {
+//			if ($fieldName === 'folderid' || $fieldName === 'modifiedtime') {
+//				unset($popupFileds[$fieldLabel]);
+//			}
+//		}
+//
+//		$reqPopUpFields = array('File Status' => 'filestatus',
+//								'File Size' => 'filesize',
+//								'File Location Type' => 'filelocationtype');
+//
+//		foreach ($reqPopUpFields as $fieldLabel => $fieldName) {
+//            $fieldModel = Vtiger_Field_Model::getInstance($fieldName,$this);
+//			if ($fieldModel->getPermissions('readwrite')) {
+//				$popupFileds[$fieldLabel] = $fieldName;
+//			}
+//		}
+//		return $popupFileds;
+//	}
 
 	/**
 	 * Function to get the url for add folder from list view of the module

@@ -113,6 +113,7 @@ class Contacts_AssignRelatedEntities_Action extends Vtiger_Mass_Action {
 		return $adb->pquery($query, $params);
 	}
 		
+	
 	/** ED150713
 	* Affectation de document à une liste de contacts
 	*/	
@@ -136,7 +137,10 @@ class Contacts_AssignRelatedEntities_Action extends Vtiger_Mass_Action {
 		for($i=0; $i < count($related_ids); $i++){
 			$query .= ' WHEN ? THEN ?';
 			$params[] = $related_ids[$i];
-			$params[] = DateTimeField::convertToDBFormat($dateapplication[$i]);
+			if(!$dateapplication)
+				$params[] = date('Y-m-d');
+			else
+				$params[] = DateTimeField::convertToDBFormat($dateapplication[$i]);
 		}
 		$query .= ' END';
 		
@@ -146,7 +150,10 @@ class Contacts_AssignRelatedEntities_Action extends Vtiger_Mass_Action {
 		for($i=0; $i < count($related_ids); $i++){
 			$query .= ' WHEN ? THEN ?';
 			$params[] = $related_ids[$i];
-			$params[] = $reldata[$i];
+			if(!$reldata)
+				$params[] = null;
+			else
+				$params[] = $reldata[$i];
 		}
 		$query .= ' END';
 		
@@ -162,7 +169,10 @@ class Contacts_AssignRelatedEntities_Action extends Vtiger_Mass_Action {
 		for($i=0; $i < count($related_ids); $i++){
 			$query .= ' WHEN ? THEN ?';
 			$params[] = $related_ids[$i];
-			$params[] = $reldata[$i];
+			if(!$reldata)
+				$params[] = null;
+			else
+				$params[] = $reldata[$i];
 		}
 		$query .= ' END';
 		

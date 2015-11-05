@@ -56,5 +56,6 @@ $languageStrings = array(
 	
 	'Recurring Invoice Information' => 'Génération périodique de facture',
         
-        'socomment' => 'Commentaire',
+	'socomment' => 'Commentaire',
+	'LBL_RECEIVED' => 'Reçu',
 );

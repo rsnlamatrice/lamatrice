@@ -90,15 +90,45 @@ jQuery.Class("Vtiger_Popup_Js",{
 	 * Function to get Search key
 	 */
 	getSearchKey : function(){
-		return jQuery('#searchableColumnsList').val();
+		var keys = this.getAlphabetSearchKeys()
+		, key = jQuery('#searchableColumnsList').val()
+		, value = jQuery('#searchvalue').val();
+		if(value)
+			keys.push(key);
+		return keys;
 	},
-
 	/**
 	 * Function to get Search value
 	 */
 	getSearchValue : function(){
-		return jQuery('#searchvalue').val();
+		var values = this.getAlphabetSearchValues()
+		, value = jQuery('#searchvalue').val();
+		if(value)
+			values.push(value);
+		return values;
 	},
+	
+	/** ED151105
+	 * Function to get Alphabet Search keys
+	 */
+	getAlphabetSearchKeys : function(){
+		var keys = [];
+		$('.alphabetSorting[data-searchkey][data-searchvalue]').each(function(){
+			keys.push(this.getAttribute('data-searchkey'));
+		});
+		return keys;
+	},
+	/** ED151105
+	 * Function to get Alphabet Search values
+	 */
+	getAlphabetSearchValues : function(){
+		var values = [];
+		$('.alphabetSorting[data-searchkey][data-searchvalue]').each(function(){
+			values.push(this.getAttribute('data-searchvalue'));
+		});
+		return values;
+	},
+
 
 	/**
 	 * Function to get Order by
@@ -794,6 +824,27 @@ jQuery.Class("Vtiger_Popup_Js",{
 
 	},
 
+	//ED151105
+	registerEventForAlphabetSearch : function() {
+		var thisInstance = this;
+		var listViewPageDiv = $('#popupPageContainer');
+		listViewPageDiv.on('click','.alphabetSearch',function(e) {
+			var $target = jQuery(e.currentTarget);
+			var $alphabet = $target.find('a');
+			var alphabet = $alphabet.attr('data-searchvalue') !== undefined ? $alphabet.attr('data-searchvalue') : $target.find('a').text();
+			/* ED150903 defined search key in one ancestor */
+			var $container = $target.parents('.alphabetSorting[data-searchkey]');
+			$container.attr('data-searchvalue', alphabet);
+			
+			jQuery('#totalPageCount').text("");
+			thisInstance.searchHandler().then(function(data){
+				jQuery('#pageNumber').val(1);
+				jQuery('#pageToJump').val(1);
+				thisInstance.updatePagination();
+			});
+		});
+	},
+
 	registerEvents: function(){
 		var pageNumber = jQuery('#pageNumber').val();
 		if(pageNumber == 1){
@@ -803,6 +854,7 @@ jQuery.Class("Vtiger_Popup_Js",{
 		this.registerSelectButton();
 		this.registerEventForCheckboxChange();
 		this.registerEventForSearch();
+		this.registerEventForAlphabetSearch();//ED151105
 		this.registerEventForSort();
 		this.registerEventForListViewEntries();
 		//this.triggerDisplayTypeEvent();

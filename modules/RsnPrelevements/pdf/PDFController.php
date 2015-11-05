@@ -1,13 +1,13 @@
 <?php
 /*********************************************************************************
  ** ED151104
- *
+ * Lettre de remerciement pour nouveau prélèvement
  ********************************************************************************/
 
-include_once 'include/LetterToAccountPDFController.php';
+include_once 'modules/Accounts/pdf/LetterToAccount/PDFController.php';
 include_once 'modules/RSNBanques/RSNBanques.php';
 
-class Vtiger_RsnPrelevementsPDFController extends Vtiger_LetterToAccountPDFController {
+class Vtiger_RsnPrelevements_PDFController extends Vtiger_LetterToAccount_PDFController {
 
 	function getContentText(){
 		//TODO stocker quelque part
@@ -35,9 +35,8 @@ class Vtiger_RsnPrelevementsPDFController extends Vtiger_LetterToAccountPDFContr
 		$banque = RSNBanques::getEntityNameFromCode($this->focusColumnValue('codebanque'));
 		$IBAN = $this->focusColumnValue('sepaibanpays').$this->focusColumnValue('sepaibancle').$this->focusColumnValue('sepaibanbban');
 		
-		include 'config.RSN.inc.php';
-		$dest_ICS = $RSN_PRELVIRNTS_NUMEROICS;
-		$dest_nom = $RSN_PRELVIRNTS_EMETTEUR;
+		$dest_ICS = $this->organizationDetails['sepa::ics'];
+		$dest_nom = $this->organizationDetails['sepa::emetteur'];
 		
 		$periodicite = preg_replace('/^(\D+)(\s\d+)?$/', '$1', $this->focusColumnValue('periodicite'));
 		$mois = preg_replace('/^(\D+)(\s\d+)?$/', '$2', $this->focusColumnValue('periodicite'));
@@ -94,6 +93,9 @@ class Vtiger_RsnPrelevementsPDFController extends Vtiger_LetterToAccountPDFContr
 	}
 	function getLetterSubject(){
 		return "Remerciement";
+	}
+	function buildPagerModel() {
+		return false;
 	}
 }
 ?>
