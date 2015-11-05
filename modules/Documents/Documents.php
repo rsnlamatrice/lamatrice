@@ -419,7 +419,7 @@ class Documents extends CRMEntity {
 	 */
 	function setRelationTables($secmodule){
 		$rel_tables = array (
-			/* ED141013 pas sur que ce soit utilisŽ */
+			/* ED141013 pas sur que ce soit utilisÅ½ */
 			"Contacts" => array("vtiger_senotesrel"=>array("crmid","notesid"),"vtiger_contactdetails"=>"contactid"),
 			"Campaigns" => array("vtiger_senotesrel"=>array("crmid","notesid"),"vtiger_campaign"=>"campaign_no"),
 		);
@@ -808,8 +808,8 @@ class Documents extends CRMEntity {
 	 }
 	
 	/* ED150630
-	 * Compteur de l'entité
-	 * Différencie les compteurs suivant le dossier
+	 * Compteur de l'entitÃ©
+	 * DiffÃ©rencie les compteurs suivant le dossier
 	 */
 	function setModuleSeqNumber($mode, $module, $req_str = '', $req_no = '') {
 		if(strpos($module, '_') === FALSE){

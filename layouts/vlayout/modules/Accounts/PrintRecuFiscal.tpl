@@ -31,27 +31,21 @@
 			<div class="modal-body">
 				{foreach key=RELATED_KEY item=RELATED_RECORD from=$RELATED_ENTRIES name=relatedList}
 					<div class="row-fluid">
-						<label class="span3">
+						<label class="span6">
 							<input type="radio" name="related_ids[]" value="{$RELATED_RECORD->getId()}" {if $smarty.foreach.relatedList.index === 1}checked="checked"{/if}/>
 								{$RELATED_RECORD->getName()}
 						</label>
 					</div>
 				{/foreach}
-				<br/>
-				<hr/>
-				<div class="row-fluid">
-					<label class="span2">{vtranslate('Comment')} :</label>
-					<span class="span6"><textarea name="comment" class="input-xxlarge"/></span>
-				</div>
 			</div>
 		</div>
 		<div class="modal-footer">
 			<div class=" pull-right cancelLinkContainer">
-				<a class="cancelLink" type="reset" data-dismiss="modal">{vtranslate('LBL_CANCEL', $MODULE)}</a>
+				<a class="cancelLink" type="reset" data-dismiss="modal">{vtranslate('LBL_CLOSE', $MODULE)}</a>
 			</div>
-			<button class="btn btn-success" type="submit" name="saveButton"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
+			<button class="btn btn-success" type="submit" name="saveButton"><strong>{vtranslate('LBL_DOWNLOAD', $MODULE)}</strong></button>
 			{if $IS_EMAIL_SENDABLE}
-				<button class="btn btn-success" type="submit" name="sendEmail" value="1"><strong>{vtranslate('LBL_SEND_BY_EMAIL', $MODULE)}</strong></button>
+				<button class="btn btn-success" {* TODO *}disabled="disabled"{* TODO *} type="submit" name="sendEmail" value="1"><strong>{vtranslate('LBL_SEND_BY_EMAIL', $MODULE)}</strong></button>
 			{/if}
 		</div>
 	</form>
