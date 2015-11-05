@@ -116,6 +116,8 @@ $languageStrings = array(
 		
 	'LBL_DUPLICATES_RELATIONS_DESCRIPTION' => 'Vous pouvez créer une relation entre les enregistrements en définissant un type de relation. En "compte commun" signifie que les factures, les abonnements, les envois de courrier, etc, seront regroupés.',
 	'LBL_DUPLICATES_RELATIONS_IN' => 'Relation entre les enregistrements dans ',
+	'LBL_PRINT_RECU_FISCAL'	=> 'Impression du reçu fiscal',
+	'LBL_SEND_BY_EMAIL'              => 'Envoyer par email', 
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 

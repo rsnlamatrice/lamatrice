@@ -38,14 +38,14 @@
 						{if IS_SELECTED_ITEM}
 								border: 4px inset {$PICKLIST_ITEM['uicolor']};
 						{else}
-										border: 3px solid {$PICKLIST_ITEM['uicolor']};
+								border: 3px solid {$PICKLIST_ITEM['uicolor']};
 						{/if}
 					{else}
 						{if $IS_SELECTED_ITEM}
 								border-style: inset;
 						{/if}
 					{/if}">
-					<a href="#" data-searchvalue="{$PICKLIST_KEY}">
+					<a href="#" data-searchvalue="{if $PICKLIST_KEY neq '%'}{$PICKLIST_KEY}{/if}">
 						<label class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
 						{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
 						{$PICKLIST_LABEL}</label>

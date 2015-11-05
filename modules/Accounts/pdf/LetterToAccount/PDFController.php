@@ -5,15 +5,15 @@
  ********************************************************************************/
 
 include_once 'vtlib/Vtiger/PDF/models/Model.php';
-include_once 'vtlib/Vtiger/PDF/LetterToAccount/HeaderViewer.php';
-include_once 'vtlib/Vtiger/PDF/LetterToAccount/FooterViewer.php';
-include_once 'vtlib/Vtiger/PDF/LetterToAccount/ContentViewer.php';
+include_once 'modules/Accounts/pdf/LetterToAccount/HeaderViewer.php';
+include_once 'modules/Accounts/pdf/LetterToAccount/FooterViewer.php';
+include_once 'modules/Accounts/pdf/LetterToAccount/ContentViewer.php';
 include_once 'vtlib/Vtiger/PDF/viewers/PagerViewer.php';
 include_once 'vtlib/Vtiger/PDF/PDFGenerator.php';
 include_once 'data/CRMEntity.php';
 include_once 'modules/Settings/Vtiger/models/CompanyDetails.php';
 
-class Vtiger_LetterToAccountPDFController {
+class Vtiger_LetterToAccount_PDFController {
 
 	protected $module;
 	protected $focus = null;
@@ -26,13 +26,15 @@ class Vtiger_LetterToAccountPDFController {
 		global $current_user;
 		$this->focus = $focus = CRMEntity::getInstance($this->moduleName);
 		$focus->retrieve_entity_info($id,$this->moduleName);
-		$focus->apply_field_security();
+		$focus->apply_field_security($this->moduleName);
 		$focus->id = $id;
 		
-		$accountId = $focus->column_fields['accountid'];
-		if(!$accountId)
-			$accountId = $focus->column_fields['account_id'];
-		if($this->moduleName !== 'Accounts'){
+		if($this->moduleName === 'Accounts'){
+			$focus->column_fields['accountid'] = $accountId = $id;
+		}else{
+			$accountId = $focus->column_fields['accountid'];
+			if(!$accountId)
+				$accountId = $focus->column_fields['account_id'];
 			if($accountId){
 				
 				$accountFocus = CRMEntity::getInstance('Accounts');
@@ -58,7 +60,6 @@ class Vtiger_LetterToAccountPDFController {
 				
 				$focus->column_fields = array_merge($focus->column_fields, $contactFocus->column_fields);
 			}
-			
 		}
 	}
 
@@ -161,8 +162,10 @@ class Vtiger_LetterToAccountPDFController {
 	function purifyText($text){
 		$text = decode_html($text);
 		$text = vtlib_purify($text);
-		$text = str_replace("\t", '    ', $text);
+		$text = str_replace("\t", '      ', $text);
 		$text = str_replace("\r\n", "\n", $text);
+		//éviter le saut de ligne à cause d'un espace avant % ou €. TODO le char(160) n'est pas conservé comme tel dans tcpdf.php
+		//$text = preg_replace('/ ([%€])/', chr(160).'$1', $text);
 		return $text;
 	}
 
@@ -193,7 +196,7 @@ class Vtiger_LetterToAccountPDFController {
 	}
 
 	function buildHeaderModelColumnLeft() {
-		global $adb;
+		//global $adb;
 
 		// Company information
 		$organization = Settings_Vtiger_CompanyDetails_Model::getInstance();
@@ -303,15 +306,15 @@ class Vtiger_LetterToAccountPDFController {
 	
 	function buildHeaderBillingAddress() {
 		$contactName = $this->resolveReferenceLabel($this->focusColumnValue('accountid'), 'Accounts');
-		$street2 = $this->focusColumnValues(array('bill_street2'));
-		$addressFormat = $this->focusColumnValues(array('bill_addressformat'));
-		$poBox	= $this->focusColumnValues(array('bill_pobox'));
-		$street = $this->focusColumnValues(array('bill_street'));
-		$street3 = $this->focusColumnValues(array('bill_street3'));
-		$zipCode =  $this->focusColumnValues(array('bill_code')); 
-		$city	= $this->focusColumnValues(array('bill_city'));
-		$state	= $this->focusColumnValues(array('bill_state'));
-		$country = $this->focusColumnValues(array('bill_country'));   
+		$street2 = $this->focusColumnValue('bill_street2');
+		$addressFormat = $this->focusColumnValue('bill_addressformat');
+		$poBox	= $this->focusColumnValue('bill_pobox');
+		$street = $this->focusColumnValue('bill_street');
+		$street3 = $this->focusColumnValue('bill_street3');
+		$zipCode =  $this->focusColumnValue('bill_code'); 
+		$city	= $this->focusColumnValue('bill_city');
+		$state	= $this->focusColumnValue('bill_state');
+		$country = $this->focusColumnValue('bill_country');   
 		
 		return $this->buildAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress);
 	}
@@ -377,6 +380,12 @@ class Vtiger_LetterToAccountPDFController {
 			return decode_html($focus->column_fields[$key]);
 		}
 		return $defvalue;
+	}
+
+	function setColumnValue($key, $value) {
+		$focus = $this->focus;
+		$focus->column_fields[$key] = $value;
+		return $this;
 	}
 
 	function resolveReferenceLabel($id, $module=false) {

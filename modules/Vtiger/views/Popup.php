@@ -152,6 +152,10 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 			$this->listViewHeaders = $listViewModel->getListViewHeaders();
 			//var_dump($this->listViewHeaders);
 		}
+		
+		//ED151105
+		$alphabetFields = $listViewModel->getAlphabetFieldsForPopup($this->listViewHeaders);
+		
 		//var_dump(get_class($listViewModel));
 		if(!$this->listViewEntries){
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
@@ -198,6 +202,9 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		$viewer->assign('LISTVIEW_ENTIRES_COUNT',$noOfEntries);
 		$viewer->assign('LISTVIEW_HEADERS', $this->listViewHeaders);
 		$viewer->assign('LISTVIEW_ENTRIES', $this->listViewEntries);
+		
+		/*ED151105*/
+		$viewer->assign('ALPHABET_FIELDS', $alphabetFields);
 		
 		if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			if(!$this->listViewCount){

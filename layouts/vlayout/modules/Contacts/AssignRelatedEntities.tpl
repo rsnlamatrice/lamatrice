@@ -14,7 +14,7 @@
 	<div class="modal-header contentsBackground">
 		<button type="button" class="close " data-dismiss="modal" aria-hidden="true">&times;</button>
 		<h3 id="massEditHeader">{if count($RELATED_ENTRIES) > 1}{vtranslate('LBL_ASSIGN_'|cat:$RELATED_MODULE|cat:'_MULTI', $MODULE)}{else}{vtranslate('LBL_ASSIGN_'|cat:$RELATED_MODULE, $MODULE)}{/if}
-			&nbsp;{vtranslate('LBL_TO', $MODULE)} {$ASSIGNABLE_COUNTER} {vtranslate($MODULE, $MODULE)}</h3>
+			&nbsp;{vtranslate('LBL_TO', $MODULE)} {$ASSIGNABLE_COUNTER} {if $ASSIGNABLE_COUNTER > 1}{vtranslate($MODULE, $MODULE)}{else}{vtranslate('SINGLE_'|cat:$MODULE, $MODULE)}{/if}</h3>
 	</div>
 	<form class="form-horizontal" id="massEdit" name="MassEdit" method="post" action="index.php">
 		<input type="hidden" name="module" value="{$MODULE}" />

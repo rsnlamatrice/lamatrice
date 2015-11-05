@@ -1542,6 +1542,13 @@ class Vtiger_Module_Model extends Vtiger_Module {
 		return $focus->def_basicsearch_col;
 	}
 
+	/** ED151105
+	 * Function returns the default column for Alphabetic search for popup
+	 * @return <String> columnname
+	 */
+	public function getAlphabetSearchFieldForPopup(){
+	}
+
 	/**
 	 * Function which will give complusory mandatory fields
 	 * @return type

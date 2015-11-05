@@ -167,6 +167,13 @@ class Products_Module_Model extends Vtiger_Module_Model {
 		return 'productcategory,productname'; //TODO invoicestatus ne fonctionne pas
 	}
 	
+	/**
+	 * Function to get Alphabet Search Field for popup
+	 */
+	public function getAlphabetSearchFieldForPopup(){
+		return 'productcategory';
+	}
+	
 	/** ED150619
 	 * Function to get relation query for particular module with function name
 	 * Similar to getRelationQuery but overridable.
