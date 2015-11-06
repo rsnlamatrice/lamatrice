@@ -114,12 +114,13 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 		$relationModel = $this->getRelationModel();
 		$parentRecordModel = $this->getParentRecordModel();
 		$modulesInfo = $relationModel->getModulesInfoForDetailView();
-		if($modulesInfo[$parentRecordModel->getName()] && $modulesInfo[$parentRecordModel->getName()]['tableName'] == 'vtiger_senotesrel'){
-			$orderBy = $this->get('orderby');
-			if(!$orderBy) {
-				$this->set('orderby', 'dateapplication');
-				$this->set('sortorder', 'DESC');
-			}
+		$relatedModuleName = $relationModel->getRelationModuleModel()->getName();
+		$orderBy = $this->get('orderby');
+		if(!$orderBy
+		&& ($modulesInfo[$relatedModuleName] && $modulesInfo[$relatedModuleName]['tableName'] == 'vtiger_senotesrel'
+		 || $modulesInfo[$parentRecordModel->getName()] && $modulesInfo[$parentRecordModel->getName()]['tableName'] == 'vtiger_senotesrel')){
+			$this->set('orderby', 'dateapplication');
+			$this->set('sortorder', 'DESC');
 		}
 		$relatedRecordModelsList = parent::getEntries($pagingModel);
 		if ($relatedRecordModelsList) {
@@ -131,7 +132,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 
 			$db = PearDatabase::getInstance();
 			//$db->setDebug(true);
-			if($relationModel->getRelationModuleModel()->getName() === 'Contacts'){
+			if($relatedModuleName === 'Contacts'){
 				
 				/* cf Documents.php get_contacts
 				 * getEntries a retourné des Contacts qui ne sont pas dans vtiger_senotesrel mais dont le Compte y est.
@@ -141,8 +142,9 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$relatedRecordIdsList = array();
 				foreach($relatedRecordModelsList as $relatedRecordModel){
 					$relatedRecordIdsList[$relatedRecordModel->getId()] = $relatedRecordModel->getId();
-					if($relatedRecordModel->get('accountid'))
-						$relatedRecordIdsList[$relatedRecordModel->get('accountid')] = $relatedRecordModel->getId();
+					if($relatedRecordModel->get('account_id')){
+						$relatedRecordIdsList[$relatedRecordModel->get('account_id')] = $relatedRecordModel->getId();
+					}
 				}
 			}
 			else
@@ -167,29 +169,30 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$recordId = $relatedRecordIdsList[$relatedId];
 				$relatedRecordModel = $relatedRecordModelsList[$recordId];
 				if($relatedRecordModel)
-				foreach($fieldRels as $fieldRel){
-					
-					$fieldRelType = $fieldRel->get('typeofdata');
-					$fieldRel = $fieldRel->get('name');
-					$value = $db->query_result($result, $i, strtolower( $fieldRel ));
-					switch($fieldRelType){
-					  case "D":
-					  case "DATETIME":
-						  if($value)
-							  $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
-						break;
-					  default:
-						$value = preg_replace('/\\r\\n?/', '<br/>', $value);
-						break;
+					foreach($fieldRels as $fieldRel){
+						
+						$fieldRelType = $fieldRel->get('typeofdata');
+						$fieldRel = $fieldRel->get('name');
+						$value = $db->query_result($result, $i, strtolower( $fieldRel ));
+						switch($fieldRelType){
+						  case "D":
+						  case "DATETIME":
+							  if($value)
+								  $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
+							break;
+						  default:
+							$value = preg_replace('/\\r\\n?/', '<br/>', $value);
+							break;
+						}
+						$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
+						if(!is_array($values))//1er tour
+							$values = array($value);
+						else
+							$values[] = $value;
+						$relatedRecordModel->set($fieldRel, $values);
+				
 					}
-					$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
-					if(!is_array($values))//1er tour
-						$values = array($value);
-					else
-						$values[] = $value;
-					$relatedRecordModel->set($fieldRel, $values);
-			
-				}		
+				
 				$relatedRecordModelsList[$recordId] = $relatedRecordModel;
 			}
 		}

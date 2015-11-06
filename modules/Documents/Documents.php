@@ -596,10 +596,21 @@ class Documents extends CRMEntity {
 				vtiger_account.accountname,
 				case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
 				FROM vtiger_contactdetails
+				
+				/* liste les contactid et les accountid, sinon la jointure est très longue */
+				INNER JOIN ( 
+				    SELECT vtiger_contactdetails.contactid, vtiger_contactdetails.contactid AS crmid
+				    FROM vtiger_contactdetails
+				    UNION
+				    SELECT vtiger_contactdetails.contactid, vtiger_contactdetails.accountid
+				    FROM vtiger_contactdetails
+				    WHERE vtiger_contactdetails.accountid IS NOT NULL
+				    ) contacts_relcrmid
+				    ON contacts_relcrmid.contactid = vtiger_contactdetails.contactid
+				INNER JOIN vtiger_senotesrel 
+				ON vtiger_senotesrel.crmid = contacts_relcrmid.crmid
+				
 				LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
-				INNER JOIN vtiger_senotesrel
-					ON vtiger_senotesrel.crmid = vtiger_contactdetails.contactid
-					OR (vtiger_account.accountid IS NOT NULL AND vtiger_senotesrel.crmid = vtiger_account.accountid)
 				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
 				INNER JOIN vtiger_contactaddress ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
 				INNER JOIN vtiger_contactsubdetails ON vtiger_contactdetails.contactid = vtiger_contactsubdetails.contactsubscriptionid

@@ -221,7 +221,6 @@ class Vtiger_PDF_Generator {
 		$cmd = "gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=$outputName ";
 		//Add each pdf file to the end of the command
 		$cmd .= implode(' ', $fileNames);
-		
 		try {
 			$result = shell_exec($cmd);
 			if(!file_exists($outputName)){
