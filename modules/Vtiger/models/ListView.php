@@ -642,4 +642,21 @@ var_dump($listResult);*/
 		}
 		return $headerFieldModels;
 	}
+	
+	/** ED151105
+	 * Function to get the alphabet fields for popup
+	 * @return <Array> - List of Vtiger_Field_Model instances
+	 */
+	public function getAlphabetFieldsForPopup($listViewHeaders) {
+		$headerFieldModels = array();
+		$moduleAlphabetFields = explode(',', $this->getModule()->getAlphabetSearchFieldForPopup());
+		foreach($moduleAlphabetFields as $fieldName) {
+			if(!array_key_exists($fieldName, $listViewHeaders))
+				continue;
+			$fieldModel = $listViewHeaders[$fieldName];
+			if($fieldModel)
+				$headerFieldModels[$fieldName] = $fieldModel;
+		}
+		return $headerFieldModels;
+	}
 }

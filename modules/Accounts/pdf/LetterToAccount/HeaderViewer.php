@@ -7,7 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
-include_once dirname(__FILE__) . '/../viewers/HeaderViewer.php';
+include_once 'vtlib/Vtiger/PDF/viewers/HeaderViewer.php';
 
 class Vtiger_PDF_LetterToAccountHeaderViewer extends Vtiger_PDF_HeaderViewer {
 
@@ -157,8 +157,8 @@ class Vtiger_PDF_LetterToAccountHeaderViewer extends Vtiger_PDF_HeaderViewer {
 			$pdf->SetFont(PDF_FONT_NAME, '');
 				
 			$location = array(
-					'x' => 210 * (100 / 210),
-					'y' => 297 * (50 / 297),
+					'x' => 210 * (105 / 210),
+					'y' => 297 * (40 / 297),
 					'w' => 210 * (80 / 210),
 					'h' => 297 * (35 / 297),
 				);

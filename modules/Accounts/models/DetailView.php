@@ -81,13 +81,24 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 		
 		$moduleModel = $this->getModule();
 		if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
+			//ED151105 impression du reçu fiscal
 			$massActionLink = array(
-				'linktype' => 'LISTVIEWMASSACTION',
-				'linklabel' => 'LBL_TRANSFER_OWNERSHIP',
-				'linkurl' => 'javascript:Vtiger_Detail_Js.triggerTransferOwnership("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=transferOwnership")',
+				'linktype' => 'DETAILVIEW',
+				'linklabel' => 'LBL_PRINT_RECU_FISCAL',
+				'linkurl' => 'javascript:Vtiger_Detail_Js.triggerDetailViewAction("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=printRecuFiscal")',
 				'linkicon' => ''
 			);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+			
+			if($currentUserModel->isAdminUser()){
+				$massActionLink = array(
+					'linktype' => 'LISTVIEWMASSACTION',
+					'linklabel' => 'LBL_TRANSFER_OWNERSHIP',
+					'linkurl' => 'javascript:Vtiger_Detail_Js.triggerTransferOwnership("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=transferOwnership")',
+					'linkicon' => ''
+				);
+				$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+			}
 		}
 
 		foreach($CalendarActionLinks as $basicLink) {

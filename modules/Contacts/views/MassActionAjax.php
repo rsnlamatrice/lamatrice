@@ -3,7 +3,7 @@
  * ED150628
  *************************************************************************************/
 
-class Contacts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
+class Contacts_MassActionAjax_View extends Accounts_MassActionAjax_View {
 	function __construct() {
 		parent::__construct();
 		$this->exposeMethod('assignRelatedEntities');

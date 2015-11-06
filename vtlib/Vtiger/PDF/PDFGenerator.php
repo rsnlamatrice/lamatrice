@@ -50,6 +50,9 @@ class Vtiger_PDF_Generator {
 	function getContentFrame() {
 		return $this->contentFrame;
 	}
+	function setContentFrame($value) {
+		$this->contentFrame = $value;
+	}
 
 	function getPDF() {
 		return $this->pdf;
@@ -196,6 +199,17 @@ class Vtiger_PDF_Generator {
 	 * @return output file name
 	 */
 	public static function mergeFiles($fileNames, $outputName = false){
+		if(!$fileNames)
+			return $outputName;
+		if(count($fileNames) === 1){
+			foreach($files as $fileName)//assoc array
+				break;
+			if(!$outputName)
+					return $fileName;
+			copy($fileName, $outputName);
+			return $outputName;
+		}
+		
 		if(!$outputName)
 			$outputName = tempnam(sys_get_temp_dir(), 'mrg_'.count($fileNames).'_pdf') . '.pdf';
 		

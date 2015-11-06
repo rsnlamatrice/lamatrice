@@ -103,6 +103,10 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		if(!$this->listViewHeaders) {
 			$this->listViewHeaders = $listViewModel->getListViewHeaders();
 		}
+		
+		//ED151105
+		$alphabetFields = $listViewModel->getAlphabetFieldsForPopup($this->listViewHeaders);
+		
 		if(!$this->listViewEntries) {
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
 		}
@@ -154,6 +158,9 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		$viewer->assign('LISTVIEW_ENTIRES_COUNT',$noOfEntries);
 		$viewer->assign('LISTVIEW_HEADERS', $this->listViewHeaders);
 		$viewer->assign('LISTVIEW_ENTRIES', $this->listViewEntries);
+		
+		/*ED151105*/
+		$viewer->assign('ALPHABET_FIELDS', $alphabetFields);
 		
 		if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			if(!$this->listViewCount){

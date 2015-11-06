@@ -148,10 +148,10 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		    $orderByFieldName = $columnFieldMapping[$orderBy];
 		    $orderByFieldModel = $moduleModel->getField($orderByFieldName);
 		    if($orderByFieldModel && $orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::REFERENCE_TYPE){
-			//IF it is reference add it in the where fields so that from clause will be having join of the table
-			$queryGenerator = $this->get('query_generator');
-			$queryGenerator->addWhereField($orderByFieldName);
-			//$queryGenerator->whereFields[] = $orderByFieldName;
+				//IF it is reference add it in the where fields so that from clause will be having join of the table
+				$queryGenerator = $this->get('query_generator');
+				$queryGenerator->addWhereField($orderByFieldName);
+				//$queryGenerator->whereFields[] = $orderByFieldName;
 		    }
 		}
 
@@ -175,19 +175,19 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 			    $referenceModules = $orderByFieldModel->getReferenceList();
 			    $referenceNameFieldOrderBy = array();
 			    foreach($referenceModules as $referenceModuleName) {
-				$referenceModuleModel = Vtiger_Module_Model::getInstance($referenceModuleName);
-				$referenceNameFields = $referenceModuleModel->getNameFields();
-	    
-				$columnList = array();
-				foreach($referenceNameFields as $nameField) {
-				    $fieldModel = $referenceModuleModel->getField($nameField);
-				    $columnList[] = $fieldModel->get('table').$orderByFieldModel->getName().'.'.$fieldModel->get('column');
-				}
-				if(count($columnList) > 1) {
-				    $referenceNameFieldOrderBy[] = getSqlForNameInDisplayFormat(array('first_name'=>$columnList[0],'last_name'=>$columnList[1]),'Users').' '.$sortOrder;
-				} else {
-				    $referenceNameFieldOrderBy[] = implode('', $columnList).' '.$sortOrder ;
-				}
+					$referenceModuleModel = Vtiger_Module_Model::getInstance($referenceModuleName);
+					$referenceNameFields = $referenceModuleModel->getNameFields();
+			
+					$columnList = array();
+					foreach($referenceNameFields as $nameField) {
+						$fieldModel = $referenceModuleModel->getField($nameField);
+						$columnList[] = $fieldModel->get('table').$orderByFieldModel->getName().'.'.$fieldModel->get('column');
+					}
+					if(count($columnList) > 1) {
+						$referenceNameFieldOrderBy[] = getSqlForNameInDisplayFormat(array('first_name'=>$columnList[0],'last_name'=>$columnList[1]),'Users').' '.$sortOrder;
+					} else {
+						$referenceNameFieldOrderBy[] = implode('', $columnList).' '.$sortOrder ;
+					}
 			    }
 			    $listQuery .= ' ORDER BY '. implode(',',$referenceNameFieldOrderBy);
 			}else{

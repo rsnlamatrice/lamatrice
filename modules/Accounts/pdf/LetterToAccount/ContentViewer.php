@@ -8,7 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 
-include_once dirname(__FILE__) . '/../viewers/ContentViewer.php';
+include_once 'vtlib/Vtiger/PDF/viewers/ContentViewer.php';
 
 class Vtiger_PDF_LetterToAccountContentViewer extends Vtiger_PDF_ContentViewer {
 
@@ -22,7 +22,7 @@ class Vtiger_PDF_LetterToAccountContentViewer extends Vtiger_PDF_ContentViewer {
 
 		$pdf = $parent->getPDF();
 		$contentFrame = $parent->getContentFrame();
-		
+			
 		if(!$parent->onLastPage()) {
 			$this->displayWatermark($parent);
 		}
@@ -47,17 +47,19 @@ class Vtiger_PDF_LetterToAccountContentViewer extends Vtiger_PDF_ContentViewer {
 		$parent->createPage();
 		$contentFrame = $parent->getContentFrame();
 
-		$contentLineX = $contentFrame->x; $contentLineY = $contentFrame->y;
+		$contentLineX = $contentFrame->x;
+		$contentLineY = $contentFrame->y;
 		$overflowOffsetH = 8; // This is offset used to detect overflow to next page
 		for ($index = 0; $index < $totalModels; ++$index) {
 			$model = $models[$index];
 			
 			$contentHeight = 1;
-			
+				
 			$cellWidth = 189;
 			
 			$contentString = $model->get('reference');
 			if($contentString){
+				
 				$alignment = 'L';
 				$pdf->MultiCell($cellWidth, $contentHeight, $contentString, 0, $alignment, 0, 1, $contentLineX, $contentLineY);
 				$contentLineY = $pdf->GetY();
@@ -75,20 +77,36 @@ class Vtiger_PDF_LetterToAccountContentViewer extends Vtiger_PDF_ContentViewer {
 				$pdf->MultiCell($cellWidth, $contentHeight, $contentString, 0, $alignment, 0, 1, $contentLineX, $contentLineY);
 				$contentLineY = $pdf->GetY();
 			}
+			else
+				$contentLineY += $this->headerRowHeight;
 			
 			if($contentString)
 				$contentLineY += $this->headerRowHeight;
 			
-			
+			$rowHeight = $pdf->GetStringHeight("X", $contentFrame->w);
 			$contentString = $model->get('text');
 			if($contentString){
 				$alignment = 'J';
 				$isHtml = false;//isHtml = true ne permet pas le padding
 				//$contentString = str_replace("\n", '<br>', htmlspecialchars($contentString));
 				//bugg de "ê" précédé d'un espace si passage à la ligne avant le "ê"
-				$contentString = $contentString;
-				$pdf->MultiCell($cellWidth, $contentHeight, $contentString, 0, $alignment, 0, 1, $contentLineX, $contentLineY,/*$reseth=*/true, /*$stretch=*/0, $isHtml);
-				$contentLineY = $pdf->GetY();
+				$contentStrings = preg_split('/\r?\n/', $contentString);
+				for($i = 0; $i < count($contentStrings); $i++){
+					$contentString = $contentStrings[$i];
+					//une ligne vide correspond à un interligne d'une demi hauteur
+					if(!preg_replace('/\s/', '', $contentString)){
+						$contentLineY += $rowHeight / 2;
+						continue;
+					}
+					if($alignment === 'J') //la justification ne doit pas se faire sur la dernière ligne du paragraphe
+						$contentString .= "\n ";
+						
+					$pdf->MultiCell($cellWidth, $contentHeight, $contentString, 0, $alignment, 0, 1, $contentLineX, $contentLineY,/*$reseth=*/true, /*$stretch=*/0, $isHtml);
+					$contentLineY = $pdf->GetY();
+					if($alignment === 'J') //du fait de l'ajout d'une ligne vide ci-dessus
+						$contentLineY -= $rowHeight;
+						
+				}
 			}
 		}
 		$this->onSummaryPage = true;

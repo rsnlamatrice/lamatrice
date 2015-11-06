@@ -72,12 +72,17 @@ class Critere4D_Module_Model extends Vtiger_Module_Model {
 		}
 	}
 	
-	
-	
 	/**
 	 * Function to get Alphabet Search Field 
 	 */
 	public function getAlphabetSearchField(){
 		return 'categorie,nom';
+	}
+	
+	/**
+	 * Function to get Alphabet Search Field for popup
+	 */
+	public function getAlphabetSearchFieldForPopup(){
+		return 'categorie';
 	}
 }
