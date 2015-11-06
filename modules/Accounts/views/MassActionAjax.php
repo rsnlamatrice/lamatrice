@@ -7,6 +7,7 @@ class Accounts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 	function __construct() {
 		parent::__construct();
 		$this->exposeMethod('printRecuFiscal');
+		$this->exposeMethod('messageNoRecuFiscal');
 	}
 	
 	function printRecuFiscal(Vtiger_Request $request){

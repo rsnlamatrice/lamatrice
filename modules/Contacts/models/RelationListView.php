@@ -233,6 +233,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				break;
 			
 			  default:
+				return $relatedRecordModelsList;
 				die(__FILE__ . ' getEntries : module ' . $relatedModuleName . ' non traité');
 				//break;
 			}
