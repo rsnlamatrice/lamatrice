@@ -51,6 +51,18 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			throw new AppException('LBL_PERMISSION_DENIED');
 		}
 	}
+
+	public function getHeaderCss(Vtiger_Request $request) {
+		$headerCssInstances = parent::getHeaderCss($request);
+
+		$cssFileNames = array(
+			'~/layouts/vlayout/modules/RSNImportSources/resources/css/style.css',
+		);
+		$cssInstances = $this->checkAndConvertCssStyles($cssFileNames);
+		$headerCssInstances = array_merge($headerCssInstances, $cssInstances);
+
+		return $headerCssInstances;
+	}
 	
 	/**
 	 * Method to catch request and redirect to right method.
