@@ -16,4 +16,16 @@ class RSNImportSources_List_View extends Import_List_View {
 		$viewer->assign('MODULE', $moduleName);
         $viewer->view('ImportDetails.tpl', 'Import');//TODO: do not call template from Import Module
     }
+
+    public function getHeaderCss(Vtiger_Request $request) {
+	    $headerCssInstances = parent::getHeaderCss($request);
+
+	    $cssFileNames = array(
+		    '~/layouts/vlayout/modules/RSNImportSources/resources/css/style.css',
+	    );
+	    $cssInstances = $this->checkAndConvertCssStyles($cssFileNames);
+	    $headerCssInstances = array_merge($headerCssInstances, $cssInstances);
+
+	    return $headerCssInstances;
+    }
 }
