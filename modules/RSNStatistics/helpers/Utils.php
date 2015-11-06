@@ -288,6 +288,8 @@ class RSNStatistics_Utils_Helper {
 				$rows .= ', ' . $code;
 			}
 		}
+		
+		//$parentFocus = CRMEntity::getInstance($parentModuleName);
 
 		$query = "";
 		$first = true;
@@ -304,9 +306,14 @@ class RSNStatistics_Utils_Helper {
 		}
 		if($mainTable){
 			$query .= "SELECT " .
-					"`" . $mainTable . "`.id, `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, " . $rows .
-					" FROM `" . $mainTable . "`";
-
+					"`" . $mainTable . "`.id, `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, " . $rows;
+					//" FROM `" . $mainTable . "`";
+			//Se base sur les entités parentes car $mainTable ne fait pas forcément référence à toutes les entités
+			// ce qui n'est pas nécessaire si !$aggregate ou si $crmid TODO
+			$query .= " FROM vtiger_crmentity
+				LEFT OUTER JOIN `" . $mainTable . "`
+				ON `" . $mainTable . "`.crmid = vtiger_crmentity.crmid
+			";
 			foreach($relatedStatsTablesNames as $relatedStatsTableName) {
 				if ($relatedStatsTableName != $mainTable) { 
 					$query .= " LEFT OUTER JOIN `" . $relatedStatsTableName .
@@ -314,9 +321,12 @@ class RSNStatistics_Utils_Helper {
 								" AND `" . $relatedStatsTableName . "`.`crmid` = `" . $mainTable . "`.`crmid`";
 				}
 			}
-
-			if(!$aggregate)
-				$query .= " WHERE `" . $mainTable . "`.crmid=" . $crmid;
+			$queryWhere = " WHERE vtiger_crmentity.setype = '$parentModuleName'
+				AND vtiger_crmentity.deleted = FALSE";
+			if(!$aggregate){
+				$queryWhere .= " AND `" . $mainTable . "`.crmid=" . $crmid;
+				$queryGroupBy = '';
+			}
 			else {
 				if($crmid){
 					//provient du parametre &related_viewname= de la requête
@@ -343,18 +353,22 @@ class RSNStatistics_Utils_Helper {
 					}
 					elseif($crmid){
 						//TODO
-						$query .= " WHERE `" . $mainTable . "`.crmid=" . $crmid;
+						$queryWhere .= " AND `" . $mainTable . "`.crmid=" . $crmid;
 					}
 					/*var_dump($query);
 					die();*/
 				}
-				$query .= "
-					GROUP BY `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date";
+				$queryGroupBy .= "GROUP BY `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date";
 			}
+			$query .= "
+				$queryWhere
+				$queryGroupBy
+			";
 		}
 
 		$query .= " ORDER BY `end_date` DESC";
-
+		//echo "<pre>$query</pre>";
+		//die();
 		return $query;
 	}
 }
