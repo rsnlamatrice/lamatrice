@@ -365,6 +365,8 @@ a.qty_helper_plus, a.qty_helper_minus {
   border-bottom: 1px solid #d3d3d3 !important;
 }
 
+
+
 /* adresse SNA */
 button.address-sna-check {
   margin-right: 28px;
@@ -406,4 +408,9 @@ ListView stylings **/
 #detailView div.relatedContainer.rsnstatistics .listViewEntriesTable > * > tr > *:first-of-type ~ * {
   text-align: right;
   padding-right: 1em !important;
+}
+
+#detailView div.relatedContainer.multidates div.input-append > div,
+#detailView div.relatedContainer.multidates div.sub-field > div{
+  height: 37px;
 }

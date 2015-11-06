@@ -168,6 +168,10 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		
 		case "Accounts" :
 			switch($relatedModuleName){
+			  case "Critere4D":
+			  case "Documents":
+				$tpl = "RelatedListMultiDates.tpl";
+				break;
 			  case "ContactAddresses" :
 				$tpl = "RelatedListContactAddresses.tpl";
 				break;

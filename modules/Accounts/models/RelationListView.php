@@ -138,51 +138,87 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			//$db->setDebug(true);
 			$relatedRecordIdsList = array_keys($relatedRecordModelsList);
 
-			$query = "SELECT dateapplication,
-				data AS rel_data, $fieldName
-				FROM $tableName
-				WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
-				AND contactid = ?";
+			switch($relatedModuleName){
+			case "Documents":
+				$query = "SELECT dateapplication,
+					data AS rel_data, $fieldName
+					FROM $tableName
+					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
+					AND (	crmid = ?
+						OR crmid IN (
+							SELECT contactid
+							FROM vtiger_contactdetails
+							WHERE accountid = ?
+						)
+					)
+					ORDER BY dateapplication desc";//contactid ou accountid
+				array_push($relatedRecordIdsList, $parentRecordModel->getId());
+				break;
+			default:
+				$query = "SELECT dateapplication,
+					data AS rel_data, $fieldName
+					FROM $tableName
+					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
+					AND (	contactid = ?
+						OR contactid IN (
+							SELECT contactid
+							FROM vtiger_contactdetails
+							WHERE accountid = ?
+						)
+					)
+					ORDER BY dateapplication desc";//contactid ou accountid
+				array_push($relatedRecordIdsList, $parentRecordModel->getId());
+				break;
+			}
 			array_push($relatedRecordIdsList, $parentRecordModel->getId());
+			
 			$result = $db->pquery($query, $relatedRecordIdsList);
+			if(!$result){
+				echo __FILE__ . '::getEntries' . "<pre>$query</pre>";
+				var_dump($result, $relatedRecordIdsList);
+				$db->echoError();
+			}
 
 			$numOfrows = $db->num_rows($result);
 			
 			switch($relatedModuleName){
-				case "Critere4D":
-					$fieldRels = Critere4D_RelationListView_Model::get_related_fields();
-					break;
-				case "Contacts":
-					$fieldRels = Contacts_RelationListView_Model::get_related_contacts_fields();
-					break;
-				default:
-					$fieldRels = Vtiger_RelationListView_Model::get_related_fields();
-					break;
+			case "Critere4D":
+				$fieldRels = Critere4D_RelationListView_Model::get_related_fields();
+				break;
+			case "Contacts":
+				$fieldRels = Contacts_RelationListView_Model::get_related_contacts_fields();
+				break;
+			case "Documents":
+				$fieldRels = Documents_RelationListView_Model::get_related_fields();
+				break;
+			default:
+				$fieldRels = Vtiger_RelationListView_Model::get_related_fields();
+				break;
 			}
 			
 			for($i=0; $i<$numOfrows; $i++) {
 				$recordId = $db->query_result($result, $i, $fieldName);
 				foreach($fieldRels as $fieldRel){
-				  $relatedRecordModel = $relatedRecordModelsList[$recordId];
-				  
-				  $fieldRelType = $fieldRel->get('typeofdata');
-				  $fieldRel = $fieldRel->get('name');
-				  
-				  $value = $db->query_result($result, $i, strtolower( $fieldRel ));
-				    switch($fieldRelType){
-				    case "DATETIME":
-				      $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
-				      break;
-				    default:
-				      $value = preg_replace('/\\r\\n?/', '<br/>', $value);
-				      break;
-				  }
-				  $values = $relatedRecordModel->get($fieldRel);//valeur prÈcÈdemment affectÈe
-				  if($values === null)
-				    $values = array($value);
-				  else
-				    $values[] = $value;
-				  $relatedRecordModel->set($fieldRel, $values);
+					$relatedRecordModel = $relatedRecordModelsList[$recordId];
+					
+					$fieldRelType = $fieldRel->get('typeofdata');
+					$fieldRel = $fieldRel->get('name');
+					
+					$value = $db->query_result($result, $i, strtolower( $fieldRel ));
+					switch($fieldRelType){
+					case "DATETIME":
+						$value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
+						break;
+					default:
+						$value = preg_replace('/\\r\\n?/', '<br/>', $value);
+						break;
+					}
+					$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
+					if(!is_array($values))
+						$values = array($value);
+					else
+						$values[] = $value;
+					$relatedRecordModel->set($fieldRel, $values);
 				}		
 				$relatedRecordModelsList[$recordId] = $relatedRecordModel;
 			}

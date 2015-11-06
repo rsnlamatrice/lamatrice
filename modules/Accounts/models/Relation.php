@@ -19,7 +19,17 @@ class Accounts_Relation_Model extends Vtiger_Relation_Model {
 	public function getModulesInfoForDetailView() {
 		return array(
 			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel')
-			, 'Contacts' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_contactdetails')
+			, 'Contacts' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_contactdetails'),
+			
+			//Attention : manque la relation au contact du compte
+			'Documents' => array('fieldName' => 'notesid', 'tableName' => 'vtiger_senotesrel'
+					   , 'sourceFieldName' => 'vtiger_account.accountid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_senotesrel.crmid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_senotesrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'notesid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'notesid'
+					   , 'keyDateFieldName' => 'dateapplication'//clé primaire en 3 champs, incluant une date
+					   ),
 		);
 	}
 }

@@ -7,7 +7,7 @@
 class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 	
 
-	/* Retourne les en-tÍtes des colonnes des contacts
+	/* Retourne les en-t√çtes des colonnes des contacts
 	 * Ajoute les champs de la relation
 	 * */
 	public function getHeaders() {
@@ -40,10 +40,10 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 		return $headerFields;
 	}
 	
-	/* Retourne les en-tÍtes des colonnes des contacts
+	/* Retourne les en-t√çtes des colonnes des contacts
 	 * Ajoute les champs de la relation
 	 * ED140907
-	 * TODO Fonction ‡ refaire
+	 * TODO Fonction ‚Ä° refaire
 	 * */
 	public static function get_related_fields($headerFields = false, $relationModel = false) {
 		
@@ -106,7 +106,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 	 * Function to get list of record models in this relation
 	 * @param <Vtiger_Paging_Model> $pagingModel
 	 * @return <array> List of record models <Vtiger_Record_Model>
-	 * ED140906 : complËte les enregistrements de contacts par les champs de la relation
+	 * ED140906 : compl√ãte les enregistrements de contacts par les champs de la relation
 	 *
 	 * Documents : vtiger_senotesrel
 	 */
@@ -135,7 +135,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 			if($relatedModuleName === 'Contacts'){
 				
 				/* cf Documents.php get_contacts
-				 * getEntries a retournÈ des Contacts qui ne sont pas dans vtiger_senotesrel mais dont le Compte y est.
+				 * getEntries a retourn√à des Contacts qui ne sont pas dans vtiger_senotesrel mais dont le Compte y est.
 				 * On construit donc un mapping $relatedRecordModelsList[accountid|contactid] = contactid
 				 */
 				
@@ -154,7 +154,8 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 				data AS rel_data, $fieldName
 				FROM $tableName
 				WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
-				AND notesid = ?";
+				AND notesid = ?
+				ORDER BY dateapplication desc";
 			
 			$fieldRels = self::get_related_fields();
 			
@@ -184,7 +185,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 							$value = preg_replace('/\\r\\n?/', '<br/>', $value);
 							break;
 						}
-						$values = $relatedRecordModel->get($fieldRel);//valeur prÈcÈdemment affectÈe
+						$values = $relatedRecordModel->get($fieldRel);//valeur pr√àc√àdemment affect√àe
 						if(!is_array($values))//1er tour
 							$values = array($value);
 						else

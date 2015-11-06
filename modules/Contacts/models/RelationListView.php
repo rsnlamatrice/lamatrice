@@ -176,7 +176,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					data AS rel_data, $fieldName
 					FROM $tableName
 					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
-					AND contactid = ?";
+					AND contactid = ?
+					ORDER BY dateapplication desc";
 			
 				$fieldRels = Critere4D_RelationListView_Model::get_related_fields();
 				break;
@@ -186,7 +187,9 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					data AS rel_data, $fieldName
 					FROM $tableName
 					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
-					AND crmid = ?";
+					AND crmid IN (?, ?)
+					ORDER BY dateapplication desc";//contactid ou accountid
+				$where_accountId = $parentRecordModel->get('account_id');
 			
 				$fieldRels = Documents_RelationListView_Model::get_related_fields();
 				break;
@@ -224,6 +227,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					WHERE c1.contactid = ".$contactId."
 					AND  vtiger_contactdetails.contactid <> ".$contactId."
 					AND account.deleted = 0
+					
+					ORDER BY dateapplication desc
 					";
 					  
 				array_push($relatedRecordIdsList, $contactId);
@@ -234,11 +239,13 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			
 			  default:
 				return $relatedRecordModelsList;
-				die(__FILE__ . ' getEntries : module ' . $relatedModuleName . ' non traité');
+				//die(__FILE__ . ' getEntries : module ' . $relatedModuleName . ' non traité');
 				//break;
 			}
 			if($query){
 				array_push($relatedRecordIdsList, $contactId);
+				if(isset($where_accountId))
+					array_push($relatedRecordIdsList, $where_accountId);
 				$result = $db->pquery($query, $relatedRecordIdsList);
 				if(!$result)
 					$db->echoError();
@@ -249,6 +256,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					if($relatedModuleName == "Contacts"
 					&& $recordId == $contactId) 
 						$recordId = $db->query_result($result, $i, "contactid");
+				
 					$relatedRecordModel = $relatedRecordModelsList[$recordId];
 					if($relatedRecordModel)
 					foreach($fieldRels as $fieldRel){
