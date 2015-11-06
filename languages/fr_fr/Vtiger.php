@@ -787,7 +787,7 @@ $languageStrings = array(
 	
 	'LBL_SORRY_SQL_ERROR' => 'Désolé, la formulation de la recherche provoque une erreur.',
 	
-	'LBL_RESULTS' => 'Résultats',
+	'LBL_RESULTS' => 'Résultats statistiques',
 	
 	'LBL_DOWNLOAD' => 'Télécharger',
 	

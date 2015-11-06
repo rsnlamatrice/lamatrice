@@ -296,7 +296,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 					$end_date = $statPeriod['end_date'];
 					$begin_date = $statPeriod['begin_date'];
 						
-					$executionQuery = $sqlqueryRecord->getExecutionQuery(['crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date]);
+					$executionQuery = $sqlqueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date));
 					
 					//Delete
 					$deleteParams = array();
