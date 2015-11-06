@@ -357,29 +357,8 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		}
 		$montant = round($montant, 2);
 		
-		//get num reçu fiscal
-		$query = "SELECT COUNT(*)
-			FROM vtiger_senotesrel
-			WHERE notesid = ?
-			AND IFNULL(data, '') LIKE '%Montant : %'";
-		$params = array(
-			$documentRecordModel->getId(),
-		);
-		$result = $adb->pquery($query, $params);
-		if(!$result){
-			echo "<pre>$query</pre>";
-			var_dump($params);
-			$adb->echoError();
-			return false;
-		}
+		$numRecu = $documentRecordModel->getNexRelatedCounterValue();
 		
-		$numRecu = $adb->query_result($result, 0, 0);
-		if(!$numRecu){
-			$numRecu = 1;
-		}
-		else
-			$numRecu++;
-													  
 		//create relation
 		
 		$data = "Montant : $montant €, Reçu n° : $numRecu";

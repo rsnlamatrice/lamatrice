@@ -50,7 +50,8 @@ $languageStrings = array(
 	'LBL_FILE_AVAILABLE'           => 'Fichier disponible au téléchargement', 
 	'LBL_FILE_NOT_AVAILABLE'       => 'Fichier non disponible au téléchargement',
 	//ED150903
-	'Default'       => '(non défini)', 
+	'Default'       => '(non défini)',
+        'LBL_RELATEDCOUNTER' => 'Compteur de relation',
 );
 $jsLanguageStrings = array(
 	'JS_EXCEEDS_MAX_UPLOAD_SIZE'   => 'Taille max. du fichier attainte', 

@@ -205,5 +205,54 @@ class Documents_Record_Model extends Vtiger_Record_Model {
 		}
 		return $relatedProducts;
 	}
-
+	
+	/**
+	 * ED151106
+	 * Affecte le prochain n° du compteur de relations
+	 * Par exemple, n° de reçu fiscal
+	 *
+	 */
+	public function getNexRelatedCounterValue(){
+		global $adb;
+		//get num 
+		$query = "SELECT MAX(relatedcounter)
+			FROM vtiger_notes
+			WHERE notesid = ?";
+		$params = array(
+			$this->getId(),
+		);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError();
+			return false;
+		}
+		
+		$relatedCounter = $adb->query_result($result, 0, 0);
+		if(!$relatedCounter)
+			$relatedCounter = 1;
+		else
+			$relatedCounter++;
+		
+		//mise à jour du compteur
+		$query = "UPDATE vtiger_notes
+			SET relatedcounter = ?
+			WHERE notesid = ?";
+		$params = array(
+			$relatedCounter,
+			$this->getId(),
+		);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError();
+			return false;
+		}
+		
+		$this->set('relatedcounter', $relatedCounter);
+		
+		return $relatedCounter;
+	}
 }

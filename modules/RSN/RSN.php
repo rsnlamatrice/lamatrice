@@ -58,6 +58,7 @@ class RSN {
 			$this->add_crontasks_fields();
 			$this->add_rsnreglements_fields();
 			$this->add_RSNStatisticsResults_Extension();
+			$this->add_documents_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -431,6 +432,19 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 										 , 'default' => 'SUM'
 										 , 'picklist_values' => array('SUM', 'COUNT', 'MIN', 'MAX', 'AVG', 'COUNT DISTINCT', 'STD', 'STDDEV'),
 										)
+		);
+		foreach($newFields as $newFieldName => $newField){
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
+		}
+	}
+	
+	static function add_documents_fields() {
+		$module = Vtiger_Module_Model::getInstance('Documents');
+		foreach( $module->getBlocks() as $block1)
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'relatedcounter' => array( 'columntype' => 'INT(8)', 'uitype' => '1', 'tablename' => 'vtiger_notes', 'label' => 'LBL_RELATEDCOUNTER', 'typeofdata' => 'N~O' ),
 		);
 		foreach($newFields as $newFieldName => $newField){
 			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
