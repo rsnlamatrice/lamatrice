@@ -12,7 +12,7 @@
             <div class="span6">
 				{if $RELATED_MODULE->get('name') === $MODULE}
 					<span class="btn-toolbar span4">
-						{include file='ListViewHeaderViewSelector.tpl'|@vtemplate_path}
+						{include file='ListViewHeaderViewSelector.tpl'|@vtemplate_path NOT_EDITABLE_CUSTOMVIEWS=1}
 					</span>
 				{else}
 					&nbsp;

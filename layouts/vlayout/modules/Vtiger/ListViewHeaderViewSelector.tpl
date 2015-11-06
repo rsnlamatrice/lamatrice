@@ -60,6 +60,7 @@
 							{/if}
 						</select>
 						{* ED151104 *}
+						{if !$NOT_EDITABLE_CUSTOMVIEWS}
 						<a id="customFilter-edit" href="" style="opacity:0.7;"><span class="ui-icon ui-icon-pencil"></span></a>
 						<span class="filterActionsDiv hide">
 							<hr>
@@ -68,6 +69,7 @@
 							</ul>
 						</span>
 						<img class="filterImage" src="{'filter.png'|vimage_path}" style="display:none;height:13px;margin-right:2px;vertical-align: middle;">
+						{/if}
 					{else}
 						<input type="hidden" value="0" id="customFilter" />
 					{/if}
