@@ -239,6 +239,42 @@ class Vtiger_PDF_Generator {
 		}
 		return $outputName;
 	}
+	
+	/***
+	 * Function that send file data
+	 * note "exit;" at the end
+	 */
+	public static function downloadFile($outputFileName, $unlinkFile = false){
+		if(file_exists($outputFileName)){
+			if ($fd = fopen ($outputFileName, "r")) {
+				$fsize = filesize($outputFileName);
+				$path_parts = pathinfo($outputFileName);
+				$ext = strtolower($path_parts["extension"]);
+				switch ($ext) {
+				case "pdf":
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=\"".$path_parts["basename"]."\""); // use 'attachment' to force a file download
+					break;
+					// add more headers for other content types here
+				default: //zip
+					header("Content-type: application/octet-stream");
+					header("Content-Disposition: filename=\"".$path_parts["basename"]."\"");
+					break;
+				}
+				//problme au tŽlŽchargement par Chrome header("Content-length: $fsize");
+				header("Cache-control: private"); //use this to open files directly
+				while(!feof($fd)) {
+					echo fread($fd, 4096);
+				}
+			}
+			fclose ($fd);
+			
+			if($unlinkFile)
+				unlink($outputFileName);
+			
+			exit;
+		}
+	}
 }
 
 ?>

@@ -34,42 +34,30 @@ class RsnPrelevements_ExportPDF_Action extends Vtiger_Action_Controller {
 				$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleModel->getName());
 				$files[] = $recordModel->getPDF($filesPath);
 			}
-			//Fusion en un seul PDF (ou un zip si ghostscript n'est pas installé)
-			$outputFileName = $filesPath . '/' . 'Prelevements FIRST du ' . $dateVir->format('Y-m-d') . '.pdf';
-			$outputFileName = Vtiger_PDF_Generator::mergeFiles($files, $outputFileName);
-			if(file_exists($outputFileName)){
-				if ($fd = fopen ($outputFileName, "r")) {
-					$fsize = filesize($outputFileName);
-					$path_parts = pathinfo($outputFileName);
-					$ext = strtolower($path_parts["extension"]);
-					switch ($ext) {
-					case "pdf":
-						header("Content-type: application/pdf");
-						header("Content-Disposition: attachment; filename=\"".$path_parts["basename"]."\""); // use 'attachment' to force a file download
-						break;
-						// add more headers for other content types here
-					default: //zip
-						header("Content-type: application/octet-stream");
-						header("Content-Disposition: filename=\"".$path_parts["basename"]."\"");
-						break;
-					}
-					header("Content-length: $fsize");
-					header("Cache-control: private"); //use this to open files directly
-					while(!feof($fd)) {
-						echo fread($fd, 4096);
-					}
-				}
-				fclose ($fd);
-				
-				//Supprime les fichiers temporaires
-				foreach($files as $fileName)
-					unlink($fileName);
-					
-				unlink($outputFileName);
-				
-				exit;
+			if(!$files){
+				$request->set('message', 'Prélèvements FIRST : aucun élement à imprimer.');
+				$viewModel = new Vtiger_InfoMessage_View();
+				$viewModel->preProcess($request);
+				$viewModel->process($request);
+				$viewModel->postProcess($request);
+				exit();
 			}
-			echo "<code>Désolé, le fichier n'a pas pu être généré</code>";
+			else {
+				//Fusion en un seul PDF (ou un zip si ghostscript n'est pas installé)
+				$outputFileName = $filesPath . '/' . 'Prelevements FIRST du ' . $dateVir->format('Y-m-d') . '.pdf';
+				$outputFileName = Vtiger_PDF_Generator::mergeFiles($files, $outputFileName);
+				if(file_exists($outputFileName)){
+					
+					//Supprime les fichiers temporaires
+					foreach($files as $fileName)
+						if(file_exists($fileName))
+							unlink($fileName);
+					
+					//ça bogue, parfois, sous Chrome
+					
+					Vtiger_PDF_Generator::downloadFile($outputFileName, true);
+				}
+			}
 		}
 	}
 }

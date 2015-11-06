@@ -58,7 +58,13 @@ class Accounts_PrintRecuFiscal_Action extends Vtiger_Mass_Action {
 			//TODO
 		}
 		if(!$files){
-			return false;
+			
+			$request->set('message', $documentRecordModel->getName() . ' : aucun élement à imprimer.');
+			$viewModel = new Vtiger_InfoMessage_View();
+			$viewModel->preProcess($request);
+			$viewModel->process($request);
+			$viewModel->postProcess($request);
+			exit();
 		}
 		elseif(count($files) === 1){
 			foreach($files as $fileName){
@@ -72,38 +78,15 @@ class Accounts_PrintRecuFiscal_Action extends Vtiger_Mass_Action {
 			$outputFileName = Vtiger_PDF_Generator::mergeFiles($files, $outputFileName);
 		}
 		if(file_exists($outputFileName)){
-			if ($fd = fopen ($outputFileName, "r")) {
-				$fsize = filesize($outputFileName);
-				$path_parts = pathinfo($outputFileName);
-				$ext = strtolower($path_parts["extension"]);
-				switch ($ext) {
-				case "pdf":
-					header("Content-type: application/pdf");
-					header("Content-Disposition: attachment; filename=\"".$path_parts["basename"]."\""); // use 'attachment' to force a file download
-					break;
-					// add more headers for other content types here
-				default: //zip
-					header("Content-type: application/octet-stream");
-					header("Content-Disposition: filename=\"".$path_parts["basename"]."\"");
-					break;
-				}
-				header("Content-length: $fsize");
-				header("Cache-control: private"); //use this to open files directly
-				while(!feof($fd)) {
-					echo fread($fd, 4096);
-				}
-			}
-			fclose ($fd);
-			
-			//Supprime les fichiers temporaires
-			foreach($files as $fileName)
-				unlink($fileName);
 				
-			unlink($outputFileName);
-			
-			exit;
+			//Supprime les fichiers temporaires
+			if(count($files) > 1)
+				foreach($files as $fileName)
+					if(file_exists($fileName))
+						unlink($fileName);
+					
+			Vtiger_PDF_Generator::downloadFile($outputFileName, true);
 		}
-		echo "<code>Désolé, le fichier n'a pas pu être généré</code>";
 	}
 	
 }
