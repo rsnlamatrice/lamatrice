@@ -797,6 +797,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 		var isMulitDates = detailContentsHolder.find('.relatedContainer.multidates:first').length;
 		
 		detailContentsHolder.on('click','.relatedListHeaderValues',function(e){
+			e.stopImmediatePropagation();
 			var element = jQuery(e.currentTarget);
 			/*var selectedTabElement = thisInstance.getSelectedTab();
 			var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
@@ -809,6 +810,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 		});
 		
 		detailContentsHolder.on('click', 'button.selectRelation', function(e){
+			e.stopImmediatePropagation();
 			var selectedTabElement = thisInstance.getSelectedTab();
 			/* ED141101
 			 * Bug in case of summary widget header button : get last RelatedModule name
@@ -831,6 +833,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 
 		/* ED150110 */
 		detailContentsHolder.on('click', 'button.refreshWidget', function(e){
+			e.stopImmediatePropagation();
 			var widgetHolder = $(this).parents('.summaryWidgetContainer:first');
 			if (widgetHolder.length) {
 			    e.stopImmediatePropagation();
