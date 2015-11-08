@@ -294,6 +294,11 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		if(($account_id == null || $account_id == '0') ){
 			if(!$createIfNone) return false;
 			
+			/* if from import */
+			global $VTIGER_BULK_SAVE_MODE;
+			$prev_VTIGER_BULK_SAVE_MODE = $VTIGER_BULK_SAVE_MODE;
+			$VTIGER_BULK_SAVE_MODE = false;
+			
 			$account = Vtiger_Record_Model::getCleanInstance('Accounts');    
 			$account->set('mode', 'create');
 			
@@ -312,6 +317,9 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			$this->set('reference', 1);// contact referent du nouveau compte
 			
 			$this->save();
+			
+			$VTIGER_BULK_SAVE_MODE = $prev_VTIGER_BULK_SAVE_MODE;
+			
 			return $account;
 		}	
 		return Vtiger_Record_Model::getInstanceById($account_id, 'Accounts');

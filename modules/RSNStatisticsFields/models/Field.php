@@ -39,7 +39,16 @@ class RSNStatisticsFields_Field_Model extends Vtiger_Field_Model {
 		$rowData['readonly'] = 1;
 		$fieldInstance->initialize($rowData);
 		$fieldInstance->set('parentid', $rowData['rsnstatisticsid']);
+		$rowData['tablename'] = RSNStatistics_Utils_Helper::getStatsTableNameFromId($row['rsnstatisticsid']);;
 		return $fieldInstance;
+	}
+	
+	public function getTableName(){
+		return $this->get('table');
+	}
+	
+	public function getColumnName(){
+		return $this->get('column');
 	}
 	
 	public static function getVtigerUIType($statFieldType){

@@ -3,6 +3,9 @@
 class RSNStatistics_Utils_Helper {
 
 	public static function getStatsTableNameFromId($id) {
+		$tableName = Vtiger_Cache::get('getStatsTableName', $id);
+		if($tableName)
+			return $tableName;
 		$sql = "SELECT * FROM `vtiger_rsnstatistics`
 				WHERE `vtiger_rsnstatistics`.`rsnstatisticsid` = ?
 				AND `vtiger_rsnstatistics`.`disabled` = 0";
@@ -20,7 +23,9 @@ class RSNStatistics_Utils_Helper {
 
 		$row = $db->raw_query_result_rowdata($result, 0);
 		
-		return self::getStatsTableName($id, $row);
+		$tableName = self::getStatsTableName($id, $row);
+		Vtiger_Cache::set('getStatsTableName', $id, $tableName);
+		return $tableName;
 	}
 
 	public static function getRelatedStatistics($moduleNames, $includeDisabled = false) {
@@ -130,17 +135,32 @@ class RSNStatistics_Utils_Helper {
 		return $relatedStatFields;
 	}
 	
+	//public static function getRelatedStatsFieldsWebserviceFields($statisticIds, $moduleName = false) {
+	//	$relatedStatFields = self::getRelatedStatsFields($statisticIds, $moduleName);
+	//	foreach($relatedStatFields as $index => $rowData){
+	//		$tableNames = array();
+	//		$row['columnname'] = $row['uniquecode'];
+	//		$row['fieldlabel'] = $row['fieldname'];
+	//		if(!array_key_exists($row['rsnstatisticsid'], $tableNames))
+	//			$tableNames[$row['rsnstatisticsid']] = self::getStatsTableNameFromId($row['rsnstatisticsid']);
+	//		$row['tablename'] = $tableNames[$row['rsnstatisticsid']];
+	//		$relatedStatFields[$index] = RSNStatisticsFields_Field_Model::getInstanceFromRowData(null, $rowData);
+	//	}
+	//	return $relatedStatFields;
+	//}
+	
 	/**
 	 * Retourne les champs statistiques sous la forme de Vtiger_Field_Model
 	 */
 	public static function getRelatedStatsFieldsVtigerFieldModels($statisticIds, $moduleName = false) {
-		$relatedStatFields = self::getRelatedStatsFields($statisticIds, $moduleName);
+		$statFields = self::getRelatedStatsFields($statisticIds, $moduleName);
+		$relatedStatFields = array();
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'Record', 'RSNStatisticsFields');
 		$moduleModel = Vtiger_Module_Model::getInstance('RSNStatisticsFields');
-		foreach($relatedStatFields as $index => $rowData){
+		foreach($statFields as $index => $rowData){
 			$fieldInstance = RSNStatisticsFields_Field_Model::getInstanceFromRowData($rowData);
 			$fieldInstance->setModule($moduleModel);
-			$relatedStatFields[$index] = $fieldInstance;
+			$relatedStatFields[$fieldInstance->get('column')] = $fieldInstance;
 		}
 		return $relatedStatFields;
 	}

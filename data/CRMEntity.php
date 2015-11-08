@@ -766,8 +766,8 @@ echo "</pre>//saveentity\r\n";
 
 			$sql = sprintf('SELECT %s FROM %s WHERE %s %s', $column_clause, $from_clause, $where_clause, $limit_clause);
 
-/*echo('<pre><br/><br/><br/></pre>');echo('<br/>');
-echo($sql); 
+/*echo('<br/><br/><br/><br/>');
+echo("<pre>$sql</pre>"); 
 var_dump($params);*/
 			$result = $adb->pquery($sql, $params);
 
@@ -775,10 +775,12 @@ var_dump($params);*/
 				throw new Exception($app_strings['LBL_RECORD_NOT_FOUND'], -1);
 			} else {
 				$resultrow = $adb->query_result_rowdata($result);
+						
+				//var_dump("vtiger_contactdetailsaccount_id", $resultrow['vtiger_contactdetailsaccount_id']);
+				
 				if (!empty($resultrow['deleted'])) {
 					throw new Exception($app_strings['LBL_RECORD_DELETE'], 1);
 				}
-
 				foreach ($cachedModuleFields as $fieldinfo) {
 					$fieldvalue = '';
 					$fieldkey = $this->createColumnAliasForField($fieldinfo);
