@@ -414,3 +414,9 @@ ListView stylings **/
 #detailView div.relatedContainer.multidates div.sub-field > div{
   height: 37px;
 }
+
+/*CustomView editor : bugg select picklist
+Correction : c'est uniquement quand il y a un var_dump qui traine */
+#CustomView input[type="text"] {
+  height: auto;
+}

@@ -82,7 +82,7 @@ Class CustomView_EditAjax_View extends Vtiger_IndexAjax_View {
 		/* ED151025
 		 * RSNStatistics
 		 */
-		if(false){ //TODO Trop long !
+		if(true){ //TODO Trop long !
 			$relatedStats = array();
 			$statRecords = RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName);
 			if($statRecords){

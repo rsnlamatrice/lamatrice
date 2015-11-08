@@ -124,13 +124,14 @@ promouvant une autre politique énergétique.Association régie par la loi de 19
 <b>Le Réseau <i>\"Sortir du nucléaire\"</i> reconnaît que les dons reçus</b>, en un ou plusieurs versements, au cours de
 l'année [[année]], <b>pour la somme totale de</b> :
 <div style=\"text-align: center;\"><b>[[montant]] euros</b>, soit <b>[[montant en toutes lettres]]</b></div>
-<br>ouvrent droit à la réduction d'impôts prévue à l'article 200 du CGI (Particuliers) du Code Général des Impôts.
+<br>ouvrent droit à la réduction d'impôts prévue à l'article [[article CGI]] du Code Général des Impôts.
 <div style=\"text-align: center\">Mode de paiement : chèque ou virement</div>
 <br/>
 <table style=\"width: 100%\"><tr>
 	<td>Lyon, le [[date]]</td>
-	<td style=\"text-align: center\">Le trésorier, <img src=\"layouts/vlayout/modules/RSN/resources/images/signature_tresorier.png\" height=\"20mm\"/></td>
+	<td style=\"text-align: center\">Le trésorier, <img src=\"[[image signature]]\" height=\"20mm\"/></td>
 </tr></table>";
+
 		$annee = $this->focusColumnValue('year');
 		$montant = str_replace('.', ',', $this->focusColumnValue('montant'));
 		$montant_lettres = montant_en_toutes_lettres((float)$this->focusColumnValue('montant'));
@@ -143,6 +144,12 @@ l'année [[année]], <b>pour la somme totale de</b> :
 		$contact_address = $this->buildContactAddress();
 		$recufiscal_num = $this->focusColumnValue('recu_fiscal_num');; //TODO
 		
+		if($this->focusColumnValue('isgroup') > 0)
+			$articleCGI = '238 bis du CGI (entreprises & asociations)';
+		else
+			$articleCGI = '200 du CGI (Particuliers)';
+		$imageSignature = 'layouts/vlayout/modules/RSN/resources/images/signature_tresorier.png';
+		
 		$mapping = array(
 			'année' => $annee,
 			'n° reçu' => $recufiscal_num,
@@ -152,6 +159,8 @@ l'année [[année]], <b>pour la somme totale de</b> :
 			'montant en toutes lettres' => $montant_lettres,
 			'montant' => $montant,
 			'date' => $date,
+			'article CGI' => $articleCGI,
+			'image signature' => $imageSignature,
 		);
 	
 		foreach($mapping as $field => $value)
