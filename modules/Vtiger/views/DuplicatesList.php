@@ -14,7 +14,16 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 		$listViewModel = Vtiger_DuplicatesListView_Model::getInstance($moduleName);
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'));
 		$viewer->assign('CUSTOM_VIEWS', CustomView_Record_Model::getAllByGroup($moduleName));
-		$this->viewName = $request->get('viewname');
+		
+		//ED151109
+		if(true){
+			$customView = CustomView_Record_Model::getAllFilterByModule($moduleName);
+			$this->viewName = $customView->getId();
+			$request->set('viewname', $this->viewName);
+		}
+		else
+			$this->viewName = $request->get('viewname');
+		
 		if(empty($this->viewName)){
 			//If not view name exits then get it from custom view
 			//This can return default view id or view id present in session
@@ -35,6 +44,7 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		
 		$this->viewName = $request->get('viewname');
 
 		$this->initializeListViewContents($request, $viewer);
@@ -42,7 +52,7 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 		$viewer->assign('MODULE_MODEL', $moduleModel);
 		$viewer->assign('CURRENT_USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		
-        $recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
+		$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 		$viewer->assign('RECORD_MODEL', $recordModel);
 		$viewer->view('DuplicatesListViewContents.tpl', $moduleName);
 		
@@ -88,7 +98,6 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 			$pageNumber = '1';
 		}
 
-
 		$listViewModel = Vtiger_DuplicatesListView_Model::getInstance($moduleName, $cvId);
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'), 'CVID'=>$cvId);
 		$linkModels = $listViewModel->getListViewMassActions($linkParams);
@@ -118,7 +127,7 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 			$viewer->assign('ALPHABET_VALUE',is_array($searchValue) ? htmlspecialchars(json_encode($searchValue)) : $searchValue);
 		}
 		//ED150414 $searchValue == 0 is acceptable
-		if(!empty($searchKey) && (!empty($searchValue) || ($searchValue == '0'))) {
+		if(!empty($searchKey) && (!empty($searchValue) || ($searchValue === '0'))) {
 			$listViewModel->set('search_key', $searchKey);
 			$listViewModel->set('search_value', $searchValue);
 			$listViewModel->set('search_input', $searchInput);
@@ -134,6 +143,7 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 		if(!$this->listViewEntries){
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
 		}
+		
 		$noOfEntries = count($this->listViewEntries);
 
 		$viewer->assign('MODULE', $moduleName);

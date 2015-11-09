@@ -56,6 +56,10 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 				       && $primaryRecordModel->get($field->getName())){
 					$fieldValue = $primaryRecordModel->get($field->getName()) . "\r\n" . $fieldValue;
 				}
+				elseif($moduleName == 'Contacts' && $field->getName() === 'email'
+				       && $primaryRecordModel->get($field->getName()) != $fieldValue){
+					$primaryRecordModel->createContactEmailsRecord();
+				}
 				$primaryRecordModel->set($field->getName(), $fieldValue);
 			}
 		}

@@ -19,6 +19,27 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		unset($fields['account_id']);
 		unset($fields['reference']);
 		
+		$fields = 
+			array_move_assoc('mailingcity', 'mailingzip',  
+			array_move_assoc('mailingzip', 'mailingpobox',
+			array_move_assoc('mailingpobox', 'mailingstreet3',
+			array_move_assoc('mailingstreet3', 'mailingstreet',
+			array_move_assoc('mailingstreet', 'mailingstreet2',
+			array_move_assoc('mailingstreet2', 'mailingaddressformat',
+			array_move_assoc('mailingaddressformat', 'rsnnpaicomment',
+					 $fields
+		)))))));
+		
+		$fields = 
+			array_move_assoc('othercity', 'otherzip',  
+			array_move_assoc('otherzip', 'otherpobox',
+			array_move_assoc('otherpobox', 'otherstreet3',
+			array_move_assoc('otherstreet3', 'otherstreet',
+			array_move_assoc('otherstreet', 'otherstreet2',
+			array_move_assoc('otherstreet2', 'otheraddressformat',
+					 $fields
+		))))));
+		
 		return $fields;
 	}
 	

@@ -10,6 +10,7 @@
  ********************************************************************************/
 -->*}
 {strip}
+<input type="hidden" id="popUpClassName" value="Vtiger_MergeRecord_Js"/>
 <div style='background: white;'>
 	<div>
 		<br>
@@ -23,68 +24,99 @@
 		<input type="hidden" name="records" value={Zend_Json::encode($RECORDS)} />
 
 	<div>
-		<table class='table table-bordered table-condensed'>
+		<table id="mergeRecords" class='table table-bordered table-condensed'>
 			<thead class='listViewHeaders'>
-			<th>
-				{vtranslate('LBL_FIELDS', $MODULE)}
-			</th>
-			{foreach item=RECORD from=$RECORDMODELS name=recordList}
-				<th>
-					{vtranslate('LBL_RECORD')} #{$smarty.foreach.recordList.index+1} &nbsp;
-					<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio value="{$RECORD->getId()}" name=primaryRecord style='bottom:1px;position:relative;'/>
-					{if count($RECORDMODELS) > 1}
-					<span style="float: right"><a href="#" title="supprimer de la fusion" onclick="alert('TODO suprimer la colonne'); return false;"><span class="ui-icon ui-icon-trash"></span></a></span>{/if}
-				</th>
-			{/foreach}
+				<tr>
+					<th>
+						{vtranslate('LBL_FIELDS', $MODULE)}
+					</th>
+					{foreach item=RECORD from=$RECORDMODELS name=recordList}
+						<th class="record">
+							<label>
+								<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio value="{$RECORD->getId()}" name=primaryRecord style='bottom:1px;position:relative;'/>
+								 &nbsp; #{$smarty.foreach.recordList.index+1}
+							</label>
+							<a href="{$RECORD->get('url')}" target="_blank">{$RECORD->getHtmlLabel()}</a>
+							{if count($RECORDMODELS) > 2}
+							<span style="float: right"><a href="#" title="supprimer de la fusion"><span class="ui-icon ui-icon-trash"></span></a></span>{/if}
+						</th>
+					{/foreach}
+				</tr>
 			</thead>
-			{foreach item=FIELD from=$FIELDS}
-				{if $FIELD->isEditable()}
-				<tr>
-					<td>
-						{vtranslate($FIELD->get('label'), $MODULE)}
-					</td>
-					{foreach item=RECORD from=$RECORDMODELS name=recordList}
-						<td>
-							{*ED150910*}
-							{if $FIELD->get('uitype') == 33 }
-								<input checked type=checkbox name="{$FIELD->getName()}[]"
-								data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
-							{else}
-								<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio name="{$FIELD->getName()}"
-								data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
-							{/if}
-							 &nbsp;&nbsp;{$RECORD->getDisplayValue($FIELD->getName())}
-						</td>
-					{/foreach}
-				</tr>
-				{/if}
-			{/foreach}
-			{foreach item=RELATED_MODULE from=$RELATED_MODULES name=modulesList}
-				{if $smarty.foreach.modulesList.index eq 0}
-					<tr>
-						<td colspan="{count($RECORDMODELS)+1}">
-							<h4>Modules</h4>
-						</td>
+			<tbody>
+				{foreach item=BLOCK from=$BLOCKS}
+					<tr class='listViewHeaders'>
+						<th {if !$BLOCK@first} colspan="{count($RECORDMODELS)+1}"{/if}>
+							{vtranslate($BLOCK->label, $MODULE)}
+						</th>
+						{if $BLOCK@first}
+							{foreach item=RECORD from=$RECORDMODELS name=recordList}
+								<th style="font-size: smaller">
+									{vtranslate('LBL_CREATED_ON')} : {$RECORD->getDisplayValue('createdtime')}
+									&nbsp;-&nbsp;{vtranslate('LBL_MODIFIED_ON')} : {$RECORD->getDisplayValue('modifiedtime')}
+								</th>
+							{/foreach}
+						{/if}
 					</tr>
-				{/if}
-				<tr>
-					<td>
-						{vtranslate($RELATED_MODULE, $RELATED_MODULE)}
-					</td>
-					{foreach item=RECORD from=$RECORDMODELS name=recordList}
-						<td>
-							{*ED151012*}
-							{if $RECORD->get('_related_module_'|cat:$RELATED_MODULE)}
-								{if $RECORD->get('_related_module_'|cat:$RELATED_MODULE) > 1}
-									{$RECORD->get('_related_module_'|cat:$RELATED_MODULE)} {vtranslate($RELATED_MODULE, $RELATED_MODULE)}
-								{else}
-									{$RECORD->get('_related_module_'|cat:$RELATED_MODULE)} {vtranslate('SINGLE_'|cat:$RELATED_MODULE, $RELATED_MODULE)}
-								{/if}
-							{/if}
-						</td>
+					{foreach item=FIELD from=$BLOCK->fields}
+						{if $FIELD->isEditable()}
+						<tr class="records-value">
+							<td>
+								{vtranslate($FIELD->get('label'), $MODULE)}
+							</td>
+							{foreach item=RECORD from=$RECORDMODELS name=recordList}
+								<td><label>
+									{if $FIELD->get('uitype') == 33 }
+										<input checked type=checkbox name="{$FIELD->getName()}[]"
+										data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+									{else}
+										<input type=radio {if $smarty.foreach.recordList.index eq 0}checked{/if} name="{$FIELD->getName()}"
+										data-id="{$RECORD->getId()}" value="{$RECORD->get($FIELD->getName())}" style='bottom:1px;position:relative;'/>
+									{/if}
+									<span class="value" data-field-type="{$FIELD->getFieldDataType()}">
+										{assign var=FIELD_NAME value=$FIELD->getName()}
+										{if $FIELD->get('uitype') eq '15'}{* ED141005 *}
+											{$RECORD->getDisplayValue($FIELD_NAME)}
+										{else}
+											{assign var=tmp value=$FIELD->set('fieldvalue', $RECORD->get($FIELD_NAME))}
+											{include file=vtemplate_path($FIELD->getUITypeModel()->getDetailViewTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+										{/if}
+										{* &nbsp;&nbsp;{$RECORD->getDisplayValue($FIELD->getName())}*}
+									</span>
+								</label>
+								</td>
+							{/foreach}
+						</tr>
+						{/if}
 					{/foreach}
-				</tr>
-			{/foreach}
+				{/foreach}
+				{foreach item=RELATED_MODULE from=$RELATED_MODULES name=modulesList}
+					{if $smarty.foreach.modulesList.index eq 0}
+						<tr class='listViewHeaders'>
+							<td colspan="{count($RECORDMODELS)+1}">
+								<h4 style="color: white">Modules</h4>
+							</td>
+						</tr>
+					{/if}
+					<tr>
+						<td>
+							{vtranslate($RELATED_MODULE, $RELATED_MODULE)}
+						</td>
+						{foreach item=RECORD from=$RECORDMODELS name=recordList}
+							<td>
+								{*ED151012*}
+								{if $RECORD->get('_related_module_'|cat:$RELATED_MODULE)}
+									{if $RECORD->get('_related_module_'|cat:$RELATED_MODULE) > 1}
+										{$RECORD->get('_related_module_'|cat:$RELATED_MODULE)} {vtranslate($RELATED_MODULE, $RELATED_MODULE)}
+									{else}
+										{$RECORD->get('_related_module_'|cat:$RELATED_MODULE)} {vtranslate('SINGLE_'|cat:$RELATED_MODULE, $RELATED_MODULE)}
+									{/if}
+								{/if}
+							</td>
+						{/foreach}
+					</tr>
+				{/foreach}
+			</tbody>
 		</table>
 	</div>
 	<div class='row-fluid'>

@@ -420,3 +420,23 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
 #CustomView input[type="text"] {
   height: auto;
 }
+
+/* Merge records */
+#mergeRecords .listViewHeaders label {
+  color: white;
+}
+#mergeRecords thead.listViewHeaders label {
+  display: inline-block;
+  margin-right: 1em;
+}
+#mergeRecords .records-value .value,
+#mergeRecords .records-value input[type="checkbox"],
+#mergeRecords .records-value input[type="radio"] {
+  float: left;
+}
+#mergeRecords .records-value .value{
+  margin-left: 8px;
+}
+#mergeRecords .records-value .value .ui-icon{
+  display: inline-block;
+}

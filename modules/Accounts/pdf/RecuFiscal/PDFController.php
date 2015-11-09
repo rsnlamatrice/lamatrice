@@ -47,6 +47,36 @@ class Vtiger_RecuFiscal_PDFController extends Vtiger_LetterToAccount_PDFControll
 		return $contentModels;
 	}
 	
+	function buildHeaderBillingAddress() {
+		
+		$contactName = $this->resolveReferenceLabel($this->focusColumnValue('accountid'), 'Accounts');
+		
+		//Contrôle du champ "use_address2_for_recu_fiscal" disponible dans le contact
+		if($this->focusColumnValue('use_address2_for_recu_fiscal')){
+			$street2 = $this->focusColumnValue('otherstreet2');
+			$addressFormat = $this->focusColumnValue('otheraddressformat');
+			$poBox	= $this->focusColumnValue('otherpobox');
+			$street = $this->focusColumnValue('otherstreet');
+			$street3 = $this->focusColumnValue('otherstreet3');
+			$zipCode =  $this->focusColumnValue('otherzip'); 
+			$city	= $this->focusColumnValue('othercity');
+			$state	= $this->focusColumnValue('otherstate');
+			$country = $this->focusColumnValue('othercountry');
+		}
+		else {	//adresse principale synchronisée dans le compte
+			$street2 = $this->focusColumnValue('bill_street2');
+			$addressFormat = $this->focusColumnValue('bill_addressformat');
+			$poBox	= $this->focusColumnValue('bill_pobox');
+			$street = $this->focusColumnValue('bill_street');
+			$street3 = $this->focusColumnValue('bill_street3');
+			$zipCode =  $this->focusColumnValue('bill_code'); 
+			$city	= $this->focusColumnValue('bill_city');
+			$state	= $this->focusColumnValue('bill_state');
+			$country = $this->focusColumnValue('bill_country');
+		}
+		return $this->buildAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress);
+	}
+	
 	function getContentText(){
 		//TODO stocker quelque part
 		$text = 

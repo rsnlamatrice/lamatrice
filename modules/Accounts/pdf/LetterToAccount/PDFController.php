@@ -339,12 +339,12 @@ class Vtiger_LetterToAccount_PDFController {
 		}
 		//ED151006
 		if($street3 && $pobox)
-			$street3 .= $this->joinValues(array($street3, $pobox), ', ');
+			$street3 .= $this->joinValues(array($street3, $pobox), '  ');
 		elseif(!$street3 && $pobox)
-			$street3 .= $this->joinValues(array($street3, $pobox), ', ');
+			$street3 .= $pobox;
 		
 		$address .= "\n$street\n$street3\n$zipCode $city";
-		if($country && $country != 'France')//ED151006 // TODO France en constante	
+		if($country && strcasecmp($country, $this->organizationDetails['country']) !== 0)//ED151006
 			$address .= "\n".$country;
 		
 		return preg_replace('/^\s+|\s*(\n)\s*|\s+$/', "\n", $address);

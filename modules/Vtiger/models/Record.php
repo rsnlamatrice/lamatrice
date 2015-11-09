@@ -772,4 +772,9 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	public function isUnsavedRecord() {
 		return (!$this->getId());
 	}
+	
+	//ED151109
+	public function getHtmlLabel(){
+		return $this->getName();
+	}
 }
