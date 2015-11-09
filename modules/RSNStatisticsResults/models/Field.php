@@ -49,6 +49,29 @@ class RSNStatisticsResults_Field_Model extends Vtiger_Field_Model {
 		return $fieldInstance;
 	}
 
+	public static function getInstanceForPeriodField() {
+		$fieldInstance = new self();
+		$rowData = array();
+		$rowData['fieldid'] = 0;
+		$rowData['fieldlabel'] = 'Période';
+		$rowData['fieldname'] = 'code';
+		$rowData['columnname'] = 'code';
+		$rowData['uitype'] = 1;
+		$rowData['typeofdata'] = 'V~M';
+		$rowData['displaytype'] = 402;
+		$rowData['readonly'] = 1;
+		$fieldInstance->initialize($rowData);
+		return $fieldInstance;
+	}
+
+	
+	public function getTableName(){
+		return $this->get('table');
+	}
+	
+	public function getColumnName(){
+		return $this->get('column');
+	}
 
 }
 ?>

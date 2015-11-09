@@ -3,6 +3,7 @@
 /config.*.php
 /licence
 /logs
+/storage
 
 *.sh
 .DS_Store

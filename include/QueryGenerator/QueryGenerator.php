@@ -27,6 +27,10 @@ class QueryGenerator {
 	private $manyToManyRelatedModuleConditions;
 	private $groupType;
 	private $whereFields;
+	
+	private $statistictsRelations;
+	private $statistictsFields;
+	
 	/**
 	 *
 	 * @var VtigerCRMObjectMeta
@@ -305,7 +309,22 @@ class QueryGenerator {
 						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
 						$filter['relatedmodulename'] = $viewName[0];
 						if($viewName[0] === 'RSNStatisticsResults'){//RSNStatisticsResults
-							echo "<code>TODO parseAdvFilterList for statistics</code>";
+							//RSNStatisticsResults::stats_periodicite::statId::stats_periodicite_fieldId
+							//RSNStatisticsResults::statFieldName::statId::statFieldId
+							//echo "<code>TODO parseAdvFilterList for statistics</code>";
+							//var_dump($viewName);
+							if($viewName[1] === 'stats_periodicite'){//1ere ligne
+								//$statisticRelation = $this->addStatisticsTable($viewName[2]);
+								$statisticRelation = $this->addStatisticsPeriodeCondition($viewName[2], $filter['comparator'], $filter['value']);
+							}
+							else{
+								$statisticRelation = $this->addStatisticsCondition($viewName[2], $viewName[1], $viewName[3], $filter['comparator'], $filter['value']);
+							}
+							$columncondition = $filter['column_condition'];
+							if(!empty($columncondition)) {
+								$this->addConditionGlue($columncondition);
+							}
+							continue;
 						}
 						else { //CustomView
 							$filter['viewid'] = $viewName[2];
@@ -489,6 +508,78 @@ class QueryGenerator {
 		}
 	}
 
+	//Inclut une table de résultats de stats dans le from
+	private function addStatisticsPeriodeCondition($statId, $comparator = false, $condition = false){
+		if(!$this->statistictsRelations)
+			$this->statistictsRelations = array();
+		$alias = $this->getStatisticsPeriodeAlias($statId, $comparator, $condition);
+		if(!array_key_exists($alias, $this->statistictsRelations)){
+			$relationInfos = array(
+				'id' => $statId,
+				'tableName' => RSNStatistics_Utils_Helper::getStatsTableNameFromId($statId),
+				'alias' => $alias,
+			);
+			$this->statistictsRelations[$alias] = $relationInfos;
+			$this->addMetaStatFields($statId, $alias);
+		}
+		else
+			$relationInfos = $this->statistictsRelations[$alias];
+		if($condition){
+			$this->addStatisticsCondition($statId, 'code', null, $comparator, $condition);
+		}
+		return $relationInfos;
+	}
+	
+	private function addMetaStatFields($statId, $tableAlias){
+		$tableFields = RSNStatistics_Utils_Helper::getRelatedStatsFieldsVtigerFieldModels($statId);
+		
+		$tableFields['code'] = RSNStatisticsResults_Field_Model::getInstanceForPeriodField();
+		
+		$fields = array();
+		foreach($tableFields as $field){
+			$field->set('table', $tableAlias);
+			$field->set('table', $tableAlias);
+			$fields[$tableAlias . '_' . $field->getName()] = $field;
+		}
+		if(!$this->statistictsFields)
+			$this->statistictsFields = $fields;
+		else
+			$this->statistictsFields = array_merge($this->statistictsFields, $fields);
+	}
+	
+	//Construit un alias de table selon les conditions fournies
+	private function getStatisticsPeriodeAlias($statId, $comparator, $condition){
+		$alias = 'stat'.$statId;
+		if(!$comparator){
+			//dernier fourni pour cette stat
+			$lastAlias = false;
+			foreach($this->statistictsRelations as $alias => $relationsInfos)
+				if(substr($alias, strlen('stat'.$statId)+1) == 'stat'.$statId.'_')
+				   $lastAlias = $alias;
+			if($lastAlias)
+				return $lastAlias;
+		}
+		if($comparator && $comparator != 'e')
+			$alias .= '_' . $comparator;
+		if($condition){
+			if(is_array($condition))
+				$alias .= '_' . implode('_', $condition);
+			else
+				$alias .= '_' . preg_replace('/\W/', '_', $condition);
+		}
+		return $alias;
+	}
+	//Inclut une condition de résultats de stats dans le where
+	private function addStatisticsCondition($statId, $fieldName, $columnId, $comparator, $condition){
+		$relationInfos = $this->addStatisticsPeriodeCondition($statId);
+		$tableAlias = $relationInfos['alias'];
+		$this->startGroup('', $comparator . ' [' . $fieldName . ']');
+		$this->addCondition('stat::' . $tableAlias . '_' . $fieldName
+					, $condition
+					, $comparator);
+		$this->endGroup($fieldName);
+	}
+	
 	public function getCustomViewQueryById($viewId) {
 		$this->initForCustomViewById($viewId);
 		return $this->getQuery();
@@ -519,7 +610,7 @@ class QueryGenerator {
 			$query .= $this->getWhereClause();
 			$this->query = $query;
 			
-			//print_r('<pre>'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+//			print_r('<pre style="margin-top:4em">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
 			//echo_callstack();
 			
 			return $query;
@@ -777,6 +868,14 @@ class QueryGenerator {
 				}
 			}
 		}
+
+		//RSNStatistics
+		if($this->statistictsRelations)
+			foreach ($this->statistictsRelations as $statisticId => $relationInfos) {
+				//TODO : LEFT JOIN if needed
+				$sql .= ' INNER JOIN '.$relationInfos['tableName'].' `'.$relationInfos['alias'].'`
+					 ON `'.$relationInfos['alias'].'`.crmid = '.$baseTable.'.'.$baseTableIndex;
+			}
 		
 		$sql .= $this->meta->getEntityAccessControlQuery();
 		$this->fromClause = $sql;
@@ -799,6 +898,7 @@ class QueryGenerator {
 			$sql .= ' WHERE ';
 		}
 		$baseModule = $this->getModule();
+		//var_dump($this->meta);//class VtigerCRMObjectMeta
 		$moduleFieldList = $this->meta->getModuleFields();
 		$baseTable = $this->meta->getEntityBaseTable();
 		$moduleTableIndexList = $this->meta->getEntityTableIndexList();
@@ -811,6 +911,8 @@ class QueryGenerator {
 			
 			$fieldName = $conditionInfo['name'];
 			$field = $moduleFieldList[$fieldName];
+			if(empty($field) && substr($fieldName, 0, strlen('stat::')) === 'stat::')
+				$field = $this->statistictsFields[substr($fieldName, strlen('stat::'))];
 			if(empty($field) || $conditionInfo['operator'] == 'None') {
 				/* ED150307 IN, NOT IN
 				 * sub view

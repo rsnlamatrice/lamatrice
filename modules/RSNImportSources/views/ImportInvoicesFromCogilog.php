@@ -272,54 +272,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	}
 
 	/**
-	 * Method to process to the import a line of the invoice.
-	 * @param $invoice : the concerned invoice.
-	 * @param $invoiceLine : the line to import.
-	 * @param int $sequence : the line number of this invoice.
-	 */
-	function importInvoiceLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
-        
-		$qty = self::str_to_float($invoiceLine['quantity']);
-		$listprice = self::str_to_float($invoiceLine['prix_unit_ht']);
-		
-		//N'importe pas les lignes de frais de port à 0
-		if($listprice == 0
-		&& $invoiceLine['productcode'] == 'ZFPORT')
-			return;
-		
-		$discount_amount = 0;
-		$discount_percent = self::str_to_float($invoiceLine['remise_ligne']);
-		$amountHT = $qty * $listprice;
-		$tax = self::getTax($invoiceLine['taxrate']);
-		if($tax){
-			$taxName = $tax['taxname'];
-			$taxValue = $tax['percentage'];
-			$amountTTC = $amountHT * (1 + $taxValue/100);
-			$taxAmount = $amountTTC - $amountHT;
-			//var_dump('$totalTax', $totalTax, "$qty * $listprice * ($taxValue/100)");
-		}
-		else {
-			$taxName = 'tax1';
-			$taxValue = null;
-			$taxAmount = 0.0;
-			$amountTTC = $amountHT;
-		}
-		$totalTax += $taxAmount * (1 - $discount_percent/100);
-		$totalAmountHT += $amountHT * (1 - $discount_percent/100);
-		$listprice = ($amountTTC - $taxAmount) / $qty;
-		//var_dump('$totalAmountHT', $totalAmountHT, "$qty * $listprice", $invoiceLine['taxrate']);
-		
-		$incrementOnDel = $invoiceLine['isproduct'] ? 1 : 0;
-		
-		$db = PearDatabase::getInstance();
-		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_percent, discount_amount, incrementondel, $taxName)
-			VALUES(?,?,?,?,?,?,?,?,?)";
-		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $qty, $listprice, $discount_percent, $discount_amount, $incrementOnDel, $taxValue);
-		//$db->setDebug(true);
-		$db->pquery($query, $qparams);
-	}
-
-	/**
 	 * Method to process to the import of a one invoice.
 	 * @param $invoiceData : the data of the invoice to import
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
@@ -506,6 +458,54 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 
 		return true;
+	}
+
+	/**
+	 * Method to process to the import a line of the invoice.
+	 * @param $invoice : the concerned invoice.
+	 * @param $invoiceLine : the line to import.
+	 * @param int $sequence : the line number of this invoice.
+	 */
+	function importInvoiceLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
+        
+		$qty = self::str_to_float($invoiceLine['quantity']);
+		$listprice = self::str_to_float($invoiceLine['prix_unit_ht']);
+		
+		//N'importe pas les lignes de frais de port à 0
+		if($listprice == 0
+		&& $invoiceLine['productcode'] == 'ZFPORT')
+			return;
+		
+		$discount_amount = 0;
+		$discount_percent = self::str_to_float($invoiceLine['remise_ligne']);
+		$amountHT = $qty * $listprice;
+		$tax = self::getTax($invoiceLine['taxrate']);
+		if($tax){
+			$taxName = $tax['taxname'];
+			$taxValue = $tax['percentage'];
+			$amountTTC = $amountHT * (1 + $taxValue/100);
+			$taxAmount = $amountTTC - $amountHT;
+			//var_dump('$totalTax', $totalTax, "$qty * $listprice * ($taxValue/100)");
+		}
+		else {
+			$taxName = 'tax1';
+			$taxValue = null;
+			$taxAmount = 0.0;
+			$amountTTC = $amountHT;
+		}
+		$totalTax += $taxAmount * (1 - $discount_percent/100);
+		$totalAmountHT += $amountHT * (1 - $discount_percent/100);
+		$listprice = ($amountTTC - $taxAmount) / $qty;
+		//var_dump('$totalAmountHT', $totalAmountHT, "$qty * $listprice", $invoiceLine['taxrate']);
+		
+		$incrementOnDel = $invoiceLine['isproduct'] ? 1 : 0;
+		
+		$db = PearDatabase::getInstance();
+		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_percent, discount_amount, incrementondel, $taxName)
+			VALUES(?,?,?,?,?,?,?,?,?)";
+		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $qty, $listprice, $discount_percent, $discount_amount, $incrementOnDel, $taxValue);
+		//$db->setDebug(true);
+		$db->pquery($query, $qparams);
 	}
 
 	/**

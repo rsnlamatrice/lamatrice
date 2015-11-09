@@ -551,6 +551,12 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 * @return <Array> - array of field values
 	 */
 	public function getFieldInfoForContext($context = false) {
+		
+		//ED151107 : utilisation du cache, car chargements multiples pour l'éditeur de CustomView
+        $fieldInfo = Vtiger_Cache::get('FieldInfoForContext::'.$context, $this->id);
+		if($fieldInfo)
+			return array_merge($this->fieldInfo, $fieldInfo);
+		
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 		$fieldDataType = $this->getFieldDataType();
 		$this->fieldInfo['mandatory'] = $this->isMandatory();
@@ -574,7 +580,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 				$pickListValues = $this->getPicklistValues();
 				
 		    if(!empty($pickListValues)) {
-			$this->fieldInfo['picklistvalues'] = $pickListValues;
+				$this->fieldInfo['picklistvalues'] = $pickListValues;
 		    }
 		    break;
 		case 'date':
@@ -612,7 +618,10 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		default:
 			break;
 		}
-
+		
+		//ED151107
+		Vtiger_Cache::set('FieldInfoForContext::'.$context, $this->id, $this->fieldInfo);
+		
 		return $this->fieldInfo;
 	}
 

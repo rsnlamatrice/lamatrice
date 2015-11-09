@@ -25,6 +25,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		} else {
 		   $this->updateOne($request);
 		}
+		
 		ob_end_clean();
 		
 		if(is_numeric($crmids) && $crmids != '0')

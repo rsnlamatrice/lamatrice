@@ -609,6 +609,9 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 				var row = currentElement.closest('div.conditionRow');
 				var conditionSelectElement = row.find('select[name="comparator"]');
 				conditionSelectElement.empty();
+				//ED151106 clear alert
+				$icon = row.find('.ui-icon-alert').remove();
+				
 			}
 			thisInstance.loadConditions(currentElement);
 			thisInstance.loadFieldSpecificUi(currentElement);

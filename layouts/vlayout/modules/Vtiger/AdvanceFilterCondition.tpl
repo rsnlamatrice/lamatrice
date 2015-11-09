@@ -246,7 +246,7 @@
 		</select>
 	</span>
 	<span class="span3">
-		{if empty($NOCHOSEN) && !$FIELD_TYPE}<span class="ui-icon ui-icon-alert"></span>!{/if}{*ED151021*}
+		{if empty($NOCHOSEN) && !$FIELD_TYPE}<span class="ui-icon ui-icon-alert"></span>{/if}{*ED151021*}
 		<select class="{if empty($NOCHOSEN)}chzn-select{/if} row-fluid" name="comparator" value="{$CONDITION_INFO['comparator']}">
 			 <option value="none">{vtranslate('LBL_NONE',$MODULE)}</option>
 			{assign var=ADVANCE_FILTER_OPTIONS value=$ADVANCED_FILTER_OPTIONS_BY_TYPE[$FIELD_TYPE]}
