@@ -16,6 +16,7 @@
 	<tbody>
 		<tr>
 		{assign var=PICKLIST_LABELS value=$MODULE_MODEL->getPicklistValuesDetailsForHeaderFilter($FIELD_MODEL->getFieldName())}
+		
 		{foreach item=PICKLIST_ITEM key=PICKLIST_KEY from=$PICKLIST_LABELS}
 				{if is_array($PICKLIST_ITEM)}
 					{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}
@@ -45,7 +46,7 @@
 								border-style: inset;
 						{/if}
 					{/if}">
-					<a href="#" data-searchvalue="{if $PICKLIST_KEY neq '%'}{$PICKLIST_KEY}{/if}">
+					<a href="#" data-searchvalue="{if $PICKLIST_KEY === 0}0{elseif $PICKLIST_KEY neq '%'}{$PICKLIST_KEY}{/if}">
 						<label class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
 						{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
 						{$PICKLIST_LABEL}</label>

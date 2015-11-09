@@ -574,10 +574,10 @@ if(!function_exists('array_move_assoc')) {
             }
 			if ($key == $keyBefore) {
 				$found = true;
-                $newArray[$findKey] = $array[$findKey];
-            }
+				$newArray[$findKey] = $array[$findKey];
+			}
         }
-		if(!$found && array_key_exists($findKey)) //$keyBefore does not exists
+		if(!$found && array_key_exists($findKey, $array)) //$keyBefore does not exists
 			$newArray[$findKey] = $array[$findKey];
         return $newArray;
     }

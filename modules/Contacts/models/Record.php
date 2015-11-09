@@ -493,6 +493,22 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 * used by Contacts_Save_Action::process
 	 */
 	public function createContactEmailsRecord($save = true){
+		if(!$this->get('email'))
+			return;
+		//Vérifie que cette adresse email n'existe pas déjà
+		$params = array();
+		$query = 'SELECT 1
+			FROM `vtiger_contactemails`
+			INNER JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = `vtiger_contactemails`.`contactemailsid`
+			WHERE vtiger_crmentity.deleted = 0
+			AND `vtiger_contactemails`.contactid = ?';
+		global $adb;
+		$result = $adb->pquery($query, array($this->getID()));
+		if(!$result)
+			$adb->eechoError();
+		if($adb->num_rows($result))
+			return;
 		
 		$addressModule = Vtiger_Module_Model::getInstance('ContactEmails');
 		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactEmails');
@@ -610,5 +626,17 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		}
 		return true;
 	}
+
 	
+	//ED151109
+	public function getHtmlLabel(){
+		$isGroupPickListValues = $this->getPicklistValuesDetails('isgroup');
+		$isGroupPickListValue = $isGroupPickListValues[(int)$this->get('isgroup')];
+		
+		$html = '<span class="ui-icon '.$isGroupPickListValue['icon'].'" title="'.$isGroupPickListValue['label'].'"></span>'
+			. $this->get('contact_no')
+			. ' ' . $this->getName()
+			. ($this->get('isgroup') > 0 && $this->get('mailingstreet2') ? ' - ' . $this->get('mailingstreet2') : '');
+		return $html;
+	}	
 }

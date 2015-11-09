@@ -10,5 +10,7 @@
  ********************************************************************************/
 -->*}
 {foreach item=imagePath key=imageName from=$RECORD->getImageDetails()}
-    <img src="{$imagePath}" alt="{$imageName}" title="{$imageName}" width="150" height="80"><br>
+    {if is_string($imagePath)}
+        <img src="{$imagePath}" alt="{$imageName}" title="{$imageName}" width="150" height="80"/><br/>
+    {/if}
 {/foreach}

@@ -1087,13 +1087,16 @@ class Accounts extends CRMEntity {
 					"SalesOrder"=>"vtiger_salesorder","Invoice"=>"vtiger_invoice","Activities"=>"vtiger_seactivityrel",
 					"Documents"=>"vtiger_senotesrel","Attachments"=>"vtiger_seattachmentsrel","HelpDesk"=>"vtiger_troubletickets",
 					"Products"=>"vtiger_seproductsrel",
-					"RSNAboRevues"=>"vtiger_rsnaborevues",);
+					"RsnPrelevements"=>"vtiger_rsnprelevements",
+					"RSNAboRevues"=>"vtiger_rsnaborevues",
+					);
 
 		//related id column names
 		$tbl_field_arr = Array("vtiger_contactdetails"=>"contactid","vtiger_potential"=>"potentialid","vtiger_quotes"=>"quoteid",
 					"vtiger_salesorder"=>"salesorderid","vtiger_invoice"=>"invoiceid","vtiger_seactivityrel"=>"activityid",
 					"vtiger_senotesrel"=>"notesid","vtiger_seattachmentsrel"=>"attachmentsid","vtiger_troubletickets"=>"ticketid",
 					"vtiger_seproductsrel"=>"productid",
+					"vtiger_rsnprelevements"=>"rsnprelevementsid",
 					"vtiger_rsnaborevues"=>"rsnaborevuesid");
 
 		//account id column names
@@ -1101,6 +1104,7 @@ class Accounts extends CRMEntity {
 					"vtiger_salesorder"=>"accountid","vtiger_invoice"=>"accountid","vtiger_seactivityrel"=>"crmid",
 					"vtiger_senotesrel"=>"crmid","vtiger_seattachmentsrel"=>"crmid","vtiger_troubletickets"=>"parent_id",
 					"vtiger_seproductsrel"=>"crmid",
+					"vtiger_rsnprelevements"=>"accountid",
 					"vtiger_rsnaborevues"=>"accountid");
 
 		foreach($transferEntityIds as $transferId) {

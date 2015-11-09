@@ -19,9 +19,9 @@ class Vtiger_RsnPrelevements_PDFController extends Vtiger_LetterToAccount_PDFCon
 	La référence unique de ce mandat (RUM) est : [[separum]]. Notre numéro identifiant Créancier SEPA (ICS) est : [[dest_ICS]] ([[dest_NOM]]). 
 	Le prélèvement sera effectué le 8[[mois]].
 
-	Nous vous remercions sincèrement de ce soutien. Il nous permet de compter sur des rentrées d'argent régulières, indispensables pour assurer les salaires de notre association.
+	Nous vous remercions sincèrement de ce soutien. Il nous permet de compter sur des rentrées d'argent régulières, indispensables pour assurer notre indépendance financière... et donc notre totale liberté de parole et d'action !
 
-	Les prélèvements permettent également de limiter nos dépenses administratives puisque vous ne recevrez plus d'appel à participation financière. Tous les ans, un reçu fiscal récapitulatif du total de vos dons (pour l'année civile) vous est envoyé automatiquement au mois de mars de l'année suivante. Enfin, vous recevez tous nos courriers de campagnes et vous êtes abonnés gratuitement à la revue trimestrielle \"Sortir du nucléaire\".
+	Les prélèvements permettent également de limiter nos dépenses administratives puisque vous ne recevrez plus d'appel à participation financière. Tous les ans, un reçu fiscal récapitulatif du total de vos dons (pour l'année civile) vous est envoyé automatiquement au mois de mars de l'année suivante. Enfin, vous recevez tous nos courriers de campagnes et vous êtes abonné-e gratuitement à la revue trimestrielle \"Sortir du nucléaire\".
 	Si vous souhaitez suspendre votre prélèvement automatique, il vous suffit de nous le signaler par simple courrier ou par mail (et en cas d'urgence par téléphone). Votre demande sera prise en compte immédiatement.
 
 	Merci de ne pas adresser de demande d'arrêt à votre banque. En effet, pour réaliser cette opération, les organismes bancaires prélèvent des frais sur votre compte ainsi que sur le nôtre. En vous adressant directement à nous, l'arrêt est réalisé gratuitement.

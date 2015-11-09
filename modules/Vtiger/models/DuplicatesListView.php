@@ -140,13 +140,15 @@ var_dump($listResult);*/
 		//FROM xxx WHERE
 		$sqlParts = explode(' WHERE ', $listQuery);
 		
-		
+		if($requestSearchQuery)
+			$requestSearchQuery = "WHERE $requestSearchQuery";
+			
 		//TODO limit query because of very slow query
 		$sqlParts[0] .= ' INNER JOIN (
 				SELECT *
 				FROM vtiger_duplicateentities
-				WHERE '.$requestSearchQuery.'
-				LIMIT 0,21
+				'.$requestSearchQuery.'
+				LIMIT 0,30
 			) vtiger_duplicateentities
 			ON vtiger_crmentity.crmid = vtiger_duplicateentities.crmid1
 			OR vtiger_crmentity.crmid = vtiger_duplicateentities.crmid2
@@ -170,6 +172,7 @@ var_dump($listResult);*/
 		
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
+		
 		if(empty($searchKey)) {
 			$searchKey = array('duplicatestatus');
 			$searchValue = array(0);

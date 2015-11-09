@@ -10,9 +10,9 @@
  ********************************************************************************/
 -->
 		ED150102
-		possibilité de passer INPUT_CLASS
-				valeur par défaut : 'input-large'
-		possibilité de passer TITLE
+		possibilitÃ© de passer INPUT_CLASS
+				valeur par dÃˆfaut : 'input-large'
+		possibilitÃ© de passer TITLE
 		*}
 {strip}
 {assign var="FIELD_INFO" value=Vtiger_Util_Helper::toSafeHTML(Zend_Json::encode($FIELD_MODEL->getFieldInfo()))}
