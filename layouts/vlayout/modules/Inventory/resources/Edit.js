@@ -761,9 +761,19 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
 				function(e) {
 					var parentRows = $existing.parents('tr.'+ thisInstance.rowClass)
-					, qty = 0.0;
+					, qty = 0.0
+					, comments = '';
 					parentRows.find('input.qty').each(function(){ qty += parseFloat(this.value.replace(',', '.')); });
+					parentRows.find('textarea.lineItemCommentBox').each(function(){
+						if (this.value) {
+							if(comments) comments += "\n";
+							comments += this.value;
+						}
+					});
 					parentRows.find('.deleteRow').click();
+					if (comments)
+						newRow.find('textarea.lineItemCommentBox')
+							.val(comments);
 					newRow.find('input.qty')
 						.val(qty)
 						.focusout();

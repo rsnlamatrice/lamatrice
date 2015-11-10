@@ -1702,28 +1702,31 @@ class Contacts extends CRMEntity {
 			,"Contacts"=>"vtiger_contactscontrel"
 			,"ContactAdresses"=>"vtiger_contactaddresses"
 			,"ContactEmails"=>"vtiger_contactemails"
+			,"RSNDonateursWeb"=>"vtiger_rsndonateursweb"
 		);
 
 		$tbl_field_arr = Array("vtiger_contpotentialrel"=>"potentialid","vtiger_cntactivityrel"=>"activityid","vtiger_seactivityrel"=>"activityid",
-				"vtiger_troubletickets"=>"ticketid","vtiger_quotes"=>"quoteid","vtiger_purchaseorder"=>"purchaseorderid",
-				"vtiger_salesorder"=>"salesorderid","vtiger_seproductsrel"=>"productid","vtiger_senotesrel"=>"notesid",
-				"vtiger_seattachmentsrel"=>"attachmentsid","vtiger_campaigncontrel"=>"campaignid",'vtiger_invoice'=>'invoiceid',
-                'vtiger_servicecontracts'=>'servicecontractsid','vtiger_project'=>'projectid','vtiger_assets'=>'assetsid'
-		,"vtiger_critere4dcontrel"=>"critere4did"
-		,"vtiger_contactscontrel"=>"contactid"
-		,"vtiger_contactaddresses"=>"contactaddressesid"
-		,"vtiger_contactemails"=>"contactemailsid"
+			"vtiger_troubletickets"=>"ticketid","vtiger_quotes"=>"quoteid","vtiger_purchaseorder"=>"purchaseorderid",
+			"vtiger_salesorder"=>"salesorderid","vtiger_seproductsrel"=>"productid","vtiger_senotesrel"=>"notesid",
+			"vtiger_seattachmentsrel"=>"attachmentsid","vtiger_campaigncontrel"=>"campaignid",'vtiger_invoice'=>'invoiceid',
+			'vtiger_servicecontracts'=>'servicecontractsid','vtiger_project'=>'projectid','vtiger_assets'=>'assetsid'
+			,"vtiger_critere4dcontrel"=>"critere4did"
+			,"vtiger_contactscontrel"=>"contactid"
+			,"vtiger_contactaddresses"=>"contactaddressesid"
+			,"vtiger_contactemails"=>"contactemailsid"
+			,"vtiger_rsndonateursweb"=>"rsndonateurswebid"
 		);
 
 		$entity_tbl_field_arr = Array("vtiger_contpotentialrel"=>"contactid","vtiger_cntactivityrel"=>"contactid","vtiger_seactivityrel"=>"crmid",
-				"vtiger_troubletickets"=>"contact_id","vtiger_quotes"=>"contactid","vtiger_purchaseorder"=>"contactid",
-				"vtiger_salesorder"=>"contactid","vtiger_seproductsrel"=>"crmid","vtiger_senotesrel"=>"crmid",
-				"vtiger_seattachmentsrel"=>"crmid","vtiger_campaigncontrel"=>"contactid",'vtiger_invoice'=>'contactid',
-                'vtiger_servicecontracts'=>'sc_related_to','vtiger_project'=>'linktoaccountscontacts','vtiger_assets'=>'contact'
-		,"vtiger_critere4dcontrel"=>"contactid"
-		,"vtiger_contactscontrel"=>"relcontid"
-		,"vtiger_contactaddresses"=>"contactid"
-		,"vtiger_contactemails"=>"contactid"
+			"vtiger_troubletickets"=>"contact_id","vtiger_quotes"=>"contactid","vtiger_purchaseorder"=>"contactid",
+			"vtiger_salesorder"=>"contactid","vtiger_seproductsrel"=>"crmid","vtiger_senotesrel"=>"crmid",
+			"vtiger_seattachmentsrel"=>"crmid","vtiger_campaigncontrel"=>"contactid",'vtiger_invoice'=>'contactid',
+			'vtiger_servicecontracts'=>'sc_related_to','vtiger_project'=>'linktoaccountscontacts','vtiger_assets'=>'contact'
+			,"vtiger_critere4dcontrel"=>"contactid"
+			,"vtiger_contactscontrel"=>"relcontid"
+			,"vtiger_contactaddresses"=>"contactid"
+			,"vtiger_contactemails"=>"contactid"
+			,"vtiger_rsndonateursweb"=>"contactid"
 		);
 
 		//ED150910

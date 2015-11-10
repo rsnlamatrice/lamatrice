@@ -1088,6 +1088,7 @@ class Accounts extends CRMEntity {
 					"Documents"=>"vtiger_senotesrel","Attachments"=>"vtiger_seattachmentsrel","HelpDesk"=>"vtiger_troubletickets",
 					"Products"=>"vtiger_seproductsrel",
 					"RsnPrelevements"=>"vtiger_rsnprelevements",
+					"RsnReglements"=>"vtiger_rsnregrelements",
 					"RSNAboRevues"=>"vtiger_rsnaborevues",
 					);
 
@@ -1097,6 +1098,7 @@ class Accounts extends CRMEntity {
 					"vtiger_senotesrel"=>"notesid","vtiger_seattachmentsrel"=>"attachmentsid","vtiger_troubletickets"=>"ticketid",
 					"vtiger_seproductsrel"=>"productid",
 					"vtiger_rsnprelevements"=>"rsnprelevementsid",
+					"vtiger_rsnregrelements"=>"rsnregrelementsid",
 					"vtiger_rsnaborevues"=>"rsnaborevuesid");
 
 		//account id column names
@@ -1105,6 +1107,7 @@ class Accounts extends CRMEntity {
 					"vtiger_senotesrel"=>"crmid","vtiger_seattachmentsrel"=>"crmid","vtiger_troubletickets"=>"parent_id",
 					"vtiger_seproductsrel"=>"crmid",
 					"vtiger_rsnprelevements"=>"accountid",
+					"vtiger_rsnregrelements"=>"accountid",
 					"vtiger_rsnaborevues"=>"accountid");
 
 		foreach($transferEntityIds as $transferId) {
