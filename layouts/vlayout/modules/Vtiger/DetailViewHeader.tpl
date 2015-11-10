@@ -63,6 +63,10 @@
 							{/if}
 							</div>
 						</div>
+					
+						<div class="detailViewHeaderCenter">
+							{include file="DetailViewHeaderCenter.tpl"|vtemplate_path:$MODULE}
+						</div>
 					</div>
 				</div>
 			</div>

@@ -270,7 +270,6 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 	 * @param <type> $request
 	 */
 	function showModuleBasicView($request) {
-
 		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
 

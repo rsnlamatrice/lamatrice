@@ -43,4 +43,24 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 
 		return parent::process($request);
 	}
+	
+	function preProcessDisplay(Vtiger_Request $request) {
+		
+		$statsFields = array(
+			'Dons 2015' => 'xxxx €',
+			'Prélèvements 2015' => 'xxxx €',
+			'Boutique 2015' => 'xxxx €',
+			'Dons 2014' => 'xxxx €',
+			'Prélèvements 2014' => 'xxxx €',
+			'Boutique 2014' => 'xxxx €',
+			'Dons 2013' => 'xxxx €',
+			'Prélèvements 2013' => 'xxxx €',
+			'Boutique 2013' => 'xxxx €',
+		);
+		
+		$viewer = $this->getViewer($request);
+		$viewer->assign('STATISTICS_FIELDS', $statsFields);
+		
+		parent::preProcessDisplay($request);
+	}
 }

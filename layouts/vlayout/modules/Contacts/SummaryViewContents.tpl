@@ -47,6 +47,8 @@
 		&& $FIELD_NAME neq 'firstname'
 		&& $FIELD_NAME neq 'isgroup'
 		
+		&& ($FIELD_NAME neq 'description' || $RECORD->get($FIELD_NAME))
+		
 		&& $FIELD_NAME neq 'leadsource'
 		
 		}
