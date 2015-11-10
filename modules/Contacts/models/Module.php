@@ -332,10 +332,14 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 				
 		switch($relatedModule->getName()){
 		 case 'ContactAddresses' :
-		 case 'ContactEmails' :
 			//don't show if not > 1
 			$query = parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
 			$query = preg_replace('/^SELECT\sCOUNT\(\*\)/', 'SELECT IF(COUNT(*)>1, COUNT(*), 0)', $query);
+			return $query;
+		 case 'ContactEmails' :
+			//don't show if not > 1
+			$query = parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
+			$query = preg_replace('/^SELECT\sCOUNT\(\*\)/', 'SELECT IF(COUNT(DISTINCT email)>1, COUNT(DISTINCT email), 0)', $query);
 			return $query;
 		 default:
 			return parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);

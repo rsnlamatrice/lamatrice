@@ -97,6 +97,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		
 		case 'TestsED' :
 			$this->freeDebug();
+			exit;
 			break;
 		
 		case 'PicklistValuesTransfer' :
@@ -112,7 +113,6 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$viewer->assign('HTML_DATA', "Inconnu : \"$sub\"");
 			break;
 		}
-		
 		$VTIGER_BULK_SAVE_MODE = $previousBulkSaveMode;
 	}
 	
@@ -120,9 +120,65 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$input = '100.08';
-		var_dump($input, Vtiger_Currency_UIType::convertToDBFormat($input));
+		$contactRecordModel = Vtiger_Record_Model::getInstanceById(1822469, 'Contacts');
+		$contactsData = array(array(
+			'email' => 'test.manu222.p.chesneau@test.test ',
+			'listesn' => '0',
+			'listesd' => '1',
+		));
+		//function addContactEmail($contactRecordModel, $contactsData){
+			$email = $contactsData[0]['email'];
+			if(!$contactRecordModel->get('email')){
+				$emailRecordModel = $contactRecordModel->createContactEmailsRecord(false, $email);
+				$contactRecordModel->set('mode','edit');
+				$contactRecordModel->save();
+			}
+			else
+				$emailRecordModel = $contactRecordModel->createContactEmailsRecord(false, $email);
+			$rsnMediaDocuments = $emailRecordModel->get('rsnmediadocuments');
+			$rsnMediaDocumentsDoNot = $emailRecordModel->get('rsnmediadocumentsdonot');
+			$rsnMediaDocuments = $rsnMediaDocuments 		? explode(' |##| ', $rsnMediaDocuments) : array();
+			$rsnMediaDocumentsDoNot = $rsnMediaDocumentsDoNot 	? explode(' |##| ', $rsnMediaDocumentsDoNot) : array();
+			
+			$listes = array(
+					'rezo-info' => $contactsData[0]['listesn'],
+					'Liste régionale' => $contactsData[0]['listesd'],
+			);
+			
+			foreach($listes as $document => $inscription){
+				$document = to_html($document);
+				if($inscription === '1'){
+					if(!in_array($document, $rsnMediaDocuments)){
+						$rsnMediaDocuments[] = $document;
+					}
+					if(in_array($document, $rsnMediaDocumentsDoNot)){
+						unset($rsnMediaDocumentsDoNot[array_search($document, $rsnMediaDocumentsDoNot)]);
+					}
+				}
+				else { //désinscription
+					if(!in_array($document, $rsnMediaDocumentsDoNot)){
+						$rsnMediaDocumentsDoNot[] = $document;
+					}
+					if(in_array($document, $rsnMediaDocuments)){
+						
+						unset($rsnMediaDocuments[array_search($document, $rsnMediaDocuments)]);
+					}
+				}
+			}
+			//save
+			$rsnMediaDocuments = implode(' |##| ', $rsnMediaDocuments);
+			$rsnMediaDocumentsDoNot = implode(' |##| ', $rsnMediaDocumentsDoNot);
+			if($emailRecordModel->get('rsnmediadocuments') != $rsnMediaDocuments
+			|| $emailRecordModel->get('rsnmediadocumentsdonot') != $rsnMediaDocumentsDoNot){
+				if(!$emailRecordModel->get('mode'))
+					$emailRecordModel->set('mode', 'edit');
+				$emailRecordModel->set('rsnmediadocuments', $rsnMediaDocuments);
+				$emailRecordModel->set('rsnmediadocumentsdonot', $rsnMediaDocumentsDoNot);
+				$emailRecordModel->save();
+			}
+		//}
 	}
+	
 	
 	
 	private function process_ImportCogilog_Factures($request, $sub, $viewer){

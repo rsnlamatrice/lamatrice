@@ -38,9 +38,17 @@
 		&& $FIELD_NAME neq 'donotappeldonweb'
 		&& $FIELD_NAME neq 'donototherdocuments'
 		
+		&& $FIELD_NAME neq 'reference'
+		
 		&& $FIELD_NAME neq 'phone'
-		&& ($FIELD_NAME neq 'reference' || ($RECORD->get($FIELD_NAME) && $RECORD->get('account_id')))
 		&& $FIELD_NAME neq 'rsnnpai'
+		
+		&& $FIELD_NAME neq 'contact_no'
+		&& $FIELD_NAME neq 'firstname'
+		&& $FIELD_NAME neq 'isgroup'
+		
+		&& $FIELD_NAME neq 'leadsource'
+		
 		}
 			<tr class="summaryViewEntries">
 				<td class="fieldLabel" style="width:30%"><label class="muted">
@@ -48,8 +56,13 @@
 					Ne pas...
 				{elseif $FIELD_NAME == 'email'}
 					Email, téléphone
-				{elseif $FIELD_NAME == 'reference'}
-					&nbsp;
+				{elseif $FIELD_NAME == 'lastname'}
+					Contact
+					<span class="pull-right" style="padding-right:4px;">
+						{$RECORD->get('contact_no')}
+					</span>
+				{elseif $FIELD_NAME == 'accounttype'}
+					Type de contact / origine
 				{elseif $FIELD_NAME == 'mailingcity'}
 					Adresse
 					{* status NPAI *}
@@ -76,6 +89,9 @@
 						<span class="value span10" style="word-wrap: break-word;">
 							{if $FIELD_MODEL->get('uitype') eq '15'}{* ED141005 *}
 								{$RECORD->getDisplayValue($FIELD_NAME)}
+							{* concaténation de prénom + nom + mailingstreet2 *}
+							{elseif $FIELD_NAME eq 'lastname'}
+								{$RECORD->getHtmlLabel('isgroup,firstname,lastname,mailingstreet2')}
 							{* DO NOT *}
 							{elseif $FIELD_NAME eq 'emailoptout'}
 								{assign var=DONOT_COUNTER value=0}
@@ -142,6 +158,27 @@
 								{if $RECORD->get('mailingcountry')}
 									&nbsp;-&nbsp;{$RECORD->getDisplayValue('mailingcountry')}
 								{/if}
+							{* concaténation de nom du compte + reference *}
+							{elseif $FIELD_NAME eq 'account_id'}
+								{* origin *}
+								{if $RECORD->get($FIELD_NAME)}
+									<span style="float: left;">
+									{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+									</span>
+									<span style="float: left; margin-left: 1em;">
+									{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
+									{assign var=FIELD_NAME_TMP value=$FIELD_NAME}
+									{assign var=FIELD_NAME value='reference'}
+									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+									{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+									{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
+									{assign var=FIELD_NAME value=$FIELD_NAME_TMP}
+									</span>
+									<span style="float: left;">
+									{if !$RECORD->get(FIELD_NAME)}référent du compte{/if} 
+									</span>
+								{/if}
+								
 							{* concaténation de email + phone *}
 							{elseif $FIELD_NAME eq 'email'}
 								{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
@@ -149,12 +186,22 @@
 									&nbsp;-&nbsp;{$RECORD->getDisplayValue('phone')}
 								{/if}
 								
+							{* type de contact + origin *}
+							{elseif $FIELD_NAME == 'accounttype'}
+								{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+								{* origin *}
+								{if $RECORD->get('leadsource')}
+									{if $RECORD->get($FIELD_NAME)}<br>{/if}
+									{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
+									{assign var=FIELD_NAME_TMP value=$FIELD_NAME}
+									{assign var=FIELD_NAME value='leadsource'}
+									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+									{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
+									{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
+									{assign var=FIELD_NAME value=$FIELD_NAME_TMP}
+								{/if}
 							{else}
 								{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
-								{*ED15000*}
-								{if $FIELD_NAME eq 'lastname' && $RECORD->get('isgroup') neq '0' && $RECORD->get('mailingstreet2')}
-									&nbsp;-&nbsp;{$RECORD->get('mailingstreet2')}
-								{/if}
 								
 							{/if}
 						</span>
@@ -176,8 +223,24 @@
 								{/foreach}
 								{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
 							{else}
+								
+								{* AVANT *}
+								{* lastname : isgroup, street2 *}
+								{if $FIELD_NAME eq 'lastname'}
+									{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
+									{assign var=FIELD_NAME_TMP value=$FIELD_NAME}
+									{assign var=FIELD_NAME value='firstname'}
+									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+									{if $FIELD_MODEL}
+									<span class="hide edit span10" title="Prénom">
+										{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD TITLE=vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}
+										<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
+									</span>
+									{/if}
+									{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
+									{assign var=FIELD_NAME value=$FIELD_NAME_TMP}	
 								{* code postal *}
-								{if $FIELD_NAME eq 'mailingcity'}
+								{elseif $FIELD_NAME eq 'mailingcity'}
 									{assign var=FIELD_MODEL_TMP value=$FIELD_MODEL}
 									{assign var=FIELD_NAME_TMP value=$FIELD_NAME}
 									{assign var=FIELD_NAME value='mailingzip'}
@@ -201,15 +264,26 @@
 									{/if}
 								</span>
 								
-								{* isgroup -> street2 *}
-								{if $FIELD_NAME eq 'lastname' && $RECORD->get('isgroup') neq '0' && $RECORD->get('mailingstreet2')}
-									{assign var=FIELD_NAME value='mailingstreet2'}
+								{* APRES *}
+								{* lastname : isgroup, street2 *}
+								{if $FIELD_NAME eq 'lastname'}
+									{assign var=FIELD_NAME value='isgroup'}
 									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
 									{if $FIELD_MODEL}
-									<span class="hide edit span10" title="Nom du groupe">
+									<span class="hide edit span10" title="Particulier / Structure">
 										{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD TITLE=vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}
 										<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
 									</span>
+									{/if}
+									{if $RECORD->get('isgroup') neq '0' && $RECORD->get('mailingstreet2')}
+										{assign var=FIELD_NAME value='mailingstreet2'}
+										{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+										{if $FIELD_MODEL}
+										<span class="hide edit span10" title="Nom du groupe">
+											{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD TITLE=vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}
+											<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
+										</span>
+										{/if}
 									{/if}
 								{* pays *}
 								{elseif $FIELD_NAME eq 'mailingcity'}
@@ -223,6 +297,15 @@
 								{* email, phone *}
 								{elseif $FIELD_NAME eq 'email'}
 									{assign var=FIELD_NAME value='phone'}
+									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+									<span class="hide edit span10">{* ED141010 : add RECORD_MODEL=$RECORD*}
+										{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
+										{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD_MODEL=$RECORD TITLE=vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}
+										<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
+									</span>
+								{* type de contact -> origin *}
+								{elseif $FIELD_NAME == 'accounttype'}
+									{assign var=FIELD_NAME value='leadsource'}
 									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
 									<span class="hide edit span10">{* ED141010 : add RECORD_MODEL=$RECORD*}
 										{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}

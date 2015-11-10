@@ -254,7 +254,7 @@ class Vtiger_Util_Helper {
 		 * cf Settings_Picklist_Field_Model->getPickListName()
 		 */
 		
-    	/* ED150102
+		/* ED150102
 		 * redirection exceptionnel de champ vers une table commune
 		 * TODO : extraire cette config
 		 * TODO : autres modules que Contacts ?
@@ -291,6 +291,9 @@ class Vtiger_Util_Helper {
 		 	break;
 		 case 'rsnmoderegl':
 		 	$fieldName = 'receivedmoderegl';
+		 	break;
+		 case 'rsnmediadocumentsdonot':
+		 	$fieldName = 'rsnmediadocuments';
 		 	break;
 		 default:
 			break;

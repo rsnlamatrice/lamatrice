@@ -492,43 +492,42 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * used by Contacts_Save_Action::process
 	 */
-	public function createContactEmailsRecord($save = true){
-		if(!$this->get('email'))
-			return;
-		//Vérifie que cette adresse email n'existe pas déjà
-		$params = array();
-		$query = 'SELECT 1
-			FROM `vtiger_contactemails`
-			INNER JOIN vtiger_crmentity
-				ON vtiger_crmentity.crmid = `vtiger_contactemails`.`contactemailsid`
-			WHERE vtiger_crmentity.deleted = 0
-			AND `vtiger_contactemails`.contactid = ?';
+	public function createContactEmailsRecord($save = true, $email = false){
 		global $adb;
-		$result = $adb->pquery($query, array($this->getID()));
-		if(!$result)
-			$adb->eechoError();
-		if($adb->num_rows($result))
-			return;
-		
+		if(!$email && !$this->get('email'))
+			return false;
+		if($email && !$this->get('email')){
+			$query = 'UPDATE `vtiger_contactdetails`
+				SET email = ?
+				WHERE `vtiger_contactdetails`.contactid = ?';
+			$result = $adb->pquery($query, array($email, $this->getId()));
+			$this->set('email', $email);
+		}
+		elseif(!$email)
+			$email = $this->get('email');
+			
 		$addressModule = Vtiger_Module_Model::getInstance('ContactEmails');
+		$addressRecord = $addressModule->getRecordModelFromContactAndEmail($this->getId(), $email);
+		if($addressRecord)//already exists
+			return $addressRecord;
+		
 		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactEmails');
 		$addressRecord->set('mode', 'create');
 		$mapping = array(
 			'id' => 'contactid',
-			'email' => 'email',
 			'emailoptout' => 'emailoptout',
 			'modifiedtime' => 'createdtime',
 		);
-		//echo '<pre>';
+		
 		foreach($mapping as $sourceField => $destField){
 			$addressRecord->set($destField, $this->get($sourceField));
-			//var_dump($sourceField, $destField, $addressRecord->get($destField));
 		}
-		//echo '</pre>';
-		//die();
+		$destField = 'email';
+		$addressRecord->set($destField, $email);
+		
 		if($save){
 			$addressRecord->save();
-			$addressRecord->set('mode', '');
+			$addressRecord->set('mode', 'edit');
 		}
 		return $addressRecord;
 	}
@@ -628,15 +627,20 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	}
 
 	
-	//ED151109
-	public function getHtmlLabel(){
+	/* ED151109
+	 *
+	 * @params $fields
+	 */
+	public function getHtmlLabel($fields = true){
+		if($fields === true)
+			$fields = 'contact_no,isgroup,firstname,lastname,mailingstreet2';
 		$isGroupPickListValues = $this->getPicklistValuesDetails('isgroup');
 		$isGroupPickListValue = $isGroupPickListValues[(int)$this->get('isgroup')];
 		
-		$html = '<span class="ui-icon '.$isGroupPickListValue['icon'].'" title="'.$isGroupPickListValue['label'].'"></span>'
-			. $this->get('contact_no')
-			. ' ' . $this->getName()
-			. ($this->get('isgroup') > 0 && $this->get('mailingstreet2') ? ' - ' . $this->get('mailingstreet2') : '');
+		$html = '<span class="ui-icon '.$isGroupPickListValue['icon'].'" title="'.$isGroupPickListValue['label'].'"></span> '
+			. (strpos($fields, 'contact_no') !== false ? $this->get('contact_no').' ' : '')
+			. (strpos($fields, 'lastname') !== false ? $this->getName() : '')
+			. (strpos($fields, 'mailingstreet2') !== false && $this->get('isgroup') > 0 && $this->get('mailingstreet2') ? ' - ' . $this->get('mailingstreet2') : '');
 		return $html;
 	}	
 }
