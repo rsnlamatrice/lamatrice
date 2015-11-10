@@ -230,6 +230,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
 			//Relations  only
 			$this->createContactRelatedDocument($record, $contactsData);
+			//historique d'email 
+			$this->addContactEmail($record, $contactsData);
 			
 			//already imported !!
 			foreach ($contactsData as $contactsLine) {
@@ -294,6 +296,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			else {
 				//Relations 
 				$this->createContactRelatedDocument($record, $contactsData);
+				//historique d'email 
+				$this->addContactEmail($record, $contactsData);
 			}
 			return $record;
 		}
@@ -366,6 +370,58 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			$db->echoError($query);
 			die();
 		}		
+	}
+	
+	private function addContactEmail($contactRecordModel, $contactsData){
+		$email = $contactsData[0]['email'];
+		if(!$contactRecordModel->get('email')){
+			$emailRecordModel = $contactRecordModel->createContactEmailsRecord(false, $email);
+			$contactRecordModel->set('mode','edit');
+			$contactRecordModel->save();
+		} else {
+			$emailRecordModel = $contactRecordModel->createContactEmailsRecord(false, $email);
+		}
+		$rsnMediaDocuments 	= $emailRecordModel->get('rsnmediadocuments');
+		$rsnMediaDocumentsDoNot = $emailRecordModel->get('rsnmediadocumentsdonot');
+		$rsnMediaDocuments 	= $rsnMediaDocuments 		? explode(' |##| ', $rsnMediaDocuments) : array();
+		$rsnMediaDocumentsDoNot = $rsnMediaDocumentsDoNot 	? explode(' |##| ', $rsnMediaDocumentsDoNot) : array();
+		
+		$listes = array(
+				'rezo-info' => $contactsData[0]['listesn'],
+				'Liste régionale' => $contactsData[0]['listesd'],
+		);
+		
+		foreach($listes as $document => $inscription){
+			$document = to_html($document);
+			if($inscription === '1'){
+				if(!in_array($document, $rsnMediaDocuments)){
+					$rsnMediaDocuments[] = $document;
+				}
+				if(in_array($document, $rsnMediaDocumentsDoNot)){
+					unset($rsnMediaDocumentsDoNot[array_search($document, $rsnMediaDocumentsDoNot)]);
+				}
+			}
+			else { //désinscription
+				if(!in_array($document, $rsnMediaDocumentsDoNot)){
+					$rsnMediaDocumentsDoNot[] = $document;
+				}
+				if(in_array($document, $rsnMediaDocuments)){
+					
+					unset($rsnMediaDocuments[array_search($document, $rsnMediaDocuments)]);
+				}
+			}
+		}
+		//save
+		$rsnMediaDocuments = implode(' |##| ', $rsnMediaDocuments);
+		$rsnMediaDocumentsDoNot = implode(' |##| ', $rsnMediaDocumentsDoNot);
+		if($emailRecordModel->get('rsnmediadocuments') != $rsnMediaDocuments
+		|| $emailRecordModel->get('rsnmediadocumentsdonot') != $rsnMediaDocumentsDoNot){
+			if(!$emailRecordModel->get('mode'))
+				$emailRecordModel->set('mode', 'edit');
+			$emailRecordModel->set('rsnmediadocuments', $rsnMediaDocuments);
+			$emailRecordModel->set('rsnmediadocumentsdonot', $rsnMediaDocumentsDoNot);
+			$emailRecordModel->save();
+		}
 	}
 	
 	/**

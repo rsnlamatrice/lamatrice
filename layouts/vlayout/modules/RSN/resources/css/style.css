@@ -418,6 +418,19 @@ ListView stylings **/
 #detailView .value label.ui-buttonset {
   border: none;
 }
+
+/* detailView summary
+stats */
+div.detailViewHeaderCenter {
+  float: left;
+}
+#statisticsSummary .stat-field {
+  padding-right: 8px;
+}
+#statisticsSummary {
+  max-height: 64px;
+}
+
 /*CustomView editor : bugg select picklist
 Correction : c'est uniquement quand il y a un var_dump qui traine */
 #CustomView input[type="text"] {
