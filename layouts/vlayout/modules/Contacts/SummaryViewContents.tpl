@@ -174,9 +174,11 @@
 									{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
 									{assign var=FIELD_NAME value=$FIELD_NAME_TMP}
 									</span>
-									<span style="float: left;">
-									{if !$RECORD->get(FIELD_NAME)}référent du compte{/if} 
-									</span>
+									{if !$RECORD->get($FIELD_NAME)}
+										<span style="float: left;">
+										référent du compte
+										</span>
+									{/if}
 								{/if}
 								
 							{* concaténation de email + phone *}
