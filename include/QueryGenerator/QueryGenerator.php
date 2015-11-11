@@ -294,17 +294,21 @@ class QueryGenerator {
 			if(count($filtercolumns) > 0) {
 				$this->startGroup('');
 				$skipNextIndex = -1;
-				foreach ($filtercolumns as $index=>$filter) {
+				//foreach ($filtercolumns as $index=>$filter) { //les filtres suivants sont modifiés dans la boucle
+				for($index = 0; $index < count($filtercolumns); $index++) {
+					$filter = $filtercolumns[$index];
+				
 					if($skipNextIndex >= $index){
-						$filter['skip'] = true;
+						$filtercolumns[$index]['skip'] = true;
 						continue;
 					}
 					
 					/*ED150226
 					 * related module view field
+					 * ou statistique
 					 */
 					//die('<pre>'.print_r($filter['columnname'], true).'</pre>');
-					if($filter['columnname'][0] == '['){
+					if($filter['columnname'][0] === '['){
 						$pos = strpos($filter['columnname'], ']', 1);
 						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
 						$filter['relatedmodulename'] = $viewName[0];
@@ -315,14 +319,40 @@ class QueryGenerator {
 							//var_dump($viewName);
 							if($viewName[1] === 'stats_periodicite'){//1ere ligne
 								//$statisticRelation = $this->addStatisticsTable($viewName[2]);
-								$statisticRelation = $this->addStatisticsPeriodeCondition($viewName[2], $filter['comparator'], $filter['value']);
+								$statId = $viewName[2];
+								$columncondition = $filter['column_condition'];
+								
+								$statisticRelation = $this->addStatisticsPeriodeCondition($statId, $filter['comparator'], $filter['value'], $columncondition);
+								
+								if(!empty($columncondition)) {
+									//Pour le groupe OR, les champs de stat qui suivent la période de stat est toujours en AND
+									if(strcasecmp($columncondition, 'or') === 0
+									&& count($filtercolumns) > $index + 1
+												//stat : d'un autre champ que la période : même stat id
+									&& preg_match('/^\[RSNStatisticsResults\:(?!stats_periodicite)[^:]+\:'.$statId.'/', $filtercolumns[$index+1]['columnname'])
+									){
+										//et c'est vrai pour les suivants aussi
+										for($nextFilterIndex = $index + 1; $nextFilterIndex < count($filtercolumns); $nextFilterIndex++) {
+											if(preg_match('/^\[RSNStatisticsResults\:(?!stats_periodicite)[^:]+\:'.$statId.'/', $filtercolumns[$nextFilterIndex]['columnname'])){
+												$filtercolumns[$nextFilterIndex - 1]['column_condition'] = 'AND';
+											}
+											else //fin du groupe de cette stat
+												break;
+										}
+										$columncondition = $filtercolumns[$index]['column_condition'];
+								
+									}
+									
+									$this->addConditionGlue($columncondition);
+								}
 							}
 							else{
 								$statisticRelation = $this->addStatisticsCondition($viewName[2], $viewName[1], $viewName[3], $filter['comparator'], $filter['value']);
-							}
-							$columncondition = $filter['column_condition'];
-							if(!empty($columncondition)) {
-								$this->addConditionGlue($columncondition);
+									
+								$columncondition = $filter['column_condition'];
+								if(!empty($columncondition)) {
+									$this->addConditionGlue($columncondition);
+								}
 							}
 							continue;
 						}
@@ -508,8 +538,13 @@ class QueryGenerator {
 		}
 	}
 
-	//Inclut une table de résultats de stats dans le from
-	private function addStatisticsPeriodeCondition($statId, $comparator = false, $condition = false){
+	/**
+	 * Inclut une table de résultats de stats dans le from
+	 *
+	 *
+	 * @param $groupCondition : définit si il faut un INNER JOIN ou un LEFT JOIN
+	 */
+	private function addStatisticsPeriodeCondition($statId, $comparator = false, $condition = false, $groupCondition = 'and'){
 		if(!$this->statistictsRelations)
 			$this->statistictsRelations = array();
 		$alias = $this->getStatisticsPeriodeAlias($statId, $comparator, $condition);
@@ -518,6 +553,7 @@ class QueryGenerator {
 				'id' => $statId,
 				'tableName' => RSNStatistics_Utils_Helper::getStatsTableNameFromId($statId),
 				'alias' => $alias,
+				'groupCondition' => $groupCondition,
 			);
 			$this->statistictsRelations[$alias] = $relationInfos;
 			$this->addMetaStatFields($statId, $alias);
@@ -606,11 +642,12 @@ class QueryGenerator {
 
 			$query = "SELECT ";
 			$query .= $this->getSelectClauseColumnSQL();
-			$query .= $this->getFromClause();
-			$query .= $this->getWhereClause();
+			$query .= "\n". $this->getFromClause();
+			$query .= "\n". $this->getWhereClause();
 			$this->query = $query;
 			
-//			print_r('<pre style="margin-top:4em">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+			//print_r('<pre style="margin-top:4em; max-width: 180px;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+			
 			//echo_callstack();
 			
 			return $query;
@@ -873,7 +910,8 @@ class QueryGenerator {
 		if($this->statistictsRelations)
 			foreach ($this->statistictsRelations as $statisticId => $relationInfos) {
 				//TODO : LEFT JOIN if needed
-				$sql .= ' INNER JOIN '.$relationInfos['tableName'].' `'.$relationInfos['alias'].'`
+				$joinType = strcasecmp($relationInfos['groupCondition'], 'or') === 0 ? 'LEFT' : 'INNER';
+				$sql .= ' '.$joinType.' JOIN '.$relationInfos['tableName'].' `'.$relationInfos['alias'].'`
 					 ON `'.$relationInfos['alias'].'`.crmid = '.$baseTable.'.'.$baseTableIndex;
 			}
 		
