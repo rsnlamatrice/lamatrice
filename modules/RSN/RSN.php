@@ -59,6 +59,7 @@ class RSN {
 			$this->add_rsnreglements_fields();
 			$this->add_RSNStatisticsResults_Extension();
 			$this->add_documents_fields();
+			$this->add_parenttab_label_index();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -677,5 +678,34 @@ INSERT INTO `vtiger_organizationsubdetails` (`organization_id`, `parameter`, `co
 		}
 	}
 	
+	
+	/* ED151021
+	 * Champ label indexé et unique de parenttab
+	 */ 
+	static function add_parenttab_label_index(){
+		
+		$db = PearDatabase::getInstance();
+		
+		$sql = array();
+		$sql[] = "ALTER TABLE `vtiger_parenttab` ADD UNIQUE(`parenttab_label`)";
+		
+		$sql[] = "ALTER TABLE vtiger_parenttab DROP INDEX parenttab_parenttabid_parenttabl_label_visible_idx";
+		
+		$sql[] = "alter table vtiger_parenttabrel drop foreign key fk_2_vtiger_parenttabrel";
+		$sql[] = "ALTER TABLE vtiger_parenttabrel DROP INDEX fk_2_vtiger_parenttabrel";
+		$sql[] = "ALTER TABLE `vtiger_parenttab` CHANGE `parenttabid` `parenttabid` INT(19) NOT NULL AUTO_INCREMENT";
+		
+		$sql[] = "alter table vtiger_parenttabrel
+ADD CONSTRAINT fk_2_vtiger_parenttabrel
+FOREIGN KEY fk_2_vtiger_parenttabrel(parenttabid)
+REFERENCES vtiger_parenttab(parenttabid)
+ON DELETE CASCADE
+ON UPDATE RESTRICT";
+
+		$sql[] = "ALTER TABLE `vtiger_parenttabrel` ADD PRIMARY KEY( `parenttabid`, `tabid`)";
+
+		foreach($sql as $query)
+			$db->query($query);
+	}
 	
 }

@@ -294,16 +294,10 @@ class QueryGenerator {
 			if(count($filtercolumns) > 0) {
 				$this->startGroup('');
 				$skipNextIndex = -1;
-				//foreach ($filtercolumns as $index=>$filter) { //les filtres suivants sont modifiés dans la boucle et le foreach semble avoir réservé les valeurs à l'initialisation de la boucle
-				//initialise le 1er index, qui n'est pas forcément 0 (dans le group OR)
-				foreach ($filtercolumns as $index=>$filter)
-					break;
-				//et le test de sortie est sur l'existence du filtre de l'index
-				for(/*$index = 0*/; array_key_exists($index, $filtercolumns); $index++) {
-					$filter = $filtercolumns[$index];
+				foreach ($filtercolumns as $index => &$filter){
 				
 					if($skipNextIndex >= $index){
-						$filtercolumns[$index]['skip'] = true;
+						$filter['skip'] = true;
 						continue;
 					}
 					
@@ -343,7 +337,7 @@ class QueryGenerator {
 											else //fin du groupe de cette stat
 												break;
 										}
-										$columncondition = $filtercolumns[$index]['column_condition'];
+										$columncondition = $filter['column_condition'];
 								
 									}
 									
@@ -650,7 +644,7 @@ class QueryGenerator {
 			$query .= $this->getWhereClause();
 			$this->query = $query;
 			
-			//print_r('<pre style="margin-top:4em; max-width: 180px;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+			//print_r('<pre style="margin-top:4em;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
 			
 			//echo_callstack();
 			

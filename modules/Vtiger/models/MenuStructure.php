@@ -68,21 +68,25 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 
 		$menuListArray = array();
 		$menuListArray[self::TOP_MENU_INDEX] = array();
-		$menuListArray[self::MORE_MENU_INDEX] = $structureModel->getEmptyMoreMenuList();
+		$menuListArray[self::MORE_MENU_INDEX] = array();//$structureModel->getEmptyMoreMenuList();
 
 		foreach($menuModelList as $menuModel) {
 			if(($menuModel->get('tabsequence') != -1 && (!$topMenuLimit || $currentTopMenuCount < $topMenuLimit)) ) {
 				$menuListArray[self::TOP_MENU_INDEX][$menuModel->get('name')] = $menuModel;
 				$currentTopMenuCount++;
 			}
-			
+		}
+		
+		usort($menuModelList, array('Vtiger_MenuStructure_Model', 'sortMenuItemsBySequenceInParent'));
+		foreach($menuModelList as $menuModel) {
 			$parent = $menuModel->get('parent');
 			if($parent == 'Sales' || $parent == 'Marketing'){
 				$parent = 'MARKETING_AND_SALES';
 			}
 			$menuListArray[self::MORE_MENU_INDEX][strtoupper($parent)][$menuModel->get('name')] = $menuModel;
 		}
-
+		
+		
 		if(!empty($selectedMenu) && !array_key_exists($selectedMenu, $menuListArray[self::TOP_MENU_INDEX])) {
 			$selectedMenuModel = $menuModelList[$selectedMenu];
 			if($selectedMenuModel) {
@@ -90,13 +94,23 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 			}
 		}
 		
-		// Apply custom comparator
+		//echo '<br><br><br><br>';
+		//echo_callstack();
+		//var_dump($menuModelList, $menuListArray[self::MORE_MENU_INDEX]);
+		/*// Apply custom comparator
 		foreach ($menuListArray[self::MORE_MENU_INDEX] as $parent => &$values) {
+			//var_dump($parent);
 			uksort($values, array('Vtiger_MenuStructure_Model', 'sortMenuItemsByProcess'));
 		}
-		//uksort($menuListArray[self::TOP_MENU_INDEX], array('Vtiger_MenuStructure_Model', 'sortMenuItemsByProcess'));
 		
+		uksort($menuListArray[self::MORE_MENU_INDEX], array('Vtiger_MenuStructure_Model', 'sortMenuItemsParentsByProcess'));
+		*/
+		//uksort($menuListArray[self::TOP_MENU_INDEX], array('Vtiger_MenuStructure_Model', 'sortMenuItemsByProcess'));
 		return $structureModel->setData($menuListArray);
+	}
+	
+	static function sortMenuItemsBySequenceInParent($a, $b){
+		return ($a->get('tabsequenceinparent') - $b->get('tabsequenceinparent'));
 	}
 	
 	/**
@@ -140,10 +154,41 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 
 		return ($apos - $bpos);
 	}
+	
+	/**
+	 * Custom comparator to sort the menu items by process.
+	 * Refer: http://php.net/manual/en/function.uksort.php
+	 */
+	static function sortMenuItemsParentsByProcess($a, $b) {
+		static $order = NULL;
+		if ($order == NULL) {
+			$order = array(
+				'CONTACTS',
+				'MARKETING_AND_SALES',
+				'INVENTORY',
+				'BOUTIQUE',
+				'COMPTA',
+				'NONUK',
+				'MEDIA_PRESSE',
+				'ANALYTICS',
+				'SUPPORT',
+				'SETTINGS',
+				'TOOLS',			
+			);
+		}
+		$apos  = array_search($a, $order);
+		$bpos  = array_search($b, $order);
+
+		if ($apos === false) return PHP_INT_MAX;
+		if ($bpos === false) return -1*PHP_INT_MAX;
+
+		return ($apos - $bpos);
+	}
 
 
 	private function getEmptyMoreMenuList(){
-		return array('MARKETING_AND_SALES'=>array()
+		return array('CONTACTS'=>array()
+			     ,'MARKETING_AND_SALES'=>array()
 			     ,'INVENTORY'=>array()
 			     ,'NONUK'=>array()
 			     ,'TOOLS'=>array()

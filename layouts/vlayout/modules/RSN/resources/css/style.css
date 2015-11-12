@@ -440,6 +440,7 @@ stats */
   background: white;
   border: 1px solid gray;
   color: black;
+  z-index: 9999;
 }
 #statisticsSummary td ~ td {
   text-align: right;
@@ -479,3 +480,16 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
 #mergeRecords .records-value .value .ui-icon{
   display: inline-block;
 }
+
+/* Editeur du menu Tout */
+#menuEditorContainer .contents {
+  padding: 0px; width: 60em;
+}
+#menuEditorContainer .menuParent {
+  display: inline-block; vertical-align: top; margin: 4px; padding: 4px; border: 1px outset #CCCCCC; width: 12em;
+}
+#menuEditorContainer .menuParent > ul {
+  list-style: none; margin-left: 8px;
+}
+#menuEditorContainer .menuItem {
+   margin-bottom: 8px;
