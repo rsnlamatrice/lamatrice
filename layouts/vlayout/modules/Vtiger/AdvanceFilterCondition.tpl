@@ -275,6 +275,8 @@
 	</span>
 	 <span class="span1">
 		<i class="deleteCondition icon-trash alignMiddle" title="{vtranslate('LBL_DELETE', $MODULE)}"></i>
+		
+		<img class="sort-handler alignMiddle" src="{vimage_path('drag.png')}" style="margin-left: 2em;"/>
 	</span>
 </div>
 {/strip}

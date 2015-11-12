@@ -436,7 +436,12 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
 #CustomView input[type="text"] {
   height: auto;
 }
-
+#CustomView .conditionRow.sub-field {
+ border-left: 1px gray dotted;
+}
+#CustomView .conditionRow.sub-field span:first-of-type .chzn-container {
+  margin-left: 8px;
+}
 /* Merge records */
 #mergeRecords .listViewHeaders label {
   color: white;

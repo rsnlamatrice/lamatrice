@@ -142,6 +142,19 @@ var Vtiger_CustomView_Js = {
                 update: function() { Vtiger_CustomView_Js.getSelectedOrderByFieldsList().select2("onSortEnd"); }
             });
 	},
+	
+	/** ED150622
+	 * Function to regiser the event to make the conditions list sortable
+	 */
+	makeConditionsSortable : function() {
+		var $conditionList = jQuery('.filterContainer .conditionList');
+		$conditionList.sortable({
+			'handle' : '.sort-handler',
+			//'containment': '.conditionGroup',
+			//start: function() { Vtiger_CustomView_Js.getSelectedOrderByFieldsList().select2("onSortStart"); },
+			//update: function() { Vtiger_CustomView_Js.getSelectedOrderByFieldsList().select2("onSortEnd"); }
+		});
+	},
 
 	/**
 	 * Function which will get the selected columns with order preserved
@@ -359,6 +372,8 @@ var Vtiger_CustomView_Js = {
 		Vtiger_CustomView_Js.makeColumnListSortable();
 		//ED150622
 		Vtiger_CustomView_Js.makeOrderByFieldsListSortable();
+		//ED151112
+		Vtiger_CustomView_Js.makeConditionsSortable();
 
 		jQuery("#CustomView").submit(function(e) {
 			

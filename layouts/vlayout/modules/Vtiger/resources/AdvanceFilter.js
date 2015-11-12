@@ -235,6 +235,23 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		return conditionSelectElement;
 	},
 
+	/** ED151112
+	 * Ajoute une indentation pour les champs de relatedView, de panel et de statistics
+	 */
+	loadSubFieldUI : function(fieldSelect){
+		var row = fieldSelect.closest('div.conditionRow')
+		, fieldSelected = fieldSelect.find('option:selected')
+		, fieldValue = fieldSelected.val();
+		if (fieldValue[0] === '['
+		&& (	/^\[.*\]\:/.test(fieldValue)
+			|| /^\[RSNStatisticsResults\:(?!stats_periodicite)/.test(fieldValue)
+		)) {
+			row.addClass('sub-field');
+		}
+		else
+			row.removeClass('sub-field');
+	},
+	
 	/**
 	 * Functiont to get the field specific ui for the selected field
 	 * @prarms : fieldSelectElement - select element which will represents field list
@@ -615,6 +632,8 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 			}
 			thisInstance.loadConditions(currentElement);
 			thisInstance.loadFieldSpecificUi(currentElement);
+			//ED151112
+			thisInstance.loadSubFieldUI(currentElement);
 		});
 	},
 

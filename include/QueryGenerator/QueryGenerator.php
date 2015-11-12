@@ -642,8 +642,8 @@ class QueryGenerator {
 
 			$query = "SELECT ";
 			$query .= $this->getSelectClauseColumnSQL();
-			$query .= "\n". $this->getFromClause();
-			$query .= "\n". $this->getWhereClause();
+			$query .= $this->getFromClause();
+			$query .= $this->getWhereClause();
 			$this->query = $query;
 			
 			//print_r('<pre style="margin-top:4em; max-width: 180px;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
