@@ -16,7 +16,7 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
 		
-		$recordModel = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);
+		$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
 		
 		/* ED141005
 		ne fonctionne pas pour que la valeur soit récupérée dans les .tpl 
