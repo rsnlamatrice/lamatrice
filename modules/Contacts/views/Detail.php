@@ -16,9 +16,7 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
 		
-		if(!$this->record){
-			$this->record = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);
-		}
+		$recordModel = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);
 		
 		/* ED141005
 		ne fonctionne pas pour que la valeur soit récupérée dans les .tpl 
@@ -27,7 +25,7 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		$recordModel->set('isgroup', $values[$key]['label']);*/
 		
 		$viewer = $this->getViewer($request);
-		$viewer->assign('IMAGE_DETAILS', $this->record->getImageDetails());
+		$viewer->assign('IMAGE_DETAILS', $recordModel->getImageDetails());
 
 		return parent::showModuleDetailView($request);
 	}
