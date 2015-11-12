@@ -231,7 +231,9 @@ $languageStrings = array(
 	'sepa::ribcle' => 'Clé du RIB',
 	
 	'LBL_COMPANY_PRINT_LOGO'             => 'Logo pour impression', 
-	'LBL_PRINT_LOGO_RECOMMENDED_MESSAGE' => 'Taille recommandée 340X120 pixels( .jpeg , .jpg , .png , .gif , .pjpeg , .x-png format ).', 
+	'LBL_PRINT_LOGO_RECOMMENDED_MESSAGE' => 'Taille recommandée 340X120 pixels( .jpeg , .jpg , .png , .gif , .pjpeg , .x-png format ).',
+	
+	'LBL_ALLMENU_EDITOR' => 'Editeur du menu \'Tout\'',
         
 );
 $jsLanguageStrings = array(

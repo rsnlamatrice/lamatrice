@@ -819,12 +819,14 @@ class Vtiger_Module_Model extends Vtiger_Module {
 			$is_Admin = $current_user->is_admin;
 			if($roleid === null)
 				//if($is_Admin == 'off') // Administrateur
-					$roleid=$current_user->roleid;
+					$roleid = $current_user->roleid;
 				//else
 				//	$roleid = false;
 		    $query = 'SELECT vtiger_tab.`tabid`, vtiger_tab.`name`, vtiger_tab.`presence`, vtiger_tab.`tablabel`
 			, vtiger_tab.`modifiedby`, vtiger_tab.`modifiedtime`, vtiger_tab.`customized`, vtiger_tab.`ownedby`
 			, vtiger_tab.`isentitytype`, vtiger_tab.`version`, vtiger_tab.`parent`
+			, vtiger_parenttab.`parenttabid`
+			, IFNULL(vtiger_parenttab.`sequence`,999) * 1000 + IFNULL(vtiger_parenttabrel.`sequence`, 999) as tabsequenceinparent
 			, ' . ($roleid ? 'IFNULL(vtiger_rsnroletabsequence.`tabsequence`, vtiger_tab.`tabsequence` * 1)' : '`tabsequence` * 1') . ' AS `tabsequence`
 			FROM vtiger_tab
 			';
@@ -835,11 +837,23 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				
 				array_push($params, $roleid);
 			}
+			//ED151112
+			$query .= ' LEFT JOIN vtiger_parenttab
+				ON vtiger_parenttab.`parenttab_label` = vtiger_tab.`parent`
+			LEFT JOIN vtiger_parenttabrel
+				ON vtiger_parenttab.`parenttabid` = vtiger_parenttabrel.`parenttabid`
+				AND vtiger_parenttabrel.`tabid` = vtiger_tab.`tabid`
+			';
 		    if($presence) {
 				$query .= ' WHERE vtiger_tab.presence IN ('. generateQuestionMarks($presence) .')';
 				$params = array_merge($params, $presence);
 		    }
+			
+			//ED151112 ? needs ?
+			//$query .= 'ORDER BY tabsequenceinparent, tabsequence';
+			
 		    $result = $db->pquery($query, $params);
+			
 		    $noOfModules = $db->num_rows($result);
 		    for($i=0; $i<$noOfModules; ++$i) {
 				$row = $db->query_result_rowdata($result, $i);

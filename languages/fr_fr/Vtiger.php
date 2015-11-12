@@ -687,6 +687,8 @@ $languageStrings = array(
         'MEDIACONTACTS' 	=> 'Journalistes, ...',
         'LBL_SUIVI' 		=> 'SUIVI',
         'LBL_NONUK' 		=> 'NO NUK',
+		'LBL_COMPTA'        => 'Compta',
+		'LBL_BOUTIQUE'        => 'Boutique', 
         'LBL_RSNTHEMATIQUES' 	=> 'Thématiques',
         'Folders' 		=> 'Dossiers',
         'LBL_RSNCONTACTSPANELS' => 'Panels de contacts',
@@ -790,6 +792,8 @@ $languageStrings = array(
 	'LBL_RESULTS' => 'Résultats statistiques',
 	
 	'LBL_DOWNLOAD' => 'Télécharger',
+	
+	'AllMenuEditor' => 'Editeur du menu \'Tout\'',
 	
 );
 $jsLanguageStrings = array(
