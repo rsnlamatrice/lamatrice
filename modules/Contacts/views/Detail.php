@@ -15,8 +15,10 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 	public function showModuleDetailView(Vtiger_Request $request) {
 		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
-
-		$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+		
+		if(!$this->record){
+			$this->record = Vtiger_DetailView_Model::getInstance($moduleName, $recordId);
+		}
 		
 		/* ED141005
 		ne fonctionne pas pour que la valeur soit récupérée dans les .tpl 
@@ -25,7 +27,7 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		$recordModel->set('isgroup', $values[$key]['label']);*/
 		
 		$viewer = $this->getViewer($request);
-		$viewer->assign('IMAGE_DETAILS', $recordModel->getImageDetails());
+		$viewer->assign('IMAGE_DETAILS', $this->record->getImageDetails());
 
 		return parent::showModuleDetailView($request);
 	}
@@ -45,22 +47,55 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 	}
 	
 	function preProcessDisplay(Vtiger_Request $request) {
+		$this->initStatisticsResults($request);
+		parent::preProcessDisplay($request);
+	}
+	
+	function initStatisticsResults(Vtiger_Request $request){
+		$recordId = $request->get('record');
+		$moduleName = $request->getModule();
 		
-		$statsFields = array(
-			'Dons 2015' => 'xxxx €',
-			'Prélèvements 2015' => 'xxxx €',
-			'Boutique 2015' => 'xxxx €',
-			'Dons 2014' => 'xxxx €',
-			'Prélèvements 2014' => 'xxxx €',
-			'Boutique 2014' => 'xxxx €',
-			'Dons 2013' => 'xxxx €',
-			'Prélèvements 2013' => 'xxxx €',
-			'Boutique 2013' => 'xxxx €',
-		);
+		$relatedStatsTablesNames = RSNStatistics_Utils_Helper::getRelatedStatsTablesNames($moduleName);
+		$statsFieldInfos = RSNStatistics_Utils_Helper::getRelatedStatsFields(false,$moduleName);
+
+		$year = date('Y');
+		$years = array($year, $year - 1);
+		$yearCodes = array();
+		$yearsEmptyValues = array();
+		foreach($years as $year){
+			$yearCodes[] = 'Annuelle-' . $year;
+			$yearsEmptyValues[$year] = null;
+		}
+		
+		$query = "SELECT *
+			FROM " . $relatedStatsTablesNames[0] . "
+			WHERE crmid = ?
+			AND code IN (".generateQuestionMarks($yearCodes).")
+			ORDER BY code DESC
+			LIMIT ".count($yearCodes)."
+		";
+			
+		$params = array($recordId);
+		$params = array_merge($params, $yearCodes);
+		global $adb;
+		$result = $adb->pquery($query, $params);
+		if(!$result)
+			$adb->echoError();
+		$statsFields = array();
+		$rowIndex = 0;
+		while ($row = $adb->fetch_row($result, $rowIndex++)){
+			foreach($statsFieldInfos as $statsFieldInfo)
+				if(array_key_exists($statsFieldInfo['uniquecode'], $row)){
+					$unit = '';
+					$value = RSNStatisticsResults_Field_Model::getDisplayValueForFieldType($row[$statsFieldInfo['uniquecode']], $statsFieldInfo['fieldtype'], $unit);
+					if(!$statsFields[$statsFieldInfo['fieldname']])
+						$statsFields[$statsFieldInfo['fieldname']] = $yearsEmptyValues;
+					$statsFields[$statsFieldInfo['fieldname']][$row['name']] = array('value' => $value, 'unit' => $unit);
+				}
+		}
 		
 		$viewer = $this->getViewer($request);
 		$viewer->assign('STATISTICS_FIELDS', $statsFields);
 		
-		parent::preProcessDisplay($request);
 	}
 }

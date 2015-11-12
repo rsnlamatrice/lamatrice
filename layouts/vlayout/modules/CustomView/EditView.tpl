@@ -120,7 +120,7 @@
 			<h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_FILTER_CONDITIONS', $MODULE)}:</h4>
 			<div class="well filterConditionsDiv">
 				<div class="row-fluid">
-					<span class="span10">
+					<span class="span12">
 						{include file='AdvanceFilter.tpl'|@vtemplate_path}
 					</span>
 				</div>

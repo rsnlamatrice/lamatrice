@@ -363,7 +363,7 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 					$advFilterColumnCondition = $columnCondition['column_condition'];
 
 					/* ED150225
-					 * Related module view
+					 * Related module view ou Statistics
 					 */
 					if($advFilterColumn[0] == '['){ //[Module:ViewName:ViewId]:field table:column:field:label (TODO check column:field)
 						$pos = strpos($advFilterColumn, ']', 1);
