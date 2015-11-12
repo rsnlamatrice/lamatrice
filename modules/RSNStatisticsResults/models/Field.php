@@ -72,6 +72,29 @@ class RSNStatisticsResults_Field_Model extends Vtiger_Field_Model {
 	public function getColumnName(){
 		return $this->get('column');
 	}
+	
+	public static function getDisplayValueForFieldType($value, $statFieldType, &$unit = ''){
+		if($value === null)
+			return $value;
+		switch($statFieldType){
+			case 'INT':
+				break;
+			case 'DOUBLE':
+				break;
+			case 'PERCENT':
+				$unit = '%';
+				break;
+			case 'CURRENCY':
+				$unit = ' €';
+				break;
+			case 'DATE':
+				$value = str_replace($value, ' 00:00:00');
+				break;
+			default:
+				break;
+		}
+		return $value;
+	}
 
 }
 ?>

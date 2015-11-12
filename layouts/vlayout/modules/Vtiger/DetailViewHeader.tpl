@@ -64,7 +64,7 @@
 							</div>
 						</div>
 					
-						<div class="detailViewHeaderCenter">
+						<div id="detailViewHeaderCenter">
 							{include file="DetailViewHeaderCenter.tpl"|vtemplate_path:$MODULE}
 						</div>
 					</div>

@@ -421,15 +421,33 @@ ListView stylings **/
 
 /* detailView summary
 stats */
-div.detailViewHeaderCenter {
+#detailViewHeaderCenter {
   float: left;
+}
+#statisticsSummary {
+  max-height: 43px;
+  border: 1px solid white;
+  color: gray;
+  padding: 2px;
 }
 #statisticsSummary .stat-field {
   padding-right: 8px;
+  font-size: smaller;
 }
-#statisticsSummary {
-  max-height: 64px;
+#statisticsSummary:hover {
+  position: absolute;
+  max-height: inherit;
+  background: white;
+  border: 1px solid gray;
+  color: black;
 }
+#statisticsSummary td ~ td {
+  text-align: right;
+}
+#statisticsSummary td.unit {
+  padding-right :2px;
+}
+
 
 /*CustomView editor : bugg select picklist
 Correction : c'est uniquement quand il y a un var_dump qui traine */
