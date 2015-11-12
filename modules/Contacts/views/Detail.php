@@ -85,6 +85,7 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		$rowIndex = 0;
 		while ($row = $adb->fetch_row($result, $rowIndex++)){
 			foreach($statsFieldInfos as $statsFieldInfo)
+				//TODO if (showInDetailViewHeader) par exemple, le panier moyen, c'est moyen...
 				if(array_key_exists($statsFieldInfo['uniquecode'], $row)){
 					$unit = '';
 					$value = RSNStatisticsResults_Field_Model::getDisplayValueForFieldType($row[$statsFieldInfo['uniquecode']], $statsFieldInfo['fieldtype'], $unit);
