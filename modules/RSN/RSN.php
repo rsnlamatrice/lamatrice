@@ -60,6 +60,7 @@ class RSN {
 			$this->add_RSNStatisticsResults_Extension();
 			$this->add_documents_fields();
 			$this->add_parenttab_label_index();
+			$this->add_emaildomains_table();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -687,7 +688,7 @@ INSERT INTO `vtiger_organizationsubdetails` (`organization_id`, `parameter`, `co
 		$db = PearDatabase::getInstance();
 		
 		$sql = array();
-		$sql[] = "ALTER TABLE `vtiger_parenttab` ADD UNIQUE(`parenttab_label`)";
+		$sql[] = "ALTER TABLE `vtiger_parenttab` ADD UNIQUE parenttab_label (`parenttab_label`)";
 		
 		$sql[] = "ALTER TABLE vtiger_parenttab DROP INDEX parenttab_parenttabid_parenttabl_label_visible_idx";
 		
@@ -703,6 +704,27 @@ ON DELETE CASCADE
 ON UPDATE RESTRICT";
 
 		$sql[] = "ALTER TABLE `vtiger_parenttabrel` ADD PRIMARY KEY( `parenttabid`, `tabid`)";
+
+		foreach($sql as $query)
+			$db->query($query);
+	}
+	
+	
+	/* ED151021
+	 * Table des domaines d'emails
+	 */ 
+	static function add_emaildomains_table(){
+		
+		$db = PearDatabase::getInstance();
+		
+		$sql = array();
+		$sql[] = "CREATE TABLE IF NOT EXISTS `vtiger_emaildomains` (
+  `domain` varchar(128) NOT NULL,
+  `error` int(11) NOT NULL DEFAULT '0',
+  `validdomain` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`domain`),
+  KEY `error` (`error`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
 		foreach($sql as $query)
 			$db->query($query);

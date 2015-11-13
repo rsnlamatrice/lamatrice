@@ -38,7 +38,8 @@ Vtiger_Base_Validator_Js("Vtiger_Email_Validator_Js",{
 	validateValue : function(fieldValue){
 		var emailFilter = /^[_/a-zA-Z0-9]+([!"#$%&'()*+,./:;<=>?\^_`{|}~-]?[a-zA-Z0-9/_/-])*@[a-zA-Z0-9]+([\_\-\.]?[a-zA-Z0-9]+)*\.([\-\_]?[a-zA-Z0-9])+(\.?[a-zA-Z0-9]+)?$/;
 		var illegalChars= /[\(\)\<\>\,\;\:\\\"\[\]]/ ;
-
+		var replaceWith;
+		
 		if (!emailFilter.test(fieldValue)) {
 			var errorInfo = app.vtranslate('JS_PLEASE_ENTER_VALID_EMAIL_ADDRESS');
 			this.setError(errorInfo);
@@ -48,8 +49,54 @@ Vtiger_Base_Validator_Js("Vtiger_Email_Validator_Js",{
 			var errorInfo = app.vtranslate('JS_CONTAINS_ILLEGAL_CHARACTERS');
 			this.setError(errorInfo);
 			return false;
+		
+		//ED15113
+		} else if (!this.checkEmailDomain(fieldValue)) {
+			var errorInfo = app.vtranslate('JS_EMAIL_DOMAIN_KNOWN_AS_ERROR');
+			this.setError(errorInfo);
+			return false;
+		
 		}
+		
         return true;
+	},
+
+	getInvalidEmailDomainError: function(){
+		return this.error;
+	},
+
+	checkEmailDomain: function($emailAddress){
+		var postData = {
+			'action' : 'FieldValidatorAjax',
+			'mode' : 'getEmailDomainValidation',
+			'domain' : $emailAddress.split('@')[1],
+		};
+		var params = {
+			'async' : false,
+			'data' : postData,
+		};
+		var isError = false
+		, validDomain = '';
+	    AppConnector.request(params).then(
+			function(data) {
+				if(data && data.result && data.result.error) {
+					isError = true;
+					validDomain = data.result.validdomain;
+					var params = {
+						title : app.vtranslate('JS_MESSAGE'),
+						text: 'Domaine reconnu comme incorrect'
+							+ (validDomain ? '\nUtilisez le domaine "' + validDomain + '".' : ''),
+						animation: 'show',
+						type: 'error'
+					};
+					Vtiger_Helper_Js.showPnotify(params);
+				}
+			},
+			function(error,err){
+				isError = true;
+			}
+	    );
+		return !isError;
 	}
 });
 

@@ -800,6 +800,11 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 * @param <array> $presence
 	 * @param <array> $restrictedModulesList
 	 * @return <array> List of module models <Vtiger_Module_Model>
+	 *
+	 * ED151211 Les modules ont désormais un champ tabsequenceinparent en relation avec vtiger_parenttabrel
+	 * 	avec modification dans Vtiger_ModuleBasic::initialize
+	 * 	Les tables vtiger_parenttab et vtiger_parenttabrel ont été modifiées en terme d'index car jointure sur
+	 * 		vtiger_parenttab.parenttab_label = vtiger_tab.parent
 	 */
 	public static function getAll($presence = array(), $restrictedModulesList = array(), $roleid = NULL) {
 		$db = PearDatabase::getInstance();
@@ -848,9 +853,6 @@ class Vtiger_Module_Model extends Vtiger_Module {
 				$query .= ' WHERE vtiger_tab.presence IN ('. generateQuestionMarks($presence) .')';
 				$params = array_merge($params, $presence);
 		    }
-			
-			//ED151112 ? needs ?
-			//$query .= 'ORDER BY tabsequenceinparent, tabsequence';
 			
 		    $result = $db->pquery($query, $params);
 			
