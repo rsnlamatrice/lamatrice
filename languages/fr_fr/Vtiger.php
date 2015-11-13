@@ -922,4 +922,6 @@ $jsLanguageStrings = array(
     'JS_HELP'                       => 'Aide',
 	'JS_SELECT_RECORDS_TO_MERGE_FROM_SAME_GROUP' => 'Veuillez sélectionner dans un même groupe les enregistrements à fusionner',
 	'JS_SELECT_ATLEAST_TWO_RECORD_FOR_MERGING' => 'Veuillez sélectionner au moins deux enregistrements pour effectuer la fusion',
+	
+	'JS_EMAIL_DOMAIN_KNOWN_AS_ERROR' => 'Le domaine de l\'adresse est connu comme étant erroné.',
 );

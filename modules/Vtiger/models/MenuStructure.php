@@ -60,6 +60,10 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 	 * Function to get an instance of the Vtiger MenuStructure Model from list of menu models
 	 * @param <array> $menuModelList - array of Vtiger_Menu_Model instances
 	 * @return Vtiger_MenuStructure_Model instance
+	 *
+	 * ED151112 Les modules ont désormais un champ tabsequenceinparent en relation avec vtiger_parenttabrel
+	 * 	initialisé par Vtiger_Module_Model::getAll
+	 * 
 	 */
 	public static function getInstanceFromMenuList($menuModelList, $selectedMenu='') {
 		$structureModel = new self();
@@ -70,14 +74,16 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 		$menuListArray[self::TOP_MENU_INDEX] = array();
 		$menuListArray[self::MORE_MENU_INDEX] = array();//$structureModel->getEmptyMoreMenuList();
 
+		//Menu TOP utilisateur
 		foreach($menuModelList as $menuModel) {
 			if(($menuModel->get('tabsequence') != -1 && (!$topMenuLimit || $currentTopMenuCount < $topMenuLimit)) ) {
 				$menuListArray[self::TOP_MENU_INDEX][$menuModel->get('name')] = $menuModel;
 				$currentTopMenuCount++;
 			}
 		}
-		
+		//Tri selon le menu Tout
 		usort($menuModelList, array('Vtiger_MenuStructure_Model', 'sortMenuItemsBySequenceInParent'));
+		//Menu Tout
 		foreach($menuModelList as $menuModel) {
 			$parent = $menuModel->get('parent');
 			if($parent == 'Sales' || $parent == 'Marketing'){
@@ -86,7 +92,7 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 			$menuListArray[self::MORE_MENU_INDEX][strtoupper($parent)][$menuModel->get('name')] = $menuModel;
 		}
 		
-		
+		//Ajout du module courant
 		if(!empty($selectedMenu) && !array_key_exists($selectedMenu, $menuListArray[self::TOP_MENU_INDEX])) {
 			$selectedMenuModel = $menuModelList[$selectedMenu];
 			if($selectedMenuModel) {
@@ -109,10 +115,13 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 		return $structureModel->setData($menuListArray);
 	}
 	
+	//ED151112 tri par champ tabsequenceinparent
 	static function sortMenuItemsBySequenceInParent($a, $b){
 		return ($a->get('tabsequenceinparent') - $b->get('tabsequenceinparent'));
 	}
 	
+	
+	//ED151112 n'est plus utilisé ici mais par ailleurs (tri des QuickCreate) TODO
 	/**
 	 * Custom comparator to sort the menu items by process.
 	 * Refer: http://php.net/manual/en/function.uksort.php
@@ -148,54 +157,55 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 		}
 		$apos  = array_search($a, $order);
 		$bpos  = array_search($b, $order);
-
+	
 		if ($apos === false) return PHP_INT_MAX;
 		if ($bpos === false) return -1*PHP_INT_MAX;
-
+	
 		return ($apos - $bpos);
 	}
 	
+	//ED151112 n'est plus utilisé
 	/**
 	 * Custom comparator to sort the menu items by process.
 	 * Refer: http://php.net/manual/en/function.uksort.php
 	 */
-	static function sortMenuItemsParentsByProcess($a, $b) {
-		static $order = NULL;
-		if ($order == NULL) {
-			$order = array(
-				'CONTACTS',
-				'MARKETING_AND_SALES',
-				'INVENTORY',
-				'BOUTIQUE',
-				'COMPTA',
-				'NONUK',
-				'MEDIA_PRESSE',
-				'ANALYTICS',
-				'SUPPORT',
-				'SETTINGS',
-				'TOOLS',			
-			);
-		}
-		$apos  = array_search($a, $order);
-		$bpos  = array_search($b, $order);
+	//static function sortMenuItemsParentsByProcess($a, $b) {
+	//	static $order = NULL;
+	//	if ($order == NULL) {
+	//		$order = array(
+	//			'CONTACTS',
+	//			'MARKETING_AND_SALES',
+	//			'INVENTORY',
+	//			'BOUTIQUE',
+	//			'COMPTA',
+	//			'NONUK',
+	//			'MEDIA_PRESSE',
+	//			'ANALYTICS',
+	//			'SUPPORT',
+	//			'SETTINGS',
+	//			'TOOLS',			
+	//		);
+	//	}
+	//	$apos  = array_search($a, $order);
+	//	$bpos  = array_search($b, $order);
+	//
+	//	if ($apos === false) return PHP_INT_MAX;
+	//	if ($bpos === false) return -1*PHP_INT_MAX;
+	//
+	//	return ($apos - $bpos);
+	//}
 
-		if ($apos === false) return PHP_INT_MAX;
-		if ($bpos === false) return -1*PHP_INT_MAX;
-
-		return ($apos - $bpos);
-	}
-
-
-	private function getEmptyMoreMenuList(){
-		return array('CONTACTS'=>array()
-			     ,'MARKETING_AND_SALES'=>array()
-			     ,'INVENTORY'=>array()
-			     ,'NONUK'=>array()
-			     ,'TOOLS'=>array()
-			     ,'ANALYTICS'=>array()
-			     ,'SUIVI'=>array()
-			     ,'MEDIA_PRESSE'=>array()
-			     ,'SUPPORT'=>array()
-		);
-	}
+	//ED151112 n'est plus utilisé
+	//private function getEmptyMoreMenuList(){
+	//	return array('CONTACTS'=>array()
+	//		     ,'MARKETING_AND_SALES'=>array()
+	//		     ,'INVENTORY'=>array()
+	//		     ,'NONUK'=>array()
+	//		     ,'TOOLS'=>array()
+	//		     ,'ANALYTICS'=>array()
+	//		     ,'SUIVI'=>array()
+	//		     ,'MEDIA_PRESSE'=>array()
+	//		     ,'SUPPORT'=>array()
+	//	);
+	//}
 }

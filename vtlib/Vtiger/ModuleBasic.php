@@ -38,7 +38,7 @@ class Vtiger_ModuleBasic {
 	var $parent = false;
 	var $customized = 0;
 	//ED151112
-	var $parenttabid = false;
+	var $parenttabid = false; //not used
 	var $tabsequenceinparent = false;
 
 	var $isentitytype = true; // Real module or an extension?
@@ -83,7 +83,7 @@ class Vtiger_ModuleBasic {
 
 		$this->isentitytype = $valuemap['isentitytype'];
 		//ED151112
-		$this->parenttabid = $valuemap['parenttabid'];
+		$this->parenttabid = $valuemap['parenttabid']; //not used
 		$this->tabsequenceinparent = $valuemap['tabsequenceinparent'];
 
 		if($this->isentitytype || $this->name == 'Users') {
