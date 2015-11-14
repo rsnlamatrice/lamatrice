@@ -81,7 +81,7 @@ Vtiger_Base_Validator_Js("Vtiger_Email_Validator_Js",{
 			function(data) {
 				if(data && data.result && data.result.error) {
 					isError = true;
-					validDomain = data.result.validdomain;
+					validDomain = data.result.validdomain; //TODO update email ?
 					var params = {
 						title : app.vtranslate('JS_MESSAGE'),
 						text: 'Domaine reconnu comme incorrect'

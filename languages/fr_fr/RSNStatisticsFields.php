@@ -21,6 +21,7 @@ $languageStrings = array(
 	'LBL_SEQUENCE' => 'Index de tri',
 	'LBL_AGGREGATE_FUNCTION' => 'Fonction de cumuls',
 	'LBL_STATS_PERIODICITE' => 'Période',
+	'LBL_MODULEHEADERSEQUENCE' => 'Ordre en en-tête de module',
 );
 
 ?>

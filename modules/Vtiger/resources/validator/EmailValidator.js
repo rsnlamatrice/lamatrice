@@ -6,6 +6,13 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  *************************************************************************************/
+
+/*
+ * La procédure utilisée est dans :
+ * modules\Vtiger\resources\validator\FieldValidator.js
+ *
+ */
+
 Vtiger_BaseValidator_Js("Vtiger_EmailValidator_Js",{},{
 	error: "",
 	validate: function(){
@@ -60,17 +67,21 @@ Vtiger_BaseValidator_Js("Vtiger_EmailValidator_Js",{},{
 			'mode' : 'getEmailDomainValidation',
 			'domain' : $emailAddress.split('@')[1],
 		};
+		var params = {
+			'async' : false,
+			'data' : postData,
+		};
 		var isError = false
 		, validDomain = '';
-	    AppConnector.request(postData).then(
+	    AppConnector.request(params).then(
 			function(data) {
 				if(data && data.result && data.result.error) {
 					isError = true;
-					validDomain = data.result.validdomain;
+					validDomain = data.result.validdomain; //TODO update email ?
 					var params = {
 						title : app.vtranslate('JS_MESSAGE'),
 						text: 'Domaine reconnu comme incorrect'
-							+ (validDomain ? 'Utilisez le domaine "' + validDomain + '".' : ''),
+							+ (validDomain ? '\nUtilisez le domaine "' + validDomain + '".' : ''),
 						animation: 'show',
 						type: 'error'
 					};
@@ -78,9 +89,10 @@ Vtiger_BaseValidator_Js("Vtiger_EmailValidator_Js",{},{
 				}
 			},
 			function(error,err){
-
+				isError = true;
 			}
 	    );
+		return !isError;
 	}
 
 

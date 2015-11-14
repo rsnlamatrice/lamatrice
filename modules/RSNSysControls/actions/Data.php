@@ -48,13 +48,22 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 						->save();
 			}
 		}
+		
 		if($mailBody && !$verbose){
+			
 			global $HELPDESK_SUPPORT_EMAIL_ID ;
+			
+			$server = $GLOBALS['dev_title'];
+			if($server)
+				$server = 'La Matrice - '.$server;
+			else
+				$server = 'La Matrice';
+				
 			$vtigerMailer = new Vtiger_Mailer();
 			$vtigerMailer->initialize();
 			$vtigerMailer->IsHTML(false);
 			$vtigerMailer->AddAddress($HELPDESK_SUPPORT_EMAIL_ID, 'Administrateur'); //TODO
-			$vtigerMailer->Subject ='[La Matrice] Requetes de controle : Alerte !';
+			$vtigerMailer->Subject ='[$server] Requetes de controle : Alerte !';
 			$vtigerMailer->Body = $mailBody;
 			$vtigerMailer->Send();
 			//tmp mail

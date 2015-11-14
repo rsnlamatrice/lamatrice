@@ -73,7 +73,7 @@ class RSNStatistics_Utils_Helper {
 	 * @param $statisticIds : id or array of ids
 	 * @return array of array of statistic fields properties
 	 */
-	public static function getRelatedStatsFields($statisticIds, $moduleNames = false) {//statistics 306963 tmp
+	public static function getRelatedStatsFields($statisticIds, $moduleNames = false, $context = false) {//statistics 306963 tmp
 		if($statisticIds && !is_array($statisticIds))
 			$statisticIds = array($statisticIds);
 		$params = array();
@@ -106,8 +106,13 @@ class RSNStatistics_Utils_Helper {
 					$params = array_merge($params, $moduleNames);
 				}
 			}
-			$sql .= "
-				ORDER BY `vtiger_rsnstatisticsfields`.sequence";
+			if($context === 'moduleheader')
+				$sql .= "
+					AND IFNULL(`vtiger_rsnstatisticsfields`.moduleheadersequence, 0) > 0
+					ORDER BY `vtiger_rsnstatisticsfields`.moduleheadersequence";
+			else
+				$sql .= "
+					ORDER BY `vtiger_rsnstatisticsfields`.sequence";
 
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($sql, $params);

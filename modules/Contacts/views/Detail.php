@@ -54,7 +54,7 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		$moduleName = $request->getModule();
 		
 		$relatedStatsTablesNames = RSNStatistics_Utils_Helper::getRelatedStatsTablesNames($moduleName);
-		$statsFieldInfos = RSNStatistics_Utils_Helper::getRelatedStatsFields(false,$moduleName);
+		$statsFieldInfos = RSNStatistics_Utils_Helper::getRelatedStatsFields(false, $moduleName, 'moduleheader');
 
 		$year = date('Y');
 		$years = array($year, $year - 1);
@@ -89,7 +89,8 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 					$value = RSNStatisticsResults_Field_Model::getDisplayValueForFieldType($row[$statsFieldInfo['uniquecode']], $statsFieldInfo['fieldtype'], $unit);
 					if(!$statsFields[$statsFieldInfo['fieldname']])
 						$statsFields[$statsFieldInfo['fieldname']] = $yearsEmptyValues;
-					$statsFields[$statsFieldInfo['fieldname']][$row['name']] = array('value' => $value, 'unit' => $unit);
+					$statsFields[$statsFieldInfo['fieldname']][$row['name']] = array('value' => $value
+																					 , 'unit' => $unit);
 				}
 		}
 		
