@@ -429,6 +429,7 @@ stats */
   border: 1px solid white;
   color: gray;
   padding: 2px;
+  line-height: 11px;
 }
 #statisticsSummary .stat-field {
   padding-right: 8px;

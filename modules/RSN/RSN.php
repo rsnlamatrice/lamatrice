@@ -433,7 +433,8 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 			'aggregatefunction' => array( 'columntype' => 'VARCHAR(255)', 'uitype' => '16', 'tablename' => 'vtiger_rsnstatisticsfields', 'label' => 'LBL_AGGREGATE_FUNCTION', 'typeofdata' => 'V~M'
 										 , 'default' => 'SUM'
 										 , 'picklist_values' => array('SUM', 'COUNT', 'MIN', 'MAX', 'AVG', 'COUNT DISTINCT', 'STD', 'STDDEV'),
-										)
+										),
+			'moduleheadersequence' 	=> array( 'columntype' => 'INT(8)', 'uitype' => '1', 'tablename' => 'vtiger_rsnstatisticsfields', 'label' => 'LBL_MODULEHEADERSEQUENCE', 'typeofdata' => 'N~O', 'default' => '-1' ),
 		);
 		foreach($newFields as $newFieldName => $newField){
 			self::add_new_field($newFieldName, $newField, $block1, $existingFields);

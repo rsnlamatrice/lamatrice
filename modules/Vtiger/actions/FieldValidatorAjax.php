@@ -22,6 +22,8 @@ class Vtiger_FieldValidatorAjax_Action extends Vtiger_BasicAjax_Action {
 	 * Function to check if an email domain is known as an error
 	 * @param <Vtiger_Request> $request
 	 * @return <Object> Error code and a valid domain in replacement
+	 *
+	 * appelée depuis modules\Vtiger\resources\validator\FieldValidator.js
 	 */
 	public function getEmailDomainValidation(Vtiger_Request $request) {
 		
