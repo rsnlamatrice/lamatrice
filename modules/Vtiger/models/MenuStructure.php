@@ -66,6 +66,7 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 	 * 
 	 */
 	public static function getInstanceFromMenuList($menuModelList, $selectedMenu='') {
+		
 		$structureModel = new self();
 		$topMenuLimit = $structureModel->getResponsiveMode() ? 0 : $structureModel->getLimit();
 		$currentTopMenuCount = 0;
@@ -82,7 +83,7 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 			}
 		}
 		//Tri selon le menu Tout
-		usort($menuModelList, array('Vtiger_MenuStructure_Model', 'sortMenuItemsBySequenceInParent'));
+		uasort($menuModelList, array('Vtiger_MenuStructure_Model', 'sortMenuItemsBySequenceInParent'));
 		//Menu Tout
 		foreach($menuModelList as $menuModel) {
 			$parent = $menuModel->get('parent');
@@ -91,7 +92,6 @@ class Vtiger_MenuStructure_Model extends Vtiger_Base_Model {
 			}
 			$menuListArray[self::MORE_MENU_INDEX][strtoupper($parent)][$menuModel->get('name')] = $menuModel;
 		}
-		
 		//Ajout du module courant
 		if(!empty($selectedMenu) && !array_key_exists($selectedMenu, $menuListArray[self::TOP_MENU_INDEX])) {
 			$selectedMenuModel = $menuModelList[$selectedMenu];
