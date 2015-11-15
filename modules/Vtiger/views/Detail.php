@@ -54,7 +54,6 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 			$summaryInfo[$blockLabel] = $fieldList;
 			break;
 		}
-
 		$detailViewLinkParams = array('MODULE'=>$moduleName,'RECORD'=>$recordId);
 
 		$detailViewLinks = $this->record->getDetailViewLinks($detailViewLinkParams);
