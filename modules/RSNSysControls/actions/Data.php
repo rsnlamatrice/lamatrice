@@ -63,7 +63,7 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 			$vtigerMailer->initialize();
 			$vtigerMailer->IsHTML(false);
 			$vtigerMailer->AddAddress($HELPDESK_SUPPORT_EMAIL_ID, 'Administrateur'); //TODO
-			$vtigerMailer->Subject ='[$server] Requetes de controle : Alerte !';
+			$vtigerMailer->Subject ='['.$server.'] Requetes de controle : Alerte !';
 			$vtigerMailer->Body = $mailBody;
 			$vtigerMailer->Send();
 			//tmp mail
