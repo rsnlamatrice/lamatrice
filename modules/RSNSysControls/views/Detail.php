@@ -20,6 +20,7 @@ class RSNSysControls_Detail_View extends Vtiger_Detail_View {
 	      
 		$moduleName = $request->getModule();
 		$relatedModuleName = $request->get('relatedModule');
+		
 		$parentId = $request->get('record');
 		$label = $request->get('tab_label');
 		$requestedPage = $request->get('page');
@@ -30,6 +31,9 @@ class RSNSysControls_Detail_View extends Vtiger_Detail_View {
 		$pagingModel->set('page',$requestedPage);
 		if($request->get('limit')) /* ED140921 */
 			$pagingModel->set('limit',$request->get('limit'));
+		
+		if(!$relatedModuleName)
+			return $this->showSysControlsBasicResult($request);
 		
 		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName, $label);
@@ -122,5 +126,54 @@ class RSNSysControls_Detail_View extends Vtiger_Detail_View {
 		$tpl = 'RelatedList.tpl';
 		
 		return $viewer->view($tpl, $moduleName, 'true');
+	}
+	
+	/** ED150817
+	 * Function returns syscontrol result records
+	 * @param Vtiger_Request $request
+	 * @return <type>
+	 */
+	function showSysControlsBasicResult(Vtiger_Request $request) {
+	      
+		$moduleName = $request->getModule();
+		$parentId = $request->get('record');
+		$label = $request->get('tab_label');
+		$requestedPage = $request->get('page');
+		if(empty($requestedPage)) {
+			$requestedPage = 1;
+		}
+		$pagingModel = new Vtiger_Paging_Model();
+		$pagingModel->set('page',$requestedPage);
+		if($request->get('limit')) /* ED140921 */
+			$pagingModel->set('limit',$request->get('limit'));
+		
+		$sysControl = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
+		
+		
+		global $adb;
+		
+		$query = $sysControl->getQueryFieldValue();
+		
+		if($request->get('limit')) 
+			$query .= "\n LIMIT " . $pagingModel->get('limit');
+		else
+			$query .= "\n LIMIT 100";
+		
+		$result = $adb->query($query);
+		
+		if(!$result){
+			echo "<pre>$query</pre>";
+			$adb->echoError();
+			return;
+		}
+		
+		$modules = array();
+		$nRow = 0;
+		while($entry = $adb->fetch_row($result, $nRow++)){
+			if(!$modules[$entry['setype']])
+				$modules[$entry['setype']] = array();
+			$modules[$entry['setype']][] = array('crmid' => $entry['crmid'], 'createdtime' => $entry['createdtime']);
+		}
+		var_dump( $modules );
 	}
 }
