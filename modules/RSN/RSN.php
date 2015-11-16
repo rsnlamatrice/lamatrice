@@ -61,6 +61,7 @@ class RSN {
 			$this->add_documents_fields();
 			$this->add_parenttab_label_index();
 			$this->add_emaildomains_table();
+			$this->add_contacts_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -466,6 +467,7 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 	// fonction générique
 	static function add_new_field($newFieldName, $newField, $block1, $existingFields) {
 			
+			
 		if($existingFields[$newFieldName]){
 			if($newField['picklist_values'] && is_array($newField['picklist_values']))
 				$existingFields[$newFieldName]->setPicklistValues($newField['picklist_values']);
@@ -487,6 +489,20 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$block1->addField($field3);
 		if($newField['picklist_values'] && is_array($newField['picklist_values']))
 			$field3->setPicklistValues($newField['picklist_values']);
+			
+		if($newField['relatedTo'])
+			self::add_relatedmodule_field($field3, $block1->module->getName(), $newField['relatedTo']);
+		return $field3;
+	}
+	
+	static function add_relatedmodule_field($field, $moduleFrom, $moduleTo){
+		$db = PearDatabase::getInstance();
+		$sql = 'INSERT INTO `vtiger_fieldmodulerel` (`fieldid`, `module`, `relmodule`, `status`, `sequence`)
+			VALUES (?, ?, ?, NULL, NULL)';
+		$result = $db->pquery($sql, array(
+			$field->getId(),
+			$moduleFrom, $moduleTo
+		));
 	}
 	
 	static function add_mysql_function_levenshtein(){
@@ -730,5 +746,41 @@ ON UPDATE RESTRICT";
 		foreach($sql as $query)
 			$db->query($query);
 	}
+
+
 	
+	static function add_contacts_fields() {
+		$module = Vtiger_Module_Model::getInstance('Contacts');
+		foreach( $module->getBlocks() as $block1)
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'transfererrevue' 	=> array( 'columntype' => 'INT(19)', 'uitype' => '10', 'tablename' => 'vtiger_contactscf', 'label' => 'LBL_TRANSFERER_REVUE', 'typeofdata' => 'V~O', 'relatedTo' => 'Contacts' ),
+			'transfererdons' 	=> array( 'columntype' => 'INT(19)', 'uitype' => '10', 'tablename' => 'vtiger_contactscf', 'label' => 'LBL_TRANSFERER_DONS', 'typeofdata' => 'V~O', 'relatedTo' => 'Contacts' ),
+		);
+		foreach($newFields as $newFieldName => $newField){
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
+		}
+		
+		
+		
+		$db = PearDatabase::getInstance();
+		
+		$sql = array();
+		$sql[] = "UPDATE vtiger_contactscf
+			JOIN vtiger_contactscontrel
+				ON vtiger_contactscontrel.contactid = vtiger_contactscf.contactid
+				AND vtiger_contactscontrel.contreltype = 'Transférer la revue'
+			SET transfererrevue = vtiger_contactscontrel.relcontid";
+		$sql[] = "UPDATE vtiger_contactscf
+			JOIN vtiger_contactscontrel
+				ON vtiger_contactscontrel.contactid = vtiger_contactscf.contactid
+				AND vtiger_contactscontrel.contreltype = 'Transférer les dons'
+			SET transfererdons = vtiger_contactscontrel.relcontid";
+
+		foreach($sql as $query)
+			$db->query($query);
+		
+	}
+		
 }

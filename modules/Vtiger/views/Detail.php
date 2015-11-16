@@ -254,7 +254,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 
 		$viewer->assign('MODULE_NAME', $moduleName);
 		$viewer->assign('IS_AJAX_ENABLED', $this->isAjaxEnabled($recordModel));
-		$viewer->assign('SUMMARY_RECORD_STRUCTURE', $recordStrucure->getStructure());
+		$viewer->assign('SUMMARY_RECORD_STRUCTURE', $this->getRecordStructure($recordStrucure));
 		
 		/* ED141210 court-circuite les activitŽs */
 		$no_activities = $viewer->getVariable('NO_ACTIVITIES_WIDGET');
@@ -262,6 +262,13 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 			$viewer->assign('RELATED_ACTIVITIES', $this->getActivities($request));
 		}
 		return $viewer->view('ModuleSummaryView.tpl', $moduleName, true);
+	}
+	
+	/* ED151116
+	 * Permet le tri des champs
+	 */
+	function getRecordStructure($recordStructure){
+		return $recordStructure->getStructure();
 	}
 
 	/**

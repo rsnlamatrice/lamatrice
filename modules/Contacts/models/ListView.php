@@ -209,21 +209,36 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 	 */
 	protected function setListViewSearchConditions($pagingModel = false) {
 		//TODO add mailingstreet2
-		
+		$moduleCustomNumberingPrefix = $this->getModuleCustomNumberingPrefix();
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		
 		if(is_array($searchKey)){
 			$operators = $this->get('operator');
 			for($i = 0; $i < count($searchKey); $i++){
+				//tests sur 'lastname' parce que c'est le premier
+				
 				//add module prefix char ('C') when searching on 'contact_no' field
 				if($searchKey[$i] == 'contact_no' && $searchValue[$i] && is_numeric($searchValue[$i][0])){
-					$searchValue[$i] = $this->getModuleCustomNumberingPrefix() . $searchValue[$i];
+					$searchValue[$i] = $moduleCustomNumberingPrefix . $searchValue[$i];
 					$this->set('search_value', $searchValue);
+				}
+				//une valeur de recherche numérique doit correspondre au contact_no
+				else if($searchKey[$i] === 'lastname' && is_numeric($searchValue[$i])){
+					$searchKey[$i] = 'contact_no';
+					$searchValue[$i] = $moduleCustomNumberingPrefix . $searchValue[$i];
+					$this->set('search_key', $searchKey);
+					$this->set('search_value', $searchValue);
+				}
+				//une valeur de recherche 'C' . numérique doit correspondre au contact_no
+				else if($searchKey[$i] === 'lastname' && strcasecmp($searchValue[$i][0], $moduleCustomNumberingPrefix) === 0
+				&& is_numeric(substr($searchValue[$i],1))){
+					$searchKey[$i] = 'contact_no';
+					$this->set('search_key', $searchKey);
 				}
 				//une recherche sur le nom s'effectue aussi sur le mailingstreet2 si c'est un groupe
 				// lastname LIKE % OR (mailingstreet2 LIKE % OR isgroup == 0 )
-				else if($searchKey[$i] == 'lastname' && $searchValue[$i]){
+				else if($searchKey[$i] === 'lastname' && $searchValue[$i]){
 					/* un sous-tableau
 					*/
 					$searchKey[$i] = array('lastname', null, array('mailingstreet2', null, 'isgroup'));
@@ -255,13 +270,14 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		}
 		elseif($searchKey == 'contact_no' && $searchValue && is_numeric($searchValue[0])){
 			//add module prefix char ('C') when searching on 'contact_no' field
-			$this->set('search_value', $this->getModuleCustomNumberingPrefix() . $searchValue);
+			$this->set('search_value', $moduleCustomNumberingPrefix . $searchValue);
 		}
 		return parent::setListViewSearchConditions($pagingModel);
 	}
 	
 	/* ED150424 */
 	private function getModuleCustomNumberingPrefix(){
+		
 		$model = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($this->getModule()->getName());
 		$data = $model->getModuleCustomNumberingData();
 		return $data['prefix'];

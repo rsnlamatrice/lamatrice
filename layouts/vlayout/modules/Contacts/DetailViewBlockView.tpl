@@ -66,6 +66,9 @@ affichage du détail d'un contact
 			{if !$FIELD_MODEL->isViewableInDetailView()}
 				 {continue}
 			 {/if}
+			{if $FIELD_NAME eq 'contact_no'}
+				 {continue}
+			 {/if}
 			{if $FIELD_MODEL->get('uitype') eq "69" || $FIELD_MODEL->get('uitype') eq "105"}
 				{if $COUNTER neq 0}
 					{if $COUNTER eq 2}

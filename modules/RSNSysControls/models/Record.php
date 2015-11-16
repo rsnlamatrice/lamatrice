@@ -2,7 +2,7 @@
 /*+***********************************************************************************
  * ED150817
  *
- * Attention, dans le champ query, l'initialisation remplace < et > par &lt; et &gt;
+ * Attention, dans le champ query, l'initialisation remplace < et > par &lt; et &gt;, ainsi que &quot;
  *************************************************************************************/
 
 /**
@@ -20,7 +20,7 @@ class RSNSysControls_Record_Model extends Vtiger_Record_Model {
 	//L'initialisation remplace < et > par &lt; et &gt;
 	//TODO éviter ça
 	public function getQueryFieldValue(){
-		$ctrlQuery = $this->get('query');
+		$ctrlQuery = from_html($this->get('query'));
 		if(preg_match('/\&.*\;/', $ctrlQuery))
 			$ctrlQuery = str_replace('&gt;', '>',
 					str_replace('&lt;', '<',

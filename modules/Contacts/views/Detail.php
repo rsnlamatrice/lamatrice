@@ -98,4 +98,48 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		$viewer->assign('STATISTICS_FIELDS', $statsFields);
 		
 	}
+	
+	/* ED151116
+	 * Permet le tri des champs
+	 */
+	function getRecordStructure($recordStructure){
+		$structure = $recordStructure->getStructure();
+		uksort($structure['SUMMARY_FIELDS'], array('Contacts_Detail_View', 'uksortSummaryFields'));
+		return $structure;
+	}
+	static function uksortSummaryFields($a, $b){
+		$orderedFieldNames = array(
+			'contact_no',
+			'lastname',
+			'firstname',
+			'isgroup',
+			'account_id',
+			'reference',
+			'accounttype',
+			'leadsource',
+			'email',
+			'phone',
+			'emailoptout',
+			'donotcall',
+			'donotprospect',
+			'donotrelanceadh',
+			'donotappeldoncourrier',
+			'donotrelanceabo',
+			'donotappeldonweb',
+			'donototherdocuments',
+			'description',
+			'rsnnpai',
+			'mailingzip',
+			'mailingstreet2',
+			'mailingcity',
+			'mailingcountry',
+		);
+		$apos  = array_search($a, $orderedFieldNames);
+		$bpos  = array_search($b, $orderedFieldNames);
+	
+		if ($apos === false) return PHP_INT_MAX;
+		if ($bpos === false) return -1*PHP_INT_MAX;
+	
+		return ($apos - $bpos);
+	}
 }

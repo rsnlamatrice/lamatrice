@@ -118,6 +118,8 @@ $languageStrings = array(
 	'LBL_DUPLICATES_RELATIONS_IN' => 'Relation entre les enregistrements dans ',
 	'LBL_PRINT_RECU_FISCAL'	=> 'Impression du reçu fiscal',
 	'LBL_SEND_BY_EMAIL'              => 'Envoyer par email', 
+	'LBL_TRANSFERER_REVUE'              => 'Transférer la revue vers', 
+	'LBL_TRANSFERER_DONS'              => 'Transférer les dons vers', 
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 

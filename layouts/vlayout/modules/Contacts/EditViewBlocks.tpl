@@ -131,7 +131,7 @@
 				{/if}
 				
 				{assign var="isReferenceField" value=$FIELD_MODEL->getFieldDataType()}
-				{if $FIELD_MODEL->get('uitype') eq "20" || $FIELD_MODEL->get('uitype') eq "19"}
+				{if $FIELD_MODEL->get('uitype') eq "20" || $FIELD_MODEL->get('uitype') eq "19" || $FIELD_NAME eq 'isgroup'}
 					{if $COUNTER eq '1'}
 						<td class="{$WIDTHTYPE}"></td><td class="{$WIDTHTYPE}"></td></tr><tr>
 						{assign var=COUNTER value=0}
@@ -209,7 +209,7 @@
 					{if $isReferenceField neq "reference"}</label>{/if}
 				</td>
 				{if $FIELD_MODEL->get('uitype') neq "83"}
-					<td class="fieldValue {$WIDTHTYPE}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20' or $FIELD_NAME eq 'rsnnpai'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
+					<td class="fieldValue {$WIDTHTYPE}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20' or $FIELD_NAME eq 'rsnnpai' or $FIELD_NAME eq 'isgroup'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
 						<div class="row-fluid">
 							<span class="{if $FIELD_NAME eq 'rsnnpai'}span6{else}span10{/if}">{* ED141005 *}
 								{* street2/3*}

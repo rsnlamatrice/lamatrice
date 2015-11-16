@@ -128,6 +128,9 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 				break;
 			}
 		}
+		if($numberOfRecords)
+			$this->updateContactsTransfertRevueEtDons();
+		
 		$perf->terminate();
 		
 		if(isset($keepScheduledImport))
@@ -477,5 +480,25 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 			default :
 				return $typelien;
 		}
+	}
+	
+	
+	function updateContactsTransfertRevueEtDons(){
+		$db = PearDatabase::getInstance();
+		
+		$sql = array();
+		$sql[] = "UPDATE vtiger_contactscf
+			JOIN vtiger_contactscontrel
+				ON vtiger_contactscontrel.contactid = vtiger_contactscf.contactid
+				AND vtiger_contactscontrel.contreltype = 'Transférer la revue'
+			SET transfererrevue = vtiger_contactscontrel.relcontid";
+		$sql[] = "UPDATE vtiger_contactscf
+			JOIN vtiger_contactscontrel
+				ON vtiger_contactscontrel.contactid = vtiger_contactscf.contactid
+				AND vtiger_contactscontrel.contreltype = 'Transférer les dons'
+			SET transfererdons = vtiger_contactscontrel.relcontid";
+
+		foreach($sql as $query)
+			$db->query($query);
 	}
 }
