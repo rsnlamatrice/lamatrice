@@ -253,7 +253,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$codeAffaire = $invoice['codeaffaire'];
 					$piece = $invoice['invoice_no'];
 					$invoiceModeRegl = $invoice['receivedmoderegl'];
-					$invoiceCompteVente = self::getCodeAffaireCompteVente($codeAffaire, $invoiceModeRegl);
+					$invoiceCompteVente = self::getInvoiceCompteVente($codeAffaire, $invoiceModeRegl, $invoice['productcode']);
 					if($invoiceCompteVente[0] === '7' || $invoiceCompteVente[0] === '6')
 						$invoiceCodeAnal = self::getCodeAffaireCodeAnal($codeAffaire);
 					else	$invoiceCodeAnal = '';
@@ -293,7 +293,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						if(!array_key_exists("$taxId", $invoiceTaxes))
 							$invoiceTaxes["$taxId"] = 0.0;
 						//Passage par le TTC, arrondi à 2 chiffres et retrait du HT pour éviter les écarts d'arrondis
-						$value = round((1 + $invoice['tax'.$taxId] / 100) * $amountHT, 2) - $amountHT;
+						$value = round((1 + $invoice['tax'.$taxId] / 100) * $invoice['quantity'] * $invoice['listprice'], 2) - $amountHT;
 						$invoiceTotalTaxes += $value;
 						$invoiceTaxes["$taxId"] += $value;
 						break;
@@ -420,21 +420,27 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		return false;
 	}
 	
-	private static function getCodeAffaireCompteVente($codeAffaire, $modeRegl){
-		switch(strtoupper($codeAffaire)){
-		case 'PAYBOX' :// (dons réguliers)  
+	private static function getInvoiceCompteVente($codeAffaire, $modeRegl, $codeProduit){
+		switch(strtouper($codeProduit)){
+		case 'ADETAL':
 			return '511104';
-		case 'PAYBOXP' :
-			return '511400';// (dons ponctuels)  
-		case 'PAYPAL' :
-			return '511300';
 		default:
-			switch($modeRegl){
-			case 'PayPal' :
-			case 'PayBox' :
-				return '511101';
+			switch(strtoupper($codeAffaire)){
+			case 'PAYBOX' :// (dons réguliers)  
+				return '511104';
+			case 'PAYBOXP' :
+				return '511400';// (dons ponctuels)  
+			case 'PAYPAL' :
+				return '511300';
+			default:
+				switch(strtoupper($modeRegl)){
+				case 'PAYPAL' :
+				case 'PAYBOX' :
+					return '511101';
+				default:
+					return '511200';//LBP
+				}
 			}
-			return '511200';//LBP
 		}
 	}
 	
