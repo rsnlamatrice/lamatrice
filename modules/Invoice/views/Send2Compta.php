@@ -150,6 +150,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			
 		$query .= '
 			ORDER BY vtiger_invoice.invoicedate ASC
+			, vtiger_invoice.invoiceid
 			, vtiger_inventoryproductrel.sequence_no
 		';
 		$params = $selectedIds;
@@ -210,6 +211,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			 * 	
 			 * 1 ligne par jour 
 			 * 	Compte 512107 : compte bancaire NEF
+			 * 	Compte 514000 : compte banque postale pour les chèques
 			 * 	Section analytique : ?
 			 * 	Au débit
 			 * 
@@ -227,7 +229,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$prevInvoiceId = 0;
 			$prevDate = '';
 			$totalPerDate = array();
-			while($invoice = $db->fetch_row($result)){
+			while($invoice = $db->fetch_row($result, false)){
 				$isInvoiceHeader = $prevInvoiceId != $invoice['invoiceid'];
 				if($isInvoiceHeader){
 					/* En-tête de facture */
@@ -250,22 +252,24 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					//ligne de facture de l'encaissement
 					$codeAffaire = $invoice['codeaffaire'];
 					$piece = $invoice['invoice_no'];
-					$invoiceModeRegl = self::formatAmountForCogilog($invoice['receivedmoderegl']);
+					$invoiceModeRegl = $invoice['receivedmoderegl'];
 					$invoiceCompteVente = self::getCodeAffaireCompteVente($codeAffaire, $invoiceModeRegl);
 					if($invoiceCompteVente[0] === '7' || $invoiceCompteVente[0] === '6')
 						$invoiceCodeAnal = self::getCodeAffaireCodeAnal($codeAffaire);
 					else	$invoiceCodeAnal = '';
-					$invoiceJournal = self::getCodeAffaireJournal($codeAffaire);
+					$invoiceJournal = self::getCodeAffaireJournal($codeAffaire, $invoiceModeRegl);
 					$invoiceAmount = self::formatAmountForCogilog($invoice['total']);
 					$invoiceReceived = self::formatAmountForCogilog($invoice['received']);
-					$invoiceSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']) . ' - ' . $codeAffaire);
+					$basicSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
+					$invoiceSubject = $basicSubject . ($codeAffaire ? ' - ' . $codeAffaire : '');
 					$date = self::formatDateForCogilog($invoice['invoicedate']);
-					$key = $date . '-' . $invoiceJournal . '-' . $invoiceCodeAnal;
 					if($invoiceReceived){
+						$key = $invoiceModeRegl . ($invoiceCodeAnal ? '-' . $invoiceCodeAnal : '') . '-' . $date;
+					
 						if(!$totalPerDate[$key])
 							$totalPerDate[$key] = array(
-										    'journal' => $journalVente,
 										    'codeAnal' => $invoiceCodeAnal,
+										    'moderegl' => $invoiceModeRegl,
 										    'date' => $date,
 										    'total' => 0.0
 										);
@@ -279,6 +283,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				
 				/* ligne de produit */
 				
+				$amountHT = round($invoice['quantity'] * $invoice['listprice'], 2);//HT
+				
 				//Taxe utilisée
 				$invoiceTotalTaxes = 0.0;
 				for($nTax = 0; $nTax < count($taxes); $nTax++){
@@ -286,7 +292,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					if($invoice['tax'.$taxId]){
 						if(!array_key_exists("$taxId", $invoiceTaxes))
 							$invoiceTaxes["$taxId"] = 0.0;
-						$value = $invoice['tax'.$taxId] / 100 * $invoice['quantity'] * $invoice['listprice'];
+						//Passage par le TTC, arrondi à 2 chiffres et retrait du HT pour éviter les écarts d'arrondis
+						$value = round((1 + $invoice['tax'.$taxId] / 100) * $amountHT, 2) - $amountHT;
 						$invoiceTotalTaxes += $value;
 						$invoiceTaxes["$taxId"] += $value;
 						break;
@@ -297,19 +304,19 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				if($compteVente[0] === '7' || $compteVente[0] === '6')
 					$codeAnal = $invoiceCodeAnal ? $invoiceCodeAnal : $invoice['productsectionanal'];
 				else	$codeAnal = '';
-				$amount = self::formatAmountForCogilog($invoice['quantity'] * $invoice['listprice']);//HT
 				//$productName = $invoice['productname'];
+				$productCode = $invoice['productcode'];
 				echo ROWSEPAR.$journalVente
 					.COLSEPAR.$date
 					.COLSEPAR.$piece
 					.COLSEPAR.$compteVente
 					.COLSEPAR.$codeAnal
-					.COLSEPAR.$invoiceSubject
+					.COLSEPAR.$basicSubject . ($productCode ? ' - ' . $productCode : '')
 					.COLSEPAR.''
 					.COLSEPAR.''
-					.COLSEPAR.$amount
+					.COLSEPAR.self::formatAmountForCogilog($amountHT)
 				;
-				$invoiceTotal += str_to_float($amount) + $invoiceTotalTaxes;
+				$invoiceTotal += $amountHT + $invoiceTotalTaxes;
 			}
 		
 			if($invoiceTaxes)//dernière facture
@@ -325,17 +332,18 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			}
 			
 			/* Lignes des encaissements par jour */
-			$compteEnc = self::getCodeAffaireCompteEncaissement(''); 
 			foreach($totalPerDate as $key => $data){
 				$total = $data['total'];
-				$journal = $data['journal'];
 				$date = $data['date'];
+				$modeRegl = $data['moderegl'];
+				$compteEnc = self::getModeReglCompteEncaissement($modeRegl); 
+				$journal = self::getCompteEncaissementJournal($compteEnc);
 				if($compteEnc[0] === '7' || $compteEnc[0] === '6')
 					$codeAnal = $data['codeAnal'];
 				else	$codeAnal = '';
 				$amount= self::formatAmountForCogilog($total);
-				$piece = $key;
-				$descriptif = 'Paiements du ' . $date;
+				$piece = 'ENC-' . $key;
+				$descriptif = 'Paiements par ' . $modeRegl. ' du ' . $date;
 				echo ROWSEPAR.$journal
 					.COLSEPAR.$date
 					.COLSEPAR.$piece
@@ -455,10 +463,22 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		}
 	}
 	
-	private static function getCodeAffaireCompteEncaissement($codeAffaire){
-		switch(strtoupper($codeAffaire)){
+	private static function getModeReglCompteEncaissement($modeRegl){
+		switch(strtoupper($modeRegl)){
+		case 'CHèQUE' :
+		case 'CHEQUE' :
+			return '514000'; //chèque
 		default :
 			return '512107';//c/c Nef
+		}
+	}
+	
+	private static function getCompteEncaissementJournal($compte){
+		switch(strtoupper($compte)){
+		case '514000' :
+			return 'LBP';
+		default :
+			return 'BFC';
 		}
 	}
 	
@@ -469,12 +489,18 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		}
 	}
 	
-	private static function getCodeAffaireJournal($codeAffaire){
+	private static function getCodeAffaireJournal($codeAffaire, $modeRegl = false){
 		switch(strtoupper($codeAffaire)){
 		case 'PAYBOX' :
 		case 'PAYBOXP' :
 			return 'BFC';
 		default :
+			if($modeRegl)
+				switch(strtoupper($modeRegl)){
+				case 'PAYBOX' :
+				case 'PAYBOXP' :
+					return 'BFC';
+				}
 			return 'LBP';
 		}
 	}
@@ -485,7 +511,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	private static function formatAmountForCogilog($amount){
-		return str_replace('.', ',', round($amount, 3));
+		return str_replace('.', ',', round($amount, 2));
 	}
 	
 	

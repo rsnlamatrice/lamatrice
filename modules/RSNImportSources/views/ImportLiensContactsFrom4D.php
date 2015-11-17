@@ -368,7 +368,9 @@ class RSNImportSources_ImportLiensContactsFrom4D_View extends RSNImportSources_I
 	 * @return boolean - true if the line is a client information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[3])) {
+		if (sizeof($line) > 0 && is_numeric($line[0]) && is_numeric($line[1]) && $this->isDate($line[3])
+		     && $line[0] != $line[1] //contact === contact
+		) {
 			return true;
 		}
 

@@ -376,9 +376,9 @@
                 <td>
 					<span class="pull-right">
                     {if $MODULE eq 'Invoice'}
-                        <input id="received" name="received" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('received') && !($IS_DUPLICATE)}{$RECORD->getDisplayValue('received')}{else}0.00{/if}">
+                        <input id="received" name="received" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('received')}{$RECORD->getDisplayValue('received')}{else}0.00{/if}">
                     {else}
-                        <input id="paid" name="paid" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('paid') && !($IS_DUPLICATE)}{$RECORD->getDisplayValue('paid')}{else}0.00{/if}">
+                        <input id="paid" name="paid" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('paid')}{$RECORD->getDisplayValue('paid')}{else}0.00{/if}">
                     {/if}
 						<a id="received_set_balance">=</a>
 					</span>
@@ -391,7 +391,7 @@
                     </div>
                 </td>
                 <td>
-                    <span class="pull-right"><input id="balance" name="balance" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('balance') && !($IS_DUPLICATE)}{$RECORD->getDisplayValue('balance')}{else}0.00{/if}" readonly></span>
+                    <span class="pull-right"><input id="balance" name="balance" type="text" class="lineItemInputBox" value="{if $RECORD->getDisplayValue('balance')}{$RECORD->getDisplayValue('balance')}{else}0.00{/if}" readonly></span>
                 </td>
             </tr>
         {/if}

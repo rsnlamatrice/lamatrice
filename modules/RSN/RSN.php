@@ -487,11 +487,15 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$field3->summaryfield = $newField['summaryfield'] ? $newField['summaryfield'] : '0';
 		$field3->defaultvalue = $newField['defaultvalue'] ? $newField['defaultvalue'] : '';
 		$block1->addField($field3);
+		
 		if($newField['picklist_values'] && is_array($newField['picklist_values']))
 			$field3->setPicklistValues($newField['picklist_values']);
-			
+		
+		//Champ lié à un module
 		if($newField['relatedTo'])
+			//TODO bugg à la création d'un champ. Manque l'id ?
 			self::add_relatedmodule_field($field3, $block1->module->getName(), $newField['relatedTo']);
+			
 		return $field3;
 	}
 	

@@ -20,10 +20,11 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		if(!empty($record)  && $request->get('isDuplicate') == true) {
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
 			
+		
 			//ED150630
 			if($recordModel->get('sent2compta'))
 				$recordModel->set('sent2compta', null);
-				
+		
 			$currencyInfo = $recordModel->getCurrencyInfo();
 			$taxes = $recordModel->getProductTaxes();
 			$shippingTaxes = $recordModel->getShippingTaxes();
@@ -48,8 +49,20 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 							$relatedProducts[$index]['final_details'][$fieldName] = null;
 					}
 				}
+				foreach(array('received', 'hdnGrandTotal', 'balance') as $fieldName)
+					$recordModel->set($fieldName, -1 * $recordModel->get($fieldName));;
+					
 			}
-			
+			else {
+				if($moduleName === 'Invoice'){
+					$recordModel->set('invoicestatus', 'Approved');
+					$recordModel->set('received', 0);
+				} else {
+					$recordModel->set('postatus', null);
+					$recordModel->set('paid', 0);
+				}
+				$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
+			}
 		} elseif (!empty($record)) {
                
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
@@ -128,7 +141,6 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		//$inventoryRecordModel = Inventory_Record_Model::getCleanInstance($moduleName);
 		$termsAndConditions = $recordModel->getInventoryTermsandConditions();
 			
-		
 		foreach($requestFieldList as $fieldName=>$fieldValue) {
 			$fieldModel = $fieldList[$fieldName];
 			if($fieldModel->isEditable()) {
@@ -215,7 +227,6 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			}
 			
 		}
-		
 		$viewer->view('EditView.tpl', 'Inventory');
 	}
 

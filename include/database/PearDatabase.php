@@ -798,7 +798,7 @@ class PearDatabase{
     }
 
     function fetch_row(&$result, $encode=true) {
-		return $this->getNextRow($result);
+		return $this->getNextRow($result, $encode);
     }
 
     function field_name(&$result, $col) {
