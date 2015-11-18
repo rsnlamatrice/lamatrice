@@ -167,14 +167,14 @@ class Invoice extends CRMEntity {
 			$this->createRecurringInvoiceFromSO();
 
 		} else if(isset($_REQUEST)) {
-			if($_REQUEST['action'] != 'InvoiceAjax' && $_REQUEST['ajxaction'] != 'DETAILVIEW'
-			&& $_REQUEST['action'] != 'MassEditSave' && $_REQUEST['action'] != 'ProcessDuplicates'
-			&& $_REQUEST['action'] != 'SaveAjax' && $this->isLineItemUpdate != false) {
+			if($_REQUEST['action'] !== 'InvoiceAjax' && $_REQUEST['ajxaction'] !== 'DETAILVIEW'
+			&& $_REQUEST['action'] !== 'MassEditSave' && $_REQUEST['action'] !== 'ProcessDuplicates'
+			&& $_REQUEST['action'] !== 'SaveAjax' && $this->isLineItemUpdate != false) {
 				//Based on the total Number of rows we will save the product relationship with this entity
 				//Ici la gestion de stock
 				saveInventoryProductDetails($this, 'Invoice');
 				
-			} else if($_REQUEST['action'] == 'InvoiceAjax' || $_REQUEST['action'] == 'MassEditSave') {
+			} else if($_REQUEST['action'] === 'InvoiceAjax' || $_REQUEST['action'] === 'MassEditSave') {
 				$updateInventoryProductRel_deduct_stock = false;
 			}
 		}
@@ -191,7 +191,7 @@ class Invoice extends CRMEntity {
 	function restore($module, $id) {
 		global $updateInventoryProductRel_deduct_stock;
 		$status = getInvoiceStatus($id);
-		if($status != 'Cancel') {
+		if($status !== 'Cancel' && $status !== 'Cancelled') {
 			$updateInventoryProductRel_deduct_stock = true;
 		}
 		parent::restore($module, $id);
@@ -202,7 +202,7 @@ class Invoice extends CRMEntity {
 	 */
 	function trash($module, $recordId) {
 		$status = getInvoiceStatus($recordId);
-		if($status != 'Cancel') {
+		if($status !== 'Cancel' && $status !== 'Cancelled') {
 			addProductsToStock($recordId);
 		}
 		parent::trash($module, $recordId);

@@ -182,7 +182,7 @@ class PurchaseOrder extends CRMEntity {
 			saveInventoryProductDetails($this, 'PurchaseOrder', $this->update_prod_stock);
 
 			if ($manageStock && $this->mode != '') {
-				$updateInventoryProductRel_deduct_stock = true;
+				$updateInventoryProductRel_deduct_stock = $this->column_fields['postatus'] === 'Received Shipment';;
 			}
 		}
 
@@ -518,6 +518,28 @@ class PurchaseOrder extends CRMEntity {
 
 		$log->debug("Exiting create_export_query method ...");
 		return $query;
+	}
+
+	/**
+	 * Customizing the Delete procedure.
+	 */
+	function trash($module, $recordId) {
+		$status = Vtiger_Functions::getPurchaseOrderStatus($recordId);
+		if($status === 'Received Shipment') {
+			deductProductsFromStock($recordId);
+		}
+		parent::trash($module, $recordId);
+	}
+	
+	/**
+	 * Customizing the restore procedure.
+	 */
+	function restore($module, $id) {
+		$status = Vtiger_Functions::getPurchaseOrderStatus($id);
+		if($status === 'Received Shipment') {
+			addProductsToStock($id);
+		}
+		parent::restore($module, $id);
 	}
 
 }

@@ -312,6 +312,7 @@ var Vtiger_Index_Js = {
 		}
 
 		function showTooltip(el, data) {
+			//ED151118 : modifications dans le css pour la largeur et sur le positionnement dans libraries\bootstrap\js\bootstrap-tooltip.js
 			el.popover({
 				//title: '', - Is derived from the Anchor Element (el).
 				trigger: 'manual',

@@ -880,6 +880,22 @@ class Vtiger_Functions {
 		return $invoiceStatus;
 	}
 
+	//ED151118
+	static function getPurchaseOrderStatus($id) {
+		global $adb;
+		$result = $adb->pquery("SELECT postatus FROM vtiger_purchaseorder where purchaseorderid=?", array($id));
+		$status = $adb->query_result($result,0,0);
+		return $status;
+	}
+
+	//ED151118
+	static function getSalesOrderStatus($id) {
+		global $adb;
+		$result = $adb->pquery("SELECT sostatus FROM vtiger_salesorder where salesorderid=?", array($id));
+		$status = $adb->query_result($result,0,0);
+		return $status;
+	}
+
 	static function mkCountQuery($query) {
 		// Remove all the \n, \r and white spaces to keep the space between the words consistent.
 		// This is required for proper pattern matching for words like ' FROM ', 'ORDER BY', 'GROUP BY' as they depend on the spaces between the words.

@@ -33,6 +33,7 @@ $languageStrings = array(
 	'Credit Invoice'               => 'Avoir'                     , 
 	'Paid'                         => 'Soldée'                      , 
 	'AutoCreated'                  => 'Créée automatiquement'      , 
+	'Created'                  		=> 'Créée'      , 
 	'Cancel'                       => 'Annuler'                     , 
 	'LBL_COPY_SHIPPING_ADDRESS'    => 'Copier l\'adresse de livraison'       , 
 	'LBL_COPY_BILLING_ADDRESS'     => 'Copier l\'adresse de facturation'        , 

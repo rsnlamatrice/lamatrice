@@ -554,8 +554,11 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		
 		//ED151107 : utilisation du cache, car chargements multiples pour l'éditeur de CustomView
         $fieldInfo = Vtiger_Cache::get('FieldInfoForContext::'.$context, $this->id);
-		if($fieldInfo)
-			return array_merge($this->fieldInfo, $fieldInfo);
+		if($fieldInfo){
+			if(is_array($this->fieldInfo))
+				return array_merge($this->fieldInfo, $fieldInfo);
+			return $fieldInfo;
+		}
 		
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 		$fieldDataType = $this->getFieldDataType();

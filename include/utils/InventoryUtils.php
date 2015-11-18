@@ -414,26 +414,39 @@ function deleteInventoryProductDetails($focus)
 	global $log, $adb,$updateInventoryProductRel_update_product_array;
 	$log->debug("Entering into function deleteInventoryProductDetails(".$focus->id.").");
 
-	$product_info = $adb->pquery("SELECT productid, quantity, sequence_no, incrementondel from vtiger_inventoryproductrel WHERE id=?",array($focus->id));
-	$numrows = $adb->num_rows($product_info);
-	for($index = 0;$index <$numrows;$index++){
-		$productid = $adb->query_result($product_info,$index,'productid');
-		$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
-		$qty = $adb->query_result($product_info,$index,'quantity');
-		$incrementondel = $adb->query_result($product_info,$index,'incrementondel');
-
-		if($incrementondel){
-			$focus->update_product_array[$focus->id][$sequence_no][$productid]= $qty;
-			$sub_prod_query = $adb->pquery("SELECT productid from vtiger_inventorysubproductrel WHERE id=? AND sequence_no=?",array($focus->id,$sequence_no));
-			if($adb->num_rows($sub_prod_query)>0){
-				for($j=0;$j<$adb->num_rows($sub_prod_query);$j++){
-					$sub_prod_id = $adb->query_result($sub_prod_query,$j,"productid");
-					$focus->update_product_array[$focus->id][$sequence_no][$sub_prod_id]= $qty;
+	//ED151118
+	$moduleName = get_class($focus);
+	$manageStock = !(
+		$_REQUEST['previous_status'] === 'Cancelled'
+		|| ($moduleName === 'PurchaseOrder' && $_REQUEST['previous_status'] === 'Created')
+		|| ($moduleName === 'SalesOrder')
+	);
+	
+	if($manageStock){
+		$product_info = $adb->pquery("SELECT productid, quantity, sequence_no, incrementondel from vtiger_inventoryproductrel WHERE id=?",array($focus->id));
+		$numrows = $adb->num_rows($product_info);
+		for($index = 0;$index <$numrows;$index++){
+			$productid = $adb->query_result($product_info,$index,'productid');
+			$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
+			$qty = $adb->query_result($product_info,$index,'quantity');
+			$incrementondel = $adb->query_result($product_info,$index,'incrementondel');
+	
+			if($incrementondel){
+				$focus->update_product_array[$focus->id][$sequence_no][$productid]= $qty * $incrementondel;
+				$sub_prod_query = $adb->pquery("SELECT productid from vtiger_inventorysubproductrel WHERE id=? AND sequence_no=?",array($focus->id,$sequence_no));
+				if($adb->num_rows($sub_prod_query)>0){
+					for($j=0;$j<$adb->num_rows($sub_prod_query);$j++){
+						$sub_prod_id = $adb->query_result($sub_prod_query,$j,"productid");
+						$focus->update_product_array[$focus->id][$sequence_no][$sub_prod_id]= $qty * $incrementondel;
+					}
 				}
+	
 			}
-
 		}
 	}
+	$log->debug("deleteInventoryProductDetails $moduleName ".$_REQUEST['previous_status']." (".($manageStock ? 'manageStock' : 'NOT manageStock').")
+				update_product_array : ".print_r($focus->update_product_array, true));
+	
 	$updateInventoryProductRel_update_product_array = $focus->update_product_array;
     $adb->pquery("delete from vtiger_inventoryproductrel where id=?", array($focus->id));
     $adb->pquery("delete from vtiger_inventorysubproductrel where id=?", array($focus->id));
@@ -446,25 +459,37 @@ function updateInventoryProductRel($entity) {
 	global $log, $adb,$updateInventoryProductRel_update_product_array,$updateInventoryProductRel_deduct_stock;
 	$entity_id = vtws_getIdComponents($entity->getId());
 	$entity_id = $entity_id[1];
-	$update_product_array = $updateInventoryProductRel_update_product_array;
 	$log->debug("Entering into function updateInventoryProductRel(".$entity_id.").");
+	$update_product_array = $updateInventoryProductRel_update_product_array;
 
+	//Affectation des stocks après suppression des anciennes lignes
 	if(!empty($update_product_array)) {
 		foreach($update_product_array as $id=>$seq) {
 			foreach($seq as $seq=>$product_info) {
-				foreach($product_info as $key=>$index) {
-					$updqtyinstk= getPrdQtyInStck($key);
-					$upd_qty = $updqtyinstk+$index;
+				foreach($product_info as $key=>$prevQty) {
+					$updqtyinstk = getPrdQtyInStck($key);
+					$upd_qty = $updqtyinstk + $prevQty;
 					updateProductQty($key, $upd_qty);
 				}
 			}
 		}
 	}
 
+	//TODO c'est la chiotte ce bordel
+	//erreur pour un purchaseorder si on passe du status 'Received Shipment' à 'Cancelled' tout en changeant de produit.
+	
+	
 	$moduleName = $entity->getModuleName();
+	////ED151118
+	//$manageStock = !(
+	//	$_REQUEST['new_status'] === 'Cancelled'
+	//	|| ($moduleName === 'PurchaseOrder' && $_REQUEST['new_status'] === 'Created')
+	//	|| ($moduleName === 'SalesOrder')
+	//);
+	//statut pour mouvement du stock
 	if ($moduleName === 'Invoice') {
 		$statusFieldName = 'invoicestatus';
-		$statusFieldValue = 'Cancel';
+		$statusFieldValue = 'Cancelled'; //ED151118 : changed Cancel to Cancelled
 	} elseif ($moduleName === 'PurchaseOrder') {
 		$statusFieldName = 'postatus';
 		$statusFieldValue = 'Received Shipment';
@@ -479,14 +504,18 @@ function updateInventoryProductRel($entity) {
 	$log->debug("statusChanged = $statusChanged");
 		
 	if($statusChanged) {
+		//Réception de produit ou annulation de facture
 		if($recordDetails[$statusFieldName] == $statusFieldValue) {
 			$log->debug("statusFieldName $statusFieldName == $statusFieldValue");
-			$adb->pquery("UPDATE vtiger_inventoryproductrel SET incrementondel=0 WHERE id=?",array($entity_id));
+			$incrementOnDel = $moduleName === 'PurchaseOrder' ? -1 : 0;
+			$adb->pquery("UPDATE vtiger_inventoryproductrel SET incrementondel=? WHERE id=?",array($incrementOnDel, $entity_id));
 			$updateInventoryProductRel_deduct_stock = false;
 			if(empty($update_product_array)) {
 				addProductsToStock($entity_id);
 			}
-		} elseif($oldEntity == $statusFieldValue) {
+		//Désannulation d'une facture
+		} elseif($oldEntity == $statusFieldValue
+		&& $moduleName !== 'PurchaseOrder') {
 			$log->debug("oldEntity $oldEntity == $statusFieldValue");
 			$updateInventoryProductRel_deduct_stock = false;
 			deductProductsFromStock($entity_id);
@@ -495,28 +524,34 @@ function updateInventoryProductRel($entity) {
 		$log->debug("status NOT Changed $statusFieldName == $statusFieldValue");
 		$updateInventoryProductRel_deduct_stock = false;
 	}
-
+	
+	$log->debug("IN updateInventoryProductRel $updateInventoryProductRel_deduct_stock = ".$updateInventoryProductRel_deduct_stock.".");
+	
 	if($updateInventoryProductRel_deduct_stock) {
 		$log->debug("updateInventoryProductRel_deduct_stock");
 		
-		$adb->pquery("UPDATE vtiger_inventoryproductrel SET incrementondel=1 WHERE id=?",array($entity_id));
+		$incrementOnDel = $moduleName === 'PurchaseOrder' ? -1 : 1;
+		$adb->pquery("UPDATE vtiger_inventoryproductrel SET incrementondel=? WHERE id=?",array($incrementOnDel, $entity_id));
 
-		$product_info = $adb->pquery("SELECT productid,sequence_no, quantity from vtiger_inventoryproductrel WHERE id=?",array($entity_id));
-		$numrows = $adb->num_rows($product_info);
-		for($index = 0;$index <$numrows;$index++) {
-			$productid = $adb->query_result($product_info,$index,'productid');
-			$qty = $adb->query_result($product_info,$index,'quantity');
-			$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
-			$qtyinstk= getPrdQtyInStck($productid);
-			$upd_qty = $qtyinstk-$qty;
-			updateProductQty($productid, $upd_qty);
-			$sub_prod_query = $adb->pquery("SELECT productid from vtiger_inventorysubproductrel WHERE id=? AND sequence_no=?",array($entity_id,$sequence_no));
-			if($adb->num_rows($sub_prod_query)>0) {
-				for($j=0;$j<$adb->num_rows($sub_prod_query);$j++) {
-					$sub_prod_id = $adb->query_result($sub_prod_query,$j,"productid");
-					$sqtyinstk= getPrdQtyInStck($sub_prod_id);
-					$supd_qty = $sqtyinstk-$qty;
-					updateProductQty($sub_prod_id, $supd_qty);
+		//Pour les PurchaseOrder, c'est déjà traité
+		if ($moduleName !== 'PurchaseOrder'){			
+			$product_info = $adb->pquery("SELECT productid,sequence_no, quantity from vtiger_inventoryproductrel WHERE id=?",array($entity_id));
+			$numrows = $adb->num_rows($product_info);
+			for($index = 0;$index <$numrows;$index++) {
+				$productid = $adb->query_result($product_info,$index,'productid');
+				$qty = $adb->query_result($product_info,$index,'quantity');
+				$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
+				$qtyinstk= getPrdQtyInStck($productid);
+				$upd_qty = $qtyinstk-$qty;
+				updateProductQty($productid, $upd_qty);
+				$sub_prod_query = $adb->pquery("SELECT productid from vtiger_inventorysubproductrel WHERE id=? AND sequence_no=?",array($entity_id,$sequence_no));
+				if($adb->num_rows($sub_prod_query)>0) {
+					for($j=0;$j<$adb->num_rows($sub_prod_query);$j++) {
+						$sub_prod_id = $adb->query_result($sub_prod_query,$j,"productid");
+						$sqtyinstk= getPrdQtyInStck($sub_prod_id);
+						$supd_qty = $sqtyinstk-$qty;
+						updateProductQty($sub_prod_id, $supd_qty);
+					}
 				}
 			}
 		}
@@ -551,8 +586,7 @@ function saveInventoryProductDetails(&$focus, $module, $update_prod_stock='false
 		if($_REQUEST['taxtype'] == 'group')
 			$all_available_taxes = getAllTaxes('available','','edit',$id);
 		$return_old_values = '';
-		if($module != 'PurchaseOrder')
-		{
+		if($module != 'PurchaseOrder'){
 			$return_old_values = 'return_old_values';
 		}
 
@@ -560,15 +594,14 @@ function saveInventoryProductDetails(&$focus, $module, $update_prod_stock='false
 		//$ext_prod_arr = deleteInventoryProductDetails($focus->id,$return_old_values);
 		deleteInventoryProductDetails($focus);
 	}
-	else
-	{
-	if($_REQUEST['taxtype'] == 'group')
+	elseif($_REQUEST['taxtype'] == 'group'){
 		$all_available_taxes = getAllTaxes('available','','edit',$id);
 	}
+	
 	$tot_no_prod = $_REQUEST['totalProductCount'];
 	//If the taxtype is group then retrieve all available taxes, else retrive associated taxes for each product inside loop
-	$prod_seq=1;
-	for($i=1; $i<=$tot_no_prod; $i++)
+	$prod_seq = 1;
+	for($i = 1; $i <= $tot_no_prod; $i++)
 	{
 		//if the product is deleted then we should avoid saving the deleted products
 		if($_REQUEST["deleted".$i] == 1)

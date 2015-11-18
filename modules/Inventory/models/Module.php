@@ -143,21 +143,52 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 			$recordModel->set('account_id', $accountRecordModel->getId());
 		}
 		
-		/** ED151027
-		* Approved invoice with balance === 0 becomes Paid
-		*/
-		$approvedStatus = array('Approved', 'Created', 'AutoCreated');
-		$balance = (float)str_replace(',', '.', $recordModel->get('balance'));
-		if(in_array($_REQUEST['invoicestatus'], $approvedStatus)
-		&& $recordModel->get('invoicestatus') == $_REQUEST['invoicestatus']
-		&& abs($balance) < 0.01){
-			$recordModel->set('invoicestatus', 'Paid');
+		switch($this->getName()){
+		case 'Invoice':
+			$statusFieldName = 'invoicestatus';
+			$previousStatus = Vtiger_Functions::getInvoiceStatus($recordModel->getId());
+			break;
+		case 'PurchaseOrder':
+			$statusFieldName = 'postatus';
+			$previousStatus = Vtiger_Functions::getPurchaseOrderStatus($recordModel->getId());
+			break;
+		case 'SalesOrder':
+			$statusFieldName = 'sostatus';
+			$previousStatus = Vtiger_Functions::getSalesOrderStatus($recordModel->getId());
+			break;
 		}
-		elseif($_REQUEST['invoicestatus'] === 'Paid'
-		&& $recordModel->get('invoicestatus') == $_REQUEST['invoicestatus']
-		&& abs($balance) >= 0.01){
-			//TODO alerter l'utilisateur
-			//$recordModel->set('invoicestatus', 'Approved');
+		
+		$_REQUEST['previous_status'] = $previousStatus;
+		$_REQUEST['new_status'] = $_REQUEST[$statusFieldName];
+		
+		//Annulation de la facture
+		if($previousStatus === 'Cancelled'
+		&& $_REQUEST[$statusFieldName] !== 'Cancelled'){
+			$_REQUEST['status_previously_cancelled'] = true;
+		}
+
+		if($this->getName() === 'Invoice'){
+			/** ED151027
+			* Approved invoice with balance === 0 becomes Paid
+			*/
+			$approvedStatus = array('Approved', 'Created', 'AutoCreated');
+			$balance = (float)str_replace(',', '.', $recordModel->get('balance'));
+			if(in_array($_REQUEST[$statusFieldName], $approvedStatus)
+			&& $recordModel->get($statusFieldName) == $_REQUEST[$statusFieldName]
+			&& abs($balance) < 0.01){
+				$recordModel->set($statusFieldName, 'Paid');
+			}
+			elseif($_REQUEST[$statusFieldName] === 'Paid'
+			&& $recordModel->get($statusFieldName) == $_REQUEST[$statusFieldName]
+			&& abs($balance) >= 0.01){
+				//TODO alerter l'utilisateur
+				//$recordModel->set('invoicestatus', 'Approved');
+			}
+		}
+		//Annulation de la facture
+		if($_REQUEST[$statusFieldName] === 'Cancelled'
+		&& $previousStatus !== 'Cancelled'){
+			$_REQUEST['status_becomes_cancelled'] = true;
 		}
 		return parent::saveRecord($recordModel);
 	}

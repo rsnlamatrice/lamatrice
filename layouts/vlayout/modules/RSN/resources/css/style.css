@@ -493,4 +493,16 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
   list-style: none; margin-left: 8px;
 }
 #menuEditorContainer .menuItem {
-   margin-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+/* ToolTip on reference */
+.popover {
+  z-index: 9999;
+}
+.popover-inner {
+  width: 380px;
+}
+.popover-content .ui-icon {
+  display: inline-block;
+}

@@ -95,7 +95,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$recordModel = Inventory_Record_Model::getCleanInstance($moduleName);/*ED141219 : Vtiger_Record_Model -> Inventory_Record_Model*/
 			$viewer->assign('MODE', '');
 				
-
+			$recordModel->set('invoicestatus', 'Created');
 			//$recordModel->set('invoicedate', date('j-n-Y'));
 		
 			//The creation of Inventory record from action and Related list of product/service detailview the product/service details will calculated by following code
@@ -185,6 +185,34 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		} else {
 			$viewer->assign('IS_DUPLICATE',false);
 		}
+
+		//ED150603
+		if($recordModel->get('sent2compta'))
+			$viewer->assign('NOT_EDITABLE', vtranslate('LBL_ALREADY_SENT_2_COMPTA', $moduleName) . ' (' . $recordModel->getDisplayValue('sent2compta') . ')');
+		
+		//ED150629
+		if($moduleName === 'PurchaseOrder'){
+			if($request->get('potype') && (empty($record) || $request->get('isDuplicate'))){
+				$recordModel->set('potype', $request->get('potype'));
+				$recordModel->setDefaultStatus();
+			}
+			$fieldList['potype']->set('fieldvalue', $recordModel->get('potype'));
+			$fieldList['postatus']->set('fieldvalue', $recordModel->get('postatus'));
+			
+			if( $request->get('isDuplicate')){
+				if($request->get('potype') === 'receipt')
+					$recordModel->set('subject', str_replace('Cmde fourn.', 'Bon récept.', $recordModel->get('subject')));
+				elseif($request->get('potype') === 'invoice')
+					$recordModel->set('subject', preg_replace('/^Bon r.*cept./', 'Fact. fourn.', $recordModel->get('subject')));
+			}
+			$viewer->assign('POTYPE_FIELD_MODEL', $fieldList['potype']);
+			
+			if($recordModel->get('potype') !== 'invoice'){
+				//suppression du champ sent2compta ailleurs qu'en facture
+			}
+			
+		}
+		
 		$currencies = Inventory_Module_Model::getAllCurrencies();
 		$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($moduleName);
 		$viewer->assign('PICKIST_DEPENDENCY_DATASOURCE',Zend_Json::encode($picklistDependencyDatasource));
@@ -207,26 +235,6 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 
 		$serviceModuleModel = Vtiger_Module_Model::getInstance('Services');
 		$viewer->assign('SERVICE_ACTIVE', $serviceModuleModel->isActive());
-
-		//ED150603
-		if($recordModel->get('sent2compta'))
-			$viewer->assign('NOT_EDITABLE', vtranslate('LBL_ALREADY_SENT_2_COMPTA', $moduleName) . ' (' . $recordModel->getDisplayValue('sent2compta') . ')');
-		
-		//ED150629
-		if($moduleName === 'PurchaseOrder'){
-			if($request->get('potype') && (empty($record) || $request->get('isDuplicate'))){
-				$recordModel->set('potype', $request->get('potype'));
-				$recordModel->setDefaultStatus();
-			}
-			$fieldList['potype']->set('fieldvalue', $recordModel->get('potype'));
-			$fieldList['postatus']->set('fieldvalue', $recordModel->get('postatus'));
-			$viewer->assign('POTYPE_FIELD_MODEL', $fieldList['potype']);
-			
-			if($recordModel->get('potype') !== 'invoice'){
-				//suppression du champ sent2compta ailleurs qu'en facture
-			}
-			
-		}
 		$viewer->view('EditView.tpl', 'Inventory');
 	}
 

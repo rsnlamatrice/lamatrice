@@ -534,7 +534,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	
 	//ED151014
 	getReceivedControlElement : function() {
-		return jQuery('#received');
+		return jQuery('#received,#paid');
 	},
 
 	getReceived : function() {
@@ -1109,7 +1109,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 */
 	registerFinalReceivedValueChangeEvent : function(){
 		var thisInstance = this;
-		jQuery('#received').on('change',function(e){
+		jQuery('#received,#paid').on('change',function(e){
 			thisInstance.calculateBalance();
 		});
 	},
