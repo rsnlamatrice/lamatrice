@@ -32,6 +32,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
+		if(!$this->validateInvoicesData($request))
+			return false;
+		
 		$this->initSend2ComptaForm ($request);
 
 		$viewer->assign('MODE', 'send2compta');
@@ -87,7 +90,51 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$viewer->assign('SELECTED_IDS', $selectedIds);
 	}
 		
-	function downloadSend2Compta (Vtiger_Request $request){
+	//Controle des données avant affichage
+	function validateInvoicesData(Vtiger_Request $request){
+		
+		$controller = new Vtiger_MassSave_Action();
+		$query = $controller->getRecordsQueryFromRequest($request);
+		
+		//Contrôle que tous les produits et services on
+		$query = 'SELECT DISTINCT vtiger_products.productid
+			, IF(vtiger_products.productid IS NULL, "Service", "Produit") as module
+			, IFNULL(productname, servicename) AS productname
+			, IFNULL(vtiger_products.productcode, vtiger_service.productcode) AS productcode
+			FROM ('.$query.') _source_ids_
+			JOIN vtiger_inventoryproductrel
+				ON vtiger_inventoryproductrel.id = _source_ids_.invoiceid
+			LEFT JOIN vtiger_products
+				ON vtiger_products.productid = vtiger_inventoryproductrel.productid
+			LEFT JOIN vtiger_service
+				ON vtiger_service.serviceid = vtiger_inventoryproductrel.productid
+			LEFT JOIN vtiger_servicecf
+				ON vtiger_servicecf.serviceid = vtiger_inventoryproductrel.productid
+			WHERE ((vtiger_products.productid IS NOT NULL AND IFNULL(vtiger_products.glacct, "") = "")
+				OR (vtiger_servicecf.serviceid IS NOT NULL AND IFNULL(vtiger_servicecf.glacct, "") = ""))
+			AND vtiger_inventoryproductrel.listprice <> 0
+		';
+		$params = array();
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			return false;
+		}
+		elseif($db->getRowCount($result)) {
+			echo "<ul><h4 style=\"color: red;\">Produits ou services sans compte de vente !!!</h4>";
+			while($product = $db->fetch_row($result)){
+				echo "<li>".$product['module']." - ".$product['productname']." (".$product['productcode'].")</li>";
+			}
+			echo "</ul>";
+			return false;
+		}
+		return true;
+	}
+		
+	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
 			
@@ -171,12 +218,12 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$isDebug = COLSEPAR;
 			$isDebug = $isDebug[0] === '<';
 			
-			$fileName = 'LAM2Cogilog.Factures.Compta.'.date('YmdHis');
+			$fileName = 'LAMAT_vers_COG.Factures.Compta.'.date('Ymd_His').'csv';
 			$exportType = 'text/csv';
 			if($isDebug)
 				echo '<table border="1"><tr><td>';//debug
-			else {
-				header("Content-Disposition:attachment;filename=$fileName.csv");
+			elseif($setHeaders) {
+				header("Content-Disposition:attachment;filename=$fileName");
 				header("Content-Type:$exportType;charset=UTF-8");
 				header("Expires: Mon, 31 Dec 2000 00:00:00 GMT" );
 				header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
@@ -253,7 +300,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$codeAffaire = $invoice['codeaffaire'];
 					$piece = $invoice['invoice_no'];
 					$invoiceModeRegl = $invoice['receivedmoderegl'];
-					$invoiceCompteVente = self::getInvoiceCompteVente($codeAffaire, $invoiceModeRegl, $invoice['productcode']);
+					$invoiceCompteVente = self::getInvoiceCompteVenteSolde($invoice);
 					if($invoiceCompteVente[0] === '7' || $invoiceCompteVente[0] === '6')
 						$invoiceCodeAnal = self::getCodeAffaireCodeAnal($codeAffaire);
 					else	$invoiceCodeAnal = '';
@@ -358,7 +405,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		}
 		if($isDebug)
 			echo '</table>';//debug
-			
+		
+		return $fileName;
 	}
 	
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
@@ -419,41 +467,27 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				return $tax;
 		return false;
 	}
-	
-	private static function getInvoiceCompteVente($codeAffaire, $modeRegl, $codeProduit){
-		switch(strtouper($codeProduit)){
-		case 'ADETAL':
-			return '511104';
-		default:
-			switch(strtoupper($codeAffaire)){
-			case 'PAYBOX' :// (dons réguliers)  
-				return '511104';
-			case 'PAYBOXP' :
-				return '511400';// (dons ponctuels)  
-			case 'PAYPAL' :
-				return '511300';
-			default:
-				switch(strtoupper($modeRegl)){
-				case 'PAYPAL' :
-				case 'PAYBOX' :
-					return '511101';
-				default:
-					return '511200';//LBP
-				}
-			}
-		}
-	}
-	
+		
 	private static function getInvoiceCompteVenteSolde($invoiceData){
 		$modeRegl = $invoiceData['receivedmoderegl'];
 		switch(strtoupper($invoiceData['invoicestatus'])){
 		case 'PAID' :
 			switch($modeRegl){
-			case 'PayPal' :
 			case 'PayBox' :
 				return '511101';
+			case 'PayPal' :
+				return '511300';
+			case 'Espèces' :
+				return '511103';
+			case 'CB' :
+				return '511102';
+			case 'Virement' :
+				return '511106';
+			case 'Mandat' :
+				return '511106';//TODO
+			default:
+				return '511200';//LBP
 			}
-			return '511200';//LBP
 		default:
 			switch($invoiceData['typedossier']){
 			case 'Facture de dépôt-vente' :
@@ -520,7 +554,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		return str_replace('.', ',', round($amount, 2));
 	}
 	
-	
+	//Marque les factures comme étant envoyées en compta (champ sent2compta)
 	function validateSend2Compta(Vtiger_Request $request){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
@@ -537,6 +571,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$params = $selectedIds;
 		$params[] = 'Cancelled';
 		
+		if($selectedIds)
+			$this->storeFile($request);
+		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
 		if(!$result){
@@ -547,6 +584,21 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$response->setError('Erreur de requête');
 			$response->emit();
 		}
+	}
+	
+	//regénère le fichier et l'enregistre dans le répertoire storage
+	function storeFile(Vtiger_Request $request){
+		ob_start();
+		$fileName = $this->downloadSend2Compta ($request, false);
+		$fileContent =  ob_get_contents();
+		ob_end_clean();
+		global $root_directory;
+		$firstDayOfMonth = strtotime(date("Y-m-01", time()));
+		$weekNum = date("W") - date("W", $firstDayOfMonth) + (date('w', $firstDayOfMonth) === '0' ? 0 : 1);
+		$path = $root_directory . '/storage/'.date('Y').'/'.date('F').'/week'.$weekNum;
+		if(!file_exists($path))
+			mkdir($path);
+		file_put_contents($path.'/'.$fileName, $fileContent);
 	}
 	
 	

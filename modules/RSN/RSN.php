@@ -471,7 +471,7 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		if($existingFields[$newFieldName]){
 			if($newField['picklist_values'] && is_array($newField['picklist_values']))
 				$existingFields[$newFieldName]->setPicklistValues($newField['picklist_values']);
-			return;
+			return $existingFields[$newFieldName];
 		}
 	
 		$tableName = $newField['tablename'];
@@ -492,10 +492,9 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 			$field3->setPicklistValues($newField['picklist_values']);
 		
 		//Champ lié à un module
-		if($newField['relatedTo'])
-			//TODO bugg à la création d'un champ. Manque l'id ?
+		if($newField['relatedTo']){
 			self::add_relatedmodule_field($field3, $block1->module->getName(), $newField['relatedTo']);
-			
+		}
 		return $field3;
 	}
 	
@@ -504,8 +503,7 @@ CREATE TABLE IF NOT EXISTS `vtiger_fielduirelation` (
 		$sql = 'INSERT INTO `vtiger_fieldmodulerel` (`fieldid`, `module`, `relmodule`, `status`, `sequence`)
 			VALUES (?, ?, ?, NULL, NULL)';
 		$result = $db->pquery($sql, array(
-			$field->getId(),
-			$moduleFrom, $moduleTo
+			$field->id, $moduleFrom, $moduleTo
 		));
 	}
 	

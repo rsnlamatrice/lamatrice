@@ -899,7 +899,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'zip'		=> $invoiceInformations[$this->columnName_indexes['cp']],
 			'city'		=> $invoiceInformations[$this->columnName_indexes['ville']],
 			'country' 	=> $invoiceInformations[$this->columnName_indexes['pays']],
-			'subject'		=> $invoiceInformations[$this->columnName_indexes['nomclient']].' / '. $invoiceInformations[$this->columnName_indexes['datepiece']],
+			'subject'		=> $invoiceInformations[$this->columnName_indexes['nomclient']],
 			'invoicedate'		=> $date,
 			'affaire_code' 	=> $invoiceInformations[$this->columnName_indexes['affaire_code']],
 			'paiementpropose' => $this->getModePaiement($invoiceInformations[$this->columnName_indexes['paiementpropose']], $receivedcomments),

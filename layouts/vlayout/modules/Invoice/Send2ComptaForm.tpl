@@ -34,15 +34,28 @@
 				</div>
 				
 				<div class="row-fluid" style="margin-top: 2em; font-size: larger">
-					<a class="downloadSend2Compta" href="#downloadSend2Compta">Télécharger le fichier pour la compta</a>
+					<a class="downloadSend2Compta" href="#downloadSend2Compta">Cliquez ici pour télécharger le fichier pour la compta</a>
+				</div>
+				<div class="row-fluid" style="font-style: italic;">
+					Le fichier devrait se trouver dans votre répertoire "Téléchargements".
+					<br>Il doit être importé dans la compta (menu Fichier/Importer), en spécifiant les formats "Tabulation" et "UTF-8".
 				</div>
 				
-				<div class="row-fluid" style="margin-top: 2em; font-size: larger; font-style: italic;">
-					Après avoir téléchargé le fichier, vous devez cliquer sur le bouton "Enregistrer" pour valider les factures comme étant en compta.
+				<div class="row-fluid" style="margin-top: 4em; font-size: larger; font-style: italic;">
+					Après avoir téléchargé le fichier, vous devez cliquer sur le bouton "Valider le transfert en compta".
+				</div>
+				<div class="row-fluid" style="font-style: italic;">
+					Les factures seront définitivement verrouillées et ne seront plus transférables en compta.
+					<br>Effectuer l'importation en compta et ne pas valider le transfert provoque des doublons en compta.
 				</div>
 			</div>
 		</div>
-		{include file='ModalFooter.tpl'|@vtemplate_path:$MODULE}
+		<div class="modal-footer">
+			<div class=" pull-right cancelLinkContainer">
+				<a class="cancelLink" type="reset" data-dismiss="modal">{vtranslate('LBL_CANCEL', $MODULE)}</a>
+			</div>
+			<button class="btn btn-success" type="submit" name="saveButton"><strong>Valider le transfert en compta</strong></button>
+		</div>
 	</form>
 	{else}
 		<div name='massEditContent'>
