@@ -12,7 +12,7 @@
  ************************************************************************************/
 
 $languageStrings = Array (
-	'MailManager' => 'Mail Manager',
+	'MailManager' => 'Gestionnaire d\'emails',
 	
 	// General translations
 	'LBL_Folders'         => 'Dossiers',

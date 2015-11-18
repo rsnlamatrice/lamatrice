@@ -88,6 +88,61 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 		$viewer->assign('SOURCE_MODULE',$moduleName);
 		$viewer->assign('SOURCE_MODULE_MODEL', $moduleModel);
 		$viewer->assign('MODULE', $module);
+		
+		//ED151118
+		if(false){
+			//TODO
+			//copie depuis modules\CustomView\views\EditAjax.php mais ça ne fonctionne pas 
+
+			/* ED150212
+			 * Related record structures
+			 */
+			$relationModels = $moduleModel->getRelations();
+			$relatedViews = array();
+			foreach($relationModels as $relationModel){
+				$relatedViews[$relationModel->getRelationModuleName()] = $relationModel->getRelationViews();
+			}
+	
+			/* ED150507
+			 * RSNContactsPanels
+			 */
+			if($moduleName == 'Contacts'){
+				$contactsPanels = array();
+				$contactsPanelsRecords = RSNContactsPanels_Record_Model::getAllForCustomViewEditor();
+				foreach($contactsPanelsRecords as $contactsPanel){
+					$contactsPanels[$contactsPanel->getName()] = $contactsPanel;
+				}
+				$viewer->assign('CONTACTS_PANELS',$contactsPanels);
+			}
+	
+			/* ED151025
+			 * RSNStatistics
+			 */
+			if(true){ //TODO Trop long !
+				$relatedStats = array();
+				$statRecords = RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName);
+				if($statRecords){
+					$statsModuleModel = Vtiger_Module_Model::getInstance('RSNStatistics');
+					$periodicityField = false;
+					foreach($statRecords as $statRecord){
+						if(!$periodicityField)
+							$periodicityField = $statsModuleModel->getField('stats_periodicite');
+						else
+							$periodicityField = clone $periodicityField;
+						$periodicityField->set('label', '[' . $statRecord->getName() . '] Période');
+						$periodicityField->set('parentid', $statRecord->getId());
+						$relatedStatsFields = array($periodicityField->getId() => $periodicityField);
+						$relatedStatsFields = array_merge($relatedStatsFields, RSNStatistics_Utils_Helper::getRelatedStatsFieldsVtigerFieldModels($statRecord->getId(),$moduleName));
+						$relatedStats[$statRecord->getId()] = array(
+							'recordModel' => $statRecord,
+							'fields' => $relatedStatsFields,
+						);
+					}
+					$viewer->assign('RELATED_STATISTICS',$relatedStats);
+				}
+			}
+		}
+		$viewer->assign('NOCHOSEN', true);
         
 		$viewer->assign('SAVE_FILTER_PERMITTED', $saveFilterPermitted);
 
