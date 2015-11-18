@@ -33,6 +33,7 @@ class Contacts_Popup_View extends Vtiger_Popup_View {
 			$sourceRecord = $request->get('src_record');
 			$searchKey = $request->get('search_key');
 			$searchValue = $request->get('search_value');
+			$operator = $request->get('operator');
 			$currencyId = $request->get('currency_id');
 			
 			$requestedPage = $pageNumber;
@@ -98,6 +99,7 @@ class Contacts_Popup_View extends Vtiger_Popup_View {
 
 			$viewer->assign('SEARCH_KEY', $searchKey);
 			$viewer->assign('SEARCH_VALUE', $searchValue);
+			$viewer->assign('SEARCH_OPERATOR', $operator);
 
 			$viewer->assign('ORDER_BY',$orderBy);
 			$viewer->assign('SORT_ORDER',$sortOrder);

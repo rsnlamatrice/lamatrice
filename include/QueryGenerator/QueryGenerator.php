@@ -1545,9 +1545,16 @@ class QueryGenerator {
 						$search_texts = array($search_texts);
 					if(!is_array($operators))
 						$operators = array($operators);
+					$startingGroup = true;
 					for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++)
-						if(!($search_texts[$i] == '' && $operators[$i] == 'e'))
-							$this->addUserSearchConditionUnique($search_fields[$i], $search_texts[$i], $operators[$i]);
+						if(!$search_fields[$i]){
+							$this->addConditionGlue($operators[$i]);
+							$startingGroup = true;
+						}
+						elseif(!($search_texts[$i] == '' && $operators[$i] == 'e')){
+							$this->addUserSearchConditionUnique($search_fields[$i], $search_texts[$i], $operators[$i], $startingGroup);
+							$startingGroup = false;
+						}
 				}
 				else	//original
 					$this->addUserSearchConditionUnique($search_fields, $search_texts, $operators);
@@ -1563,11 +1570,20 @@ class QueryGenerator {
 	 * see modules/Contacts/models/ListView.php, function getListViewEntries()
 	 * see modules/Inventory/views/ProductsPopup.php, function initializeListViewContents()
 		$searchKey 	= array(array('productname', '', 'productcode'));
-		$searchValue 	= array(array($searchValue, '', $searchValue));
+		$searchValue= array(array($searchValue, '', $searchValue));
 		$operator 	= array(array('s', 'OR', 's'));
+		
+	 * see modules\Contacts\views\PopupAjax.php
+		$searchKey 	= array(array('lastname', 'firstname'), null, array('lastname', 'firstname'));
+		$searchValue= array(array($searchValues[0], $searchValues[1]), null, array($searchValues[1], $searchValues[0]));
+		$operator 	= array(array('s', 's'), 'OR', array('s', 's'));
 	 **/
 	private function addUserSearchConditionUnique($search_field, $search_text, $operator, $startingGroup = null){
 		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator);
+		if(!$search_field){
+			echo_callstack();
+			return;
+		}
 		if(is_array($search_field)){
 			//Array means OR conditions
 			if(!$startingGroup && $this->conditionInstanceCount > 0) {
@@ -1577,7 +1593,7 @@ class QueryGenerator {
 			}
 			$previousIsLogicalOperator = false;
 			for($i = 0; $i < count($search_field); $i++){
-				if(!$search_field[$i]){ //ONLY for logicial operator 
+				if(!$search_field[$i]){ //ONLY for logicial operator
 					$this->addConditionGlue($operator[$i]);
 					$previousIsLogicalOperator = true;
 					continue;

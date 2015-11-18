@@ -165,6 +165,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			}
 			$this->set('subject', $subject);
 			$this->set('typedossier', 'Facture de dépôt-vente');
+			$this->set('invoicestatus', 'Approved');
 		}
 		
 		return $recordModel;

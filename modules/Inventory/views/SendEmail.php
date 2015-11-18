@@ -16,11 +16,26 @@ class Inventory_SendEmail_View extends Vtiger_ComposeEmail_View {
      * @param Vtiger_Request $request 
      */
     public function composeMailData(Vtiger_Request $request) {
+        
+        $inventoryRecordId = $request->get('record');
+        $recordModel = Vtiger_Record_Model::getInstanceById($inventoryRecordId, $request->getModule());
+        
+        switch($request->getModule()){
+        case 'Invoice':
+            $request->set('selected_ids', array($recordModel->get('contact_id')));
+            $request->set('selectedFields', array('email'));
+            break;
+        //Dépôt-vente
+        case 'SalesOrder':
+            $request->set('selected_ids', array( $recordModel->get('accountid') ));
+            $request->set('selectedFields', array('email'));
+            break;
+        }
+        
+        
         parent::composeMailData($request);
 
         $viewer = $this->getViewer($request);
-        $inventoryRecordId = $request->get('record');
-        $recordModel = Vtiger_Record_Model::getInstanceById($inventoryRecordId, $request->getModule());
         $pdfFileName = $recordModel->getPDFFileName();
         
         $fileComponents = explode('/', $pdfFileName);

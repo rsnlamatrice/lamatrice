@@ -73,6 +73,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$viewer->assign('RECORD_ID', $record);
 			$viewer->assign('MODE', 'edit');
 			
+		//Conversion de dépôt-vente ou de devis en facture
 		} elseif ($request->get('salesorder_id') || $request->get('quote_id')) {
 			if ($request->get('salesorder_id')) {
 				$referenceId = $request->get('salesorder_id');

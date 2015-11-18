@@ -348,11 +348,33 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				';
 			$params = array(trim($searchKey), trim($searchKey));
 		}
+		elseif((!$module || $module === 'Contacts')
+		&& strpos($searchKey, ',') !== FALSE) {	/* séparation du nom et prénom */
+			$query = 'SELECT CONCAT(vtiger_crmentity.label, " (", vtiger_contactdetails.contact_no, ")") AS label
+					, crmid, setype, createdtime
+				FROM vtiger_crmentity
+				JOIN vtiger_contactdetails
+					ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+				WHERE (label LIKE ?
+				OR label LIKE ?)
+				AND vtiger_crmentity.deleted = 0';
+			$searchKeys = preg_split('/\s*,\s*/', $searchKey);
+			$params = array();
+			$params[] = $searchKeys[0].'% '.$searchKeys[1].'%';
+			$params[] = $searchKeys[1].'% '.$searchKeys[0].'%';
+		
+			if(!$module)
+				$module = 'Contacts';
+			$query .= ' AND setype = ?';
+			$params[] = $module;
+		}
 		else {	/* requête générale sur le champ label */
 			$query = 'SELECT label, crmid, setype, createdtime
 				FROM vtiger_crmentity
 				WHERE label LIKE ?
 				AND vtiger_crmentity.deleted = 0';
+			if(strpos($searchKey, ',') !== FALSE)
+				$searchKey = preg_replace('/\s*,\s*/', '%', $searchKey);
 			$params = array("%$searchKey%");
 		
 			if($module !== false) {
