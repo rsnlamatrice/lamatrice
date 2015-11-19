@@ -82,28 +82,30 @@ Class CustomView_EditAjax_View extends Vtiger_IndexAjax_View {
 		/* ED151025
 		 * RSNStatistics
 		 */
-		if(true){ //TODO Trop long !
-			$relatedStats = array();
-			$statRecords = RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName);
-			if($statRecords){
-				$statsModuleModel = Vtiger_Module_Model::getInstance('RSNStatistics');
-				$periodicityField = false;
-				foreach($statRecords as $statRecord){
-					if(!$periodicityField)
-						$periodicityField = $statsModuleModel->getField('stats_periodicite');
-					else
-						$periodicityField = clone $periodicityField;
-					$periodicityField->set('label', '[' . $statRecord->getName() . '] Période');
-					$periodicityField->set('parentid', $statRecord->getId());
-					$relatedStatsFields = array($periodicityField->getId() => $periodicityField);
-					$relatedStatsFields = array_merge($relatedStatsFields, RSNStatistics_Utils_Helper::getRelatedStatsFieldsVtigerFieldModels($statRecord->getId(),$moduleName));
-					$relatedStats[$statRecord->getId()] = array(
-						'recordModel' => $statRecord,
-						'fields' => $relatedStatsFields,
-					);
+		$relatedStats = array();
+		$statRecords = RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName);
+		if($statRecords){
+			$statsModuleModel = Vtiger_Module_Model::getInstance('RSNStatistics');
+			$periodicityField = false;
+			foreach($statRecords as $statRecord){
+				if(!$periodicityField){
+					$periodicityField = $statsModuleModel->getField('stats_periodicite');
+				} else {
+					$periodicityField = clone $periodicityField;
 				}
-				$viewer->assign('RELATED_STATISTICS',$relatedStats);
+				$periodicityField->set('label', '[' . $statRecord->getName() . '] Période');
+				$periodicityField->set('parentid', $statRecord->getId());
+				//Champs d'une stat
+				$relatedStatsFields = array();
+				//1er champ : la période
+				$relatedStatsFields[$periodicityField->getId()] = $periodicityField;
+				$relatedStatsFields = array_merge($relatedStatsFields, RSNStatistics_Utils_Helper::getRelatedStatsFieldsVtigerFieldModels($statRecord->getId(),$moduleName));
+				$relatedStats[$statRecord->getId()] = array(
+					'recordModel' => $statRecord,
+					'fields' => $relatedStatsFields,
+				);
 			}
+			$viewer->assign('RELATED_STATISTICS',$relatedStats);
 		}
 		//var_dump($relatedStructures);
 		$viewer->assign('RELATED_MODELS',$relationModels);

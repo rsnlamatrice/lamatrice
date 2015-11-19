@@ -243,8 +243,8 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		, fieldSelected = fieldSelect.find('option:selected')
 		, fieldValue = fieldSelected.val();
 		if (fieldValue[0] === '['
-		&& (	/^\[.*\]\:/.test(fieldValue)
-			|| /^\[RSNStatisticsResults\:(?!stats_periodicite)/.test(fieldValue)
+		&& (	/^\[(.+\:){4}.*\]/.test(fieldValue)//Au moins 4 champs entre [ ]
+			|| /^\[RSNStatisticsResults\:(?!stats_periodicite)/.test(fieldValue)//Champ de statistique autre que la période
 		)) {
 			row.addClass('sub-field');
 		}

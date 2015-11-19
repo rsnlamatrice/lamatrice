@@ -291,9 +291,18 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 
 	/**
 	 * Function to get relation field for relation module and parent module
+	 * @param $relationFieldName [default value : false] specified field name in nn relation
 	 * @return Vtiger_Field_Model
 	 */
-	public function getRelationField() {
+	public function getRelationField($relationFieldName = false) {
+		
+		//ED151119 : 
+		if($relationFieldName){
+			foreach( $this->getRelationFields() as $field)
+				if(strcmp($relationFieldName, $field->getName()) === 0)
+					return $field;
+		}
+		
 		$relationField = $this->get('relationField');
 		if (!$relationField) {
 			$relationField = false;

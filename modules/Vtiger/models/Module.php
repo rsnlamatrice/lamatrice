@@ -580,7 +580,7 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	 * @return <Vtiger_Field_Model>
 	 */
 	public function getField($fieldName){
-		return Vtiger_Field_Model::getInstance($fieldName,$this);
+		return Vtiger_Field_Model::getInstance($fieldName, $this);
 	}
 
 	/**

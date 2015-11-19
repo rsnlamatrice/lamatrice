@@ -25,7 +25,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			$field = new Vtiger_Field_Model();
 			$field->set('name', 'contreltype');
 			$field->set('column', 'vtiger_contactscontrel:contreltype');
-			$field->set('label', 'Désignation');
+			$field->set('label', 'Relation');
 			$field->set('typeofdata', 'V~O');
 			$field->set('uitype', 1);
 			array_push($fields, $field);
@@ -162,9 +162,15 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					   , 'relatedSourceFieldName' => 'notesid'
 					   , 'keyDateFieldName' => 'dateapplication'//clé primaire en 3 champs, incluant une date
 					   ),
-			
+						
 			'Contacts' => array('fieldName' => 'relcontid', 'tableName' => 'vtiger_contactscontrel'
-					   , 'keyDateFieldName' => 'dateapplication'),
+					   , 'sourceFieldName' => 'vtiger_contactdetails.contactid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_contactscontrel.relcontid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_contactscontrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'contactid' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'contactid'
+					   , 'keyDateFieldName' => 'dateapplication'//clé primaire en 3 champs, incluant une date
+					   ),
 			//'Campaigns' => array('fieldName' => 'contactid', 'tableName' => 'vtiger_campaigncontrel'),
 			'Invoice' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_invoice'
 					   , 'sourceFieldName' => 'vtiger_contactdetails.accountid'),

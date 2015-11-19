@@ -1350,7 +1350,8 @@ class CustomView extends CRMEntity {
 			}
 			if ($s != 0)
 				$value .= ' or ';
-			if ($modulename == 'Accounts') {
+			switch ($modulename){
+			case 'Accounts':
 				//By Pavani : Related to problem in calender, Ticket: 4284 and 4675
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					if ($tablename == 'vtiger_seactivityrel' && $fieldname == 'crmid') {
@@ -1364,70 +1365,71 @@ class CustomView extends CRMEntity {
 				} else {
 					$value .= 'vtiger_account.accountname';
 				}
-			}
-			if ($modulename == 'Leads') {
+				break;
+			case 'Leads':
 				$concatSql = getSqlForNameInDisplayFormat(array('lastname' => 'vtiger_leaddetails.lastname', 'firstname' => 'vtiger_leaddetails.firstname'), 'Leads');
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= " $concatSql IS NULL or ";
 				}
 				$value .= " $concatSql";
-			}
-			if ($modulename == 'Potentials') {
+				break;
+			case 'Potentials':
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 
 					$value .= ' vtiger_potential.potentialname IS NULL or ';
 				}
 				$value .= ' vtiger_potential.potentialname';
-			}
-			if ($modulename == 'Products') {
+				break;
+			case 'Products':
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= ' vtiger_products.productname IS NULL or ';
 				}
 				$value .= ' vtiger_products.productname';
-			}
-			if ($modulename == 'Invoice') {
+				break;
+			case 'Invoice':
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= ' vtiger_invoice.subject IS NULL or ';
 				}
 				$value .= ' vtiger_invoice.subject';
-			}
-			if ($modulename == 'PurchaseOrder') {
+				break;
+			case 'PurchaseOrder':
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= ' vtiger_purchaseorder.subject IS NULL or ';
 				}
 				$value .= ' vtiger_purchaseorder.subject';
-			}
-			if ($modulename == 'SalesOrder') {
+				break;
+			case 'SalesOrder':
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= ' vtiger_salesorder.subject IS NULL or ';
 				}
 				$value .= ' vtiger_salesorder.subject';
-			}
-			if ($modulename == 'Quotes') {
+				break;
+			case 'Quotes':
 
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= ' vtiger_quotes.subject IS NULL or ';
 				}
 				$value .= ' vtiger_quotes.subject';
-			}
-			if ($modulename == 'Contacts') {
+				break;
+			case 'Contacts':
 				$concatSql = getSqlForNameInDisplayFormat(array('lastname' => 'vtiger_contactdetails.lastname', 'firstname' => 'vtiger_contactdetails.firstname'), 'Contacts');
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= " $concatSql IS NULL or ";
 				}
 				$value .= " $concatSql";
-			}
-			if ($modulename == 'HelpDesk') {
+				break;
+			case 'HelpDesk':
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= ' vtiger_troubletickets.title IS NULL or ';
 				}
 				$value .= ' vtiger_troubletickets.title';
-			}
-			if ($modulename == 'Campaigns') {
+				break;
+			case 'Campaigns':
 				if (($comparator == 'e' || $comparator == 's' || $comparator == 'c') && trim($adv_chk_value) == '') {
 					$value .= ' vtiger_campaign.campaignname IS NULL or ';
 				}
 				$value .= ' vtiger_campaign.campaignname';
+				break;
 			}
 
 			$value .= $this->getAdvComparator($comparator, $adv_chk_value, $datatype);
@@ -1443,12 +1445,12 @@ class CustomView extends CRMEntity {
 	 * @returns  $rtvalue in the format $comparator $value
 	 */
 	function getAdvComparator($comparator, $value, $datatype = '') {
-
 		global $adb, $default_charset;
 		$value = html_entity_decode(trim($value), ENT_QUOTES, $default_charset);
 		$value = $adb->sql_escape_string($value);
 
-		if ($comparator == "e") {
+		switch ($comparator ){
+		case "e":
 			if (trim($value) == "NULL") {
 				$rtvalue = " is NULL";
 			} elseif (trim($value) != "") {
@@ -1458,8 +1460,8 @@ class CustomView extends CRMEntity {
 			} else {
 				$rtvalue = " is NULL";
 			}
-		}
-		if ($comparator == "n") {
+			break;
+		case "n":
 			if (trim($value) == "NULL") {
 				$rtvalue = " is NOT NULL";
 			} elseif (trim($value) != "") {
@@ -1471,54 +1473,57 @@ class CustomView extends CRMEntity {
 			} else {
 				$rtvalue = " is NOT NULL";
 			}
-		}
-		if ($comparator == "s") {
+			break;
+		case "s":
 			if (trim($value) == "" && ($datatype == "V" || $datatype == "E")) {
 				$rtvalue = " like '" . formatForSqlLike($value, 3) . "'";
 			} else {
 				$rtvalue = " like '" . formatForSqlLike($value, 2) . "'";
 			}
-		}
-		if ($comparator == "ew") {
+			break;
+		case "ew":
 			if (trim($value) == "" && ($datatype == "V" || $datatype == "E")) {
 				$rtvalue = " like '" . formatForSqlLike($value, 3) . "'";
 			} else {
 				$rtvalue = " like '" . formatForSqlLike($value, 1) . "'";
 			}
-		}
-		if ($comparator == "c"
-		|| $comparator == "ct" || $comparator == "ca") { //ED150619 TODO
+			break;
+		case "c":
+		case "ct":
+		case "ca": //ED150619 TODO
 			if (trim($value) == "" && ($datatype == "V" || $datatype == "E")) {
 				$rtvalue = " like '" . formatForSqlLike($value, 3) . "'";
 			} else {
 				$rtvalue = " like '" . formatForSqlLike($value) . "'";
 			}
-		}
-		if ($comparator == "k"
-		|| $comparator == "kt" || $comparator == "ka") { //ED150619 TODO
+			break;
+		case "k":
+		case "kt":
+		case "ka": //ED150619 TODO
 			if (trim($value) == "" && ($datatype == "V" || $datatype == "E")) {
 				$rtvalue = " not like ''";
 			} else {
 				$rtvalue = " not like '" . formatForSqlLike($value) . "'";
 			}
-		}
-		if ($comparator == "l") {
+			break;
+		case "l":
 			$rtvalue = " < " . $adb->quote($value);
-		}
-		if ($comparator == "g") {
+			break;
+		case "g":
 			$rtvalue = " > " . $adb->quote($value);
-		}
-		if ($comparator == "m") {
+			break;
+		case "m":
 			$rtvalue = " <= " . $adb->quote($value);
-		}
-		if ($comparator == "h") {
+			break;
+		case "h":
 			$rtvalue = " >= " . $adb->quote($value);
-		}
-		if ($comparator == "b") {
+			break;
+		case "b":
 			$rtvalue = " < " . $adb->quote($value);
-		}
-		if ($comparator == "a") {
+			break;
+		case "a":
 			$rtvalue = " > " . $adb->quote($value);
+			break;
 		}
 
 		return $rtvalue;
@@ -1593,111 +1598,114 @@ class CustomView extends CRMEntity {
 			$cFq1 = date("Y-m-d", mktime(0, 0, 0, "12", "31", date("Y")));
 		}
 
-		if ($type == "today") {
-
-			$datevalue[0] = $today;
-			$datevalue[1] = $today;
-		} elseif ($type == "yesterday") {
-
-			$datevalue[0] = $yesterday;
-			$datevalue[1] = $yesterday;
-		} elseif ($type == "tomorrow") {
-
-			$datevalue[0] = $tomorrow;
-			$datevalue[1] = $tomorrow;
-		} elseif ($type == "thisweek") {
-
-			$datevalue[0] = $thisweek0;
-			$datevalue[1] = $thisweek1;
-		} elseif ($type == "lastweek") {
-
-			$datevalue[0] = $lastweek0;
-			$datevalue[1] = $lastweek1;
-		} elseif ($type == "nextweek") {
-
-			$datevalue[0] = $nextweek0;
-			$datevalue[1] = $nextweek1;
-		} elseif ($type == "thismonth") {
-
-			$datevalue[0] = $currentmonth0;
-			$datevalue[1] = $currentmonth1;
-		} elseif ($type == "lastmonth") {
-
-			$datevalue[0] = $lastmonth0;
-			$datevalue[1] = $lastmonth1;
-		} elseif ($type == "nextmonth") {
-
-			$datevalue[0] = $nextmonth0;
-			$datevalue[1] = $nextmonth1;
-		} elseif ($type == "next7days") {
-
-			$datevalue[0] = $today;
-			$datevalue[1] = $next7days;
-		} elseif ($type == "next30days") {
-
-			$datevalue[0] = $today;
-			$datevalue[1] = $next30days;
-		} elseif ($type == "next60days") {
-
-			$datevalue[0] = $today;
-			$datevalue[1] = $next60days;
-		} elseif ($type == "next90days") {
-
-			$datevalue[0] = $today;
-			$datevalue[1] = $next90days;
-		} elseif ($type == "next120days") {
-
-			$datevalue[0] = $today;
-			$datevalue[1] = $next120days;
-		} elseif ($type == "last7days") {
-
-			$datevalue[0] = $last7days;
-			$datevalue[1] = $today;
-		} elseif ($type == "last30days") {
-
-			$datevalue[0] = $last30days;
-			$datevalue[1] = $today;
-		} elseif ($type == "last60days") {
-
-			$datevalue[0] = $last60days;
-			$datevalue[1] = $today;
-		} else if ($type == "last90days") {
-
-			$datevalue[0] = $last90days;
-			$datevalue[1] = $today;
-		} elseif ($type == "last120days") {
-
-			$datevalue[0] = $last120days;
-			$datevalue[1] = $today;
-		} elseif ($type == "thisfy") {
-
-			$datevalue[0] = $currentFY0;
-			$datevalue[1] = $currentFY1;
-		} elseif ($type == "prevfy") {
-
-			$datevalue[0] = $lastFY0;
-			$datevalue[1] = $lastFY1;
-		} elseif ($type == "nextfy") {
-
-			$datevalue[0] = $nextFY0;
-			$datevalue[1] = $nextFY1;
-		} elseif ($type == "nextfq") {
-
-			$datevalue[0] = $nFq;
-			$datevalue[1] = $nFq1;
-		} elseif ($type == "prevfq") {
-
-			$datevalue[0] = $pFq;
-			$datevalue[1] = $pFq1;
-		} elseif ($type == "thisfq") {
-			$datevalue[0] = $cFq;
-			$datevalue[1] = $cFq1;
-		} else {
-			$datevalue[0] = "";
-			$datevalue[1] = "";
+		switch ($type){
+		case "today":
+			$dateValues[0] = $today;
+			$dateValues[1] = $today;
+			break;
+		case "yesterday":
+			$dateValues[0] = $yesterday;
+			$dateValues[1] = $yesterday;
+			break;
+		case "tomorrow":
+			$dateValues[0] = $tomorrow;
+			$dateValues[1] = $tomorrow;
+			break;
+		case "thisweek":
+			$dateValues[0] = $thisweek0;
+			$dateValues[1] = $thisweek1;
+			break;
+		case "lastweek":
+			$dateValues[0] = $lastweek0;
+			$dateValues[1] = $lastweek1;
+			break;
+		case "nextweek":
+			$dateValues[0] = $nextweek0;
+			$dateValues[1] = $nextweek1;
+			break;
+		case "thismonth":
+			$dateValues[0] = $currentmonth0;
+			$dateValues[1] = $currentmonth1;
+			break;
+		case "lastmonth":
+			$dateValues[0] = $lastmonth0;
+			$dateValues[1] = $lastmonth1;
+			break;
+		case "nextmonth":
+			$dateValues[0] = $nextmonth0;
+			$dateValues[1] = $nextmonth1;
+			break;
+		case "next7days":
+			$dateValues[0] = $today;
+			$dateValues[1] = $next7days;
+			break;
+		case "next30days":
+			$dateValues[0] = $today;
+			$dateValues[1] = $next30days;
+			break;
+		case "next60days":
+			$dateValues[0] = $today;
+			$dateValues[1] = $next60days;
+			break;
+		case "next90days":
+			$dateValues[0] = $today;
+			$dateValues[1] = $next90days;
+			break;
+		case "next120days":
+			$dateValues[0] = $today;
+			$dateValues[1] = $next120days;
+			break;
+		case "last7days":
+			$dateValues[0] = $last7days;
+			$dateValues[1] = $today;
+			break;
+		case "last30days":
+			$dateValues[0] = $last30days;
+			$dateValues[1] = $today;
+			break;
+		case "last60days":
+			$dateValues[0] = $last60days;
+			$dateValues[1] = $today;
+			break;
+		case "last90days":
+			$dateValues[0] = $last90days;
+			$dateValues[1] = $today;
+			break;
+		case "last120days":
+			$dateValues[0] = $last120days;
+			$dateValues[1] = $today;
+			break;
+		case "thisfy":
+			$dateValues[0] = $currentFY0;
+			$dateValues[1] = $currentFY1;
+			break;
+		case "prevfy":
+			$dateValues[0] = $lastFY0;
+			$dateValues[1] = $lastFY1;
+			break;
+		case "nextfy";
+			$dateValues[0] = $nextFY0;
+			$dateValues[1] = $nextFY1;
+			break;
+		case "nextfq";
+			$dateValues[0] = $nFq;
+			$dateValues[1] = $nFq1;
+			break;
+		case "prevfq":
+			$dateValues[0] = $pFq;
+			$dateValues[1] = $pFq1;
+			break;
+		case "thisfq":
+			$dateValues[0] = $cFq;
+			$dateValues[1] = $cFq1;
+			break;
+		default:
+			$dateValues[0] = "";
+			$dateValues[1] = "";
+			break;
 		}
 
-		return $datevalue;
+		return $dateValues;
 	}
 
 	/** to get the customview query for the given customview
@@ -1711,28 +1719,43 @@ class CustomView extends CRMEntity {
 		if ($viewid != "" && $listquery != "") {
 
 			$listviewquery = substr($listquery, strpos($listquery, 'FROM'), strlen($listquery));
-			if ($module == "Calendar" || $module == "Emails") {
+			switch ($module){
+			case "Calendar":
+			case "Emails":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . ", vtiger_activity.activityid, vtiger_activity.activitytype as type, vtiger_activity.priority, case when (vtiger_activity.status not like '') then vtiger_activity.status else vtiger_activity.eventstatus end as status, vtiger_crmentity.crmid,vtiger_contactdetails.contactid " . $listviewquery;
 				if ($module == "Calendar")
 					$query = str_replace('vtiger_seactivityrel.crmid,', '', $query);
-			}else if ($module == "Documents") {
+				break;
+			case "Documents":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid,vtiger_notes.* " . $listviewquery;
-			} else if ($module == "Products") {
+				break;
+			case "Products":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid,vtiger_products.* " . $listviewquery;
-			} else if ($module == "Vendors") {
+				break;
+			case "Vendors":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid " . $listviewquery;
-			} else if ($module == "PriceBooks") {
+				break;
+			case "PriceBooks":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid " . $listviewquery;
-			} else if ($module == "Faq") {
+				break;
+			case "Faq":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid " . $listviewquery;
-			} else if ($module == "Potentials" || $module == "Contacts") {
+				break;
+			case "Potentials":
+			case "Contacts":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid,vtiger_account.accountid " . $listviewquery;
-			} else if ($module == "Invoice" || $module == "SalesOrder" || $module == "Quotes") {
+				break;
+			case "Invoice":
+			case "SalesOrder":
+			case "Quotes":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid,vtiger_contactdetails.contactid,vtiger_account.accountid " . $listviewquery;
-			} else if ($module == "PurchaseOrder") {
+				break;
+			case "PurchaseOrder":
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid,vtiger_contactdetails.contactid " . $listviewquery;
-			} else {
+				break;
+			default:
 				$query = "select " . $this->getCvColumnListSQL($viewid) . " ,vtiger_crmentity.crmid " . $listviewquery;
+				break;
 			}
 			$stdfiltersql = $this->getCVStdFilterSQL($viewid);
 			$advfiltersql = $this->getCVAdvFilterSQL($viewid);

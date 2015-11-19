@@ -96,7 +96,7 @@
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
 					{foreach key=FIELD_NAME item=FIELD_MODEL from=$RELATED_FIELDS}
 						{assign var=COLUMN_NAME value=$RELATED_NAME|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()}
-						{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()}
+						{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()|cat:"]"}
 						{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfo()}
 						<option value="{$COLUMN_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$COLUMN_NAME}"
 							data-view="[{$RELATED_NAME}][{$VIEW_LABEL}]"
