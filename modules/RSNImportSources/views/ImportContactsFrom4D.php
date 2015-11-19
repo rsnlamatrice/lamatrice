@@ -740,12 +740,14 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	function postPreImportData() {
 		// Pré-identifie les contacts
 		
-		return RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
+		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,
 			'Contacts',
 			'reffiche',
 			'_contactid'
 		);
+		
+		return true;
 	}
         
 	/**

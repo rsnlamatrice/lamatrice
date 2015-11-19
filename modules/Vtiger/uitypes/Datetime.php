@@ -34,7 +34,7 @@ class Vtiger_Datetime_UIType extends Vtiger_Date_UIType {
 	 */
 	public static function getDisplayDateTimeValue($date) {
 		$date = new DateTimeField($date);
-		return $date->getDisplayDateTimeValue();
+		return str_replace(' 00:00:00', '', $date->getDisplayDateTimeValue());
 	}
 
 	/**
