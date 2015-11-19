@@ -36,7 +36,12 @@ class Users_Login_View extends Vtiger_View_Controller {
 	function process (Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
-		//var_dump($viewer);
+		
+		include('config.login.ui.php');
+		
+		$viewer->assign('HELP_LINKS', $LOGIN_LINKS);
+		$viewer->assign('IMAGES', $LOGIN_IMAGES);
+		
 		$viewer->assign('MODULE', $moduleName);
 		$viewer->view('Login.tpl', 'Users');
 	}

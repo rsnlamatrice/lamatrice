@@ -46,12 +46,10 @@
 				</div>
 				<div class="span9">
 					<div class="helpLinks">
-						<a href="http://www.sortirdunucleaire.org/">Sortir du nucl&eacute;aire</a> | 
-						<a href="https://groupware.sortirdunucleaire.org/">Groupware</a> | 
-						<a href="https://echanges.sortirdunucleaire.org">Intranet</a> | 
-						<a href="https://echanges.sortirdunucleaire.org/lemoulin">Le Moulin</a> | 
-						<a href="https://lune.sortirdunucleaire.fr/lemoulin">La Moulune</a> | 
-						<a href="https://webmail.gandi.net/">Webmail</a>
+						{foreach item=LABEL key=URL from=$HELP_LINKS}
+							<a href="{$URL}/">{$LABEL}</a>
+							{if !$LABEL@last} | {/if}
+						{/foreach}
 					</div>
 				</div>
 			</div>
@@ -64,42 +62,14 @@
 									<div class="carousal-container">
 										<div><h2>&nbsp;</h2></div>
 										<ul class="bxslider">
-											<li>
-												<div id="slide01" class="slide">
-													<img class="pull-left" src="http://www.sortirdunucleaire.org/squelettes/images/une-cartes.jpg"/>
-													<img class="pull-right" src="http://www.sortirdunucleaire.org/squelettes/stop-rafistolage/bando-stop-rafistolage.png"/>
-												</div>
-											</li>
-											<li>
-												<div id="slide02" class="slide">
-													<img class="pull-left" src="http://boutique.sortirdunucleaire.org/101-home_default/changeons-dere-sortons-du-nucleaire.jpg"/>
-													<img class="pull-right" src="layouts/vlayout/modules/RSN/resources/images/Lamatigre.small.png"/>
-												</div>
-											</li>
-											<li>
-												<div id="slide03" class="slide">
-													<img class="pull-left" src="http://boutique.sortirdunucleaire.org/172-home_default/masques-contre-le-deni-x5.jpg"/>
-													<img class="pull-right" src="http://boutique.sortirdunucleaire.org/182-home_default/autocollant-bure-stop.jpg"/>
-												</div>
-											</li>
-											<li>
-												<div id="slide04" class="slide">
-													<img class="pull-left" src="http://boutique.sortirdunucleaire.org/222-home_default/par-ici-la-sortie-du-nucleaire.jpg"/>
-													<img class="pull-right" src="http://www.sortirdunucleaire.org/squelettes/stop-rafistolage/bando-stop-rafistolage.png"/>
-												</div>
-											</li>
-											<li>
-												<div id="slide05" class="slide">
-													<img class="pull-left" src="http://boutique.sortirdunucleaire.org/93-home_default/autocollant-nucleaire-non-merci-en-japonais.jpg"/>
-													<img class="pull-right" src="http://boutique.sortirdunucleaire.org/25-home_default/revue-silence-n-410-agonie-du-nucleaire.jpg"/>
-												</div>
-											</li>
-											<li>
-												<div id="slide05" class="slide">
-													<img class="pull-left" src="layouts/vlayout/modules/RSN/resources/images/Lamatigre.small.png"/>
-													<img class="pull-right" src="http://boutique.sortirdunucleaire.org/85-home_default/5-autocollants-tchernobyl-fukushima-plus-jamais-ca.jpg"/>
-												</div>
-											</li>
+											{foreach item=URLS key=INDEX from=$IMAGES}
+												<li>
+													<div id="slide{$INDEX}" class="slide">
+														<img class="pull-left" src="{$URLS[0]}"/>
+														<img class="pull-right" src="{$URLS[1]}"/>
+													</div>
+												</li>
+											{/foreach}
 										</ul>
 									</div>
 								</div>
