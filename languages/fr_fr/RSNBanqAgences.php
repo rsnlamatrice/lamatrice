@@ -20,6 +20,7 @@ $languageStrings = array(
 	'LBL_ZIPCODE' => 'Code postal',
 	'LBL_CITY' => 'Ville',
 	'LBL_STREET' => 'Adresse',
+	'LBL_CODEBANQUE' => 'Code Banque',
 
 );
 
