@@ -1545,7 +1545,7 @@ class QueryGenerator {
 						$search_texts = array($search_texts);
 					if(!is_array($operators))
 						$operators = array($operators);
-					$startingGroup = true;
+					$startingGroup = false;
 					for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++)
 						if(!$search_fields[$i]){
 							$this->addConditionGlue($operators[$i]);
@@ -1579,7 +1579,7 @@ class QueryGenerator {
 		$operator 	= array(array('s', 's'), 'OR', array('s', 's'));
 	 **/
 	private function addUserSearchConditionUnique($search_field, $search_text, $operator, $startingGroup = null){
-		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator);
+		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator, $startingGroup);
 		if(!$search_field){
 			echo_callstack();
 			return;
