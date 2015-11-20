@@ -127,7 +127,8 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		if($string){
 			$array = json_decode(decode_html($string));
 			if(!$array){
-				var_dump($string);
+				echo_callstack();
+				var_dump(__FILE__ . ' ERREUR dans queryParams_decode(), variables non interprétables par json_decode', $string, $array);
 			}
 			else
 				foreach($array as $variable)
@@ -237,7 +238,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			}
 			else {
 				$variable = $variables[$variableName];
-				$value = $variable->get('defaultvalue');
+				$value = str_replace('&quot;', '"', $variable->get('defaultvalue'));
 				//Variable déjà traitée
 				if(!isset($variablesId[$variable->getId()])){
 					$paramsDetails[] = array(
@@ -363,10 +364,10 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 	/** ED150507
 	 * Function returns query execution result widget
 	 * Replaces question mark with param value
-	 * @param $paramsValues : values to insert in query
+	 * @param $paramsNameValuePairs : values to insert in query
 	 * @return <string>
 	 */
-	function getExecutionSQLWithIntegratedParams($paramsValues = false){
+	function getExecutionSQLWithIntegratedParams($paramsNameValuePairs = false){
 		$params = array();
 		$paramsDetails = array();
 		$sql = $this->getExecutionSQL($params, $paramsDetails);
@@ -374,8 +375,8 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			return $sql;
 		for($i = 0; $i < count($params); $i++){
 			$paramName = $paramsDetails[$i]['name'];
-			if(is_array($paramsValues) && array_key_exists($paramName, $paramsValues))
-				$params[$i] = $paramsValues[$paramName];
+			if(is_array($paramsNameValuePairs) && array_key_exists($paramName, $paramsNameValuePairs))
+				$params[$i] = $paramsNameValuePairs[$paramName];
 			// replace /*[[operator xxx]]*/ [operator] ? with /*[[operator xxx]]*/ 'value'
 			$sql = preg_replace('/(\/\*\[\[.*'.preg_quote($paramName) . '[^\]]*\]\]\*\/\s[^?]*)\?/'
 					    , '$1\'' . str_replace('\'', '\\\'', $params[$i]) . '\''
