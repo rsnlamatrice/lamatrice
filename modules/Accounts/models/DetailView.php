@@ -169,7 +169,7 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 			
 			$widgets[] = array(
 					'linktype' => 'DETAILVIEWWIDGET',
-					'linklabel' => 'Contacts',
+					'linklabel' => 'LBL_RELATED_CONTACTS',
 					'linkName'	=> $contactsInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 							'&relatedModule=Contacts&mode=showRelatedRecords&page=1&limit=15',

@@ -369,8 +369,30 @@ class QueryGenerator {
 									$sourceFieldName = $this->getSQLColumn('id');
 									$viewFilters = false; //TODO sure ?
 									$panelRecord = Vtiger_Record_Model::getInstanceById($filter['viewid'], $filter['relatedmodulename']);
-									$relatedSql  = $panelRecord->getExecutionSQLWithIntegratedParams();
-			
+									
+									
+									/*next conditions*/
+									$paramsValues = array();
+									for($iNext = $index+1; $iNext < count($filtercolumns); $iNext++) {
+										$nextFilter = $filtercolumns[$iNext];
+										//same panel, memorize and skip
+										if($nextFilter['isSubQuery'] && $nextFilter['viewid'] == $filter['viewid']){
+											//champ du module lié
+											if($nextFilter['subQueryColumn'] && $nextFilter['subQueryColumn']['isPanelVariable']){
+												$paramsValues[$nextFilter['subQueryColumn']['variableName']] = $nextFilter['subQueryColumn']['value'];
+												
+												$skipIndexes[] = $iNext;
+											}
+											else
+												break;
+										}
+											else
+												break;
+									}
+									
+									$relatedSql  = $panelRecord->getExecutionSQLWithIntegratedParams($paramsValues);
+									//var_dump('panel $relatedSql', $paramsValues);
+									//echo "<pre>$relatedSql</pre>";
 								}
 								else { //"normal" relation
 									foreach($relationModels as $model)
@@ -580,6 +602,13 @@ class QueryGenerator {
 	*  [RSNStatisticsResults:stats_periodicite:StatId:stats_periodicite fieldId === 1380]
 	* - Test sur un champ d'une statistique pour une période péalablement donnée 
 	*  [RSNStatisticsResults:stat column:StatId:Stat fieldId]
+	*
+	* - Test sur un panel
+	*  [RSNContactsPanels:Panel name:Panel Id]
+	* - Définition de la valeur d'une variable de panel
+	*  [RSNContactsPanels:Panel name:Panel Id]:as field name:variableId:variableName:dataType
+	*
+	*  Tout ceci à comparer avec modules\CustomView\models\Record.php  save
 	*/
 	private function parseFilterInfos(&$filter, $customView, $dateSpecificConditions){
 		if($filter['isParsed'])
@@ -616,7 +645,7 @@ class QueryGenerator {
 						'column' => $viewName[5],
 						'field' => $viewName[6],
 						'fieldLabel' => $viewName[7],
-						'dataType' => $viewName[8],
+						'dataType' => explode('~', $viewName[8])[0],
 					));
 					$this->initFilterConditionValue($filter['relationColumn'], $viewName[5], $customView, $dateSpecificConditions);
 				}
@@ -627,16 +656,27 @@ class QueryGenerator {
 				//Champ du module lié
 				$subQueryColumnName = trim(substr($filter['columnname'], $posClosingBracket + 1));
 				if(strpos($subQueryColumnName, ':') !== false){
+					if($subQueryColumnName[0] === ':')
+						$subQueryColumnName = substr($subQueryColumnName,1);
 					$subQueryColumnInfos = explode(':', $subQueryColumnName);
-					//TODO recursive ?
-					$filter['subQueryColumn'] = array_merge($filter, array(
-						'columnname' => $subQueryColumnName,
-						
-						'table' => $subQueryColumnInfos[0],
-						'column' => $subQueryColumnInfos[1],
-						'field' => $subQueryColumnInfos[2],
-						'dataType' => $subQueryColumnInfos[2],
-					));
+					
+					if($filter['relatedIsPanel']){
+						$filter['subQueryColumn'] = array_merge($filter, array(
+							'columnname' => $subQueryColumnName,
+							'variableId' => $subQueryColumnInfos[1],
+							'variableName' => $subQueryColumnInfos[2],
+							'dataType' => explode('~', $subQueryColumnInfos[3])[0],
+							'isPanelVariable' => true,
+						));
+					} else {
+						$filter['subQueryColumn'] = array_merge($filter, array(
+							'columnname' => $subQueryColumnName,
+							'table' => $subQueryColumnInfos[0],
+							'column' => $subQueryColumnInfos[1],
+							'field' => $subQueryColumnInfos[2],
+							'dataType' => explode('~', $subQueryColumnInfos[3])[0],
+						));
+					}
 					$this->initFilterConditionValue($filter['subQueryColumn'], $subQueryColumnInfos[1], $customView, $dateSpecificConditions);
 				}
 			}
@@ -648,7 +688,7 @@ class QueryGenerator {
 			} else {
 				$name = $nameComponents[2];
 			}
-			$filter['dataType'] = $nameComponents[4];
+			$filter['dataType'] = explode('~', $nameComponents[4])[0];
 			$this->initFilterConditionValue($filter, $name, $customView, $dateSpecificConditions);
 		}
 	}

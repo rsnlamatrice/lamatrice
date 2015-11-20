@@ -31,6 +31,7 @@ class Vtiger_RejetPrelvnt_PDFController extends Vtiger_LetterToAccount_PDFContro
 	
 	function getContentText(){
 		//TODO stocker quelque part
+		//TODO bug des indentations en mode Justifié
 		$text = 
 "	Madame, Monsieur,
 

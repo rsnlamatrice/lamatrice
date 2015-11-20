@@ -367,17 +367,21 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 					 * - Existence d'une relation avec la vue d'un autre module
 					 * 	[RelatedModule:ViewName:ViewId]
 					 * - Test sur un champ de la table de relation par la vue d'un autre module
-					 *  [RelatedModule:ViewName:ViewId::relation table:relation column:relation field:label]
+					 *  [RelatedModule:ViewName:ViewId::relation table:relation column:relation field:label:dataType]
 					 * - Test sur un champ d'un autre module via une vue de cet autre module
-					 *  [RelatedModule:ViewName:ViewId]:field related table:column:field:label (TODO check column:field)
+					 *  [RelatedModule:ViewName:ViewId]:field related table:column:field:label:dataType
 					 * - Test sur l'existence d'une stat pour une période donnée 
 					 *  [RSNStatisticsResults:stats_periodicite:StatId:stats_periodicite fieldId === 1380]
 					 * - Test sur un champ d'une statistique pour une période péalablement donnée 
-					 *  [RSNStatisticsResults:stat column:StatId:Stat fieldId]
+					 *  [RSNStatisticsResults:stat column:StatId:Stat fieldId:dataType]
+					 * - Test sur un panel
+					 *  [RSNContactsPanels:Panel name:Panel Id]
+					 * - Définition de la valeur d'une variable de panel
+					 *  [RSNContactsPanels:Panel name:Panel Id]:as field name:variableId:variableName:dataType
 					 */
 					if($advFilterColumn[0] == '['){ 
-						$pos = strpos($advFilterColumn, ']', 1);
-						$viewName = explode(":", substr($advFilterColumn, 1, $pos-1));
+						$posClosingBracket = strpos($advFilterColumn, ']', 1);
+						$viewName = explode(":", substr($advFilterColumn, 1, $posClosingBracket-1));
 						$relatedModuleName = $viewName[0];
 						$viewId = $viewName[2];
 						$viewName = $viewName[1];
@@ -390,15 +394,20 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 						
 						//données après le ]
 						//Champ de l'autre module lié
-						$columnInfo = trim(substr($advFilterColumn, $pos + 1));
-						$columnInfo = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
+						$columnInfo = trim(substr($advFilterColumn, $posClosingBracket + 1));
+						if($columnInfo[0] == ':' )
+							$columnInfo = substr($columnInfo, 1);
 						
 						$columnInfo = explode(":", $columnInfo);
 						
 						$fieldModuleModel = false;
-						$relatedModule = Vtiger_Module_Model::getInstance($relatedModuleName);
-						if(count($columnInfo) > 1){
-							$moduleRelationModel = Vtiger_Relation_Model::getInstance($moduleModel, $relatedModule);
+						if($relatedModuleName === 'RSNContactsPanels'){
+						}
+						else {
+							$relatedModule = Vtiger_Module_Model::getInstance($relatedModuleName);
+							if(count($columnInfo) > 1){
+								$moduleRelationModel = Vtiger_Relation_Model::getInstance($moduleModel, $relatedModule);
+							}
 						}
 					}
 					else {
@@ -414,12 +423,17 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 						elseif($moduleRelationModel){
 							$fieldModel = $moduleRelationModel->getRelationField($fieldName);
 						}
+						elseif($relatedModuleName === 'RSNContactsPanels'){
+							$variableId = $columnInfo[1];
+							$variableRecord = Vtiger_Record_Model::getInstanceById($variableId, 'RSNPanelsVariables');
+							$fieldModel = $variableRecord->getQueryField();
+						}
 						else {
 							$fieldModel = false; // !
 						}
 						//ED151119 le champ peut ne pas exister si c'est un champ de relation
 						if(!$fieldModel){
-							var_dump('Champ introuvable', $advFilterColumn, $fieldName, $fieldModuleModel->getName(), $columnInfo);
+							var_dump('Champ introuvable', $advFilterColumn, $fieldName, $fieldModuleModel ? $fieldModuleModel->getName() : 'no $fieldModuleModel', $columnInfo);
 							die();
 						}
 						if($fieldModel){
