@@ -707,84 +707,111 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		}
 
 		$dateValues = array();
-		if ($type == "today") {
+		switch ($type){
+		case "today":
 			$dateValues[0] = $today;
 			$dateValues[1] = $today;
-		} elseif ($type == "yesterday") {
+			break;
+		case "yesterday":
 			$dateValues[0] = $yesterday;
 			$dateValues[1] = $yesterday;
-		} elseif ($type == "tomorrow") {
+			break;
+		case "tomorrow":
 			$dateValues[0] = $tomorrow;
 			$dateValues[1] = $tomorrow;
-		} elseif ($type == "thisweek") {
+			break;
+		case "thisweek":
 			$dateValues[0] = $thisweek0;
 			$dateValues[1] = $thisweek1;
-		} elseif ($type == "lastweek") {
+			break;
+		case "lastweek":
 			$dateValues[0] = $lastweek0;
 			$dateValues[1] = $lastweek1;
-		} elseif ($type == "nextweek") {
+			break;
+		case "nextweek":
 			$dateValues[0] = $nextweek0;
 			$dateValues[1] = $nextweek1;
-		} elseif ($type == "thismonth") {
+			break;
+		case "thismonth":
 			$dateValues[0] = $currentmonth0;
 			$dateValues[1] = $currentmonth1;
-		} elseif ($type == "lastmonth") {
+			break;
+		case "lastmonth":
 			$dateValues[0] = $lastmonth0;
 			$dateValues[1] = $lastmonth1;
-		} elseif ($type == "nextmonth") {
+			break;
+		case "nextmonth":
 			$dateValues[0] = $nextmonth0;
 			$dateValues[1] = $nextmonth1;
-		} elseif ($type == "next7days") {
+			break;
+		case "next7days":
 			$dateValues[0] = $today;
 			$dateValues[1] = $next7days;
-		} elseif ($type == "next30days") {
+			break;
+		case "next30days":
 			$dateValues[0] = $today;
 			$dateValues[1] = $next30days;
-		} elseif ($type == "next60days") {
+			break;
+		case "next60days":
 			$dateValues[0] = $today;
 			$dateValues[1] = $next60days;
-		} elseif ($type == "next90days") {
+			break;
+		case "next90days":
 			$dateValues[0] = $today;
 			$dateValues[1] = $next90days;
-		} elseif ($type == "next120days") {
+			break;
+		case "next120days":
 			$dateValues[0] = $today;
 			$dateValues[1] = $next120days;
-		} elseif ($type == "last7days") {
+			break;
+		case "last7days":
 			$dateValues[0] = $last7days;
 			$dateValues[1] = $today;
-		} elseif ($type == "last30days") {
+			break;
+		case "last30days":
 			$dateValues[0] = $last30days;
 			$dateValues[1] = $today;
-		} elseif ($type == "last60days") {
+			break;
+		case "last60days":
 			$dateValues[0] = $last60days;
 			$dateValues[1] = $today;
-		} else if ($type == "last90days") {
+			break;
+		case "last90days":
 			$dateValues[0] = $last90days;
 			$dateValues[1] = $today;
-		} elseif ($type == "last120days") {
+			break;
+		case "last120days":
 			$dateValues[0] = $last120days;
 			$dateValues[1] = $today;
-		} elseif ($type == "thisfy") {
+			break;
+		case "thisfy":
 			$dateValues[0] = $currentFY0;
 			$dateValues[1] = $currentFY1;
-		} elseif ($type == "prevfy") {
+			break;
+		case "prevfy":
 			$dateValues[0] = $lastFY0;
 			$dateValues[1] = $lastFY1;
-		} elseif ($type == "nextfy") {
+			break;
+		case "nextfy";
 			$dateValues[0] = $nextFY0;
 			$dateValues[1] = $nextFY1;
-		} elseif ($type == "nextfq") {
+			break;
+		case "nextfq";
 			$dateValues[0] = $nFq;
 			$dateValues[1] = $nFq1;
-		} elseif ($type == "prevfq") {
+			break;
+		case "prevfq":
 			$dateValues[0] = $pFq;
 			$dateValues[1] = $pFq1;
-		} elseif ($type == "thisfq") {
+			break;
+		case "thisfq":
 			$dateValues[0] = $cFq;
 			$dateValues[1] = $cFq1;
-		} else {
+			break;
+		default:
 			$dateValues[0] = "";
 			$dateValues[1] = "";
+			break;
 		}
 
 		return $dateValues;

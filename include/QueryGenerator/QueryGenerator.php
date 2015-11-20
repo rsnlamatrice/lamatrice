@@ -29,7 +29,7 @@ class QueryGenerator {
 	private $whereFields;
 	
 	private $statistictsRelations;
-	private $statistictsFields;
+	private $statisticsFields;
 	
 	/**
 	 *
@@ -291,12 +291,18 @@ class QueryGenerator {
 		foreach ($advFilterList as $groupindex=>$groupcolumns) {
 			$filtercolumns = $groupcolumns['columns'];
 			//var_dump('parseAdvFilterList', $filtercolumns);
+			//echo_callstack();
 			if(count($filtercolumns) > 0) {
 				$this->startGroup('');
-				$skipNextIndex = -1;
-				foreach ($filtercolumns as $index => &$filter){
+				$skipIndexes = array();
 				
-					if($skipNextIndex >= $index){
+				//1er passage pour parser
+				foreach ($filtercolumns as $index => &$filter){
+					$this->parseFilterInfos($filter, $customView, $dateSpecificConditions);
+				}
+				
+				foreach ($filtercolumns as $index => &$filter){
+					if(in_array($index, $skipIndexes)){
 						$filter['skip'] = true;
 						continue;
 					}
@@ -306,18 +312,16 @@ class QueryGenerator {
 					 * ou statistique
 					 */
 					//die('<pre>'.print_r($filter['columnname'], true).'</pre>');
-					if($filter['columnname'][0] === '['){
-						$pos = strpos($filter['columnname'], ']', 1);
-						$viewName = explode(":", substr($filter['columnname'], 1, $pos-1));
-						$filter['relatedmodulename'] = $viewName[0];
-						if($viewName[0] === 'RSNStatisticsResults'){//RSNStatisticsResults
+					//echo('<pre>'.print_r($filter['columnname'], true).'</pre>');
+					if($filter['isSubQuery']){
+						if($filter['relatedmodulename'] === 'RSNStatisticsResults'){//RSNStatisticsResults
 							//RSNStatisticsResults::stats_periodicite::statId::stats_periodicite_fieldId
 							//RSNStatisticsResults::statFieldName::statId::statFieldId
 							//echo "<code>TODO parseAdvFilterList for statistics</code>";
 							//var_dump($viewName);
-							if($viewName[1] === 'stats_periodicite'){//1ere ligne
+							$statId = $filter['statid'];
+							if($filter['fieldName'] === 'stats_periodicite'){//1ere ligne
 								//$statisticRelation = $this->addStatisticsTable($viewName[2]);
-								$statId = $viewName[2];
 								$columncondition = $filter['column_condition'];
 								
 								$statisticRelation = $this->addStatisticsPeriodeCondition($statId, $filter['comparator'], $filter['value'], $columncondition);
@@ -338,14 +342,13 @@ class QueryGenerator {
 												break;
 										}
 										$columncondition = $filter['column_condition'];
-								
 									}
 									
 									$this->addConditionGlue($columncondition);
 								}
 							}
 							else{
-								$statisticRelation = $this->addStatisticsCondition($viewName[2], $viewName[1], $viewName[3], $filter['comparator'], $filter['value']);
+								$statisticRelation = $this->addStatisticsCondition($statId, $filter['fieldName'], $filter['columnId'], $filter['comparator'], $filter['value']);
 									
 								$columncondition = $filter['column_condition'];
 								if(!empty($columncondition)) {
@@ -355,17 +358,14 @@ class QueryGenerator {
 							continue;
 						}
 						else { //CustomView
-							$filter['viewid'] = $viewName[2];
-							$filter['viewname'] = $viewName[1];
-							$filter['relatedmodule'] = Vtiger_Module_Model::getInstance($filter['relatedmodulename']);
 							
-							$columnInfo = trim(substr($filter['columnname'], $pos + 1));
-							$filter['columnname'] = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
-							if(!$filter['columnname']){
+							$relationFilters = array();
+									
+							if(!$filter['subQueryColumn']){//[xx:xx:xx]:subQueryColumn...
 								//echo '<br><br><br><br>'.__FILE__;
 								$relationModel = false;
 								//RSNContactsPanels
-								if($filter['relatedmodulename'] == 'RSNContactsPanels'){
+								if($filter['relatedIsPanel']){
 									$sourceFieldName = $this->getSQLColumn('id');
 									$viewFilters = false; //TODO sure ?
 									$panelRecord = Vtiger_Record_Model::getInstanceById($filter['viewid'], $filter['relatedmodulename']);
@@ -400,17 +400,22 @@ class QueryGenerator {
 									for($iNext = $index+1; $iNext < count($filtercolumns); $iNext++) {
 										$nextFilter = $filtercolumns[$iNext];
 										//same view, memorize and skip
-										if(substr($nextFilter['columnname'], 0, strlen($filter['relatedmodulename']) + 2) == '['.$filter['relatedmodulename'].':'){
-											$nextFilter['columnname'] = preg_replace('/^[^\]]+\]::(.+)$/', '$1', $nextFilter['columnname']);
-											$nextFilter['relatedmodulename'] = $filter['relatedmodulename'];
-											$nextFilter['viewid'] = $filter['viewid'];
-											$nextFilter['viewname'] = $filter['viewname'];
-											$nextFilter['relatedmodule'] = $filter['relatedmodule'];
-											$viewFilters[] = $nextFilter;
-											$skipNextIndex = $iNext;
+										if($nextFilter['isSubQuery'] && $nextFilter['relatedmodulename'] == $filter['relatedmodulename']){
+											//Il faut différencier les champs du module lié et les champs de la table de relation
+											//champ du module lié
+											if($nextFilter['subQueryColumn']){
+												$viewFilters[] = $nextFilter['subQueryColumn'];
+												$skipIndexes[] = $iNext;
+											}
+											//Champ de la table de relation
+											else {
+												$relationFilters[] = $nextFilter['relationColumn'];
+												$skipIndexes[] = $iNext;
+												//var_dump('Champ de la table de relation', $nextFilter['relationColumn']);
+											}
 										}
-										else
-											break;
+											
+										//TODO modifier le column_condition pour ne pas avoir un AND final
 									}
 									
 									//sub view
@@ -429,12 +434,19 @@ class QueryGenerator {
 										$subQueryTable = uniqid('subq_');
 										$subQueryField =  $subQueryTable . '.' . $relationInfos['relatedFieldName'];
 										$relSourceFieldName = isset($relationInfos['sourceFieldNameInRelation']) ? $relationInfos['sourceFieldNameInRelation'] : $relationInfos['fieldName'];
+										
+										$relationTableName = $relationInfos['relationTableName'];
+										
+										
 										$relatedSql = 'SELECT ' . $relSourceFieldName
-											. ' FROM ' . $relationInfos['relationTableName']
+											. ' FROM `' . $relationTableName . '`'
 											. ' JOIN (' . $relatedSql . ') ' . $subQueryTable
-											. ' 	ON ' . $relationInfos['relationTableName'] . '.' . $relationInfos['relatedSourceFieldName']
+											. ' 	ON ' . $relationTableName . '.' . $relationInfos['relatedSourceFieldName']
 											. '		= ' . $subQueryField
-											;
+										;
+										
+										if($relationFilters)
+											$relatedSql .= $this->getRelationFiltersSQLWhere($relationTableName, $relationFilters);
 									}
 									else {
 										$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
@@ -464,65 +476,83 @@ class QueryGenerator {
 											, $relatedSql
 											, $filter['comparator']);
 								$this->endGroup($filter['viewname']);
-								
+									
 								//column_condition
 								//must use the last filter, even if skipped
-								if(count($viewFilters))
-									$columncondition = $viewFilters[count($viewFilters)-1]['column_condition'];
+								if(count($viewFilters) || count($relationFilters)){
+									for($nextFilterIndex = $index + 1; $nextFilterIndex < count($filtercolumns); $nextFilterIndex++)
+										if(in_array($index, $skipIndexes)){
+											$columncondition = $filtercolumns[$nextFilterIndex]['column_condition'];
+										}
+										else
+											break;
+								}
 								else
 									$columncondition = $filter['column_condition'];
 								if(!empty($columncondition)) {
 									$this->addConditionGlue($columncondition);
 								}
 							}
+							//Filtre sur un champ de relation
+							else {
+								
+								var_dump('subQueryColumn->columnname', $filter['subQueryColumn']['columnname']);
+								
+							}
 							continue;
 						}
 					}
+			
+					//ED151911 toute l'analyse mise en commentaire a été basculée dans parseFilterInfos
 					
-					$nameComponents = explode(':',$filter['columnname']);
-					if(empty($nameComponents[2]) && $nameComponents[1] == 'crmid' && $nameComponents[0] == 'vtiger_crmentity') {
-						$name = $this->getSQLColumn('id');
-					} else {
-						$name = $nameComponents[2];
-					}
-					if(($nameComponents[4] == 'D' || $nameComponents[4] == 'DT') && in_array($filter['comparator'], $dateSpecificConditions)) {
-						$filter['stdfilter'] = $filter['comparator'];
-						$valueComponents = explode(',',$filter['value']);
-						if($filter['comparator'] == 'custom') {
-							if($nameComponents[4] == 'DT') {
-								$startDateTimeComponents = explode(' ',$valueComponents[0]);
-								$endDateTimeComponents = explode(' ',$valueComponents[1]);
-								$filter['startdate'] = DateTimeField::convertToDBFormat($startDateTimeComponents[0]);
-								$filter['enddate'] = DateTimeField::convertToDBFormat($endDateTimeComponents[0]);
-							} else {
-								$filter['startdate'] = DateTimeField::convertToDBFormat($valueComponents[0]);
-								$filter['enddate'] = DateTimeField::convertToDBFormat($valueComponents[1]);
-							}
-						}
-						$dateFilterResolvedList = $customView->resolveDateFilterValue($filter);
-						$value[] = $this->fixDateTimeValue($name, $dateFilterResolvedList['startdate']);
-						$value[] = $this->fixDateTimeValue($name, $dateFilterResolvedList['enddate'], false);
-						$this->addCondition($name, $value, 'BETWEEN');
-					} else if($nameComponents[4] == 'DT' && ($filter['comparator'] == 'e' || $filter['comparator'] == 'n')) {
-						$filter['stdfilter'] = $filter['comparator'];
-						$dateTimeComponents = explode(' ',$filter['value']);
-						$filter['startdate'] = DateTimeField::convertToDBFormat($dateTimeComponents[0]);
-						$filter['enddate'] = DateTimeField::convertToDBFormat($dateTimeComponents[0]);
-						$dateTimeFilterResolvedList = $customView->resolveDateFilterValue($filter);
-						$value[] = $this->fixDateTimeValue($name, $dateTimeFilterResolvedList['startdate']);
-						$value[] = $this->fixDateTimeValue($name, $dateTimeFilterResolvedList['enddate'], false);
-						if($filter['comparator'] == 'n') {
-							$this->addCondition($name, $value, 'NOTEQUAL');
-						} else {
-							$this->addCondition($name, $value, 'BETWEEN');
-						}
-					} else if($nameComponents[4] == 'DT' && $filter['comparator'] == 'a') {
-						$dateTime = explode(' ', $filter['value']);
-						$value[] = $this->fixDateTimeValue($name, $dateTime[0], false);
-						$this->addCondition($name, $value, $filter['comparator']);
-					} else{
-						$this->addCondition($name, $filter['value'], $filter['comparator']);
-					}
+					//$nameComponents = explode(':',$filter['columnname']);
+					//if(empty($nameComponents[2]) && $nameComponents[1] == 'crmid' && $nameComponents[0] == 'vtiger_crmentity') {
+					//	$name = $this->getSQLColumn('id');
+					//} else {
+					//	$name = $nameComponents[2];
+					//}
+					//if(($nameComponents[4] === 'D' || $nameComponents[4] === 'DT') && in_array($filter['comparator'], $dateSpecificConditions)) {
+					//	$filter['stdfilter'] = $filter['comparator'];
+					//	$valueComponents = explode(',',$filter['value']);
+					//	if($filter['comparator'] === 'custom') {
+					//		if($nameComponents[4] === 'DT') {
+					//			$startDateTimeComponents = explode(' ',$valueComponents[0]);
+					//			$endDateTimeComponents = explode(' ',$valueComponents[1]);
+					//			$filter['startdate'] = DateTimeField::convertToDBFormat($startDateTimeComponents[0]);
+					//			$filter['enddate'] = DateTimeField::convertToDBFormat($endDateTimeComponents[0]);
+					//		} else {
+					//			$filter['startdate'] = DateTimeField::convertToDBFormat($valueComponents[0]);
+					//			$filter['enddate'] = DateTimeField::convertToDBFormat($valueComponents[1]);
+					//		}
+					//	}
+					//
+					//	$dateFilterResolvedList = $customView->resolveDateFilterValue($filter);
+					//	$value[] = $this->fixDateTimeValue($name, $dateFilterResolvedList['startdate']);
+					//	$value[] = $this->fixDateTimeValue($name, $dateFilterResolvedList['enddate'], false);
+					//	$this->addCondition($name, $value, 'BETWEEN');
+					//} else if($nameComponents[4] === 'DT' && ($filter['comparator'] == 'e' || $filter['comparator'] == 'n')) {
+					//	$filter['stdfilter'] = $filter['comparator'];
+					//	$dateTimeComponents = explode(' ',$filter['value']);
+					//	$filter['startdate'] = DateTimeField::convertToDBFormat($dateTimeComponents[0]);
+					//	$filter['enddate'] = DateTimeField::convertToDBFormat($dateTimeComponents[0]);
+					//	$dateTimeFilterResolvedList = $customView->resolveDateFilterValue($filter);
+					//	$value[] = $this->fixDateTimeValue($name, $dateTimeFilterResolvedList['startdate']);
+					//	$value[] = $this->fixDateTimeValue($name, $dateTimeFilterResolvedList['enddate'], false);
+					//	if($filter['comparator'] == 'n') {
+					//		$this->addCondition($name, $value, 'NOTEQUAL');
+					//	} else {
+					//		$this->addCondition($name, $value, 'BETWEEN');
+					//	}
+					//} else if($nameComponents[4] == 'DT' && $filter['comparator'] == 'a') {
+					//	$dateTime = explode(' ', $filter['value']);
+					//	$value[] = $this->fixDateTimeValue($name, $dateTime[0], false);
+					//	$this->addCondition($name, $value, $filter['comparator']);
+					//} else{
+					//	$this->addCondition($name, $filter['value'], $filter['comparator']);
+					//}
+					//remplace ce qui précède et qui a été déplacé dans parseFilterInfos
+					$this->addCondition($filter['condition_fieldname'], $filter['value'], $filter['comparator']);
+					
 					$columncondition = $filter['column_condition'];
 					if(!empty($columncondition)) {
 						$this->addConditionGlue($columncondition);
@@ -536,6 +566,139 @@ class QueryGenerator {
 		}
 	}
 
+	/* ED151119
+	* Related module view ou Statistics
+	* - Existence d'une relation avec la vue d'un autre module
+	* 	[RelatedModule:ViewName:ViewId]
+	* - Test sur un champ de la table de relation par la vue d'un autre module
+	*  [RelatedModule:ViewName:ViewId::relation table:relation column:relation field:label]
+	* - Test sur un champ d'un autre module via une vue de cet autre module
+	*  [RelatedModule:ViewName:ViewId]:field related table:column:field:label (TODO check column:field)
+	* - Relation à un RSNContactsPanels (idem que les related module custom views)
+	* 	[RSNContactsPanels:PanelName:PanelId]
+	* - Test sur l'existence d'une stat pour une période donnée 
+	*  [RSNStatisticsResults:stats_periodicite:StatId:stats_periodicite fieldId === 1380]
+	* - Test sur un champ d'une statistique pour une période péalablement donnée 
+	*  [RSNStatisticsResults:stat column:StatId:Stat fieldId]
+	*/
+	private function parseFilterInfos(&$filter, $customView, $dateSpecificConditions){
+		if($filter['isParsed'])
+			return;
+		$filter['isParsed'] = true;
+		
+		
+		if($filter['columnname'][0] === '['){
+			$filter['isSubQuery'] = true;
+			$posClosingBracket = strpos($filter['columnname'], ']', 1);
+			$viewName = explode(":", substr($filter['columnname'], 1, $posClosingBracket-1));
+			$filter['relatedmodulename'] = $viewName[0];
+			if($viewName[0] === 'RSNStatisticsResults'){//RSNStatisticsResults
+				//RSNStatisticsResults::stats_periodicite::statId::stats_periodicite_fieldId
+				//RSNStatisticsResults::statFieldName::statId::statFieldId
+				//echo "<code>TODO parseAdvFilterList for statistics</code>";
+				//var_dump($viewName);
+				$filter['statid'] = $viewName[2];
+				$filter['fieldName'] = $viewName[1];
+				$filter['columnId'] = $viewName[3];
+				if($filter['fieldName'] === 'stats_periodicite'){
+				} else {
+				}
+			}
+			else { //CustomView
+				$filter['viewid'] = $viewName[2];
+				$filter['viewname'] = $viewName[1];
+				$filter['relatedmodule'] = Vtiger_Module_Model::getInstance($filter['relatedmodulename']);
+				
+				//Champ de la table de relation
+				if(count($viewName) > 3){//relation table:relation column:relation field:label
+					$filter['relationColumn'] = array_merge($filter, array(
+						'table' => $viewName[4],
+						'column' => $viewName[5],
+						'field' => $viewName[6],
+						'fieldLabel' => $viewName[7],
+						'dataType' => $viewName[8],
+					));
+					$this->initFilterConditionValue($filter['relationColumn'], $viewName[5], $customView, $dateSpecificConditions);
+				}
+
+				$filter['relatedIsPanel'] = $filter['relatedmodulename'] === 'RSNContactsPanels';
+				
+				//Données après le ]
+				//Champ du module lié
+				$subQueryColumnName = trim(substr($filter['columnname'], $posClosingBracket + 1));
+				if(strpos($subQueryColumnName, ':') !== false){
+					$subQueryColumnInfos = explode(':', $subQueryColumnName);
+					//TODO recursive ?
+					$filter['subQueryColumn'] = array_merge($filter, array(
+						'columnname' => $subQueryColumnName,
+						
+						'table' => $subQueryColumnInfos[0],
+						'column' => $subQueryColumnInfos[1],
+						'field' => $subQueryColumnInfos[2],
+						'dataType' => $subQueryColumnInfos[2],
+					));
+					$this->initFilterConditionValue($filter['subQueryColumn'], $subQueryColumnInfos[1], $customView, $dateSpecificConditions);
+				}
+			}
+		}
+		else {	
+			$nameComponents = explode(':',$filter['columnname']);
+			if(empty($nameComponents[2]) && $nameComponents[1] == 'crmid' && $nameComponents[0] == 'vtiger_crmentity') {
+				$name = $this->getSQLColumn('id');
+			} else {
+				$name = $nameComponents[2];
+			}
+			$filter['dataType'] = $nameComponents[4];
+			$this->initFilterConditionValue($filter, $name, $customView, $dateSpecificConditions);
+		}
+	}
+	
+	private function initFilterConditionValue(&$filter, $name, $customView, $dateSpecificConditions){
+		//Traitement des dates et des opérateurs spécifiques
+		//Les 3 champs utilisés pour la fonction addCondition
+		$filter['condition_fieldname'] = $name;
+			
+		if(($filter['dataType'] === 'D' || $filter['dataType'] === 'DT') && in_array($filter['comparator'], $dateSpecificConditions)) {
+			$filter['stdfilter'] = $filter['comparator'];
+			$valueComponents = explode(',',$filter['value']);
+			if($filter['comparator'] === 'custom') {
+				if($filter['dataType'] === 'DT') {
+					$startDateTimeComponents = explode(' ',$valueComponents[0]);
+					$endDateTimeComponents = explode(' ',$valueComponents[1]);
+					$filter['startdate'] = DateTimeField::convertToDBFormat($startDateTimeComponents[0]);
+					$filter['enddate'] = DateTimeField::convertToDBFormat($endDateTimeComponents[0]);
+				} else {
+					$filter['startdate'] = DateTimeField::convertToDBFormat($valueComponents[0]);
+					$filter['enddate'] = DateTimeField::convertToDBFormat($valueComponents[1]);
+				}
+			}
+
+			$dateFilterResolvedList = $customView->resolveDateFilterValue($filter);
+			$value[] = $this->fixDateTimeValue($name, $dateFilterResolvedList['startdate']);
+			$value[] = $this->fixDateTimeValue($name, $dateFilterResolvedList['enddate'], false);
+			$filter['value'] = $value;
+			$filter['comparator'] = 'BETWEEN';
+		} else if($filter['dataType'] === 'DT' && ($filter['comparator'] == 'e' || $filter['comparator'] == 'n')) {
+			$filter['stdfilter'] = $filter['comparator'];
+			$dateTimeComponents = explode(' ',$filter['value']);
+			$filter['startdate'] = DateTimeField::convertToDBFormat($dateTimeComponents[0]);
+			$filter['enddate'] = DateTimeField::convertToDBFormat($dateTimeComponents[0]);
+			$dateTimeFilterResolvedList = $customView->resolveDateFilterValue($filter);
+			$value[] = $this->fixDateTimeValue($name, $dateTimeFilterResolvedList['startdate']);
+			$value[] = $this->fixDateTimeValue($name, $dateTimeFilterResolvedList['enddate'], false);
+			$filter['value'] = $value;
+			if($filter['comparator'] == 'n') {
+				$filter['comparator'] = 'NOTEQUAL';
+			} else {
+				$filter['comparator'] = 'BETWEEN';
+			}
+		} else if($filter['dataType'] == 'DT' && $filter['comparator'] == 'a') {
+			$dateTime = explode(' ', $filter['value']);
+			$value[] = $this->fixDateTimeValue($name, $dateTime[0], false);
+			$filter['value'] = $value;
+		}
+	}
+	
 	/**
 	 * Inclut une table de résultats de stats dans le from
 	 *
@@ -575,10 +738,10 @@ class QueryGenerator {
 			$field->set('table', $tableAlias);
 			$fields[$tableAlias . '_' . $field->getName()] = $field;
 		}
-		if(!$this->statistictsFields)
-			$this->statistictsFields = $fields;
+		if(!$this->statisticsFields)
+			$this->statisticsFields = $fields;
 		else
-			$this->statistictsFields = array_merge($this->statistictsFields, $fields);
+			$this->statisticsFields = array_merge($this->statisticsFields, $fields);
 	}
 	
 	//Construit un alias de table selon les conditions fournies
@@ -644,7 +807,7 @@ class QueryGenerator {
 			$query .= $this->getWhereClause();
 			$this->query = $query;
 			
-			//print_r('<pre style="margin-top:4em;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+//			print_r('<pre style="margin-top:4em;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
 			
 			//echo_callstack();
 			
@@ -947,8 +1110,12 @@ class QueryGenerator {
 			
 			$fieldName = $conditionInfo['name'];
 			$field = $moduleFieldList[$fieldName];
-			if(empty($field) && substr($fieldName, 0, strlen('stat::')) === 'stat::')
-				$field = $this->statistictsFields[substr($fieldName, strlen('stat::'))];
+			if(empty($field)){
+				if(substr($fieldName, 0, strlen('stat::')) === 'stat::')
+					$field = $this->statisticsFields[substr($fieldName, strlen('stat::'))];
+				elseif($conditionInfo['dataType'])
+					$field = $this->getGenericField($fieldName, $conditionInfo['dataType']);
+			}
 			if(empty($field) || $conditionInfo['operator'] == 'None') {
 				/* ED150307 IN, NOT IN
 				 * sub view
@@ -988,6 +1155,7 @@ class QueryGenerator {
 			$fieldGlue = '';
 			$valueSqlList = $this->getConditionValue($conditionInfo['value'],
 				$conditionInfo['operator'], $field);
+			
 			if(!is_array($valueSqlList)) {
 				$valueSqlList = array($valueSqlList);
 			}
@@ -1155,6 +1323,62 @@ class QueryGenerator {
 		return $sql;
 	}
 
+	/** ED151119
+	 * @param $fieldName === $tableName.$fieldName
+	 */
+	private function getGenericField($fieldName, $dataType){
+		$fieldName = explode('.', $fieldName);
+		global $adb;
+		$field = WebserviceField::fromArray($adb, array(
+			'tablename' => $fieldName[0],
+			'columnname' => $fieldName[1],
+			'fieldlabel' => $fieldName[1],
+			'typeofdata' => $dataType . '~O',
+		));
+		return $field;
+	}
+	
+	/** ED151119
+	 * Retourne un WHERE pour les filtres sur les champs de table de relation
+	 *
+	 */
+	private function getRelationFiltersSQLWhere($relationTableName, $relationFilters){
+		if(!$relationFilters)
+			return '';
+		
+		$queryGenerator = new QueryGenerator($this->module, $this->user);
+		
+		$query = '';
+		$glue = false;
+		foreach($relationFilters as $relationFilter){
+			if($relationTableName !== $relationFilter['table']){
+				echo "<pre>ERREUR in ".__FILE__.'::parseAdvFilterList() : $relationTableName !== $relationFilter[\'table\']'.
+				' ('.$relationTableName.' !== '.$relationFilter['table']
+				."</pre>";
+				continue;
+			}
+			if(!$glue)
+				$glue = 'WHERE';
+			else
+				$glue = 'AND';
+			//Ajoute une condition de jointure
+			$queryGenerator->addSQLCondition(
+				$query,
+				$glue,
+				'`'.$relationTableName.'`.'.$relationFilter['column'],
+				$relationFilter['value'],
+				$relationFilter['comparator'],
+				$relationFilter['dataType']
+			);
+		}
+		$queryGenerator->groupInfo = $query;
+		//Traitement
+		$queryGenerator->getWhereClause();
+		
+		$query = $queryGenerator->conditionalWhere;
+		return $query;
+	}
+	
 	/**
 	 *
 	 * @param mixed $value
@@ -1434,13 +1658,28 @@ class QueryGenerator {
 			'SQLOperator'=>$SQLOperator);
 	}
 
-	private function getConditionalArray($fieldname,$value,$operator) {
+	/** ED151119
+	 * Add a new condition value to a string
+	 */
+	public function addSQLCondition(&$sqlString, $glue, $fieldname, $value, $operator, $dataType) {
+		$conditionNumber = $this->conditionInstanceCount++;
+		if($glue)
+			$sqlString .= " $glue ";
+		$sqlString .= " /*VAR*/$conditionNumber/*/VAR*/ ";/*ED150522 adds /*VAR*/
+		$this->conditionals[$conditionNumber] = $this->getConditionalArray(
+				$fieldname, $value, $operator, $dataType);
+	}
+
+	/**
+	 * @param $dataType ED151119
+	 */
+	private function getConditionalArray($fieldname,$value,$operator, $dataType = false) {
 		if(is_string($value)) {
 			$value = trim($value);
 		} elseif(is_array($value)) {
 			$value = array_map(trim, $value);
 		}
-		return array('name'=>$fieldname,'value'=>$value,'operator'=>$operator);
+		return array('name'=>$fieldname,'value'=>$value,'operator'=>$operator,'dataType'=>$dataType);
 	}
 
 	private $groupCounter = 0;
@@ -1581,6 +1820,7 @@ class QueryGenerator {
 	private function addUserSearchConditionUnique($search_field, $search_text, $operator, $startingGroup = null){
 		//var_dump(__FILE__."::addUserSearchConditionsFromInput()", $search_field, $search_text, $operator, $startingGroup);
 		if(!$search_field){
+			echo 'addUserSearchConditionUnique : !$search_field !!!';
 			echo_callstack();
 			return;
 		}

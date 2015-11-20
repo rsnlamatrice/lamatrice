@@ -364,19 +364,42 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 
 					/* ED150225
 					 * Related module view ou Statistics
+					 * - Existence d'une relation avec la vue d'un autre module
+					 * 	[RelatedModule:ViewName:ViewId]
+					 * - Test sur un champ de la table de relation par la vue d'un autre module
+					 *  [RelatedModule:ViewName:ViewId::relation table:relation column:relation field:label]
+					 * - Test sur un champ d'un autre module via une vue de cet autre module
+					 *  [RelatedModule:ViewName:ViewId]:field related table:column:field:label (TODO check column:field)
+					 * - Test sur l'existence d'une stat pour une période donnée 
+					 *  [RSNStatisticsResults:stats_periodicite:StatId:stats_periodicite fieldId === 1380]
+					 * - Test sur un champ d'une statistique pour une période péalablement donnée 
+					 *  [RSNStatisticsResults:stat column:StatId:Stat fieldId]
 					 */
-					if($advFilterColumn[0] == '['){ //[Module:ViewName:ViewId]:field table:column:field:label (TODO check column:field)
+					if($advFilterColumn[0] == '['){ 
 						$pos = strpos($advFilterColumn, ']', 1);
 						$viewName = explode(":", substr($advFilterColumn, 1, $pos-1));
 						$relatedModuleName = $viewName[0];
 						$viewId = $viewName[2];
 						$viewName = $viewName[1];
-						$fieldModuleModel = Vtiger_Module_Model::getInstance($relatedModuleName);
+						if($relatedModuleName === 'RSNStatisticsResults'){
+							
+						}
+						elseif(count($viewName) > 3){
+							//Champ de la table de relation à un autre module
+						}
 						
+						//données après le ]
+						//Champ de l'autre module lié
 						$columnInfo = trim(substr($advFilterColumn, $pos + 1));
 						$columnInfo = $columnInfo[0] == ':' ? substr($columnInfo, 1) : $columnInfo;
 						
 						$columnInfo = explode(":", $columnInfo);
+						
+						$fieldModuleModel = false;
+						$relatedModule = Vtiger_Module_Model::getInstance($relatedModuleName);
+						if(count($columnInfo) > 1){
+							$moduleRelationModel = Vtiger_Relation_Model::getInstance($moduleModel, $relatedModule);
+						}
 					}
 					else {
 						$columnInfo = explode(":",$advFilterColumn);
@@ -385,40 +408,55 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 					if(count($columnInfo) > 1){
 						$fieldName = $columnInfo[2];
 						
-						$fieldModel = $fieldModuleModel->getField($fieldName);
-						$fieldType = $fieldModel->getFieldDataType();
-	
-						if($fieldType == 'currency') {
-							if($fieldModel->get('uitype') == '71') {
-								$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue, null, true);
-							} else {
-								$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue);
-							}
+						if($fieldModuleModel){
+							$fieldModel = $fieldModuleModel->getField($fieldName);
 						}
-	
-						if(($fieldType == 'date'
-						|| ($fieldType == 'time' && $fieldName != 'time_start' && $fieldName != 'time_end')
-						|| ($fieldType == 'datetime'))
-						&& ($fieldType != '' && $advFitlerValue != '' )) {
-							$temp_val = explode(",",$advFitlerValue);
-							$val = Array();
-							for($x=0;$x<count($temp_val);$x++) {
-								//if date and time given then we have to convert the date and
-								//leave the time as it is, if date only given then temp_time
-								//value will be empty
-								if(trim($temp_val[$x]) != '') {
-									$date = new DateTimeField(trim($temp_val[$x]));
-									if($fieldType == 'date') {
-										$val[$x] = DateTimeField::convertToDBFormat(
-												trim($temp_val[$x]));
-									} elseif($fieldType == 'datetime') {
-										$val[$x] = $date->getDBInsertDateTimeValue();
-									} else {
-										$val[$x] = $date->getDBInsertTimeValue();
-									}
+						elseif($moduleRelationModel){
+							$fieldModel = $moduleRelationModel->getRelationField($fieldName);
+						}
+						else {
+							$fieldModel = false; // !
+						}
+						//ED151119 le champ peut ne pas exister si c'est un champ de relation
+						if(!$fieldModel){
+							var_dump('Champ introuvable', $advFilterColumn, $fieldName, $fieldModuleModel->getName(), $columnInfo);
+							die();
+						}
+						if($fieldModel){
+							$fieldType = $fieldModel->getFieldDataType();
+		
+							if($fieldType == 'currency') {
+								if($fieldModel->get('uitype') == '71') {
+									$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue, null, true);
+								} else {
+									$advFitlerValue = CurrencyField::convertToDBFormat($advFitlerValue);
 								}
 							}
-							$advFitlerValue = implode(",",$val);
+		
+							if(($fieldType == 'date'
+							|| ($fieldType == 'time' && $fieldName != 'time_start' && $fieldName != 'time_end')
+							|| ($fieldType == 'datetime'))
+							&& ($fieldType != '' && $advFitlerValue != '' )) {
+								$temp_val = explode(",",$advFitlerValue);
+								$val = Array();
+								for($x=0;$x<count($temp_val);$x++) {
+									//if date and time given then we have to convert the date and
+									//leave the time as it is, if date only given then temp_time
+									//value will be empty
+									if(trim($temp_val[$x]) != '') {
+										$date = new DateTimeField(trim($temp_val[$x]));
+										if($fieldType == 'date') {
+											$val[$x] = DateTimeField::convertToDBFormat(
+													trim($temp_val[$x]));
+										} elseif($fieldType == 'datetime') {
+											$val[$x] = $date->getDBInsertDateTimeValue();
+										} else {
+											$val[$x] = $date->getDBInsertTimeValue();
+										}
+									}
+								}
+								$advFitlerValue = implode(",",$val);
+							}
 						}
 					}
 					

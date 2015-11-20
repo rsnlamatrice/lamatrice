@@ -69,9 +69,8 @@
 			{if $RECORD->get('sent2compta')}
 				<br><span style="color: red;">{vtranslate('LBL_ALREADY_SENT_2_COMPTA')}</span>
 			{/if}
-			</h3><hr>
-		
-			<span class="pull-right">
+			</h3>
+			<span class="pull-right" style="padding-left: 12px;">
 				{if !$NOT_EDITABLE}
 					<button class="btn btn-success" type="submit"><strong>{vtranslate('LBL_SAVE', $MODULE)}</strong></button>
 				{elseif !is_numeric($NOT_EDITABLE)}
@@ -79,6 +78,7 @@
 				{/if}
 				<a class="cancelLink" type="reset" onclick="javascript:window.history.back();">{vtranslate('LBL_CANCEL', $MODULE)}</a>
 			</span>
+			<hr>
 		</div>
 		{foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE name="EditViewBlockLevelLoop"}
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
@@ -86,7 +86,7 @@
 				{assign var=REGLEMENTS_BLOCK_FIELDS value=$BLOCK_FIELDS}
 				{continue}
 			{/if}
-			{assign var=IS_HIDDEN value=($BLOCK_LABEL eq 'LBL_DESCRIPTION_INFORMATION' || $BLOCK_LABEL eq 'LBL_CUSTOM_INFORMATION')}
+			{assign var=IS_HIDDEN value=($BLOCK_LABEL eq 'LBL_ADDRESS_INFORMATION' || $BLOCK_LABEL eq 'LBL_DESCRIPTION_INFORMATION' || $BLOCK_LABEL eq 'LBL_CUSTOM_INFORMATION')}
 			<table class="table table-bordered blockContainer showInlineTable">
 			<thead><tr>
 				<th class="blockHeader" colspan="4">
