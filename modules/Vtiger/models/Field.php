@@ -638,75 +638,117 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 */
 	protected static function getDateForStdFilterBytype($type) {
 		$today = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-		$tomorrow = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 1, date("Y")));
-		$yesterday = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 1, date("Y")));
-
-		$currentmonth0 = date("Y-m-d", mktime(0, 0, 0, date("m"), "01", date("Y")));
-		$currentmonth1 = date("Y-m-t");
-		$lastmonth0 = date("Y-m-d", mktime(0, 0, 0, date("m") - 1, "01", date("Y")));
-		$lastmonth1 = date("Y-m-t", strtotime("-1 Month"));
-		$nextmonth0 = date("Y-m-d", mktime(0, 0, 0, date("m") + 1, "01", date("Y")));
-		$nextmonth1 = date("Y-m-t", strtotime("+1 Month"));
-
-		$lastweek0 = date("Y-m-d", strtotime("-2 week Sunday"));
-		$lastweek1 = date("Y-m-d", strtotime("-1 week Saturday"));
-
-		$thisweek0 = date("Y-m-d", strtotime("-1 week Sunday"));
-		$thisweek1 = date("Y-m-d", strtotime("this Saturday"));
-
-		$nextweek0 = date("Y-m-d", strtotime("this Sunday"));
-		$nextweek1 = date("Y-m-d", strtotime("+1 week Saturday"));
-
-		$next7days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 6, date("Y")));
-		$next30days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 29, date("Y")));
-		$next60days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 59, date("Y")));
-		$next90days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 89, date("Y")));
-		$next120days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 119, date("Y")));
-
-		$last7days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 6, date("Y")));
-		$last30days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 29, date("Y")));
-		$last60days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 59, date("Y")));
-		$last90days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 89, date("Y")));
-		$last120days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 119, date("Y")));
-
-		$currentFY0 = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y")));
-		$currentFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y")));
-		$lastFY0 = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y") - 1));
-		$lastFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y") - 1));
-		$nextFY0 = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y") + 1));
-		$nextFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y") + 1));
-
-		if (date("m") <= 3) {
-			$cFq = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y")));
-			$cFq1 = date("Y-m-d", mktime(0, 0, 0, "03", "31", date("Y")));
-			$nFq = date("Y-m-d", mktime(0, 0, 0, "04", "01", date("Y")));
-			$nFq1 = date("Y-m-d", mktime(0, 0, 0, "06", "30", date("Y")));
-			$pFq = date("Y-m-d", mktime(0, 0, 0, "10", "01", date("Y") - 1));
-			$pFq1 = date("Y-m-d", mktime(0, 0, 0, "12", "31", date("Y") - 1));
-		} else if (date("m") > 3 and date("m") <= 6) {
-			$cFq = date("Y-m-d", mktime(0, 0, 0, "04", "01", date("Y")));
-			$cFq1 = date("Y-m-d", mktime(0, 0, 0, "06", "30", date("Y")));
-			$nFq = date("Y-m-d", mktime(0, 0, 0, "07", "01", date("Y")));
-			$nFq1 = date("Y-m-d", mktime(0, 0, 0, "09", "30", date("Y")));
-			$pFq = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y")));
-			$pFq1 = date("Y-m-d", mktime(0, 0, 0, "03", "31", date("Y")));
-		} else if (date("m") > 6 and date("m") <= 9) {
-			$cFq = date("Y-m-d", mktime(0, 0, 0, "07", "01", date("Y")));
-			$cFq1 = date("Y-m-d", mktime(0, 0, 0, "09", "30", date("Y")));
-			$nFq = date("Y-m-d", mktime(0, 0, 0, "10", "01", date("Y")));
-			$nFq1 = date("Y-m-d", mktime(0, 0, 0, "12", "31", date("Y")));
-			$pFq = date("Y-m-d", mktime(0, 0, 0, "04", "01", date("Y")));
-			$pFq1 = date("Y-m-d", mktime(0, 0, 0, "06", "30", date("Y")));
-		} else {
-			$cFq = date("Y-m-d", mktime(0, 0, 0, "10", "01", date("Y")));
-			$cFq1 = date("Y-m-d", mktime(0, 0, 0, "12", "31", date("Y")));
-			$nFq = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y") + 1));
-			$nFq1 = date("Y-m-d", mktime(0, 0, 0, "03", "31", date("Y") + 1));
-			$pFq = date("Y-m-d", mktime(0, 0, 0, "07", "01", date("Y")));
-			$pFq1 = date("Y-m-d", mktime(0, 0, 0, "09", "30", date("Y")));
+		switch ($type){
+		case "yesterday":
+			$yesterday = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 1, date("Y")));
+			break;
+		case "tomorrow":
+			$tomorrow = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 1, date("Y")));
+			break;
+		case "thisweek":
+			$thisweek0 = date("Y-m-d", strtotime("-1 week Sunday"));
+			$thisweek1 = date("Y-m-d", strtotime("this Saturday"));
+			break;
+		case "thismonth":
+			$currentmonth0 = date("Y-m-d", mktime(0, 0, 0, date("m"), "01", date("Y")));
+			$currentmonth1 = date("Y-m-t");
+			break;
+		case "nextweek":
+			$nextweek0 = date("Y-m-d", strtotime("this Sunday"));
+			$nextweek1 = date("Y-m-d", strtotime("+1 week Saturday"));
+			break;
+		case "nextmonth":
+			$nextmonth0 = date("Y-m-d", mktime(0, 0, 0, date("m") + 1, "01", date("Y")));
+			$nextmonth1 = date("Y-m-t", strtotime("+1 Month"));
+			break;
+		case "next7days":
+			$next7days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 6, date("Y")));
+			break;
+		case "next30days":
+			$next30days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 29, date("Y")));
+			break;
+		case "next60days":
+			$next60days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 59, date("Y")));
+			break;
+		case "next90days":
+			$next90days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 89, date("Y")));
+			break;
+		case "next120days":
+			$next120days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + 119, date("Y")));
+			break;
+		case "lastweek":
+			$lastweek0 = date("Y-m-d", strtotime("-2 week Sunday"));
+			$lastweek1 = date("Y-m-d", strtotime("-1 week Saturday"));
+			break;
+		case "lastmonth":
+			$lastmonth0 = date("Y-m-d", mktime(0, 0, 0, date("m") - 1, "01", date("Y")));
+			$lastmonth1 = date("Y-m-t", strtotime("-1 Month"));
+			break;
+		case "last7days":
+			$last7days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 6, date("Y")));
+			break;
+		case "last30days":
+			$last30days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 29, date("Y")));
+			break;
+		case "last60days":
+			$last60days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 59, date("Y")));
+			break;
+		case "last90days":
+			$last90days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 89, date("Y")));
+			break;
+		case "last120days":
+			$last120days = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") - 119, date("Y")));
+			break;
+		case "thisfy":
+			$currentFY0 = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y")));
+			$currentFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y")));
+			break;
+		case "prevfy":
+			$lastFY0 = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y") - 1));
+			$lastFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y") - 1));
+			break;
+		case "nextfy";
+			$nextFY0 = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y") + 1));
+			$nextFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y") + 1));
+			break;
+		case "nextfq";
+			if (date("m") <= 4) {
+				$nFq = date("Y-m-d", mktime(0, 0, 0, "05", "01", date("Y")));
+				$nFq1 = date("Y-m-d", mktime(0, 0, 0, "08", "31", date("Y")));
+			} else if (date("m") > 4 and date("m") <= 8) {
+				$nFq = date("Y-m-d", mktime(0, 0, 0, "09", "01", date("Y")));
+				$nFq1 = date("Y-m-d", mktime(0, 0, 0, "12", "31", date("Y")));
+			} else {
+				$nFq = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y") + 1));
+				$nFq1 = date("Y-m-d", mktime(0, 0, 0, "04", "30", date("Y") + 1));
+			}
+			break;
+		case "prevfq":
+			if (date("m") <= 4) {
+				$pFq = date("Y-m-d", mktime(0, 0, 0, "09", "01", date("Y") - 1));
+				$pFq1 = date("Y-m-d", mktime(0, 0, 0, "12", "31", date("Y") - 1));
+			} else if (date("m") > 4 and date("m") <= 8) {
+				$pFq = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y")));
+				$pFq1 = date("Y-m-d", mktime(0, 0, 0, "04", "30", date("Y")));
+			} else {
+				$pFq = date("Y-m-d", mktime(0, 0, 0, "05", "01", date("Y")));
+				$pFq1 = date("Y-m-d", mktime(0, 0, 0, "08", "31", date("Y")));
+			}
+			break;
+		case "thisfq":
+			if (date("m") <= 4) {
+				$cFq = date("Y-m-d", mktime(0, 0, 0, "01", "01", date("Y")));
+				$cFq1 = date("Y-m-d", mktime(0, 0, 0, "04", "30", date("Y")));
+			} else if (date("m") > 4 and date("m") <= 8) {
+				$cFq = date("Y-m-d", mktime(0, 0, 0, "05", "01", date("Y")));
+				$cFq1 = date("Y-m-d", mktime(0, 0, 0, "08", "31", date("Y")));
+			} else {
+				$cFq = date("Y-m-d", mktime(0, 0, 0, "09", "01", date("Y")));
+				$cFq1 = date("Y-m-d", mktime(0, 0, 0, "12", "31", date("Y")));
+			}
+			break;
 		}
-
-		$dateValues = array();
+		
 		switch ($type){
 		case "today":
 			$dateValues[0] = $today;

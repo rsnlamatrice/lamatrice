@@ -17,7 +17,12 @@
 		</tr>
 		<tr>
 			<td class='small' align='right' nowrap='nowrap'>
-				<a href='javascript:window.history.back();'>{vtranslate('LBL_GO_BACK')}</a><br>
+				{if $BUTTON_CLOSE}
+					<a onclick="$.unblockUI(); return false;">{vtranslate('LBL_CLOSE')}</button><br>
+				{else}
+					<a href='javascript:window.history.back();'>{vtranslate('LBL_GO_BACK')}</a>
+				{/if}
+				<br>
 			</td>
 		</tr>
 		</table>
