@@ -28,7 +28,6 @@ class Vtiger_LetterToAccount_PDFController {
 		$focus->retrieve_entity_info($id,$this->moduleName);
 		$focus->apply_field_security($this->moduleName);
 		$focus->id = $id;
-		
 		if($this->moduleName === 'Accounts'){
 			$focus->column_fields['accountid'] = $accountId = $id;
 		}else{

@@ -18,6 +18,7 @@ $languageStrings = array(
 	'LBL_RSNPRELEVEMENTS' => 'Prélèvement',
 	'LBL_COMMENTAIRE' => 'Commentaire',
 	'LBL_STATUS' => 'Etat',
+	'LBL_PRINT_REJET_PRELVNT' => 'Imprimer le courrier de rejet',
 );
 
 ?>

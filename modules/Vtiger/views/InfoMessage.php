@@ -3,7 +3,7 @@
  * ED151106
  *
  * exemple :			
-	$request->set('message', 'Aucun Žlement ˆ imprimer.');
+	$request->set('message', 'Aucun élément ˆ imprimer.');
 	$viewModel = new Vtiger_InfoMessage_View();
 	$viewModel->preProcess($request);
 	$viewModel->process($request);

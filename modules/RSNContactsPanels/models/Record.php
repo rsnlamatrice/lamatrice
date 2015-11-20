@@ -363,17 +363,21 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 	/** ED150507
 	 * Function returns query execution result widget
 	 * Replaces question mark with param value
+	 * @param $paramsValues : values to insert in query
 	 * @return <string>
 	 */
-	function getExecutionSQLWithIntegratedParams(){
+	function getExecutionSQLWithIntegratedParams($paramsValues = false){
 		$params = array();
 		$paramsDetails = array();
 		$sql = $this->getExecutionSQL($params, $paramsDetails);
 		if(!$sql)
 			return $sql;
 		for($i = 0; $i < count($params); $i++){
-			// replace /*[[operator xxx]]*/ ? with /*[[operator xxx]]*/ 'value'
-			$sql = preg_replace('/(\/\*\[\[.*'.preg_quote($paramsDetails[$i]['name']) . '.*\]\]\*\/\s)\?/'
+			$paramName = $paramsDetails[$i]['name'];
+			if(is_array($paramsValues) && array_key_exists($paramName, $paramsValues))
+				$params[$i] = $paramsValues[$paramName];
+			// replace /*[[operator xxx]]*/ [operator] ? with /*[[operator xxx]]*/ 'value'
+			$sql = preg_replace('/(\/\*\[\[.*'.preg_quote($paramName) . '[^\]]*\]\]\*\/\s[^?]*)\?/'
 					    , '$1\'' . str_replace('\'', '\\\'', $params[$i]) . '\''
 					    , $sql);
 		}
@@ -443,7 +447,29 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		return $relationListView->getEntries($pagingModel);
 	}
 	
+	/**
+	 * Liste des variables présentées comme des field models
+	 *
+	 */
+	public function getVariablesRecordModels(){
+		$existingVariables = $this->getModule()->getRelatedPanelVariables($this);
+		return $existingVariables;
+	}
 	
+	///**
+	// * Liste des variables présentées comme des field models
+	// *
+	// */
+	//public function getVariablesAsFields(){
+	//	$existingVariables = $this->getModule()->getRelatedPanelVariables($this);
+	//	$fields = array();
+	//	foreach($existingVariables as $variable){
+	//		$fields[$variable->getId] = $variable->getQueryField($variable->getName());
+	//	}
+	//	var_dump($fields);
+	//	die();
+	//	return $fields;
+	//}
 
 	/**
 	 * Function to get List of RSNContactsPanels records

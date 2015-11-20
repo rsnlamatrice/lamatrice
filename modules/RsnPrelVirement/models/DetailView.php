@@ -1,14 +1,9 @@
 <?php
 /*+***********************************************************************************
- * The contents of this file are subject to the vtiger CRM Public License Version 1.0
- * ("License"); You may not use this file except in compliance with the License
- * The Original Code is:  vtiger CRM Open Source
- * The Initial Developer of the Original Code is vtiger.
- * Portions created by vtiger are Copyright (C) vtiger.
- * All Rights Reserved.
+ * ED151120
  *************************************************************************************/
 
-class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
+class RsnPrelVirement_DetailView_Model extends Vtiger_DetailView_Model {
 
 	/**
 	 * Function to get the detail view links (links and widgets)
@@ -19,116 +14,21 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 	 */
 	public function getDetailViewLinks($linkParams, $countRelatedEntity = false) {
 		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
-		$emailModuleModel = Vtiger_Module_Model::getInstance('Emails');
 		$recordModel = $this->getRecord();
 
 		$linkModelList = parent::getDetailViewLinks($linkParams, $countRelatedEntity);
-
-		if($currentUserModel->hasModulePermission($emailModuleModel->getId())) {
-			$basicActionLink = array(
-				'linktype' => 'DETAILVIEWBASIC',
-				'linklabel' => 'LBL_SEND_EMAIL',
-				'linkurl' => 'javascript:Vtiger_Detail_Js.triggerSendEmail("index.php?module='.$this->getModule()->getName().
-								'&view=MassActionAjax&mode=showComposeEmailForm&step=step1","Emails");',
-				'linkicon' => ''
-			);
-			$linkModelList['DETAILVIEWBASIC'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
-		}
-
-		//TODO: update the database so that these separate handlings are not required
-		$index=0;
-		foreach($linkModelList['DETAILVIEW'] as $link) {
-			if($link->linklabel == 'View History' || $link->linklabel == 'Send SMS') {
-				unset($linkModelList['DETAILVIEW'][$index]);
-			} else if($link->linklabel == 'LBL_SHOW_ACCOUNT_HIERARCHY') {
-				$linkURL = 'index.php?module=Accounts&view=AccountHierarchy&record='.$recordModel->getId();
-				$link->linkurl = 'javascript:Accounts_Detail_Js.triggerAccountHierarchy("'.$linkURL.'");';
-				unset($linkModelList['DETAILVIEW'][$index]);
-				$linkModelList['DETAILVIEW'][$index] = $link;
-			}
-			$index++;
-		}
-		
-		$CalendarActionLinks = array();
-		$CalendarModuleModel = Vtiger_Module_Model::getInstance('Calendar');
-		if($currentUserModel->hasModuleActionPermission($CalendarModuleModel->getId(), 'EditView')) {
-			$CalendarActionLinks[] = array(
-					'linktype' => 'DETAILVIEW',
-					'linklabel' => 'LBL_ADD_EVENT',
-					'linkurl' => $recordModel->getCreateEventUrl(),
-					'linkicon' => ''
-			);
-
-			$CalendarActionLinks[] = array(
-					'linktype' => 'DETAILVIEW',
-					'linklabel' => 'LBL_ADD_TASK',
-					'linkurl' => $recordModel->getCreateTaskUrl(),
-					'linkicon' => ''
-			);
-		}
-
-		$SMSNotifierModuleModel = Vtiger_Module_Model::getInstance('SMSNotifier');
-		if($currentUserModel->hasModulePermission($SMSNotifierModuleModel->getId())) {
-			$basicActionLink = array(
-				'linktype' => 'DETAILVIEWBASIC',
-				'linklabel' => 'LBL_SEND_SMS',
-				'linkurl' => 'javascript:Vtiger_Detail_Js.triggerSendSms("index.php?module='.$this->getModule()->getName().
-								'&view=MassActionAjax&mode=showSendSMSForm","SMSNotifier");',
-				'linkicon' => ''
-			);
-			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
-		}
-		
 		$moduleModel = $this->getModule();
 		if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
 			//ED151105 impression du reçu fiscal
 			$massActionLink = array(
 				'linktype' => 'DETAILVIEW',
-				'linklabel' => 'LBL_PRINT_RECU_FISCAL',
-				'linkurl' => 'javascript:Vtiger_Detail_Js.triggerDetailViewAction("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=printRecuFiscal")',
+				'linklabel' => 'LBL_PRINT_REJET_PRELVNT',
+				'linkurl' => $recordModel->getExportRejetPrelvntPDFURL(),
 				'linkicon' => ''
 			);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
-			
-			if($currentUserModel->isAdminUser()){
-				$massActionLink = array(
-					'linktype' => 'LISTVIEWMASSACTION',
-					'linklabel' => 'LBL_TRANSFER_OWNERSHIP',
-					'linkurl' => 'javascript:Vtiger_Detail_Js.triggerTransferOwnership("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=transferOwnership")',
-					'linkicon' => ''
-				);
-				$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
-			}
 		}
 
-		foreach($CalendarActionLinks as $basicLink) {
-			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicLink);
-		}
-
-		//ED150211
-		//Moves Comments widget before Modifications
-		$modCommentsLink = false;
-		for($nLink = 0; $nLink < count($linkModelList['DETAILVIEWWIDGET']); $nLink++){
-			$link = $linkModelList['DETAILVIEWWIDGET'][$nLink];
-			switch($link->getLabel()){
-			case "ModComments" :
-				$modCommentsLink = $link;
-				unset($linkModelList['DETAILVIEWWIDGET'][$nLink]);
-				break;
-			case "LBL_UPDATES" :
-				if($modCommentsLink){
-					array_splice( $linkModelList['DETAILVIEWWIDGET'], $nLink, 0, array($modCommentsLink));
-					++$nLink;
-					$modCommentsLink = false;
-				}
-				break;
-			default:
-				break;
-			}
-		}
-		if($modCommentsLink){
-			$linkModelList['DETAILVIEWWIDGET'][] = $modCommentsLink;
-		}
 		return $linkModelList;
 	}
 
@@ -169,7 +69,7 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 			
 			$widgets[] = array(
 					'linktype' => 'DETAILVIEWWIDGET',
-					'linklabel' => 'LBL_RELATED_CONTACTS',
+					'linklabel' => 'Contacts',
 					'linkName'	=> $contactsInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 							'&relatedModule=Contacts&mode=showRelatedRecords&page=1&limit=15',

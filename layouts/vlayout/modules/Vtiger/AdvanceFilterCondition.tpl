@@ -68,24 +68,29 @@
 			{assign var=SELECTED_VIEW value=$CONDITION_INFO['columnname']}
 			{assign var=SELECTED_VIEW_ESC value=htmlentities($SELECTED_VIEW)}
 			{foreach key=RELATED_NAME item=RELATED_VIEWS from=$RELATED_MODELS_VIEWS}
-				<optgroup label='[{vtranslate($RELATED_NAME, $SOURCE_MODULE)}]'>
+				{if $RELATED_NAME eq $SOURCE_MODULE}
+					{assign var=RELATION_LABEL value=vtranslate('LBL_RELATED_'|cat:strtoupper($RELATED_NAME), $SOURCE_MODULE)}
+				{else}
+					{assign var=RELATION_LABEL value=vtranslate($RELATED_NAME, $SOURCE_MODULE)}
+				{/if}
+				<optgroup label='[{$RELATION_LABEL}]'>
 				{* each view of module *}
 				{foreach key=VIEW_IDX item=RELATED_VIEW from=$RELATED_VIEWS}
 					{if $RELATED_VIEW['id'] eq $RECORD_ID}{break}{/if}
 					{assign var=RELATED_FIELDS value=$RELATED_VIEW['fields']}
 					{assign var=VIEW_ID value=$RELATED_VIEW['id']}
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
-					{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
-					<option value="{$COLUMN_NAME}" data-fieldtype="VW" data-field-name="(exists)"
-						{if $COLUMN_NAME eq $SELECTED_VIEW
-						|| $COLUMN_NAME eq $SELECTED_VIEW_ESC}
+					{assign var=CONDITION_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
+					<option value="{$CONDITION_NAME}" data-fieldtype="VW" data-field-name="(exists)"
+						{if $CONDITION_NAME eq $SELECTED_VIEW
+						|| $CONDITION_NAME eq $SELECTED_VIEW_ESC}
 							{assign var=FIELD_TYPE value='VW'}
 							selected="selected"
 						{/if}
 						data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
 					{* translate *}
-					{assign var=COLUMN_NAME value="["|cat:vtranslate($RELATED_NAME, $SOURCE_MODULE)|cat:"] "|cat:vtranslate($VIEW_LABEL, $RELATED_NAME)}
-					>{$COLUMN_NAME}
+					{assign var=VIEW_LABEL value="["|cat:$RELATION_LABEL|cat:"] "|cat:vtranslate($VIEW_LABEL, $RELATED_NAME)}
+					>{$VIEW_LABEL}
 					</option>
 				{/foreach}
 				{* add relation fields *}
@@ -95,12 +100,12 @@
 					{assign var=VIEW_ID value=$RELATED_VIEW['id']}
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
 					{foreach key=FIELD_NAME item=FIELD_MODEL from=$RELATED_FIELDS}
-						{assign var=COLUMN_NAME value=$RELATED_NAME|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()}
-						{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()|cat:"]"}
+						{assign var=CONDITION_NAME value=$RELATED_NAME|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()}
+						{assign var=CONDITION_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()|cat:"]"}
 						{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfo()}
-						<option value="{$COLUMN_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$COLUMN_NAME}"
+						<option value="{$CONDITION_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$CONDITION_NAME}"
 							data-view="[{$RELATED_NAME}][{$VIEW_LABEL}]"
-							{if $COLUMN_NAME eq $CONDITION_INFO['columnname']}
+							{if $CONDITION_NAME eq $CONDITION_INFO['columnname']}
 								{assign var=FIELD_TYPE value=$FIELD_MODEL->getFieldType()}
 								{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
 								{if $FIELD_MODEL->getFieldDataType() == 'reference'}{$FIELD_TYPE='V'}{/if}
@@ -120,26 +125,45 @@
 			{* ED150507 - Contacts panels *}
 			{if isset($CONTACTS_PANELS)}
 				{assign var=RELATED_NAME value='RSNContactsPanels'}
-				<optgroup label='* {vtranslate($RELATED_NAME)} *'>
 				{* each panel *}
 				{foreach key=VIEW_IDX item=RECORD_MODEL from=$CONTACTS_PANELS}
-					{if $RECORD_MODEL->getId() eq $RECORD_ID}{break}{/if}
+					<optgroup label='* [Panel] {$RECORD_MODEL->getName()} *'>
 					{*assign var=RELATED_FIELDS value=$RECORD_MODEL->getFields()*}
 					{assign var=VIEW_ID value=$RECORD_MODEL->getId()}
 					{assign var=VIEW_LABEL value=$RECORD_MODEL->getName()}
-					{assign var=COLUMN_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
-					<option value="{$COLUMN_NAME}" data-fieldtype="PANEL" data-field-name="(exists)"
-						{if $COLUMN_NAME eq $CONDITION_INFO['columnname']}
+					{assign var=PANEL_CONDITION_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:"]"}
+					<option value="{$PANEL_CONDITION_NAME}" data-fieldtype="PANEL" data-field-name="(exists)"
+						{if $PANEL_CONDITION_NAME eq $CONDITION_INFO['columnname']}
 							{assign var=FIELD_TYPE value='VW'}
 							selected="selected"
 						{/if}
 						data-fieldinfo='{*Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))*}'
 					>
-					{assign var=COLUMN_NAME value=vtranslate($VIEW_LABEL, $RELATED_NAME)}
-					{$COLUMN_NAME}
+					[Panel] {vtranslate($VIEW_LABEL, $RELATED_NAME)}
 					</option>
+					{* variables du panel *}
+					{foreach item=VARIABLE from=$RECORD_MODEL->getVariablesRecordModels()}
+						{assign var=VARIABLE_ID value=$VARIABLE->getId()}
+						{assign var=VARIABLE_NAME value=$VARIABLE->getName()}
+						{assign var=VARIABLE_AS_FIELD value=$VARIABLE->get('fieldid')}
+						{assign var=VARIABLE_LABEL value=$VARIABLE->getName()}
+						{assign var=FIELD_MODEL value=$VARIABLE->getQueryField()}
+						{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfoForCustomView()}
+						{assign var=CONDITION_NAME value=$PANEL_CONDITION_NAME|cat:":"|cat:$VARIABLE_AS_FIELD|cat:":"|cat:$VARIABLE_ID|cat:":"|cat:$VARIABLE_NAME|cat:":"|cat:$FIELD_MODEL->get('typeofdata')}
+						<option value="{$CONDITION_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$VARIABLE_NAME}"
+							{if $CONDITION_NAME eq $CONDITION_INFO['columnname']}
+								{assign var=FIELD_TYPE value=$FIELD_MODEL->getFieldType()}
+								{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
+								{$FIELD_INFO['value'] = decode_html($CONDITION_INFO['value'])}
+								selected="selected"
+							{/if}
+							data-fieldinfo='{Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))}'
+						>
+						{$VARIABLE_LABEL}
+						</option>
+					{/foreach}
+					</optgroup>
 				{/foreach}
-				</optgroup>
 			{/if}
 			
 			{* ED151025 - Statistiques *}
@@ -149,15 +173,15 @@
 				{foreach key=STAT_ID item=STAT_DATA from=$RELATED_STATISTICS}
 					{assign var=RECORD_MODEL value=$STAT_DATA['recordModel']}
 					{assign var=STAT_LABEL value=$RECORD_MODEL->getName()}
-					<optgroup label='* {$STAT_LABEL} *'>
+					<optgroup label='* [Stat] {$STAT_LABEL} *'>
 					{foreach item=FIELD_MODEL from=$STAT_DATA['fields']}
 						{assign var=STATFIELD_ID value=$FIELD_MODEL->get('id')}
 						{assign var=STATFIELD_COLUMN_NAME value=$FIELD_MODEL->get('column')}
 						{assign var=STATFIELD_LABEL value=$FIELD_MODEL->get('label')}
-						{assign var=CV_COLUMN_NAME value="["|cat:$RELATED_MODULE_NAME|cat:":"|cat:$STATFIELD_COLUMN_NAME|cat:":"|cat:$STAT_ID|cat:":"|cat:$STATFIELD_ID|cat:"]"}
+						{assign var=CV_CONDITION_NAME value="["|cat:$RELATED_MODULE_NAME|cat:":"|cat:$STATFIELD_COLUMN_NAME|cat:":"|cat:$STAT_ID|cat:":"|cat:$STATFIELD_ID|cat:":"|cat:$FIELD_MODEL->get('typeofdata')|cat:"]"}
 						{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfoForCustomView()}
-						<option value="{$CV_COLUMN_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$STATFIELD_COLUMN_NAME}"
-							{if $CV_COLUMN_NAME eq $CONDITION_INFO['columnname']}
+						<option value="{$CV_CONDITION_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$STATFIELD_COLUMN_NAME}"
+							{if $CV_CONDITION_NAME eq $CONDITION_INFO['columnname']}
 								{assign var=FIELD_TYPE value=$FIELD_MODEL->getFieldType()}
 								{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
 								{$FIELD_INFO['value'] = decode_html($CONDITION_INFO['value'])}

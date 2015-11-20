@@ -85,11 +85,13 @@ class Vtiger_PDF_LetterToAccountContentViewer extends Vtiger_PDF_ContentViewer {
 			
 			$rowHeight = $pdf->GetStringHeight("X", $contentFrame->w);
 			$contentString = $model->get('text');
+			$isNewParagraph = true;
 			if($contentString){
 				$alignment = 'J';
 				$isHtml = false;//isHtml = true ne permet pas le padding
 				//$contentString = str_replace("\n", '<br>', htmlspecialchars($contentString));
 				//bugg de "ê" précédé d'un espace si passage à la ligne avant le "ê"
+				//La justification est foireuse pour la tabulation de la 1ère ligne
 				$contentStrings = preg_split('/\r?\n/', $contentString);
 				for($i = 0; $i < count($contentStrings); $i++){
 					$contentString = $contentStrings[$i];
@@ -98,9 +100,15 @@ class Vtiger_PDF_LetterToAccountContentViewer extends Vtiger_PDF_ContentViewer {
 						$contentLineY += $rowHeight / 2;
 						continue;
 					}
-					if($alignment === 'J') //la justification ne doit pas se faire sur la dernière ligne du paragraphe
+					if($alignment === 'J'){
+						//hack : la justification ne doit pas se faire sur la dernière ligne du paragraphe
 						$contentString .= "\n ";
 						
+						//TODO dans libraries\tcpdf\tcpdf.php, function Write()
+						//La justification est foireuse pour la tabulation de la 1ère ligne du paragraphe (largeur calculée comme tout espace du texte, j'imagine)
+						//Les tabulations ont été remplacée par 6 espaces !
+						//$contentString = "{t}". $contentString;
+					}
 					$pdf->MultiCell($cellWidth, $contentHeight, $contentString, 0, $alignment, 0, 1, $contentLineX, $contentLineY,/*$reseth=*/true, /*$stretch=*/0, $isHtml);
 					$contentLineY = $pdf->GetY();
 					if($alignment === 'J') //du fait de l'ajout d'une ligne vide ci-dessus
