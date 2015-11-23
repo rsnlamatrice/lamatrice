@@ -13,7 +13,7 @@ define('_4D_TYPEABONNE_ABOGROUPE', '4');
 define('TYPEABONNE_ABOGROUPE', 'Abonnement groupé');
 
 /* Phase de migration
- * Importation des prelevements Web depuis le fichier provenant de 4D
+ * Importation des contacts Web depuis le fichier provenant de 4D
  */
 class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_ImportFromFile_View {
         
@@ -327,7 +327,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	}
 
 	//Mise à jour des données du record model nouvellement créé à partir des données d'importation
-	private function updateContactRecordModelFromData($record, $contactsData){
+	protected function updateContactRecordModelFromData($record, $contactsData){
 		
 		$fieldsMapping = $this->getContactsFieldsMapping();
 		foreach($contactsData[0] as $fieldName => $value)
