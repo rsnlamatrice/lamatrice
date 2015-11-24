@@ -27,7 +27,15 @@ Class CustomView_EditAjax_View extends Vtiger_IndexAjax_View {
 			$customViewModel->setModule($moduleName);
 			$viewer->assign('MODE', '');
 		}
-		$viewer->assign('ADVANCE_CRITERIA', $customViewModel->transformToNewAdvancedFilter());
+		
+		
+		$advanceCriteria = $customViewModel->transformToNewAdvancedFilter();
+		if(!array_key_exists('1', $advanceCriteria))
+			$advanceCriteria['1'] = array();
+		if(!array_key_exists('2', $advanceCriteria))
+			$advanceCriteria['2'] = array();
+		
+		$viewer->assign('ADVANCE_CRITERIA', $advanceCriteria);
 		$viewer->assign('CURRENTDATE', date('Y-n-j'));
 		$viewer->assign('DATE_FILTERS', Vtiger_Field_Model::getDateFilterTypes());
 		

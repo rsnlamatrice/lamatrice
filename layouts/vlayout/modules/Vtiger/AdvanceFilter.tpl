@@ -10,6 +10,7 @@
  ********************************************************************************/
 -->*}
 {strip}
+	
 	{assign var=ALL_CONDITION_CRITERIA value=$ADVANCE_CRITERIA[1] }
 	{*assign var=ANY_CONDITION_CRITERIA value=$ADVANCE_CRITERIA[2] *}
 
@@ -20,10 +21,6 @@
 	{*if empty($ANY_CONDITION_CRITERIA) }
 		{assign var=ANY_CONDITION_CRITERIA value=array()}
 	{/if*}
-	{if count($ADVANCE_CRITERIA) === 1}
-		{assign var=tmp value=array_push($ADVANCE_CRITERIA, array())}
-	{/if}
-
 
 <div class="filterContainer">
 	<input type="hidden" name="date_filters" data-value='{Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($DATE_FILTERS))}' />
