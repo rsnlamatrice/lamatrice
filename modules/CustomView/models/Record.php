@@ -1098,7 +1098,8 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 	function transformToNewAdvancedFilter() {
 		$standardFilter = $this->transformStandardFilter();
 		$advancedFilter = $this->getAdvancedCriteria();
-		$allGroupColumns = $anyGroupColumns = array();
+		$allGroupColumns = array();
+		$groupColumnsBlocks = array();
 		foreach($advancedFilter as $index=>$group) {
 			$columns = $group['columns'];
 			$and = $or = 0;
@@ -1114,12 +1115,16 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
                 if($and == count($columns)-1 && count($columns) != 1) {
 					$allGroupColumns = array_merge($allGroupColumns, $group['columns']);
                 } else {
-					$anyGroupColumns = array_merge($anyGroupColumns, $group['columns']);
+					if(!$groupColumnsBlocks[$index])
+						$groupColumnsBlocks[$index] = array();
+					$groupColumnsBlocks[$index] = array_merge($groupColumnsBlocks[$index], $group['columns']);
                 }
             } else if($block == 'and'  || $index == 1) {
                 $allGroupColumns = array_merge($allGroupColumns, $group['columns']);
             } else {
-                $anyGroupColumns = array_merge($anyGroupColumns, $group['columns']);
+                if(!$groupColumnsBlocks[$index])
+					$groupColumnsBlocks[$index] = array();
+				$groupColumnsBlocks[$index] = array_merge($groupColumnsBlocks[$index], $group['columns']);
             }
 		}
 		if($standardFilter){
@@ -1127,7 +1132,8 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		}
 		$transformedAdvancedCondition = array();
 		$transformedAdvancedCondition[1] = array('columns' => $allGroupColumns, 'condition' => 'and');
-		$transformedAdvancedCondition[2] = array('columns' => $anyGroupColumns, 'condition' => '');
+		foreach($groupColumnsBlocks as $index => $groupColumnsBlock)
+			$transformedAdvancedCondition[$index] = array('columns' => $groupColumnsBlock, 'condition' => '');
 
 		return $transformedAdvancedCondition;
 	}
