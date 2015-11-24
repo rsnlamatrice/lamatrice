@@ -1207,6 +1207,12 @@ class QueryGenerator {
 						// We are checking for zero since many reference fields will be set to 0 if it doest not have any value
 						$fieldSql .= "$fieldGlue $tableName.$columnName $valueSql OR $tableName.$columnName = '0'";
 						$fieldGlue = ' OR';
+					}elseif($conditionInfo['operator'] == 'ny'){
+						$columnName = $field->getColumnName();
+						$tableName = $field->getTableName();
+						// We are checking for zero since many reference fields will be set to 0 if it doest not have any value
+						$fieldSql .= "$fieldGlue NOT($tableName.$columnName $valueSql OR $tableName.$columnName = '0')";
+						$fieldGlue = ' OR';
 					}else{
 						$moduleList = $this->referenceFieldInfoList[$fieldName];
 						foreach($moduleList as $module) {
@@ -1479,7 +1485,10 @@ class QueryGenerator {
 			if(!$this->isStringType($fieldDataType)) {
 				$value = trim($value);
 			}
-			if ($operator == 'empty' || $operator == 'y') {
+			if ($operator == 'empty' || $operator == 'y' || $operator == 'ny') {
+				if($operator == 'ny')
+					$sql[] = sprintf("IS NOT NULL AND %s <> ''", $this->getSQLColumn($field->getFieldName()));
+				else
 				$sql[] = sprintf("IS NULL OR %s = ''", $this->getSQLColumn($field->getFieldName()));
 				continue;
 			}

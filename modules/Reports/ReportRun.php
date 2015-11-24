@@ -1030,6 +1030,11 @@ class ReportRun extends CRMEntity
 								$selectedfields[0]='vtiger_inventoryproductrel'.$moduleName;
 							}
 							$fieldvalue = "(".$selectedfields[0].".".$selectedfields[1]." IS NULL OR ".$selectedfields[0].".".$selectedfields[1]." = '')";
+						} elseif($comparator == 'ny') {
+							if($selectedfields[0] == 'vtiger_inventoryproductrel') {
+								$selectedfields[0]='vtiger_inventoryproductrel'.$moduleName;
+							}
+							$fieldvalue = "(".$selectedfields[0].".".$selectedfields[1]." IS NOT NULL AND ".$selectedfields[0].".".$selectedfields[1]." != '')";
 						} elseif($selectedfields[0] == 'vtiger_inventoryproductrel' ) {
 							if($selectedfields[1] == 'productid'){
 									$fieldvalue = "vtiger_products$moduleName.productname ".$this->getAdvComparator($comparator,trim($value),$datatype);

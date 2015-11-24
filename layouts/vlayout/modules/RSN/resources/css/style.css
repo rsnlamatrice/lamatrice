@@ -462,12 +462,9 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
 #CustomView .conditionRow.sub-field span:first-of-type .chzn-container {
   margin-left: 8px;
 }
-#CustomView .anyConditionContainer .deleteConditionsGroup {
-  display: none;
-}
-#CustomView .anyConditionContainer ~ .anyConditionContainer .deleteConditionsGroup {
-  display: inherit;
-}
+
+#CustomView .anyConditionContainer .deleteConditionsGroup { display: none; }
+#CustomView .anyConditionContainer ~ .anyConditionContainer .deleteConditionsGroup { display: inherit; }
 #CustomView .addConditionsGroup button, #CustomView .deleteConditionsGroup button {
   padding: 2px 4px;
   margin-top: 10px;
