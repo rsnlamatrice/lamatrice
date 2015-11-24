@@ -293,7 +293,7 @@ class QueryGenerator {
 			//var_dump('parseAdvFilterList', $filtercolumns);
 			//echo_callstack();
 			if(count($filtercolumns) > 0) {
-				$this->startGroup('');
+				$this->startGroup($groupindex == 1 ? '' : "/* group $groupindex */");
 				$skipIndexes = array();
 				
 				//1er passage pour parser
@@ -1392,7 +1392,7 @@ class QueryGenerator {
 		$glue = false;
 		foreach($relationFilters as $relationFilter){
 			if($relationTableName !== $relationFilter['table']){
-				echo "<pre>ERREUR in ".__FILE__.'::parseAdvFilterList() : $relationTableName !== $relationFilter[\'table\']'.
+				echo "<pre>ERREUR in ".__FILE__.'::getRelationFiltersSQLWhere() : $relationTableName !== $relationFilter[\'table\']'.
 				' ('.$relationTableName.' !== '.$relationFilter['table']
 				."</pre>";
 				continue;
