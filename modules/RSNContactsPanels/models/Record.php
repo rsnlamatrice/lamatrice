@@ -184,27 +184,34 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		if(is_array($paramsPriorValues)){
 			$followParamsPriorValues = array();
 			$thisInstanceName = $this->get('instanceName');
-			foreach($paramsPriorValues as $paramPriorValue){
+			//$paramsPriorValues est un array( array('name'=>name, 'value'=>value), ... ) ou array(name => value, ...)
+			foreach($paramsPriorValues as $paramName => $paramPriorInfos){
+				if(is_array($paramPriorValue) && $paramPriorValue['name']){
+					$paramName = $paramPriorValue['name'];
+					$paramPriorValue = $paramPriorInfos['value'];
+				}
+				else
+					$paramPriorValue = $paramPriorInfos;
 				//le nom de la variable contient un /
-				if(strpos($paramPriorValue['name'], '/')){
+				if(strpos($paramName, '/')){
 					//Destiné à un sous-panel
 					$followParamPriorValue = array_merge(array(), $paramPriorValue, array(
 						'path' => $thisPath,
-						'parent' => substr($paramPriorValue['name'], 0, strpos($paramPriorValue['name'], '/')),
-						'name' => substr($paramPriorValue['name'], strpos($paramPriorValue['name'], '/')+1),
+						'parent' => substr($paramName, 0, strpos($paramName, '/')),
+						'name' => substr($paramName, strpos($paramName, '/')+1),
 					));
 					$followParamsPriorValues[] = $followParamPriorValue;
 				}
 				//le nom de la variable est connu
-				elseif(isset($variables[$paramPriorValue['name']])){
-					$variable = $variables[$paramPriorValue['name']];
+				elseif(isset($variables[$paramName])){
+					$variable = $variables[$paramName];
 					//valeur précédente
-					if(!isset($variablesPrevValues[$paramPriorValue['name']]))
-						$variablesPrevValues[$paramPriorValue['name']] = $variable->get('defaultvalue'); 
+					if(!isset($variablesPrevValues[$paramName]))
+						$variablesPrevValues[$paramName] = $variable->get('defaultvalue'); 
 					//affectation de la valeur pour son usage ci-dessous
 					$variable
 						//valeur à utiliser
-						->set('defaultvalue', $paramPriorValue['value'])
+						->set('defaultvalue', $paramPriorValue)
 						// Chemin des appels
 						//TODO path ne fonctionne pas, l'objet est partagé, c'est donc purement cumulatif
 						->set('path', //utilisé pour le commentaire
@@ -214,7 +221,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 					//var_dump($paramPriorValue->name, $paramPriorValue->value);
 				}
 				else
-					var_dump('<br><code># paramètre de panel "' . $paramPriorValue['name'] . '" introuvable #<code><br>');
+					var_dump('<br><code># paramètre de panel "' . $paramName . '" introuvable #<code><br>');
 			}
 		}
 		//var_dump($variablesPrevValues);
@@ -255,7 +262,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			$comment = ' /*[[' . str_replace('?', '!', $queryVariable['operation'] . ' ' . $variable->get('path') . $variableName) . ']]*/ ';
 			
 			//TODO le regex de fin s'arrête dès le 1er ] existant : faire pour ]]
-			//$regex_end = '\s*(\|[^\]|]*)*\]\]/'; cf plus haut
+			//$regex_end = '\s*(\|[^\]]*)*\]\]/'; cf plus haut
 			
 			//selon opération
 			switch(strtoupper($queryVariable['operation'])){
@@ -349,7 +356,8 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			}
 			
 		}
-		//var_dump($sql, $params);
+		//echo("<pre>$sql</pre>");
+		//var_dump($params);
 		
 		// rétablit les valeurs d'orgine aux variables
 		foreach($variablesPrevValues as $variableName => $variablePrevValue){
@@ -371,6 +379,10 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		$params = array();
 		$paramsDetails = array();
 		$sql = $this->getExecutionSQL($params, $paramsDetails);
+		if(count($params) !== count($paramsDetails)){
+			echo "<br><br><br><br><br>getExecutionSQLWithIntegratedParams : Les tableaux sont de tailles différentes";
+			var_dump($params, $paramsDetails);
+		}
 		if(!$sql)
 			return $sql;
 		for($i = 0; $i < count($params); $i++){

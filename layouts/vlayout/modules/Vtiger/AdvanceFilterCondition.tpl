@@ -197,6 +197,7 @@
 			{/if}
 		</select>
 	</span>
+	{if false}{*ED151122 je ne vois pas à quoi ça sert*}
 	<span class="hide">
 		<select class="relatedviews-fields">
 			{* ED150212 - related modules views
@@ -269,6 +270,7 @@
 			{/if}
 		</select>
 	</span>
+	{/if}
 	<span class="span3">
 		{if empty($NOCHOSEN) && !$FIELD_TYPE}<span class="ui-icon ui-icon-alert"></span>{/if}{*ED151021*}
 		<select class="{if empty($NOCHOSEN)}chzn-select{/if} row-fluid" name="comparator" value="{$CONDITION_INFO['comparator']}">

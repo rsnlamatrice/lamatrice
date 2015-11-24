@@ -826,6 +826,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * @return array : the formated data of the contact.
 	 */
 	function getContactValues($invoiceInformations) {
+		$this->erreurSaisieCodeClient($invoiceInformations);
 		$contactMapping = array(
 			'reffiche' 		=> $invoiceInformations[$this->columnName_indexes['codeclient']],
 			'lastname'		=> $invoiceInformations[$this->columnName_indexes['nomclient']],
@@ -881,7 +882,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * @return array : the formated data of the invoice.
 	 */
 	function getInvoiceValues($invoice) {
-	//TODO end implementation of this method
+		$this->erreurSaisieCodeClient($invoiceInformations);
 		$invoiceValues = array();
 		$invoiceInformations = $invoice['invoiceInformations'];
 		$date = $this->getMySQLDate($invoiceInformations[$this->columnName_indexes['datepiece']]);
@@ -937,6 +938,141 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 		//var_dump($invoiceValues);
 		return $invoiceValues;
+	}
+	
+	//erreurs trouvés dans les logs
+	function erreurSaisieCodeClient(&$data){
+		switch($data[$this->columnName_indexes['codeclient']]){
+		case '1552052':
+		case '2416112':
+		case '2146702':
+		case '1928872':
+		case '1905072':
+		case '2396042':
+		case '2396032':
+		case '2396052':
+		case '1497532':
+		case '1921532':
+		case '2178562':
+		case '2047752':
+		case '407952':
+		case '1910802':
+			$data[$this->columnName_indexes['codeclient']] = substr($data[$this->columnName_indexes['codeclient']], 0, 6);
+			break;
+		case '214685':
+			$data[$this->columnName_indexes['codeclient']] = '241685';
+			break;
+		case '193368':
+			$data[$this->columnName_indexes['codeclient']] = '198368';
+			break;
+		case '420792':
+			$data[$this->columnName_indexes['codeclient']] = '42079';
+			break;
+		case '240134':
+			$data[$this->columnName_indexes['codeclient']] = '215871';
+			break;
+		case '240166':
+			$data[$this->columnName_indexes['codeclient']] = '11567';
+			break;
+		case '214103':
+			$data[$this->columnName_indexes['codeclient']] = '241103';
+			break;
+		case '211289':
+			$data[$this->columnName_indexes['codeclient']] = '48803';
+			break;
+		case '211091':
+			$data[$this->columnName_indexes['codeclient']] = '110296';
+			break;
+		case '80078':
+			$data[$this->columnName_indexes['codeclient']] = '29106';
+			break;
+		case '208764':
+			$data[$this->columnName_indexes['codeclient']] = '85092';
+			break;
+		case '202278':
+			$data[$this->columnName_indexes['codeclient']] = '19270';
+			break;
+		case '161271':
+			$data[$this->columnName_indexes['codeclient']] = '139861';
+			break;
+		case '210536':
+			$data[$this->columnName_indexes['codeclient']] = '26968';
+			break;
+		case '201652':
+			$data[$this->columnName_indexes['codeclient']] = '166435';
+			break;
+		case '212237':
+			$data[$this->columnName_indexes['codeclient']] = '12308';
+			break;
+		case '211232':
+			$data[$this->columnName_indexes['codeclient']] = '198866';
+			break;
+		case '201515':
+			$data[$this->columnName_indexes['codeclient']] = '108234';
+			break;
+		case '205873':
+			$data[$this->columnName_indexes['codeclient']] = '66480';
+			break;
+		case '198131':
+			$data[$this->columnName_indexes['codeclient']] = '154846';
+			break;
+		case '208875':
+			$data[$this->columnName_indexes['codeclient']] = '40677';
+			break;
+		case '200142':
+			$data[$this->columnName_indexes['codeclient']] = '48017';
+			break;
+		}
+		case '4658L':
+		case '240081':
+		case '240165':
+		case '213920':
+		case '164808':
+		case '197497':
+		case '186551':
+		case '172848':
+		case '150215':
+		case '127982':
+		case '210314':
+		case '199297':
+		case '208250':
+		case '196423':
+		case '168768':
+		case '888888':
+		case '144438':
+		case '16276':
+		case '200508':
+		case '30318':
+		case '44318':
+		case '40730':
+		case '198542':
+		case '184092':
+		case '16501':
+		case '197707':
+		case '17237':
+		case '139619':
+		case '197001':
+		case '2150192':
+		case '208036':
+		case '195850':
+		case '186669':
+		case '197024':
+		case '215671':
+		case '18293':
+		case '202718':
+		case '198085':
+		case '195790':
+		case '208142':
+		case '195999':
+		case '25620':
+		case '156550':
+		case '21707':
+		case '73377':
+		case '217436':
+		case '218879':
+		case '1867362':
+			$data[$this->columnName_indexes['codeclient']] = '999999';
+			break;
 	}
 
 	function getModePaiement($paiementpropose, &$receivedcomments){

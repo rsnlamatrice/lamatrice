@@ -1219,7 +1219,13 @@ var app = {
 	},
 
 	htmlDecode : function(value) {
-		if (value) {
+		//ED151124 Array
+		if (typeof value === 'object') {
+			for(var k in value)
+				value[k] = this.htmlDecode(value[k]);
+			return value;
+		}
+		else if (value) {
 			return $('<div />').html(value).text();
 		} else {
 			return '';

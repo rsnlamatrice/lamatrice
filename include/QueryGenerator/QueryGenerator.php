@@ -391,8 +391,8 @@ class QueryGenerator {
 									}
 									
 									$relatedSql  = $panelRecord->getExecutionSQLWithIntegratedParams($paramsValues);
-									//var_dump('panel $relatedSql', $paramsValues);
-									//echo "<pre>$relatedSql</pre>";
+									var_dump('panel $relatedSql', $paramsValues);
+									echo "<pre>$relatedSql</pre>";
 								}
 								else { //"normal" relation
 									foreach($relationModels as $model)
