@@ -649,6 +649,7 @@ $languageStrings = array(
 	'LBL_VIEW_DETAILS' 		=> 'Afficher les détails',
         'LBL_to' => 'à' ,
 	'LBL_IS_EMPTY'=> '(est vide)',
+	'LBL_IS_NOT_EMPTY'=> '(non vide)',
         
         
 	'LBL_NOTEPAD' => 'Post-it',

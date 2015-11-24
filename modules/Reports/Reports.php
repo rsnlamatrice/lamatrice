@@ -38,6 +38,7 @@ $adv_filter_options = array("e"=>"equals",
 			    "a"=>"after",
 			    "b"=>"before",
 				"y"=>"is empty",
+				"ny"=>"is not empty",
 			   );
 
 //$report_modules = Array('Faq','Rss','Portal','Recyclebin','Emails','Reports','Dashboard','Home','Activities'

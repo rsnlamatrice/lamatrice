@@ -559,6 +559,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		// re-enable if condition element is chosen.
 		switch(conditionSelectElement.val()){
 		case 'y' :
+		case 'ny' :
 		case 'vwi' :
 		case 'vwx' :
 			fieldUiHolder.hide();
