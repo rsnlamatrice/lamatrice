@@ -65,6 +65,89 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		this.registerEvents();
 		this.initializeOperationMappingDetails();
 		this.loadFieldSpecificUiForAll();
+		this.initializeAllConditionRows();
+	},
+	
+	/** ED151122
+	 * Les données ne sont plus chargées dans le template mais dupliquées côté client
+	 *
+	 */
+	initializeAllConditionRows : function(){
+		var thisInstance = this;
+		this.getFilterContainer().find('.conditionGroup').each(function(){
+			var $conditionGroup = $(this)
+			, $template = $conditionGroup.find('.conditionRow-template .conditionRow')
+			;
+			$conditionGroup.find('.conditionList .conditionRow.js-handled').each(function(){
+				thisInstance.addNewCondition($conditionGroup);
+				var $newRow = $conditionGroup.find('.conditionList .conditionRow:last')
+				, $selectColumnName = $newRow.find('select.chzn-select[name="columnname"]')
+				, $selectComparator = $newRow.find('select.chzn-select[name="comparator"]')
+				, conditionInfo = this.getAttribute('data-conditionInfo');
+				conditionInfo = eval('('+conditionInfo+')');
+				$selectColumnName.val(conditionInfo['columnname']).trigger("liszt:updated");
+				$selectColumnName.trigger('change');
+				//pour les boolean, le comparateur est masqué, c'est la valeur qui définit "est (in)actif"
+				$selectComparator.val(conditionInfo['comparator']).trigger("liszt:updated");
+				$selectComparator.trigger('change');
+				thisInstance.setRowConditionValue($newRow, conditionInfo['value']);
+				$(this).remove();
+			});
+		});
+	},
+	
+	//Affectation de la valeur du filtre
+	setRowConditionValue : function(rowElement, value){
+		var thisInstance = this;
+		var fieldSelectElement = jQuery('[name="columnname"]', rowElement);
+		var valueSelectElement = jQuery('[data-value="value"]',rowElement);
+		//To not send empty fields to server
+		if(thisInstance.isEmptyFieldSelected(fieldSelectElement)) {
+			fieldSelectElement.parent().next().prepend('<span class="ui-icon ui-icon-alert"></span>');
+			return true;
+		}
+		//var fieldList = new Array('columnname', 'comparator', 'value', 'column_condition');
+
+		var fieldDataInfo = fieldSelectElement.find('option:selected').data('fieldinfo');
+		var fieldType = fieldDataInfo.type;
+		
+		if(fieldType == 'owner'){
+			if(valueSelectElement.is('select')){
+				var selectedOption = valueSelectElement.find('option[value="' + value + '"]');
+				
+				 
+			} else if(valueSelectElement.is('input')) {
+				valueSelectElement.val(value);
+			} else {	
+				jQuery('[name="value"]', rowElement).val(value);
+			}
+		} else if (fieldType == 'picklist' || fieldType == 'multipicklist'
+		|| fieldType == 'buttonset') { //ED150225
+			if(valueSelectElement.is('input')){
+				if(rowValues.comparator == 'ct' || rowValues.comparator == 'kt') {
+					valueSelectElement.val(value);
+				}
+				else {
+					valueSelectElement.val(value);//TODO picklist
+				}
+			} else if(valueSelectElement.is('select') && fieldType == 'picklist'){
+				//thisInstance.setMultiPickListValues(valueSelectElement, value.split(','));
+				valueSelectElement.val(app.htmlDecode(value).split(','));
+			} else if(valueSelectElement.is('select') && fieldType == 'multipicklist'){
+				//thisInstance.setMultiPickListValues(valueSelectElement, value.split(' |##| '));
+				valueSelectElement.val(app.htmlDecode(value).split(','));
+			} else {
+				jQuery('[name="value"]', rowElement).val(value);
+			}
+		} else if (fieldType === 'date') {
+			//TODO user date format
+			//TODO (mais c'est général au datepicker) initialiser le calendrier
+			valueSelectElement.val(value.replace(/(\d{4}).(\d{2}).(\d{2})/, '$3-$2-$1'));
+		
+		} else {
+			valueSelectElement.val(value);
+		}
+		thisInstance.loadFieldSpecificUi(fieldSelectElement);
 	},
 
 	/**
@@ -165,13 +248,43 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	 * @return : current instance
 	 */
 	addNewCondition : function(conditionGroupElement){
+		var conditionList = jQuery('.conditionList', conditionGroupElement);
+		//ED151124 si le précédent est un panel, initialise avec la variable suivante
+		var previousRowCondition = jQuery('.conditionRow:last',conditionList);
 		var basicElement = jQuery('.basic',conditionGroupElement);
 		var newRowElement = basicElement.find('.conditionRow').clone(true,true);
 		jQuery('select',newRowElement).addClass('chzn-select');
-		var conditionList = jQuery('.conditionList', conditionGroupElement);
 		conditionList.append(newRowElement);
+		
 		//change in to chosen elements
 		app.changeSelectElementView(newRowElement);
+		
+		//ED151124 si le précédent est un panel, initialise avec la variable suivante
+		if (previousRowCondition.length) {
+			var fieldSelected = previousRowCondition.find('option:selected')
+			, fieldValue = fieldSelected.val();
+			if (fieldValue && fieldValue[0] === '[') {
+				var nextField = fieldSelected.next()
+				, nextFieldValue = nextField.val();
+				//pour les modules liés, on cherche le champ de relation suivant 
+				if (/^\[(?!RSNStatisticsResults|RSNContactsPanels)/.test(fieldValue))//Au moins 4 champs entre [ ]) 
+				{	do {
+						if (/^\[(.+\:){4}.*\]/.test(nextFieldValue))
+							break;
+						nextField = nextField.next();
+						nextFieldValue = nextField.val()
+					} while(nextField.is('option'));
+				}
+				if (nextFieldValue && nextFieldValue[0] === '['
+				&& (/^\[(.+\:){4}.*\]/.test(nextFieldValue)//Au moins 4 champs entre [ ]
+					|| /^\[RSNStatisticsResults\:(?!stats_periodicite)/.test(nextFieldValue)//Champ de statistique autre que la période
+					|| /^\[RSNContactsPanels\:.*\].+/.test(nextFieldValue)//Champ de statistique autre que la période
+				)) {
+					jQuery('select[name="columnname"]',newRowElement).val(nextFieldValue).trigger("liszt:updated").change();
+				}
+			}
+		}
+		
 		return this;
 	},
 
@@ -243,8 +356,9 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		, fieldSelected = fieldSelect.find('option:selected')
 		, fieldValue = fieldSelected.val();
 		if (fieldValue[0] === '['
-		&& (	/^\[(.+\:){4}.*\]/.test(fieldValue)//Au moins 4 champs entre [ ]
+		&& (	/^\[(?!RSNStatisticsResults|RSNContactsPanels)(.+\:){4}.*\]/.test(fieldValue)//Au moins 4 champs entre [ ]
 			|| /^\[RSNStatisticsResults\:(?!stats_periodicite)/.test(fieldValue)//Champ de statistique autre que la période
+			|| /^\[RSNContactsPanels\:.*\].+/.test(fieldValue)//Champ de statistique autre que la période
 		)) {
 			row.addClass('sub-field');
 		}
@@ -701,7 +815,7 @@ Vtiger_Picklist_Field_Js('AdvanceFilter_Picklist_Field_Js',{},{
 			var html = '<select class="select2 row-fluid" multiple name="'+ this.getName() +'[]">';
 			var pickListValues = this.getPickListValues();
 			var selectedOption = app.htmlDecode(this.getValue());
-			var selectedOptionsArray = selectedOption.split(',')
+			var selectedOptionsArray = typeof selectedOption === 'object' ? selectedOption : selectedOption.split(',')
 			for(var option in pickListValues) {
 				html += '<option value="'+option+'" ';
 				if(jQuery.inArray(option,selectedOptionsArray) != -1){

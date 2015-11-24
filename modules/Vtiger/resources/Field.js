@@ -244,7 +244,7 @@ Vtiger_Field_Js('Vtiger_Multipicklist_Field_Js',{},{
 		var html = '<select class="select2" multiple name="'+ this.getName() +'[]">';
 		var pickListValues = this.getPickListValues();
 		var selectedOption = app.htmlDecode(this.getValue());
-		var selectedOptionsArray = selectedOption.split(',')
+		var selectedOptionsArray = typeof selectedOption === 'object' ? selectedOption : selectedOption ? selectedOption.split(',') : [];
 		for(var option in pickListValues) {
 			html += '<option value="'+option+'" ';
 			if(jQuery.inArray(option,selectedOptionsArray) != -1){
