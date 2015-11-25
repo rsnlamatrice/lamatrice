@@ -290,6 +290,24 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				, contact_no = CONCAT('C', ?)
 				WHERE vtiger_crmentity.crmid = ?
 			";
+				
+			$this->createInitialModComment($record, $contactsData);
+				
+			//Abonnement à la revue (peut générer le compte du contact)
+			$rsnAboRevue = $this->importRSNAboRevuesForContact($record, $contactsData);
+			//type de contact [ancien] Abonné
+			if($rsnAboRevue
+			&& $rsnAboRevue->get('rsnabotype') != TYPEABONNE_NEPASABONNER){
+				$record->set('mode', 'edit');
+				$contactType = $record->get('accounttype');
+				$addType = $rsnAboRevue->get('isabonne') ? 'Abonné' : 'Ancien abonné';
+				if($contactType)
+					$record->set('accounttype', $contactType . ' |##| ' . $addType);
+				else
+					$record->set('accounttype', $addType);
+				$record->save();
+			}
+				
 			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 								, $contactsData[0]['datemodification']
 								, $contactsData[0]['datecreation']
@@ -300,26 +318,6 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 					. ", result=" . ($result ? " true" : "false"). " )");
 			if( ! $result)
 				$db->echoError();
-			else {
-				$this->createInitialModComment($record, $contactsData);
-					
-				//Abonnement à la revue (peut générer le compte du contact)
-				$rsnAboRevue = $this->importRSNAboRevuesForContact($record, $contactsData);
-				//type de contact [ancien] Abonné
-				if($rsnAboRevue
-				&& $rsnAboRevue->get('rsnabotype') != TYPEABONNE_NEPASABONNER){
-					$record->set('mode', 'edit');
-					$contactType = $record->get('accounttype');
-					$addType = $rsnAboRevue->get('isabonne') ? 'Abonné' : 'Ancien abonné';
-					if($contactType)
-						$record->set('accounttype', $contactType . ' |##| ' . $addType);
-					else
-						$record->set('accounttype', $addType);
-					$record->save();
-				}
-				
-				//Relations 
-			}
 			return $record;
 		}
 
@@ -559,6 +557,13 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				}
 			}
 			$aboRevue = $this->createRSNAboRevue($contact, $contactsData, TYPEABONNE_STANDARD, $isAbonne, $dateDebut, $dateFin);
+		}
+		elseif($typeAbonne == _4D_TYPEABONNE_ABOGRATUIT){
+			$dateDebut = $contactsData[0]['datecreation'];
+			$dateDebut = new DateTime($dateDebut);
+			$isAbonne = true;
+			$dateFin = null;
+			$aboRevue = $this->createRSNAboRevue($contact, $contactsData, TYPEABONNE_ABOGRATUIT, $isAbonne, $dateDebut, $dateFin);
 		}
 		
 		if($doNotAbonnerToDay){
