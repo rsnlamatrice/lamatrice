@@ -40,9 +40,9 @@
 			{foreach item=CONDITION_INFO from=$ALL_CONDITION_CRITERIA['columns']}
 				{include file='AdvanceFilterConditionJSInitialized.tpl'|@vtemplate_path:$QUALIFIED_MODULE RECORD_STRUCTURE=$RECORD_STRUCTURE CONDITION_INFO=$CONDITION_INFO MODULE=$MODULE}
 			{/foreach}
-			{if count($ALL_CONDITION_CRITERIA) eq 0}
+			{*if count($ALL_CONDITION_CRITERIA) eq 0}
 				{include file='AdvanceFilterCondition.tpl'|@vtemplate_path:$QUALIFIED_MODULE RECORD_STRUCTURE=$RECORD_STRUCTURE MODULE=$MODULE CONDITION_INFO=array()}
-			{/if}
+			{/if*}
 			</div>
 			<div class="hide basic conditionRow-template">
 				{include file='AdvanceFilterCondition.tpl'|@vtemplate_path:$QUALIFIED_MODULE RECORD_STRUCTURE=$RECORD_STRUCTURE CONDITION_INFO=array() MODULE=$MODULE NOCHOSEN=true}
@@ -72,9 +72,9 @@
 				{foreach item=CONDITION_INFO from=$ANY_CONDITION_CRITERIA['columns']}
 					{include file='AdvanceFilterConditionJSInitialized.tpl'|@vtemplate_path:$QUALIFIED_MODULE RECORD_STRUCTURE=$RECORD_STRUCTURE CONDITION_INFO=$CONDITION_INFO MODULE=$MODULE CONDITION="or"}
 				{/foreach}
-				{if count($ANY_CONDITION_CRITERIA) eq 0}
+				{*if count($ANY_CONDITION_CRITERIA) eq 0}
 					{include file='AdvanceFilterCondition.tpl'|@vtemplate_path:$QUALIFIED_MODULE RECORD_STRUCTURE=$RECORD_STRUCTURE MODULE=$MODULE CONDITION_INFO=array() CONDITION="or"}
-				{/if}
+				{/if*}
 				</div>
 				<div class="hide basic">
 					{include file='AdvanceFilterCondition.tpl'|@vtemplate_path:$QUALIFIED_MODULE RECORD_STRUCTURE=$RECORD_STRUCTURE MODULE=$MODULE CONDITION_INFO=array() CONDITION="or" NOCHOSEN=true}
