@@ -120,11 +120,6 @@ class Vtiger_Language_Handler {
 	public static function getModuleStringsFromFile($language, $module='Vtiger'){
         $module = str_replace(':', '.', $module);
 		if(empty(self::$languageContainer[$language][$module])){
-
-
-
-
-
 			$qualifiedName = 'languages.'.$language.'.'.$module;
 			$file = Vtiger_Loader::resolveNameToPath($qualifiedName);
 
@@ -134,20 +129,6 @@ class Vtiger_Language_Handler {
 				self::$languageContainer[$language][$module]['languageStrings'] = $languageStrings;
 				self::$languageContainer[$language][$module]['jsLanguageStrings'] = $jsLanguageStrings;
 			}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		}
 		return self::$languageContainer[$language][$module];
 	}

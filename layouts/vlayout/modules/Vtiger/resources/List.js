@@ -566,7 +566,15 @@ jQuery.Class("Vtiger_List_Js",{
 			exportActionUrl += '&search_key='+listViewInstance.getRequestSearchField('string')
 				+'&search_value='+(typeof searchValue == 'object' ? JSON.stringify(searchValue) : searchValue)
 				+'&operator='+listViewInstance.getSearchOperator('string');
-		    }
+		}
+
+		var orderBy = jQuery('#orderBy').val();
+		var sortOrder = jQuery("#sortOrder").val();
+
+		if(typeof orderBy != "undefined") {//tmp
+			exportActionUrl += '&orderby='+orderBy//tmp
+				+'&sortorder='+((typeof sortOrder == "undefined") ? 'ASC' : sortOrder);//tmp
+		}
 		    window.location.href = exportActionUrl;
 	},
 

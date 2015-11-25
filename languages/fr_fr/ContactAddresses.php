@@ -29,4 +29,3 @@ $languageStrings = array(
 );
 
 ?>
-

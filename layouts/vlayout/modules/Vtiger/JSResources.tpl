@@ -100,6 +100,7 @@
   <link rel="stylesheet" type="text/css" href="resources/autocompletor/autocompletor.css" media="screen" />
 
 	{foreach key=index item=jsModel from=$SCRIPTS}
+    <!-- {$jsModel->getSrc()}?&v={$VTIGER_VERSION} -->
 		<script type="{$jsModel->getType()}" src="{$jsModel->getSrc()}?&v={$VTIGER_VERSION}"></script>
 	{/foreach}
 

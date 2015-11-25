@@ -20,6 +20,24 @@ class Vtiger_Export_View extends Vtiger_Index_View {
 		}
 	}
 
+	/**
+	 * Function to get the list of Script models to be included
+	 * @param Vtiger_Request $request
+	 * @return <Array> - List of Vtiger_JsScript_Model instances
+	 */
+	function getHeaderScripts(Vtiger_Request $request) {
+		$headerScriptInstances = parent::getHeaderScripts($request);
+		$moduleName = $request->getModule();
+
+		$jsFileNames = array(
+			'modules.Vtiger.resources.Export'
+		);
+
+		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
+		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
+		return $headerScriptInstances;
+	}
+
 	function process(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		
@@ -76,6 +94,11 @@ class Vtiger_Export_View extends Vtiger_Index_View {
 		
 		$viewer->assign('COUNT_CURRENT_PAGE', $limit);//TMP !!!get real number an take care of the last page !!
 		
+		// TODO : add the list of preconfigured export (+ export de base)
+		$exportList = Export_Utils_Helper::getSourceList($source_module);
+		$viewer->assign('EXPORT_LIST', $exportList);
+		$viewer->assign('DEFAULT_EXPORT', Export_Utils_Helper::getDefaultExport());
+
 		$viewer->view('Export.tpl', $source_module);
 	}
 }
