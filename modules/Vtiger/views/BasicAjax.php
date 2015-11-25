@@ -146,6 +146,8 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
         
 		$viewer->assign('SAVE_FILTER_PERMITTED', $saveFilterPermitted);
 
+		$viewer->assign('ADVANCE_CRITERIA', array('1' => array(), '2' => array()));
+		
 		echo $viewer->view('AdvanceSearch.tpl',$moduleName, true);
 	}
 

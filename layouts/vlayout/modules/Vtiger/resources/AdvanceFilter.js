@@ -113,9 +113,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		
 		if(fieldType == 'owner'){
 			if(valueSelectElement.is('select')){
-				var selectedOption = valueSelectElement.find('option[value="' + value + '"]');
-				
-				 
+				valueSelectElement.val(value);
 			} else if(valueSelectElement.is('input')) {
 				valueSelectElement.val(value);
 			} else {	
@@ -124,12 +122,8 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		} else if (fieldType == 'picklist' || fieldType == 'multipicklist'
 		|| fieldType == 'buttonset') { //ED150225
 			if(valueSelectElement.is('input')){
-				if(rowValues.comparator == 'ct' || rowValues.comparator == 'kt') {
-					valueSelectElement.val(value);
-				}
-				else {
-					valueSelectElement.val(value);//TODO picklist
-				}
+				//TODO pas de picklist values  if(rowValues.comparator == 'ct' || rowValues.comparator == 'kt') {
+				valueSelectElement.val(app.htmlDecode(value).split(','));
 			} else if(valueSelectElement.is('select') && fieldType == 'picklist'){
 				//thisInstance.setMultiPickListValues(valueSelectElement, value.split(','));
 				valueSelectElement.val(app.htmlDecode(value).split(','));
@@ -243,6 +237,15 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	},
 
 	/**
+	 * Function to get the add conditions group elements
+	 * @returns : jQuery object which represents the add conditions group element
+	 */
+	getAddConditionsGroupElement : function() {
+		var filterContainer = this.getFilterContainer();
+		return jQuery('.addConditionsGroup button', filterContainer);
+	},
+
+	/**
 	 * Function to add new condition row
 	 * @params : condtionGroupElement - group where condtion need to be added
 	 * @return : current instance
@@ -288,6 +291,33 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		return this;
 	},
 
+	/** ED151124
+	 * Function to add new conditions group
+	 * @params : previousConditionGroupElement - group where add condtion button has been clicked
+	 * @return : current instance
+	 */
+	addNewConditionsGroup : function(previousConditionGroupElement){
+		var conditionGroupElement = previousConditionGroupElement.clone();
+		var conditionList = jQuery('.conditionList', conditionGroupElement).empty();
+		conditionGroupElement.insertAfter(previousConditionGroupElement);
+		
+		return this.addNewCondition(conditionGroupElement);
+	},
+
+	/** ED151124
+	 * Function to add new conditions group
+	 * @params : condtionGroupElement - group where condtion need to be deleted
+	 * @return : current instance
+	 */
+	deleteConditionsGroup : function(conditionGroupElement){
+		var conditionList = jQuery('.conditionList', conditionGroupElement)
+		, conditionRows = conditionList.find('div.conditionRow');
+		/*if(conditionRows.length)
+			if(!confirm('Supprimer toutes ces conditions ?')) return;*/
+		
+		conditionGroupElement.remove();
+	},
+
 	/**
 	 * Function/Handler  which will triggered when user clicks on add condition
 	 */
@@ -295,6 +325,24 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		var element = jQuery(e.currentTarget);
 		var conditionGroup = element.closest('div.conditionGroup');
 		this.addNewCondition(conditionGroup);
+	},
+
+	/**
+	 * Function/Handler  which will triggered when user clicks on add conditions group
+	 */
+	addConditionsGroupHandler : function(e) {
+		var element = jQuery(e.currentTarget);
+		var conditionGroup = element.closest('div.conditionGroup');
+		this.addNewConditionsGroup(conditionGroup);
+	},
+	
+	/**
+	 * Function/Handler  which will triggered when user clicks on delete conditions group
+	 */
+	deleteConditionsGroupHandler : function(e) {
+		var element = jQuery(e.currentTarget);
+		var conditionGroup = element.closest('div.conditionGroup');
+		this.deleteConditionsGroup(conditionGroup);
 	},
 	
 	/* ED150619 add	@param forConditionList (default value is false)
@@ -511,6 +559,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		// re-enable if condition element is chosen.
 		switch(conditionSelectElement.val()){
 		case 'y' :
+		case 'ny' :
 		case 'vwi' :
 		case 'vwx' :
 			fieldUiHolder.hide();
@@ -723,8 +772,28 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	 */
 	registerAddCondition : function() {
 		var thisInstance = this;
-		this.getAddConditionElement().on('click',function(e){
+		this.getFilterContainer().on('click', '.addCondition > button',function(e){
 			thisInstance.addConditionHandler(e);
+		});
+	},
+
+	/**
+	 * Event handler which is invoked on add a conditions group 
+	 */
+	registerAddConditionsGroup : function() {
+		var thisInstance = this;
+		this.getFilterContainer().on('click', '.addConditionsGroup > button',function(e){
+			thisInstance.addConditionsGroupHandler(e);
+		});
+	},
+
+	/**
+	 * Event handler which is invoked on add a conditions group 
+	 */
+	registerDeleteConditionsGroup : function() {
+		var thisInstance = this;
+		this.getFilterContainer().on('click', '.deleteConditionsGroup > button',function(e){
+			thisInstance.deleteConditionsGroupHandler(e);
 		});
 	},
 
@@ -786,6 +855,9 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		this.registerFieldChange();
 		this.registerDeleteCondition();
 		this.registerConditionChange();
+		//ED151124
+		this.registerAddConditionsGroup();
+		this.registerDeleteConditionsGroup();
 	}
 });
 

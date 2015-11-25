@@ -1182,6 +1182,9 @@ class CustomView extends CRMEntity {
 					}
 					elseif ($comparator == 'y') {
 						$advfiltersql = sprintf("(%s.%s IS NULL OR %s.%s = '')", $columns[0], $columns[1], $columns[0], $columns[1]);
+					}
+					elseif ($comparator == 'ny') {
+						$advfiltersql = sprintf("(%s.%s IS NOT NULL AND %s.%s != '')", $columns[0], $columns[1], $columns[0], $columns[1]);
 					} else {
 						//Added for getting vtiger_activity Status -Jaguar
 						if ($this->customviewmodule == "Calendar" && ($columns[1] == "status" || $columns[1] == "eventstatus")) {
