@@ -11,7 +11,7 @@ define('_4D_TYPEABONNE_ABOGRATUIT', '3');
 define('TYPEABONNE_ABOGRATUIT', 'Abonné(e) à vie');
 define('_4D_TYPEABONNE_ABOGROUPE', '4');
 define('TYPEABONNE_ABOGROUPE', 'Abonnement groupé');
-
+define('TYPE_CONTACT_SUPPRIME', 'SUPPRIMÉ');
 /* Phase de migration
  * Importation des contacts Web depuis le fichier provenant de 4D
  */
@@ -280,6 +280,28 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			}
 			
 			$record->set('mode','edit');
+				
+			$this->createInitialModComment($record, $contactsData);
+				
+			//Abonnement à la revue (peut générer le compte du contact)
+			$fieldName = 'accounttype';
+			$contactType = TYPE_CONTACT_SUPPRIME;
+			if($record->get($fieldName) !== $contactType){
+				$rsnAboRevue = $this->importRSNAboRevuesForContact($record, $contactsData);
+				//type de contact [ancien] Abonné
+				if($rsnAboRevue
+				&& $rsnAboRevue->get('rsnabotype') != TYPEABONNE_NEPASABONNER){
+					$record->set('mode', 'edit');
+					$contactType = $record->get('accounttype');
+					$addType = $rsnAboRevue->get('isabonne') ? 'Abonné' : 'Ancien abonné';
+					if($contactType)
+						$record->set('accounttype', $contactType . ' |##| ' . $addType);
+					else
+						$record->set('accounttype', $addType);
+					$record->save();
+				}
+			}
+			
 			$db = PearDatabase::getInstance();
 			$query = "UPDATE vtiger_crmentity
 				JOIN vtiger_contactdetails
@@ -287,30 +309,14 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				SET smownerid = ?
 				, modifiedtime = ?
 				, createdtime = ?
+				, label = ?
 				, contact_no = CONCAT('C', ?)
 				WHERE vtiger_crmentity.crmid = ?
 			";
-				
-			$this->createInitialModComment($record, $contactsData);
-				
-			//Abonnement à la revue (peut générer le compte du contact)
-			$rsnAboRevue = $this->importRSNAboRevuesForContact($record, $contactsData);
-			//type de contact [ancien] Abonné
-			if($rsnAboRevue
-			&& $rsnAboRevue->get('rsnabotype') != TYPEABONNE_NEPASABONNER){
-				$record->set('mode', 'edit');
-				$contactType = $record->get('accounttype');
-				$addType = $rsnAboRevue->get('isabonne') ? 'Abonné' : 'Ancien abonné';
-				if($contactType)
-					$record->set('accounttype', $contactType . ' |##| ' . $addType);
-				else
-					$record->set('accounttype', $addType);
-				$record->save();
-			}
-				
 			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 								, $contactsData[0]['datemodification']
 								, $contactsData[0]['datecreation']
+								, trim($record->get('firstname') . ' ' . $record->get('lastname'))
 								, $contactsData[0]['reffiche']
 								, $contactId));
 			
@@ -538,7 +544,11 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	function importRSNAboRevuesForContact($contact, $contactsData) {
 		global $VTIGER_BULK_SAVE_MODE;
 		$VTIGER_BULK_SAVE_MODE = true;
-		
+	
+		$fieldName = 'accounttype';
+		$contactType = TYPE_CONTACT_SUPPRIME;
+		if($record->get($fieldName) === $contactType) return;
+				
 		$typeAbonne = $contactsData[0]['typeabonne'];
 		
 		$doNotAbonnerToDay = $typeAbonne == _4D_TYPEABONNE_NEPASABONNER
@@ -656,6 +666,13 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		$record->set('mode', 'create');
 		
 		$text = 'Données 4D : ';
+		
+		$fieldName = 'accounttype';
+		$contactType = TYPE_CONTACT_SUPPRIME;
+		if($record->get($fieldName) == $contactType){
+			$text .= "\nADRESSE SUPPRIMEE";
+		}
+		
 		$fieldsMapping = $this->getContactsFieldsMapping();
 		foreach($fieldsMapping as $srcFieldName => $fieldName)
 			$text .= "\n- $srcFieldName = " . print_r($contactsData[0][$srcFieldName], true);

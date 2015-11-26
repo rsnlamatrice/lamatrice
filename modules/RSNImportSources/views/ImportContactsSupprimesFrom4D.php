@@ -110,11 +110,10 @@ class RSNImportSources_ImportContactsSupprimesFrom4D_View extends RSNImportSourc
 		parent::updateContactRecordModelFromData($record, $contactsData);
 		
 		$fieldName = 'accounttype';
-		$contactType = 'SUPPRIME';
+		$contactType = TYPE_CONTACT_SUPPRIME;
 		//set
-		if($contactType){
-			$record->set($fieldName, $contactType);
-		}
+		$record->set($fieldName, $contactType);
+		
 		/* "ne pas" partout */
 		foreach( array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb')
 				as $fieldName){
@@ -124,7 +123,7 @@ class RSNImportSources_ImportContactsSupprimesFrom4D_View extends RSNImportSourc
 		$fieldName = 'lastname';
 		if($record->get($fieldName) && $record->get('firstname') != $record->get($fieldName))
 			$record->set('firstname', trim( $record->get('firstname') . ' ' . $record->get($fieldName)));
-		$record->set($fieldName, '[SUPPRIME] '.$contactsData[0]['reffiche']);
+		$record->set($fieldName, '[SUPPRIMÉ(E)] '.$contactsData[0]['reffiche']);
 		
 		
 		$fieldName = 'mailingzip';

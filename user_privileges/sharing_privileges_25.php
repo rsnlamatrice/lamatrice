@@ -202,4 +202,28 @@ $RSNSysControls_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNSysControls_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$RSNStatistics_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNStatistics_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNQueriesVariables_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNQueriesVariables_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNSQLQueries_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNSQLQueries_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNStatisticsFields_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNStatisticsFields_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNExportPreconfigured_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNExportPreconfigured_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNPreconfiguredExport_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNPreconfiguredExport_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 ?>
