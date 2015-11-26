@@ -794,16 +794,12 @@ $languageStrings = array(
 	
 	'LBL_SORRY_SQL_ERROR' => 'Désolé, la formulation de la recherche provoque une erreur.',
 	
-<<<<<<< Updated upstream
 	'LBL_RESULTS' => 'Résultats statistiques',
 	
 	'LBL_DOWNLOAD' => 'Télécharger',
 	
 	'AllMenuEditor' => 'Editeur du menu \'Tout\'',
 	
-=======
-	'LBL_RESULTS' => 'Résultats',
->>>>>>> Stashed changes
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 
