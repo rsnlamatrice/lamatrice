@@ -28,8 +28,8 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		$this->ExportData($request);
 	}
 
-	private $moduleInstance;
-	private $focus;
+	protected $moduleInstance;
+	protected $focus;
 
 	/**
 	 * Function exports the data based on the mode
@@ -37,6 +37,7 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 	 */
 	function ExportData(Vtiger_Request $request) {
 		$db = PearDatabase::getInstance();
+		$isPreview = $request->get('preview');
 		$moduleName = $request->get('source_module');
 
 		$this->moduleInstance = Vtiger_Module_Model::getInstance($moduleName);
@@ -69,7 +70,11 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 			$entries[] = $this->sanitizeValues($db->fetchByAssoc($result, $j));
 		}
 
-		$this->output($request, $translatedHeaders, $entries);
+		if ($isPreview) {
+			$this->displayPrewiew($request, $translatedHeaders, $entries);
+		} else {
+			$this->output($request, $translatedHeaders, $entries);
+		}
 	}
 
 	/**
@@ -77,11 +82,17 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 	 * @param Vtiger_Request $request
 	 * @return <String> export query
 	 */
-	function getExportQuery(Vtiger_Request $request) {
+	function getExportQuery(Vtiger_Request $request) {//depand of the export type...
+		$queryorderby = "";
+		$querylimit = "";
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 		$mode = $request->getMode();
 		$cvId = $request->get('viewname');
 		$moduleName = $request->get('source_module');
+		$isPreview = $request->get('preview');
+		$searchKey = $request->get('search_key');
+		$searchValue = $request->get('search_value');
+		$operator = $request->get('operator');
 
 		$queryGenerator = new QueryGenerator($moduleName, $currentUser);
 		$queryGenerator->initForCustomViewById($cvId);
@@ -96,6 +107,11 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
             }
         }
 		$queryGenerator->setFields($fields);
+		
+		if(!empty($searchKey)) {
+			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
+		}
+
 		$query = $queryGenerator->getQuery();
 
 		if(in_array($moduleName, getInventoryModules())){
@@ -104,11 +120,12 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 
 		$this->accessibleFields = $queryGenerator->getFields();
 
-		switch($mode) {
-			case 'ExportAllData' :	return $query;
-									break;
 
-			case 'ExportCurrentPage' :	$pagingModel = new Vtiger_Paging_Model();
+		switch($mode) {
+			case 'ExportAllData' :	break;
+
+			case 'ExportCurrentPage' :
+										$pagingModel = new Vtiger_Paging_Model();
 										$limit = $pagingModel->getPageLimit();
 
 										$currentPage = $request->get('page');
@@ -116,9 +133,7 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 
 										$currentPageStart = ($currentPage - 1) * $limit;
 										if ($currentPageStart < 0) $currentPageStart = 0;
-										$query .= ' LIMIT '.$currentPageStart.','.$limit;
-
-										return $query;
+										$querylimit = ' LIMIT '.$currentPageStart.','.$limit;
 										break;
 
 			case 'ExportSelectedRecords' :	$idList = $this->getRecordsListFromRequest($request);
@@ -132,13 +147,88 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 											} else {
 												$query .= ' AND '.$baseTable.'.'.$baseTableColumnId.' NOT IN ('.implode(',',$request->get('excluded_ids')).')';
 											}
-											return $query;
+
 											break;
 
 
-			default :	return $query;
-						break;
+			default :	break;
 		}
+
+		$queryorderby = $this->getQueryOrderBy($request);
+
+		if ($isPreview && !$querylimit) {
+			$querylimit = ' LIMIT 0, 20';
+		}
+
+		$query .= $queryorderby . $querylimit;
+
+		return $query;
+	}
+
+	function getQueryOrderBy($request) {
+		$moduleName = $request->get('source_module');
+		$orderBy = Vtiger_Util_Helper::validateStringForSql($request->get('orderby'));
+		$sortOrder = Vtiger_Util_Helper::validateStringForSql($request->get('sortorder'));
+
+		//List view will be exported on recently created/modified records
+		if(empty($orderBy) && empty($sortOrder)){
+			switch($moduleName){
+			case "Users":
+				break;
+			case "RSNMediaRelations":
+				$orderBy = 'daterelation';
+				$sortOrder = 'DESC';
+				break;
+			default:
+				$orderBy = 'modifiedtime';
+				$sortOrder = 'DESC';
+				break;
+			}
+		}
+
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+
+		if(!empty($orderBy)){
+		    $columnFieldMapping = $moduleModel->getColumnFieldMapping();
+		    $orderByFieldName = $columnFieldMapping[$orderBy];
+		    $orderByFieldModel = $moduleModel->getField($orderByFieldName);
+		    if($orderByFieldModel &&
+				(	$orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::REFERENCE_TYPE
+				||	preg_match('/cf$/', $orderByFieldModel->table)//ED150622 TODO more than *cf
+				)
+			){
+				//IF it is reference add it in the where fields so that from clause will be having join of the table
+				$queryGenerator = $this->get('query_generator');
+				$queryGenerator->addWhereField($orderByFieldName);
+				//$queryGenerator->whereFields[] = $orderByFieldName;
+		    }
+		}
+
+	    if ($orderByFieldModel && $orderByFieldModel->isReferenceField()) {
+			$referenceModules = $orderByFieldModel->getReferenceList();
+			$referenceNameFieldOrderBy = array();
+
+			foreach ($referenceModules as $referenceModuleName) {
+			    $referenceModuleModel = Vtiger_Module_Model::getInstance($referenceModuleName);
+			    $referenceNameFields = $referenceModuleModel->getNameFields();
+			    $columnList = array();
+
+			    foreach ($referenceNameFields as $nameField) {
+					$fieldModel = $referenceModuleModel->getField($nameField);
+					$columnList[] = $fieldModel->get('table').$orderByFieldModel->getName().'.'.$fieldModel->get('column');
+			    }
+
+			    if (count($columnList) > 1) {
+					$referenceNameFieldOrderBy[] = getSqlForNameInDisplayFormat(array('first_name'=>$columnList[0],'last_name'=>$columnList[1]),'Users').' '.$sortOrder;
+			    } else {
+					$referenceNameFieldOrderBy[] = implode('', $columnList).' '.$sortOrder ;
+			    }
+			}
+
+			return ' ORDER BY '. implode(',',$referenceNameFieldOrderBy);
+	    }
+
+		return ' ORDER BY '. $orderBy . ' ' .$sortOrder;
 	}
 
 	/**
@@ -154,14 +244,21 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 	}
 
 	/**
+	 * AV1511
+	 */
+	function getExportFileName($request) {
+		$moduleName = $request->get('source_module');
+		return str_replace(' ','_',vtranslate($moduleName, $moduleName));
+	}
+
+	/**
 	 * Function that create the exported file
 	 * @param Vtiger_Request $request
 	 * @param <Array> $headers - output file header
 	 * @param <Array> $entries - outfput file data
 	 */
 	function output($request, $headers, $entries) {
-		$moduleName = $request->get('source_module');
-		$fileName = str_replace(' ','_',vtranslate($moduleName, $moduleName));    
+		$fileName = $this->getExportFileName($request);
 		$exportType = $this->getExportContentType($request);
 
 		//ED150922
@@ -173,19 +270,36 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
 		header("Cache-Control: post-check=0, pre-check=0", false );
 
-		$header = implode("\"$csvseparator\"", $headers);
-		$header = "\"" .$header;
-		$header .= "\"\r\n";
-		echo $header;
+		//AV151026
+		$out = fopen('php://output', 'w');
+		fputcsv($out, $headers, $csvseparator);
 
 		foreach($entries as $row) {
-			$line = implode("\"$csvseparator\"", $row);
-			$line = "\"" .$line;
-			$line .= "\"\r\n";
-			echo $line;
+			fputcsv($out, $row, $csvseparator);
 		}
+
+		fclose($out);
 	}
-	
+
+	function displayPrewiew($request, $headers, $entries) {
+		// echo 'display preview';
+		// var_dump($headers);
+		// var_dump($entries);
+
+		$module = $request->get('module');
+
+		$viewer = new Vtiger_Viewer();
+		$viewer->assign('DISPLAY_HEADER', (is_array($headers) && sizeof($headers) > 0));
+		$viewer->assign('HEADERS', $headers);
+		$viewer->assign('ENTRIES', $entries);
+
+		$viewer->view('ExportPreview.tpl', $module);
+
+		// fputcsv($out, $headers, $csvseparator);
+		// foreach($entries as $row) {
+		// 	fputcsv($out, $row, $csvseparator);
+		// }
+	}	
 	
 	//ED150922
 	function getCSVSeparator(){
@@ -201,9 +315,9 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		return $string;
 	}
 
-	private $picklistValues;
-	private $fieldArray;
-	private $fieldDataTypeCache = array();
+	protected $picklistValues;
+	protected $fieldArray;
+	protected $fieldDataTypeCache = array();
 	/**
 	 * this function takes in an array of values for an user and sanitizes it for export
 	 * @param array $arr - the array of values
@@ -285,7 +399,7 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 				array_push($new_arr,$value);
 			}
 		}
-		//ED150922 $this->escapeForCSV
-		return array_map($this->escapeForCSV, $arr);
+
+		return $arr;
 	}
 }

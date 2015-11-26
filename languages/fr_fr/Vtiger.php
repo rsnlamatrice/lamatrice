@@ -24,6 +24,7 @@ $languageStrings = array(
 	'LBL_CANCEL'                   => 'Annuler'                     , 
 	'LBL_BACK'                     => 'Retour'                      , 
 	'LBL_IMPORT'                   => 'Importer'                    ,
+	'LBL_PREVIEW'                  => 'Aperçu'                      ,
 	'LBL_RSN_IMPORT'               => 'Import préconfiguré'         , 
 	'LBL_EXPORT'                   => 'Exporter'                    ,
         'LBL_PRINT'                   => 'Imprimer...'                    ,
@@ -369,6 +370,9 @@ $languageStrings = array(
 	'LBL_EXPORT_DATA_IN_CURRENT_PAGE' => 'Exporter les données de la page courante', 
 	'LBL_EXPORT_SELECTED_RECORDS'  => 'Exporter les enregistrements sélectionnés'     , 
 	'LBL_EXPORT_RECORDS'           => 'Exporter les types d\'enregistrement', 
+	//AV1511
+	'LBL_EXPORT_TYPE' => 'Type d\'export',
+	'LBL_NO_EXPORT_AVAILABLE' => 'Aucun export disponible !',
 	'LBL_NO_RECORD_SELECTED'       => 'Aucun enregistrement sélectionné.'         , 
 	'LBL_CAN_NOT_REMOVE_DEFAULT_WIDGET' => 'Impossible de supprimer ce widget par défaut', 
 	'LBL_CUSTOM_VIEW_NAME_DUPLICATES_EXIST' => 'filtre déjà existant'       , 
@@ -790,12 +794,16 @@ $languageStrings = array(
 	
 	'LBL_SORRY_SQL_ERROR' => 'Désolé, la formulation de la recherche provoque une erreur.',
 	
+<<<<<<< Updated upstream
 	'LBL_RESULTS' => 'Résultats statistiques',
 	
 	'LBL_DOWNLOAD' => 'Télécharger',
 	
 	'AllMenuEditor' => 'Editeur du menu \'Tout\'',
 	
+=======
+	'LBL_RESULTS' => 'Résultats',
+>>>>>>> Stashed changes
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

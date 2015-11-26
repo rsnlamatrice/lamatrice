@@ -40,14 +40,15 @@
                             {if empty($SELECTED_IDS)}&nbsp; <span class="redColor">{vtranslate('LBL_NO_RECORD_SELECTED',$MODULE)}</span>
                             {else} <span >({$COUNT_SELECTED})</span>{/if}
                         </div>
-                        <div class="row-fluid" style="height:30px">
+                        {*<!-- AV151023 : Display the nunber of rows -->*}
+                        {*<!-- <div class="row-fluid" style="height:30px">
                             <div class="span6 textAlignRight row-fluid">
                                 <div class="span8">{vtranslate('LBL_EXPORT_DATA_IN_CURRENT_PAGE',$MODULE)}&nbsp;</div>
                                 <div class="span3"><input type="radio" name="mode" value="ExportCurrentPage" /></div>
                             </div>
-                            {*<!-- AV151023 : Display the nunber of rows -->*}
+                            
                             <span >({$COUNT_CURRENT_PAGE})</span>
-                        </div>
+                        </div> -->*}
                         <div class="row-fluid" style="height:30px">
                             <div class="span6 textAlignRight row-fluid">
                                 <div class="span8">{vtranslate('LBL_EXPORT_ALL_DATA',$MODULE)}&nbsp;</div>
@@ -57,12 +58,42 @@
                             <span >({$COUNT_ALL})</span>
                         </div>
                     </div>
+                    {*<!-- AV151026 add export type list -->*}
+                     <div class="row-fluid" style="height:30px">
+                            <div class="span6 textAlignRight row-fluid">
+                                <div class="span8">{vtranslate('LBL_EXPORT_TYPE',$MODULE)}&nbsp;</div>
+                                <div class="span3">
+                                    <!-- TMP $EXPORT_LIST ... -->
+                                    {if sizeof($EXPORT_LIST) gt 0}
+                                        <select id="SelectExportDropdown" name="ExportClassName" style="width: 420px;">
+                                            {if sizeof($EXPORT_LIST) gt 1}
+                                                <option disabled selected></option>
+                                            {/if}
+                                            {foreach item=EXPORT from=$EXPORT_LIST}
+                                                {assign var=DESCRIPTION value=htmlentities($EXPORT['description']|cat:$EXPORT['lastimport'])}
+                                                <option value="{$EXPORT['classname']}" {if $DEFAULT_EXPORT eq $EXPORT['classname']}selected="selected"{/if}
+                                                    title="{$DESCRIPTION}">
+                                                    {$EXPORT['exportname']|@vtranslate:$MODULE}<!-- ({$EXPORT['exporttype']|@vtranslate:$MODULE})-->
+                                                </option>
+                                            {/foreach}
+                                        </select>
+
+                                    {else}
+                                        <strong>{'LBL_NO_EXPORT_AVAILABLE'|@vtranslate:$MODULE}</stron>
+                                    {/if}
+                                </div>
+                            </strong>
+                        </div>
+                    </div>
                     <br> 
                     <div class="textAlignCenter">
-                        <button class="btn btn-success" type="submit"><strong>{vtranslate($MODULE, $MODULE)}&nbsp;{vtranslate($SOURCE_MODULE, $MODULE)}</strong></button>
+                        <button name="export-preview" class="btn btn-primary">{vtranslate('LBL_PREVIEW', $MODULE)}</button>
+                        <button class="btn btn-success" type="submit"><strong>{vtranslate($MODULE, $MODULE)}&nbsp;{vtranslate($EXPORT_LIST_MODULE, $MODULE)}</strong></button>
                         <a class="cancelLink" type="reset" onclick='window.history.back()'>{vtranslate('LBL_CANCEL', $MODULE)}</a>
                     </div>
                 </div>
+            </div>
+            <div id="preview-container" style="width:96%; overflow:scroll; margin:0px 2%;">
             </div>
         </div>
     </form>

@@ -24,6 +24,7 @@ $languageStrings = array(
 	'LBL_CANCEL' => 'Cancel',
 	'LBL_BACK' => 'Back',
 	'LBL_IMPORT' => 'Import',
+	'LBL_PREVIEW' => 'Preview',
 	'LBL_EXPORT' => 'Export',
 	'LBL_FIND_DUPLICATES' => 'Find Duplicates',
 	'LBL_MORE' => 'More',
