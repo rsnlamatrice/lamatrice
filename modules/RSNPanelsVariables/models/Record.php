@@ -99,27 +99,41 @@ class RSNPanelsVariables_Record_Model extends Vtiger_Record_Model {
 		switch(html_entity_decode ( $this->get('rsnvariableoperator') )){
 			case '<' :
 			case 'inférieur' :
+			case 'l' :
 				return ' < ?';
 			case '>' :
 			case 'supérieur' :
+			case 'g' :
 				return ' > ?';
 			case '<=' :
 			case 'inférieur ou égal' :
+			case 'm' :
 				return ' <= ?';
 			case '>=' :
 			case 'supérieur ou égal' :
+			case 'h' :
 				return ' >= ?';
 			case '=' :
 			case 'égal' :
+			case 'e' :
 				return ' = ?';
 			case '<>' :
 			case '!=' :
 			case 'différent' :
+			case 'n' :
 				return ' != ?';
 			case 'contient' :
+			case 'c' :
 				return ' LIKE CONCAT(\'%\', ?, \'%\')';
 			case 'ne contient pas' :
+			case 'k' :
 				return ' NOT LIKE CONCAT(\'%\', ?, \'%\')';
+			case 'commence par' :
+			case 's' :
+				return ' LIKE CONCAT(?, \'%\')';
+			case 'finit par' :
+			case 'ew' :
+				return ' LIKE CONCAT(\'%\', ?)';
 			default:
 				//var_dump(html_entity_decode ( $this->get('rsnvariableoperator') ));
 				return ' # operateur "' . $this->get('rsnvariableoperator') . '" inconnu #';

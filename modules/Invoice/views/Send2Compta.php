@@ -218,7 +218,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$isDebug = COLSEPAR;
 			$isDebug = $isDebug[0] === '<';
 			
-			$fileName = 'LAMAT_vers_COG.Factures.Compta.'.date('Ymd_His').'csv';
+			$fileName = 'LAMAT_vers_COG.Factures.Compta.'.date('Ymd_His').'.csv';
 			$exportType = 'text/csv';
 			if($isDebug)
 				echo '<table border="1"><tr><td>';//debug
@@ -504,12 +504,21 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	private static function getModeReglCompteEncaissement($modeRegl){
-		switch(strtoupper($modeRegl)){
-		case 'CHèQUE' :
-		case 'CHEQUE' :
-			return '514000'; //chèque
-		default :
-			return '512107';//c/c Nef
+		switch($modeRegl){
+		case 'PayBox' :
+			return '512107';
+		case 'PayPal' :
+			return '514000';
+		case 'Espèces' :
+			return '514000';
+		case 'CB' :
+			return '514000';
+		case 'Virement' :
+			return '514000';
+		case 'Mandat' :
+			return '514000';//TODO
+		default:
+			return '514000';//LBP
 		}
 	}
 	

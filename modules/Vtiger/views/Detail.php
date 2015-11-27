@@ -210,6 +210,9 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 	 * Function shows the entire detail for the record
 	 * @param Vtiger_Request $request
 	 * @return <type>
+
+	 * ED151126 A noter que les champs d'adresses des contacts sont triés dans modules\Contacts\models\DetailRecordStructure.php
+
 	 */
 	function showModuleDetailView(Vtiger_Request $request) {
 		$recordId = $request->get('record');
@@ -256,7 +259,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$viewer->assign('IS_AJAX_ENABLED', $this->isAjaxEnabled($recordModel));
 		$viewer->assign('SUMMARY_RECORD_STRUCTURE', $this->getRecordStructure($recordStrucure));
 		
-		/* ED141210 court-circuite les activitŽs */
+		/* ED141210 court-circuite les activités */
 		$no_activities = $viewer->getVariable('NO_ACTIVITIES_WIDGET');
 		if(!$no_activities){
 			$viewer->assign('RELATED_ACTIVITIES', $this->getActivities($request));

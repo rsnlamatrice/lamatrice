@@ -52,7 +52,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 	
 	/**
 	 * Traitement des variables imbriques dans la requête
-	 * 	transforme les lments de la forme [[Title | field/type | defaultValue ]]
+	 * 	transforme les éléments de la forme [[Title | field/type | defaultValue ]]
 	 * 	en RSNPanelsVariables
 	 * @param Boolean $associative : returns an associative array
 	 *
@@ -132,7 +132,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			}
 			else
 				foreach($array as $variable)
-					$variables[] = array(
+					$variables[$variable[0]] = array(
 						'name' => $variable[0],
 						'value' => $variable[1]
 					);
@@ -181,13 +181,14 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 					
 		//affectation de valeur aux variables
 		// provient de la syntaxe [[PANEL <subpanel> | <domain>/<subpanelname> | Nom_Var:=Value | Nom_Var2 := Value]]
+		// ou des valeurs de customview
 		if(is_array($paramsPriorValues)){
 			$followParamsPriorValues = array();
 			$thisInstanceName = $this->get('instanceName');
 			//$paramsPriorValues est un array( array('name'=>name, 'value'=>value), ... ) ou array(name => value, ...)
 			foreach($paramsPriorValues as $paramName => $paramPriorInfos){
-				if(is_array($paramPriorValue) && $paramPriorValue['name']){
-					$paramName = $paramPriorValue['name'];
+				if(is_array($paramPriorInfos) && $paramPriorInfos['name']){
+					$paramName = $paramPriorInfos['name'];
 					$paramPriorValue = $paramPriorInfos['value'];
 				}
 				else
@@ -195,12 +196,14 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				//le nom de la variable contient un /
 				if(strpos($paramName, '/')){
 					//Destiné à un sous-panel
-					$followParamPriorValue = array_merge(array(), $paramPriorValue, array(
+					var_dump('sous panel', $paramPriorInfos, $paramPriorValue);
+					$followParamPriorValue = array_merge(array(), $paramPriorInfos, array(
 						'path' => $thisPath,
 						'parent' => substr($paramName, 0, strpos($paramName, '/')),
 						'name' => substr($paramName, strpos($paramName, '/')+1),
+						'value' => $paramPriorValue,
 					));
-					$followParamsPriorValues[] = $followParamPriorValue;
+					$followParamsPriorValues[substr($paramName, strpos($paramName, '/')+1)] = $followParamPriorValue;
 				}
 				//le nom de la variable est connu
 				elseif(isset($variables[$paramName])){
@@ -218,6 +221,8 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 							$thisPath
 							. '/')
 					;
+					if($paramPriorInfos['comparator'])
+						$variable->set('rsnvariableoperator', $paramPriorInfos['comparator']);
 					//var_dump($paramPriorValue->name, $paramPriorValue->value);
 				}
 				else
@@ -237,7 +242,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			if(!isset($variables[$variableName])){
 				// Erreur
 				$value = '[[# Variable "' . $variableName . '" inconnue ! #]]';
-				$paramsDetails[] = array(
+				$paramsDetails[$queryVariable['name']] = array(
 					'name'=>$queryVariable['name'],
 					'variable'=> null,
 					'value'=> $value
@@ -248,7 +253,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				$value = str_replace('&quot;', '"', $variable->get('defaultvalue'));
 				//Variable déjà traitée
 				if(!isset($variablesId[$variable->getId()])){
-					$paramsDetails[] = array(
+					$paramsDetails[$queryVariable['name']] = array(
 						'operation'=> $queryVariable['operation'],
 						'name'=> $queryVariable['name'],
 						'variable'=> $variable,
@@ -279,6 +284,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				else
 					$sqlOperation = '= ?';
 				$params[] = $value;
+				$paramsDetails[$queryVariable['name']]['value'] = $value;
 				/* injection dans le sql d'un paramètre */
 				$sql = preg_replace('/\[\[\?\?\s*' . preg_quote($variableName) . $regex_end,
 						    $comment
@@ -303,11 +309,11 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 					$paramsPriorValues = self::queryParams_decode( $value );
 					/* arguments suivis */
 					if(isset($followParamsPriorValues)){
-						foreach($followParamsPriorValues as $followParamPriorValue){
+						foreach($followParamsPriorValues as $followParamName => $followParamPriorValue){
 							//var_dump($followParamPriorValue, $instanceName);
 							// contrôle le parent
 							if($followParamPriorValue['parent'] == $instanceName){
-								$paramsPriorValues[] = $followParamPriorValue;
+								$paramsPriorValues[$followParamName] = $followParamPriorValue;
 							}
 						}
 						//var_dump($paramsPriorValues, $instanceName);
@@ -323,6 +329,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 					//	$paramsPriorValues[$index++] = $paramPriorValue;
 					//}
 					//getExecutionSQL
+					//var_dump($params, $paramsDetails, $paramsPriorValues);
 					$value = $subPanelRecord->getExecutionSQL($params, $paramsDetails, $paramsPriorValues, $callStask);
 					//restaure
 					//foreach($paramsPriorValues as $paramsPriorValue){
@@ -375,23 +382,21 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 	 * @param $paramsNameValuePairs : values to insert in query
 	 * @return <string>
 	 */
-	function getExecutionSQLWithIntegratedParams($paramsNameValuePairs = false){
+	function getExecutionSQLWithIntegratedParams($paramsValues = false){
 		$params = array();
 		$paramsDetails = array();
-		$sql = $this->getExecutionSQL($params, $paramsDetails);
-		if(count($params) !== count($paramsDetails)){
+		$sql = $this->getExecutionSQL($params, $paramsDetails, $paramsValues);
+		/*if(count($params) !== count($paramsDetails)){
 			echo "<br><br><br><br><br>getExecutionSQLWithIntegratedParams : Les tableaux sont de tailles différentes";
 			var_dump($params, $paramsDetails);
-		}
+		}*/
 		if(!$sql)
 			return $sql;
-		for($i = 0; $i < count($params); $i++){
-			$paramName = $paramsDetails[$i]['name'];
-			if(is_array($paramsNameValuePairs) && array_key_exists($paramName, $paramsNameValuePairs))
-				$params[$i] = $paramsNameValuePairs[$paramName];
+		//for($i = 0; $i < count($params); $i++){
+		foreach($paramsDetails as $paramName => $paramDetails){
 			// replace /*[[operator xxx]]*/ [operator] ? with /*[[operator xxx]]*/ 'value'
 			$sql = preg_replace('/(\/\*\[\[.*'.preg_quote($paramName) . '[^\]]*\]\]\*\/\s[^?]*)\?/'
-					    , '$1\'' . str_replace('\'', '\\\'', $params[$i]) . '\''
+					    , '$1\'' . str_replace('\'', '\\\'', $paramDetails['value']) . '\''
 					    , $sql);
 		}
 		return $sql;
