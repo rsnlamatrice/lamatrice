@@ -84,8 +84,15 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 		);
 
 		$moduleName = $request->get('for_module');
+		
 		if($moduleName === 'Contacts'){
+			//Ajout du JS spécifique à la validation du pré-import
 			$jsFileNames[] = 'modules.RSNImportSources.resources.RSNImportContacts';
+		} else {
+			//Si l'import concerne les Contacts, ajout du JS spécifique à la validation du pré-import
+			$controller = $this->getImportController($request);
+			if($controller && in_array('Contacts', $controller->getImportModules()))
+				$jsFileNames[] = 'modules.RSNImportSources.resources.RSNImportContacts';
 		}
 		
 		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
@@ -281,8 +288,9 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 			return;
 		}
 		$importId = $request->get('import_id');
-		if ($importController->needValidatingStep())
+		if ($importController->needValidatingStep()){
 			RSNImportSources_Queue_Action::updateStatus($importId, Import_Queue_Action::$IMPORT_STATUS_VALIDATING);
+		}
 		else{	
 			$user = Users_Record_Model::getCurrentUserModel();
 			if(RSNImportSources_Queue_Action::getUserCurrentImportInfos($user)){
@@ -388,6 +396,7 @@ class RSNImportSources_Index_View extends Vtiger_Index_View {
 							$lockOwner = Users_Record_Model::getInstanceById($lockInfo['userid'], 'Users');
 						}
 						$showStatus = true;
+						break;
 					}
 					
 					continue;
