@@ -153,6 +153,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			if ($account != null) {
 				$datesign = $rsnprelevementsData[0]['sepadatesignature'];
 				$etat = $rsnprelevementsData[0]['etat'];
+				$numcompte = $rsnprelevementsData[0]['numcompte'];
 				//test sur separum == $sourceId
 				$query = "SELECT crmid
 					FROM vtiger_rsnprelevements
@@ -162,11 +163,12 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					AND accountid = ?
 					AND sepadatesignature = ?
 					AND etat = ?
+					AND numcompte = ?
 					AND deleted = FALSE
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
-				$result = $db->pquery($query, array($sourceId, $account->getId(), $datesign, $etat));
+				$result = $db->pquery($query, array($sourceId, $account->getId(), $datesign, $etat, $numcompte));
 				if($db->num_rows($result)){
 					//already imported !!
 					$row = $db->fetch_row($result, 0); 
