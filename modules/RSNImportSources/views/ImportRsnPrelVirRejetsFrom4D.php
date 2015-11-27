@@ -228,7 +228,9 @@ class RSNImportSources_ImportRsnPrelVirRejetsFrom4D_View extends RSNImportSource
 			ON vtiger_rsnprelevements.accountid = vtiger_contactdetails.accountid
 		JOIN vtiger_rsnprelvirement
 			ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_rsnprelevements.rsnprelevementsid
-			AND ABS(vtiger_rsnprelvirement.dateexport - `$tableName`.dateexport) < 10*1000000
+			AND DATE(vtiger_rsnprelvirement.dateexport)
+				BETWEEN DATE(`$tableName`.dateexport) - INTERVAL 10 DAY
+					AND DATE(`$tableName`.dateexport) + INTERVAL 10 DAY
 		JOIN vtiger_crmentity as vtiger_crmentity_contacts
 			ON vtiger_contactdetails.contactid = vtiger_crmentity_contacts.crmid
 		JOIN vtiger_crmentity as vtiger_crmentity_prelvirements
