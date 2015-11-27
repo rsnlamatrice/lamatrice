@@ -452,8 +452,10 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			
 			$exists = self::addPickListValues($moduleName, $fieldName, $fieldValue);
 		}
-		else
+		else{
+			//var_dump('!checkPickListTableSequence '.$moduleName.', '.$pickListName);
 			$exists = false;
+		}
 		self::$checkPickListValueCache["$moduleName:$pickListName:$fieldValue"] = $exists;
 		return $exists;
 	}
@@ -461,7 +463,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	public static function addPickListValues($moduleName, $fieldName, $fieldValue){
 		$moduleModel = Settings_Picklist_Module_Model::getInstance($moduleName);
 		$fieldModel = Settings_Picklist_Field_Model::getInstance($fieldName, $moduleModel);
-		//var_dump('getPickListName', $fieldName, $fieldModel->getPickListName());
+		//var_dump('getPickListName', $fieldName, $fieldModel ? $fieldModel->getPickListName() : ' NOT $fieldModel');
 		$rolesSelected = array();
 		if($fieldModel->isRoleBased()) {
 			$userSelectedRoles = $request->get('rolesSelected',array());
