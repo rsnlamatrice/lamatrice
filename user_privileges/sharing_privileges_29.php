@@ -118,10 +118,6 @@ $Critere4D_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $Critere4D_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
-$RsnDons_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnDons_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
 $RsnPrelevements_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RsnPrelevements_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
@@ -137,10 +133,6 @@ $RsnTODO_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 $RsnReglements_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RsnReglements_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnAdhesions_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
-
-$RsnAdhesions_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNMedias_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
@@ -218,9 +210,9 @@ $RSNStatisticsFields_share_read_permission=array('ROLE'=>array(),'GROUP'=>array(
 
 $RSNStatisticsFields_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
-$RSNExportPreconfigured_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+$RSNStatisticsResults_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 
-$RSNExportPreconfigured_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+$RSNStatisticsResults_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
 $RSNPreconfiguredExport_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
 

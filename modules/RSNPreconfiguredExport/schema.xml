@@ -8,7 +8,7 @@
     `relatedmodule` VARCHAR(128) DEFAULT NULL,
     `classname` VARCHAR(128) DEFAULT NULL,
     `exportname` VARCHAR(128) DEFAULT NULL,
-    `description` VARCHAR(128) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
     `exporttype` VARCHAR(128) DEFAULT NULL,
     PRIMARY KEY (`rsnpreconfiguredexportid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
