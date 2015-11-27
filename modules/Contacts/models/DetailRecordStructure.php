@@ -35,9 +35,9 @@ class Contacts_DetailRecordStructure_Model extends Vtiger_DetailRecordStructure_
 			'mailingzip',
 			'mailingstreet2',
 			'mailingcity',
-			'mailingstreet',
-			'mailingcountry',
 			'mailingstreet3',
+			'mailingcountry',
+			'mailingstreet',
 			'mailingstate',
 			'mailingpobox',
 			
@@ -47,9 +47,9 @@ class Contacts_DetailRecordStructure_Model extends Vtiger_DetailRecordStructure_
 			'otherzip',
 			'otherstreet2',
 			'othercity',
-			'otherstreet',
-			'othercountry',
 			'otherstreet3',
+			'othercountry',
+			'otherstreet',
 			'otherstate',
 			'otherpobox',
 		);
