@@ -510,7 +510,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		case 'PayPal' :
 			return '514000';
 		case 'Espèces' :
-			return '514000';
+			return '511103';
 		case 'CB' :
 			return '514000';
 		case 'Virement' :
@@ -524,10 +524,12 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	
 	private static function getCompteEncaissementJournal($compte){
 		switch(strtoupper($compte)){
-		case '514000' :
-			return 'LBP';
-		default :
+		case '511103' :
+			return 'CS';//caisse
+		case '512107' :
 			return 'BFC';
+		default :
+			return 'LBP';
 		}
 	}
 	
@@ -549,6 +551,10 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				case 'PAYBOX' :
 				case 'PAYBOXP' :
 					return 'BFC';
+				case 'ESPèCES' :
+				case 'ESPÈCES' :
+				case 'ESPECES' :
+					return 'CS';
 				}
 			return 'LBP';
 		}

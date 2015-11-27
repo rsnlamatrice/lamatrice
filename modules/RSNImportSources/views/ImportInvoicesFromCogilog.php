@@ -1022,7 +1022,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		case '200142':
 			$data[$this->columnName_indexes['codeclient']] = '48017';
 			break;
-		}
 		case '4658L':
 		case '240081':
 		case '240165':
@@ -1073,6 +1072,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		case '1867362':
 			$data[$this->columnName_indexes['codeclient']] = '999999';
 			break;
+		}
 	}
 
 	function getModePaiement($paiementpropose, &$receivedcomments){

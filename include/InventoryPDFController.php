@@ -469,7 +469,7 @@ class Vtiger_InventoryPDFController {
 		elseif(!$street3 && $pobox)
 			$street3 .= $this->joinValues(array($street3, $pobox), ', ');
 		
-		$address .= "\n$street\n$street3\n$zipCode $city";
+		$address .= "\n$street3\n$street\n$zipCode $city";
 		if($country && $country != 'France')//ED151006 // TODO France en constante	
 			$address .= "\n".$country;
 		return preg_replace('/^\s+|\s*(\n)\s*|\s+$/', "\n", $address);
