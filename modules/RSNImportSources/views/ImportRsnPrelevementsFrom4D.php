@@ -203,7 +203,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					$record->set($fieldName, $value);
 					
 					$fieldName = 'rsnprelvtype';
-					$value = 'Virement périodique';
+					$value = 'Prélèvement périodique';
 					$record->set($fieldName, $value);
 					
 					//$db->setDebug(true);
@@ -483,7 +483,8 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 */
 	function getRsnPrelevementsValues($rsnprelevements) {
 	//TODO end implementation of this method
-			
+		$dejapreleve = $rsnprelevements['prlvInformations'][12] == '1' && $rsnprelevements['prlvInformations'][25] != '00/00/00'
+			?  $this->getMySQLDate($rsnprelevements['prlvInformations'][25]) : null;
 		$rsnprelevementsHeader = array(
 			'reffiche'	=> $rsnprelevements['prlvInformations'][0],
 			'nom'	=> $rsnprelevements['prlvInformations'][1],
@@ -497,7 +498,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			'datedernmodif'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][9]),
 			'heuredernmodif'	=> $rsnprelevements['prlvInformations'][10],
 			'datecreation'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][11]),
-			'dejapreleve'	=> $rsnprelevements['prlvInformations'][12],
+			'dejapreleve'	=> $dejapreleve,
 			'etat'	=> $rsnprelevements['prlvInformations'][13],
 			'datedernmodifetat'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][14]),
 			'datedernmodifmontant'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][15]),
@@ -513,6 +514,8 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			'datedernierpvt'	=> $rsnprelevements['prlvInformations'][25],
 			'heuretraitementpvt'	=> $rsnprelevements['prlvInformations'][26],
 		);
+		if($rsnprelevementsHeader['dejapreleve'])
+			$rsnprelevementsHeader['dejapreleve'] = $rsnprelevementsHeader['datedernierpvt'];
 		return $rsnprelevementsHeader;
 	}
 	

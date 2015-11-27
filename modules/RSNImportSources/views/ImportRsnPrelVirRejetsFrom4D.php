@@ -239,8 +239,7 @@ class RSNImportSources_ImportRsnPrelVirRejetsFrom4D_View extends RSNImportSource
 		$query .= " SET `_rsnprelvirementid` = vtiger_rsnprelvirement.rsnprelvirementid
 		, `$tableName`.status = ?
 		, vtiger_rsnprelvirement.rsnprelvirstatus = `$tableName`.motifrejet
-		, vtiger_rsnprelvirement.commentaire = CONCAT(IFNULL(vtiger_rsnprelvirement.commentaire, ''), '-', `$tableName`.daterejet)
-		, vtiger_crmentity_prelvirements.modifiedtime = NOW()
+		, vtiger_crmentity_prelvirements.modifiedtime = `$tableName`.daterejet
 		";
 		$query .= "
 			WHERE vtiger_crmentity_contacts.deleted = 0
