@@ -1550,6 +1550,31 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		
 		return true;
 	}
+	
+	
+	
+	//Répertorie toutes les valeurs possibles et les ajoute à la picklist
+	function addAllPicklistValues($moduleName, $fieldName, $pickListName){
+		
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, $moduleName);
+		
+		$query = 'SELECT DISTINCT '.$fieldName.'
+			FROM '.$tableName.'
+			WHERE IFNULL('.$fieldName.', "") != ""
+			ORDER BY '.$fieldName.'
+		';
+		$result = $db->query($query);
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		while($row = $db->fetch_row($result, false)){
+			RSNImportSources_Utils_Helper::checkPickListValue($moduleName, $pickListName, $pickListName, $row[$fieldName]);
+		}
+	}
 }
 
 ?>
