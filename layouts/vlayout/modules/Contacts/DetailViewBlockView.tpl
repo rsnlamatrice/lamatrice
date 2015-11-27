@@ -8,6 +8,9 @@
  * All Rights Reserved.
 *
 affichage du détail d'un contact
+
+
+A noter que les champs d'adresses sont triés dans modules\Contacts\models\DetailRecordStructure.php
  ********************************************************************************/
  
  ED141010 : add RECORD_MODEL=$RECORD
@@ -30,7 +33,7 @@ affichage du détail d'un contact
 				<img class="cursorPointer alignMiddle blockToggle {if !($IS_HIDDEN)} hide {/if} "  src="{vimage_path('arrowRight.png')}" data-mode="hide" data-id={$BLOCK_LIST[$BLOCK_LABEL_KEY]->get('id')}>
 				<img class="cursorPointer alignMiddle blockToggle {if ($IS_HIDDEN)} hide {/if}"  src="{vimage_path('arrowDown.png')}" data-mode="show" data-id={$BLOCK_LIST[$BLOCK_LABEL_KEY]->get('id')}>
 				&nbsp;&nbsp;{vtranslate({$BLOCK_LABEL_KEY},{$MODULE_NAME})}
-				{if BLOCK_DO_NOT}
+				{if $BLOCK_DO_NOT}
 					<div class="rsn_block_values_summary">{* see \layouts\vlayout\modules\RSN\resources\css\style.css *}
 						{assign var=COUNTER value=0}
 						{foreach item=FIELD_MODEL key=FIELD_NAME from=$FIELD_MODEL_LIST}
@@ -44,16 +47,37 @@ affichage du détail d'un contact
 					</div>
 				
 				{* ED150810 *}
+				{elseif $BLOCK_LABEL_KEY eq 'LBL_ADDRESS_INFORMATION'}
+					{if $RECORD->get('use_address2_for_revue') || $RECORD->get('use_address2_for_recu_fiscal')}
+						<label style="margin-left: 4em; display: inline-block; color: white;">
+							cf adresse secondaire 
+							{assign var=FIELD_NAME value='use_address2_for_revue'}
+							{if $RECORD->get($FIELD_NAME)}
+								,&nbsp;{vtranslate($FIELD_NAME, $MODULE_NAME)}
+							{/if}
+							{assign var=FIELD_NAME value='use_address2_for_recu_fiscal'}
+							{if $RECORD->get($FIELD_NAME)}
+								,&nbsp;{vtranslate($FIELD_NAME, $MODULE_NAME)}
+							{/if}
+						</label>
+					{/if}
+				
+				{* ED150810 *}
 				{elseif $BLOCK_LABEL_KEY eq 'Adresse secondaire'}
-					<label style="margin-left: 4em; display: inline-block; color: white;">
 					{assign var=FIELD_NAME value='use_address2_for_revue'}
-					&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
-					</label>
+					{if $RECORD->get($FIELD_NAME)}
+						<label style="margin-left: 4em; display: inline-block; color: white;">
+						&nbsp;{vtranslate($FIELD_NAME, $MODULE_NAME)}
+						</label>
+					{/if}
 					
-					<label style="margin-left: 2em; display: inline-block; color: white;">
 					{assign var=FIELD_NAME value='use_address2_for_recu_fiscal'}
-					&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
-					</label>
+					{if $RECORD->get($FIELD_NAME)}
+						<label style="margin-left: 2em; display: inline-block; color: white;">
+						&nbsp;{vtranslate($FIELD_NAME, $MODULE_NAME)}
+						</label>
+					{/if}
+					
 				{/if}
 			</th>
 		</tr>

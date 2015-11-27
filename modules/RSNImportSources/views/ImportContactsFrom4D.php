@@ -547,7 +547,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	
 		$fieldName = 'accounttype';
 		$contactType = TYPE_CONTACT_SUPPRIME;
-		if($record->get($fieldName) === $contactType) return;
+		if($contact->get($fieldName) === $contactType) return;
 				
 		$typeAbonne = $contactsData[0]['typeabonne'];
 		
@@ -669,7 +669,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		
 		$fieldName = 'accounttype';
 		$contactType = TYPE_CONTACT_SUPPRIME;
-		if($record->get($fieldName) == $contactType){
+		if($contact->get($fieldName) == $contactType){
 			$text .= "\nADRESSE SUPPRIMEE";
 		}
 		

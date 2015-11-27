@@ -379,7 +379,11 @@ class QueryGenerator {
 										if($nextFilter['isSubQuery'] && $nextFilter['viewid'] == $filter['viewid']){
 											//champ du module lié
 											if($nextFilter['subQueryColumn'] && $nextFilter['subQueryColumn']['isPanelVariable']){
-												$paramsValues[$nextFilter['subQueryColumn']['variableName']] = $nextFilter['subQueryColumn']['value'];
+												$paramsValues[$nextFilter['subQueryColumn']['variableName']] = array(
+													'name' => $nextFilter['subQueryColumn']['variableName'],
+													'value' => $nextFilter['subQueryColumn']['value'],
+													'comparator' => $nextFilter['subQueryColumn']['comparator'],
+												);
 												
 												$skipIndexes[] = $iNext;
 											}
@@ -391,8 +395,7 @@ class QueryGenerator {
 									}
 									
 									$relatedSql  = $panelRecord->getExecutionSQLWithIntegratedParams($paramsValues);
-									var_dump('panel $relatedSql', $paramsValues);
-									echo "<pre>$relatedSql</pre>";
+									//var_dump('panel $relatedSql', $paramsValues); echo "<pre>$relatedSql</pre>";
 								}
 								else { //"normal" relation
 									foreach($relationModels as $model)
