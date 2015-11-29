@@ -42,6 +42,7 @@ $languageStrings = array(
 	'LBL_COPY_BILLING_ADDRESS'     => 'Copier l\'adresse de facturation'        ,
 	'LBL_PRINT_RECU_FISCAL'	=> 'Impression du reçu fiscal',
 	'LBL_SEND_BY_EMAIL'              => 'Envoyer par email',
+	'LBL_RELATED_CONTACTS' => 'Contacts liés',
 );
 $jsLanguageStrings = array(
 	'LBL_RELATED_RECORD_DELETE_CONFIRMATION' => 'Confirmer la suppression?', 

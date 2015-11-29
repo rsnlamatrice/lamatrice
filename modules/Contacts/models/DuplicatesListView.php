@@ -15,11 +15,11 @@ class Contacts_DuplicatesListView_Model extends Vtiger_DuplicatesListView_Model 
 	
 
 	//TODO en théorie, le nom de la table vtiger_duplicateentities dépend du module
-	function getQuery() {
+	function getQuery($startIndex = 0, $pageLimit = 30) {
 		$queryGenerator = $this->get('query_generator');
 		$queryGenerator->addField('mailingstreet2');
 		
-		return parent::getQuery();
+		return parent::getQuery($startIndex, $pageLimit);
 	}
 	
 	public function getListViewEntries($pagingModel) {

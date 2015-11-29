@@ -4,15 +4,15 @@
  * Cet import s'effectue après l'importation des Donateurs web (qui fournit les coordonnées des contacts)
  * Les écritures avec un n° d'objet correspondent aux données RSNDonateursWeb et génèrent des factures de dons.
  * Les écritures sans n° d'objet génèrent, éventuellement un contact, et des factures de dons.
+ * TODO
  * Les réglements des commissions de Paypal sont à générer en Facture Fournisseur, à transférer en compta.
- * D'autres écritures, en montant négatif, correspondent à l'abonnement à DotSpirit.
- * Elles sont générées comme des Factures Fournisseur et doivent être transférées à la compta.
- * DotSpirit ne devrait plus, à ce jour, utiliser PayPal.
  */
 
 class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSources_ImportFromFile_View {
 
-	private $reglementOrigine = 'PayBox';
+	private $reglementOrigine = 'PayPal';
+	
+	public $invoiceNo_prefix = 'PPAL';
 
 	/**
 	 * Method to get the source import label to display.
@@ -69,34 +69,113 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	public function getDefaultFileEncoding() {
 		return 'ISO-8859-1';
 	}
+	
+	/**
+	 * Function that returns if the import controller has a validating step of pre-import data
+	 */
+	public function hasValidatingStep(){
+		return in_array('Contacts', $this->getImportModules());//héritage From4D
+	}
+	
+	/**
+	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
+	 */
+	public function needValidatingStep(){
+		if(!$this->hasValidatingStep())
+			return false;
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT * FROM ' . $tableName . '
+			WHERE ( _contactid_status = '.RSNImportSources_Import_View::$RECORDID_STATUS_NONE.'
+			OR _contactid_status >= '.RSNImportSources_Import_View::$RECORDID_STATUS_CHECK.')
+			AND status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE .'
+			LIMIT 1';
+
+		$result = $adb->query($sql);
+		if(!$result){
+			echo "<pre>$sql</pre>";
+			$adb->echoError('needValidatingStep');
+			return true;
+		}
+		$numberOfRecords = $adb->num_rows($result);
+		return $numberOfRecords;
+	}
+
+	function getImportPreviewTemplateName($moduleName){
+		if($this->request->get('mode') === 'validatePreImportData'
+		|| $this->request->get('mode') === 'getPreviewData'
+		|| $this->needValidatingStep())//$moduleName === 'Contacts' && 
+			return 'ImportPreviewContacts.tpl';
+		return parent::getImportPreviewTemplateName($moduleName);
+	}
 
 	/**
 	 * Method to get the imported fields for the contact module.
 	 * @return array - the imported fields for the contact module.
 	 *
-	 * Les contacts doivent tous pré-exister du fait des imports DonateursWeb ou Boutique
+	 * Les contacts devraient tous pré-exister du fait des imports DonateursWeb ou Boutique
+	 * sauf que ce n'est pas vrai pour les DR
 	 */
-	public function getContactsFields() {
+	public function getContactsFieldsMapping() {
 		return array(
-			'sourceid',
-			'lastname',
-			'firstname',
-			'email',
-			'mailingstreet',
-			'mailingstreet2',
-			'mailingstreet3',
-			'mailingzip',
-			'mailingcity',
-			'mailingstate',
-			'mailingcountry',
-			'phone',
-			'mobile',
-			'accounttype',
-			'leadsource',
+			'sourceid' => '',
 			
-			'_contactid',
+			"firstname" => "firstname",
+			"lastname" => "lastname",
+			"mailingstreet3" => "mailingstreet3",
+			"mailingstreet" => "mailingstreet",
+			"mailingzip" => "mailingzip",
+			"mailingcity" => "mailingcity",
+			"mailingcountry" => "mailingcountry",
+			"email" => "email",
+			'phone' => 'phone',
+			'mobile' => 'mobile',
+			'accounttype' => 'accounttype',
+			'leadsource' => 'leadsource',
+			'isgroup' => 'isgroup',
+			
+			"date" => "",//format MySQL
+			
+			//champ supplémentaire
+			"mailingstreet2" => "mailingstreet2",
+			"mailingpobox" => "mailingpobox",
+			"rsnnpai" => "rsnnpai",
+			
+			'_contactid' => '',
+			'_contactid_status' => '', //Type de reconnaissance automatique. Massively updated after preImport
+			'_contactid_source' => '', //Source de la reconnaissance automatique. Massively updated after preImport
 		);
 	}
+	function getContactsDateFields(){
+		return array();
+	}
+	function getContactsFieldsMappingForPreview(){
+		$fields = $this->getContactsFieldsMapping();
+		unset($fields['sourceid']);
+		unset($fields['isgroup']);
+		unset($fields['accounttype']);
+		unset($fields['leadsource']);
+		unset($fields['phone']);
+		unset($fields['mobile']);
+		unset($fields['date']);
+		$fields = array_move_assoc('mailingstreet2', 'lastname', $fields);
+		$fields = array_move_assoc('mailingstreet3', 'mailingstreet', $fields);
+		$fields = array_move_assoc('mailingpobox', 'mailingstreet3', $fields);
+		$fields = array_move_assoc('rsnnpai', 'lastname', $fields);
+		$fields = array_move_assoc('isgroup', 'email', $fields);
+		
+		return $fields;
+	}
+	
+	/**
+	 * Method to get the imported fields for the contacts module.
+	 * @return array - the imported fields for the contacts module.
+	 */
+	function getContactsFields() {
+		//laisser exactement les colonnes du fichier
+		return array_keys($this->getContactsFieldsMapping());
+	}
+	
 
 	/**
 	 * Method to get the imported fields for the invoice module.
@@ -121,6 +200,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'subject',
 			'invoicedate',
 			'invoicetype',
+			'typedossier',
 			//lines
 			'productcode',
 			'productid',
@@ -195,6 +275,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'errorcode',
 			'contactname',
 			'phone',
+			'firstname',
 			'lastname',
 			'street',
 			'street3',
@@ -202,7 +283,236 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'city',
 			'state',
 			'country',
+			
+			'_contactid',
 		);
+	}
+
+	/**
+	 * Method to process to the import of the Contacts module.
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importContacts($importDataController) {
+
+		$this->identifyContacts();
+		if($this->needValidatingStep()){
+			$this->skipNextScheduledImports = true;
+			$this->keepScheduledImport = true;
+			return;
+		}
+		
+		$config = new RSNImportSources_Config_Model();
+		
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$sql = 'SELECT * FROM ' . $tableName . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND _contactid_status IN ('.RSNImportSources_Import_View::$RECORDID_STATUS_SELECT.'
+									, '.RSNImportSources_Import_View::$RECORDID_STATUS_CREATE.'
+									, '.RSNImportSources_Import_View::$RECORDID_STATUS_UPDATE.')
+			ORDER BY id';
+
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+
+		if ($numberOfRecords <= 0) {
+			return;
+		}
+		if($numberOfRecords == $config->get('importBatchLimit')){
+			$this->keepScheduledImport = true;
+		}
+
+		$perf = new RSN_Performance_Helper($numberOfRecords);
+		for ($i = 0; $i < $numberOfRecords; ++$i) {
+			$row = $adb->raw_query_result_rowdata($result, $i);
+			$this->importOneContacts(array($row), $importDataController);
+			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh(true)){
+				$keepScheduledImport = true;
+				break;
+			}
+		}
+		$perf->terminate();
+		
+		if(isset($keepScheduledImport))
+			$this->keepScheduledImport = $keepScheduledImport;
+		elseif($numberOfRecords == $config->get('importBatchLimit'))
+			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
+		
+		if($this->keepScheduledImport)
+			$this->skipNextScheduledImports = true;
+	}
+
+	/**
+	 * Method to process to the import of a one contact.
+	 * @param $contactsData : the data of the contact to import
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importOneContacts($contactsData, $importDataController) {
+					
+		global $log;
+		
+		$entryId = $contactsData[0]['_contactid']; // initialisé dans le postPreImportData
+		if($entryId){
+			//clean up concatened ids
+			$entryId = preg_replace('/(^,+|,+$|,(,+))/', '$2', $entryId);
+			if(strpos($entryId, ',')){
+				//Contacts multiples : non validable
+				return false;
+			}
+		}
+		if(is_numeric($entryId)){
+			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
+			
+			//already imported !!
+			foreach ($contactsData as $contactsLine) {
+				$entityInfo = array(
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_UPDATED,
+					'id'		=> $entryId
+				);
+				
+				//TODO update all with array
+				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+			}
+		}
+		else {
+			$record = Vtiger_Record_Model::getCleanInstance('Contacts');
+			$record->set('mode', 'create');
+			
+			$this->updateContactRecordModelFromData($record, $contactsData);
+			
+			//$db->setDebug(true);
+			$record->save();
+			$contactId = $record->getId();
+			
+			if(!$contactId){
+				//TODO: manage error
+				echo "<pre><code>Impossible d'enregistrer le contact</code></pre>";
+				foreach ($contactsData as $contactsLine) {
+					$entityInfo = array(
+						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+					);
+					
+					//TODO update all with array
+					$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+				}
+
+				return false;
+			}
+			
+			$entryId = $this->getEntryId("Contacts", $contactId);
+			foreach ($contactsData as $contactsLine) {
+				$entityInfo = array(
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
+					'id'		=> $entryId
+				);
+				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
+			}
+			
+			$record->set('mode','edit');
+			$db = PearDatabase::getInstance();
+			$query = "UPDATE vtiger_crmentity
+				SET smownerid = ?
+				, createdtime = ?
+				WHERE vtiger_crmentity.crmid = ?
+			";
+			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
+								, $contactsData[0]['date']
+								, $contactId));
+			
+			$log->debug("" . basename(__FILE__) . " update imported contacts (id=" . $record->getId() . ", date=" . $contactsData[0]['date']
+					. ", result=" . ($result ? " true" : "false"). " )");
+			if( ! $result){
+				$db->echoError(__FILE__.'::importOneContacts');
+			}
+			return $record;
+		}
+
+		return true;
+	}
+	
+	
+	/**
+	 * Method called before the data are really imported.
+	 *  This method must be overload in the child class.
+	 *
+	 * Note : pas de postPreImportData() à cause de la validation du pre-import
+	 */
+	function beforeImportInvoice() {
+		if(!$this->hasValidatingStep())
+			return;
+		$db = PearDatabase::getInstance();
+		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$invoiceTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
+							
+		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
+		*/
+		$query = "UPDATE $contactsTableName
+		JOIN  $invoiceTableName
+			ON ($invoiceTableName.sourceid = `$contactsTableName`.sourceid
+				OR (
+					$invoiceTableName.email = `$contactsTableName`.email AND
+					NOT($invoiceTableName.email IS NULL OR $invoiceTableName.email = '')
+				)
+			)
+		";
+		$query .= " SET `$invoiceTableName`._contactid = `$contactsTableName`.recordid
+		/* affecte le status FAILED si contactid est inconnu */
+		, `$invoiceTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$invoiceTableName`.status)";
+		$query .= "
+			WHERE `$invoiceTableName`._contactid IS NULL
+			AND `$invoiceTableName`.status = ? 
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Method called before the data are really imported.
+	 *  This method must be overload in the child class.
+	 *
+	 * Note : pas de postPreImportData() à cause de la validation du pre-import
+	 */
+	function beforeImportRsnReglements() {
+		if(!$this->hasValidatingStep())
+			return;
+		$db = PearDatabase::getInstance();
+		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		$rsnreglementsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
+							
+		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
+		*/
+		$query = "UPDATE $contactsTableName
+		JOIN  $rsnreglementsTableName
+			ON ($rsnreglementsTableName.numpiece = `$contactsTableName`.sourceid
+				OR (
+					$rsnreglementsTableName.email = `$contactsTableName`.email AND
+					NOT($rsnreglementsTableName.email IS NULL OR $rsnreglementsTableName.email = '')
+				)
+			)
+		";
+		$query .= " SET `$rsnreglementsTableName`._contactid = `$contactsTableName`.recordid
+		/* affecte le status FAILED si contactid est inconnu */
+		, `$rsnreglementsTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$rsnreglementsTableName`.status)";
+		$query .= "
+			WHERE `$rsnreglementsTableName`._contactid IS NULL
+			AND `$rsnreglementsTableName`.status = ? 
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		return true;
 	}
 	
 
@@ -211,6 +521,15 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importRsnReglements($importDataController) {
+
+		if($this->needValidatingStep()){
+			$this->skipNextScheduledImports = true;
+			$this->keepScheduledImport = true;
+			return;
+		}
+
+		$this->beforeImportRsnReglements();
+		
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
@@ -371,6 +690,15 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importInvoice($importDataController) {
+
+		if($this->needValidatingStep()){
+			$this->skipNextScheduledImports = true;
+			$this->keepScheduledImport = true;
+			return;
+		}
+
+		$this->beforeImportInvoice();
+		
 		global $adb;
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
@@ -511,7 +839,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					$record->set('account_id', $account->getId());
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
-					$record->set('typedossier', 'Facture'); //TODO
+					$record->set('typedossier', $invoiceData[0]['typedossier']);
 					$record->set('invoicestatus', 'Approved');//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
@@ -688,6 +1016,31 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	}
 
 
+
+	//Mise à jour des données du record model nouvellement créé à partir des données d'importation
+	private function updateContactRecordModelFromData($record, $contactsData){
+		
+		$fieldsMapping = $this->getContactsFieldsMapping();
+		foreach($contactsData[0] as $fieldName => $value)
+			if(!is_numeric($fieldName) && $fieldName != 'id'){
+				$vField = $fieldsMapping[$fieldName];
+				if($vField)
+					$record->set($vField, $value);
+			}
+					
+		//cast des DateTime
+		foreach($this->getContactsDateFields() as $fieldName){
+			$value = $record->get($fieldName);
+			if( is_object($value) )
+				$record->set($fieldsMapping[$fieldName], $value->format('Y-m-d'));
+		}
+		
+		$fieldName = 'isgroup';
+		$record->set('isgroup', 0);
+		$record->set('leadsource', 'PETITION');//TODO
+		
+		
+	}
 	/**
 	 * Method that return the formated information of a contact found in the file.
 	 * @param $invoiceInformations : the invoice informations data found in the file.
@@ -715,10 +1068,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'mobile'		=> $mobile,
 			'accounttype'		=> 'Donateur Web',
 			'leadsource'		=> 'PAYPAL',
+			'date'		=> $invoice['invoicedate'],
 		);
-		
-		//numérique
-		$contactsHeader['_contactid_status'] = null;
 		
 		//TODO 'France' en constante de config
 		if(strcasecmp($contactsHeader['mailingcountry'], 'France') === 0)
@@ -1115,8 +1466,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			$invoiceType = $this->getInvoiceType($reglement['typeregl']);
 			
 			$externalid = $reglement['refdonateurweb'] ? $reglement['refdonateurweb'] : $reglement['numpiece'];//transactionid
-			$clickSource = $reglement['cliksource'];
-			$sourceId = $invoiceType . $externalid;
+			$clickSource = $reglement['clicksource'];
+			$sourceId = $this->invoiceNo_prefix . $externalid;
 			if(!is_numeric($externalid))
 				$externalid = null;
 			switch($invoiceType){
@@ -1138,6 +1489,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				break;
 			}
 	
+			$typeDossier = $this->getInvoiceTypeDossier($invoiceType);
 			$invoiceValues = array(
 				'sourceid'		=> $sourceId,
 				'rsndonateurweb_externalid' => $externalid,
@@ -1145,6 +1497,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				'subject'		=> $product['name'],
 				'invoicedate'		=> $date,
 				'affaire_code' => $clickSource,
+				'typedossier' => $typeDossier,
 			);
 		}
 		
@@ -1153,9 +1506,10 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				$invoiceValues[$fieldName] = decode_html($donateurWeb->get($fieldName));
 		}
 		elseif($reglement){
-			foreach(array('lastname', 'email', 'street', 'street3', 'zip', 'city', 'state', 'country') as $fieldName)
+			foreach(array('lastname', 'firstname', 'email', 'street', 'street3', 'zip', 'city', 'state', 'country') as $fieldName)
 				$invoiceValues[$fieldName] = $reglement[$fieldName];
 		}
+		
 		if(isset($product) && $reglement)
 			$invoiceValues = array_merge($invoiceValues, array(
 				'productcode'	=> $product['code'],
@@ -1240,7 +1594,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'currency_id'		=> $currencyId,
 			'typeregl'		=> $typeregl,
 			'rsnmoderegl'		=> 'PayPal',
-			'lastname'		=> $reglement[3],
+			'lastname'		=> trim($reglement[3]),
 			'street'		=> $reglement[33],
 			'street3'		=> $reglement[34],
 			'zip'			=> $reglement[37],
@@ -1251,7 +1605,11 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'contactname'		=> $reglement[3] . ' - ' . $reglement[10],
 			'clicksource'		=> $clickSource,
 		);
-
+		//Le nom est en un seul champ
+		if(strpos($reglementValues['lastname'], ' ') !== false){
+			$reglementValues['firstname'] = explode(' ', $reglementValues['lastname'])[0];
+			$reglementValues['lastname'] = trim(substr($reglementValues['lastname'], strlen($reglementValues['firstname'])));
+		}
 		return $reglementValues;
 	}
 	
@@ -1299,6 +1657,22 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			throw new Exception('Type de réglement inconnu : "' . $typeregl . '"');
 		}
 		return FALSE;
+	}
+	
+	/**
+	 * Retourne le type de facture associée : BOU, DR, DP
+	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
+	 */
+	function getInvoiceTypeDossier($invoiceType){
+		switch($invoiceType){
+		case 'PI': //Purchase invoice
+			return 'Facture fournisseur';
+		case 'DP':
+		case 'DR':
+			return 'Don DP/DR';
+		default:
+			return 'Boutique';
+		}
 	}
 	
 	/**
@@ -1353,6 +1727,31 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		$row = $db->fetch_row($result, 0);
 		return Vtiger_Record_Model::getInstanceById( $row['crmid'], 'RSNDonateursWeb');
+	}
+	
+	
+	/**
+	 * Initialise les données de validation des Contacts
+	 */
+	function initDisplayPreviewData() {
+		$this->initDisplayPreviewContactsData();
+		return parent::initDisplayPreviewData();
+	}
+	
+	/**
+	 * Method to get the pre Imported data in order to preview them.
+	 *  By default, it return the values in the pre-imported table.
+	 *  This method can be overload in the child class.
+	 * @return array - the pre-imported values group by module.
+	 */
+	public function getPreviewData($request, $offset = 0, $limit = 24, $importModules = false) {
+		if(!$this->hasValidatingStep())
+			return parent::getPreviewData($request, $offset, $limit, $importModules);
+		if(!$importModules
+		&& $this->needValidatingStep())
+			$importModules =array('Contacts');
+		$data = parent::getPreviewData($request, $offset, $limit, $importModules);
+		return RSNImportSources_Utils_Helper::getPreviewDataWithMultipleContacts($data);
 	}
 	
 }

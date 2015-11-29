@@ -951,16 +951,20 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		
 		//mise à jour de la facture
 		$query = 'UPDATE vtiger_invoice
+			JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			SET received = IFNULL(received,0) + ?
 			, balance = received - total
 			, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)
-			WHERE invoiceid = ?';
+			WHERE vtiger_invoice.invoiceid = ?
+			AND (IFNULL(receivedreference, \'\') = \'\' OR receivedreference <> ?)';
 			
 		$amount = self::str_to_float($reglement->get('amount'));
 		
 		$params = array(
-			  $amount
+			$amount
 			, $invoice->getId()
+			, $reglement->get('numpiece')
 		);
 		
 		$result = $adb->pquery($query, $params);
@@ -975,14 +979,16 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$query = 'UPDATE vtiger_invoicecf
 			SET receivedreference = IF(receivedreference IS NULL OR receivedreference = \'\', ?, CONCAT(receivedreference, \', \', ?))
 			, receivedcomments = IF(receivedcomments IS NULL OR receivedcomments = \'\', ?, CONCAT(receivedcomments, \'\\n\', ?))
-			, receivedmoderegl = IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', ?, CONCAT(receivedmoderegl, \', \', ?))
-			WHERE invoiceid = ?';
+			, receivedmoderegl = ?
+			WHERE invoiceid = ?
+			AND (IFNULL(receivedreference, \'\') = \'\' OR receivedreference <> ?)';
 		
 		$params = array(
 			$reglement->get('numpiece'), $reglement->get('numpiece')
 			, $receivedComments, $receivedComments
-			, $reglement->get('rsnmoderegl'), $reglement->get('rsnmoderegl')
+			, $reglement->get('rsnmoderegl')
 			, $invoice->getId()
+			, $reglement->get('numpiece')
 		);
 		
 		$result = $adb->pquery($query, $params);
