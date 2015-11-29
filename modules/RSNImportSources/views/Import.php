@@ -953,8 +953,13 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @return int - the product id | null.
 	 */
 	function getProductId(&$productcode, &$isProduct = NULL, &$name = NULL) {
-        //TODO cache
-		
+		$ini_productcode = $productcode;
+		$data = Vtiger_Cache::get('ProductCode::Info', $productcode);
+        if($data){
+			$isProduct = $data['isProduct'];
+			$productcode = $data['productcode'];
+			return $data['productid'];
+		}
 		$db = PearDatabase::getInstance();
 		if($isProduct !== TRUE){
 			if($productcode){
@@ -964,6 +969,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$searchKey = 'servicename';
 				$searchValue = $name;
 				if(!$searchValue){
+					Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>false, 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 					echo "\nProduit sans code ni nom !";
 					return false;
 				}
@@ -984,6 +990,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$isProduct = false;
 				$name = $row['label'];
 				$productcode = $row['productcode'];
+				Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>$row['serviceid'], 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 				return $row['serviceid'];
 			}
 		}
@@ -996,6 +1003,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$searchKey = 'productname';
 				$searchValue = $name;
 				if(!$searchValue){
+					Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>false, 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 					echo "\nProduit sans code ni nom !";
 					return false;
 				}
@@ -1016,10 +1024,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$isProduct = true;
 				$name = $row['label'];
 				$productcode = $row['productcode'];
+				Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>$row['productid'], 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 				return $row['productid'];
 			}
 		}
 
+		Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>false, 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 		return null;
 	}
 	

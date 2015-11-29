@@ -38,12 +38,12 @@ class Vtiger_DuplicatesListView_Model extends Vtiger_ListView_Model {
 		$listViewContoller = $this->get('listview_controller');
 
 		//echo "<br><br><br><br>".__FILE__;
-
-		$listQuery = $this->getQuery();
-		//echo("<p style=\"margin-top:6em\"> ICICICI getListViewEntries $listQuery </p>");
 	
 		$startIndex = $pagingModel->getStartIndex();
 		$pageLimit = $pagingModel->getPageLimit();
+
+		$listQuery = $this->getQuery($startIndex, $pageLimit);
+		//echo("<p style=\"margin-top:6em\"> ICICICI getListViewEntries $listQuery </p>");
 
 		//duplicatestatus, duplicatefields
 		$orderBy = 'crmid1, crmid';
@@ -56,8 +56,9 @@ class Vtiger_DuplicatesListView_Model extends Vtiger_ListView_Model {
 		$viewid = ListViewSession::getCurrentView($moduleName);
 		ListViewSession::setSessionQuery($moduleName, $listQuery, $viewid);
 
-		$listQuery .= " LIMIT $startIndex,".($pageLimit+1);
+		$listQuery .= " LIMIT 0,".($pageLimit+1);//suppression $startIndex car intégré dans getQuery($startIndex, $pageLimit)
 
+		
 		$listResult = $db->pquery($listQuery, array());
 		if(!$listResult){
 			echo $db->echoError() . '<pre>' . $listQuery . '</pre>';
@@ -79,7 +80,6 @@ class Vtiger_DuplicatesListView_Model extends Vtiger_ListView_Model {
 $reflector = new ReflectionClass($listViewContoller);
 echo $reflector->getFileName();
 var_dump($listResult);*/
-                    
 		$index = 0;
 		$firstEntityId = 0;
 		$firstEntityId1 = 0;
@@ -128,18 +128,15 @@ var_dump($listResult);*/
 	}
 
 	//TODO en théorie, le nom de la table vtiger_duplicateentities dépend du module
-	function getQuery() {
+	function getQuery($startIndex = 0, $pageLimit = 30) {
 		$queryGenerator = $this->get('query_generator');
 		$listQuery = $queryGenerator->getQuery();
-		
-		//status
-		$requestSearchQuery = $this->getRequestSearchQuery();
-		if($requestSearchQuery)
-			$sqlParts[1] .= ' AND ('.$requestSearchQuery.')';
 			
 		//FROM xxx WHERE
 		$sqlParts = explode(' WHERE ', $listQuery);
 		
+		//status
+		$requestSearchQuery = $this->getRequestSearchQuery();
 		if($requestSearchQuery)
 			$requestSearchQuery = "WHERE $requestSearchQuery";
 			
@@ -148,7 +145,7 @@ var_dump($listResult);*/
 				SELECT *
 				FROM vtiger_duplicateentities
 				'.$requestSearchQuery.'
-				LIMIT 0,30
+				LIMIT '.$startIndex.', '.($pageLimit * 2).'
 			) vtiger_duplicateentities
 			ON vtiger_crmentity.crmid = vtiger_duplicateentities.crmid1
 			OR vtiger_crmentity.crmid = vtiger_duplicateentities.crmid2
@@ -230,5 +227,33 @@ var_dump($listResult);*/
 			$viewId = $customView->getViewId($moduleName);
 		}
 		return self::getInstanceWithClassName('DuplicatesListView', $moduleName, $viewId, $moreFilters);
+	}
+	
+	/**
+	 * Function to get the list view entries
+	 * @param Vtiger_Paging_Model $pagingModel
+	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
+	 */
+	public function getListViewCount() {
+		$db = PearDatabase::getInstance();
+
+		$queryGenerator = $this->get('query_generator');
+		
+		$this->setListViewSearchConditions();
+		
+		$requestSearchQuery = $this->getRequestSearchQuery();
+		if($requestSearchQuery)
+			$requestSearchQuery = "WHERE $requestSearchQuery";
+		$listQuery = 'SELECT COUNT(*)
+				FROM vtiger_duplicateentities
+				'.$requestSearchQuery.'
+		';
+		$listResult = $db->pquery($listQuery, array());
+		if(!$listResult){
+			$db->echoError('Impossible de compter le nombre de lignes.');
+			echo '<pre>'; print_r($listQuery); echo '</pre>'; 
+			return 0;
+		}
+		return $db->query_result($listResult, 0, 0);
 	}
 }

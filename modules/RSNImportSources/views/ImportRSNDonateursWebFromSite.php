@@ -158,7 +158,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		return $fields;
 	}
 	
-	
 	/**
 	 * Method to get the imported fields for the contacts module.
 	 * @return array - the imported fields for the contacts module.
@@ -521,8 +520,6 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 
 		return true;
 	}
-	
-	
 	
 
 	//Mise à jour des données du record model nouvellement créé à partir des données d'importation
@@ -906,7 +903,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	}
 	
 	function getClickSource($clickSource){
-		if ($clickSource == "ACAR 30")
+		if ($clickSource === 'ACAR 30')
 			return "ACAR+30";
 		return $clickSource;
 	}

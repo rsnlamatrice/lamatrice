@@ -522,4 +522,14 @@ class Products_Record_Model extends Vtiger_Record_Model {
 	
 		return $destRecordModel;
 	}
+	
+	
+	/** ED151127
+	 * Function to save the current Record Model
+	 */
+	public function save() {
+		if($this->get('productcode'))
+			$this->set('productcode', strtoupper($this->get('productcode')));
+		return parent::save();
+	}
 }

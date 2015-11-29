@@ -29,13 +29,10 @@
 		</div>
 		<br>
 		<div class="visible-on-hover"><i class="icon-play"></i>
-			<pre class="hide">{$QUERY}
-			
-			<div style="font-family: monospace;">Paramètres : {print_r($QUERY_PARAMS_VALUES, true)}
-			</div></pre>
+			<pre class="hide">{$QUERY}</pre>
 		</div>
 	</div>
 	<div class="pull-right alignMiddle">
-		<a href="">voir les contacts</a>
+		<a href="" title="TODO">voir les contacts</a>
 	</div>
 {/strip}

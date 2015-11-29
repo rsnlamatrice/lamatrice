@@ -544,8 +544,13 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		                    
 				    
 					$coupon = $this->getCoupon($invoiceData[0]);
-					if($coupon != null)
+					if($coupon){
 						$record->set('notesid', $coupon->getId());
+						$campagne = $this->getCampaign($invoiceData[0]['affaire_code'], $coupon);
+						if($campagne)
+							$record->set('campaign_no', $campagne->getId());
+						
+					}
 					/*$campagne = self::findCampagne($srcRow, $coupon);
 					if($campagne)
 						$record->set('campaign_no', $campagne->getId());*/
@@ -742,7 +747,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 * @param $invoice : the invoice data.
 	 */
 	function checkContact($invoice) {
-		$contactData = $this->getContactValues($invoice['invoiceInformations']);
+		$contactData = $this->getContactValues($invoice['header']);
 		
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
@@ -950,7 +955,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$nextLine = $fileReader->readNextDataLine($fileReader);
 		if ($nextLine != false) {
 			$invoice = array(
-				'invoiceInformations' => $nextLine,
+				'header' => $nextLine,
 				'detail' => array());
 			do {
 				$cursorPosition = $fileReader->getCurentCursorPosition();
@@ -1037,10 +1042,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	 * @return array : the formated data of the invoice.
 	 */
 	function getInvoiceValues($invoice) {
-	//TODO end implementation of this method
 		$invoiceValues = array();
-		$date = $this->getMySQLDate($invoice['invoiceInformations'][0]);
-		$sourceId = $invoice['invoiceInformations'][41];
+		$date = $this->getMySQLDate($invoice['header'][0]);
+		$sourceId = $invoice['header'][41];
 		$numcart = explode('-',$sourceId);
 		if(count($numcart) == 2)
 			$numcart = $numcart[1];
@@ -1050,16 +1054,16 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'sourceid'		=> $sourceId,
 			'numcart'		=> $numcart,
 			'num_ligne'		=> $numLigne++,
-			'lastname'		=> $invoice['invoiceInformations'][46],
-			'firstname'		=> $invoice['invoiceInformations'][45],
-			'email'			=> $invoice['invoiceInformations'][22],
-			'street'		=> $invoice['invoiceInformations'][13],
-			'street2'		=> $invoice['invoiceInformations'][14],
-			'street3'		=> $invoice['invoiceInformations'][15],
-			'zip'			=> $invoice['invoiceInformations'][16],
-			'city'			=> $invoice['invoiceInformations'][17],
-			'country' 		=> $invoice['invoiceInformations'][19],
-			'subject'		=> $invoice['invoiceInformations'][11],
+			'lastname'		=> $invoice['header'][46],
+			'firstname'		=> $invoice['header'][45],
+			'email'			=> $invoice['header'][22],
+			'street'		=> $invoice['header'][13],
+			'street2'		=> $invoice['header'][14],
+			'street3'		=> $invoice['header'][15],
+			'zip'			=> $invoice['header'][16],
+			'city'			=> $invoice['header'][17],
+			'country' 		=> $invoice['header'][19],
+			'subject'		=> $invoice['header'][11],
 			'invoicedate'		=> $date,
 		);
 		foreach ($invoice['detail'] as $product) {
@@ -1215,7 +1219,6 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	}
 
 
-	
 	
 	/**
 	 * Method called before the data are really imported.
