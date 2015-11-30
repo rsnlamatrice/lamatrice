@@ -13,7 +13,7 @@
 <div class="detailViewInfo">
 	<form method="GET" action="{$FORM_URL}">
 		<input type="hidden" name="module" value="{$MODULE_NAME}"/>
-		<input type="hidden" name="view" value="GestionVSCompta"/>
+		<input type="hidden" name="view" value="GestionVSComptaRows"/>
 		<label>Mois à analyser :</label>
 		<select name="date">{foreach item=DATE_LABEL key=DATE from=$DATES}
 			<option value="{$DATE}">{$DATE_LABEL}</option>
@@ -21,16 +21,24 @@
 		<input type="submit"/>
 	</form>
 	<table class="table table-bordered equalSplit detailview-table">
-		<caption style="text-align: left;">Ecart entre Lamatrice et Cogilog <small>(les écarts négatifs indiquent qu'il y a plus dans La Matrice que dans Cogilog)</small></caption>
-		{foreach item=COMPTES key=DATE from=$ENTRIES}
+		<caption style="text-align: left;">Ecritures dans Lamatrice et Cogilog <small></small></caption>
+		{foreach item=SOURCES_ENTRIES key=DATE from=$ENTRIES}
 			<tr>
-				<td><b>{$DATE}</b></td>
-				{foreach item=SOURCES key=COMPTE from=$COMPTES}
-					<td><b>{$COMPTE}</b>
-						<br>
-						{if count($SOURCES) eq 2}<span style="color:blue">écart&nbsp;:&nbsp;{money_format('%.2n', $SOURCES['LAM'] - $SOURCES['COG'])}</span>
-						{elseif $SOURCES['COG']}<span style="color:red">Cogilog&nbsp;:&nbsp;{money_format('%.2n', $SOURCES['COG'])}</span>
-						{elseif $SOURCES['LAM']}<span style="color:green">La Matrice&nbsp;:&nbsp;{money_format('%.2n', $SOURCES['LAM'])}</span>
+				<td style="width: 10%;"><b>{$DATE}</b></td>
+				{foreach item=SOURCE_LABEL key=SOURCE from=$SOURCES}
+					<td style="vertical-align: top;"><b>{$SOURCE} {$SOURCE_LABEL}</b>
+						{if $SOURCES_ENTRIES[$SOURCE]}
+							<table>
+							{foreach item=ECRITURE from=$SOURCES_ENTRIES[$SOURCE]}
+								<tr>
+									<td colspan="2" style="border-top: 1px solid black;">{$ECRITURE['nomfacture']}</td>
+								</tr>
+								<tr>
+									<td style="text-align: right;">{$ECRITURE['compte']}</td>
+									<td style="text-align: right;">{$ECRITURE['montant']}</td>
+								</tr>
+							{/foreach}
+							</table>
 						{/if}
 					</td>
 				{/foreach}

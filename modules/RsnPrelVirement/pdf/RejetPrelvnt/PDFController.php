@@ -38,9 +38,7 @@ class Vtiger_RejetPrelvnt_PDFController extends Vtiger_LetterToAccount_PDFContro
 	Vous avez autorisé notre association à prélever sur votre compte [[NomDeLaBanque]] numéro [[NuméroCompte]] au nom de [[depositaire]] [[periodicite]], la somme de [[montant]] euros. Nous sommes reconnaissants du soutien que vous nous apportez en nous accordant ce don régulier.
 
 	Cependant, je me permets de vous signaler que votre prélèvement à l’échéance du [[dateexport]] a été rejeté pour le motif suivant : \"[[MotifRejet]]\".
-	Afin d'éviter des frais bancaires répétés (notre banque retient 10€ par prélèvement rejeté), nous souhaiterions savoir si nous pouvons poursuivre ces prélèvements réguliers sur votre compte, ou si vous souhaitez y mettre fin.
-
-	Merci de me préciser vos intentions pour les prochains prélèvements en me retournant le coupon-réponse ci-dessous par courrier ou par mail.
+	Afin d'éviter des frais bancaires répétés, merci de me préciser vos intentions pour les prochains prélèvements en me retournant le coupon-réponse ci-dessous par courrier ou par mail.
 	Merci de votre compréhension.
 
 	Pour le service de  comptabilité,

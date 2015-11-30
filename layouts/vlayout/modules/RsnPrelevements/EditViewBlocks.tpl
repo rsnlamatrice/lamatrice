@@ -51,6 +51,14 @@
 					{/if}
 				</span>
 			{/if}
+			{if $RelatedPrelVirementsCount}
+				<br>
+				<span class="recordLabel font-x-x-large" style="color: red">
+				{if $RelatedPrelVirementsCount == 1}Un ordre de prélèvement existe déjà
+				{else}{$RelatedPrelVirementsCount} ordres de prélèvement existent déjà
+				{/if}
+				</span>
+			{/if}
 			</h3>
 		{else}
 			<h3 class="span8 textOverflowEllipsis">{vtranslate('LBL_CREATING_NEW', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)}</h3>

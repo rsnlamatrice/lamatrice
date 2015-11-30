@@ -63,53 +63,48 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		$laMatEntries = $this->getLaMatriceRowsEntries($dateDebut->format('Y-m-d'), $dateFin->format('Y-m-d'), $compte);
 		$cogEntries = $this->getCogilogRowsEntries($dateDebut->format('Y-m-d'), $dateFin->format('Y-m-d'), $compte);
-		
-		$entries = array();
-		foreach($laMatEntries as $date => $comptes){
-			if(!$entries[$date])
-				$entries[$date] = array();
-			foreach($comptes as $compte => $montant)
-				if($montant != 0)
-					$entries[$date][$compte] = array('LAM' => $montant);
-		}
-		foreach($cogEntries as $date => $comptes){
-			if(!$entries[$date])
-				$entries[$date] = array();
-			foreach($comptes as $compte => $montant){
-				if(!$entries[$date][$compte]){
-					if($montant != 0)
-						$entries[$date][$compte] = array('COG' => $montant);
-				}
-				elseif(abs($entries[$date][$compte]['LAM'] - $montant) < $ecartMontants)
-					unset($entries[$date][$compte]);
+		//var_dump($laMatEntries);
+		//var_dump($cogEntries);
+		if(1){
+			$entries = array();
+			foreach($laMatEntries as $date => $ecritures){
+				if(!$entries[$date])
+					$entries[$date] = array('LAM'=>array());
+				foreach($ecritures as $ecriture)
+					if($ecriture['montant'] != 0)
+						$entries[$date]['LAM'][] = $ecriture;
+			}
+			foreach($cogEntries as $date => $ecritures){
+				if(!$entries[$date])
+					$entries[$date] = array('COG'=>array());
 				else
-					$entries[$date][$compte]['COG'] = $montant;
+					$entries[$date]['COG'] = array();
+				$laMatEntries = $entries[$date]['LAM'];
+				foreach($ecritures as $ecriture)
+					if($ecriture['montant'] != 0){
+						
+						if($laMatEntries){
+							$found = false;
+							foreach($laMatEntries as $laMatIndex => $laMatEntry){
+								if($laMatEntry['compte'] === $ecriture['compte']
+								&& $laMatEntry['montant'] == $ecriture['montant']){
+									unset($laMatEntries[$laMatIndex]);
+									unset($entries[$date]['LAM'][$laMatIndex]);
+									$found = true;
+									break;
+								}
+								if($laMatEntry['montant'] > $ecriture['montant'])
+									break;
+							}
+							if($found)
+								continue;
+						}
+						
+						$entries[$date]['COG'][] = $ecriture;
+					}
 			}
-			if(count($entries[$date]) === 0)
-				unset($entries[$date]);
 		}
-		$allComptes = array();
-		foreach($entries as $date => $comptes){
-			foreach($comptes as $compte => $data){
-				if(count($data) === 0)
-					unset($entries[$date][$compte]);
-				else
-					$allComptes[$compte] = true;
-			}
-			if(count($entries[$date]) === 0)
-				unset($entries[$date]);
-		}
-		foreach($entries as $date => $comptes){
-			$totaux = array('LAM'=>0.0,'COG'=>0.0,);
-			foreach($comptes as $compte => $data){
-				$totaux['LAM'] += $data['LAM'];
-				$totaux['COG'] += $data['COG'];
-			}
-			$entries[$date] = array('TOTAUX' => $totaux) + $entries[$date];
-		}
-		
-		
-		$viewer->assign('COMPTES', $allComptes);
+		$viewer->assign('SOURCES', array('COG'=>'Cogilog', 'LAM'=>'La Matrice'));
 		$viewer->assign('ENTRIES', $entries);
 	}
 	
@@ -147,7 +142,6 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		AND `vtiger_invoice`.`invoicedate` >= ?
 		AND `vtiger_invoice`.`invoicedate` < ?
-		AND `vtiger_invoice`.`invoicedate` < ?
 		
 		ORDER BY `Date`, `Montant`
 		";
@@ -157,7 +151,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		$result = $adb->pquery($query, $params);
 		
 		if(!$result){
-			$adb->echoError('getLaMatriceEntries');
+			$adb->echoError('getLaMatriceRowsEntries');
 			return;
 		}
 		$nRow = 0;
@@ -207,9 +201,9 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		$entries = array();
 		foreach($rows as $row){
-			if(!$entries[$row['Date']])
-				$entries[$row['Date']] = array();
-			$entries[$row['Date']][] = $row;
+			if(!$entries[$row['date']])
+				$entries[$row['date']] = array();
+			$entries[$row['date']][] = $row;
 		}
 		return $entries;
 	}
