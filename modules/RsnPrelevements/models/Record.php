@@ -88,10 +88,10 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 		$recordModel->set('rsnprelvirstatus', 'Ok');
 		$recordModel->save();
 		
-		if(!$this->get('dejapreleve')){
+		if(!$this->get('dejapreleve') || $this->get('dejapreleve') == '0000-00-00'){
 			$this->set('mode', 'edit');
 			$this->set('dejapreleve', date('d-m-Y'));
-			$this->set('montant', str_replace('.', ',', $prelvnt->get('montant')));//bug de prise en compte de la virgule comme séparateur de millier
+			$this->set('montant', str_replace('.', ',', $this->get('montant')));//bug de prise en compte de la virgule comme séparateur de millier
 			$this->save();
 		}
 		//S'assure de l'abonnement à la revue
@@ -120,17 +120,29 @@ class RsnPrelevements_Record_Model extends Vtiger_Record_Model {
 	 * @return true if there is one ore more related RsnPrelVirement.
 	 */
 	public function hasRelatedPrelVirements() {
+		return $this->getRelatedPrelVirementsCount() > 0;
+	}
+
+	/**
+	 * ED151130
+	 * @return related RsnPrelVirement count.
+	 */
+	public function getRelatedPrelVirementsCount() {
 		$relationModel = Vtiger_Relation_Model::getInstance($this->getModule(), Vtiger_Module_Model::getInstance('RsnPrelVirement'));
 
-		return $relationModel->countRecords($this) > 0;
+		return $relationModel->countRecords($this);
 	}
 
 	/**
 	 * AV151008
 	 * @return false if there is one ore more related RsnPrelVirement.
+	 *
+	 * ED151130
+	 * Désolé, mais on peut modifierr le prélèvement : changement d'état et de montant
 	 */
 	public function isEditable() {
-		return !$this->hasRelatedPrelVirements();
+		//return !$this->hasRelatedPrelVirements();
+		return true;
 	}
 
 	/**

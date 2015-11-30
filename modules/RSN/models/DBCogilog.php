@@ -46,8 +46,6 @@ class RSN_DBCogilog_Module extends RSN_DBConnector_Module {
 		
 		$line = false;
 		$nLine = 0;
-		//ED150722 TODO PGSQL_ASSOC uniquement pour la 1ere ligne, sinon PGSQL_NUM
-		//	attention, entre PGSQL_ASSOC et PGSQL_NUM j'ai constaté un écart d'une colonne, à confirmer
 		while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
 			
 		    $rows[] = $line;
