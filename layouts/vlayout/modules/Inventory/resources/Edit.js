@@ -762,8 +762,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				function(e) {
 					var parentRows = $existing.parents('tr.'+ thisInstance.rowClass)
 					, qty = 0.0
+					, amount = 0.0
 					, comments = '';
 					parentRows.find('input.qty').each(function(){ qty += parseFloat(this.value.replace(',', '.')); });
+					parentRows.find('input.listPrice').each(function(){ amount += parseFloat(this.value.replace(',', '.')); });
 					parentRows.find('textarea.lineItemCommentBox').each(function(){
 						if (this.value) {
 							if(comments) comments += "\n";
@@ -774,6 +776,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 					if (comments)
 						newRow.find('textarea.lineItemCommentBox')
 							.val(comments);
+					$newPrice = newRow.find('input.listPrice');
+					if ($newPrice.val()==0) {
+						//par exemple, un don
+						$newPrice.val(amount)
+							.focusout();
+						$qty = 1;
+					}
 					newRow.find('input.qty')
 						.val(qty)
 						.focusout();
@@ -1297,8 +1306,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				thisInstance.lineItemRowCalculations($(this));
 			});
 		}
-		else
+		else{
 			this.lineItemRowCalculations(lineItemRow);
+		}
 		this.lineItemToTalResultCalculations();
 	},
 
@@ -1466,6 +1476,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		lineItemTable.on('focusout', 'input.listPrice',function(e){
 			var element = jQuery(e.currentTarget);
 			var lineItemRow = thisInstance.getClosestLineItemRow(element);
+			if (this.value != 0) {
+				var $qty = lineItemRow.find('input.qty');
+				if ($qty.val() == '0') {
+					$qty.val(1);
+				}
+			}
 			thisInstance.quantityChangeActions(lineItemRow);
 		});
 	 },
@@ -1571,7 +1587,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	 },
 
-    lineItemActions: function() {
+	lineItemActions: function() {
 		var lineItemTable = this.getLineItemContentsContainer();
 
 		this.registerDisountChangeEvent();
@@ -2321,7 +2337,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 	
 	/**
-	 * ED141219 : lors de l'enregistrement, enlève les produits ou services vides (sans article sélectionné)
+	 * ED141219 : lors de l'enregistrement, enlève les produits ou services vides (sans article sélectionné ou en quantité nulle)
 	 */
 	registerSaveEvent : function(container){
 		var thisInstance = this;
@@ -2333,6 +2349,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 						if(!$productField.val()){
 							jQuery(this).remove();
 							oneDeleted = true;
+							return;
+						}
+						var $productQuantity = $(this).find('.qty');
+						if($productQuantity.val() == '0'){
+							jQuery(this).remove();
+							oneDeleted = true;
+							return;
 						}
 				});
 				if (oneDeleted) {

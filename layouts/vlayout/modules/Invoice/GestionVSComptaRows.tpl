@@ -16,12 +16,14 @@
 		<input type="hidden" name="view" value="GestionVSComptaRows"/>
 		<label>Mois à analyser :</label>
 		<select name="date">{foreach item=DATE_LABEL key=DATE from=$DATES}
-			<option value="{$DATE}">{$DATE_LABEL}</option>
+			<option value="{$DATE}" {if $SELECTED_DATE eq $DATE}selected="selected"{/if}>{$DATE_LABEL}</option>
 		{/foreach}</select>
 		<input type="submit"/>
 	</form>
 	<table class="table table-bordered equalSplit detailview-table">
-		<caption style="text-align: left;">Ecritures dans Lamatrice et Cogilog <small></small></caption>
+		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecritures dans Lamatrice et Cogilog
+			&nbsp;{if $SELECTED_COMPTE}pour le compte {$SELECTED_COMPTE}{/if}
+			&nbsp;{if $SELECTED_DATE}à la date du {$SELECTED_DATE}{/if}</caption>
 		{foreach item=SOURCES_ENTRIES key=DATE from=$ENTRIES}
 			<tr>
 				<td style="width: 10%;"><b>{$DATE}</b></td>

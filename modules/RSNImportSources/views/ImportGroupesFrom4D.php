@@ -549,6 +549,10 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 		//Parse dates
 		foreach($this->getContactsDateFields() as $fieldName)
 			$contactsHeader[$fieldName] = $this->getMySQLDate($contactsHeader[$fieldName]);
+		
+		//Caractère foireux
+		$fieldName = 'nomlongdugroupe';
+		$contactsHeader[$fieldName] = str_replace(chr(194).chr(146), "'", $contactsHeader[$fieldName] );
 			
 		return $contactsHeader;
 	}
