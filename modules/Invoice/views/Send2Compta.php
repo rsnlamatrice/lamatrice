@@ -102,6 +102,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, IFNULL(productname, servicename) AS productname
 			, IFNULL(vtiger_products.productcode, vtiger_service.productcode) AS productcode
 			FROM ('.$query.') _source_ids_
+			JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = _source_ids_.invoiceid
 			JOIN vtiger_inventoryproductrel
 				ON vtiger_inventoryproductrel.id = _source_ids_.invoiceid
 			LEFT JOIN vtiger_products
@@ -113,6 +115,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			WHERE ((vtiger_products.productid IS NOT NULL AND IFNULL(vtiger_products.glacct, "") = "")
 				OR (vtiger_servicecf.serviceid IS NOT NULL AND IFNULL(vtiger_servicecf.glacct, "") = ""))
 			AND vtiger_inventoryproductrel.listprice <> 0
+			AND vtiger_invoicecf.sent2compta IS NULL
 		';
 		$params = array();
 		

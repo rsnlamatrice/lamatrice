@@ -30,12 +30,27 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		$viewer = $this->getViewer($request);
 		
+		$dateDebut = $request->get('date');
+		if(!$dateDebut)
+			$dateDebut = date('Y-m-d');
+		$dateRef = new DateTime($dateDebut);
+		$dateRef->modify('-1 month');
+		
 		$dates = array();
-		for($y = date('Y'); $y >= date('Y') - 2; $y--){
-			for($m = $y == date('Y') ? date('n') : 12; $m >= 1; $m--){
-				$dates[$y . '-' . $m . '-' . '01'] = date('M Y', strtotime($y . '-' . $m . '-' . '01'));
-			}
+		for($d = 1; $d < 62; $d++){
+			$dates[$dateRef->format('Y-m-d')] = $dateRef->format('d/m/Y');
+			$dateRef->modify('+1 day');
 		}
+		
+		$compte = $request->get('compte');
+		if($compte === 'TOTAUX'){
+			$request->set('compte', false);
+			$compte = '';
+		}
+		
+		$viewer->assign('SELECTED_COMPTE', $compte);
+		
+		$viewer->assign('SELECTED_DATE', $dateDebut);
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_URL', 'index.php?module='.$request->get('module').'&view=GestionVSCompta');
@@ -115,11 +130,11 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 			$compte = "'$compte'";
 		else
 			$compte = $this->getComptesString();
-		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `Date`
-		, `vtiger_invoice`.`invoice_no` AS `NumFacture`
-		, `vtiger_invoice`.`subject` AS `NomFacture`
-		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` ) AS `Compte`
-		, ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`, 2 ) AS `Montant`
+		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `date`
+		, `vtiger_invoice`.`invoice_no` AS `numfacture`
+		, `vtiger_invoice`.`subject` AS `nomfacture`
+		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` ) AS `compte`
+		, SUM(ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`, 2 )) AS `montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
 			ON `vtiger_invoice`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
@@ -136,14 +151,19 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		LEFT JOIN `vtiger_campaignscf`
 			ON `vtiger_campaignscf`.`campaignid` = `vtiger_invoicecf`.`campaign_no`
 		WHERE `vtiger_crmentity_invoice`.`deleted` = FALSE
-		AND `vtiger_invoice`.`invoicedate` >= CAST( CONCAT( YEAR( CURRENT_DATE ) - IF( MONTH( CURRENT_DATE ) <= 9, 2, 1 ), '-09-01' ) AS DATE )
 		AND IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` )
 		IN ( ".$compte." )
 		
 		AND `vtiger_invoice`.`invoicedate` >= ?
 		AND `vtiger_invoice`.`invoicedate` < ?
 		
-		ORDER BY `Date`, `Montant`
+		GROUP BY `vtiger_invoice`.`invoicedate`
+		, `vtiger_invoice`.`invoice_no`
+		, `vtiger_invoice`.`subject`
+		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` )
+		
+		ORDER BY `date`, `montant`
+		
 		";
 		
 		$params = array($dateDebut, $dateFin);
@@ -179,7 +199,6 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
 		WHERE ( "ligne"."compte" IN ( '.$compte.' ) )
-		AND ( "ligne"."ladate" BETWEEN CAST( ( CASE WHEN DATE_PART( \'month\', CURRENT_DATE ) < 10 THEN EXTRACT( YEAR FROM CURRENT_DATE ) - 2 ELSE EXTRACT( YEAR FROM CURRENT_DATE ) - 1 END || \'-09-01\' ) AS DATE ) AND CAST( ( CASE WHEN DATE_PART( \'month\', CURRENT_DATE ) < 10 THEN EXTRACT( YEAR FROM CURRENT_DATE ) ELSE EXTRACT( YEAR FROM CURRENT_DATE ) + 1 END || \'-08-31\' ) AS DATE ) )
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18

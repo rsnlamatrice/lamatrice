@@ -45,9 +45,12 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 				$dates[$y . '-' . $m . '-' . '01'] = date('M Y', strtotime($y . '-' . $m . '-' . '01'));
 			}
 		}
+		$dateDebut = $request->get('date');
+		$viewer->assign('SELECTED_DATE', $dateDebut);
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_URL', 'index.php?module='.$request->get('module').'&view=GestionVSCompta');
+		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaRows');
 	}
 	
 	public function initComptesEntries(Vtiger_Request $request) {
@@ -145,7 +148,6 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		LEFT JOIN `vtiger_campaignscf`
 			ON `vtiger_campaignscf`.`campaignid` = `vtiger_invoicecf`.`campaign_no`
 		WHERE `vtiger_crmentity_invoice`.`deleted` = FALSE
-		AND `vtiger_invoice`.`invoicedate` >= CAST( CONCAT( YEAR( CURRENT_DATE ) - IF( MONTH( CURRENT_DATE ) <= 9, 2, 1 ), '-09-01' ) AS DATE )
 		AND IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` )
 		IN ( ".$this->getComptesString()." )
 		
@@ -162,7 +164,7 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		$result = $adb->pquery($query, $params);
 		
 		if(!$result){
-			$adb->echoError('getLaMatriceEntries');
+			$adb->echoError('getLaMatriceComptesEntries');
 			return;
 		}
 		$nRow = 0;
@@ -184,7 +186,6 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
 		WHERE ( "ligne"."compte" IN ( '.$this->getComptesString().' ) )
-		AND ( "ligne"."ladate" BETWEEN CAST( ( CASE WHEN DATE_PART( \'month\', CURRENT_DATE ) < 10 THEN EXTRACT( YEAR FROM CURRENT_DATE ) - 2 ELSE EXTRACT( YEAR FROM CURRENT_DATE ) - 1 END || \'-09-01\' ) AS DATE ) AND CAST( ( CASE WHEN DATE_PART( \'month\', CURRENT_DATE ) < 10 THEN EXTRACT( YEAR FROM CURRENT_DATE ) ELSE EXTRACT( YEAR FROM CURRENT_DATE ) + 1 END || \'-08-31\' ) AS DATE ) )
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18
@@ -202,7 +203,8 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		$rows = $db->getDBRows($query);
 		
 		if(!$rows){
-			echo('<code> ERREUR dans getCogilogEntries</code>');
+			echo "<pre>$query</pre>";
+			echo('<code> ERREUR dans getCogilogComptesEntries</code>');
 			return;
 		}
 		
