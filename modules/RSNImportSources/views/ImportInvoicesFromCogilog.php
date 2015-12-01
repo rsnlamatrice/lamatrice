@@ -98,7 +98,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
 		if(false)
-			$query .= ' WHERE facture.numero = 6318
+			$query .= ' WHERE facture.numero IN ( 6130)
 				AND annee = 2015
 			';
 		else {
@@ -239,20 +239,20 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 
 		$row = $adb->raw_query_result_rowdata($result, 0);
-		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
+		$previousInvoiceNo = $row['sourceid'];//tmp subject, use invoice_no ???
 		$invoiceData = array($row);
 
 		$perf = new RSN_Performance_Helper($numberOfRecords);
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
-			$invoiceSubject = $row['subject'];
+			$invoiceNo = $row['sourceid'];
 
-			if ($previousInvoiceSubjet == $invoiceSubject) {
+			if ($previousInvoiceNo == $invoiceNo) {
 				array_push($invoiceData, $row);
 			} else {
 				$this->importOneInvoice($invoiceData, $importDataController);
 				$invoiceData = array($row);
-				$previousInvoiceSubjet = $invoiceSubject;
+				$previousInvoiceNo = $invoiceNo;
 			}
 			
 			//perf

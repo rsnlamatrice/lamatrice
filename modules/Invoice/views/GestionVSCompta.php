@@ -202,7 +202,7 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		$db = new RSN_DBCogilog_Module();
 		$rows = $db->getDBRows($query);
 		
-		if(!$rows){
+		if($rows === false){
 			echo "<pre>$query</pre>";
 			echo('<code> ERREUR dans getCogilogComptesEntries</code>');
 			return;

@@ -23,19 +23,24 @@
 	<table class="table table-bordered equalSplit detailview-table">
 		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecritures dans Lamatrice et Cogilog
 			&nbsp;{if $SELECTED_COMPTE}pour le compte {$SELECTED_COMPTE}{/if}
-			&nbsp;{if $SELECTED_DATE}à la date du {$SELECTED_DATE}{/if}</caption>
+			&nbsp;{if $SELECTED_DATE}à la date du {$SELECTED_DATE}{/if}
+		<br><label><input type="checkbox" style="display: inline;"
+				  onchange="var $table = $(this).parents('table:first'), show = this.checked;
+				  if(show) $table.addClass('show-pointee');
+				  else $table.removeClass('show-pointee');
+				  ">Afficher les lignes équivalentes</label></caption>
 		{foreach item=SOURCES_ENTRIES key=DATE from=$ENTRIES}
 			<tr>
 				<td style="width: 10%;"><b>{$DATE}</b></td>
 				{foreach item=SOURCE_LABEL key=SOURCE from=$SOURCES}
-					<td style="vertical-align: top;"><b>{$SOURCE} {$SOURCE_LABEL}</b>
+					<td style="vertical-align: top;"><b>{$SOURCE_LABEL}</b>
 						{if $SOURCES_ENTRIES[$SOURCE]}
 							<table>
 							{foreach item=ECRITURE from=$SOURCES_ENTRIES[$SOURCE]}
-								<tr>
+								<tr {if $ECRITURE['pointee']}class="pointee"{/if}>
 									<td colspan="2" style="border-top: 1px solid black;">{$ECRITURE['nomfacture']}</td>
 								</tr>
-								<tr>
+								<tr {if $ECRITURE['pointee']}class="pointee"{/if}>
 									<td style="text-align: right;">{$ECRITURE['compte']}</td>
 									<td style="text-align: right;">{$ECRITURE['montant']}</td>
 								</tr>
@@ -48,4 +53,13 @@
 		{/foreach}
 	</table>
 </div>
+<style>
+	tr.pointee {
+		display: none;
+	}
+	table.show-pointee tr.pointee {
+		display: table-row;
+		background-color: #BBBB55;
+	}
+</style>
 {/strip}
