@@ -211,7 +211,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 		$quickLinks = array(
 			array(
 				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Contr&ocirc;le Gestion / Compta',
+				'linklabel' => 'Gestion vs Compta',
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSCompta',
 				'linkicon' => '',
 			),

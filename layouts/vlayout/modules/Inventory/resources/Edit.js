@@ -1307,6 +1307,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			});
 		}
 		else{
+			var $input = lineItemRow.find('.qty');
+			$input.css('color', $input.val()=='0' ?'red' : '#444444');
 			this.lineItemRowCalculations(lineItemRow);
 		}
 		this.lineItemToTalResultCalculations();

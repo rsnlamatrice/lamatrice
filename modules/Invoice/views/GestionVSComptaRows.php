@@ -101,18 +101,20 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 						if($laMatEntries){
 							$found = false;
 							foreach($laMatEntries as $laMatIndex => $laMatEntry){
-								if($laMatEntry['compte'] === $ecriture['compte']
+								if(!$laMatEntry['pointee']
+								&& $laMatEntry['compte'] === $ecriture['compte']
 								&& $laMatEntry['montant'] == $ecriture['montant']){
-									unset($laMatEntries[$laMatIndex]);
-									unset($entries[$date]['LAM'][$laMatIndex]);
+									//unset($laMatEntries[$laMatIndex]);
+									//unset($entries[$date]['LAM'][$laMatIndex]);
+									$laMatEntries[$laMatIndex]['pointee'] = true;
+									$entries[$date]['LAM'][$laMatIndex]['pointee'] = true;
+									$ecriture['pointee'] = true;
 									$found = true;
 									break;
 								}
 								if($laMatEntry['montant'] > $ecriture['montant'])
 									break;
 							}
-							if($found)
-								continue;
 						}
 						
 						$entries[$date]['COG'][] = $ecriture;
@@ -131,8 +133,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		else
 			$compte = $this->getComptesString();
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `date`
-		, `vtiger_invoice`.`invoice_no` AS `numfacture`
-		, `vtiger_invoice`.`subject` AS `nomfacture`
+		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`) AS `nomfacture`
 		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` ) AS `compte`
 		, SUM(ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`, 2 )) AS `montant`
 		FROM `vtiger_invoice`
@@ -158,8 +159,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		AND `vtiger_invoice`.`invoicedate` < ?
 		
 		GROUP BY `vtiger_invoice`.`invoicedate`
-		, `vtiger_invoice`.`invoice_no`
-		, `vtiger_invoice`.`subject`
+		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`)
 		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` )
 		
 		ORDER BY `date`, `montant`
@@ -191,10 +191,9 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		$query = '
 		SELECT "ligne"."ladate" AS "date"
-		, "ligne"."piece" AS "numfacture"
-		, "ligne"."libelle" AS "nomfacture"
+		, "ligne"."libelle" || \' - \' || "ligne"."piece" AS "nomfacture"
 		, "ligne"."compte" AS "compte"
-		, "ligne"."credit" - "ligne"."debit" AS "montant"
+		, SUM("ligne"."credit" - "ligne"."debit") AS "montant"
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
@@ -206,6 +205,10 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		AND "ligne"."ladate" >= \''.$dateDebut.'\'
 		AND "ligne"."ladate" < \''.$dateFin.'\'
 		
+		GROUP BY "ligne"."ladate"
+		, "ligne"."libelle" || \' - \' || "ligne"."piece"
+		, "ligne"."compte"
+		
 		ORDER BY "ligne"."ladate", "montant"
 		';
 		
@@ -213,7 +216,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		$db = new RSN_DBCogilog_Module();
 		$rows = $db->getDBRows($query);
 		
-		if(!$rows){
+		if($rows === false){
 			echo('<code> ERREUR dans getCogilogEntries</code>');
 			return;
 		}
