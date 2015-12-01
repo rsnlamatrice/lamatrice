@@ -544,6 +544,9 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		$record->set('isgroup', 0);
 		$record->set('leadsource', 'PETITION');//TODO
 		
+		if(!$record->get('mailingzip') || !$record->get('mailingcity')
+		|| (!$record->get('mailingstreet') && !$record->get('mailingstreet3') && !$record->get('mailingstreet2') && !$record->get('mailingpobox')))
+			$record->set('rsnnpai', 4);//incomplète
 		
 	}
 	

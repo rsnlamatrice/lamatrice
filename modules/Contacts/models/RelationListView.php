@@ -227,6 +227,48 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					WHERE c1.contactid = ".$contactId."
 					AND  vtiger_contactdetails.contactid <> ".$contactId."
 					AND account.deleted = 0
+				
+					UNION
+					
+					/* Transférer revue */
+					SELECT vtiger_crmentity.modifiedtime, '[Transférer la revue vers]'
+					, vtiger_contactscf.transfererrevue, vtiger_contactscf.contactid
+					FROM vtiger_contactscf
+					JOIN vtiger_crmentity
+						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
+					WHERE vtiger_contactscf.contactid = ".$contactId."
+					AND vtiger_contactscf.transfererrevue IS NOT NULL
+					
+					UNION
+					
+					/* Transférer dons */
+					SELECT vtiger_crmentity.modifiedtime, '[Transférer les dons vers]'
+					, vtiger_contactscf.transfererdons, vtiger_contactscf.contactid
+					FROM vtiger_contactscf
+					JOIN vtiger_crmentity
+						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
+					WHERE vtiger_contactscf.contactid = ".$contactId."
+					AND vtiger_contactscf.transfererdons IS NOT NULL
+				
+					UNION
+					
+					/* Transférer revue depuis */
+					SELECT vtiger_crmentity.modifiedtime, '[Transférer la revue depuis]'
+					, vtiger_contactscf.contactid, vtiger_contactscf.contactid
+					FROM vtiger_contactscf
+					JOIN vtiger_crmentity
+						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
+					WHERE vtiger_contactscf.transfererrevue = ".$contactId."
+					
+					UNION
+					
+					/* Transférer dons */
+					SELECT vtiger_crmentity.modifiedtime, '[Transférer les dons depuis]'
+					, vtiger_contactscf.contactid, vtiger_contactscf.contactid
+					FROM vtiger_contactscf
+					JOIN vtiger_crmentity
+						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
+					WHERE vtiger_contactscf.transfererdons = ".$contactId."
 					
 					ORDER BY dateapplication desc
 					";
