@@ -37,20 +37,24 @@
         <div class="control-group margin0px">
             <span class="paddingLeft10px"><strong>{vtranslate('LBL_SEARCH_FOR')}</strong></span>
             <span class="paddingLeft10px"></span>
-            <input type="text" placeholder="{vtranslate('LBL_TYPE_SEARCH')}" id="searchvalue"/>
+            <input type="text" placeholder="{vtranslate('LBL_TYPE_SEARCH')}" id="searchvalue"
+                {if $SEARCH_VALUE}value="{$SEARCH_VALUE}"{/if}/>
             <span class="paddingLeft10px"><strong>{vtranslate('LBL_IN')}</strong></span>
             <span class="paddingLeft10px help-inline pushDownHalfper">
                 <select style="width: 150px;" class="chzn-select help-inline" id="searchableColumnsList">
                     {foreach key=block item=fields from=$RECORD_STRUCTURE}
                         {foreach key=fieldName item=fieldObject from=$fields}
                             <optgroup>
-                                <option value="{$fieldName}">{vtranslate($fieldObject->get('label'),$MODULE)}</option>
+                                <option value="{$fieldName}"
+                                {if $SEARCH_KEY eq $fieldName}selected="selected"{/if}
+                                >{vtranslate($fieldObject->get('label'),$MODULE)}</option>
                             </optgroup>
                         {/foreach}
                     {/foreach}
                 </select>
             </span>
             <span class="paddingLeft10px cursorPointer help-inline" id="popupSearchButton"><img src="{vimage_path('search.png')}" alt="{vtranslate('LBL_SEARCH_BUTTON')}" title="{vtranslate('LBL_SEARCH_BUTTON')}" /></span>
+            <!-- TODO span class="paddingLeft10px cursorPointer help-inline" id="popupAddSearchButton"><img src="{vimage_path('plus.png')}" alt="{vtranslate('LBL_ADDSEARCH_BUTTON')}" title="{vtranslate('LBL_SEARCH_BUTTON')}" /></span-->
         </div>
 
         {foreach item=ALPHABET_FIELD from=$ALPHABET_FIELDS}

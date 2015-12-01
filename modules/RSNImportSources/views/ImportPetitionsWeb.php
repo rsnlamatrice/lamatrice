@@ -327,6 +327,12 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		$record->set('isgroup', 0);
 		$record->set('leadsource', 'PETITION');//TODO
 		
+		if(!$record->get('rsnnpai')){ //TODO ?
+			if(!$record->get('mailingzip') || !$record->get('mailingcity')
+			|| (!$record->get('mailingstreet') && !$record->get('mailingstreet3') && !$record->get('mailingstreet2') && !$record->get('mailingpobox')))
+				$record->set('rsnnpai', 4);//incomplète
+		}
+		
 		// copie depuis tout en haut
 		//
 		//

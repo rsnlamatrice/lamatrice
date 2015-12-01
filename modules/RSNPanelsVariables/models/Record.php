@@ -132,6 +132,7 @@ class RSNPanelsVariables_Record_Model extends Vtiger_Record_Model {
 			case 'ew' :
 				return " LIKE '%$value'";
 			case 'parmi' :
+				//TODO
 				return " IN ($value)";
 			default:
 				//var_dump(html_entity_decode ( $this->get('rsnvariableoperator') ));
