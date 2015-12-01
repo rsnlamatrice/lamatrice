@@ -955,7 +955,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			SET received = IFNULL(received,0) + ?
 			, balance = received - total
-			, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)
+			/*, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)*/
 			WHERE vtiger_invoice.invoiceid = ?
 			AND (IFNULL(receivedreference, \'\') = \'\' OR receivedreference <> ?)';
 			

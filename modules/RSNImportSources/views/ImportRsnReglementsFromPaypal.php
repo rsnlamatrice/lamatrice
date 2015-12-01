@@ -840,7 +840,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', $invoiceData[0]['typedossier']);
-					$record->set('invoicestatus', 'Approved');//TODO
+					$record->set('invoicestatus', 'Validated');//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
@@ -1036,7 +1036,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		
 		$fieldName = 'isgroup';
-		$record->set('isgroup', 0);
+		$record->set($fieldName, 0);
 		$record->set('leadsource', 'PETITION');//TODO
 		
 		if(!$record->get('mailingzip') || !$record->get('mailingcity')

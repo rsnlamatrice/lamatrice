@@ -537,7 +537,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('invoicestatus', 'Approved');//TODO
+					$record->set('invoicestatus', 'Validated');//TODO
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
@@ -604,7 +604,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 						, createdtime = ?
 						, modifiedtime = ?
 						, balance = total - received
-						, invoicestatus = IF(balance = 0, 'Paid', invoicestatus)
+						/*, invoicestatus = IF(balance = 0, 'Paid', invoicestatus)*/
 						WHERE invoiceid = ?
 					";
 					$total = $totalAmount + $totalTax;

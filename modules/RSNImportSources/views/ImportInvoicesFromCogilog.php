@@ -330,10 +330,12 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					if($invoiceData[0]['solde'] == 0)
+					/*if($invoiceData[0]['solde'] == 0)
 						$record->set('invoicestatus', 'Paid');
 					else
-						$record->set('invoicestatus', 'Approved');//TODO
+						$record->set('invoicestatus', 'Approved');//TODO*/
+					$record->set('invoicestatus', 'Compta');
+					
 					$record->set('receivedmoderegl', $invoiceData[0]['paiementpropose']);
 					$record->set('receivedcomments', $srcRow['_receivedcomments']);
 					$record->set('currency_id', CURRENCY_ID);
