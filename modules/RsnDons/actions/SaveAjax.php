@@ -63,7 +63,7 @@ class RsnDons_SaveAjax_Action extends Invoice_SaveAjax_Action {
 			$request->setGlobal('account_id', $request->get('sourceRecord'));
 			$request->setGlobal('invoicedate', $request->get( $this->invoicedate_field ));
 			$request->setGlobal('typedossier', $this->serviceType);
-			$request->setGlobal('invoicestatus', 'Approved');
+			$request->setGlobal('invoicestatus', 'Created');
 			
 			$request->setGlobal('copyAddressFromRight', "on");
 			$request->setGlobal('copyAddressFromLeft',"on");

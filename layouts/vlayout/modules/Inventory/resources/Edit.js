@@ -554,30 +554,31 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	setBalance : function(value) {
 		jQuery('#balance').val(value);
 		
-		this.setAutoInvoiceStatus(value);
+		//this.setAutoInvoiceStatus(value);
 		return this;
 	},
 	
-	//ED150515 : set balance (solde, reste à payer)
-	setAutoInvoiceStatus : function(balance) {
-		var $status = $('select[name="invoicestatus"]');
-		//Si le statut n'est pas défini et qu'il y a un total à payer
-		//ou que le status a été défini automatiquement
-		if ((!$status.val() && this.getGrandTotal())
-		|| ($status.val() && $status.is('.auto-filled'))) {
-			var status = balance == 0 ? 'Paid' : '';
-			$status
-				.addClass('auto-filled')
-				.val(status);
-			var $seloption = $status.children('option[value="' + status + '"]:first');
-			if ($seloption.length) {
-				$seloption.attr('selected', 'selected');
-				$status.select2("val",status); /* ne fonctionne pas bien */
-				$status.next().find('> a > span:first').html($seloption.html());
-			}
-		}
-		return this;
-	},
+	//ED151201 Abandon
+	////ED150515 : set balance (solde, reste à payer)
+	//setAutoInvoiceStatus : function(balance) {
+	//	var $status = $('select[name="invoicestatus"]');
+	//	//Si le statut n'est pas défini et qu'il y a un total à payer
+	//	//ou que le status a été défini automatiquement
+	//	if ((!$status.val() && this.getGrandTotal())
+	//	|| ($status.val() && $status.is('.auto-filled'))) {
+	//		var status = balance == 0 ? 'Paid' : '';
+	//		$status
+	//			.addClass('auto-filled')
+	//			.val(status);
+	//		var $seloption = $status.children('option[value="' + status + '"]:first');
+	//		if ($seloption.length) {
+	//			$seloption.attr('selected', 'selected');
+	//			$status.select2("val",status); /* ne fonctionne pas bien */
+	//			$status.next().find('> a > span:first').html($seloption.html());
+	//		}
+	//	}
+	//	return this;
+	//},
 
 	loadRowSequenceNumber: function() {
 		if(this.rowSequenceHolder == false) {
