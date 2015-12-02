@@ -115,7 +115,23 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 	}
 	
 	function getComptesString(){
-		return "'411000', '511101', '511300', '511103', '511102', '511106', '511200'";
+//511101	Encaissements Paybox Boutique en ligne
+//511102	CB Achats en débit différé
+//511103	Encaissements espèces gestion
+//511104	Encaissements Paybox Dons étalés
+//511105	Encaissements des dons NEF
+//511106	Virements reçus
+//511200	CCP - Chèques à encaisser
+//511300	Encaissements  Paypal Dons et décaissements
+//511400	Encaissements Paybox Dons
+//511600	Réaffectation Bilan dons
+//511700	Réaffectation Bilan encaissement dons Nef
+//511BOU	Encaissements boutique en ligne
+//511CB	CB en débit différé
+//511ETAL	Encaissement des dons étalés
+//511NEF	Encaissements des dons Nef
+//511VIR	Virements reçus (dons)
+		return "'411000', '511101', '511104', '511105', '511300', '511103', '511102', '511106', '511200', '511400', '511BOU', '511CB', '511ETAL', '511NEF', '511VIR'";
 	}
 	
 	public function getLaMatriceComptesEntries($dateDebut, $dateFin){
