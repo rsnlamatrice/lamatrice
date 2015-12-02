@@ -48,11 +48,21 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	function initSend2ComptaForm (Vtiger_Request $request){
+		
+		$this->initSend2ComptaFormExportableInvoices ($request);
+		$this->initSend2ComptaFormValidatableInvoices ($request);
+	}
+	
+	function initSend2ComptaFormExportableInvoices(Vtiger_Request $request){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
 		
 		$controller = new Vtiger_MassSave_Action();
+		
 		$query = $controller->getRecordsQueryFromRequest($request);
+		
+		$excludeInvoicestatus = array('Created', 'Cancelled');
+		
 		//$query retourne autant de lignes que de lignes de factures
 		$query = 'SELECT DISTINCT invoiceid
 				FROM ('.$query.') _source_';
@@ -63,16 +73,15 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			WHERE vtiger_invoicecf.sent2compta IS NULL
-			AND NOT vtiger_invoice.invoicestatus IN (?)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
 			LIMIT 200 /*too long URL*/
 		';
-		$params = array('Cancelled');
 		
 		$selectedIds = array();
 		$total = 0;
 		
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, $params);
+		$result = $db->pquery($query, $excludeInvoicestatus);
 		if(!$result){
 			$db->echoError();
 			echo "<pre>$query</pre>";
@@ -88,6 +97,53 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$viewer->assign('INVOICES_COUNT', count($selectedIds));
 		}
 		$viewer->assign('SELECTED_IDS', $selectedIds);
+	}
+		
+	//Compte les factures "En cours" qui pourraient passer en Validé
+	function initSend2ComptaFormValidatableInvoices (Vtiger_Request $request){
+		$moduleName = $request->getModule();
+		$viewer = $this->getViewer($request);
+		
+		$controller = new Vtiger_MassSave_Action();
+		
+		$query = $controller->getRecordsQueryFromRequest($request);
+		
+		$onlyInvoicestatus = array('Created');
+		
+		//$query retourne autant de lignes que de lignes de factures
+		$query = 'SELECT DISTINCT invoiceid
+				FROM ('.$query.') _source_';
+		$query = 'SELECT COUNT(*) AS `count`
+			, SUM(vtiger_invoice.total) AS `amount`
+			, MIN(vtiger_invoice.invoicedate) AS `datemini`
+			, MAX(vtiger_invoice.invoicedate) AS `datemaxi`
+			FROM ('.$query.') _source_ids_
+			JOIN vtiger_invoice
+				ON vtiger_invoice.invoiceid = _source_ids_.invoiceid
+			JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+			WHERE vtiger_invoicecf.sent2compta IS NULL
+			AND vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($onlyInvoicestatus).')
+			
+		';
+		
+		$total = 0;
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $onlyInvoicestatus);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			var_dump($params);
+		}
+		else {
+			$row = $db->fetch_row($result);
+			
+			$viewer->assign('VALIDATABLE_TOTAL', $row['amount']);
+			$viewer->assign('VALIDATABLE_COUNT', $row['count']);
+			$viewer->assign('VALIDATABLE_DATEMINI', $row['datemini']);
+			$viewer->assign('VALIDATABLE_DATEMAXI', $row['datemaxi']);
+		}
 	}
 		
 	//Controle des données avant affichage
@@ -143,6 +199,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			
 		$taxes = self::getAllTaxes();
 			
+		$excludeInvoicestatus = array('Created', 'Cancelled');
+		
 		$selectedIds = $request->get('selected_ids');
 		$query = 'SELECT vtiger_invoice.*
 			, vtiger_invoicecf.receivedmoderegl
@@ -183,7 +241,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			AND vtiger_invoicecf.sent2compta IS NULL
 			AND vtiger_invoice.total <> 0
 			AND vtiger_inventoryproductrel.listprice <> 0
-			AND NOT vtiger_invoice.invoicestatus IN (?)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
 		';
 		
 		if(FALSE){
@@ -195,8 +253,6 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$query .= " AND vtiger_invoice.invoicedate > '2015-09-29'";
 		
 		}
-		
-		
 			
 		$query .= '
 			ORDER BY vtiger_invoice.invoicedate ASC
@@ -204,7 +260,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, vtiger_inventoryproductrel.sequence_no
 		';
 		$params = $selectedIds;
-		$params[] = 'Cancelled';
+		$params = array_merge($params, $excludeInvoicestatus);
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
@@ -573,17 +629,20 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
 		
+		$excludeInvoicestatus = array('Created', 'Cancelled');
 		$selectedIds = $request->get('selected_ids');
 		$query = 'UPDATE vtiger_invoicecf
 			JOIN vtiger_invoice
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			SET vtiger_invoicecf.sent2compta = NOW()
+			, vtiger_invoice.invoicestatus = ?
 			WHERE vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
 			AND vtiger_invoicecf.sent2compta IS NULL
-			AND NOT vtiger_invoice.invoicestatus IN (?)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
 		';
-		$params = $selectedIds;
-		$params[] = 'Cancelled';
+		$params = array('Compta');
+		$params = array_merge($params, $selectedIds);
+		$params = array_merge($params, $excludeInvoicestatus);
 		
 		if($selectedIds)
 			$this->storeFile($request);

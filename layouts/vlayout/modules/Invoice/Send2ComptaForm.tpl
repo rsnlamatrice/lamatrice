@@ -33,7 +33,7 @@
 					<span class="span2">{CurrencyField::convertToUserFormat($INVOICES_TOTAL)} €</span>
 				</div>
 				
-				<div class="row-fluid" style="margin-top: 2em; font-size: larger">
+				<div class="row-fluid" style="margin-top: 2em; font-size: larger; text-decoration: underline;">
 					<a class="downloadSend2Compta" href="#downloadSend2Compta">Cliquez ici pour télécharger le fichier pour la compta</a>
 				</div>
 				<div class="row-fluid" style="font-style: italic;">
@@ -42,19 +42,41 @@
 				</div>
 				
 				<div class="row-fluid" style="margin-top: 4em; font-size: larger; font-style: italic;">
-					Après avoir téléchargé le fichier, vous devez cliquer sur le bouton "Valider le transfert en compta".
+					Après avoir téléchargé le fichier, vous devez cliquer sur 
+					&nbsp;<button class="btn btn-success" type="submit" name="saveButton"><strong>Valider le transfert en compta</strong></button>
 				</div>
 				<div class="row-fluid" style="font-style: italic;">
 					Les factures seront définitivement verrouillées et ne seront plus transférables en compta.
 					<br>Effectuer l'importation en compta et ne pas valider le transfert provoque des doublons en compta.
 				</div>
+				
+				{if $VALIDATABLE_COUNT}
+					<div class="row-fluid" style="font-style: italic; margin-top: 4em;">
+						<b>Pour info, factures en cours de création et validables :</b>
+					</div>
+					<div class="row-fluid">
+						<span class="span3">entre le :</span>
+						<span class="span2">{DateTimeField::convertToUserFormat($VALIDATABLE_DATEMINI)}</span>
+					</div>
+					<div class="row-fluid">
+						<span class="span3">et le :</span>
+						<span class="span2">{DateTimeField::convertToUserFormat($VALIDATABLE_DATEMAXI)}</span>
+					</div>
+					<div class="row-fluid">
+						<span class="span3">Nombre :</span>
+						<span class="span2">{$VALIDATABLE_COUNT}</span>
+					</div>
+					<div class="row-fluid">
+						<span class="span3">Montant total :</span>
+						<span class="span2">{CurrencyField::convertToUserFormat($VALIDATABLE_TOTAL)} €</span>
+					</div>
+				{/if}
 			</div>
 		</div>
 		<div class="modal-footer">
 			<div class=" pull-right cancelLinkContainer">
 				<a class="cancelLink" type="reset" data-dismiss="modal">{vtranslate('LBL_CANCEL', $MODULE)}</a>
 			</div>
-			<button class="btn btn-success" type="submit" name="saveButton"><strong>Valider le transfert en compta</strong></button>
 		</div>
 	</form>
 	{else}
