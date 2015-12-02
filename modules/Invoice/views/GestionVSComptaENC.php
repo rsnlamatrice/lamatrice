@@ -187,7 +187,7 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
-		WHERE ( "ligne"."compte" IN ( '.$this->getComptesString().' ) )
+		WHERE ( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18

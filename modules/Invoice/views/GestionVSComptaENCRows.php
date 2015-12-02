@@ -197,7 +197,7 @@ class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_Vie
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
-		WHERE ( "ligne"."compte" IN ( '.$compte.' ) )
+		WHERE ( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18
