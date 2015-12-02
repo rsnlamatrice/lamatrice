@@ -235,6 +235,8 @@ $languageStrings = array(
 	
 	'LBL_ALLMENU_EDITOR' => 'Editeur du menu \'Tout\'',
         
+        'LBL_PREFIX_IN_USE' => 'Préfixe de module déjà utilisé',
+        
 );
 $jsLanguageStrings = array(
 	'JS_PLEASE_SELECT_ATLEAST_ONE_MEMBER_FOR_A_GROUP' => 'Veuillez choisir au moins un collaborateur pour le groupe', 

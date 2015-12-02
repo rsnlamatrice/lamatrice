@@ -21,6 +21,8 @@ class RSNSysControls_Record_Model extends Vtiger_Record_Model {
 	//TODO éviter ça
 	public function getQueryFieldValue(){
 		$ctrlQuery = from_html($this->get('query'));
+		
+		//TODO
 		if(preg_match('/\&.*\;/', $ctrlQuery))
 			$ctrlQuery = str_replace('&gt;', '>',
 					str_replace('&lt;', '<',

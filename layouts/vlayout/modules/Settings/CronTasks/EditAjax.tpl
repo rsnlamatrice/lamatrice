@@ -83,6 +83,16 @@
 					<textarea name="description" rows="4">{$FIELD_VALUE}</textarea>
 				</div>	
 			</div>
+			
+			<div class="control-group">
+				<div class="control-label">
+					{vtranslate('Last Start',$QUALIFIED_MODULE)}
+				</div>
+				<div class="controls row-fluid">
+					{assign var=FIELD_VALUE value=$RECORD_MODEL->getDisplayValue('laststart')}
+					<label title="Cochez pour une réexécution dans les 5 minutes"><input type="checkbox" name="reset_laststart">Réinitialiser la date de dernière exécution ({$FIELD_VALUE})</label>
+				</div>	
+			</div>
 		</div>
 		{include file='ModalFooter.tpl'|@vtemplate_path:$MODULE}
 	</form>

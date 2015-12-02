@@ -181,6 +181,22 @@ class Settings_CronTasks_Record_Model extends Settings_Vtiger_Record_Model {
 		$db->pquery($updateQuery, $params);
 	}
 	
+	/* ED151202
+	 * RŽinitialise les dates de dernires exŽcutions pour une rŽexŽcution immŽdiate
+	 */
+	public function resetLastStartTime(){
+		$db = PearDatabase::getInstance();
+
+		$updateQuery = "UPDATE vtiger_cron_task
+			SET laststart = 0
+			, lastend = 0
+			WHERE id = ?";
+		$params = array( $this->getId());
+		$result = $db->pquery($updateQuery, $params);
+		if(!$result)
+			$db->echoError();
+	}
+	
 	protected static function parseStartHour($str){
 		$str = explode(':', $str);
 		return $str[0] + ($str[1] ? ((float)$str[1])/60 : 0);
