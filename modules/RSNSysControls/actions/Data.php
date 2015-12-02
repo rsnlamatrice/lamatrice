@@ -58,7 +58,10 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 				$server = 'La Matrice - '.$server;
 			else
 				$server = 'La Matrice';
-				
+			echo "
+			Envoi d'un email à $HELPDESK_SUPPORT_EMAIL_ID suite aux contrôles périodiques du système de données.
+			";
+			
 			$vtigerMailer = new Vtiger_Mailer();
 			$vtigerMailer->initialize();
 			$vtigerMailer->IsHTML(false);

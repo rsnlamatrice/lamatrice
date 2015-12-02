@@ -342,13 +342,19 @@ var Vtiger_Index_Js = {
 				out: hideAllTooltipViews
 			});
 		});
-
+		
 		function registerToolTipDestroy() {
+			//ED151202 moi, je doute de cette méthode
 			jQuery('button[name="vtTooltipClose"]').on('click', function(e){
 				var lastPopover = lastPopovers.pop();
 				lastPopover.popover('hide');
 			});
 		}
+		//ED151202 interception de tous les clics sur le close
+		jQuery(document.body).on('click', '.popover button[name="vtTooltipClose"]', function(e){
+			var popover = $(this).parents('.popover:first:visible');
+			popover.remove();
+		});
 	},
 
 	registerShowHideLeftPanelEvent : function() {

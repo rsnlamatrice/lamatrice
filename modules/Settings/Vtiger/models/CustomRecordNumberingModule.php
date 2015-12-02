@@ -69,6 +69,12 @@ class Settings_Vtiger_CustomRecordNumberingModule_Model extends Vtiger_Module_Mo
 					$modulesModels[$moduleName . '_' . $folder] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId, $moduleName . '_' . $folder, $folder);
 				
 				break;
+			case 'Invoice':
+				$modulesModels[$moduleName] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId);
+				for($year = date('y') - 1; $year <= date('y') + 1; $year++)
+					$modulesModels[$moduleName . '_' . $year] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId, $moduleName . '_' . $year, vtranslate($moduleName) . " 20$year");
+				
+				break;
 			default:
 				$modulesModels[$moduleName] = Settings_Vtiger_CustomRecordNumberingModule_Model::getInstance($moduleName, $tabId);
 				break;

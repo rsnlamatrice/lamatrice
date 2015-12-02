@@ -473,8 +473,16 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		
 	private static function getInvoiceCompteVenteSolde($invoiceData){
 		$modeRegl = $invoiceData['receivedmoderegl'];
-		switch(strtoupper($invoiceData['invoicestatus'])){
-		case 'PAID' :
+		switch($invoiceData['typedossier']){
+		case 'Facture de dépôt-vente' :
+			return '411DEP';
+	
+		case 'Credit Invoice' ://Avoir
+		case 'Avoir' :
+		case 'Remboursement' :
+			return '511200';//TODO
+		default:
+				
 			switch($modeRegl){
 			case 'PayBox' :
 				return '511101';
@@ -490,18 +498,6 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				return '511106';//TODO
 			default:
 				return '511200';//LBP
-			}
-		default:
-			switch($invoiceData['typedossier']){
-			case 'Facture de dépôt-vente' :
-				return '411DEP';
-		
-			case 'CREDIT INVOICE' ://Avoir
-			case 'Avoir' :
-			case 'Remboursement' :
-				return '511200';//TODO
-			default:
-				return '411000';
 			}
 		}
 	}

@@ -34,7 +34,10 @@ class Settings_CronTasks_SaveAjax_Action extends Settings_Vtiger_Index_Action {
 		}
 
 		$recordModel->save();
-
+		
+		if($request->get('reset_laststart'))
+			$recordModel->resetLastStartTime();
+		
 		$response = new Vtiger_Response();
 		$response->setResult(array(true));
 		$response->emit();
