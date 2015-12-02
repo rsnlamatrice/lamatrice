@@ -49,7 +49,7 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		$viewer->assign('SELECTED_DATE', $dateDebut);
 		
 		$viewer->assign('DATES', $dates);
-		$viewer->assign('FORM_URL', 'index.php?module='.$request->get('module').'&view=GestionVSCompta');
+		$viewer->assign('FORM_VIEW', 'GestionVSCompta');
 		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaRows');
 	}
 	

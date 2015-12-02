@@ -122,9 +122,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				ON vtiger_invoice.invoiceid = _source_ids_.invoiceid
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
-			WHERE vtiger_invoicecf.sent2compta IS NULL
-			AND vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($onlyInvoicestatus).')
-			
+			WHERE vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($onlyInvoicestatus).')
 		';
 		
 		$total = 0;
@@ -192,7 +190,13 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		}
 		return true;
 	}
-		
+	
+	/******************************************
+	 *
+	 *	downloadSend2Compta
+	 *
+	 ******************************************/
+	
 	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
