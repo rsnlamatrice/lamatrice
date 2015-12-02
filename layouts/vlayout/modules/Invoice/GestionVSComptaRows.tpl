@@ -13,7 +13,7 @@
 <div class="detailViewInfo">
 	<form method="GET" action="{$FORM_URL}">
 		<input type="hidden" name="module" value="{$MODULE_NAME}"/>
-		<input type="hidden" name="view" value="GestionVSComptaRows"/>
+		<input type="hidden" name="view" value="{$FORM_VIEW}"/>
 		<label>Mois à analyser :</label>
 		<select name="date">{foreach item=DATE_LABEL key=DATE from=$DATES}
 			<option value="{$DATE}" {if $SELECTED_DATE eq $DATE}selected="selected"{/if}>{$DATE_LABEL}</option>

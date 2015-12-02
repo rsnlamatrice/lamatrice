@@ -10,7 +10,7 @@
 
 include_once('modules/RSN/models/DBCogilog.php');
  
-class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
+class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_View {
 
 
 	public function process(Vtiger_Request $request) {
@@ -53,7 +53,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		$viewer->assign('SELECTED_DATE', $dateDebut);
 		
 		$viewer->assign('DATES', $dates);
-		$viewer->assign('FORM_VIEW', 'GestionVSComptaRows');
+		$viewer->assign('FORM_VIEW', 'GestionVSComptaENCRows');
 	}
 	
 	public function initRowsEntries(Vtiger_Request $request) {
@@ -131,36 +131,33 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		if($compte)
 			$compte = "'$compte'";
 		else
-			$compte = $this->getComptesString();
+			$compte = false;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `date`
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`) AS `nomfacture`
-		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` ) AS `compte`
-		, SUM(ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`, 2 )) AS `montant`
+		, vtiger_invoicecf.receivedmoderegl AS `compte`
+		, SUM(ROUND( `vtiger_invoice`.`total`, 2 )) AS `montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
 			ON `vtiger_invoice`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
 		INNER JOIN `vtiger_invoicecf`
 			ON `vtiger_invoicecf`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
-		INNER JOIN `vtiger_inventoryproductrel`
-			ON `vtiger_inventoryproductrel`.`id` = `vtiger_crmentity_invoice`.`crmid`
-		LEFT JOIN `vtiger_products`
-			ON `vtiger_inventoryproductrel`.`productid` = `vtiger_products`.`productid`
-		LEFT JOIN `vtiger_servicecf`
-			ON `vtiger_inventoryproductrel`.`productid` = `vtiger_servicecf`.`serviceid`
 		LEFT JOIN `vtiger_notescf`
 			ON `vtiger_notescf`.`notesid` = `vtiger_invoicecf`.`notesid`
 		LEFT JOIN `vtiger_campaignscf`
 			ON `vtiger_campaignscf`.`campaignid` = `vtiger_invoicecf`.`campaign_no`
 		WHERE `vtiger_crmentity_invoice`.`deleted` = FALSE
-		AND IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` )
-		IN ( ".$compte." )
-		
+		AND vtiger_invoice.invoicestatus != 'Cancelled'
+		";
+		if($compte)
+			$query .= " AND vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
+			";
+		$query .= "
 		AND `vtiger_invoice`.`invoicedate` >= ?
 		AND `vtiger_invoice`.`invoicedate` < ?
 		
 		GROUP BY `vtiger_invoice`.`invoicedate`
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`)
-		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` )
+		, vtiger_invoicecf.receivedmoderegl
 		
 		ORDER BY `date`, `montant`
 		
@@ -171,6 +168,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		$result = $adb->pquery($query, $params);
 		
 		if(!$result){
+			echo "<pre>$query</pre>";
 			$adb->echoError('getLaMatriceRowsEntries');
 			return;
 		}
@@ -183,6 +181,8 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		}
 		return $entries;
 	}
+	
+	/* A noter "ligne"."id_cjourn" = 18 */
 	public function getCogilogRowsEntries($dateDebut, $dateFin, $compte){
 		if($compte)
 			$compte = "'$compte'";
@@ -193,7 +193,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		SELECT "ligne"."ladate" AS "date"
 		, "ligne"."libelle" || \' - \' || "ligne"."piece" AS "nomfacture"
 		, "ligne"."compte" AS "compte"
-		, SUM("ligne"."credit" - "ligne"."debit") AS "montant"
+		, SUM("ligne"."credit" - "ligne"."debit") * -1 AS "montant"
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"

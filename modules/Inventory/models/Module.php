@@ -200,27 +200,5 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	 */
 	public function getAlphabetSearchField(){
 		return 'account_id'; //TODO invoicestatus ne fonctionne pas
-	}
-	
-	/**
-	 * Function to get the Quick Links for the module
-	 * @param <Array> $linkParams
-	 * @return <Array> List of Vtiger_Link_Model instances
-	 */
-	public function getSideBarLinks($linkParams) {
-		$links = parent::getSideBarLinks($linkParams);
-
-		$quickLinks = array(
-			array(
-				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Gestion vs Compta',
-				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSCompta',
-				'linkicon' => '',
-			),
-		);
-		foreach($quickLinks as $quickLink) {
-			$links['SIDEBARLINK'][] = Vtiger_Link_Model::getInstanceFromValues($quickLink);
-		}
-		return $links;
 	}	
 }

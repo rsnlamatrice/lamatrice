@@ -42,6 +42,10 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 		$fieldModelList = $moduleModel->getFields();
 		foreach($recordIds as $recordId) {
 			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleModel);
+			//ED151202 verrouillage
+			if($recordModel->get('sent2compta'))
+				continue;
+			
 			$recordModel->set('id', $recordId);
 			$recordModel->set('mode', 'edit');
 
