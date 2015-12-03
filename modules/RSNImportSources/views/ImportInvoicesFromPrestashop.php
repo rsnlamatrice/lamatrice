@@ -364,6 +364,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$fieldName = 'isgroup';
 		$record->set('isgroup', 0);
 		
+		if(!$record->get('mailingzip') || !$record->get('mailingcity')
+		|| (!$record->get('mailingstreet') && !$record->get('mailingstreet3') && !$record->get('mailingstreet2') && !$record->get('mailingpobox')))
+			$record->set('rsnnpai', 4);//incomplète
+		
 		// copie depuis tout en haut
 		//
 		//
@@ -529,6 +533,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					$record->set('bill_country', $invoiceData[0]['country']);
 					$record->set('subject', $invoiceData[0]['subject']);
 					//$record->set('receivedcomments', $srcRow['paiementpropose']);
+					$record->set('receivedmoderegl', 'payBox BOU');
 					//$record->set('description', $srcRow['notes']);
 					$record->set('invoicedate', $invoiceData[0]['invoicedate']);
 					$record->set('duedate', $invoiceData[0]['invoicedate']);
