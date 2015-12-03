@@ -1,0 +1,8 @@
+
+tr.pointee {
+	display: none;
+}
+table.show-pointee tr.pointee {
+	display: table-row;
+	background-color: #88D68A;
+}

@@ -22,6 +22,18 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		}
 	}
 
+	public function getHeaderCss(Vtiger_Request $request) {
+		$headerCssInstances = parent::getHeaderCss($request);
+
+		$cssFileNames = array(
+			'~/layouts/vlayout/modules/Invoice/resources/GestionVSComptaRows.css',
+		);
+		$cssInstances = $this->checkAndConvertCssStyles($cssFileNames);
+		$headerCssInstances = array_merge($headerCssInstances, $cssInstances);
+
+		return $headerCssInstances;
+	}
+
 	public function process(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
