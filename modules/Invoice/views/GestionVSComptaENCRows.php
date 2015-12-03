@@ -134,7 +134,7 @@ class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_Vie
 			$compte = false;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `date`
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`) AS `nomfacture`
-		, vtiger_invoicecf.receivedmoderegl AS `compte`
+		, IFNULL(vtiger_receivedmoderegl.compteencaissement, vtiger_invoicecf.receivedmoderegl) AS `compte`
 		, SUM(ROUND( `vtiger_invoice`.`total`, 2 )) AS `montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
@@ -145,6 +145,8 @@ class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_Vie
 			ON `vtiger_notescf`.`notesid` = `vtiger_invoicecf`.`notesid`
 		LEFT JOIN `vtiger_campaignscf`
 			ON `vtiger_campaignscf`.`campaignid` = `vtiger_invoicecf`.`campaign_no`
+		LEFT JOIN `vtiger_receivedmoderegl`
+			ON `vtiger_receivedmoderegl`.`receivedmoderegl` = `vtiger_invoicecf`.`receivedmoderegl`
 		WHERE `vtiger_crmentity_invoice`.`deleted` = FALSE
 		AND vtiger_invoice.invoicestatus != 'Cancelled'
 		";
@@ -157,7 +159,7 @@ class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_Vie
 		
 		GROUP BY `vtiger_invoice`.`invoicedate`
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`)
-		, vtiger_invoicecf.receivedmoderegl
+		, IFNULL(vtiger_receivedmoderegl.compteencaissement, vtiger_invoicecf.receivedmoderegl)
 		
 		ORDER BY `date`, `montant`
 		
@@ -197,7 +199,7 @@ class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_Vie
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
-		WHERE ( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )
+		WHERE ( "ligne"."compte" LIKE \'512%\' OR "ligne"."compte" LIKE \'514%\' OR "ligne"."compte" LIKE \'531%\' )
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18

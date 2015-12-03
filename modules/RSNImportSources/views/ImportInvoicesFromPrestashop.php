@@ -533,7 +533,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					$record->set('bill_country', $invoiceData[0]['country']);
 					$record->set('subject', $invoiceData[0]['subject']);
 					//$record->set('receivedcomments', $srcRow['paiementpropose']);
-					$record->set('receivedmoderegl', 'payBox BOU');
+					$record->set('receivedmoderegl', 'PayBox BOU');
 					//$record->set('description', $srcRow['notes']);
 					$record->set('invoicedate', $invoiceData[0]['invoicedate']);
 					$record->set('duedate', $invoiceData[0]['invoicedate']);

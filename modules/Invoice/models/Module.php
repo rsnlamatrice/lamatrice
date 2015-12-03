@@ -21,6 +21,12 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 		$quickLinks = array(
 			array(
 				'linktype' => 'SIDEBARLINK',
+				'linklabel' => 'Gestion vs Compta VT',
+				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaVT',
+				'linkicon' => '',
+			),
+			array(
+				'linktype' => 'SIDEBARLINK',
 				'linklabel' => 'Gestion vs Compta ENC',
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaENC',
 				'linkicon' => '',
