@@ -151,8 +151,9 @@ class Invoice_GestionVSComptaVTRows_View extends Invoice_GestionVSComptaENC_View
 		AND vtiger_invoice.invoicestatus != 'Cancelled'
 		";
 		if($compte)
-			$query .= " AND vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
-			";
+			$query .= " AND (vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
+						OR vtiger_receivedmoderegl.comptevente IN ( ".$compte." )
+					)";
 		$query .= "
 		AND `vtiger_invoice`.`invoicedate` >= ?
 		AND `vtiger_invoice`.`invoicedate` < ?

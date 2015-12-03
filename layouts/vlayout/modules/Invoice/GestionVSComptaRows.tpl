@@ -15,10 +15,9 @@
 		<input type="hidden" name="module" value="{$MODULE_NAME}"/>
 		<input type="hidden" name="view" value="{$FORM_VIEW}"/>
 		<label>Mois à analyser :</label>
-		<select name="date">{foreach item=DATE_LABEL key=DATE from=$DATES}
+		<select name="date" onchange="$(this).parents('form:first').submit();">{foreach item=DATE_LABEL key=DATE from=$DATES}
 			<option value="{$DATE}" {if $SELECTED_DATE eq $DATE}selected="selected"{/if}>{$DATE_LABEL}</option>
 		{/foreach}</select>
-		<input type="submit"/>
 	</form>
 	<table class="table table-bordered equalSplit detailview-table">
 		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecritures dans Lamatrice et Cogilog
