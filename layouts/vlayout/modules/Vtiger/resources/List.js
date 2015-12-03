@@ -2436,6 +2436,7 @@ jQuery.Class("Vtiger_List_Js",{
 				 case 'date':
 					operator = 'e';
 					break;
+				 case 'numeric':
 				 case 'integer':
 				 case 'currency':
 				 case 'double':
@@ -2450,6 +2451,7 @@ jQuery.Class("Vtiger_List_Js",{
 				 case 'date':
 					operator = 'e';
 					break;
+				 case 'numeric':
 				 case 'integer':
 				 case 'currency':
 				 case 'double':

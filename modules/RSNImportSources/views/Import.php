@@ -301,8 +301,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			// TODO: do not hardcode display limit ?
 			$sql .= '
 				FROM ' . $tableName . '
-				/*WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '*/
 			';
+			$nCondition = 0;
+			if($this->needValidatingStep()){
+				$nCondition++;
+				$sql .= ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE;
+			}
 			
 			if($request->get('search_key')){
 				$search_key = $request->get('search_key');
@@ -311,7 +315,6 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 					$search_key = array($search_key);
 					$search_value = array($search_value);
 				}
-				$nCondition = 0;
 				for($i = 0; $i < count($search_key); $i++)
 					if($search_value[$i] || $search_value[$i] === '0'){
 						if($nCondition++)
@@ -330,8 +333,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			$sql .= '
 				LIMIT '.$offset.', '.$limit;
 			$result = $adb->pquery($sql, $params);
-			if(!$result)
+			if(!$result){
 				$adb->echoError('Erreur dans getPreviewData');
+				die();
+			}
 			$numberOfRecords = $adb->num_rows($result);
 
 			for ($i = 0; $i < $numberOfRecords; ++$i) {

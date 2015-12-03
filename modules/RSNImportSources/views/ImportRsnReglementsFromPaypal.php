@@ -93,9 +93,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 		$result = $adb->query($sql);
 		if(!$result){
-			echo "<pre>$sql</pre>";
+			//normal si tous les contacts sont connus, la table a déjà disparu
 			$adb->echoError('needValidatingStep');
-			return true;
+			return false;
 		}
 		$numberOfRecords = $adb->num_rows($result);
 		return $numberOfRecords;

@@ -96,6 +96,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		if(!$result){
 			//normal si tous les contacts sont connus, la table a déjà disparu
 			$adb->echoError('needValidatingStep');
+			return false;
 		}
 		$numberOfRecords = $adb->num_rows($result);
 
@@ -138,6 +139,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'_contactid_source' => '', //Source de la reconnaissance automatique. Massively updated after preImport
 		);	
 	}	
+	
+	function getContactsDateFields(){
+		return array();
+	}
 	
 	/**
 	 * Method to get the imported fields for the contacts module.
@@ -757,14 +762,14 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	function checkContact($invoice) {
 		$contactData = $this->getContactValues($invoice['header']);
 		
-		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
-			return true;
+		//if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
+		//	return true;
 		
 		/* recherche massive
 		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);*/
 		$id = false;
 		
-		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
+		//$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
 		
 		if(!$id){
 			$this->preImportContact($contactData);
@@ -1116,6 +1121,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		
 		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('sourceid', 'num_ligne'));
 		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`sourceid`)";
+		$db->pquery($query);
+		
 		/* Annule les factures déjà importées
 		*/
 		$query = "UPDATE $tableName
@@ -1155,6 +1164,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			WHERE vtiger_crmentity.deleted = 0
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
+
 		$result = $db->pquery($query, array());
 		if(!$result){
 			echo '<br><br><br><br>';
@@ -1174,17 +1184,29 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 				
-		RSNImportSources_Utils_Helper::setPreImportDataContactIdByNameAndEmail(
-			$this->user,
-			'Contacts',
-			'_contactid',
-			array(
-				'lastname' => 'lastname',
-				'firstname' => 'firstname',
-				'email' => 'email',
-			), 
-			RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
-		);
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`lastname`)";
+		$db->pquery($query);
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`firstname`)";
+		$db->pquery($query);
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`email`)";
+		$db->pquery($query);
+		
+		//see PreImport validation step
+		
+		//RSNImportSources_Utils_Helper::setPreImportDataContactIdByNameAndEmail(
+		//	$this->user,
+		//	'Contacts',
+		//	'_contactid',
+		//	array(
+		//		'lastname' => 'lastname',
+		//		'firstname' => 'firstname',
+		//		'email' => 'email',
+		//	), 
+		//	RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
+		//);
 		return true;
 	}
 

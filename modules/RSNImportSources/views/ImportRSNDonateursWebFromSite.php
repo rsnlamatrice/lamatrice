@@ -55,9 +55,9 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 
 		$result = $adb->query($sql);
 		if(!$result){
-			echo "<pre>$sql</pre>";
+			//normal si tous les contacts sont connus, la table a déjà disparu
 			$adb->echoError('needValidatingStep');
-			return true;
+			return false;
 		}
 		$numberOfRecords = $adb->num_rows($result);
 		return $numberOfRecords;
@@ -740,6 +740,68 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 
 		return null;
 	}
+
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function postPreImportData() {
+		
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');
+		$contactTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		
+		/* Annule les donateursweb déjà importés
+		*/
+		$query = "UPDATE $tableName
+		JOIN  vtiger_rsndonateursweb
+			ON  vtiger_rsndonateursweb.externalid = `$tableName`.externalid
+			AND NOT (`$tableName`.externalid IS NULL OR `$tableName`.externalid = 0)
+		JOIN vtiger_crmentity
+			ON vtiger_rsndonateursweb.rsndonateurswebid = vtiger_crmentity.crmid
+		JOIN vtiger_crmentity vtiger_crmentity_contact
+			ON vtiger_rsndonateursweb.contactid = vtiger_crmentity_contact.crmid
+		";
+		$query .= " SET `$tableName`.status = ?
+		, `$tableName`.recordid = vtiger_crmentity.crmid
+		, _contactid = vtiger_rsndonateursweb.contactid";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_crmentity_contact.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+					
+		/* Affecte l'id du contact
+		*/
+		$query = "UPDATE $contactTableName
+		JOIN  $tableName
+			ON  $contactTableName.externalid = $tableName.externalid
+		";
+		$query .= " SET `$contactTableName`.status = ?
+		, `$contactTableName`._contactid_status = ?
+		, `$contactTableName`._contactid = $tableName._contactid
+		, `$contactTableName`.recordid = $tableName._contactid";
+		$query .= "
+			WHERE $tableName._contactid IS NOT NULL
+			AND `$contactTableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED, RSNImportSources_Import_View::$RECORDID_STATUS_SKIP));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		return true;
+	}
 	
 	/**
 	 * Method called before the data are really imported.
@@ -753,31 +815,41 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		$db = PearDatabase::getInstance();
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$rsndonateurswebTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');
-							
-		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
-		*/
-		$query = "UPDATE $contactsTableName
-		JOIN  $rsndonateurswebTableName
-			ON ($rsndonateurswebTableName.externalid = `$contactsTableName`.externalid
+		
+		
+		/* en scheduled import, si tous les contacts sont connus, la table de contacts a déjà disparu. Ce qui provoque un plantage de la requête plus bas */
+		$query = "SELECT 1
+			FROM $rsndonateurswebTableName
+			WHERE $rsndonateurswebTableName._contactid IS NULL
+			LIMIT 1
+		";
+		$result = $db->pquery($query);
+		if($db->getRowCount($result)){
+			/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
+			*/
+			$query = "UPDATE $contactsTableName
+			JOIN  $rsndonateurswebTableName
+				ON ($rsndonateurswebTableName.externalid = `$contactsTableName`.externalid
 				OR (
 					$rsndonateurswebTableName.email = `$contactsTableName`.email AND
 					NOT($rsndonateurswebTableName.email IS NULL OR $rsndonateurswebTableName.email = '')
 				)
-			)
-		";
-		$query .= " SET `$rsndonateurswebTableName`._contactid = `$contactsTableName`.recordid
-		/* affecte le status FAILED si contactid est inconnu */
-		, `$rsndonateurswebTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$rsndonateurswebTableName`.status)";
-		$query .= "
-			WHERE `$rsndonateurswebTableName`._contactid IS NULL
-			AND `$rsndonateurswebTableName`.status = ? 
-		";
-		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
-		if(!$result){
-			echo '<br><br><br><br>';
-			$db->echoError($query);
-			echo("<pre>$query</pre>");
-			die();
+				)
+			";
+			$query .= " SET `$rsndonateurswebTableName`._contactid = `$contactsTableName`.recordid
+			/* affecte le status FAILED si contactid est inconnu */
+			, `$rsndonateurswebTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$rsndonateurswebTableName`.status)";
+			$query .= "
+				WHERE `$rsndonateurswebTableName`._contactid IS NULL
+				AND `$rsndonateurswebTableName`.status = ? 
+			";
+			$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
+			if(!$result){
+				echo '<br><br><br><br>';
+				$db->echoError($query);
+				echo("<pre>$query</pre>");
+				die();
+			}
 		}
 		return true;
 	}
@@ -862,6 +934,10 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			$prenom = ucfirst( mb_strtolower($prenom) );
 		else
 			$prenom = ucfirst( $prenom );
+		
+		$amount = trim($rsndonateursweb['donInformations'][12]);
+		if(strpos($amount, ' ') !== false)
+			$amount = explode(' ', $amount)[0];
 			
 		$rsndonateurswebHeader = array(
 			'externalid'		=> $rsndonateursweb['donInformations'][0],
@@ -883,7 +959,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'dateaboend' 		=> $dateEndAbo,
 			'paiementerror' 	=> $rsndonateursweb['donInformations'][20],
 			'modepaiement' 		=> $rsndonateursweb['donInformations'][21],
-			'amount' 		=> $rsndonateursweb['donInformations'][12],
+			'amount' 		=> $amount,
 			'recu' 			=> $rsndonateursweb['donInformations'][17],
 			'revue' 		=> $rsndonateursweb['donInformations'][18],
 			'clicksource' 		=> $rsndonateursweb['donInformations'][22],
@@ -930,7 +1006,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			return parent::getPreviewData($request, $offset, $limit, $importModules);
 		if(!$importModules
 		&& $this->needValidatingStep())
-			$importModules =array('Contacts');
+			$importModules = array('Contacts');
 		$data = parent::getPreviewData($request, $offset, $limit, $importModules);
 		return RSNImportSources_Utils_Helper::getPreviewDataWithMultipleContacts($data);
 	}
