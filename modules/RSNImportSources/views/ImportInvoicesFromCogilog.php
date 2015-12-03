@@ -337,7 +337,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 						$record->set('invoicestatus', 'Approved');//TODO*/
 					$record->set('invoicestatus', 'Compta');
 					
-					$record->set('receivedmoderegl', $invoiceData[0]['modereglement'];
+					$record->set('receivedmoderegl', $invoiceData[0]['modereglement']);
 					$record->set('receivedcomments', $srcRow['_receivedcomments']);
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
