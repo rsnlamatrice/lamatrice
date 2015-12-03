@@ -117,6 +117,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'invoicedate',
 			'typedossier',
 			'invoicetype',
+			'receivedmoderegl',
 			
 			//lines
 			'productcode',
@@ -309,6 +310,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 					$record->set('bill_country', $invoiceData[0]['country']);
 					$record->set('subject', $subject);
 					//$record->set('receivedcomments', $srcRow['paiementpropose']);
+					$record->set('receivedmoderegl', $invoiceData[0]['receivedmoderegl']);
 					//$record->set('description', $srcRow['notes']);
 					$record->set('invoicedate', $invoiceData[0]['invoicedate']);
 					$record->set('duedate', $invoiceData[0]['invoicedate']);
@@ -1140,6 +1142,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$date = $reglement['dateregl'];
 		$invoiceType = $this->getInvoiceType($reference);
 		$typeDossier = $this->getInvoiceTypeDossier($reference);
+		$receivedmoderegl = $this->getModeRegl($reference);
 		
 		$invoiceNo = $this->invoiceNo_prefix . substr($date, 2, 2) . $sourceId;
 		
@@ -1173,6 +1176,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				'typedossier'		=> $typeDossier,
 				'subject'		=> $subject,
 				'invoicedate'		=> $date,
+				'receivedmoderegl' => $receivedmoderegl,
 			);
 			$isProduct = false;
 			$invoiceValues = array_merge($invoiceValues, array(
@@ -1259,7 +1263,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * Retourne le mode de règlement associé : PayBox BOU, PayBox DR, PayBox DP
 	 */
 	function getModeRegl($reference){
-		return 'PAYBOX ' . $this->getInvoiceType($reference);
+		return 'PayBox ' . $this->getInvoiceType($reference);
 	}
 	
 	/**

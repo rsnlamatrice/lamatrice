@@ -137,7 +137,7 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 	public function getLaMatriceComptesEntries($dateDebut, $dateFin){
 		global $adb;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `Date`
-		, vtiger_invoicecf.receivedmoderegl AS `Compte`
+		, IFNULL(vtiger_receivedmoderegl.compteencaissement, vtiger_invoicecf.receivedmoderegl) AS `Compte`
 		, SUM( ROUND( `vtiger_invoice`.`total`, 2 ) ) AS `Montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
@@ -148,13 +148,15 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 			ON `vtiger_notescf`.`notesid` = `vtiger_invoicecf`.`notesid`
 		LEFT JOIN `vtiger_campaignscf`
 			ON `vtiger_campaignscf`.`campaignid` = `vtiger_invoicecf`.`campaign_no`
+		LEFT JOIN `vtiger_receivedmoderegl`
+			ON `vtiger_receivedmoderegl`.`receivedmoderegl` = `vtiger_invoicecf`.`receivedmoderegl`
 		WHERE `vtiger_crmentity_invoice`.`deleted` = FALSE
 		AND vtiger_invoice.invoicestatus != 'Cancelled'
 		
 		AND `vtiger_invoice`.`invoicedate` >= ?
 		AND `vtiger_invoice`.`invoicedate` < ?
 		
-		GROUP BY `vtiger_invoice`.`invoicedate`, vtiger_invoicecf.receivedmoderegl
+		GROUP BY `vtiger_invoice`.`invoicedate`, IFNULL(vtiger_receivedmoderegl.compteencaissement, vtiger_invoicecf.receivedmoderegl)
 		
 		ORDER BY `Date`, `Compte`
 		";
@@ -187,7 +189,7 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
-		WHERE ( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )
+		WHERE ( "ligne"."compte" LIKE \'512%\' OR "ligne"."compte" LIKE \'514%\' OR "ligne"."compte" LIKE \'531%\' )
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18
