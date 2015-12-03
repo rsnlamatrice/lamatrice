@@ -447,7 +447,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				$date = $data['date'];
 				$modeRegl = $data['moderegl'];
 				$compteEnc = self::getModeReglCompteEncaissement($modeRegl); 
-				$journal = self::getCompteEncaissementJournal($compteEnc);
+				$journal = self::getModeReglJournal($modeRegl); 
+				//$journal = self::getCompteEncaissementJournal($compteEnc);
 				if($compteEnc[0] === '7' || $compteEnc[0] === '6')
 					$codeAnal = $data['codeAnal'];
 				else	$codeAnal = '';
@@ -543,54 +544,60 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			return '511200';//TODO
 		default:
 				
-			switch($modeRegl){
-			case 'PayBox' :
-				return '511101';
-			case 'PayPal' :
-				return '511300';
-			case 'Espèces' :
-				return '511103';
-			case 'CB' :
-				return '511102';
-			case 'Virement' :
-				return '511106';
-			case 'Mandat' :
-				return '511106';//TODO
-			default:
-				return '511200';//LBP
-			}
+			return getModeReglementInfo($modeRegl, 'comptevente');
+		
+			//switch($modeRegl){
+			//case 'PayBox' :
+			//	return '511101';
+			//case 'PayPal' :
+			//	return '511300';
+			//case 'Espèces' :
+			//	return '511103';
+			//case 'CB' :
+			//	return '511102';
+			//case 'Virement' :
+			//	return '511106';
+			//case 'Mandat' :
+			//	return '511106';//TODO
+			//default:
+			//	return '511200';//LBP
+			//}
 		}
 	}
 	
 	private static function getModeReglCompteEncaissement($modeRegl){
-		switch($modeRegl){
-		case 'PayBox' :
-			return '512107';
-		case 'PayPal' :
-			return '514000';
-		case 'Espèces' :
-			return '511103';
-		case 'CB' :
-			return '514000';
-		case 'Virement' :
-			return '514000';
-		case 'Mandat' :
-			return '514000';//TODO
-		default:
-			return '514000';//LBP
-		}
-	}
+		return getModeReglementInfo($modeRegl, 'compteencaissement');
 	
-	private static function getCompteEncaissementJournal($compte){
-		switch(strtoupper($compte)){
-		case '511103' :
-			return 'CS';//caisse
-		case '512107' :
-			return 'BFC';
-		default :
-			return 'LBP';
-		}
+		//switch($modeRegl){
+		//case 'PayBox' :
+		//	return '512107';
+		//case 'PayPal' :
+		//	return '514000';
+		//case 'Espèces' :
+		//	return '511103';
+		//case 'CB' :
+		//	return '514000';
+		//case 'Virement' :
+		//	return '514000';
+		//case 'Mandat' :
+		//	return '514000';//TODO
+		//default:
+		//	return '514000';//LBP
+		//}
 	}
+	private static function getModeReglJournal($modeRegl){
+		return getModeReglementInfo($modeRegl, 'journalencaissement');
+	}
+	//private static function getCompteEncaissementJournal($compte){
+	//	switch(strtoupper($compte)){
+	//	case '511103' :
+	//		return 'CS';//caisse
+	//	case '512107' :
+	//		return 'BFC';
+	//	default :
+	//		return 'LBP';
+	//	}
+	//}
 	
 	private static function getCodeAffaireCodeAnal($codeAffaire){
 		switch(strtoupper($codeAffaire)){

@@ -1205,6 +1205,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$currencyId = $this->getCurrencyId($currency);
 		$reference = $reglement[12];
 		$typeregl = $this->getTypeRegl($reference);
+		$modeRegl = $this->getModeRegl($reference);
 		$numpiece = $reference;
 		$rank = (int)$reglement[3];
 		$transactionId = $reglement[7];
@@ -1235,7 +1236,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'errorcode'		=> $reglement[31],
 			'bank'			=> $reglement[1],
 			'typeregl'		=> $typeregl,
-			'rsnmoderegl'		=> 'PayBox',
+			'rsnmoderegl'		=> $modeRegl,
 		);
 
 		return $reglementValues;
@@ -1252,6 +1253,13 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			elseif($reference[1] == 'P')
 				return 'Don ponctuel';
 		return 'Boutique';
+	}
+	
+	/**
+	 * Retourne le mode de règlement associé : PayBox BOU, PayBox DR, PayBox DP
+	 */
+	function getModeRegl($reference){
+		return 'PAYBOX ' . $this->getInvoiceType($reference);
 	}
 	
 	/**

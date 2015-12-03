@@ -99,7 +99,7 @@ class Settings_Picklist_IndexAjax_View extends Settings_Vtiger_IndexAjax_View {
         $pickFieldId = $request->get('pickListFieldId');
         $fieldModel = Settings_Picklist_Field_Model::getInstance($pickFieldId);
         
-	$moduleName = $request->getModule();
+		$moduleName = $request->getModule();
         $qualifiedName = $request->getModule(false);
        
         $selectedFieldAllPickListData = array();
@@ -113,11 +113,11 @@ class Settings_Picklist_IndexAjax_View extends Settings_Vtiger_IndexAjax_View {
         $viewer->assign('SELECTED_PICKLISTFIELD_ALL_VALUES',$selectedFieldAllPickListValues);
         $viewer->assign('SELECTED_PICKLISTFIELD_ALL_DATA',$selectedFieldAllPickListData);
 	
-	$properties = getPicklistProperties($fieldModel);
-	if($properties){
-	    $viewer->assign('PROPERTIES_UICOLOR', $properties["uicolor"]);
-	    $viewer->assign('PROPERTIES_UIICON', $properties["uiicon"]);
-	}
+		$properties = getPicklistProperties($fieldModel);
+		if($properties){
+			$viewer->assign('PROPERTIES_UICOLOR', $properties["uicolor"]);
+			$viewer->assign('PROPERTIES_UIICON', $properties["uiicon"]);
+		}
         $viewer->view('PickListValueDetail.tpl',$qualifiedName);
     }
     

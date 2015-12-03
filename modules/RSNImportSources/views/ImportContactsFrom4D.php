@@ -173,6 +173,8 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importContacts($importDataController) {
+		$this->checkContact999999();
+		
 		global $VTIGER_BULK_SAVE_MODE;
 		$VTIGER_BULK_SAVE_MODE = true;
 		$config = new RSNImportSources_Config_Model();
@@ -910,6 +912,54 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 				return TYPEABONNE_ABOGROUPE;
 			default:
 				return $typeAbonne;
+		}
+	}
+	
+	
+	function checkContact999999(){
+		$query = 'SELECT 1
+			FROM vtiger_contactdetails
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND contact_no = "C999999"';
+		$db = PearDatabase::getInstance();
+		$result = $db->query($query);
+		if($db->getRowCount($result) === 0){
+			$record = Vtiger_Record_Model::getCleanInstance('Contacts');
+			$record->set('lastname', '999999 Inconnu dans 4D');
+			$record->set('rsnnpai', 4);
+			$record->set('accounttype', 'SUPPRIMÉ');
+			$record->set('isgroup', 0);
+			
+			/* "ne pas" partout */
+			foreach( array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb')
+					as $fieldName){
+				$record->set($fieldName, null);
+			}
+			$record->save();
+			
+			$contactId = $record->getId();
+
+			$query = "UPDATE vtiger_crmentity
+				JOIN vtiger_contactdetails
+					ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+				SET smownerid = ?
+				, modifiedtime = ?
+				, createdtime = ?
+				, ref4d = ?
+				, label = ?
+				, contact_no = ?
+				WHERE vtiger_crmentity.crmid = ?
+			";
+			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
+								, '2000-01-01'
+								, '2000-01-01'
+								, 999999
+								, $record->get('firstname')
+								, 'C999999'
+								, $contactId));
+			
 		}
 	}
 }

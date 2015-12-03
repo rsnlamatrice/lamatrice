@@ -1528,4 +1528,31 @@ function getLineItemFields(){
 	return $lineItemdFields;
 }
 
+/**
+ * Extrait les infos complémentaires du mode de règlement
+ * Elles sont stockées avec les valeurs du picklist
+ */
+function getModeReglementInfo($modeRegl = false, $parameter = false){
+	$data = Vtiger_Cache::get('receivedmoderegl', 'all');
+	if(!$data){
+		global $adb;
+		$query = 'SELECT *
+			FROM vtiger_receivedmoderegl
+			ORDER BY presence DESC, sortorderid ASC';
+		$result = $adb->query($query);
+		$data = array();
+		while($row = $adb->fetch_row($result, false))
+			$data[$row['receivedmoderegl']] = $row;
+		Vtiger_Cache::set('receivedmoderegl', 'all', $data);
+	}
+	if($modeRegl){
+		if($parameter)
+			if($data[$modeRegl])
+				return $data[$modeRegl][$parameter];
+			else
+				return false;
+			return $data[$modeRegl];
+	}
+	return $data;
+}
 ?>
