@@ -41,7 +41,7 @@ class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_VIEW', 'GestionVSComptaVT');
-		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaENCRows');
+		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaVTRows');
 	}
 	
 	public function initComptesEntries(Vtiger_Request $request) {
