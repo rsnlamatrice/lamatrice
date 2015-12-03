@@ -1034,6 +1034,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			}
 		}
 		if($rowsByContactId){
+			
 			$query = 'SELECT vtiger_crmentity.crmid
 				, vtiger_contactdetails.contact_no, vtiger_contactdetails.isgroup
 				, vtiger_contactdetails.firstname, vtiger_contactdetails.lastname, vtiger_contactdetails.email
@@ -1054,7 +1055,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				echo("<pre>$query</pre>");
 				die();
 			}
-			while($contact = $db->fetch_row($result)){
+			while($contact = $db->fetch_row($result, false)){
 				$contactId = $contact['crmid'];
 				foreach($rowsByContactId[$contactId] as $rowId){
 					if(!$data[$moduleName][$rowId]['_contact_rows'])

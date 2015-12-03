@@ -33,7 +33,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 	private $reglementOrigine = 'PayBox';
 	
-	public $invoiceNo_prefix = 'PBOX';
+	public $sourceid_prefix = 'PBOX';
 
 	/**
 	 * Method to get the source import label to display.
@@ -100,8 +100,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			//header
 			'transactionid',
 			'refdonateursweb',
-			'invoice_no',
-			'numcart',
+			'importsourceid',
 			'num_ligne',//n° de ligne (0 pour l'en-tête). Sert à détecter les doublons de factures quand on importe plusieurs fichiers à la fois
 			'contact_no',
 			'firstname',
@@ -145,7 +144,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			//header
 			'transactionid',
 			'numpiece',
-			'numcart',
+			'refboutique',
+			'importsourceid',
 			'rank',
 			'dateregl',
 			'dateoperation',
@@ -268,18 +268,18 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			$account = $contact->getAccountRecordModel();
 
 			if ($account != null) {
-				$invoiceNo = $invoiceData[0]['invoice_no'];
+				$importSourceId = $invoiceData[0]['importsourceid'];
 		
-				//test sur invoice_no == $invoiceNo
+				//test sur importsourceid == $importSourceId
 				$query = "SELECT crmid, invoiceid
-					FROM vtiger_invoice
+					FROM vtiger_invoicecf
 					JOIN vtiger_crmentity
-					    ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
-					WHERE invoice_no = ? AND deleted = FALSE
+					    ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid
+					WHERE importsourceid = ? AND deleted = FALSE
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
-				$result = $db->pquery($query, array($invoiceNo));//$invoiceData[0]['subject']
+				$result = $db->pquery($query, array($importSourceId));//$invoiceData[0]['subject']
 				if($db->num_rows($result)){
 					//already imported !!
 					$row = $db->fetch_row($result, 0); 
@@ -323,6 +323,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
+					$record->set('importsourceid', $invoiceData[0]['importsourceid']);
 				    
 					$coupon = $this->getCoupon($invoiceData[0]);
 					if($coupon){
@@ -365,9 +366,12 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 						$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
 					}
 					$record->set('mode','edit');
+					
+					$invoiceNo = $record->getEntity()->setModuleSeqNumber("increment", $record->getModuleName());
+					
 					//This field is not manage by save()
 					$record->set('invoice_no', $invoiceNo);
-					//set invoice_no
+					//set invoice_no, date, amounts
 					$query = "UPDATE vtiger_invoice
 						JOIN vtiger_crmentity
 							ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
@@ -383,7 +387,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 						WHERE invoiceid = ?
 					";
 					$total = $totalAmount + $totalTax;
-					$result = $db->pquery($query, array($invoiceNo
+					$result = $db->pquery($query, array(
+										  $invoiceNo
 									    , $total
 									    , $total
 									    , 'individual'
@@ -392,7 +397,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 									    , $invoiceData[0]['invoicedate']
 									    , $invoiceId));
 					
-					$log->debug("" . basename(__FILE__) . " update imported invoice (id=" . $record->getId() . ", invoiceNo=$invoiceNo , total=$total, date=" . $invoiceData[0]['invoicedate']
+					$log->debug("" . basename(__FILE__) . " update imported invoice (id=" . $record->getId() . ", invoiceNo=$importSourceId , total=$total, date=" . $invoiceData[0]['invoicedate']
 						    . ", result=" . ($result ? " true" : "false"). " )");
 					if( ! $result)
 						$db->echoError();
@@ -819,15 +824,14 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		}
 					
 		/* Affecte l'id de la facture
-		vtiger_rsnreglements.numpiece LIKE <numcart>;CP;15-09-15-23:33:44
 		*/
 		$query = "UPDATE $tableName
-		JOIN  vtiger_invoice
-			ON  vtiger_invoice.invoice_no = `$tableName`.numcart
-			OR vtiger_invoice.invoice_no = CONCAT('".$this->invoiceNo_prefix."', `$tableName`.transactionid)
-			OR vtiger_invoice.invoice_no LIKE CONCAT('BOU%-', `$tableName`.numcart)
+		JOIN  vtiger_invoicecf
+			ON  (vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
+			OR vtiger_invoicecf.importsourceid LIKE CONCAT('BOU%-', `$tableName`.refboutique)
+		)
 		JOIN vtiger_crmentity
-			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+			ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid
 		";
 		$query .= " SET `_invoiceid` = vtiger_crmentity.crmid";
 		$query .= "
@@ -879,13 +883,15 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		$reglementsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
 		
-		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('invoice_no', 'num_ligne'));
+		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('importsourceid', 'num_ligne'));
 		
 		/* Affecte l'id de la facture déjà connue
 		*/
 		$query = "UPDATE $tableName
+		JOIN  vtiger_invoicecf
+			ON  vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
 		JOIN  vtiger_invoice
-			ON  vtiger_invoice.invoice_no = `$tableName`.invoice_no
+			ON  vtiger_invoice.invoiceid = vtiger_invoicecf.invoiceid
 		JOIN vtiger_crmentity
 			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
 		JOIN $reglementsTableName
@@ -1144,7 +1150,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$typeDossier = $this->getInvoiceTypeDossier($reference);
 		$receivedmoderegl = $this->getModeRegl($reference);
 		
-		$invoiceNo = $this->invoiceNo_prefix . substr($date, 2, 2) . $sourceId;
+		$importSourceId = $this->getImportationSourceId($reglement);
 		
 		switch($invoiceType){
 		case 'BOU':
@@ -1170,7 +1176,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			$invoiceValues = array(
 				'transactionid' => $reglement['transactionid'],
 				'refdonateursweb' => $reglement['numpiece'],//vtiger_rsndonateursweb.paiementid
-				'invoice_no'		=> $invoiceNo,
+				'importsourceid'		=> $importSourceId,
 				'num_ligne' => 0,
 				'invoicetype'		=> $invoiceType,
 				'typedossier'		=> $typeDossier,
@@ -1192,7 +1198,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		return $invoiceValues;
 	}
 
-
 	/**
 	 * Method that return the formated information of an RsnReglements found in the file.
 	 * @param $reglement : the invoice data found in the file.
@@ -1213,6 +1218,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$numpiece = $reference;
 		$rank = (int)$reglement[3];
 		$transactionId = $reglement[7];
+		$importSourceId = $this->getImportationSourceId($reglement);
 		
 		if($numpiece){
 			if(strpos($numpiece, ';') !== FALSE)
@@ -1226,7 +1232,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$reglementValues = array(
 			'transactionid' => $transactionId,
 			'numpiece'		=> $numpiece,//vtiger_rsndonateursweb.paiementid
-			'numcart'			=> $numcart,
+			'refboutique'		=> $numcart,
+			'importsourceid'		=> $importSourceId,
 			'rank'			=> $rank,
 			'dateregl'		=> $date,
 			'dateoperation'		=> $dateoperation,
@@ -1244,6 +1251,13 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		);
 
 		return $reglementValues;
+	}
+
+	function getImportationSourceId($reglement){
+		$sourceId = $reglement['transactionid'];
+		if(!$sourceId)
+			$sourceId = $reglement[7];
+		return $this->sourceid_prefix . $sourceId;
 	}
 	
 	/**

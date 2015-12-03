@@ -81,6 +81,13 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	 * @return CRMEntity object
 	 */
 	public function getEntity() {
+		//ED151203 : initialize a newly created CRMEntity (needed to get invoice_no in ImportInvoicesFromPrestashop.php)
+		if($this->getId() && $this->getId() != $this->entity->id){
+			$this->entity->id = $this->getId();
+			foreach($this->entity->column_fields as $fieldName => $value)
+				if($value = $this->get($fieldName))
+					$this->entity->column_fields[$fieldName] = $value;
+		}
 		return $this->entity;
 	}
 

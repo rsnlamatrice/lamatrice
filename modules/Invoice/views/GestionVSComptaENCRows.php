@@ -184,7 +184,7 @@ class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_Vie
 		return $entries;
 	}
 	
-	/* A noter "ligne"."id_cjourn" = 18 */
+	/* A noter "ligne"."id_cjourn" = 10 */
 	public function getCogilogRowsEntries($dateDebut, $dateFin, $compte){
 		if($compte)
 			$compte = "'$compte'";
@@ -202,7 +202,7 @@ class Invoice_GestionVSComptaENCRows_View extends Invoice_GestionVSComptaENC_Vie
 		WHERE ( "ligne"."compte" LIKE \'512%\' OR "ligne"."compte" LIKE \'514%\' OR "ligne"."compte" LIKE \'531%\' )
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
-		AND "ligne"."id_cjourn" = 18
+		AND "ligne"."id_cjourn" = 10
 		
 		AND "ligne"."ladate" >= \''.$dateDebut.'\'
 		AND "ligne"."ladate" < \''.$dateFin.'\'
