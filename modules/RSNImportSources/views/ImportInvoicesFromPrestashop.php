@@ -94,6 +94,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 
 		$result = $adb->query($sql);
 		if(!$result){
+			//normal si tous les contacts sont connus, la table a déjà disparu
 			$adb->echoError('needValidatingStep');
 		}
 		$numberOfRecords = $adb->num_rows($result);
@@ -422,19 +423,19 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		}
 
 		$row = $adb->raw_query_result_rowdata($result, 0);
-		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
+		$previousSourceId = $row['sourceid'];
 		$invoiceData = array($row);
 
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
-			$invoiceSubject = $row['subject'];
+			$sourceId = $row['sourceid'];
 
-			if ($previousInvoiceSubjet == $invoiceSubject) {
+			if ($previousSourceId == $sourceId) {
 				array_push($invoiceData, $row);
 			} else {
 				$this->importOneInvoice($invoiceData, $importDataController);
 				$invoiceData = array($row);
-				$previousInvoiceSubjet = $invoiceSubject;
+				$previousSourceId = $sourceId;
 			}
 		}
 
@@ -498,12 +499,12 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			if ($account != null) {
 				$sourceId = $invoiceData[0]['sourceid'];
 		
-				//test sur invoice_no == $sourceId
+				//test sur importsourceid == $sourceId
 				$query = "SELECT crmid, invoiceid
-					FROM vtiger_invoice
+					FROM vtiger_invoicecf
 					JOIN vtiger_crmentity
-					    ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
-					WHERE invoice_no = ? AND deleted = FALSE
+					    ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid
+					WHERE importsourceid = ? AND deleted = FALSE
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
@@ -547,6 +548,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
 		                    
+					$record->set('importsourceid', $sourceId);
 				    
 					$coupon = $this->getCoupon($invoiceData[0]);
 					if($coupon){
@@ -579,7 +581,6 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 						return false;
 					}
 					
-					
 					$entryId = $this->getEntryId("Invoice", $invoiceId);
 					$sequence = 0;
 					$totalAmount = 0.0;
@@ -595,9 +596,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					}
 					
 					$record->set('mode','edit');
-					//This field is not manage by save()
-					$record->set('invoice_no', $sourceId);
-					//set invoice_no
+					
+					$invoiceNo = $record->getEntity()->setModuleSeqNumber("increment", $record->getModuleName());
+					
+					//set dates, invoice_no
 					$query = "UPDATE vtiger_invoice
 						JOIN vtiger_crmentity
 							ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
@@ -613,7 +615,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 						WHERE invoiceid = ?
 					";
 					$total = $totalAmount + $totalTax;
-					$result = $db->pquery($query, array($sourceId
+					$result = $db->pquery($query, array(
+										  $invoiceNo
 									    , $total
 									    , $total
 									    , 'individual'
@@ -1116,12 +1119,15 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		/* Annule les factures déjà importées
 		*/
 		$query = "UPDATE $tableName
+		JOIN  vtiger_invoicecf
+			ON  vtiger_invoicecf.importsourceid = `$tableName`.sourceid
 		JOIN  vtiger_invoice
-			ON  vtiger_invoice.invoice_no = `$tableName`.sourceid
+			ON  vtiger_invoice.invoiceid = vtiger_invoicecf.invoiceid
 		JOIN vtiger_crmentity
 			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
 		";
 		$query .= " SET `$tableName`.status = ?
+		, `$tableName`.recordid = vtiger_invoice.invoiceid
 		, _contactid = vtiger_invoice.contactid";
 		$query .= "
 			WHERE vtiger_crmentity.deleted = 0
@@ -1235,31 +1241,41 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$db = PearDatabase::getInstance();
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$invoicesTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
-							
-		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
-		*/
-		$query = "UPDATE $contactsTableName
-		JOIN  $invoicesTableName
-			ON ($invoicesTableName.sourceid = `$contactsTableName`.sourceid
-				OR (
-					$invoicesTableName.email = `$contactsTableName`.email AND
-					NOT($invoicesTableName.email IS NULL OR $invoicesTableName.email = '')
+		
+		/* en scheduled import, si tous les contacts sont connus, la table de contacts a déjà disparu. Ce qui provoque un plantage de la requête plus bas */
+		$query = "SELECT 1
+			FROM $invoicesTableName
+			WHERE $invoicesTableName._contactid IS NULL
+			LIMIT 1
+		";
+		$result = $db->pquery($query);
+		if($db->getRowCount($result)){
+			
+			/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
+			*/
+			$query = "UPDATE $contactsTableName
+			JOIN  $invoicesTableName
+				ON ($invoicesTableName.sourceid = `$contactsTableName`.sourceid
+					OR (
+						$invoicesTableName.email = `$contactsTableName`.email AND
+						NOT($invoicesTableName.email IS NULL OR $invoicesTableName.email = '')
+					)
 				)
-			)
-		";
-		$query .= " SET `$invoicesTableName`._contactid = `$contactsTableName`.recordid
-		/* affecte le status FAILED si contactid est inconnu */
-		, `$invoicesTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$invoicesTableName`.status)";
-		$query .= "
-			WHERE `$invoicesTableName`._contactid IS NULL
-			AND `$invoicesTableName`.status = ? 
-		";
-		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
-		if(!$result){
-			echo '<br><br><br><br>';
-			$db->echoError($query);
-			echo("<pre>$query</pre>");
-			die();
+			";
+			$query .= " SET `$invoicesTableName`._contactid = `$contactsTableName`.recordid
+			/* affecte le status FAILED si contactid est inconnu */
+			, `$invoicesTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$invoicesTableName`.status)";
+			$query .= "
+				WHERE `$invoicesTableName`._contactid IS NULL
+				AND `$invoicesTableName`.status = ? 
+			";
+			$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
+			if(!$result){
+				echo '<br><br><br><br>';
+				$db->echoError($query);
+				echo("<pre>$query</pre>");
+				die();
+			}
 		}
 		return true;
 	}
