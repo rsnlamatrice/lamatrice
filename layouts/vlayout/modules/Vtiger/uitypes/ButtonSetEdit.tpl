@@ -53,7 +53,7 @@
         {if trim(decode_html($SELECTED_VALUE)) eq trim($PICKLIST_KEY)}
                 checked="checked"
         {/if}
-	{if $FIELD_MODEL->isReadOnly()} 
+	{if $FIELD_MODEL->isReadOnly() || !$FIELD_MODEL->isEditable()} 
 		disabled="disabled" 
 	{/if}
         /><label for="{$UID}{$PICKLIST_KEY}" class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">

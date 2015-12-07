@@ -72,6 +72,11 @@
 				<a class="cancelLink" type="reset" onclick="javascript:window.history.back();">{vtranslate('LBL_CANCEL', $MODULE)}</a>
 			</span>
 		</div>
+		{if $IS_DUPLICATE_FROM}{* ED11204 *}
+			<div class="contentHeader row-fluid">
+				<h3>Le prélèvement dupliqué sera arrété</h3>
+			</div>
+		{/if}
 		{foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE name="EditViewBlockLevelLoop"}
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
 			<table class="table table-bordered blockContainer showInlineTable block-{$BLOCK_LABEL}">

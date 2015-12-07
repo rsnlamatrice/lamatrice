@@ -24,6 +24,13 @@ class RsnPrelevements_DetailView_Model extends Vtiger_DetailView_Model {
 			);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($detailViewLinks);
 		}
+		
+		foreach($linkModelList['DETAILVIEW'] as &$linkModel){
+			if($linkModel->linklabel === 'LBL_DUPLICATE' ){
+				$linkModel->linklabel = 'Arr&eacute;ter et dupliquer';
+				$linkModel->linkurl .= '&closeOriginal=1';
+			}
+		}
 		return $linkModelList;
 	}
 }

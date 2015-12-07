@@ -44,20 +44,21 @@ Class Vtiger_Edit_View extends Vtiger_Index_View {
 				$recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record, $moduleName);
 				$viewer->assign('IS_DUPLICATE_FROM', $record);
 			}
+			$recordModel->set('isDuplicate', true);
 			$viewer->assign('MODE', '');
 	    }
-		elseif(!empty($record)) {
+	    elseif(!empty($record)) {
 	        $recordModel = $this->record ? $this->record : Vtiger_Record_Model::getInstanceById($record, $moduleName);
 	        $viewer->assign('RECORD_ID', $record);
 	        $viewer->assign('MODE', 'edit');
-        } else {
+	    } else {
 			$recordModel = $this->record ? $this->record : Vtiger_Record_Model::getCleanInstance($moduleName);
 			$viewer->assign('MODE', '');
-		}
-        if(!$this->record){
-			$this->record = $recordModel;
-        }
-        
+	    }
+	    if(!$this->record){
+		$this->record = $recordModel;
+	    }
+
 	    $moduleModel = $recordModel->getModule();
 	    $fieldList = $moduleModel->getFields();
 	    $requestFieldList = array_intersect_key($request->getAll(), $fieldList);
