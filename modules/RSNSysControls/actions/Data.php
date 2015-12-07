@@ -31,9 +31,13 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 		//TODO email or log when schedule control is running and ended !!
 		global $current_user;
 		$scheduledSysControls = self::getScheduledSysControls($checkLastTestTime);
+		//TODO //un tableau par utilisateur concerné
+		//$mailBody = array( 1 => "");
+		//$mailBodyPos = array( 1 => 0);
 		$mailBody = "";
 		$mailBodyPos = 0;
 		foreach ($scheduledSysControls as $scheduledId => $sysControl) {
+			$user = $sysControl->getAssignedUser();
 			self::executeSysControl($sysControl, $mailBody);
 			if($verbose){
 				echo '<h3>'.$sysControl->getName().'</h3>';
@@ -49,7 +53,7 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 			}
 		}
 		
-		if($mailBody && !$verbose){
+		if($mailBody[1] && !$verbose){
 			
 			global $HELPDESK_SUPPORT_EMAIL_ID ;
 			

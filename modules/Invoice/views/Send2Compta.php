@@ -209,7 +209,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$query = 'SELECT vtiger_invoice.*
 			, vtiger_invoicecf.receivedmoderegl
 			, vtiger_invoicecf.receivedreference
-			, IFNULL(vtiger_notescf.codeaffaire, vtiger_campaignscf.codeaffaire) AS codeaffaire
+			, IF(vtiger_campaignscf.codeaffaire IS NULL OR vtiger_campaignscf.codeaffaire = "", vtiger_notescf.codeaffaire, vtiger_campaignscf.codeaffaire) AS codeaffaire
 			, IFNULL(vtiger_products.productname, vtiger_service.servicename) AS productname
 			, IFNULL(vtiger_products.productcode, vtiger_service.productcode) AS productcode
 			, IFNULL(vtiger_products.glacct, vtiger_servicecf.glacct) AS productglacct
@@ -218,6 +218,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, vtiger_inventoryproductrel.listprice
 			, vtiger_inventoryproductrel.discount_percent
 			, vtiger_inventoryproductrel.discount_amount
+			, vtiger_account.account_type
 		';
 		
 		for($nTax = 0; $nTax < count($taxes); $nTax++){
@@ -227,6 +228,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			FROM vtiger_invoice
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+			JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_invoice.accountid
 			LEFT JOIN vtiger_notescf /*coupon*/
 				ON vtiger_invoicecf.notesid = vtiger_notescf.notesid
 			LEFT JOIN vtiger_campaignscf /*campagne*/
@@ -331,6 +334,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			 * ******
 			 * ******
 			 * Seuls les comptes en 6 ou en 7 on une section analytique
+			 *
+			 * Le type de compte est prioritaire pour définir le compte de Vente :
+			 * 	- Dépôt-vente 411DEP
 			 * 
 			 */
 			
@@ -533,35 +539,43 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 		
 	private static function getInvoiceCompteVenteSolde($invoiceData){
-		$modeRegl = $invoiceData['receivedmoderegl'];
-		switch($invoiceData['typedossier']){
-		case 'Facture de dépôt-vente' :
-			return '411DEP';
-	
-		case 'Credit Invoice' ://Avoir
-		case 'Avoir' :
-		case 'Remboursement' :
-			return '511200';//TODO
-		default:
-				
-			return getModeReglementInfo($modeRegl, 'comptevente');
 		
-			//switch($modeRegl){
-			//case 'PayBox' :
-			//	return '511101';
-			//case 'PayPal' :
-			//	return '511300';
-			//case 'Espèces' :
-			//	return '511103';
-			//case 'CB' :
-			//	return '511102';
-			//case 'Virement' :
-			//	return '511106';
-			//case 'Mandat' :
-			//	return '511106';//TODO
-			//default:
-			//	return '511200';//LBP
-			//}
+		$accountType = $invoiceData['account_type'];
+		switch($accountType){
+		case 'Dépôt-vente' :
+			return '411DEP';
+		
+		default :
+			$modeRegl = $invoiceData['receivedmoderegl'];
+			switch($invoiceData['typedossier']){
+			case 'Facture de dépôt-vente' :
+				return '411DEP';
+		
+			case 'Credit Invoice' ://Avoir
+			case 'Avoir' :
+			case 'Remboursement' :
+				return '511200';//TODO
+			default:
+					
+				return getModeReglementInfo($modeRegl, 'comptevente');
+			
+				//switch($modeRegl){
+				//case 'PayBox' :
+				//	return '511101';
+				//case 'PayPal' :
+				//	return '511300';
+				//case 'Espèces' :
+				//	return '511103';
+				//case 'CB' :
+				//	return '511102';
+				//case 'Virement' :
+				//	return '511106';
+				//case 'Mandat' :
+				//	return '511106';//TODO
+				//default:
+				//	return '511200';//LBP
+				//}
+			}
 		}
 	}
 	

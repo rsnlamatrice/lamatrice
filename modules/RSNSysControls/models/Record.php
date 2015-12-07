@@ -31,4 +31,17 @@ class RSNSysControls_Record_Model extends Vtiger_Record_Model {
 		return $ctrlQuery;
 		
 	}
+	
+	public function getAssignedUser(){
+		$user = Vtiger_Cache('assigned_user', $this->get('assigned_user_id'));
+		if(!$user){
+			$user = Vtiger_Record_Model::getInstanceById($this->get('assigned_user_id'), 'Users');
+			if(!$user){
+				$user = Vtiger_Record_Model::getInstanceById(1, 'Users');
+			}
+			Vtiger_Cache('assigned_user', $this->get('assigned_user_id'), $user);
+		}
+		
+		return $user;
+	}
 }

@@ -43,5 +43,7 @@
 	- TODO Historique 4D
 	- TODO ModèlesCourrier 4D
 
+- Les comptes en dépôt-vente doivent se voir attribuer le type "Dépôt-vente"
 
-- Supprimer le champ contactdetails.ref4d et les triggers liés
+
+- Supprimer le champ contactdetails.ref4d et les triggers liés. bof pour ref4d, non ?...
