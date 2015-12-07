@@ -43,9 +43,11 @@ $languageStrings = array(
 	'LBL_PRINT_RECU_FISCAL'	=> 'Impression du reçu fiscal',
 	'LBL_SEND_BY_EMAIL'              => 'Envoyer par email',
 	'LBL_RELATED_CONTACTS' => 'Contacts liés',
+	'Type'                     => 'Type de compte   '                   , 
 );
 $jsLanguageStrings = array(
 	'LBL_RELATED_RECORD_DELETE_CONFIRMATION' => 'Confirmer la suppression?', 
 	'LBL_DELETE_CONFIRMATION'      => 'Supprimer ce compte supprimera également les affaires et les devis liés. Confirmer la suppression?', 
-	'LBL_MASS_DELETE_CONFIRMATION' => 'Supprimer ce compte supprimera également les affaires et les devis liés. Confirmer la suppression?',  
+	'LBL_MASS_DELETE_CONFIRMATION' => 'Supprimer ce compte supprimera également les affaires et les devis liés. Confirmer la suppression?',
+        'JS_DUPLICATE_CREATION_CONFIRMATION' => 'Le nom est déjà utilisé par ailleurs. Confirmez-vous ?',
 );
