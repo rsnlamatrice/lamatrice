@@ -30,6 +30,9 @@ class Accounts_Relation_Model extends Vtiger_Relation_Model {
 					   , 'relatedSourceFieldName' => 'notesid'
 					   , 'keyDateFieldName' => 'dateapplication'//clŽ primaire en 3 champs, incluant une date
 					   ),
+			'SalesOrder' => array('fieldName' => 'accountid', 'tableName' => 'vtiger_salesorder'
+					   , 'sourceFieldName' => 'vtiger_account.accountid'),
+			
 		);
 	}
 }
