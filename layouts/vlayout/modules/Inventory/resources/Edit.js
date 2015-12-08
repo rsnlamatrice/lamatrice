@@ -291,8 +291,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var listPrice = parseFloat(listPriceValue).toFixed(2);
 		lineItemRow.find('.listPrice').val(listPrice)
 		return this;
-	},
-
+	},	
 
 	/**
 	 * Function which will set the line item total value excluding tax and discount
@@ -554,30 +553,31 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	setBalance : function(value) {
 		jQuery('#balance').val(value);
 		
-		this.setAutoInvoiceStatus(value);
+		//this.setAutoInvoiceStatus(value);
 		return this;
 	},
 	
-	//ED150515 : set balance (solde, reste à payer)
-	setAutoInvoiceStatus : function(balance) {
-		var $status = $('select[name="invoicestatus"]');
-		//Si le statut n'est pas défini et qu'il y a un total à payer
-		//ou que le status a été défini automatiquement
-		if ((!$status.val() && this.getGrandTotal())
-		|| ($status.val() && $status.is('.auto-filled'))) {
-			var status = balance == 0 ? 'Paid' : '';
-			$status
-				.addClass('auto-filled')
-				.val(status);
-			var $seloption = $status.children('option[value="' + status + '"]:first');
-			if ($seloption.length) {
-				$seloption.attr('selected', 'selected');
-				$status.select2("val",status); /* ne fonctionne pas bien */
-				$status.next().find('> a > span:first').html($seloption.html());
-			}
-		}
-		return this;
-	},
+	//ED151201 Abandon
+	////ED150515 : set balance (solde, reste à payer)
+	//setAutoInvoiceStatus : function(balance) {
+	//	var $status = $('select[name="invoicestatus"]');
+	//	//Si le statut n'est pas défini et qu'il y a un total à payer
+	//	//ou que le status a été défini automatiquement
+	//	if ((!$status.val() && this.getGrandTotal())
+	//	|| ($status.val() && $status.is('.auto-filled'))) {
+	//		var status = balance == 0 ? 'Paid' : '';
+	//		$status
+	//			.addClass('auto-filled')
+	//			.val(status);
+	//		var $seloption = $status.children('option[value="' + status + '"]:first');
+	//		if ($seloption.length) {
+	//			$seloption.attr('selected', 'selected');
+	//			$status.select2("val",status); /* ne fonctionne pas bien */
+	//			$status.next().find('> a > span:first').html($seloption.html());
+	//		}
+	//	}
+	//	return this;
+	//},
 
 	loadRowSequenceNumber: function() {
 		if(this.rowSequenceHolder == false) {
@@ -719,6 +719,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				unitPrice = recordData.purchaseprice;
 			}
 			
+			//ED151208
+			var priceBookDetails = recordData.priceBook;
+			parentRow.data('priceBookDetails', priceBookDetails);
+			
 			//ED150602 discount % from account discount type
 			var discountpc = recordData.discountpc;
 			this.checkLineWithSameProduct(recordId, selectedName, parentRow);
@@ -762,8 +766,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				function(e) {
 					var parentRows = $existing.parents('tr.'+ thisInstance.rowClass)
 					, qty = 0.0
+					, amount = 0.0
 					, comments = '';
 					parentRows.find('input.qty').each(function(){ qty += parseFloat(this.value.replace(',', '.')); });
+					parentRows.find('input.listPrice').each(function(){ amount += parseFloat(this.value.replace(',', '.')); });
 					parentRows.find('textarea.lineItemCommentBox').each(function(){
 						if (this.value) {
 							if(comments) comments += "\n";
@@ -774,6 +780,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 					if (comments)
 						newRow.find('textarea.lineItemCommentBox')
 							.val(comments);
+					$newPrice = newRow.find('input.listPrice');
+					if ($newPrice.val()==0) {
+						//par exemple, un don
+						$newPrice.val(amount)
+							.focusout();
+						$qty = 1;
+					}
 					newRow.find('input.qty')
 						.val(qty)
 						.focusout();
@@ -1283,6 +1296,76 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		//this.calculateShippingAndHandlingTaxCharges();
 		this.calculateGrandTotal();
 	},
+
+	/** ED151208
+	 * Affectation du tarif selon la grille
+	 */
+	lineItemGetPriceFromPriceBook : function(lineItemRow){
+		var thisInstance = this;
+		if (lineItemRow.length > 1) {
+			lineItemRow.each(function(){
+				thisInstance.lineItemGetPriceFromPriceBook($(this));
+			});
+			return;
+		}
+		var priceBookDetails = thisInstance.getProductPriceBookDetails(lineItemRow);
+		if (!priceBookDetails || priceBookDetails.length === 0)
+			return;
+		
+		var qty = Math.abs(thisInstance.getQuantityValue(lineItemRow))
+		, unitPrice = undefined;
+		
+		for (var $i = 0; $i < priceBookDetails.length; $i++) {
+			if (priceBookDetails[$i].modeapplication == 'qty') {
+				if (priceBookDetails[$i].minimalqty > qty) {
+					break;
+				}
+				else
+					unitPrice = priceBookDetails[$i].listprice;
+			}
+		}
+		if (unitPrice !== undefined) {
+			thisInstance.setListPriceValue(lineItemRow, unitPrice);
+		}
+	},
+	
+	getProductPriceBookDetails : function(lineItemRow){
+		
+		var priceBookDetails = lineItemRow.data('priceBookDetails');
+		if (priceBookDetails === undefined){
+			
+			var productId = lineItemRow.find('input.selectedModuleId').val()
+			, currency_id = jQuery('#currency_id option:selected').val()
+			, account_discount_type = this.getAccountDiscountType()
+			, params = {
+				url: "index.php",
+				data: {
+					module: 'Inventory',
+					action: 'GetTaxes',
+					record: productId,
+					currency_id:currency_id,
+					accountdiscounttype:account_discount_type
+				},
+				async: false //TODO depreciated : defer
+			};
+			
+			AppConnector.request(params).then(
+				function(data){
+					for(var id in data.result){
+						if(typeof data.result[id] == "object"){
+							var recordData = data.result[id];
+							priceBookDetails = recordData.priceBook;
+							lineItemRow.data('priceBookDetails', priceBookDetails);
+						}
+					}
+				},
+				function(error,err){
+					lineItemRow.data('priceBookDetails', false);
+				}
+			);
+		}
+		return priceBookDetails;
+	},
 	
 	/**
 	 * Function which will handle the actions that need to be preformed once the qty is changed like below
@@ -1290,6 +1373,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @params : lineItemRow - element which will represent lineItemRow
 	 */
 	quantityChangeActions : function(lineItemRow) {
+		
+		/*ED151208*/
+		this.lineItemGetPriceFromPriceBook(lineItemRow);
+		
 		/*ED150603*/
 		if (lineItemRow.length >1){
 			var thisInstance = this;
@@ -1297,8 +1384,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				thisInstance.lineItemRowCalculations($(this));
 			});
 		}
-		else
+		else{
+			var $input = lineItemRow.find('.qty');
+			$input.css('color', $input.val()=='0' ?'red' : '#444444');
 			this.lineItemRowCalculations(lineItemRow);
+		}
 		this.lineItemToTalResultCalculations();
 	},
 
@@ -1466,6 +1556,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		lineItemTable.on('focusout', 'input.listPrice',function(e){
 			var element = jQuery(e.currentTarget);
 			var lineItemRow = thisInstance.getClosestLineItemRow(element);
+			if (this.value != 0) {
+				var $qty = lineItemRow.find('input.qty');
+				if ($qty.val() == '0') {
+					$qty.val(1);
+				}
+			}
 			thisInstance.quantityChangeActions(lineItemRow);
 		});
 	 },
@@ -1571,7 +1667,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	 },
 
-    lineItemActions: function() {
+	lineItemActions: function() {
 		var lineItemTable = this.getLineItemContentsContainer();
 
 		this.registerDisountChangeEvent();
@@ -2321,7 +2417,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 	
 	/**
-	 * ED141219 : lors de l'enregistrement, enlève les produits ou services vides (sans article sélectionné)
+	 * ED141219 : lors de l'enregistrement, enlève les produits ou services vides (sans article sélectionné ou en quantité nulle)
 	 */
 	registerSaveEvent : function(container){
 		var thisInstance = this;
@@ -2333,6 +2429,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 						if(!$productField.val()){
 							jQuery(this).remove();
 							oneDeleted = true;
+							return;
+						}
+						var $productQuantity = $(this).find('.qty');
+						if($productQuantity.val() == '0'){
+							jQuery(this).remove();
+							oneDeleted = true;
+							return;
 						}
 				});
 				if (oneDeleted) {

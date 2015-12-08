@@ -452,8 +452,10 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			
 			$exists = self::addPickListValues($moduleName, $fieldName, $fieldValue);
 		}
-		else
+		else{
+			//var_dump('!checkPickListTableSequence '.$moduleName.', '.$pickListName);
 			$exists = false;
+		}
 		self::$checkPickListValueCache["$moduleName:$pickListName:$fieldValue"] = $exists;
 		return $exists;
 	}
@@ -461,7 +463,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	public static function addPickListValues($moduleName, $fieldName, $fieldValue){
 		$moduleModel = Settings_Picklist_Module_Model::getInstance($moduleName);
 		$fieldModel = Settings_Picklist_Field_Model::getInstance($fieldName, $moduleModel);
-		//var_dump('getPickListName', $fieldName, $fieldModel->getPickListName());
+		//var_dump('getPickListName', $fieldName, $fieldModel ? $fieldModel->getPickListName() : ' NOT $fieldModel');
 		$rolesSelected = array();
 		if($fieldModel->isRoleBased()) {
 			$userSelectedRoles = $request->get('rolesSelected',array());
@@ -949,16 +951,20 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		
 		//mise à jour de la facture
 		$query = 'UPDATE vtiger_invoice
+			JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			SET received = IFNULL(received,0) + ?
 			, balance = received - total
-			, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)
-			WHERE invoiceid = ?';
+			/*, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)*/
+			WHERE vtiger_invoice.invoiceid = ?
+			AND (IFNULL(receivedreference, \'\') = \'\' OR receivedreference <> ?)';
 			
 		$amount = self::str_to_float($reglement->get('amount'));
 		
 		$params = array(
-			  $amount
+			$amount
 			, $invoice->getId()
+			, $reglement->get('numpiece')
 		);
 		
 		$result = $adb->pquery($query, $params);
@@ -973,14 +979,16 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		$query = 'UPDATE vtiger_invoicecf
 			SET receivedreference = IF(receivedreference IS NULL OR receivedreference = \'\', ?, CONCAT(receivedreference, \', \', ?))
 			, receivedcomments = IF(receivedcomments IS NULL OR receivedcomments = \'\', ?, CONCAT(receivedcomments, \'\\n\', ?))
-			, receivedmoderegl = IF(receivedmoderegl IS NULL OR receivedmoderegl = \'\', ?, CONCAT(receivedmoderegl, \', \', ?))
-			WHERE invoiceid = ?';
+			, receivedmoderegl = ?
+			WHERE invoiceid = ?
+			AND (IFNULL(receivedreference, \'\') = \'\' OR receivedreference <> ?)';
 		
 		$params = array(
 			$reglement->get('numpiece'), $reglement->get('numpiece')
 			, $receivedComments, $receivedComments
-			, $reglement->get('rsnmoderegl'), $reglement->get('rsnmoderegl')
+			, $reglement->get('rsnmoderegl')
 			, $invoice->getId()
+			, $reglement->get('numpiece')
 		);
 		
 		$result = $adb->pquery($query, $params);
@@ -1026,6 +1034,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			}
 		}
 		if($rowsByContactId){
+			
 			$query = 'SELECT vtiger_crmentity.crmid
 				, vtiger_contactdetails.contact_no, vtiger_contactdetails.isgroup
 				, vtiger_contactdetails.firstname, vtiger_contactdetails.lastname, vtiger_contactdetails.email
@@ -1046,7 +1055,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 				echo("<pre>$query</pre>");
 				die();
 			}
-			while($contact = $db->fetch_row($result)){
+			while($contact = $db->fetch_row($result, false)){
 				$contactId = $contact['crmid'];
 				foreach($rowsByContactId[$contactId] as $rowId){
 					if(!$data[$moduleName][$rowId]['_contact_rows'])

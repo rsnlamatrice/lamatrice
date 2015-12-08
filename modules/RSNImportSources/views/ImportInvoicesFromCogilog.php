@@ -81,6 +81,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			, "produit"."codetva" AS "tva_produit"
 			, "produit"."indisponible" AS "indisponible"
 			, "codetauxtva"."taux" AS "taux_tva"
+			, "facture"."compteclient" AS "compteclient"
 			, "facture"."paiementpropose" AS "paiementpropose"
 			, "facture"."solde" AS "solde"
 			FROM gfactu00002 facture
@@ -98,7 +99,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
 		if(false)
-			$query .= ' WHERE facture.numero = 6318
+			$query .= ' WHERE facture.numero IN ( 6130)
 				AND annee = 2015
 			';
 		else {
@@ -210,7 +211,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'quantity',
 			'prix_unit_ht',
 			'taxrate',
-			'paiementpropose',
+			'modereglement',
 			'solde',
 			'remise_ligne',
 			
@@ -239,20 +240,20 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		}
 
 		$row = $adb->raw_query_result_rowdata($result, 0);
-		$previousInvoiceSubjet = $row['subject'];//tmp subject, use invoice_no ???
+		$previousInvoiceNo = $row['sourceid'];//tmp subject, use invoice_no ???
 		$invoiceData = array($row);
 
 		$perf = new RSN_Performance_Helper($numberOfRecords);
 		for ($i = 1; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
-			$invoiceSubject = $row['subject'];
+			$invoiceNo = $row['sourceid'];
 
-			if ($previousInvoiceSubjet == $invoiceSubject) {
+			if ($previousInvoiceNo == $invoiceNo) {
 				array_push($invoiceData, $row);
 			} else {
 				$this->importOneInvoice($invoiceData, $importDataController);
 				$invoiceData = array($row);
-				$previousInvoiceSubjet = $invoiceSubject;
+				$previousInvoiceNo = $invoiceNo;
 			}
 			
 			//perf
@@ -330,11 +331,13 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
 					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
 					$record->set('typedossier', 'Facture'); //TODO
-					if($invoiceData[0]['solde'] == 0)
+					/*if($invoiceData[0]['solde'] == 0)
 						$record->set('invoicestatus', 'Paid');
 					else
-						$record->set('invoicestatus', 'Approved');//TODO
-					$record->set('receivedmoderegl', $invoiceData[0]['paiementpropose']);
+						$record->set('invoicestatus', 'Approved');//TODO*/
+					$record->set('invoicestatus', 'Compta');
+					
+					$record->set('receivedmoderegl', $invoiceData[0]['modereglement']);
 					$record->set('receivedcomments', $srcRow['_receivedcomments']);
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
@@ -903,7 +906,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'subject'		=> $invoiceInformations[$this->columnName_indexes['nomclient']],
 			'invoicedate'		=> $date,
 			'affaire_code' 	=> $invoiceInformations[$this->columnName_indexes['affaire_code']],
-			'paiementpropose' => $this->getModePaiement($invoiceInformations[$this->columnName_indexes['paiementpropose']], $receivedcomments),
+			'modereglement' => $this->getModeReglement($invoiceInformations[$this->columnName_indexes['compteclient']], $invoiceInformations[$this->columnName_indexes['paiementpropose']], $receivedcomments),
 			'solde'	=> self::str_to_float($invoiceInformations[$this->columnName_indexes['solde']]),
 			'_receivedcomments' => $receivedcomments,
 			
@@ -1022,7 +1025,6 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		case '200142':
 			$data[$this->columnName_indexes['codeclient']] = '48017';
 			break;
-		}
 		case '4658L':
 		case '240081':
 		case '240165':
@@ -1073,25 +1075,33 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		case '1867362':
 			$data[$this->columnName_indexes['codeclient']] = '999999';
 			break;
+		}
 	}
 
-	function getModePaiement($paiementpropose, &$receivedcomments){
-		if(preg_match('/ch(.{1,2}|&e.+)que/i', $paiementpropose))
-			return 'Chèque';
-		elseif(preg_match('/esp(.{1,2}|&e.+)ce/i', $paiementpropose))
-			return 'Espèces';
-		elseif(preg_match('/PAYBOX/i', $paiementpropose))
-			return 'PayBox';
-		elseif(preg_match('/PAYPAL/i', $paiementpropose))
-			return 'PayPal';
-		elseif(preg_match('/Vir(emen)?t/i', $paiementpropose))
-			return 'Virement';
-		elseif(preg_match('/mandat/i', $paiementpropose))
-			return 'Mandat';
-		else{
-			$receivedcomments = $paiementpropose;
-			return '(autre)';
-		}
+	function getModeReglement($compteClient, $paiementpropose, &$receivedcomments){
+		$modesRegl = getModeReglementInfo();
+		foreach($modesRegl as $modeRegl => $info)
+			if($info['comptevente'] === $compteClient)
+				return $modeRegl;
+		$receivedcomments = $paiementpropose;
+		return '(autre)';
+	
+		//if(preg_match('/ch(.{1,2}|&e.+)que/i', $paiementpropose))
+		//	return 'Chèque';
+		//elseif(preg_match('/esp(.{1,2}|&e.+)ce/i', $paiementpropose))
+		//	return 'Espèces';
+		//elseif(preg_match('/PAYBOX/i', $paiementpropose))
+		//	return 'PayBox';
+		//elseif(preg_match('/PAYPAL/i', $paiementpropose))
+		//	return 'PayPal';
+		//elseif(preg_match('/Vir(emen)?t?|Virt/i', $paiementpropose))
+		//	return 'Virement';
+		//elseif(preg_match('/mandat/i', $paiementpropose))
+		//	return 'Mandat';
+		//else{
+		//	$receivedcomments = $paiementpropose;
+		//	return '(autre)';
+		//}
 		//$result = RSNImportSources_Utils_Helper::checkPickListValue('Invoice', 'receivedmoderegl', 'receivedmoderegl', $paiementpropose);
 		//return $paiementpropose;
 	}

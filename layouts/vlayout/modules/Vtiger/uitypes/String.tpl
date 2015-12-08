@@ -13,6 +13,8 @@
 		possibilité de passer INPUT_CLASS
 				valeur par dÈfaut : 'input-large'
 		possibilité de passer TITLE
+		
+		ED151204 || !$FIELD_MODEL->isEditable()
 		*}
 {strip}
 {assign var="FIELD_INFO" value=Vtiger_Util_Helper::toSafeHTML(Zend_Json::encode($FIELD_MODEL->getFieldInfo()))}
@@ -33,7 +35,9 @@
 	   name="{$FIELD_NAME}{*$FIELD_MODEL->getFieldName()*}" 
 	   value="{$FIELD_MODEL->get('fieldvalue')}"
 		{if ($FIELD_MODEL->get('uitype') eq '106' && $MODE neq '') || $FIELD_MODEL->get('uitype') eq '3' 
-				|| $FIELD_MODEL->get('uitype') eq '4'|| $FIELD_MODEL->isReadOnly()} 
+		|| $FIELD_MODEL->get('uitype') eq '4'
+		|| $FIELD_MODEL->isReadOnly()
+		|| !$FIELD_MODEL->isEditable()} 
 				readonly 
 		{/if}
 		{if isset($TITLE)} title="{$TITLE}" placeholder="{$TITLE}"{/if}

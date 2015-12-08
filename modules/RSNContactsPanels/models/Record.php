@@ -52,7 +52,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 	
 	/**
 	 * Traitement des variables imbriques dans la requête
-	 * 	transforme les lments de la forme [[Title | field/type | defaultValue ]]
+	 * 	transforme les éléments de la forme [[Title | field/type | defaultValue ]]
 	 * 	en RSNPanelsVariables
 	 * @param Boolean $associative : returns an associative array
 	 *
@@ -132,7 +132,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			}
 			else
 				foreach($array as $variable)
-					$variables[] = array(
+					$variables[$variable[0]] = array(
 						'name' => $variable[0],
 						'value' => $variable[1]
 					);
@@ -140,18 +140,249 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		return $variables;
 	}
 	
+//	/**
+//	 * Function returns query execution result widget
+//	 * @param array &$params : current sql query parameters array
+//	 * @param array &$paramsDetails : for each parameter, add details
+//	 * @param array &$paramsPriorValues : valeurs de variables à affecter
+//	 * @return <type>
+//	 */
+//	function getExecutionSQL(&$params = FALSE, &$paramsDetails = FALSE, &$paramsPriorValues = FALSE, &$callStask = FALSE) {
+//		if(!RSNContactsPanelsExecutionController::stack($this)) //do not forget to unstack
+//			return null;
+//		if(!is_array($params))
+//			$params = array();
+//		if(!is_array($paramsDetails))
+//			$paramsDetails = array();
+//		
+//		$sql = $this->getPanelQuery();
+//		$queryVariables = $this->getVariablesFromQuery($sql);// array() extrait de la requête
+//		//var_dump($queryVariables);
+//		//variables connues et déjà liées
+//		$relatedVariables = $this->getRelatedVariables();
+//		
+//		//variables liées filtrées par (disabled == 0)
+//		$variables = array();
+//		foreach($relatedVariables as $variable)
+//			if(!$variable->get('disabled'))
+//				$variables[$variable->get('name')] = $variable;
+//		
+//		
+//		$thisPath = $this->getName();
+//		if(!is_array($callStask))
+//			$callStask = array($thisPath=>$thisPath);
+//		else
+//			$callStask[$thisPath] = $thisPath;
+//		$thisPath = implode('/', $callStask);
+//		$thisDepth = count($callStask);
+//		
+//		
+//		$variablesPrevValues = array();
+//					
+//		//affectation de valeur aux variables
+//		// provient de la syntaxe [[PANEL <subpanel> | <domain>/<subpanelname> | Nom_Var:=Value | Nom_Var2 := Value]]
+//		// ou des valeurs de customview
+//		if(is_array($paramsPriorValues)){
+//			$followParamsPriorValues = array();
+//			$thisInstanceName = $this->get('instanceName');
+//			//$paramsPriorValues est un array( array('name'=>name, 'value'=>value), ... ) ou array(name => value, ...)
+//			foreach($paramsPriorValues as $paramName => $paramPriorInfos){
+//				if(is_array($paramPriorInfos) && $paramPriorInfos['name']){
+//					$paramName = $paramPriorInfos['name'];
+//					$paramPriorValue = $paramPriorInfos['value'];
+//				}
+//				else
+//					$paramPriorValue = $paramPriorInfos;
+//				//le nom de la variable contient un /
+//				if(strpos($paramName, '/')){
+//					//Destiné à un sous-panel
+//					var_dump('sous panel', $paramPriorInfos, $paramPriorValue);
+//					$followParamPriorValue = array_merge(array(), $paramPriorInfos, array(
+//						'path' => $thisPath,
+//						'parent' => substr($paramName, 0, strpos($paramName, '/')),
+//						'name' => substr($paramName, strpos($paramName, '/')+1),
+//						'value' => $paramPriorValue,
+//					));
+//					$followParamsPriorValues[substr($paramName, strpos($paramName, '/')+1)] = $followParamPriorValue;
+//				}
+//				//le nom de la variable est connu
+//				elseif(isset($variables[$paramName])){
+//					$variable = $variables[$paramName];
+//					//valeur précédente
+//					if(!isset($variablesPrevValues[$paramName]))
+//						$variablesPrevValues[$paramName] = $variable->get('defaultvalue'); 
+//					//affectation de la valeur pour son usage ci-dessous
+//					$variable
+//						//valeur à utiliser
+//						->set('defaultvalue', $paramPriorValue)
+//						// Chemin des appels
+//						//TODO path ne fonctionne pas, l'objet est partagé, c'est donc purement cumulatif
+//						->set('path', //utilisé pour le commentaire
+//							$thisPath
+//							. '/')
+//					;
+//					if($paramPriorInfos['comparator'])
+//						$variable->set('rsnvariableoperator', $paramPriorInfos['comparator']);
+//					//var_dump($paramPriorValue->name, $paramPriorValue->value);
+//				}
+//				else
+//					var_dump('<br><code># paramètre de panel "' . $paramName . '" introuvable #<code><br>');
+//			}
+//		}
+//		//var_dump($variablesPrevValues);
+//		
+//		$variablesId = array();
+//		
+//		//fin du regex 
+//		$regex_end = '\s*(\|[^\]|]*)*\]\]/';
+//			
+//		// pour chaque variable de la requête
+//		foreach($queryVariables as $queryVariable){
+//			$variableName = $queryVariable['name'];
+//			if(!isset($variables[$variableName])){
+//				// Erreur
+//				$value = '[[# Variable "' . $variableName . '" inconnue ! #]]';
+//				$paramsDetails[$queryVariable['name']] = array(
+//					'name'=>$queryVariable['name'],
+//					'variable'=> null,
+//					'value'=> $value
+//				);
+//			}
+//			else {
+//				$variable = $variables[$variableName];
+//				$value = str_replace('&quot;', '"', $variable->get('defaultvalue'));
+//				//Variable déjà traitée
+//				if(!isset($variablesId[$variable->getId()])){
+//					$paramsDetails[$queryVariable['name']] = array(
+//						'operation'=> $queryVariable['operation'],
+//						'name'=> $queryVariable['name'],
+//						'variable'=> $variable,
+//						'value'=> $value,
+//						'depth'=> $thisDepth,
+//					);
+//					$variablesId[$variable->getId()] = 1;
+//				}
+//			}
+//			// commentaire en préfixe
+//			$comment = ' /*[[' . str_replace('?', '!', $queryVariable['operation'] . ' ' . $variable->get('path') . $variableName) . ']]*/ ';
+//			
+//			//TODO le regex de fin s'arrête dès le 1er ] existant : faire pour ]]
+//			//$regex_end = '\s*(\|[^\]]*)*\]\]/'; cf plus haut
+//			
+//			//selon opération
+//			switch(strtoupper($queryVariable['operation'])){
+//			case '?':
+//				$params[] = $value;
+//				/* injection dans le sql d'un paramètre */
+//				$sql = preg_replace('/\[\[\?\s*' . preg_quote($variableName) . $regex_end, 
+//						    $comment
+//						    . '?', $sql);
+//				break;
+//			case '??':
+//				if($variable)
+//					$sqlOperation = $variable->getSQLOperation($value, $params);
+//				else
+//					$sqlOperation = '= ?';
+//				$params[] = $value;
+//				$paramsDetails[$queryVariable['name']]['value'] = $value;
+//				/* injection dans le sql d'un paramètre */
+//				$sql = preg_replace('/\[\[\?\?\s*' . preg_quote($variableName) . $regex_end,
+//						    $comment
+//						    . $sqlOperation, $sql);
+//				break;
+//			
+//			case 'IN':
+//				$value = explode(' |##| ', $value);
+//				$params = array_merge($params, $value);
+//				$value = generateQuestionMarks($value);
+//				/* injection dans le sql */
+//				$sql = preg_replace('/\[\[IN\s+' . preg_quote($variableName) . $regex_end, 
+//						    $comment
+//						    . ' IN (' . $value . ')', $sql);
+//				break;
+//			case 'PANEL':
+//				$instanceName = $variable->get('name');
+//				$panelName = $variable->get('fieldid');
+//				$subPanelRecord = self::getInstanceByNamePath($panelName, $this->get('rsncontactspanelsdomains'));
+//				if($subPanelRecord){
+//					/* affectation des valeurs passées par paramètres */
+//					$paramsPriorValues = self::queryParams_decode( $value );
+//					/* arguments suivis */
+//					if(isset($followParamsPriorValues)){
+//						foreach($followParamsPriorValues as $followParamName => $followParamPriorValue){
+//							//var_dump($followParamPriorValue, $instanceName);
+//							// contrôle le parent
+//							if($followParamPriorValue['parent'] == $instanceName){
+//								$paramsPriorValues[$followParamName] = $followParamPriorValue;
+//							}
+//						}
+//						//var_dump($paramsPriorValues, $instanceName);
+//					}
+//					/* sous-requête d'exécution */
+//					$index = 0;
+//					//foreach($paramsPriorValues as $paramPriorValue){
+//					//	$paramPriorValue['prev_path'] = $paramPriorValue['path'];
+//					//	$paramPriorValue['path'] = ($paramPriorValue['path'] ? $paramPriorValue['path'] . '/' : '')
+//					//		. $thisPath
+//					//		. '/'
+//					//	;
+//					//	$paramsPriorValues[$index++] = $paramPriorValue;
+//					//}
+//					//getExecutionSQL
+//					//var_dump($params, $paramsDetails, $paramsPriorValues);
+//					$value = $subPanelRecord->getExecutionSQL($params, $paramsDetails, $paramsPriorValues, $callStask);
+//					//restaure
+//					//foreach($paramsPriorValues as $paramsPriorValue){
+//					//	$paramsPriorValue['path'] = $paramsPriorValue['prev_path'];
+//					//}
+//					
+//				}
+//				else
+//					$value = '<code># Panel "'.$panelName.'" introuvable #</code>';
+//				$variableName = str_replace('/', '\\/', (preg_quote($variableName)));
+//				/* injection dans le sql */
+//				$sql = preg_replace('/\[\[PANEL\s+' . ($variableName) . $regex_end,
+//						    $comment . ' (
+//'							 . $value . '
+//'							 . '/* [[FIN DE ' . $variableName . ']] */
+//						    )'
+//						    , $sql);
+//				break;
+//			case '=':
+//				/* injection dans le sql */
+//				$sql = preg_replace('/\[\[\=\s*' . preg_quote($variableName) . $regex_end,
+//						    //$comment . pas de commentaire, car peut changer la requête
+//						    $value, $sql);
+//				break;
+//			default:
+//				/* injection dans le sql */
+//				$sql = preg_replace('/\[\[' . preg_quote($queryVariable['operation']) .'\s*' . preg_quote($variableName) . $regex_end,
+//						    $comment .
+//						    $value, $sql);
+//				break;
+//			}
+//			
+//		}
+//		//echo("<pre>$sql</pre>");
+//		//var_dump($params);
+//		
+//		// rétablit les valeurs d'orgine aux variables
+//		foreach($variablesPrevValues as $variableName => $variablePrevValue){
+//			$variables[$variableName]->set('defaultvalue', $variablePrevValue);
+//		}
+//		RSNContactsPanelsExecutionController::unstack($this);
+//		return $sql;
+//	}
+	
 	/**
 	 * Function returns query execution result widget
-	 * @param array &$params : current sql query parameters array
-	 * @param array &$paramsDetails : for each parameter, add details
 	 * @param array &$paramsPriorValues : valeurs de variables à affecter
+	 * @param array &$paramsDetails : for each parameter, add details
 	 * @return <type>
 	 */
-	function getExecutionSQL(&$params = FALSE, &$paramsDetails = FALSE, &$paramsPriorValues = FALSE, &$callStask = FALSE) {
+	function getExecutionQuery(&$paramsPriorValues = FALSE, &$paramsDetails = FALSE, &$callStask = FALSE) {
 		if(!RSNContactsPanelsExecutionController::stack($this)) //do not forget to unstack
 			return null;
-		if(!is_array($params))
-			$params = array();
 		if(!is_array($paramsDetails))
 			$paramsDetails = array();
 		
@@ -176,18 +407,19 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 		$thisPath = implode('/', $callStask);
 		$thisDepth = count($callStask);
 		
-		
+		//Valeurs des variables avant affectation (rétablissement des valeurs en fin de fonction)
 		$variablesPrevValues = array();
 					
 		//affectation de valeur aux variables
-		// provient de la syntaxe [[PANEL <subpanel> | <domain>/<subpanelname> | Nom_Var:=Value | Nom_Var2 := Value]]
+		// provient d'une récursivité par la syntaxe [[PANEL <subpanel> | <domain>/<subpanelname> | Nom_Var:=Value | Nom_Var2 := Value]]
+		// ou des valeurs de customview via le QueryGenerator
 		if(is_array($paramsPriorValues)){
 			$followParamsPriorValues = array();
 			$thisInstanceName = $this->get('instanceName');
 			//$paramsPriorValues est un array( array('name'=>name, 'value'=>value), ... ) ou array(name => value, ...)
 			foreach($paramsPriorValues as $paramName => $paramPriorInfos){
-				if(is_array($paramPriorValue) && $paramPriorValue['name']){
-					$paramName = $paramPriorValue['name'];
+				if(is_array($paramPriorInfos) && $paramPriorInfos['name']){
+					$paramName = $paramPriorInfos['name'];
 					$paramPriorValue = $paramPriorInfos['value'];
 				}
 				else
@@ -195,12 +427,14 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				//le nom de la variable contient un /
 				if(strpos($paramName, '/')){
 					//Destiné à un sous-panel
-					$followParamPriorValue = array_merge(array(), $paramPriorValue, array(
+					var_dump('sous panel', $paramPriorInfos, $paramPriorValue);
+					$followParamPriorValue = array_merge(array(), $paramPriorInfos, array(
 						'path' => $thisPath,
 						'parent' => substr($paramName, 0, strpos($paramName, '/')),
 						'name' => substr($paramName, strpos($paramName, '/')+1),
+						'value' => $paramPriorValue,
 					));
-					$followParamsPriorValues[] = $followParamPriorValue;
+					$followParamsPriorValues[substr($paramName, strpos($paramName, '/')+1)] = $followParamPriorValue;
 				}
 				//le nom de la variable est connu
 				elseif(isset($variables[$paramName])){
@@ -218,6 +452,8 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 							$thisPath
 							. '/')
 					;
+					if($paramPriorInfos['comparator'])
+						$variable->set('rsnvariableoperator', $paramPriorInfos['comparator']);
 					//var_dump($paramPriorValue->name, $paramPriorValue->value);
 				}
 				else
@@ -237,7 +473,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			if(!isset($variables[$variableName])){
 				// Erreur
 				$value = '[[# Variable "' . $variableName . '" inconnue ! #]]';
-				$paramsDetails[] = array(
+				$paramsDetails[$queryVariable['name']] = array(
 					'name'=>$queryVariable['name'],
 					'variable'=> null,
 					'value'=> $value
@@ -248,7 +484,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				$value = str_replace('&quot;', '"', $variable->get('defaultvalue'));
 				//Variable déjà traitée
 				if(!isset($variablesId[$variable->getId()])){
-					$paramsDetails[] = array(
+					$paramsDetails[$queryVariable['name']] = array(
 						'operation'=> $queryVariable['operation'],
 						'name'=> $queryVariable['name'],
 						'variable'=> $variable,
@@ -257,6 +493,10 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 					);
 					$variablesId[$variable->getId()] = 1;
 				}
+			}
+			
+			if(isset($variables[$variableName])){
+				$value = $variables[$variableName]->getValueForSQL($value);
 			}
 			// commentaire en préfixe
 			$comment = ' /*[[' . str_replace('?', '!', $queryVariable['operation'] . ' ' . $variable->get('path') . $variableName) . ']]*/ ';
@@ -267,18 +507,19 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			//selon opération
 			switch(strtoupper($queryVariable['operation'])){
 			case '?':
-				$params[] = $value;
-				/* injection dans le sql d'un paramètre */
+				/* injection dans le sql d'une valeur */
 				$sql = preg_replace('/\[\[\?\s*' . preg_quote($variableName) . $regex_end, 
 						    $comment
-						    . '?', $sql);
+						    . "'$value'", $sql);
 				break;
 			case '??':
-				if($variable)
+				/* injection dans le sql d'un opérateur et d'une valeur */
+				if($variable){
 					$sqlOperation = $variable->getSQLOperation($value, $params);
+					$paramsDetails[$queryVariable['name']]['value'] = $value;//éventuelle modifiée dans la fonction
+				}
 				else
-					$sqlOperation = '= ?';
-				$params[] = $value;
+					$sqlOperation = "= '$value'";
 				/* injection dans le sql d'un paramètre */
 				$sql = preg_replace('/\[\[\?\?\s*' . preg_quote($variableName) . $regex_end,
 						    $comment
@@ -286,13 +527,17 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				break;
 			
 			case 'IN':
-				$value = explode(' |##| ', $value);
-				$params = array_merge($params, $value);
-				$value = generateQuestionMarks($value);
+				$values = explode(' |##| ', $value);
+				$sqlValues = '';
+				foreach($values as $value){
+					if($sqlValues)
+						$sqlValues .= ',';
+					$sqlValues .= "'$value'";
+				}
 				/* injection dans le sql */
 				$sql = preg_replace('/\[\[IN\s+' . preg_quote($variableName) . $regex_end, 
 						    $comment
-						    . ' IN (' . $value . ')', $sql);
+						    . ' IN (' . $sqlValues . ')', $sql);
 				break;
 			case 'PANEL':
 				$instanceName = $variable->get('name');
@@ -303,31 +548,18 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 					$paramsPriorValues = self::queryParams_decode( $value );
 					/* arguments suivis */
 					if(isset($followParamsPriorValues)){
-						foreach($followParamsPriorValues as $followParamPriorValue){
+						foreach($followParamsPriorValues as $followParamName => $followParamPriorValue){
 							//var_dump($followParamPriorValue, $instanceName);
 							// contrôle le parent
 							if($followParamPriorValue['parent'] == $instanceName){
-								$paramsPriorValues[] = $followParamPriorValue;
+								$paramsPriorValues[$followParamName] = $followParamPriorValue;
 							}
 						}
 						//var_dump($paramsPriorValues, $instanceName);
 					}
 					/* sous-requête d'exécution */
 					$index = 0;
-					//foreach($paramsPriorValues as $paramPriorValue){
-					//	$paramPriorValue['prev_path'] = $paramPriorValue['path'];
-					//	$paramPriorValue['path'] = ($paramPriorValue['path'] ? $paramPriorValue['path'] . '/' : '')
-					//		. $thisPath
-					//		. '/'
-					//	;
-					//	$paramsPriorValues[$index++] = $paramPriorValue;
-					//}
-					//getExecutionSQL
-					$value = $subPanelRecord->getExecutionSQL($params, $paramsDetails, $paramsPriorValues, $callStask);
-					//restaure
-					//foreach($paramsPriorValues as $paramsPriorValue){
-					//	$paramsPriorValue['path'] = $paramsPriorValue['prev_path'];
-					//}
+					$value = $subPanelRecord->getExecutionQuery($paramsPriorValues, $paramsDetails, $callStask);
 					
 				}
 				else
@@ -342,13 +574,13 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 						    , $sql);
 				break;
 			case '=':
-				/* injection dans le sql */
+				/* injection brute dans le sql */
 				$sql = preg_replace('/\[\[\=\s*' . preg_quote($variableName) . $regex_end,
 						    //$comment . pas de commentaire, car peut changer la requête
 						    $value, $sql);
 				break;
 			default:
-				/* injection dans le sql */
+				/* injection brute dans le sql */
 				$sql = preg_replace('/\[\[' . preg_quote($queryVariable['operation']) .'\s*' . preg_quote($variableName) . $regex_end,
 						    $comment .
 						    $value, $sql);
@@ -369,33 +601,31 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 	
 	
 	
-	/** ED150507
-	 * Function returns query execution result widget
-	 * Replaces question mark with param value
-	 * @param $paramsNameValuePairs : values to insert in query
-	 * @return <string>
-	 */
-	function getExecutionSQLWithIntegratedParams($paramsNameValuePairs = false){
-		$params = array();
-		$paramsDetails = array();
-		$sql = $this->getExecutionSQL($params, $paramsDetails);
-		if(count($params) !== count($paramsDetails)){
-			echo "<br><br><br><br><br>getExecutionSQLWithIntegratedParams : Les tableaux sont de tailles différentes";
-			var_dump($params, $paramsDetails);
-		}
-		if(!$sql)
-			return $sql;
-		for($i = 0; $i < count($params); $i++){
-			$paramName = $paramsDetails[$i]['name'];
-			if(is_array($paramsNameValuePairs) && array_key_exists($paramName, $paramsNameValuePairs))
-				$params[$i] = $paramsNameValuePairs[$paramName];
-			// replace /*[[operator xxx]]*/ [operator] ? with /*[[operator xxx]]*/ 'value'
-			$sql = preg_replace('/(\/\*\[\[.*'.preg_quote($paramName) . '[^\]]*\]\]\*\/\s[^?]*)\?/'
-					    , '$1\'' . str_replace('\'', '\\\'', $params[$i]) . '\''
-					    , $sql);
-		}
-		return $sql;
-	}
+	///** ED150507 OBSOLETE
+	// * Function returns query execution result widget
+	// * Replaces question mark with param value
+	// * @param $paramsNameValuePairs : values to insert in query
+	// * @return <string>
+	// */
+	//function getExecutionSQLWithIntegratedParams($paramsValues = false){
+	//	$params = array();
+	//	$paramsDetails = array();
+	//	$sql = $this->getExecutionSQL($params, $paramsDetails, $paramsValues);
+	//	/*if(count($params) !== count($paramsDetails)){
+	//		echo "<br><br><br><br><br>getExecutionSQLWithIntegratedParams : Les tableaux sont de tailles différentes";
+	//		var_dump($params, $paramsDetails);
+	//	}*/
+	//	if(!$sql)
+	//		return $sql;
+	//	//for($i = 0; $i < count($params); $i++){
+	//	foreach($paramsDetails as $paramName => $paramDetails){
+	//		// replace /*[[operator xxx]]*/ [operator] ? with /*[[operator xxx]]*/ 'value'
+	//		$sql = preg_replace('/(\/\*\[\[.*'.preg_quote($paramName) . '[^\]]*\]\]\*\/\s[^?]*)\?/'
+	//				    , '$1\'' . str_replace('\'', '\\\'', $paramDetails['value']) . '\''
+	//				    , $sql);
+	//	}
+	//	return $sql;
+	//}
 	
 	/**
 	 * Fonction qui retourne une instance de record d'après son chemin.

@@ -1528,4 +1528,90 @@ function getLineItemFields(){
 	return $lineItemdFields;
 }
 
+/**
+ * Extrait les infos complémentaires du mode de règlement
+ * Elles sont stockées avec les valeurs du picklist
+ */
+function getModeReglementInfo($modeRegl = false, $parameter = false){
+	$data = Vtiger_Cache::get('receivedmoderegl', 'all');
+	if(!$data){
+		global $adb;
+		$query = 'SELECT *
+			FROM vtiger_receivedmoderegl
+			ORDER BY presence DESC, sortorderid ASC';
+		$result = $adb->query($query);
+		$data = array();
+		while($row = $adb->fetch_row($result, false))
+			$data[$row['receivedmoderegl']] = $row;
+		Vtiger_Cache::set('receivedmoderegl', 'all', $data);
+	}
+	if($modeRegl){
+		if($parameter)
+			if($data[$modeRegl])
+				return $data[$modeRegl][$parameter];
+			else
+				return false;
+			return $data[$modeRegl];
+	}
+	return $data;
+}
+
+/** ED151208
+ * Retourne le paramètrage de la grille tarifaire du produit
+ * 
+ */
+function getPriceBookDetailsForProduct($productid){
+	
+	global $adb;
+
+	$sql = 'SELECT vtiger_pricebook.*
+		, vtiger_pricebookproductrel.listprice
+		, IFNULL(vtiger_products.unit_price, vtiger_service.unit_price) AS unit_price
+		, IFNULL(vtiger_products.currency_id, vtiger_service.currency_id) AS unit_price_currency_id
+		FROM vtiger_pricebookproductrel
+		JOIN vtiger_pricebook
+			ON vtiger_pricebook.pricebookid = vtiger_pricebookproductrel.pricebookid
+		JOIN vtiger_crmentity
+			ON vtiger_pricebook.pricebookid = vtiger_crmentity.crmid
+		LEFT JOIN vtiger_products
+			ON vtiger_products.productid = vtiger_pricebookproductrel.productid
+		LEFT JOIN vtiger_service
+			ON vtiger_service.serviceid = vtiger_pricebookproductrel.productid
+		WHERE vtiger_crmentity.deleted = 0
+		AND vtiger_pricebook.active = 1
+		AND vtiger_pricebookproductrel.productid = ?
+		ORDER BY vtiger_pricebook.modeapplication, vtiger_pricebook.minimalqty';
+	$result = $adb->pquery($sql, array($productid));
+	if(!$result){
+		$adb->echoError();
+		die(__FILE__.'::getPriceBookDetailsForProduct()');
+	}
+	$priceDetails = array();
+	$num_rows = $adb->num_rows($result);
+	if($num_rows > 0){
+		//Tarif par défaut
+		$priceDetails[] = array(
+			'name' => 'basic',
+			'modeapplication' => 'qty',
+			'minimalqty' => 0,
+			'applycondition' => null,
+			'listprice' => $adb->query_result($result,$i, 'unit_price'),
+			'currency_id' => $adb->query_result($result,$i, 'unit_price_currency_id'),
+		);
+
+		//Tarif par quantité ou par critère
+		for($i=0; $i<$num_rows; $i++){
+			$priceDetails[] = array(
+				'name' => $adb->query_result($result,$i, 'bookname'),
+				'modeapplication' => $adb->query_result($result,$i, 'modeapplication'),
+				'minimalqty' => $adb->query_result($result,$i, 'minimalqty'),
+				'applycondition' => $adb->query_result($result,$i, 'applycondition'),
+				'listprice' => $adb->query_result($result,$i, 'listprice'),
+				'currency_id' => $adb->query_result($result,$i, 'currency_id'),
+			);
+		}
+	}
+	return $priceDetails;
+}
+
 ?>

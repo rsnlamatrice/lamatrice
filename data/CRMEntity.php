@@ -1445,8 +1445,13 @@ var_dump($params);*/
 				}
 			}
 		} else if ($mode == "increment") {
+			//ED151202 Gestion d'un compteur de facture par année
+			
 			//when we save new invoice we will increment the invoice id and write
 			$check = $adb->pquery("select cur_id,prefix from vtiger_modentity_num where semodule=? and active = 1", array($module));
+			$exists = $adb->getRowCount($check);
+			if(!$exists)
+				return false;
 			$prefix = $adb->query_result($check, 0, 'prefix');
 			$curid = $adb->query_result($check, 0, 'cur_id');
 			$prev_inv_no = $prefix . $curid;

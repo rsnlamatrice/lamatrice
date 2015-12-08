@@ -287,9 +287,39 @@ class Contacts extends CRMEntity {
 				WHERE NOT (vtiger_contactdetails.accountid IS NULL OR vtiger_contactdetails.accountid = 0)
 				AND c1.contactid = ".$id."
 				AND  vtiger_contactdetails.contactid <> ".$id."
+				
+				UNION
+				
+				/* Transférer revue */
+				SELECT vtiger_contactscf.transfererrevue, null, '[Transférer la revue vers]'
+				FROM vtiger_contactscf
+				WHERE vtiger_contactscf.contactid = ".$id."
+				AND vtiger_contactscf.transfererrevue IS NOT NULL
+				
+				UNION
+				
+				/* Transférer dons */
+				SELECT vtiger_contactscf.transfererdons, null, '[Transférer les dons vers]'
+				FROM vtiger_contactscf
+				WHERE vtiger_contactscf.contactid = ".$id."
+				AND vtiger_contactscf.transfererdons IS NOT NULL
+				
+				UNION
+				
+				/* Transférer revue depuis*/
+				SELECT vtiger_contactscf.contactid, null, '[Transférer la revue depuis]'
+				FROM vtiger_contactscf
+				WHERE vtiger_contactscf.transfererrevue = ".$id."
+				
+				UNION
+				
+				/* Transférer dons */
+				SELECT vtiger_contactscf.contactid, null, '[Transférer les dons depuis]'
+				FROM vtiger_contactscf
+				WHERE vtiger_contactscf.transfererdons = ".$id."
+				
 			) vtiger_contactscontrel2
 				ON vtiger_contactscontrel2.contid = vtiger_contactdetails.contactid
-				
 			
 		       INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
 		       LEFT JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid

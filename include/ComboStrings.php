@@ -241,12 +241,14 @@ $combo_strings = Array(
 			'Yearly'=>'Yearly'
 			),
 
-'invoicestatus_dom' => Array('AutoCreated'=>'AutoCreated',
+'invoicestatus_dom' => Array(/*'AutoCreated'=>'AutoCreated',*/
 			'Created'=>'Created',
-			'Approved'=>'Approved',
-			'Sent'=>'Sent',
+			/*'Approved'=>'Approved',
+			'Sent'=>'Sent',*/
 			'Credit Invoice'=>'Credit Invoice',
-			'Paid'=>'Paid'
+			/*'Paid'=>'Paid'*/
+                        'Validated'=>'Validated',
+                        'Compta'=>'Compta',
 			),
 
 'postatus_dom' => Array('Created'=>'Created',

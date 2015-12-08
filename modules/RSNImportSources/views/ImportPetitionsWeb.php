@@ -327,6 +327,12 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		$record->set('isgroup', 0);
 		$record->set('leadsource', 'PETITION');//TODO
 		
+		if(!$record->get('rsnnpai')){ //TODO ?
+			if(!$record->get('mailingzip') || !$record->get('mailingcity')
+			|| (!$record->get('mailingstreet') && !$record->get('mailingstreet3') && !$record->get('mailingstreet2') && !$record->get('mailingpobox')))
+				$record->set('rsnnpai', 4);//incomplète
+		}
+		
 		// copie depuis tout en haut
 		//
 		//
@@ -674,8 +680,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	 *  This method can be overload in the child class.
 	 * @return array - the pre-imported values group by module.
 	 */
-	public function getPreviewData($request, $offset = 0, $limit = 12) {
-		$data = parent::getPreviewData($request, $offset, $limit);
+	public function getPreviewData($request, $offset = 0, $limit = 24, $importModules = false) {
+		$data = parent::getPreviewData($request, $offset, $limit, $importModules);
 		return RSNImportSources_Utils_Helper::getPreviewDataWithMultipleContacts($data);
 	}
 }

@@ -101,14 +101,14 @@ class Invoice_Record_Model extends Inventory_Record_Model {
             , vtiger_invoicecf.receivedreference = ?
             , vtiger_invoicecf.receivedcomments = ?
             , vtiger_invoice.balance = vtiger_invoice.total - vtiger_invoice.received
-            , vtiger_invoice.invoicestatus = IF(ABS(vtiger_invoice.balance) < 0.01, ?, vtiger_invoice.invoicestatus)
+            /*, vtiger_invoice.invoicestatus = IF(ABS(vtiger_invoice.balance) < 0.01, ?, vtiger_invoice.invoicestatus)*/
             WHERE vtiger_invoice.invoiceid = ?
         ";
         $params = array($reglTotalAmount
                         , $reglTypeRegl
                         , implode(', ', $reglRefs)
                         , implode(', ', $reglComments)
-                        , 'Paid'
+                        //, 'Paid'
                         , $this->getId());
 		$result = $db->pquery($query, $params);
 		if(!$result){

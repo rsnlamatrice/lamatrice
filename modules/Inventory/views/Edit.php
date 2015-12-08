@@ -55,7 +55,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			}
 			else {
 				if($moduleName === 'Invoice'){
-					$recordModel->set('invoicestatus', 'Approved');
+					$recordModel->set('invoicestatus', 'Created');
 					$recordModel->set('received', 0);
 				} else {
 					$recordModel->set('postatus', null);
@@ -96,7 +96,12 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$recordModel = Inventory_Record_Model::getCleanInstance($moduleName);/*ED141219 : Vtiger_Record_Model -> Inventory_Record_Model*/
 			$viewer->assign('MODE', '');
 				
-			$recordModel->set('invoicestatus', 'Created');
+			if($moduleName === 'Invoice')
+				$recordModel->set('invoicestatus', 'Created');
+			elseif($moduleName === 'SalesOrder')
+				$recordModel->set('sostatus', 'Created');
+			elseif($moduleName === 'PurchaseOrder')
+				$recordModel->set('postatus', 'Created');
 			//$recordModel->set('invoicedate', date('j-n-Y'));
 		
 			//The creation of Inventory record from action and Related list of product/service detailview the product/service details will calculated by following code

@@ -92,7 +92,7 @@ $languageStrings = array(
 	'Allows you to manage Webforms' => 'Gestion des Webforms'             , 
 	'LBL_CREATING_NEW'             => 'Créer nouveau'                , 
 	'LBL_EDITING'                  => 'Edition'                     , 
-	'LBL_EDIT_RECORD'              => 'Editer'                        , 
+	'LBL_EDIT_RECORD'              => 'Modifier'                        , 
 	'LBL_DELETE_RECORD'            => 'Supprimer'                      , 
 	'LBL_ADD_MOVE_MENU_ITEMS'      => 'Ajouter/supprimer un Item au Menu '         , 
 	'LBL_ADD_MENU_ITEM'            => 'Ajouter un Item au Menu '               , 
@@ -234,6 +234,8 @@ $languageStrings = array(
 	'LBL_PRINT_LOGO_RECOMMENDED_MESSAGE' => 'Taille recommandée 340X120 pixels( .jpeg , .jpg , .png , .gif , .pjpeg , .x-png format ).',
 	
 	'LBL_ALLMENU_EDITOR' => 'Editeur du menu \'Tout\'',
+        
+        'LBL_PREFIX_IN_USE' => 'Préfixe de module déjà utilisé',
         
 );
 $jsLanguageStrings = array(

@@ -152,6 +152,10 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 
 			if ($account != null) {
 				$datesign = $rsnprelevementsData[0]['sepadatesignature'];
+				$etat = $rsnprelevementsData[0]['etat'];
+				$numcompte = $rsnprelevementsData[0]['numcompte'];
+				$sepabic = $rsnprelevementsData[0]['sepabic'];
+				$montant = $rsnprelevementsData[0]['montant'];
 				//test sur separum == $sourceId
 				$query = "SELECT crmid
 					FROM vtiger_rsnprelevements
@@ -160,11 +164,15 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					WHERE separum = ?
 					AND accountid = ?
 					AND sepadatesignature = ?
+					AND etat = ?
+					AND numcompte = ?
+					AND sepabic = ?
+					AND montant = ?
 					AND deleted = FALSE
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
-				$result = $db->pquery($query, array($sourceId, $account->getId(), $datesign));
+				$result = $db->pquery($query, array($sourceId, $account->getId(), $datesign, $etat, $numcompte, $sepabic, $montant));
 				if($db->num_rows($result)){
 					//already imported !!
 					$row = $db->fetch_row($result, 0); 
@@ -195,7 +203,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					$record->set($fieldName, $value);
 					
 					$fieldName = 'rsnprelvtype';
-					$value = 'Virement périodique';
+					$value = 'Prélèvement périodique';
 					$record->set($fieldName, $value);
 					
 					//$db->setDebug(true);
@@ -475,7 +483,8 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 */
 	function getRsnPrelevementsValues($rsnprelevements) {
 	//TODO end implementation of this method
-			
+		$dejapreleve = $rsnprelevements['prlvInformations'][12] == '1' && $rsnprelevements['prlvInformations'][25] != '00/00/00'
+			?  $this->getMySQLDate($rsnprelevements['prlvInformations'][25]) : null;
 		$rsnprelevementsHeader = array(
 			'reffiche'	=> $rsnprelevements['prlvInformations'][0],
 			'nom'	=> $rsnprelevements['prlvInformations'][1],
@@ -489,7 +498,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			'datedernmodif'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][9]),
 			'heuredernmodif'	=> $rsnprelevements['prlvInformations'][10],
 			'datecreation'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][11]),
-			'dejapreleve'	=> $rsnprelevements['prlvInformations'][12],
+			'dejapreleve'	=> $dejapreleve,
 			'etat'	=> $rsnprelevements['prlvInformations'][13],
 			'datedernmodifetat'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][14]),
 			'datedernmodifmontant'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][15]),
@@ -505,6 +514,8 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			'datedernierpvt'	=> $rsnprelevements['prlvInformations'][25],
 			'heuretraitementpvt'	=> $rsnprelevements['prlvInformations'][26],
 		);
+		if($rsnprelevementsHeader['dejapreleve'])
+			$rsnprelevementsHeader['dejapreleve'] = $rsnprelevementsHeader['datedernierpvt'];
 		return $rsnprelevementsHeader;
 	}
 	

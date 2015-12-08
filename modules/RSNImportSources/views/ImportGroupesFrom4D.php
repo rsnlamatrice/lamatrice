@@ -84,7 +84,7 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 			'webinutilise1' => '',//toujours vide
 			'webinutilise2' => '',//toujours vide
 			'contactweb' => '',//toujours vide
-			'nomlongdugroupe' => '',//grpnomlong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomlong
+			'nomlongdugroupe' => '',//grpnomllong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomllong
 			'cacheradhesion' => '',// rsnwebhide .= 'Adhésion'
 			
 			/* post pré import */
@@ -237,8 +237,8 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 		// see 'nomassoentreprisealaplacedenomp' => 'mailingaddressformat',
 		// dans le traitement, 'mailingaddressformat' a pu devenir autre chose
 		
-		//'nomlongdugroupe' => '',//grpnomlong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomlong
-		$fieldName = 'grpnomlong';
+		//'nomlongdugroupe' => '',//grpnomllong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomllong
+		$fieldName = 'grpnomllong';
 		$value = $contactsData[0]['nomlongdugroupe'];
 		if( $value ) {
 			if( $value == $record->get('grpnomllong')
@@ -251,8 +251,10 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 				if($record->get('mailingstreet2')){
 					//TODO Où mettre l'info ?
 					//Stock la valeur précédente (issue de AssociationNomCourt)
-					if($record->get('grpdescriptif'))
-						$record->set('grpdescriptif', $record->get('grpnomllong') . "\r" . $record->get('grpdescriptif'));
+					if($record->get('grpdescriptif')){
+						if( $record->get('grpdescriptif') != $record->get('grpnomllong'))
+							$record->set('grpdescriptif', $record->get('grpnomllong') . "\r" . $record->get('grpdescriptif'));
+					}
 					else
 						$record->set('grpdescriptif', $record->get('grpnomllong'));
 					//let update 'grpnomllong'
@@ -316,7 +318,7 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 		//'webinutilise1' => '',//toujours vide
 		//'webinutilise2' => '',//toujours vide
 		//'contactweb' => '',//toujours vide
-		//'nomlongdugroupe' => '',//grpnomlong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomlong
+		//'nomlongdugroupe' => '',//grpnomllong //TODO risque d'écrasement de AssociationNomCourt qui est dans grpnomllong
 		//'cacheradhesion' => '',// rsnwebhide .= 'Adhésion'
 	}
 	
@@ -547,6 +549,10 @@ class RSNImportSources_ImportGroupesFrom4D_View extends RSNImportSources_ImportF
 		//Parse dates
 		foreach($this->getContactsDateFields() as $fieldName)
 			$contactsHeader[$fieldName] = $this->getMySQLDate($contactsHeader[$fieldName]);
+		
+		//Caractère foireux
+		$fieldName = 'nomlongdugroupe';
+		$contactsHeader[$fieldName] = str_replace(chr(194).chr(146), "'", $contactsHeader[$fieldName] );
 			
 		return $contactsHeader;
 	}

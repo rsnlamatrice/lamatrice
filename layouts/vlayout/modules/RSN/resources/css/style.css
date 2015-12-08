@@ -293,6 +293,7 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
   cursor: pointer;
 }
 
+
 /* layouts\vlayout\modules\Vtiger\ListViewContents.tpl
  */
 .listViewHeaders.filters input, .listViewHeaders.filters select {

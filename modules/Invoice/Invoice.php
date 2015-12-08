@@ -153,6 +153,30 @@ class Invoice extends CRMEntity {
 	}
 
 
+
+	/* ED151202
+	 * Compteur de l'entitŽ
+	 * DiffŽrencie les compteurs par annŽe
+	 */
+	function setModuleSeqNumber($mode, $module, $req_str = '', $req_no = '') {
+		if($mode === 'increment'
+		&& strpos($module, '_') === FALSE){
+			$year = preg_replace('/^.*\d{2}(\d{2}).*$/', '$1', $this->column_fields['invoicedate']);
+			$module .= '_'.$year;
+		}
+		$no = parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
+		if($no === false
+		&& $mode === 'increment'){
+			$req_no = $year . '00001';
+			$req_str = 'FAC';
+			parent::setModuleSeqNumber('configure', $module, $req_str, $req_no);
+			$req_no = '';
+			$no = parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
+		}
+		return $no;
+	}
+	
+	
 	/** Function to handle the module specific save operations
 
 	*/

@@ -57,7 +57,7 @@
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
 			{assign var=IS_HIDDEN value=(($BLOCK_LABEL eq 'Adresse secondaire' && !$RECORD_MODEL->get('use_address2_for_revue') && !$RECORD_MODEL->get('use_address2_for_recu_fiscal'))
 			 || $BLOCK_LABEL eq 'LBL_CUSTOM_INFORMATION' || $BLOCK_LABEL eq 'LBL_IMAGE_INFORMATION'
-			 || ($BLOCK_LABEL eq 'Groupe, Structure' && $RECORD_MODEL->get('isgroup') neq '0'))}
+			 || ($BLOCK_LABEL eq 'Groupe, Structure' && $RECORD_MODEL->get('isgroup') eq '0'))}
 			
 			<table class="table table-bordered blockContainer showInlineTable {if $BLOCK_LABEL eq "LBL_ADDRESS_INFORMATION"}current-address{/if}">
 			<thead><tr>

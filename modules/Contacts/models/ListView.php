@@ -220,13 +220,13 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 				
 				//add module prefix char ('C') when searching on 'contact_no' field
 				if($searchKey[$i] == 'contact_no' && $searchValue[$i] && is_numeric($searchValue[$i][0])){
-					$searchValue[$i] = $moduleCustomNumberingPrefix . $searchValue[$i];
+					$searchValue[$i] = $this->combineContactNo($moduleCustomNumberingPrefix, $searchValue[$i]);
 					$this->set('search_value', $searchValue);
 				}
 				//une valeur de recherche numérique doit correspondre au contact_no
 				else if($searchKey[$i] === 'lastname' && is_numeric($searchValue[$i])){
 					$searchKey[$i] = 'contact_no';
-					$searchValue[$i] = $moduleCustomNumberingPrefix . $searchValue[$i];
+					$searchValue[$i] = $this->combineContactNo($moduleCustomNumberingPrefix, $searchValue[$i]);
 					$this->set('search_key', $searchKey);
 					$this->set('search_value', $searchValue);
 				}
@@ -270,9 +270,13 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		}
 		elseif($searchKey == 'contact_no' && $searchValue && is_numeric($searchValue[0])){
 			//add module prefix char ('C') when searching on 'contact_no' field
-			$this->set('search_value', $moduleCustomNumberingPrefix . $searchValue);
+			$this->set('search_value', $this->combineContactNo($moduleCustomNumberingPrefix, $searchValue));
 		}
 		return parent::setListViewSearchConditions($pagingModel);
+	}
+	
+	private function combineContactNo($prefix, $number){
+		return $prefix . preg_replace('/^0+/', '', $number);
 	}
 	
 	/* ED150424 */

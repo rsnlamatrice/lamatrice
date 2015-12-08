@@ -23,6 +23,18 @@ define('RSNABOREVUES_TYPE_ABO_PARRAINE', 'Abonné(e) parrainé(e)');
  * RSNAboRevues Entity Record Model Class
  */
 class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
+
+	/**
+	 * Function to set the entity instance of the record
+	 * @param CRMEntity $entity
+	 * @return Vtiger_Record_Model instance
+	 */
+	public function setEntity($entity) {
+		parent::setEntity($entity);
+		if(!$this->getId())
+			$this->setDebutAbo(date('Y-m-d'));
+		return $this;
+	}
 	
 	/**
 	 * Function to test if is abonné

@@ -301,8 +301,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			// TODO: do not hardcode display limit ?
 			$sql .= '
 				FROM ' . $tableName . '
-				/*WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '*/
 			';
+			$nCondition = 0;
+			if($this->needValidatingStep()){
+				$nCondition++;
+				$sql .= ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE;
+			}
 			
 			if($request->get('search_key')){
 				$search_key = $request->get('search_key');
@@ -311,7 +315,6 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 					$search_key = array($search_key);
 					$search_value = array($search_value);
 				}
-				$nCondition = 0;
 				for($i = 0; $i < count($search_key); $i++)
 					if($search_value[$i] || $search_value[$i] === '0'){
 						if($nCondition++)
@@ -330,8 +333,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			$sql .= '
 				LIMIT '.$offset.', '.$limit;
 			$result = $adb->pquery($sql, $params);
-			if(!$result)
+			if(!$result){
 				$adb->echoError('Erreur dans getPreviewData');
+				die();
+			}
 			$numberOfRecords = $adb->num_rows($result);
 
 			for ($i = 0; $i < $numberOfRecords; ++$i) {
@@ -953,8 +958,13 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	 * @return int - the product id | null.
 	 */
 	function getProductId(&$productcode, &$isProduct = NULL, &$name = NULL) {
-        //TODO cache
-		
+		$ini_productcode = $productcode;
+		$data = Vtiger_Cache::get('ProductCode::Info', $productcode);
+        if($data){
+			$isProduct = $data['isProduct'];
+			$productcode = $data['productcode'];
+			return $data['productid'];
+		}
 		$db = PearDatabase::getInstance();
 		if($isProduct !== TRUE){
 			if($productcode){
@@ -964,6 +974,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$searchKey = 'servicename';
 				$searchValue = $name;
 				if(!$searchValue){
+					Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>false, 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 					echo "\nProduit sans code ni nom !";
 					return false;
 				}
@@ -984,6 +995,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$isProduct = false;
 				$name = $row['label'];
 				$productcode = $row['productcode'];
+				Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>$row['serviceid'], 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 				return $row['serviceid'];
 			}
 		}
@@ -996,6 +1008,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$searchKey = 'productname';
 				$searchValue = $name;
 				if(!$searchValue){
+					Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>false, 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 					echo "\nProduit sans code ni nom !";
 					return false;
 				}
@@ -1016,10 +1029,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				$isProduct = true;
 				$name = $row['label'];
 				$productcode = $row['productcode'];
+				Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>$row['productid'], 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 				return $row['productid'];
 			}
 		}
 
+		Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>false, 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 		return null;
 	}
 	
@@ -1549,6 +1564,31 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		$result = $adb->query($sql);
 		
 		return true;
+	}
+	
+	
+	
+	//Répertorie toutes les valeurs possibles et les ajoute à la picklist
+	function addAllPicklistValues($moduleName, $fieldName, $pickListName){
+		
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, $moduleName);
+		
+		$query = 'SELECT DISTINCT '.$fieldName.'
+			FROM '.$tableName.'
+			WHERE IFNULL('.$fieldName.', "") != ""
+			ORDER BY '.$fieldName.'
+		';
+		$result = $db->query($query);
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		while($row = $db->fetch_row($result, false)){
+			RSNImportSources_Utils_Helper::checkPickListValue($moduleName, $pickListName, $pickListName, $row[$fieldName]);
+		}
 	}
 }
 

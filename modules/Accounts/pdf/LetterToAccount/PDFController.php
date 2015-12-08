@@ -342,7 +342,7 @@ class Vtiger_LetterToAccount_PDFController {
 		elseif(!$street3 && $pobox)
 			$street3 .= $pobox;
 		
-		$address .= "\n$street\n$street3\n$zipCode $city";
+		$address .= "\n$street3\n$street\n$zipCode $city";
 		if($country && strcasecmp($country, $this->organizationDetails['country']) !== 0)//ED151006
 			$address .= "\n".$country;
 		

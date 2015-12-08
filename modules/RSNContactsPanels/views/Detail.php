@@ -38,22 +38,20 @@ class RSNContactsPanels_Detail_View extends Vtiger_Detail_View {
 		$viewer->assign('MODULE' , $moduleName);
 		$viewer->assign('RECORD_MODEL' , $recordModel);
 		
-		$params = array();
+		$paramsValues = array();
 		$paramsDetails = array();
 		
 		$sql = "SELECT COUNT(*) FROM (
-			" . $recordModel->getExecutionSQL($params, $paramsDetails) . "
+			" . $recordModel->getExecutionQuery($paramsValues, $paramsDetails) . "
 		) _panel_";
 		
 		$viewer->assign('QUERY' , $sql);
-		$viewer->assign('QUERY_PARAMS_VALUES' , $params);
 		$viewer->assign('QUERY_PARAMS' , $paramsDetails);
 		
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
-		$result = $db->pquery($sql, $params);
+		$result = $db->query($sql);
 		//print_r('<pre>' .$sql .  '</pre>');
-		//var_dump($sql, $params);
 		if(is_object($result))
 			$viewer->assign('RESULT' , $result->fields[0]);
 		else

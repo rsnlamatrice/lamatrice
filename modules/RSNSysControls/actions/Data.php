@@ -31,15 +31,21 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 		//TODO email or log when schedule control is running and ended !!
 		global $current_user;
 		$scheduledSysControls = self::getScheduledSysControls($checkLastTestTime);
-		$mailBody = "";
+		//un tableau par utilisateur concerné
+		$mailBodies = array( 1 => "");
 		$mailBodyPos = 0;
+		$users = array();
 		foreach ($scheduledSysControls as $scheduledId => $sysControl) {
-			self::executeSysControl($sysControl, $mailBody);
+			
+			$user = $sysControl->getAssignedUser();
+			$users[$user->getId()] = $user;
+			
+			self::executeSysControl($sysControl, $mailBodies);
 			if($verbose){
-				echo '<h3>'.$sysControl->getName().'</h3>';
-				if($mailBodyPos < strlen($mailBody)){
-					echo '<pre>'.substr($mailBody, $mailBodyPos).'</pre>';
-					$mailBodyPos = strlen($mailBody);
+				if($mailBodyPos < strlen($mailBodies[1])){
+					echo '<h3>'.$sysControl->getName().'</h3>';
+					echo '<pre>'.substr($mailBodies[1], $mailBodyPos).'</pre>';
+					$mailBodyPos = strlen($mailBodies[1]);
 				}
 			}
 			if($checkLastTestTime){
@@ -48,8 +54,7 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 						->save();
 			}
 		}
-		
-		if($mailBody && !$verbose){
+		if($mailBodies[1] && !$verbose){
 			
 			global $HELPDESK_SUPPORT_EMAIL_ID ;
 			
@@ -58,14 +63,28 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 				$server = 'La Matrice - '.$server;
 			else
 				$server = 'La Matrice';
-				
-			$vtigerMailer = new Vtiger_Mailer();
-			$vtigerMailer->initialize();
-			$vtigerMailer->IsHTML(false);
-			$vtigerMailer->AddAddress($HELPDESK_SUPPORT_EMAIL_ID, 'Administrateur'); //TODO
-			$vtigerMailer->Subject ='['.$server.'] Requetes de controle : Alerte !';
-			$vtigerMailer->Body = $mailBody;
-			$vtigerMailer->Send();
+			
+			foreach($mailBodies as $userId => $mailBody){
+				$user = $users[$userId];
+				if($user->getId() == 1){
+					$address = $HELPDESK_SUPPORT_EMAIL_ID;
+					$destName = 'Administrateur';
+				}
+				else{
+					$address = $user->get('email1');
+					$destName = $user->get('user_name');
+				}
+				echo "
+				Envoi d'un email à $address suite aux contrôles périodiques du système de données.
+				";
+				$vtigerMailer = new Vtiger_Mailer();
+				$vtigerMailer->initialize();
+				$vtigerMailer->IsHTML(false);
+				$vtigerMailer->AddAddress($address, $destName);
+				$vtigerMailer->Subject ='['.$server.'] Requetes de controle : Alerte !';
+				$vtigerMailer->Body = "Bonjour $destName, \r\n".$mailBody;
+				$vtigerMailer->Send();
+			}
 			//tmp mail
 			Vtiger_Mailer::dispatchQueue(null);
 		}
@@ -100,7 +119,14 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 		return $scheduledRecords;
 	}
 	
-	static function executeSysControl($sysControl, &$mailBody){		
+	/**
+	 * Exécute la requête en mode comptage
+	 * @param $sysControl
+	 * @param &$mailBodies : tableau du contenu de mail par utilisateur assigné à la requête
+	 */
+	static function executeSysControl($sysControl, &$mailBodies){		
+		$mailBody = '';
+		
 		$db = PearDatabase::getInstance();
 		
 		$query = $sysControl->getSysControlCountQuery();
@@ -111,15 +137,26 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 ************
 Erreur dans la requête de contrôle \"" . $sysControl->getName() . "\"
 ***********", true);
-			return false;
 		}
-		
-		$result = $db->query_result($result, 0);
-		if($result > 0){
-			$mailBody .= "
+		else {
+			$result = $db->query_result($result, 0);
+			if($result > 0){
+				$mailBody .= "
 ************
 La requête de contrôle \"" . $sysControl->getName() . "\" retourne $result enregistrement(s).
 ***********";
+			}
+		}
+		if($mailBody){
+			$user = $sysControl->getAssignedUser();
+			if(!$mailBodies[$user->getId()])
+				$mailBodies[$user->getId()] = $mailBody;
+			else{
+				$mailBodies[$user->getId()] .= $mailBody;
+			}
+			if($user->getId() != 1)
+				$mailBodies[1] .= $mailBody
+					. "\r\n(suivi par ". $user->getName() . ")\r\n\r\n";
 		}
 	}
 }

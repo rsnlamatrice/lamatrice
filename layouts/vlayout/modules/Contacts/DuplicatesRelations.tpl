@@ -51,6 +51,7 @@
 										{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 									
 										{$RECORD->getName()}
+										<br/><span style="font-weight: normal;">{$RECORD->get('contact_no')}</span>
 									</a></h4></th>
 									
 									{foreach item=HEADER_FIELD key=FIELD_NAME from=$HEADER_FIELDS}
@@ -93,6 +94,7 @@
 											{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 										
 											<b>{$ALTER_RECORD->getName()}</b>
+											<br/>{$ALTER_RECORD->get('contact_no')}
 											
 											{if $ISGROUP}
 												{assign var=FIELD_NAME value='mailingstreet2'}

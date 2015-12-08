@@ -385,4 +385,20 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			'date_edition' => date('d-m-Y'),
 		);
 	}
+	
+	/**
+	 * ED141005
+	 * getListViewPicklistValues
+	 */
+	public function getPicklistValuesDetails($fieldname){
+		switch($fieldname){
+			case 'accounttype':
+				return array(
+					'' => array( 'label' => 'Normal'),
+					'Dépôt-vente' => array( 'label' => 'Dépôt-vente' ),
+				);
+			default:
+				return parent::getPicklistValuesDetails($fieldname);
+		}
+	}
 }

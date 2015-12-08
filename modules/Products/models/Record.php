@@ -249,6 +249,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 			return $priceDetails;
 		}
 		$priceDetails = getPriceDetailsForProduct($this->getId(), $this->get('unit_price'), 'available', $this->getModuleName());
+		
 		$this->set('priceDetails', $priceDetails);
 		return $priceDetails;
 	}
@@ -345,19 +346,19 @@ class Products_Record_Model extends Vtiger_Record_Model {
 							FROM vtiger_crmentity
 							INNER JOIN vtiger_products
 								ON vtiger_products.productid = vtiger_crmentity.crmid
-							WHERE (label LIKE ? OR productcode = ?)
+							WHERE (label LIKE ? OR productcode LIKE ?)
 							AND vtiger_crmentity.deleted = 0 
 							AND vtiger_products.discontinued = 1 AND setype = ?';
-				$params[] = $searchKey;
+				$params[] = "%$searchKey%";
 			}else if($module == 'Services'){
 				$query = 'SELECT label, crmid, setype, createdtime
 							FROM vtiger_crmentity
 							INNER JOIN vtiger_service
 								ON vtiger_service.serviceid = vtiger_crmentity.crmid
-							WHERE (label LIKE ? OR productcode = ?)
+							WHERE (label LIKE ? OR productcode LIKE ?)
 							AND vtiger_crmentity.deleted = 0 
 							AND vtiger_service.discontinued = 1 AND setype = ?';
-				$params[] = $searchKey;
+				$params[] = "%$searchKey%";
 			}
 			$params[] = $module;
 		}
@@ -522,4 +523,15 @@ class Products_Record_Model extends Vtiger_Record_Model {
 	
 		return $destRecordModel;
 	}
+	
+	
+	/** ED151127
+	 * Function to save the current Record Model
+	 */
+	public function save() {
+		if($this->get('productcode'))
+			$this->set('productcode', strtoupper($this->get('productcode')));
+		return parent::save();
+	}
+	
 }

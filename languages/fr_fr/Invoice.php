@@ -33,11 +33,13 @@ $languageStrings = array(
 	'Credit Invoice'               => 'Avoir'                     , 
 	'Paid'                         => 'Soldée'                      , 
 	'AutoCreated'                  => 'Créée automatiquement'      , 
-	'Created'                  		=> 'Créée'      , 
+	'Created'                  	=> 'Création en cours'      , 
 	'Cancel'                       => 'Annuler'                     , 
 	'LBL_COPY_SHIPPING_ADDRESS'    => 'Copier l\'adresse de livraison'       , 
 	'LBL_COPY_BILLING_ADDRESS'     => 'Copier l\'adresse de facturation'        , 
 	
+	'Validated'                    => 'Validée'                      , 
+	'Compta'                       => 'Comptabilisé'                      , 
 	
 	//Translations used for Export to Pdf
 	'Valid Date' => 'Date de validité',

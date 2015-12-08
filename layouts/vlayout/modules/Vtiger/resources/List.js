@@ -2259,6 +2259,7 @@ jQuery.Class("Vtiger_List_Js",{
 		var thisInstance = this;
 		var listViewPageDiv = this.getListViewContentContainer();
 		listViewPageDiv.on('hover','.listViewHeaders.filters', thisInstance.onHeaderFilterHOverEvent);
+		listViewPageDiv.on('focus','.listViewHeaders.filters :input', thisInstance.onHeaderFilterFocusEvent);
 		listViewPageDiv.on('change','.listViewHeaders.filters :input',function(e) {
 			
 			var cvId = thisInstance.getCurrentCvId();
@@ -2275,18 +2276,53 @@ jQuery.Class("Vtiger_List_Js",{
 			jQuery('#pageNumber').val('1');
 			jQuery('#pageToJump').val('1');
 			jQuery('#totalPageCount').text("");
+			
+			thisInstance.setHeaderFilterLastFocus(false);//reset
+			
 			thisInstance.getListViewRecords(urlParams).then(
 				function(data){
 					thisInstance.updatePagination();
 					//To unmark the all the selected ids
 					jQuery('#deSelectAllMsg').trigger('click');
+					
+					thisInstance.focusHeaderFilterLastFocus();
 				},
 
 				function(textStatus, errorThrown){}
 			);
 		});
 	},
-		/* ED150412
+	/** ED151201
+	 * Gestion du focus sur les input
+	 * Permet de rétablir le focus après un rechargement de listview.
+	 * Contexte :
+	 * L'utilisateur saisit un texte dans l'en-tête de colonne Nom, clique dans Prénom pour faire un second filtre
+	 * , sauf qu'après la sortie du nom la recherche se lance et recharge la liste, en perdant le focus sur Prénom.
+	 */
+	//Mémorise le dernier focus sur un input
+	onHeaderFilterFocusEvent : function(e){
+		var $focus = $(this);
+		if ($focus.attr('id')) {
+			$focus = '#' + $focus.attr('id');
+		}
+		else
+			$focus = '.' + $focus.attr('class').replace(' ', '.');
+		var listInstance = Vtiger_List_Js.getInstance();
+		listInstance.setHeaderFilterLastFocus($focus);
+	},
+	//Stocke la réfénce du dernier input ayant reçu le focus
+	setHeaderFilterLastFocus : function($focus){
+		$(document.body).data('input:focused', $focus);
+	},
+	//Focus sur l'input mémorisé
+	focusHeaderFilterLastFocus : function(){
+		var $focus = $(document.body).data('input:focused');
+		if ($focus) {
+			$($focus).focus();
+		}
+	},
+	
+	/* ED150412
 	 * Function to add header filter toolbox
 	 */
 	onHeaderFilterHOverEvent : function(e){
@@ -2394,13 +2430,28 @@ jQuery.Class("Vtiger_List_Js",{
 					break;
 				}
 			}
-			else
-				operator = 's';
+			else {
+				//ED151201 : Default operator 'Contains'
+				switch (searchType) {
+				 case 'date':
+					operator = 'e';
+					break;
+				 case 'numeric':
+				 case 'integer':
+				 case 'currency':
+				 case 'double':
+					operator = 'h';
+					break;
+				 default:
+					operator = 'c';
+				}
+			}
 			if (operator == 's') 
 				switch (searchType) {
 				 case 'date':
 					operator = 'e';
 					break;
+				 case 'numeric':
 				 case 'integer':
 				 case 'currency':
 				 case 'double':

@@ -44,7 +44,8 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				'listprice'=>$listPrice,
 				'purchaseprice'=>$purchasePrice,
 				'description' => decode_html($recordModel->get('description')),
-				'quantityInStock' => $recordModel->get('qtyinstock')
+				'quantityInStock' => $recordModel->get('qtyinstock'),
+				'priceBook' => getPriceBookDetailsForProduct($recordId),
 			);
 			//ED150602
 			if($accountdiscounttype
@@ -76,7 +77,8 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 					'listprice'=>$listPrice,
 					'purchaseprice'=>$purchasePrice,
 					'description' => $recordModel->get('description'),
-					'quantityInStock' => $recordModel->get('qtyinstock')
+					'quantityInStock' => $recordModel->get('qtyinstock'),
+					'priceBook' => getPriceBookDetailsForProduct($id),
 				);
 				//ED150602
 				if($accountdiscounttype

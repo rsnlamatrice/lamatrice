@@ -51,6 +51,14 @@
 					{/if}
 				</span>
 			{/if}
+			{if $RelatedPrelVirementsCount}
+				<br>
+				<span class="recordLabel font-x-x-large" style="color: red">
+				{if $RelatedPrelVirementsCount == 1}Un ordre de prélèvement existe déjà
+				{else}{$RelatedPrelVirementsCount} ordres de prélèvement existent déjà
+				{/if}
+				</span>
+			{/if}
 			</h3>
 		{else}
 			<h3 class="span8 textOverflowEllipsis">{vtranslate('LBL_CREATING_NEW', $MODULE)} {vtranslate($SINGLE_MODULE_NAME, $MODULE)}</h3>
@@ -64,6 +72,11 @@
 				<a class="cancelLink" type="reset" onclick="javascript:window.history.back();">{vtranslate('LBL_CANCEL', $MODULE)}</a>
 			</span>
 		</div>
+		{if $IS_DUPLICATE_FROM}{* ED11204 *}
+			<div class="contentHeader row-fluid">
+				<h3>Le prélèvement dupliqué sera arrété</h3>
+			</div>
+		{/if}
 		{foreach key=BLOCK_LABEL item=BLOCK_FIELDS from=$RECORD_STRUCTURE name="EditViewBlockLevelLoop"}
 			{if $BLOCK_FIELDS|@count lte 0}{continue}{/if}
 			<table class="table table-bordered blockContainer showInlineTable block-{$BLOCK_LABEL}">

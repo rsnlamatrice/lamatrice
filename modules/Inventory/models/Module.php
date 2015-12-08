@@ -168,22 +168,24 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 		}
 
 		if($this->getName() === 'Invoice'){
-			/** ED151027
-			* Approved invoice with balance === 0 becomes Paid
-			*/
-			$approvedStatus = array('Approved', 'Created', 'AutoCreated');
-			$balance = (float)str_replace(',', '.', $recordModel->get('balance'));
-			if(in_array($_REQUEST[$statusFieldName], $approvedStatus)
-			&& $recordModel->get($statusFieldName) == $_REQUEST[$statusFieldName]
-			&& abs($balance) < 0.01){
-				$recordModel->set($statusFieldName, 'Paid');
-			}
-			elseif($_REQUEST[$statusFieldName] === 'Paid'
-			&& $recordModel->get($statusFieldName) == $_REQUEST[$statusFieldName]
-			&& abs($balance) >= 0.01){
-				//TODO alerter l'utilisateur
-				//$recordModel->set('invoicestatus', 'Approved');
-			}
+			//ED151201 abandon
+			///**
+			// * ED151027
+			//* Approved invoice with balance === 0 becomes Paid
+			//*/
+			//$approvedStatus = array('Approved', 'Created', 'AutoCreated');
+			//$balance = (float)str_replace(',', '.', $recordModel->get('balance'));
+			//if(in_array($_REQUEST[$statusFieldName], $approvedStatus)
+			//&& $recordModel->get($statusFieldName) == $_REQUEST[$statusFieldName]
+			//&& abs($balance) < 0.01){
+			//	$recordModel->set($statusFieldName, 'Paid');
+			//}
+			//elseif($_REQUEST[$statusFieldName] === 'Paid'
+			//&& $recordModel->get($statusFieldName) == $_REQUEST[$statusFieldName]
+			//&& abs($balance) >= 0.01){
+			//	//TODO alerter l'utilisateur
+			//	//$recordModel->set('invoicestatus', 'Approved');
+			//}
 		}
 		//Annulation de la facture
 		if($_REQUEST[$statusFieldName] === 'Cancelled'
@@ -198,6 +200,5 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	 */
 	public function getAlphabetSearchField(){
 		return 'account_id'; //TODO invoicestatus ne fonctionne pas
-	}
-	
+	}	
 }

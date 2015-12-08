@@ -135,8 +135,8 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 			}
 		} else if (fieldType === 'date') {
 			//TODO user date format
-			//TODO (mais c'est général au datepicker) initialiser le calendrier
-			valueSelectElement.val(value.replace(/(\d{4}).(\d{2}).(\d{2})/, '$3-$2-$1'));
+			//fonctionne aussi pour des fourchettes de dates (bw)
+			valueSelectElement.val(value.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1'));
 		
 		} else {
 			valueSelectElement.val(value);

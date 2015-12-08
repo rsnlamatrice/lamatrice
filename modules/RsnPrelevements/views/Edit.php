@@ -24,6 +24,13 @@ Class RsnPrelevements_Edit_View extends Vtiger_Edit_View {
 			$request->set('separum', null);
 			$request->set('dejapreleve', null);
 		}
+		elseif($request->get('record')){
+			$recordModel = Vtiger_Record_Model::getInstanceById($request->get('record'), $request->get('module'));
+		
+			$viewer = $this->getViewer ($request);
+			$viewer->assign('RelatedPrelVirementsCount', $recordModel->getRelatedPrelVirementsCount());
+				
+		}
 		
 		parent::process($request);
 

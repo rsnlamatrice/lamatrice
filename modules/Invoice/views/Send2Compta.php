@@ -48,11 +48,21 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	function initSend2ComptaForm (Vtiger_Request $request){
+		
+		$this->initSend2ComptaFormExportableInvoices ($request);
+		$this->initSend2ComptaFormValidatableInvoices ($request);
+	}
+	
+	function initSend2ComptaFormExportableInvoices(Vtiger_Request $request){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
 		
 		$controller = new Vtiger_MassSave_Action();
+		
 		$query = $controller->getRecordsQueryFromRequest($request);
+		
+		$excludeInvoicestatus = array('Created', 'Cancelled');
+		
 		//$query retourne autant de lignes que de lignes de factures
 		$query = 'SELECT DISTINCT invoiceid
 				FROM ('.$query.') _source_';
@@ -63,16 +73,15 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			WHERE vtiger_invoicecf.sent2compta IS NULL
-			AND NOT vtiger_invoice.invoicestatus IN (?)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
 			LIMIT 200 /*too long URL*/
 		';
-		$params = array('Cancelled');
 		
 		$selectedIds = array();
 		$total = 0;
 		
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, $params);
+		$result = $db->pquery($query, $excludeInvoicestatus);
 		if(!$result){
 			$db->echoError();
 			echo "<pre>$query</pre>";
@@ -90,6 +99,51 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$viewer->assign('SELECTED_IDS', $selectedIds);
 	}
 		
+	//Compte les factures "En cours" qui pourraient passer en Validé
+	function initSend2ComptaFormValidatableInvoices (Vtiger_Request $request){
+		$moduleName = $request->getModule();
+		$viewer = $this->getViewer($request);
+		
+		$controller = new Vtiger_MassSave_Action();
+		
+		$query = $controller->getRecordsQueryFromRequest($request);
+		
+		$onlyInvoicestatus = array('Created');
+		
+		//$query retourne autant de lignes que de lignes de factures
+		$query = 'SELECT DISTINCT invoiceid
+				FROM ('.$query.') _source_';
+		$query = 'SELECT COUNT(*) AS `count`
+			, SUM(vtiger_invoice.total) AS `amount`
+			, MIN(vtiger_invoice.invoicedate) AS `datemini`
+			, MAX(vtiger_invoice.invoicedate) AS `datemaxi`
+			FROM ('.$query.') _source_ids_
+			JOIN vtiger_invoice
+				ON vtiger_invoice.invoiceid = _source_ids_.invoiceid
+			JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+			WHERE vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($onlyInvoicestatus).')
+		';
+		
+		$total = 0;
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $onlyInvoicestatus);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			var_dump($params);
+		}
+		else {
+			$row = $db->fetch_row($result);
+			
+			$viewer->assign('VALIDATABLE_TOTAL', $row['amount']);
+			$viewer->assign('VALIDATABLE_COUNT', $row['count']);
+			$viewer->assign('VALIDATABLE_DATEMINI', $row['datemini']);
+			$viewer->assign('VALIDATABLE_DATEMAXI', $row['datemaxi']);
+		}
+	}
+		
 	//Controle des données avant affichage
 	function validateInvoicesData(Vtiger_Request $request){
 		
@@ -102,6 +156,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, IFNULL(productname, servicename) AS productname
 			, IFNULL(vtiger_products.productcode, vtiger_service.productcode) AS productcode
 			FROM ('.$query.') _source_ids_
+			JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = _source_ids_.invoiceid
 			JOIN vtiger_inventoryproductrel
 				ON vtiger_inventoryproductrel.id = _source_ids_.invoiceid
 			LEFT JOIN vtiger_products
@@ -113,6 +169,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			WHERE ((vtiger_products.productid IS NOT NULL AND IFNULL(vtiger_products.glacct, "") = "")
 				OR (vtiger_servicecf.serviceid IS NOT NULL AND IFNULL(vtiger_servicecf.glacct, "") = ""))
 			AND vtiger_inventoryproductrel.listprice <> 0
+			AND vtiger_invoicecf.sent2compta IS NULL
 		';
 		$params = array();
 		
@@ -133,18 +190,26 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		}
 		return true;
 	}
-		
+	
+	/******************************************
+	 *
+	 *	downloadSend2Compta
+	 *
+	 ******************************************/
+	
 	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
 			
 		$taxes = self::getAllTaxes();
 			
+		$excludeInvoicestatus = array('Created', 'Cancelled');
+		
 		$selectedIds = $request->get('selected_ids');
 		$query = 'SELECT vtiger_invoice.*
 			, vtiger_invoicecf.receivedmoderegl
 			, vtiger_invoicecf.receivedreference
-			, IFNULL(vtiger_notescf.codeaffaire, vtiger_campaignscf.codeaffaire) AS codeaffaire
+			, IF(vtiger_campaignscf.codeaffaire IS NULL OR vtiger_campaignscf.codeaffaire = "", vtiger_notescf.codeaffaire, vtiger_campaignscf.codeaffaire) AS codeaffaire
 			, IFNULL(vtiger_products.productname, vtiger_service.servicename) AS productname
 			, IFNULL(vtiger_products.productcode, vtiger_service.productcode) AS productcode
 			, IFNULL(vtiger_products.glacct, vtiger_servicecf.glacct) AS productglacct
@@ -153,6 +218,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, vtiger_inventoryproductrel.listprice
 			, vtiger_inventoryproductrel.discount_percent
 			, vtiger_inventoryproductrel.discount_amount
+			, vtiger_account.account_type
 		';
 		
 		for($nTax = 0; $nTax < count($taxes); $nTax++){
@@ -162,6 +228,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			FROM vtiger_invoice
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+			JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_invoice.accountid
 			LEFT JOIN vtiger_notescf /*coupon*/
 				ON vtiger_invoicecf.notesid = vtiger_notescf.notesid
 			LEFT JOIN vtiger_campaignscf /*campagne*/
@@ -180,7 +248,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			AND vtiger_invoicecf.sent2compta IS NULL
 			AND vtiger_invoice.total <> 0
 			AND vtiger_inventoryproductrel.listprice <> 0
-			AND NOT vtiger_invoice.invoicestatus IN (?)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
 		';
 		
 		if(FALSE){
@@ -192,8 +260,6 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$query .= " AND vtiger_invoice.invoicedate > '2015-09-29'";
 		
 		}
-		
-		
 			
 		$query .= '
 			ORDER BY vtiger_invoice.invoicedate ASC
@@ -201,7 +267,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, vtiger_inventoryproductrel.sequence_no
 		';
 		$params = $selectedIds;
-		$params[] = 'Cancelled';
+		$params = array_merge($params, $excludeInvoicestatus);
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
@@ -218,7 +284,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$isDebug = COLSEPAR;
 			$isDebug = $isDebug[0] === '<';
 			
-			$fileName = 'LAMAT_vers_COG.Factures.Compta.'.date('Ymd_His').'csv';
+			$fileName = 'LAMAT_vers_COG.Factures.Compta.'.date('Ymd_His').'.csv';
 			$exportType = 'text/csv';
 			if($isDebug)
 				echo '<table border="1"><tr><td>';//debug
@@ -268,6 +334,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			 * ******
 			 * ******
 			 * Seuls les comptes en 6 ou en 7 on une section analytique
+			 *
+			 * Le type de compte est prioritaire pour définir le compte de Vente :
+			 * 	- Dépôt-vente 411DEP
 			 * 
 			 */
 			
@@ -384,7 +453,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				$date = $data['date'];
 				$modeRegl = $data['moderegl'];
 				$compteEnc = self::getModeReglCompteEncaissement($modeRegl); 
-				$journal = self::getCompteEncaissementJournal($compteEnc);
+				$journal = self::getModeReglJournal($modeRegl); 
+				//$journal = self::getCompteEncaissementJournal($compteEnc);
 				if($compteEnc[0] === '7' || $compteEnc[0] === '6')
 					$codeAnal = $data['codeAnal'];
 				else	$codeAnal = '';
@@ -469,58 +539,79 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 		
 	private static function getInvoiceCompteVenteSolde($invoiceData){
-		$modeRegl = $invoiceData['receivedmoderegl'];
-		switch(strtoupper($invoiceData['invoicestatus'])){
-		case 'PAID' :
-			switch($modeRegl){
-			case 'PayBox' :
-				return '511101';
-			case 'PayPal' :
-				return '511300';
-			case 'Espèces' :
-				return '511103';
-			case 'CB' :
-				return '511102';
-			case 'Virement' :
-				return '511106';
-			case 'Mandat' :
-				return '511106';//TODO
-			default:
-				return '511200';//LBP
-			}
-		default:
+		
+		$accountType = $invoiceData['account_type'];
+		switch($accountType){
+		case 'Dépôt-vente' :
+			return '411DEP';
+		
+		default :
+			$modeRegl = $invoiceData['receivedmoderegl'];
 			switch($invoiceData['typedossier']){
 			case 'Facture de dépôt-vente' :
 				return '411DEP';
 		
-			case 'CREDIT INVOICE' ://Avoir
+			case 'Credit Invoice' ://Avoir
 			case 'Avoir' :
 			case 'Remboursement' :
 				return '511200';//TODO
 			default:
-				return '411000';
+					
+				return getModeReglementInfo($modeRegl, 'comptevente');
+			
+				//switch($modeRegl){
+				//case 'PayBox' :
+				//	return '511101';
+				//case 'PayPal' :
+				//	return '511300';
+				//case 'Espèces' :
+				//	return '511103';
+				//case 'CB' :
+				//	return '511102';
+				//case 'Virement' :
+				//	return '511106';
+				//case 'Mandat' :
+				//	return '511106';//TODO
+				//default:
+				//	return '511200';//LBP
+				//}
 			}
 		}
 	}
 	
 	private static function getModeReglCompteEncaissement($modeRegl){
-		switch(strtoupper($modeRegl)){
-		case 'CHèQUE' :
-		case 'CHEQUE' :
-			return '514000'; //chèque
-		default :
-			return '512107';//c/c Nef
-		}
-	}
+		return getModeReglementInfo($modeRegl, 'compteencaissement');
 	
-	private static function getCompteEncaissementJournal($compte){
-		switch(strtoupper($compte)){
-		case '514000' :
-			return 'LBP';
-		default :
-			return 'BFC';
-		}
+		//switch($modeRegl){
+		//case 'PayBox' :
+		//	return '512107';
+		//case 'PayPal' :
+		//	return '514000';
+		//case 'Espèces' :
+		//	return '511103';
+		//case 'CB' :
+		//	return '514000';
+		//case 'Virement' :
+		//	return '514000';
+		//case 'Mandat' :
+		//	return '514000';//TODO
+		//default:
+		//	return '514000';//LBP
+		//}
 	}
+	private static function getModeReglJournal($modeRegl){
+		return getModeReglementInfo($modeRegl, 'journalencaissement');
+	}
+	//private static function getCompteEncaissementJournal($compte){
+	//	switch(strtoupper($compte)){
+	//	case '511103' :
+	//		return 'CS';//caisse
+	//	case '512107' :
+	//		return 'BFC';
+	//	default :
+	//		return 'LBP';
+	//	}
+	//}
 	
 	private static function getCodeAffaireCodeAnal($codeAffaire){
 		switch(strtoupper($codeAffaire)){
@@ -540,6 +631,10 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				case 'PAYBOX' :
 				case 'PAYBOXP' :
 					return 'BFC';
+				case 'ESPèCES' :
+				case 'ESPÈCES' :
+				case 'ESPECES' :
+					return 'CS';
 				}
 			return 'LBP';
 		}
@@ -559,17 +654,20 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
 		
+		$excludeInvoicestatus = array('Created', 'Cancelled');
 		$selectedIds = $request->get('selected_ids');
 		$query = 'UPDATE vtiger_invoicecf
 			JOIN vtiger_invoice
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			SET vtiger_invoicecf.sent2compta = NOW()
+			, vtiger_invoice.invoicestatus = ?
 			WHERE vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
 			AND vtiger_invoicecf.sent2compta IS NULL
-			AND NOT vtiger_invoice.invoicestatus IN (?)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
 		';
-		$params = $selectedIds;
-		$params[] = 'Cancelled';
+		$params = array('Compta');
+		$params = array_merge($params, $selectedIds);
+		$params = array_merge($params, $excludeInvoicestatus);
 		
 		if($selectedIds)
 			$this->storeFile($request);

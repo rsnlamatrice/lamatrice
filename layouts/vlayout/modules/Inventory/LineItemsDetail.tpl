@@ -149,7 +149,7 @@
 
 		</td>
 	    </tr>
-		<tr>
+		<tr class="hide">{*ED151201 hide*}
 		<td width="83%">
 		    <span class="pull-right">
 			(+)&nbsp;<b>{vtranslate('LBL_SHIPPING_AND_HANDLING_CHARGES',$MODULE_NAME)} </b>

@@ -402,7 +402,11 @@ class RSNInvoiceHandler extends VTEventHandler {
 		return $dateFin;
 	}
 	
-	/* ED150507 Règles de gestion lors de la validation d'une facture, d'après le montant total */
+	/* ED150507 Règles de gestion lors de la validation d'une facture, d'après le montant total
+	 * 
+	 * Rien de gratuit si un abonnement est en cours pendant encore 3 mois
+	 * 			
+	 */
 	public function handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems, $account, $totalDons){
 		global $log;
 		$log->debug("IN handleAfterSaveInvoiceTotalEvent");
@@ -479,17 +483,21 @@ class RSNInvoiceHandler extends VTEventHandler {
 					$rsnAboRevueCourant = $rsnAboRevue;
 					$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
 					$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
+					//Rien de gratuit si un abonnement est en cours pendant encore 3 mois
+					if($startDateOfNextAbo > self::getDateFinAbo($toDay, 3))
+						$nbTrimestresGratos = 0;
 					break;
 				}
 			}
 			elseif($rsnAboRevue->isTypeNePasAbonner()){
 				$log->debug("handleAfterSaveInvoiceAbonnementsEvent, isTypeNePasAbonner");
-				return;
+				$nbTrimestresGratos = 0;
+				break;
 			}
 		}
 		
 		
-		if($nbTrimestresGratos){
+		if($nbTrimestresGratos && !$abonneAVie){
 			$invoiceDate = new DateTime($invoice->get('invoicedate'));
 			$dateFin = self::getDateFinAbo($invoiceDate, $nbTrimestresGratos * 3 + 1);
 			if($rsnAboRevueCourant){

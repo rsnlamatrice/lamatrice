@@ -101,6 +101,78 @@ class PriceBooks extends CRMEntity {
 		$log->debug("Exiting function updateListPrices...");
 	}
 
+	/** ED151208 cette fonction était requise par ailleurs
+	 *
+	 *	function used to get product list related to a pricebook
+	 *	@param int $id - pricebook id
+	 *	@return array - array which will be returned from the function GetRelatedList
+	 */
+	function get_pricebook_products($id, $cur_tab_id, $rel_tab_id, $actions=false)
+	{
+		global $log,$singlepane_view,$currentModule;
+		$log->debug("Entering get_pricebook_products(".$id.") method ...");
+
+		$related_module = vtlib_getModuleNameById($rel_tab_id);
+		checkFileAccessForInclusion("modules/$related_module/$related_module.php");
+		require_once("modules/$related_module/$related_module.php");
+		$focus = new $related_module();
+		$singular_modname = vtlib_toSingular($related_module);
+
+
+		$query = "SELECT vtiger_crmentity.crmid, vtiger_products.*
+			FROM vtiger_products
+			INNER JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid=vtiger_products.productid
+			INNER JOIN vtiger_pricebookproductrel
+				ON vtiger_pricebookproductrel.productid = vtiger_products.productid
+			WHERE vtiger_crmentity.deleted=0
+			AND vtiger_pricebookproductrel.pricebookid = $id";
+		$log->debug("Exiting get_pricebook_products method ...");
+
+		$return_value = GetRelatedList($currentModule, $related_module, $focus, $query, $button, $returnset);
+
+		if($return_value == null) $return_value = Array();
+		$return_value['CUSTOM_BUTTON'] = $button;
+
+		return $return_value;
+	}
+
+	/** ED151208 cette fonction était requise par ailleurs
+	 *
+	 *	function used to get service list related to a pricebook
+	 *	@param int $id - pricebook id
+	 *	@return array - array which will be returned from the function GetRelatedList
+	 */
+	function get_pricebook_services($id, $cur_tab_id, $rel_tab_id, $actions=false)
+	{
+		global $log,$singlepane_view,$currentModule;
+		$log->debug("Entering get_pricebook_services(".$id.") method ...");
+
+		$related_module = vtlib_getModuleNameById($rel_tab_id);
+		checkFileAccessForInclusion("modules/$related_module/$related_module.php");
+		require_once("modules/$related_module/$related_module.php");
+		$focus = new $related_module();
+		$singular_modname = vtlib_toSingular($related_module);
+
+
+		$query = "SELECT vtiger_crmentity.crmid, vtiger_service.*
+			FROM vtiger_service
+			INNER JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid=vtiger_service.serviceid
+			INNER JOIN vtiger_pricebookproductrel
+				ON vtiger_pricebookproductrel.productid = vtiger_service.serviceid
+			WHERE vtiger_crmentity.deleted=0
+			AND vtiger_pricebookproductrel.pricebookid = $id";
+		$log->debug("Exiting get_pricebook_services method ...");
+
+		$return_value = GetRelatedList($currentModule, $related_module, $focus, $query, $button, $returnset);
+
+		if($return_value == null) $return_value = Array();
+		$return_value['CUSTOM_BUTTON'] = $button;
+
+		return $return_value;
+	}
+	
 	/**	function used to get whether the pricebook has related with a product or not
 	 *	@param int $id - product id
 	 *	@return true or false - if there are no pricebooks available or associated pricebooks for the product is equal to total number of pricebooks then return false, else return true
@@ -225,5 +297,40 @@ class PriceBooks extends CRMEntity {
 		return $rel_tables[$secmodule];
 	}
 
+	
+
+	/**
+	 * Save the related module record information. Triggered from CRMEntity->saveentity method or updateRelations.php
+	 * @param String This module name
+	 * @param Integer This module record number
+	 * @param String Related module name
+	 * @param mixed Integer or Array of related module record number
+	 */
+	function save_related_module($module, $crmid, $with_module, $with_crmid) {
+		global $adb;
+		if (!is_array($with_crmid))
+			$with_crmid = Array($with_crmid);
+		foreach ($with_crmid as $relcrmid) {
+
+			$checkpresence = $adb->pquery("SELECT productid FROM vtiger_pricebookproductrel WHERE
+				pricebookid = ? AND productid = ?", Array($crmid, $relcrmid));
+			// Relation already exists? No need to add again
+			if ($checkpresence && $adb->num_rows($checkpresence))
+				continue;
+
+			$query = "INSERT INTO vtiger_pricebookproductrel(`pricebookid`, `productid`, `listprice`, `usedcurrency`)";
+			if($with_module === 'Products')
+				$query .= " SELECT ?, productid, unit_price, currency_id
+						 FROM vtiger_products
+						 WHERE productid = ?";
+			elseif($with_module === 'Services')
+				$query .= " SELECT ?, serviceid, unit_price, currency_id
+						 FROM vtiger_service
+						 WHERE serviceid = ?";
+			$result = $adb->pquery($query, Array($crmid, $relcrmid));
+			if(!$result)
+				$adb->echoError();
+		}
+	}
 }
 ?>

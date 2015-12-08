@@ -194,14 +194,14 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				
 				$oldPeriodicite = $this->getPeriodiciteFrom4D($prelevement->get('periodicite'), $record->get('dateexport'));
 				if($prelevement->get('periodicite') != $oldPeriodicite){
-					$comments = 'Dans 4D, la pÃ©riodicitÃ© Ã©tait ' . $oldPeriodicite . ', maintenant c\'est '.$prelevement->get('periodicite').'.';
+					$comments = 'Dans 4D, la périodicité était ' . $oldPeriodicite . ', maintenant c\'est '.$prelevement->get('periodicite').'.';
 				}
 				
 				if(strlen($prelevement->get('separum')) > 3){
 					$oldRUM = $record->get('separum');
-					if($prelevement->get('separum') != $oldRUM){
+					if($prelevement->get('separum') != $oldRUM && $oldRUM && !is_numeric($oldRUM)){
 						if($comments) $comments .= "\r\n";
-						$comments .= 'Dans 4D, la RUM Ã©tait ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
+						$comments .= 'Dans 4D, la RUM était ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
 					}
 				}
 				
