@@ -44,35 +44,47 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 		*/
 		$columns = $db->getColumnNames($tableName);
 		
-			$params = array($id, $newValue);
-		foreach($columns as $column)
-			switch($column){
-			case 'picklist_valueid':
-				$params[] = $picklist_valueid;
-				break;
-			case 'sortorderid':
-				$params[] = ++$sequence;
-				break;
-			case 'presence':
-				$params[] = 1;
-				break;
-			default:
-				$params[] = null;
-				break;
-			}
-		if($fieldModel->isRoleBased()) {
-			$columns = implode(', ', array_slice($columns, 0, 5));
-			$sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?,?)';
-			$result = $db->pquery($sql, array_slice($params, 0, 5));//array($id, $newValue, 1, $picklist_valueid,++$sequence)
-		}else{
-			$columns = implode(', ', array_slice($columns, 0, 4));
-			$sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?)';
-			$result = $db->pquery($sql, array_slice($params, 0, 4));//array($id, $newValue, ++$sequence, 1)
+		$params = array();
+		$nColumn = 0;
+		foreach($columns as $column){
+			if($nColumn === 0)
+				$params[] = $id;
+			elseif($nColumn === 1)
+				$params[] = $newValue;
+			else
+				switch($column){
+				case 'picklist_valueid':
+					$params[] = $picklist_valueid;
+					break;
+				case 'sortorderid':
+					$params[] = ++$sequence;
+					break;
+				case 'presence':
+					$params[] = 1;
+					break;
+				default:
+					$params[] = null;
+					break;
+				}
+			$nColumn++;
 		}
+		//if($fieldModel->isRoleBased()) {
+		//	$columns = implode(', ', array_slice($columns, 0, 5));
+		//	$sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?,?)';
+		//	$result = $db->pquery($sql, array_slice($params, 0, 5));//array($id, $newValue, 1, $picklist_valueid,++$sequence)
+		//}else{
+		//	$columns = implode(', ', array_slice($columns, 0, 4));
+		//	$sql = 'INSERT INTO '.$tableName.' ('.$columns . ') VALUES (?,?,?,?)';
+		//	$result = $db->pquery($sql, array_slice($params, 0, 4));//array($id, $newValue, ++$sequence, 1)
+		//}
+		$sql = 'INSERT INTO '.$tableName.' ('. implode(', ', $columns) . ')
+			VALUES ('.generateQuestionMarks($columns).')';
+		$result = $db->pquery($sql, $params);
+
 		if(!$result){
 			echo("<br>ERREUR DANS addPickListValues (" . __FILE__ .")");
 			$db->echoError();
-			var_dump(array($id, $newValue, $picklist_valueid, $sequence, 1), $result);
+			var_dump($params);
 			die($sql);
 		}
         if($fieldModel->isRoleBased() && !empty($rolesSelected)) {
