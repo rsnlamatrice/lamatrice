@@ -30,7 +30,8 @@ class Documents_EditRecordStructure_Model extends Vtiger_EditRecordStructure_Mod
 			if (!empty ($fieldModelList)) {
 				$values[$blockLabel] = array();
 				foreach($fieldModelList as $fieldName=>$fieldModel) {
-					if($fieldModel->isEditable()) {
+					if($fieldModel->isEditable()
+					|| $fieldModel->getName() === 'createdtime') {
 						$fieldValue = $recordModel->get($fieldName);
 
 						if (!$fieldValue && !$recordId) {
