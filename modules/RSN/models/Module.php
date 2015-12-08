@@ -254,6 +254,12 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		;
 		
 		$list[] = array(
+				'sub' => 'resetPicklistValuesRights',
+				'label' => 'Réinit. droits des picklists'
+			)
+		;
+		
+		$list[] = array(
 				'sub' => 'PicklistValuesTransfer',
 				'label' => 'Transfert des listes de valeurs'
 			)

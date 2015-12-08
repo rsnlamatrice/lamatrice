@@ -95,12 +95,17 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->definePrelevementsPeriodicites();
 			break;
 		
+		case 'resetPicklistValuesRights' :
+			$this->resetPicklistValuesRights();
+			break;
+		
 		case 'TestsED' :
 			$this->freeDebug();
 			exit;
 			break;
 		
 		case 'PicklistValuesTransfer' :
+			//Transfert des noms des entités d'un module dans un picklist
 			
 			var_dump("Liste des banques");
 			$focus = CRMEntity::getInstance('RSNBanques');
@@ -359,5 +364,149 @@ SET  `vtiger_rsnprelevements`.`dejapreleve` = vir.dateexport
 , `is_first` = 1";
 		$db->pquery($query);
 		
+	}
+	
+	
+	/** Remise à plat des droits sur les valeurs de picklists
+	 *
+	 *	Supprime toutes les limitations
+	 */
+	private function resetPicklistValuesRights(){
+		$db = PearDatabase::getInstance();
+		
+		$sql = "SELECT MAX(picklistvalueid) as maxi
+			FROM vtiger_role2picklist
+		";
+		$result = $db->query($sql);
+		$currentPicklistvalueid = $db->query_result($result,0,0);
+		$picklistvalueid = $currentPicklistvalueid + 1;
+
+
+		$sql = "SELECT vtiger_picklist.picklistid, vtiger_field.fieldid, vtiger_field.tabid, vtiger_field.fieldname, vtiger_field.columnname, vtiger_field.uitype
+			FROM vtiger_field
+			JOIN vtiger_picklist
+				ON vtiger_picklist.name = vtiger_field.fieldname
+			WHERE vtiger_field.uitype IN (15,16)
+			
+			/*AND vtiger_field.fieldname = 'receivedmoderegl'*/
+			
+			ORDER BY vtiger_field.fieldname
+		";
+		$result = $db->query($sql);
+		$picklists = array();
+		while($row = $db->getNextRow($result, false))
+			$picklists[$row['fieldname']] = $row;
+		
+		
+		$picklists_ok = array();
+		foreach($picklists as &$picklist){
+			$sql = 'SHOW COLUMNS IN vtiger_' . $picklist['fieldname'];
+			
+			$result = $db->query($sql);
+			if(!$result){
+				echo "<br>".$picklist['fieldname']." n'est pas une picklist";
+				continue;
+			}
+			
+			$columns = array();
+			while($row = $db->getNextRow($result, false))
+				$columns[] = $row;
+			
+			$picklist['picklist_table'] = 'vtiger_' . $picklist['fieldname'];
+			$fields = '';
+			foreach($columns as $column)
+				$fields .= $column['field'] . ', ';
+			$picklist['picklist_valueid'] = strpos($fields, 'picklist_valueid') > 0;
+			$picklist['columns'] = $fields;
+			$picklist['newIds'] = '';
+			
+			//Si la table contient un champ picklist_valueid
+			if($picklist['picklist_valueid']){
+				//Elements de la table avec un picklist_valueid vide
+				$sql = 'SELECT `'. $columns[0]['field'] . '` AS rowid, picklist_valueid
+					FROM ' . $picklist['picklist_table'] .'
+					WHERE picklist_valueid = 0 OR picklist_valueid IS NULL';
+			
+				$result = $db->query($sql);
+				if(!$result){
+					$db->echoError($sql);
+					continue;
+				}
+				$missings = array();
+				while($row = $db->getNextRow($result, false))
+					$missings[] = $row;
+				
+				//UPDATE
+				//Attribution d'une valeur aux manquants
+				$params = array();
+				$sql = "UPDATE " . $picklist['picklist_table'] ."
+					SET picklist_valueid = CASE `". $columns[0]['field'] . "` 
+				";
+				foreach($missings as $missing){
+					$sql .= " WHEN ? THEN ?";
+					$params[] = $missing['rowid'];
+					$params[] = $picklistvalueid++;
+				}
+				$sql .= " ELSE `picklist_valueid` END";
+				$sql .= " WHERE picklist_valueid = 0 OR picklist_valueid IS NULL";
+					
+				if($params){
+					echo "<br>Mises à jour de ".$picklist['fieldname']." : ". count($params)/2;
+					//$picklist['newIds'] = print_r($sql, true);
+					$result = $db->pquery($sql, $params);
+					if(!$result){
+						$db->echoError($sql);
+						continue;
+					}
+					$picklist['newIds'] = $result;	
+				}
+				
+				//INSERT INTO vtiger_role2picklist
+				// Création des droits pour le rôle H1
+				$sql = "INSERT INTO `vtiger_role2picklist`(`roleid`, `picklistvalueid`, `picklistid`, `sortid`)  
+						SELECT 'H1', `picklist_valueid`, ?, `sortorderid`
+						FROM " . $picklist['picklist_table'] . "
+						ON DUPLICATE KEY UPDATE vtiger_role2picklist.sortid = vtiger_role2picklist.sortid";
+				$params = array($picklist['picklistid']);
+				$result = $db->pquery($sql, $params);
+				if(!$result){
+					$db->echoError($sql);
+					continue;
+				}
+				
+			}
+			else
+				echo "<br>Pas de champ picklist_valueid dans ".$picklist['fieldname'];
+			
+			$picklists_ok[] = $picklist;
+		}
+		
+		$sql = "UPDATE `vtiger_picklistvalues_seq` SET `id`= 
+							(SELECT MAX( `picklistvalueid`)
+							FROM vtiger_role2picklist)";
+		$db->query($sql);
+		
+		$sql = "INSERT INTO `vtiger_role2picklist`(`roleid`, `picklistvalueid`, `picklistid`, `sortid`)  
+							SELECT 'H1', `picklistvalueid`, `picklistid`, `sortid`
+							FROM vtiger_role2picklist a
+					ON DUPLICATE KEY UPDATE vtiger_role2picklist.sortid = vtiger_role2picklist.sortid";
+		$db->query($sql);
+		
+		
+		//Purge
+		$sql = "DELETE FROM `vtiger_role2picklist`
+			WHERE `roleid` != 'H1'";
+		$db->query($sql);
+		
+		//Recréation pour tous les rôles
+		$sql = "INSERT INTO `vtiger_role2picklist`(`roleid`, `picklistvalueid`, `picklistid`, `sortid`)
+		SELECT vtiger_role.roleid, vtiger_role2picklist.`picklistvalueid`, vtiger_role2picklist.`picklistid`, vtiger_role2picklist.`sortid`
+		FROM `vtiger_role2picklist`
+		JOIN vtiger_role
+			ON vtiger_role.roleid != vtiger_role2picklist.roleid
+		WHERE vtiger_role2picklist.roleid = 'H1'";
+		$db->query($sql);
+
+
 	}
 }

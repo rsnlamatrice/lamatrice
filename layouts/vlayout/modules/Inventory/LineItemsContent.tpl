@@ -101,11 +101,13 @@
 		<div>
 			<input id="{$listPrice}" name="{$listPrice}" value="{if !empty($data.$listPrice)}{$data.$listPrice}{else}0{/if}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]"
 			class="listPrice tinyInputBox" onfocus="$(this).select()"/>
+			{*ED151208 seule la gestion automatique par quantité est opérationnelle.
+			En fait, cette sélection fonctionne mais nécessiterait de s'y pencher un peu mieux.			
 			&nbsp;
 			{assign var=PRICEBOOK_MODULE_MODEL value=Vtiger_Module_Model::getInstance('PriceBooks')}
 			{if $PRICEBOOK_MODULE_MODEL->isPermitted('DetailView')}
 				<img src="{vimage_path('PriceBooks.png')}" class="cursorPointer alignMiddle priceBookPopup" data-popup="Popup" data-module-name="PriceBooks" title="{vtranslate('PriceBooks',$MODULE)}"/>
-			{/if}
+			{/if*}
 		</div>
 		<div>
 			<span>
