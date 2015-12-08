@@ -287,8 +287,11 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return this.parseFloat(jQuery('.listPrice',lineItemRow).val());
 	},
 
-	setListPriceValue : function(lineItemRow, listPriceValue) {
-		var listPrice = parseFloat(listPriceValue).toFixed(2);
+	setListPriceValue : function(lineItemRow, listPriceValue, decimals) {
+		if (typeof decimals !== 'number') {
+			decimals = 2;
+		}
+		var listPrice = parseFloat(listPriceValue).toFixed(decimals);
 		lineItemRow.find('.listPrice').val(listPrice)
 		return this;
 	},	
@@ -1325,7 +1328,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			}
 		}
 		if (unitPrice !== undefined) {
-			thisInstance.setListPriceValue(lineItemRow, unitPrice);
+			thisInstance.setListPriceValue(lineItemRow, unitPrice, 4);
 		}
 	},
 	
