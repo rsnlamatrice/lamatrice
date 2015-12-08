@@ -61,7 +61,7 @@
             {include file=vtemplate_path($ALPHABET_FIELD->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
         {/foreach}
     </form>
-    {if $SOURCE_MODULE neq 'PriceBooks'}
+    {*ED151208 if $SOURCE_MODULE neq 'PriceBooks'*}
         <div class="popupPaging">
             <div class="row-fluid">
                 <span class="actions span6">&nbsp;
@@ -100,5 +100,5 @@
     </div>
 </div>
 
-{/if}
+{*/if*}
 {/strip}
