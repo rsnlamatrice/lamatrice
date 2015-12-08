@@ -249,6 +249,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 			return $priceDetails;
 		}
 		$priceDetails = getPriceDetailsForProduct($this->getId(), $this->get('unit_price'), 'available', $this->getModuleName());
+		
 		$this->set('priceDetails', $priceDetails);
 		return $priceDetails;
 	}
@@ -532,4 +533,5 @@ class Products_Record_Model extends Vtiger_Record_Model {
 			$this->set('productcode', strtoupper($this->get('productcode')));
 		return parent::save();
 	}
+	
 }

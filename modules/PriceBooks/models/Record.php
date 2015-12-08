@@ -71,4 +71,23 @@ class PriceBooks_Record_Model extends Vtiger_Record_Model {
 		$db->pquery('DELETE FROM vtiger_pricebookproductrel WHERE pricebookid = ? AND productid = ?',
 					array($this->getId(), $relatedRecordId));
 	}
+	
+	
+	/**
+	 * ED141005
+	 * getListViewPicklistValues
+	 */
+	public function getPicklistValuesDetails($fieldname){
+		switch($fieldname){
+			case 'modeapplication':
+				return array(
+					'' => array( 'label' => 'Manuelle'),
+					'qty' => array( 'label' => 'Par quantité' ),
+					'accounttype' => array( 'label' => 'Par type de compte' ),
+					'typeremise' => array( 'label' => 'Par type de remise' ),
+				);
+			default:
+				return parent::getPicklistValuesDetails($fieldname);
+		}
+	}
 }

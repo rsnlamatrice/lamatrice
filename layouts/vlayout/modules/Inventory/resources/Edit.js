@@ -291,8 +291,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var listPrice = parseFloat(listPriceValue).toFixed(2);
 		lineItemRow.find('.listPrice').val(listPrice)
 		return this;
-	},
-
+	},	
 
 	/**
 	 * Function which will set the line item total value excluding tax and discount
@@ -719,6 +718,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			&&  recordData.purchaseprice) {
 				unitPrice = recordData.purchaseprice;
 			}
+			
+			//ED151208
+			var priceBookDetails = recordData.priceBook;
+			parentRow.data('priceBookDetails', priceBookDetails);
 			
 			//ED150602 discount % from account discount type
 			var discountpc = recordData.discountpc;
@@ -1293,6 +1296,76 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		//this.calculateShippingAndHandlingTaxCharges();
 		this.calculateGrandTotal();
 	},
+
+	/** ED151208
+	 * Affectation du tarif selon la grille
+	 */
+	lineItemGetPriceFromPriceBook : function(lineItemRow){
+		var thisInstance = this;
+		if (lineItemRow.length > 1) {
+			lineItemRow.each(function(){
+				thisInstance.lineItemGetPriceFromPriceBook($(this));
+			});
+			return;
+		}
+		var priceBookDetails = thisInstance.getProductPriceBookDetails(lineItemRow);
+		if (!priceBookDetails || priceBookDetails.length === 0)
+			return;
+		
+		var qty = Math.abs(thisInstance.getQuantityValue(lineItemRow))
+		, unitPrice = undefined;
+		
+		for (var $i = 0; $i < priceBookDetails.length; $i++) {
+			if (priceBookDetails[$i].modeapplication == 'qty') {
+				if (priceBookDetails[$i].minimalqty > qty) {
+					break;
+				}
+				else
+					unitPrice = priceBookDetails[$i].listprice;
+			}
+		}
+		if (unitPrice !== undefined) {
+			thisInstance.setListPriceValue(lineItemRow, unitPrice);
+		}
+	},
+	
+	getProductPriceBookDetails : function(lineItemRow){
+		
+		var priceBookDetails = lineItemRow.data('priceBookDetails');
+		if (priceBookDetails === undefined){
+			
+			var productId = lineItemRow.find('input.selectedModuleId').val()
+			, currency_id = jQuery('#currency_id option:selected').val()
+			, account_discount_type = this.getAccountDiscountType()
+			, params = {
+				url: "index.php",
+				data: {
+					module: 'Inventory',
+					action: 'GetTaxes',
+					record: productId,
+					currency_id:currency_id,
+					accountdiscounttype:account_discount_type
+				},
+				async: false //TODO depreciated : defer
+			};
+			
+			AppConnector.request(params).then(
+				function(data){
+					for(var id in data.result){
+						if(typeof data.result[id] == "object"){
+							var recordData = data.result[id];
+							priceBookDetails = recordData.priceBook;
+							lineItemRow.data('priceBookDetails', priceBookDetails);
+						}
+					}
+				},
+				function(error,err){
+					lineItemRow.data('priceBookDetails', false);
+				}
+			);
+		}
+		return priceBookDetails;
+	},
 	
 	/**
 	 * Function which will handle the actions that need to be preformed once the qty is changed like below
@@ -1300,6 +1373,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @params : lineItemRow - element which will represent lineItemRow
 	 */
 	quantityChangeActions : function(lineItemRow) {
+		
+		/*ED151208*/
+		this.lineItemGetPriceFromPriceBook(lineItemRow);
+		
 		/*ED150603*/
 		if (lineItemRow.length >1){
 			var thisInstance = this;
