@@ -48,4 +48,32 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 		$response->setResult($result);
 		$response->emit();
 	}
+	
+
+	/** ED151208 depuis le QuickCreate, la sélection de "Ne pas prospecter" impacte les autres Ne Pas
+	 * 
+	 * Function to get the record model based on the request parameters
+	 * @param Vtiger_Request $request
+	 * @return Vtiger_Record_Model or Module specific Record Model instance
+	 */
+	public function getRecordModelFromRequest(Vtiger_Request $request) {
+		$moduleName = $request->getModule();
+		$recordId = $request->get('record');
+
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+
+		$recordModel = parent::getRecordModelFromRequest($request);
+		
+		if(empty($recordId) && $recordModel->get('donotprospect')) {
+			
+			/* "ne pas" partout */
+			foreach( array('emailoptout', 'donotcall', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb')
+					as $fieldName){
+				$recordModel->set($fieldName, 1);
+			}
+			$fieldName = 'donototherdocuments';
+			$recordModel->set($fieldName, 'Reçu fiscal seul');
+		}
+		return $recordModel;
+	}
 }

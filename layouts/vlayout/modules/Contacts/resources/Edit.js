@@ -80,22 +80,28 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		var sourceModule = data['source_module'];
 		if (sourceModule == 'Accounts') {
 			var selectedName = data['selectedName'];
-			var progressIndicatorElement = jQuery.progressIndicator({
-				'message' : selectedName + '...',
-				'position' : 'html',
-				'blockInfo' : {
-					'enabled' : true
-				}
-			});
+			var isQuickCreate = container.is('[name="QuickCreate"]');
+			//Conflit avec QuickCreate et progressIndicator
+			if (!isQuickCreate) {
+				var progressIndicatorElement = jQuery.progressIndicator({
+				   'message' : selectedName + '...',
+				   'position' : 'html',
+				   'blockInfo' : {
+					   'enabled' : true
+				   }
+			   });
+			}
 			data['related_data'] = 'MainContacts';
 			thisInstance.getRecordDetails(data).then(
 				function(recordDetails){
-					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
-					thisInstance.copyAddressDetails(data, container, true, recordDetails);
+					if(!isQuickCreate)
+						progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+					thisInstance.copyAddressDetails(data, container, !isQuickCreate, recordDetails);
 					thisInstance.checkAccountReferent(data, container, recordDetails);
 				},
 				function(error, err){
-					progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
+					if(!isQuickCreate)
+						progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
 				}
 			);
 		}

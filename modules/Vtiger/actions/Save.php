@@ -118,4 +118,23 @@ class Vtiger_Save_Action extends Vtiger_Action_Controller {
 		}
 		return $recordModel;
 	}
+	
+	/**
+	 * ED151208
+	 * Modifie la date de création
+	 * 	utilisé par les documents. cf modules\Documents\actions\Save.php
+	 *
+	 */
+	function updateCreateTime(Vtiger_Request $request, $recordModel){
+		if($request->get('createdtime')){
+			$query = "UPDATE vtiger_crmentity
+				SET createdtime = ?
+				WHERE crmid = ?";
+			global $adb;
+			$date = getValidDBInsertDateTimeValue($request->get('createdtime'));
+			if(!$date) return;
+			$recordId = $recordModel->getId();
+			$adb->pquery($query, array($date, $recordId));
+		}
+	}
 }
