@@ -54,7 +54,6 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 						->save();
 			}
 		}
-		var_dump($mailBodies);
 		if($mailBodies[1] && !$verbose){
 			
 			global $HELPDESK_SUPPORT_EMAIL_ID ;
