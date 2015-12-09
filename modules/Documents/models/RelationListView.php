@@ -185,7 +185,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 							$value = preg_replace('/\\r\\n?/', '<br/>', $value);
 							break;
 						}
-						$values = $relatedRecordModel->get($fieldRel);//valeur prÈcÈdemment affectÈe
+						$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
 						if(!is_array($values))//1er tour
 							$values = array($value);
 						else

@@ -456,7 +456,12 @@ class Documents extends CRMEntity {
 			$this->db->pquery($sql, array($id, $return_id, $return_id));
 		} else {
 			$sql = 'DELETE FROM vtiger_senotesrel WHERE notesid = ? AND crmid = ?';
-			$this->db->pquery($sql, array($id, $return_id));
+			$params = array($id, $return_id);
+			if($return_module === 'Documents'){
+				$sql .= ' OR notesid = ? AND crmid = ?';
+				$params = array($return_id, $id);
+			}
+			$this->db->pquery($sql, $params);
 
 			$sql = 'DELETE FROM vtiger_crmentityrel WHERE (crmid=? AND relmodule=? AND relcrmid=?) OR (relcrmid=? AND module=? AND crmid=?)';
 			$params = array($id, $return_module, $return_id, $id, $return_module, $return_id);
