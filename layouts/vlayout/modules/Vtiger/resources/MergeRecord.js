@@ -19,7 +19,8 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 			, $header = $this.parents('th:first')
 			, columnIndex = $header.get(0).cellIndex
 			, $table = $header.parents('table:first')
-			, $bodyCells = $table.find('tbody td:nth-child('+(columnIndex + 1)+')');
+			, cell0ColumnIndex = $table.find('tbody td:first').get(0).cellIndex //différence entre les navigateurs
+			, $bodyCells = $table.find('tbody td:nth-child('+(columnIndex + cell0ColumnIndex + 1)+')');
 			$bodyCells.find('input[type="radio"]:not(:checked)').each(function(){
 				this.checked = true;
 			});
@@ -36,7 +37,9 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 			, $isSelected = $header.find('input[type="radio"]:checked')
 			, columnIndex = $header.get(0).cellIndex 
 			, $table = $header.parents('table:first')
-			, $bodyCells = $table.find('tbody td:nth-child('+columnIndex+')')
+			, cell0ColumnIndex = $table.find('tbody td:first').get(0).cellIndex //différence entre les navigateurs
+			, $bodyCells = $table.find('tbody td:nth-child('+(columnIndex + (1-cell0ColumnIndex))+')')
+			, $headerCells = $table.find('th:nth-child('+(columnIndex + (1-cell0ColumnIndex))+')')//th dans thead et dans tbody
 			, $headerToSelect;
 			if ($isSelected.length) {
 				if (columnIndex === 1) 
@@ -48,7 +51,7 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 					$radioToSelect.click().get(0).checked = true;
 			}
 			$bodyCells.remove();
-			$header.remove();
+			$headerCells.remove();
 		});
 	},
 	
@@ -65,4 +68,30 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 			
 		});
 	},*/
+	
+	
+
+	registerSelectButton : function(){
+		var popupPageContentsContainer = this.getPopupPageContainer();
+		var thisInstance = this;
+		popupPageContentsContainer.on('click','button[type="submit"]', function(e){
+			var $form = $('form', popupPageContentsContainer)
+			, data = $form.serializeFormData();
+			AppConnector.request(data).then(
+			    function(data){
+				if (data.success && data.result) {
+				    thisInstance.done(data.result, thisInstance.getEventName());
+				}else{
+					
+				}
+				
+			    },
+			    function(error,err){
+
+			    }
+			);
+			e.preventDefault();
+			return false;
+		});
+	},
 });

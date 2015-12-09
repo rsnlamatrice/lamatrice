@@ -8,14 +8,4 @@
  * All Rights Reserved.
  *************************************************************************************/
 
-class Documents_Save_Action extends Vtiger_Save_Action {
-    
-	/**
-	 * Autorise la modification de la date de création
-	 */
-	public function saveRecord($request) {
-		$recordModel = parent::saveRecord($request);
-		$this->updateCreateTime($request, $recordModel);
-		return $recordModel;
-    }
-}
+class Invoice_GetData_Action extends Inventory_GetData_Action {}

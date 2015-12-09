@@ -1730,7 +1730,7 @@ class Contacts extends CRMEntity {
 			'ServiceContracts'=>'vtiger_servicecontracts','Project'=>'vtiger_project','Assets'=>'vtiger_assets'
 			,"Critere4D"=>"vtiger_critere4dcontrel"
 			,"Contacts"=>"vtiger_contactscontrel"
-			,"ContactAdresses"=>"vtiger_contactaddresses"
+			,"ContactAddresses"=>"vtiger_contactaddresses"
 			,"ContactEmails"=>"vtiger_contactemails"
 			,"RSNDonateursWeb"=>"vtiger_rsndonateursweb"
 		);

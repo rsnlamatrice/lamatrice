@@ -219,6 +219,12 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			
 		}
 		
+		//ED151209
+		if($recordModel->get('account_id')){
+			$account = Vtiger_Record_Model::getInstanceById( $recordModel->get('account_id'), 'Accounts');
+			$viewer->assign('ACCOUNTTYPE',$account->get('accounttype'));
+		}
+		
 		$currencies = Inventory_Module_Model::getAllCurrencies();
 		$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($moduleName);
 		$viewer->assign('PICKIST_DEPENDENCY_DATASOURCE',Zend_Json::encode($picklistDependencyDatasource));
