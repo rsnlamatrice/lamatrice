@@ -24,7 +24,7 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 		}
 	}
 
-	function process (Vtiger_Request $request) {
+	function process (Vtiger_Request $request) {	
 		$mode = $request->get('mode');
 		if(!empty($mode)) {
 			$this->invokeExposedMethod($mode, $request);

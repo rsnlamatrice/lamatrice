@@ -80,7 +80,7 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 			AppConnector.request(data).then(
 			    function(data){
 				if (data.success && data.result) {
-				    thisInstance.done(data.result, thisInstance.getEventName());
+				    thisInstance.done(data, thisInstance.getEventName());
 				}else{
 					
 				}

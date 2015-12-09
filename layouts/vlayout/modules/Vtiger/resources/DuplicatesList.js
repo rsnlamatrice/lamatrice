@@ -43,10 +43,21 @@ Vtiger_List_Js("Vtiger_DuplicatesList_Js",{
 				function(data){
 					var msg;
 					if (data.result.Modifications !== undefined)
-						msg = data.result.Modifications;
-					else
-						msg = JSON.stringify(data.result);
-					Vtiger_Helper_Js.showPnotify(app.vtranslate('Ok (' + msg + ')'));
+						msg = 'Ok (' + data.result.Modifications + ')';
+					else{
+						if (data.result !== true){
+							msg = JSON.stringify(data.result);
+							msg = 'Ok (' + msg + ')';
+						}
+						else
+							msg = 'Ok';
+					}
+					Vtiger_Helper_Js.showPnotify(app.vtranslate(msg));
+					//Supprime les lignes
+					for (var i = 1; i < nRows; i++) {
+						$tr.next().remove();
+					}
+					$tr.remove();
 				}, function(error, err){
 				}
 			);
