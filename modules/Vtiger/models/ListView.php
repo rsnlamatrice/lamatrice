@@ -297,7 +297,7 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 		
 		$listViewRecordModels = array();
 		// ICI LE PBLM DE CHAMPS QUI DISPARAISSENT RATTRAPPABLE PLUS BAS dans $moduleModel->getRecordFromArray($record, $rawData);
-		$listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult); 
+		$listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult, $this->get('view_context')); 
 		$pagingModel->calculatePageRange($listViewEntries);
 //var_dump($listViewEntries);
 		if($db->num_rows($listResult) > $pageLimit){
@@ -476,7 +476,9 @@ var_dump($listResult);*/
 
 		$controller = new ListViewController($db, $currentUser, $queryGenerator);
 
-		return $instance->set('module', $moduleModel)->set('query_generator', $queryGenerator)->set('listview_controller', $controller);
+		return $instance->set('module', $moduleModel)->set('query_generator', $queryGenerator)->set('listview_controller', $controller)
+			->set('view_context', 'popup')//ED151210
+		;
 	}
 
 	/*

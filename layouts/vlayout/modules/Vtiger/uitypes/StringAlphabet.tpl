@@ -18,7 +18,7 @@
 	{assign var=ALPHABETS value=','|explode:$ALPHABETS}
 {/if}
 
-<div class="alphabetSorting noprint" data-searchkey="{$ALPHABET_FIELD->getName()}">
+<div class="alphabetSorting noprint" data-searchkey="{$ALPHABET_FIELD->getName()}"  data-searchoperator="s">
 	<table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed">
 		<tbody>
 			<tr>

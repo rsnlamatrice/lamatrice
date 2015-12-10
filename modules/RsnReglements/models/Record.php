@@ -45,6 +45,9 @@ class RsnReglements_Record_Model extends Vtiger_Record_Model {
 		if($moduleName === 'Invoice'
 		|| $moduleName === 'SalesOrder'){
 			$data['account_id'] = $parentRecordModel->get('account_id');
+			$data['amount'] = $parentRecordModel->get('hdnGrandTotal');
+			$data['rsnmoderegl'] = $parentRecordModel->get('receivedmoderegl');
+			$data['typeregl'] = 'Facture';
 		}
 		return $this->setData($data);
 	}

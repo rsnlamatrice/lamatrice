@@ -167,7 +167,12 @@ class ListViewController {
 		return $headerFields;
 	}
 
-	function getListViewRecords($focus, $module, $result) {
+	/**
+	 *
+	 *	ED151210
+	 *	@param $view_context : used to make difference between standard listview and popup listview
+	 */
+	function getListViewRecords($focus, $module, $result, $view_context = false) {
 		global $listview_max_textlength, $theme, $default_charset;
 
 		require('user_privileges/user_privileges_'.$this->user->id.'.php');
@@ -582,7 +587,9 @@ class ListViewController {
 							$moduleModel = Vtiger_Module_Model::getInstance($module);
 						$values = $moduleModel->getPicklistValuesDetails($fieldName);
 						if(is_array($values) && array_key_exists($value, $values)){
-							$value = '<span class="' . $values[$value]['icon'] . '" title="'.$values[$value]['label'].'" data-value="'.$value.'">' . $values[$value]['label'] . '</span>';
+							$value = '<span class="' . $values[$value]['icon'] . '" title="'.$values[$value]['label'].'" data-value="'.$value.'">'
+								. ($view_context === 'popup' ? '' : $values[$value]['label'])
+								. '</span>';
 						}
 					}
 				} else {

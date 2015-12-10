@@ -21,6 +21,9 @@
 		<input type="hidden" name="module" value="{$MODULE}" />
 		<input type="hidden" name="action" value="Save" />
 		<input type="hidden" name="record" value="{$RECORD_ID}" />
+		{if $SALESORDER_ID}
+			<input type="hidden" name="salesorder_id" value="{$SALESORDER_ID}" />
+		{/if}
 		{if $IS_RELATION_OPERATION }
 			<input type="hidden" name="sourceModule" value="{$SOURCE_MODULE}" />
 			<input type="hidden" name="sourceRecord" value="{$SOURCE_RECORD}" />

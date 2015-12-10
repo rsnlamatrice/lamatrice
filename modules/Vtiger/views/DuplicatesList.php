@@ -145,7 +145,10 @@ class Vtiger_DuplicatesList_View extends Vtiger_List_View {
 		}
 		
 		$noOfEntries = count($this->listViewEntries);
-
+		//ED151210 on triche pour avoir la navigation car on a pas le nbre exacte d'entrée
+		if($noOfEntries > 0)
+			$pagingModel->set('limit', $noOfEntries);
+		
 		$viewer->assign('MODULE', $moduleName);
 
 		if(!$this->listViewLinks){

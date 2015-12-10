@@ -40,15 +40,13 @@
             <input type="text" placeholder="{vtranslate('LBL_TYPE_SEARCH')}" id="searchvalue"
                 {if $SEARCH_VALUE}value="{$SEARCH_VALUE}"{/if}/>
             <span class="paddingLeft10px"><strong>{vtranslate('LBL_IN')}</strong></span>
-            <span class="paddingLeft10px help-inline pushDownHalfper">
+            <span class="paddingLeft10px help-inline pushDownHalfper" id="searchableColumnsListContainer">
                 <select style="width: 150px;" class="chzn-select help-inline" id="searchableColumnsList">
                     {foreach key=block item=fields from=$RECORD_STRUCTURE}
                         {foreach key=fieldName item=fieldObject from=$fields}
-                            <optgroup>
                                 <option value="{$fieldName}"
                                 {if $SEARCH_KEY eq $fieldName}selected="selected"{/if}
                                 >{vtranslate($fieldObject->get('label'),$MODULE)}</option>
-                            </optgroup>
                         {/foreach}
                     {/foreach}
                 </select>

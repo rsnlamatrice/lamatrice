@@ -19,7 +19,16 @@ class Invoice_Save_Action extends Inventory_Save_Action {
 		}
 		
 		$recordModel = parent::saveRecord($request);
-
+		
+		//Enregistre le lien avec le dépôt-vente
+		if($recordModel->get('salesorder_id')){
+			global $adb;
+			$query = 'UPDATE vtiger_invoice
+				SET salesorderid = ?
+				WHERE invoiceid = ?';
+			$adb->pquery($query, array($recordModel->get('salesorder_id'), $recordModel->getId()));
+		}
+		
 		//Reverting the action value to $_REQUEST
 		$_REQUEST['action'] = $request->get('action');
 		

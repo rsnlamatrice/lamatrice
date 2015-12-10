@@ -116,7 +116,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$listViewModel = Vtiger_ListView_Model::getInstanceForPopup($moduleName);
 		$recordStructureInstance = Vtiger_RecordStructure_Model::getInstanceForModule($moduleModel);
-
+		
 		if(!empty($orderBy)) {
 			$listViewModel->set('orderby', $orderBy);
 			$listViewModel->set('sortorder', $sortOrder);
@@ -149,8 +149,8 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		}
 
 		if(!$this->listViewHeaders){
+			//en général, c'est dans module->getPopupFields() { return CRMEntity->search_fields_name;}
 			$this->listViewHeaders = $listViewModel->getListViewHeaders();
-			//var_dump($this->listViewHeaders);
 		}
 		
 		//ED151105

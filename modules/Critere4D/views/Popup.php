@@ -13,7 +13,7 @@ class _____Critere4D_Popup_View extends Vtiger_Popup_View {}
 class Critere4D_Popup_View extends Vtiger_Popup_View {
 	
 	//protected $listViewHeaders
-	/* Retourne les en-têtes des colonnes des tables liées
+	/* Retourne les en-tÃªtes des colonnes des tables liÃ©es
 	 * Ajoute les champs de la relation
 	 * */
 	public function getHeaders($request) {
@@ -30,17 +30,17 @@ class Critere4D_Popup_View extends Vtiger_Popup_View {
 		}
 		
 		/* Champs issus de critere4dcontrel */
-		return self::get_related_fields($headerFields);
+		return self::get_related_fields($headerFields, $request);
 		
 	}
 	
-	/* Retourne les en-têtes des colonnes des contacts
+	/* Retourne les en-tÃªtes des colonnes des contacts
 	 * Ajoute les champs de la relation
 	 * ED140907
 	 * */
-	public static function get_related_fields($headerFields = false) {
+	public static function get_related_fields($headerFields = false, $request = false) {
 	    if(!$headerFields)
-		$headerFields = array();
+			$headerFields = array();
 
 	    //Added to support data
 	    $field = new Vtiger_Field_Model();
@@ -59,7 +59,7 @@ class Critere4D_Popup_View extends Vtiger_Popup_View {
 	    $field->set('tablename', 'vtiger_critere4dcontrel');
 	    $field->set('name', 'dateapplication');
 	    $field->set('column', strtolower( 'dateapplication' ));
-	    $field->set('label', 'Derniere application');
+	    $field->set('label', 'Derni&egrave;re application');
 	    /*ED140906 tests*/
 	    $field->set('typeofdata', 'DATETIME');
 	    $field->set('uitype', 6);

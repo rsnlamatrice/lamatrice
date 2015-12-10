@@ -155,8 +155,8 @@ class Invoice extends CRMEntity {
 
 
 	/* ED151202
-	 * Compteur de l'entité
-	 * Différencie les compteurs par année
+	 * Compteur de l'entite
+	 * Diff√©rencie les compteurs par ann√©e
 	 */
 	function setModuleSeqNumber($mode, $module, $req_str = '', $req_no = '') {
 		if($mode === 'increment'
