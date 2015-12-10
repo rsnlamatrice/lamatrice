@@ -53,6 +53,9 @@
 				{else}
 					{vtranslate($SINGLE_MODULE_NAME, $MODULE)}
 				{/if}
+				{if $MODULE === 'SalesOrder'}
+					<span style="color: blue;">&nbsp;({vtranslate($RECORD->get('typedossier'), $MODULE )})</span>
+				{/if}
 				&nbsp;- {$RECORD_STRUCTURE_MODEL->getRecordName()}
 			{else}
 				<h3>{vtranslate('LBL_CREATING_NEW', $MODULE)}&nbsp;
@@ -65,6 +68,10 @@
 			{/if}
 			{if $RECORD->get('invoicestatus') === 'Cancelled'}
 				<br><span style="color: red;">{vtranslate($RECORD->get('invoicestatus'), $MODULE )}</span>
+			{elseif $RECORD->get('sostatus') === 'Cancelled'}
+				<br><span style="color: red;">{vtranslate($RECORD->get('sostatus'), $MODULE )}</span>
+			{elseif $RECORD->get('postatus') === 'Cancelled'}
+				<br><span style="color: red;">{vtranslate($RECORD->get('postatus'), $MODULE )}</span>
 			{/if}
 			{if $RECORD->get('sent2compta')}
 				<br><span style="color: red;">{vtranslate('LBL_ALREADY_SENT_2_COMPTA')}</span>

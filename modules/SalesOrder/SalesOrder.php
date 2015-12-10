@@ -158,7 +158,13 @@ class SalesOrder extends CRMEntity {
 			//Based on the total Number of rows we will save the product relationship with this entity
 			saveInventoryProductDetails($this, 'SalesOrder');
 		}
-			
+		
+		//ED151210 gestion du solde
+		if($this->column_fields['typedossier'] !== 'Solde'){
+			$contactId = $this->column_fields["contact_id"];
+			$this->updateSaleOrderSolde($contactId);
+		}
+		
 		//ED150708 refreshes qty in demand
 		if($productIdsList)
 			$this->refreshQtyInDemand($productIdsList);
@@ -194,6 +200,7 @@ class SalesOrder extends CRMEntity {
 				JOIN vtiger_crmentity
 					ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid
 				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_salesorder.typedossier = 'Solde'
 				AND vtiger_salesorder.sostatus IN (" . generateQuestionMarks($this->statusForQtyInDemand) . ")
 			".($productIdsList
 				? " AND vtiger_inventoryproductrel.productid IN (" . generateQuestionMarks($productIdsList) . ")"
@@ -229,6 +236,380 @@ class SalesOrder extends CRMEntity {
 		$log->debug("Exiting refreshQtyInDemand method ...");
 	}
 	
+	/*******************************
+	 * GESTION DU DOSSIER DE SOLDE
+	 *******************************/
+	
+	/**
+	 * Création du dossier de solde (typeddosier === 'Solde')
+	 * 1) le dossier de solde est celui qui a la date de création la plus récente
+	 * 2) Si le saleorder le plus récent n'est pas de typedossier 'Solde', il est créé.
+	 * 3) Le dossier de solde reprend le précédent dossier de solde et ajoute les produits des dossiers de type 'Variation' suivants
+	 */
+	function updateSaleOrderSolde($contactId){
+		$dossiers = $this->getContactDepotsVentesInfos($contactId);
+		$variationIds = $this->getVariationIds($dossiers);
+		$soldeReferenceId = $this->getSoldeReferenceId($dossiers);
+		$soldeActifId = $this->getSoldeActifId($dossiers);
+		if(!$soldeReferenceId && !$soldeActifId
+		|| $soldeReferenceId == $soldeActifId
+		|| !$variationIds)
+			//rien à faire
+			return;
+		$this->insertSaleOrderSoldeRows($soldeActifId, $soldeReferenceId, $variationIds);
+		$this->setSaleOrderTotal($soldeActifId);
+	}
+	
+	// reset des lignes dans vtiger_inventoryproductrel
+	private function insertSaleOrderSoldeRows($soldeActifId, $soldeReferenceId, $variationIds){
+		global $adb;
+		//purge des produits du solde actif
+		$query = 'DELETE FROM vtiger_inventoryproductrel
+			WHERE id = ?';
+		$adb->pquery($query, array($soldeActifId));
+		$query = 'DELETE FROM vtiger_inventorysubproductrel
+			WHERE id = ?';
+		$adb->pquery($query, array($soldeActifId));
+		
+		//insertion des lignes de produits pour le solde actif
+		
+		//sélection des produits
+		$params = $variationIds;
+		if($soldeReferenceId)
+			array_push($params, $soldeReferenceId);
+		$query = 'SELECT `vtiger_inventoryproductrel`.`productid`
+			, IFNULL(vtiger_products.unit_price, vtiger_service.unit_price) AS `listprice`
+			, MAX(`vtiger_inventoryproductrel`.`sequence_no`) AS `sequence_no`
+			, SUM(`vtiger_inventoryproductrel`.`quantity`) AS `quantity`
+			, MAX(`vtiger_inventoryproductrel`.`discount_percent`)
+			, SUM(`vtiger_inventoryproductrel`.`discount_amount`)
+			, GROUP_CONCAT(DISTINCT `vtiger_inventoryproductrel`.`comment` SEPARATOR " - ") AS `comment`
+			, GROUP_CONCAT(DISTINCT `vtiger_inventoryproductrel`.`description` SEPARATOR " - ") AS `description`
+			, MAX(`vtiger_inventoryproductrel`.`incrementondel`) AS `incrementondel`
+			
+			/* pas sur que le nombre de taxes ne soit pas dynamique, mais a vrai dire, on s en fiche pour les salesorder */
+			, MIN(`vtiger_inventoryproductrel`.`tax1`) AS `tax1`
+			, MIN(`vtiger_inventoryproductrel`.`tax2`) AS `tax2`
+			, MIN(`vtiger_inventoryproductrel`.`tax3`) AS `tax3`
+			, MIN(`vtiger_inventoryproductrel`.`tax4`) AS `tax4`
+			, MIN(`vtiger_inventoryproductrel`.`tax5`) AS `tax5`
+			, MIN(`vtiger_inventoryproductrel`.`tax6`) AS `tax6`
+			
+			FROM `vtiger_inventoryproductrel`
+			JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = `vtiger_inventoryproductrel`.id
+			JOIN vtiger_crmentity AS vtiger_crmentity_products
+				ON vtiger_crmentity_products.crmid = `vtiger_inventoryproductrel`.productid
+			LEFT JOIN vtiger_products
+				ON vtiger_products.productid = `vtiger_inventoryproductrel`.productid
+			LEFT JOIN vtiger_service
+				ON vtiger_service.serviceid = `vtiger_inventoryproductrel`.productid
+			WHERE vtiger_crmentity_products.deleted = 0
+			AND `vtiger_inventoryproductrel`.`id` IN ('.generateQuestionMarks($params).')
+			
+			GROUP BY `vtiger_inventoryproductrel`.`productid`, IFNULL(vtiger_products.unit_price, vtiger_service.unit_price)
+			/* skip les quantites a 0 */
+			HAVING SUM(`vtiger_inventoryproductrel`.`quantity`) != 0
+			
+			/* tri pour definir le sequence_no dans la reinsertion */
+			ORDER BY vtiger_crmentity.createdtime, `sequence_no`
+		';
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError('Erreur dans updateSaleOrderSolde');
+			die();
+		}
+		//insertion de chaque produit
+		$fieldNames = array('productid', 'quantity', 'listprice', 'discount_percent', 'discount_amount', 'comment', 'description', 'incrementondel', 'tax1', 'tax2', 'tax3', 'tax4', 'tax5', 'tax6');
+
+		$query = 'INSERT INTO vtiger_inventoryproductrel
+			(`id`, sequence_no, '.implode(',', $fieldNames) . ')
+		';
+		$params = array();
+		$sequence_no = 1;
+		while($row = $adb->getNextRow($result, false)){
+			var_dump($row);
+			if(count($params) === 0){
+				$query .= ' VALUES(';
+			} else {
+				$query .= ', (';
+			}
+			$query .= '?, ?, '.generateQuestionMarks($fieldNames);
+			$params[] = $soldeActifId;
+			$params[] = $sequence_no++;
+			foreach($fieldNames as $fieldName)
+				$params[] = $row[$fieldName];
+			$query .= ')';
+		}
+		if($params){
+			$result = $adb->pquery($query, $params);
+			if(!$result){
+				echo "<pre>$query</pre>";
+				var_dump($params);
+				$adb->echoError('Erreur dans updateSaleOrderSolde');
+				die();
+			}
+		}
+	}
+	
+	/* Recalcul du solde global */
+	private function setSaleOrderTotal($salesorderId){
+		global $adb;
+		$query = 'UPDATE vtiger_salesorder
+			SET total = ROUND((
+				SELECT SUM(quantity * (listprice * ( 1 - IFNULL(discount_percent, 0)/100) - IFNULL(discount_amount, 0))) AS total
+				FROM vtiger_inventoryproductrel
+				WHERE vtiger_inventoryproductrel.id = ?)
+				 * ( 1 - IFNULL(discount_percent, 0)/100) - IFNULL(discount_amount, 0)
+				, 2)
+			, subtotal = total
+			WHERE vtiger_salesorder.salesorderid = ?
+		';
+		$params = array($salesorderId, $salesorderId);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError('Erreur dans setSaleOrderTotal');
+			die();
+		}
+	}
+	
+	/**
+	 * Retourne les infos des derniers dossiers par ordre décroissant de date de création,
+	 * et pas au-delà du dernier dossier de Solde clôt.
+	 * On peut avoir
+	 * 	1) Solde actif
+	 * 	2) Variation
+	 * 	3) Solde précédent clôt
+	 * ou
+	 * 	1) Variation
+	 * 	2) Solde précédent actif
+	 */
+	private function getContactDepotsVentesInfos($contactId){
+		$query = 'SELECT crmid, createdtime, typedossier, sostatus, contactid
+			FROM vtiger_salesorder
+			JOIN vtiger_crmentity
+				ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_salesorder.contactid = ?';
+		$query .= ' ORDER BY createdtime DESC';
+		
+		global $adb;
+		$result = $adb->pquery($query, array($contactId));
+		if(!$result){
+			$adb->echoError('Erreur dans getContactDepotsVentes');
+			return;
+		}
+		$dossiers = array();
+		$soldeInactif = false;
+		while ($row = $adb->getNextRow($result, false)){
+			$row['createdtime'] = new DateTime($row['createdtime']);
+			if($row['typedossier'] === 'Solde'){
+				if($row['sostatus'] === 'Cancelled'){
+					if(count($dossiers) === 0){
+						//le dossier est annulé mais c'est le premier (peut être le seul)
+						$soldeInactif = $row;
+						continue;
+					}
+					$dossiers[] = $row;
+					break;
+				}
+			}
+			elseif($row['sostatus'] === 'Cancelled')
+				//skip dossier Annulé qui n'est pas de type Solde
+				continue;
+			$dossiers[] = $row;
+		}
+		if(count($dossiers) === 0 && $soldeInactif){
+			//unique dossier mais annulé
+			$dossiers[] = $soldeInactif;
+		}
+		return $dossiers;
+	}
+	
+	/**
+	 * Retourne l'identifiant du solde actif
+	 * Crée le dossier si il n'est pas plus récent qu'un dossier de variation
+	 * @param $dossiers : infos de salesorder triés par date de création décroissante
+	 * @return : salesorderid
+	 */
+	private function getSoldeActifId($dossiers){
+		//dossiers
+		$soldeActif = false;
+		$variation = false;
+		$soldeInactif = false;
+		//recherche des dossiers par type et statut
+		foreach($dossiers as $dossier){
+			if($dossier['typedossier'] === 'Solde'){
+				if($dossier['sostatus'] === 'Cancelled'){
+					$soldeInactif = $dossier;
+				}
+				else
+					$soldeActif = $dossier;
+			}
+			elseif(!$variation){
+				//1er dossier de variation
+				$variation = $dossier;
+			}
+		}
+		//analyse du dossier de solde actif
+		if(!$variation && $soldeActif){
+			return $soldeActif['crmid'];
+		}
+		elseif(!$variation && $soldeInactif){
+			return $soldeInactif['crmid'];
+		}
+		elseif($variation && $soldeActif){
+			if($soldeActif['createdtime'] >= $variation['createdtime'] ){
+				//Solde déjà constitué
+				return $soldeActif['crmid'];
+			}
+			//Le dossier de Solde est plus vieux que le dossier de variation
+			//on ferme le dossier de solde
+			//on duplique le dossier de variation (pour l'adresse qui est plus à jour) pour en créer le nouveau solde
+			$this->setSalesOrderStatus($soldeActif['crmid'], 'Cancelled');
+			$soldeRecordModel = $this->duplicateSalesOrder($variation['crmid'], 'Approved', 'Solde');
+			return $soldeRecordModel->getId();
+		}
+		elseif($variation && $soldeInactif){
+			//Le dossier de Solde n'est pas actif
+			//on duplique le dossier le plus récent (pour l'adresse qui est plus à jour) pour en créer le nouveau solde
+			if($soldeInactif['createdtime'] >= $variation['createdtime'] ){
+				$soldeRecordModel = $this->duplicateSalesOrder($soldeInactif['crmid'], 'Approved', 'Solde');
+			} else {
+				$soldeRecordModel = $this->duplicateSalesOrder($variation['crmid'], 'Approved', 'Solde');
+			}
+			return $soldeRecordModel->getId();
+		}
+		elseif($variation){
+			//Le dossier de Solde n'existe pas
+			//on duplique le dossier de variation pour en créer le nouveau solde
+			$soldeRecordModel = $this->duplicateSalesOrder($variation['crmid'], 'Approved', 'Solde');
+			return $soldeRecordModel->getId();
+		}
+		else {
+			die("SalesOrder::getSoldeActifId : qu'est ce qu'on fait là ?");
+		}
+	}
+	
+	/**
+	 * Retourne l'identifiant du solde précédent (de référence pour les quantités de produits)
+	 * @param $dossiers : infos de salesorder triés par date de création décroissante
+	 * @return : salesorderid
+	 */
+	private function getSoldeReferenceId($dossiers){
+		//dossiers
+		$soldeActif = false;
+		$variation = false;
+		$soldeInactif = false;
+		//recherche des dossiers par type et statut
+		foreach($dossiers as $dossier){
+			if($dossier['typedossier'] === 'Solde'){
+				if($dossier['sostatus'] === 'Cancelled'){
+					$soldeInactif = $dossier;
+				}
+				else
+					$soldeActif = $dossier;
+			}
+			elseif(!$variation){
+				//1er dossier de variation
+				$variation = $dossier;
+			}
+		}
+		//analyse du dossier de solde actif
+		if($soldeInactif){
+			return $soldeInactif['crmid'];
+		}
+		elseif(!$variation && $soldeActif){
+			return $soldeActif['crmid'];
+		}
+		elseif($variation && $soldeActif){
+			if($soldeActif['createdtime'] < $variation['createdtime'] ){
+				//Solde ancien à fermer
+				return $soldeActif['crmid'];
+			}
+			//Le dossier de Solde est plus récent que le dossier de variation et il n'y a pas de solde inactif !!!
+			return $soldeActif['crmid'];
+		}
+		elseif($variation){
+			//Le dossier de Solde n'existe pas
+			return false;
+		}
+		else {
+			die("SalesOrder::getSoldeReferenceId : qu'est ce qu'on fait là ?");
+		}
+	}
+	
+	/**
+	 * Retourne les identifiants des variations entre la référence et le solde
+	 * @param $dossiers : infos de salesorder triés par date de création décroissante
+	 * @return : salesorderid[]
+	 */
+	private function getVariationIds($dossiers){
+		//dossiers
+		$variations = array();
+		//recherche des dossiers par type et statut
+		foreach($dossiers as $dossier){
+			if($dossier['typedossier'] !== 'Solde'){
+				$variations[] = $dossier['crmid'];
+			}
+		}
+		return $variations;
+	}
+	
+	private function setSalesOrderStatus($salesOrderId, $soStatus){
+		global $adb;
+		$query = 'UPDATE vtiger_salesorder
+			JOIN vtiger_crmentity
+				ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid
+			SET vtiger_salesorder.sostatus = ?
+			, vtiger_crmentity.modifiedtime = NOW()
+			WHERE vtiger_crmentity.crmid = ?';
+		$result = $adb->pquery($query, array($soStatus, $salesOrderId));
+		if(!$result){
+			$adb->echoError('Erreur dans setSalesOrderStatus');
+			die();
+		}
+	}
+	
+	/**
+	 * Duplicate record
+	 * @return new record model
+	 */
+	private function duplicateSalesOrder($salesOrderId, $soStatus, $typeDossier){
+		$sourceRecordModel = Vtiger_Record_Model::getInstanceById($salesOrderId, 'SalesOrder');
+		$newRecordModel = Vtiger_Record_Model::getCleanInstance('SalesOrder');
+		foreach($sourceRecordModel->getModule()->getFields() as $fieldModel){
+			$newRecordModel->set($fieldModel->getName(), $sourceRecordModel->get($fieldModel->getName()));
+		}
+		$newRecordModel->set('sostatus', $soStatus);
+		$newRecordModel->set('typedossier', $typeDossier);
+		$newRecordModel->save();
+		
+		//Change la date de création, en ajoutant une minute pour s'assurer d'être en-tête de liste
+		global $adb;
+		$query = 'UPDATE vtiger_crmentity
+			SET createdtime = ?
+			WHERE crmid = ?';
+		$createdTime = new DateTime();
+		$createdTime->modify('+1 minutes');
+		$createdTime = $createdTime->format('Y-m-d H:i:00');
+		$params = array($createdTime, $newRecordModel->getId());
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			var_dump($query, $params);
+			$adb->echoError('Erreur dans duplicateSalesOrder');
+			die();
+		}
+		return $newRecordModel;
+	}
+	
+	/*******************************
+	 * /fin de GESTION DU DOSSIER DE SOLDE
+	 *******************************/
 	
 	
 	/* ED150928
