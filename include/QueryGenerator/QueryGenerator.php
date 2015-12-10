@@ -1147,7 +1147,6 @@ class QueryGenerator {
 		$baseTableIndex = $moduleTableIndexList[$baseTable];
 		$groupSql = $this->groupInfo;
 		$fieldSqlList = array();
-		
 		foreach ($this->conditionals as $index=>$conditionInfo) {
 			//echo '<br><br><br><br><br>'; var_dump($index, $conditionInfo);
 			
@@ -1495,9 +1494,9 @@ class QueryGenerator {
 				$sql[] = sprintf("IS NULL OR %s = ''", $this->getSQLColumn($field->getFieldName()));
 				continue;
 			}
-			if((strtolower(trim($value)) == 'null') ||
-					(trim($value) == '' && !$this->isStringType($fieldDataType)) &&
-							($operator == 'e' || $operator == 'n')) {
+			if((strtolower(trim($value)) == 'null')
+			|| (trim($value) == '' && !$this->isStringType($fieldDataType))
+			&& ($operator == 'e' || $operator == 'n')) {
 				if($operator == 'e'){
 					$sql[] = "IS NULL";
 					continue;
@@ -1548,11 +1547,11 @@ class QueryGenerator {
 				$value = $db->sql_escape_string($value);
 			}
 			if(trim($value) == '' && ($operator == 's' || $operator == 'ew' || $operator == 'c' || $operator == 'ct' || $operator == 'ca') //ED150619 ct
-					&& (	$this->isStringType($fieldDataType) ||
-						$fieldDataType == 'picklist' ||
-						$fieldDataType == 'multipicklist' ||
-						$fieldDataType == 'buttonset')) {
-				$sql[] = "LIKE ''";
+				&& ($this->isStringType($fieldDataType) ||
+					$fieldDataType == 'picklist' ||
+					$fieldDataType == 'multipicklist' ||
+					$fieldDataType == 'buttonset')) {
+				$sql[] = "LIKE '%'";
 				continue;
 			}
 
@@ -1826,7 +1825,7 @@ class QueryGenerator {
 			}
 			$this->endGroup();
 		} else {
-			if(isset($input['search_field']) && $input['search_field'] !="") {
+			if(isset($input['search_field']) && $input['search_field'] != "") {
 				$search_fields = $input['search_field'];
 				$search_texts = $input['search_text'];
 				$operators = $input['operator'];
@@ -1842,7 +1841,7 @@ class QueryGenerator {
 							$this->addConditionGlue($operators[$i]);
 							$startingGroup = true;
 						}
-						elseif(!($search_texts[$i] == '' && $operators[$i] == 'e')){
+						elseif(!($search_texts[$i] == '' && $operators[$i] == 'c')){
 							$this->addUserSearchConditionUnique($search_fields[$i], $search_texts[$i], $operators[$i], $startingGroup);
 							$startingGroup = false;
 						}

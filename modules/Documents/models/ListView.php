@@ -113,6 +113,25 @@ class Documents_ListView_Model extends Vtiger_ListView_Model {
 		if(!empty($folderValue)) {
 		    $queryGenerator->addCondition($folderKey,$folderValue,'e'); //ED141018 Ici bug vtiger_attachmentsfolderfolderid		    
 		}
+		
+		$sourceModule = $this->get('src_module');
+		if(!empty($sourceModule)){
+			switch($sourceModule){
+			case 'Contacts':
+				//ED150628 : related to view
+				$src_viewname = $this->get('src_viewname');
+				if(!empty($src_viewname)){
+					$queryGenerator = $this->get('query_generator');
+					$viewQuery = $this->getRecordsQueryFromRequest();
+					$viewQuery = 'SELECT vtiger_senotesrel.notesid
+						FROM vtiger_senotesrel
+						JOIN (' . $viewQuery . ') source_contacts
+							ON vtiger_senotesrel.crmid = source_contacts.contactid';
+					$queryGenerator->addUserSearchConditions(array('search_field' => 'id', 'search_text' => $viewQuery, 'operator' => 'vwi'));
+				}
+				break;
+			}
+		}
 
 		parent::setListViewSearchConditions($pagingModel);
 	}
