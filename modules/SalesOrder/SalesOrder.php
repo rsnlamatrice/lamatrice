@@ -330,7 +330,6 @@ class SalesOrder extends CRMEntity {
 		$params = array();
 		$sequence_no = 1;
 		while($row = $adb->getNextRow($result, false)){
-			var_dump($row);
 			if(count($params) === 0){
 				$query .= ' VALUES(';
 			} else {
