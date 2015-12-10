@@ -135,7 +135,7 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 			if($relatedModuleName === 'Contacts'){
 				
 				/* cf Documents.php get_contacts
-				 * getEntries a retournÈ des Contacts qui ne sont pas dans vtiger_senotesrel mais dont le Compte y est.
+				 * getEntries a retourné des Contacts qui ne sont pas dans vtiger_senotesrel mais dont le Compte y est.
 				 * On construit donc un mapping $relatedRecordModelsList[accountid|contactid] = contactid
 				 */
 				
@@ -150,17 +150,35 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 			else
 				$relatedRecordIdsList = array_combine(array_keys($relatedRecordModelsList), array_keys($relatedRecordModelsList));
 			
-			$query = "SELECT dateapplication,
-				data AS rel_data, $fieldName
-				FROM $tableName
-				WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
-				AND notesid = ?
-				ORDER BY dateapplication desc";
-			
+			if($relatedModuleName === 'Documents'){
+				//Documents related to Documents
+				$query = "SELECT dateapplication,
+					data AS rel_data, IF(notesid = ?, $fieldName, notesid) AS $fieldName
+					FROM $tableName
+					WHERE ($fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
+						AND notesid = ?)
+					OR
+						(notesid IN (". generateQuestionMarks($relatedRecordIdsList).")
+						AND $fieldName = ?)
+					ORDER BY dateapplication desc";
+				$params = array($notesId);
+				$params = array_merge($params, array_keys($relatedRecordIdsList));
+				array_push($params, $notesId);
+				$params = array_merge($params, array_keys($relatedRecordIdsList));
+				array_push($params, $notesId);
+			}
+			else {
+				$query = "SELECT dateapplication,
+					data AS rel_data, $fieldName
+					FROM $tableName
+					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
+					AND notesid = ?
+					ORDER BY dateapplication desc";
+				$params = array_keys($relatedRecordIdsList);
+				array_push($params, $notesId);
+			}
 			$fieldRels = self::get_related_fields();
 			
-			$params = array_keys($relatedRecordIdsList);
-			array_push($params, $notesId);
 			$result = $db->pquery($query, $params);
 			if(!$result)
 				$db->echoError();

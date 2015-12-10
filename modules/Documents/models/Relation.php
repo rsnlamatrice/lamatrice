@@ -31,28 +31,30 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 
 	public function deleteRelation($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList = FALSE){
 		$destinationModuleName = $this->getRelationModuleModel()->get('name');
-		/*if($destinationModuleName == "Campaigns")
-			return parent::deleteRelation($sourceRecordId, $relatedRecordId);*/
-		/*
-		$sourceModule = $this->getParentModuleModel();
-		$sourceModuleName = $sourceModule->get('name');
-		$destinationModuleFocus = CRMEntity::getInstance($destinationModuleName);*/
 		
 		$tableName = 'vtiger_senotesrel';
 		$fieldName = 'crmid';
 		$db = PearDatabase::getInstance();
 		$params = array();
 		$deleteQuery = "DELETE FROM $tableName
-			WHERE $fieldName = ?
-			AND notesid = ?"
-			. ($relatedRecordDateApplicationList === FALSE ? '' : " AND dateapplication = ?");
+			WHERE (($fieldName = ? AND notesid = ?)";
 		$params[] = $relatedRecordId;
 		$params[] = $sourceRecordId;
-		if($relatedRecordDateApplicationList !== FALSE )
+		if($destinationModuleName === 'Documents'){
+			$deleteQuery .= " OR ($fieldName = ? AND notesid = ?)";
+			$params[] = $sourceRecordId;
+			$params[] = $relatedRecordId;
+		}
+		$deleteQuery .= ")";
+		
+		if($relatedRecordDateApplicationList !== FALSE ){
+			$deleteQuery .= " AND dateapplication = ?";
 			$params[] = $relatedRecordDateApplicationList;
-		//var_dump($deleteQuery, $params);
-		if($db->pquery($deleteQuery, $params) === FALSE)
+		}
+		if($db->pquery($deleteQuery, $params) === FALSE){
+			$db->echoError();
 			return false;
+		}
 		//DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
 		return true;
 	}
@@ -63,23 +65,31 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 	/* Suppression d'une relation Critere4D ou Documents / Contact / Date */
 
 	public function deleteRelationMultiDates($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList = FALSE){
-		$db = PearDatabase::getInstance();
-			
+		$destinationModuleName = $this->getRelationModuleModel()->get('name');
+		
 		$tableName = 'vtiger_senotesrel';
 		$fieldName = 'crmid';
+		$db = PearDatabase::getInstance();
 		$params = array();
 		$deleteQuery = "DELETE FROM $tableName
-			WHERE $fieldName = ?
-			AND notesid = ?"
-			. ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?");
+			WHERE (($fieldName = ? AND notesid = ?)";
 		$params[] = $relatedRecordId;
 		$params[] = $sourceRecordId;
-		if($relatedRecordDateApplicationList !== FALSE )
+		if($destinationModuleName === 'Documents'){
+			$deleteQuery .= " OR ($fieldName = ? AND notesid = ?)";
+			$params[] = $sourceRecordId;
+			$params[] = $relatedRecordId;
+		}
+		$deleteQuery .= ")";
+		
+		if($relatedRecordDateApplicationList !== FALSE ){
+			$deleteQuery .= " AND dateapplication = ?";
 			$params[] = $relatedRecordDateApplicationList;
-			
-		//var_dump($deleteQuery, $params);
-		if($db->pquery($deleteQuery, $params) === FALSE)
+		}
+		if($db->pquery($deleteQuery, $params) === FALSE){
+			$db->echoError();
 			return false;
+		}
 		//DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
 		return true;
 	}
