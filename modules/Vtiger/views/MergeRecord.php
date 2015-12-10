@@ -23,7 +23,7 @@ class Vtiger_MergeRecord_View extends Vtiger_Popup_View {
 
 		$jsFileNames = array(
 			'modules.Vtiger.resources.MergeRecord', 
-			"modules.$moduleName.resources.MergeRecord", /* chargŽ gr‰ce ˆ #popUpClassName (cf .tpl) */
+			"modules.$moduleName.resources.MergeRecord", /* chargÃ© grÃ¢ce Ë† #popUpClassName (cf .tpl) */
 		);
 
 		$jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);

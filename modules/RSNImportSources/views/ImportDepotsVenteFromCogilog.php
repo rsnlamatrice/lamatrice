@@ -345,6 +345,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 					$record->set('currency_id', CURRENCY_ID);
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
+					$record->set('typedossier', 'Solde');
 						
 					//$db->setDebug(true);
 					$record->saveInBulkMode();
