@@ -36,21 +36,11 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			if($request->get('typedossier') === 'Avoir'
 			|| $request->get('typedossier') === 'Remboursement'){
 				//Inverse les quantités et montants
-				foreach($relatedProducts as $index => $relatedProduct){
-					foreach(array('qty', 'discount_amount', 'discountTotal', 'totalAfterDiscount', 'taxTotal', 'netPrice') as $fieldName)
-						$relatedProducts[$index][$fieldName.$index] = -1 * (float)$relatedProduct[$fieldName.$index];
-						
-					if($index == 1){
-						foreach(array('hdnSubTotal', 'discount_amount_final', 'discountTotal_final', 'tax_totalamount', 'shipping_handling_charge'
-							      , 'shtax_totalamount', 'adjustment', 'grandTotal', 'preTaxTotal', 'totalAfterDiscount') as $fieldName)
-							$relatedProducts[$index]['final_details'][$fieldName] = -1 * (float)$relatedProduct['final_details'][$fieldName];
-							
-						foreach(array('received', 'receivedcomments', 'receivedmoderegl') as $fieldName)
-							$relatedProducts[$index]['final_details'][$fieldName] = null;
-					}
+				$this->reverseAmountFields($relatedProducts, $recordModel);
+				if($relatedProducts[1]){
+					foreach(array('received', 'receivedcomments', 'receivedmoderegl') as $fieldName)
+						$relatedProducts[$index]['final_details'][$fieldName] = null;
 				}
-				foreach(array('received', 'hdnGrandTotal', 'balance') as $fieldName)
-					$recordModel->set($fieldName, -1 * $recordModel->get($fieldName));;
 					
 			}
 			else {
@@ -86,8 +76,14 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$taxes = $parentRecordModel->getProductTaxes();
 			$shippingTaxes = $parentRecordModel->getShippingTaxes();
 			$relatedProducts = $parentRecordModel->getProducts();
+			
 			$recordModel = Vtiger_Record_Model::getCleanInstance($moduleName);
 			$recordModel->setRecordFieldValues($parentRecordModel);
+			
+			if($request->get('salesorder_id')){
+				$this->reverseAmountFields($relatedProducts, $recordModel);
+			}
+			$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
 			
 		} else {  
 			
@@ -220,6 +216,12 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		}
 		
 		//ED151209
+		if(!$recordModel->get('account_id')
+		&& $recordModel->get('contact_id')){
+			$contactRecordModel = Vtiger_Record_Model::getInstanceById($recordModel->get('contact_id'), 'Contacts');
+			if($contactRecordModel->get('account_id'))
+				$recordModel->set('account_id', $contactRecordModel->get('account_id'));
+		}
 		if($recordModel->get('account_id')){
 			$account = Vtiger_Record_Model::getInstanceById( $recordModel->get('account_id'), 'Accounts');
 			$viewer->assign('ACCOUNTTYPE',$account->get('accounttype'));
@@ -276,4 +278,44 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		return $headerScriptInstances;
 	}
 
+	
+	//Inverse les quantité et montants
+	function reverseAmountFields(&$relatedProducts, &$recordModel){
+		
+		//foreach($relatedProducts as $index => $relatedProduct){
+		//	foreach(array('qty', 'discount_amount', 'discountTotal', 'totalAfterDiscount', 'taxTotal', 'netPrice') as $fieldName)
+		//		$relatedProducts[$index][$fieldName.$index] = -1 * (float)$relatedProduct[$fieldName.$index];
+		//		
+		//	if($index == 1){
+		//		foreach(array('hdnSubTotal', 'discount_amount_final', 'discountTotal_final', 'tax_totalamount', 'shipping_handling_charge'
+		//				  , 'shtax_totalamount', 'adjustment', 'grandTotal', 'preTaxTotal', 'totalAfterDiscount') as $fieldName)
+		//			$relatedProducts[$index]['final_details'][$fieldName] = -1 * (float)$relatedProduct['final_details'][$fieldName];
+		
+		$reverseFields = array('qty', 'taxTotal', 'netPrice', 'productTotal', 'discountTotal', 'totalAfterDiscount' );
+		foreach($relatedProducts as $nProduct => &$relatedProduct){
+			foreach($reverseFields as $reverseField)
+				if($relatedProduct[$reverseField.$nProduct])
+					$relatedProduct[$reverseField.$nProduct] = -1 * (float)$relatedProduct[$reverseField.$nProduct];
+			if($relatedProduct['taxes'])
+				foreach($relatedProduct['taxes'] as &$tax)
+					if($tax['amount'])
+						$tax['amount'] = -1 * (float)$tax['amount'];
+		}
+		if($relatedProducts[1] && $relatedProducts[1]['final_details']){
+			$reverseFields = array('hdnSubTotal', 'discount_amount_final', 'discountTotal_final', 'tax_totalamount', 'shipping_handling_charge'
+								   , 'shtax_totalamount', 'adjustment', 'grandTotal', 'preTaxTotal', 'totalAfterDiscount', 'balance' );
+			foreach($reverseFields as $reverseField)
+				if($relatedProducts[1]['final_details'][$reverseField])
+					$relatedProducts[1]['final_details'][$reverseField] = -1 * (float)$relatedProducts[1]['final_details'][$reverseField];
+			
+			if($relatedProducts[1]['final_details']['taxes'])
+				foreach($relatedProducts[1]['final_details']['taxes'] as &$tax)
+					if($tax['amount'])
+						$tax['amount'] *= -1;
+		}
+		
+		foreach(array('received', 'hdnGrandTotal', 'balance') as $fieldName){
+			$recordModel->set($fieldName, -1 * $recordModel->get($fieldName));
+		}
+	}
 }
