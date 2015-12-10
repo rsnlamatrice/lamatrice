@@ -11,7 +11,9 @@
 -->*}
 {strip}
 <input type="hidden" id="popUpClassName" value="Vtiger_MergeRecord_Js"/>
-<div style='background: white;'>
+<div id="popupPageContainer" class="popupBackgroundColor">
+<div id="popupContents" class="paddingLeftRight10px">
+	<input type="hidden" class="triggerEventName" value="{$smarty.request.triggerEventName}"/>
 	<div>
 		<br>
 		<div style='margin-left:10px'><h3>{vtranslate('LBL_MERGE_RECORDS_IN', $MODULE)} > {$MODULE}</h3></div><br>
@@ -21,7 +23,6 @@
 	<form class="form-horizontal contentsBackground" name="massMerge" method="post" action="index.php">
 		<input type="hidden" name=module value="{$MODULE}" />
 		<input type="hidden" name="action" value="ProcessDuplicates" />
-		<input type="hidden" name="records" value={Zend_Json::encode($RECORDS)} />
 
 	<div>
 		<table id="mergeRecords" class='table table-bordered table-condensed'>
@@ -32,6 +33,7 @@
 					</th>
 					{foreach item=RECORD from=$RECORDMODELS name=recordList}
 						<th class="record">
+							<input type="hidden" name="records[]" value="{$RECORD->getId()}"/>
 							<label>
 								<input {if $smarty.foreach.recordList.index eq 0}checked{/if} type=radio value="{$RECORD->getId()}" name=primaryRecord style='bottom:1px;position:relative;'/>
 								 &nbsp; #{$smarty.foreach.recordList.index+1}
@@ -126,5 +128,6 @@
 	</div>
 	</form>
 	<br>
+</div>
 </div>
 {/strip}

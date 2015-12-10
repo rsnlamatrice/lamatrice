@@ -1908,6 +1908,15 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				
 				var account_discount_type = response.data.discounttype;
 				thisInstance.setAccountDiscountType(account_discount_type);
+				
+				var account_data = response['account_data']
+				, account_accounttype = account_data ? account_data['accounttype'] : false
+				, $accounttype = container.find('.accounttype');
+				if (account_accounttype) {
+					$accounttype.html(account_accounttype).removeClass('hide');
+				} else {
+					$accounttype.html('').addClass('hide');
+				}
 			},
 			function(error, err){
 
@@ -2424,7 +2433,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 */
 	registerSaveEvent : function(container){
 		var thisInstance = this;
-		jQuery('button.btn-success', container).on('click', function(e, data){
+		jQuery('button.btn-success[type="submit"]', container).on('click', function(e, data){
 				var oneDeleted = false;
 				thisInstance.getLineItemContentsContainer().find('tr.'+thisInstance.rowClass).each(function(){
 						// isProductSelected() semble retourner l'inverse de ce qu'elle dit...

@@ -229,6 +229,9 @@
 							{if $FIELD_MODEL->set('disabled', true)}{/if}
 						{/if*}
 						{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS}
+						{if $FIELD_MODEL->get('name') eq 'contact_id'}
+							<span class="accounttype {if !$ACCOUNTTYPE}hide{/if}">{$ACCOUNTTYPE}</span>
+						{/if}
 					</td>
 				{/if}
 				{if $BLOCK_FIELDS|@count eq 1 and $FIELD_MODEL->get('uitype') neq "19" and $FIELD_MODEL->get('uitype') neq "20" and $FIELD_MODEL->get('uitype') neq "30" and $FIELD_MODEL->get('name') neq "recurringtype"}

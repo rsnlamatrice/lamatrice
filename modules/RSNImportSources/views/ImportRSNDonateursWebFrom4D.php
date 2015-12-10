@@ -249,7 +249,12 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 			$prenom = ucfirst( mb_strtolower($prenom) );
 		else
 			$prenom = ucfirst( $prenom );
-			
+		$paiementerror = $rsndonateursweb['donInformations'][23];
+		if(!$paiementerror)
+			$paiementerror = 0;
+		$amount = trim($rsndonateursweb['donInformations'][15]);
+		if(strpos($amount, ' '))
+			$amount = explode(' ', $amount)[0];
 		$rsndonateurswebHeader = array(
 			'externalid'		=> $rsndonateursweb['donInformations'][0],
 			'lastname'		=> mb_strtoupper($rsndonateursweb['donInformations'][2]),
@@ -268,9 +273,9 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 			'paiementid' 		=> $rsndonateursweb['donInformations'][17],
 			'abocode' 		=> $rsndonateursweb['donInformations'][18],
 			'dateaboend' 		=> $dateEndAbo,
-			'paiementerror' 	=> $rsndonateursweb['donInformations'][23],
+			'paiementerror' 	=> $paiementerror,
 			'modepaiement' 		=> $rsndonateursweb['donInformations'][25],
-			'amount' 		=> $rsndonateursweb['donInformations'][15],
+			'amount' 		=> $amount,
 			'recu' 			=> $rsndonateursweb['donInformations'][20],
 			'revue' 		=> $rsndonateursweb['donInformations'][21],
 			'clicksource' 		=> $rsndonateursweb['donInformations'][26],

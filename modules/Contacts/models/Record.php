@@ -448,7 +448,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	/*ED150312
-	 * Copy current address to a new ContactAdresses record
+	 * Copy current address to a new ContactAddresses record
 	 *
 	 * used by Contacts_Save_Action::process
 	 */

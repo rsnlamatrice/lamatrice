@@ -31,28 +31,30 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 
 	public function deleteRelation($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList = FALSE){
 		$destinationModuleName = $this->getRelationModuleModel()->get('name');
-		/*if($destinationModuleName == "Campaigns")
-			return parent::deleteRelation($sourceRecordId, $relatedRecordId);*/
-		/*
-		$sourceModule = $this->getParentModuleModel();
-		$sourceModuleName = $sourceModule->get('name');
-		$destinationModuleFocus = CRMEntity::getInstance($destinationModuleName);*/
 		
 		$tableName = 'vtiger_senotesrel';
 		$fieldName = 'crmid';
 		$db = PearDatabase::getInstance();
 		$params = array();
 		$deleteQuery = "DELETE FROM $tableName
-			WHERE $fieldName = ?
-			AND notesid = ?"
-			. ($relatedRecordDateApplicationList === FALSE ? '' : " AND dateapplication = ?");
+			WHERE (($fieldName = ? AND notesid = ?)";
 		$params[] = $relatedRecordId;
 		$params[] = $sourceRecordId;
-		if($relatedRecordDateApplicationList !== FALSE )
+		if($destinationModuleName === 'Documents'){
+			$deleteQuery .= " OR ($fieldName = ? AND notesid = ?)";
+			$params[] = $sourceRecordId;
+			$params[] = $relatedRecordId;
+		}
+		$deleteQuery .= ")";
+		
+		if($relatedRecordDateApplicationList !== FALSE ){
+			$deleteQuery .= " AND dateapplication = ?";
 			$params[] = $relatedRecordDateApplicationList;
-		//var_dump($deleteQuery, $params);
-		if($db->pquery($deleteQuery, $params) === FALSE)
+		}
+		if($db->pquery($deleteQuery, $params) === FALSE){
+			$db->echoError();
 			return false;
+		}
 		//DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
 		return true;
 	}
@@ -63,25 +65,92 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 	/* Suppression d'une relation Critere4D ou Documents / Contact / Date */
 
 	public function deleteRelationMultiDates($sourceRecordId, $relatedRecordId, $relatedRecordDateApplicationList = FALSE){
-		$db = PearDatabase::getInstance();
-			
+		$destinationModuleName = $this->getRelationModuleModel()->get('name');
+		
 		$tableName = 'vtiger_senotesrel';
 		$fieldName = 'crmid';
+		$db = PearDatabase::getInstance();
 		$params = array();
 		$deleteQuery = "DELETE FROM $tableName
-			WHERE $fieldName = ?
-			AND notesid = ?"
-			. ($relatedRecordDateApplicationList === FALSE ? '' : "AND dateapplication = ?");
+			WHERE (($fieldName = ? AND notesid = ?)";
 		$params[] = $relatedRecordId;
 		$params[] = $sourceRecordId;
-		if($relatedRecordDateApplicationList !== FALSE )
+		if($destinationModuleName === 'Documents'){
+			$deleteQuery .= " OR ($fieldName = ? AND notesid = ?)";
+			$params[] = $sourceRecordId;
+			$params[] = $relatedRecordId;
+		}
+		$deleteQuery .= ")";
+		
+		if($relatedRecordDateApplicationList !== FALSE ){
+			$deleteQuery .= " AND dateapplication = ?";
 			$params[] = $relatedRecordDateApplicationList;
-			
-		//var_dump($deleteQuery, $params);
-		if($db->pquery($deleteQuery, $params) === FALSE)
+		}
+		if($db->pquery($deleteQuery, $params) === FALSE){
+			$db->echoError();
 			return false;
+		}
 		//DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
 		return true;
 	}
 
+	
+	/** 
+	 * Function to update the data of relation
+	 * @param <Number> Document record id
+	 * @param <array> $values
+	 * 	$values = array(relatedRecordId => array(
+					'dateapplication' => date en table,
+					'value' => valeur))
+	 */
+	public function updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|data') {
+		//var_dump($sourceRecordId, $data, $fieldToUpdate);
+		if ($sourceRecordId && $data) {
+			
+			$relatedModuleName = $this->getRelationModuleModel()->getName();
+			if($relatedModuleName !== 'Documents')
+				return parent::updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|data');
+			
+			switch($fieldToUpdate){
+				case 'rel_data': $fieldToUpdate = 'data'; break;
+				default: break;
+			}
+			$fieldName = $modulesInfo[$relatedModuleName]['fieldName'];
+			$tableName = $modulesInfo[$relatedModuleName]['tableName'];
+			$sourceFieldNameInRelation = $modulesInfo[$relatedModuleName]['sourceFieldNameInRelation'];
+			if(!$sourceFieldNameInRelation){
+				$focus = CRMEntity::getInstance($this->getParentModuleModel()->getName());
+				$sourceFieldNameInRelation = $focus->table_index;
+			}
+			$keyDateFieldName = $modulesInfo[$relatedModuleName]['keyDateFieldName'];
+			
+			$db = PearDatabase::getInstance();
+
+			$params = array();
+			
+			foreach ($data as $relatedRecordId => $datum) {
+				$params = array();
+				$updateQuery = "UPDATE $tableName
+					SET $fieldToUpdate = ?
+					WHERE $fieldName = ?
+					AND $sourceFieldNameInRelation = ?"
+				;
+				$params[] = $datum['value'];
+				$params[] = $relatedRecordId;
+				$params[] = $sourceRecordId;
+				if($datum['dateapplication']){
+					$updateQuery .= "
+						AND dateapplication = ?
+					";
+					$params[] = $datum['dateapplication'];
+				}
+				//var_dump($updateQuery, $params);
+				if($db->pquery($updateQuery, $params) === FALSE){
+					$db->echoError();
+					return false;
+				}
+			}
+			return true;
+		}
+	}
 }

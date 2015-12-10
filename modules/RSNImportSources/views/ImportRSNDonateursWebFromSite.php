@@ -43,7 +43,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
 	 */
 	public function needValidatingStep(){
-		if(!$this->hasValidatingStep())
+		if(!$this->hasValidatingStep())//inheritance
 			return false;
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
@@ -746,6 +746,9 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 	 *  This method must be overload in the child class.
 	 */
 	function postPreImportData() {
+		
+		if(!$this->hasValidatingStep())//inheritance
+			return true;
 		
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');

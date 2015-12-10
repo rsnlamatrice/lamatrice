@@ -1617,7 +1617,7 @@ var_dump($params);*/
 				FROM vtiger_notes
 				inner join vtiger_senotesrel
 					ON vtiger_senotesrel.notesid = vtiger_notes.notesid
-					".($cur_tab_id == $rel_tab_id ? " OR vtiger_senotesrel.crmid = vtiger_notes.notesid" : "")."
+					".($cur_tab_id == $rel_tab_id ? " OR vtiger_senotesrel.crmid = vtiger_notes.notesid AND vtiger_senotesrel.notesid = " . $id : "")."
 				left join vtiger_attachmentsfolder on vtiger_attachmentsfolder.folderid = vtiger_notes.folderid
 				left join vtiger_notescf ON vtiger_notescf.notesid = vtiger_notes.notesid
 				inner join vtiger_crmentity
@@ -1625,13 +1625,14 @@ var_dump($params);*/
 					AND vtiger_crmentity.deleted=0
 				inner join vtiger_crmentity crm2
 					ON crm2.crmid=vtiger_senotesrel.crmid
-					".($cur_tab_id == $rel_tab_id ? " OR crm2.crmid = vtiger_senotesrel.notesid" : "")."
+					".($cur_tab_id == $rel_tab_id ? " OR crm2.crmid = vtiger_senotesrel.notesid AND vtiger_senotesrel.crmid = vtiger_notes.notesid" : "")."
 				LEFT JOIN vtiger_groups
 				ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 				left join vtiger_seattachmentsrel  on vtiger_seattachmentsrel.crmid =vtiger_notes.notesid
 				left join vtiger_attachments on vtiger_seattachmentsrel.attachmentsid = vtiger_attachments.attachmentsid
 				left join vtiger_users on vtiger_crmentity.smownerid= vtiger_users.id
-				where crm2.crmid=" . $id;
+				where crm2.crmid=" . $id
+		;
 
 		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
 
