@@ -514,3 +514,11 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
 .popover-content .ui-icon {
   display: inline-block;
 }
+
+/* popup */
+#searchableColumnsListContainer {
+  text-align: left;
+}
+#searchableColumnsListContainer .chzn-container .chzn-results li {
+  line-height: 100%;
+}

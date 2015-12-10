@@ -121,7 +121,7 @@ class Vtiger_MiniList_Model extends Vtiger_Widget_Model {
 			$targetModuleName = $this->getTargetModule();
 			$targetModuleFocus= CRMEntity::getInstance($targetModuleName);
 
-			$entries = $this->listviewController->getListViewRecords($targetModuleFocus,$targetModuleName,$result);
+			$entries = $this->listviewController->getListViewRecords($targetModuleFocus,$targetModuleName,$result, $this->get('view_context'));
 
 			$this->listviewRecords = array();
 			$index = 0;

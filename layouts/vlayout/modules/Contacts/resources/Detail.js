@@ -178,7 +178,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 			      var relatedController = new Vtiger_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			      break;
 			}*/
-			var relatedController = thisInstance.getRelatedListController();
+			var relatedController = thisInstance.getRelatedListController(e);
 			
 			relatedController.showSelectRelationPopup().then(function(data){
 				var emailEnabledModule = jQuery(data).find('[name="emailEnabledModules"]').val();

@@ -97,7 +97,7 @@ class Contacts_Popup_View extends Vtiger_Popup_View {
 			$viewer->assign('RELATED_PARENT_MODULE', $relatedParentModule);
 			$viewer->assign('RELATED_PARENT_ID', $relatedParentId);
 
-			$viewer->assign('SEARCH_KEY', $searchKey);
+			$viewer->assign('SEARCH_KEY', $searchKey ? $searchKey : 'lastname');
 			$viewer->assign('SEARCH_VALUE', $searchValue);
 			$viewer->assign('SEARCH_OPERATOR', $operator);
 
@@ -136,6 +136,8 @@ class Contacts_Popup_View extends Vtiger_Popup_View {
 			$viewer->assign('MULTI_SELECT', $multiSelectMode);
 			$viewer->assign('CURRENT_USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		} else {
+			if(!$request->get('search_key'))
+				$request->set('search_key', 'lastname');
 			return parent::initializeListViewContents($request, $viewer);
 		}
 	}

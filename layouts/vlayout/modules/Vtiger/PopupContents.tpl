@@ -33,9 +33,10 @@
 					<input type="checkbox"  class="selectAllInCurrentPage" />
 				</td>
 				{/if}
-				{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
+				{foreach item=LISTVIEW_HEADER key=LISTVIEW_HEADER_NAME from=$LISTVIEW_HEADERS}
 				<th class="{$WIDTHTYPE}">
-					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $ORDER_BY eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}
+					<a href="javascript:void(0);" class="listViewHeaderValues" data-nextsortorderval="{if $ORDER_BY eq $LISTVIEW_HEADER->get('column')}{$NEXT_SORT_ORDER}{else}ASC{/if}" data-columnname="{$LISTVIEW_HEADER->get('column')}">
+						{if $LISTVIEW_HEADER_NAME neq 'isgroup'}{vtranslate($LISTVIEW_HEADER->get('label'), $MODULE)}{/if}
 						{if $ORDER_BY eq $LISTVIEW_HEADER->get('column')}<img class="sortImage" src="{vimage_path( $SORT_IMAGE, $MODULE)}">{else}<img class="hide sortingImage" src="{vimage_path( 'downArrowSmall.png', $MODULE)}">{/if}</a>
 				</th>
 				{/foreach}

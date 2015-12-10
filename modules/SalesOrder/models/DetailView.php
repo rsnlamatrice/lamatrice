@@ -25,13 +25,15 @@ class SalesOrder_DetailView_Model extends Inventory_DetailView_Model {
 
 		$invoiceModuleModel = Vtiger_Module_Model::getInstance('Invoice');
 		if($currentUserModel->hasModuleActionPermission($invoiceModuleModel->getId(), 'EditView')) {
-			$basicActionLink = array(
-				'linktype' => 'DETAILVIEW',
-				'linklabel' => vtranslate('LBL_CREATE').' '.vtranslate($invoiceModuleModel->getSingularLabelKey(), 'Invoice'),
-				'linkurl' => $recordModel->getCreateInvoiceUrl(),
-				'linkicon' => ''
-			);
-			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
+			if($recordModel->get('typedossier') === 'Facture'){
+				$basicActionLink = array(
+					'linktype' => 'DETAILVIEW',
+					'linklabel' => vtranslate('LBL_CREATE').' '.vtranslate($invoiceModuleModel->getSingularLabelKey(), 'Invoice'),
+					'linkurl' => $recordModel->getCreateInvoiceUrl(),
+					'linkicon' => ''
+				);
+				$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
+			}
 		}
 		
 		return $linkModelList;

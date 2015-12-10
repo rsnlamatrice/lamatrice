@@ -123,23 +123,24 @@ class Contacts extends CRMEntity {
 	);
 
 	var $search_fields = Array(
+		'isgroup'=>Array('contactdetails'=>'isgroup'),
+		'N° Contact' => Array('contactdetails'=>'contact_no'),
 		'Last Name' => Array('contactdetails'=>'lastname'),
 		'First Name' => Array('contactdetails'=>'firstname'),
-		'N° Contact' => Array('contactdetails'=>'contact_no'),
-		//'Title' => Array('contactdetails'=>'title'),
-		'Account Name'=>Array('contactdetails'=>'account_id'),
-		//TODO en popup affiche le texte en plus de l'icône, et c'est pas beau 'Particulier ou Structure'=>Array('contactdetails'=>'isgroup'),
-		//'Assigned To'=>Array('crmentity'=>'smownerid'),
+		'Street2'=>Array('contactaddress'=>'mailingstreet2'),
+		'Zip code'=>Array('contactaddress'=>'mailingzip'),
+		'City'=>Array('contactaddress'=>'mailingcity'),
 	);
 
+	//Champs affichés dans les fenêtres popup
 	var $search_fields_name = Array(
+		'isgroup' => 'isgroup',
+		'N° Contact' => 'contact_no',
 		'Last Name' => 'lastname',
 		'First Name' => 'firstname',
-		'N° Contact' => 'contact_no',
-		//'Title' => 'title',
-		'Account Name'=>'account_id',
-		//TODO en popup affiche le texte en plus de l'icône, et c'est pas beau 'Particulier ou Structure'=>'isgroup',
-		//'Assigned To'=>'assigned_user_id',
+		'Street2'=>'mailingstreet2',
+		'Zip code'=>'mailingzip',
+		'City' => 'mailingcity',
 	);
 
 	// This is the list of vtiger_fields that are required

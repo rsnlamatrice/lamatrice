@@ -67,7 +67,7 @@ class Vtiger_DuplicatesListView_Model extends Vtiger_ListView_Model {
 		$listViewRecordModels = array();
 				
 		// ICI LE PBLM DE CHAMPS QUI DISPARAISSENT RATTRAPPABLE PLUS BAS dans $moduleModel->getRecordFromArray($record, $rawData);
-		$listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult); 
+		$listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult, $this->get('view_context')); 
 		$pagingModel->calculatePageRange($listViewEntries);
 
 		if($db->num_rows($listResult) > $pageLimit){

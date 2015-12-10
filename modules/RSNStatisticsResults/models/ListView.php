@@ -164,7 +164,7 @@ class RSNStatisticsResults_ListView_Model extends Vtiger_ListView_Model {
 		}
 		
 		$listViewRecordModels = array();
-		//ne fonctionne pas $listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult);
+		//ne fonctionne pas $listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus, $moduleName, $listResult, $this->get('view_context'));
 		$listViewEntries = array();
 		$rowCount = $db->num_rows($listResult);
 		for($i = 0; $i < $rowCount; $i++){
