@@ -121,15 +121,19 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 			if(count($entries[$date]) === 0)
 				unset($entries[$date]);
 		}
+		$totauxGlobaux = array('LAM'=>0.0,'COG'=>0.0,);
 		foreach($entries as $date => $comptes){
 			$totaux = array('LAM'=>0.0,'COG'=>0.0,);
 			foreach($comptes as $compte => $data){
 				$totaux['LAM'] += $data['LAM'];
 				$totaux['COG'] += $data['COG'];
 			}
+			$totauxGlobaux['LAM'] += $totaux['LAM'];
+			$totauxGlobaux['COG'] += $totaux['COG'];
 			$entries[$date] = array('TOTAUX' => $totaux) + $entries[$date];
 		}
-		
+		$label = 'Total '. $dateDebut->format('m Y');
+		$entries = array_merge(array($label => array('TOTAUX' => $totauxGlobaux)), $entries);
 		
 		$viewer->assign('COMPTES', $allComptes);
 		$viewer->assign('ENTRIES', $entries);
