@@ -38,6 +38,7 @@ class SalesOrder_Record_Model extends Inventory_Record_Model {
 			case 'typedossier'://type de dossier
 				$cancelledStatus = $this->get('sostatus') === 'Cancelled';//ne fonctionne pas pour les listview
 				return array(
+					'Inventaire' => array( 'label' => 'Inventaire', 'icon' => 'ui-icon ui-icon-locked ' . ($cancelledStatus ? 'red' : 'darkgreen') ),
 					'Solde' => array( 'label' => 'Solde', 'icon' => 'ui-icon ui-icon-flag ' . ($cancelledStatus ? 'red' : 'darkgreen') ),
 					'Variation' => array( 'label' => 'Variation', 'icon' => 'ui-icon ui-icon-transferthick-e-w ' . ($cancelledStatus ? 'red' : 'blue') ),
 					'Facture' => array( 'label' => 'Facture', 'icon' => 'ui-icon ui-icon-print ' . ($cancelledStatus ? 'red' : 'blue') ),

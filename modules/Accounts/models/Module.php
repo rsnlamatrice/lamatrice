@@ -9,6 +9,16 @@
  * ************************************************************************************/
 
 class Accounts_Module_Model extends Vtiger_Module_Model {
+
+	/**
+	 * Function to check whether the entity has an quick create menu
+	 * @return <Boolean> true/false
+	 * ED141024
+	 */
+	public function isQuickCreateMenuVisible() {
+		return false ;
+	}
+	
 	/**
 	 * Function to check whether the module is an entity type module or not
 	 * @return <Boolean> true/false
