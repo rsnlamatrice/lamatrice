@@ -48,8 +48,8 @@
 						</a></b></th>
 					</tr>
 					<tr {if $POINTEE}class="pointee"{/if}>
-						<td>{if $SOURCES['COG']}{money_format('%.2n', $SOURCES['COG'])}{/if}</td>
-						<td>{if $SOURCES['LAM']}{money_format('%.2n', $SOURCES['LAM'])}{/if}</td>
+						<td>{if $SOURCES['COG']}{money_format('%.2n', $SOURCES['COG'])} &euro;{/if}</td>
+						<td>{if $SOURCES['LAM']}{money_format('%.2n', $SOURCES['LAM'])} &euro;{/if}</td>
 					</tr>
 				{/foreach}
 				</table>

@@ -188,9 +188,9 @@ class Invoice_GestionVSComptaVTRows_View extends Invoice_GestionVSComptaENC_View
 	/* A noter "ligne"."id_cjourn" = 18 */
 	public function getCogilogRowsEntries($dateDebut, $dateFin, $compte){
 		if($compte)
-			$compte = "'$compte'";
+			$whereComptes = '"ligne"."compte" = \''.$compte.'\'';
 		else
-			$compte = $this->getComptesString();
+			$whereComptes = '( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )';
 		
 		$query = '
 		SELECT "ligne"."ladate" AS "date"
@@ -200,7 +200,7 @@ class Invoice_GestionVSComptaVTRows_View extends Invoice_GestionVSComptaENC_View
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
-		WHERE ( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )
+		WHERE '.$whereComptes.'
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18
