@@ -370,13 +370,11 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$piece = $invoice['invoice_no'];
 					$invoiceModeRegl = $invoice['receivedmoderegl'];
 					$invoiceCompteVente = self::getInvoiceCompteVenteSolde($invoice);
-					if($invoiceCompteVente[0] === '7' || $invoiceCompteVente[0] === '6')
-						$invoiceCodeAnal = self::getCodeAffaireCodeAnal($codeAffaire);
-					else	$invoiceCodeAnal = '';
+					$invoiceCodeAnal = self::getCodeAffaireCodeAnal($codeAffaire);
 					$invoiceJournal = self::getCodeAffaireJournal($codeAffaire, $invoiceModeRegl);
 					$invoiceAmount = self::formatAmountForCogilog($invoice['total']);
 					$invoiceReceived = self::formatAmountForCogilog($invoice['received']);
-					$basicSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
+					$basicSubject = $piece . ' ' . preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
 					$invoiceSubject = $basicSubject . ($codeAffaire ? ' - ' . $codeAffaire : '');
 					$date = self::formatDateForCogilog($invoice['invoicedate']);
 					if($invoiceReceived){
