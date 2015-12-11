@@ -160,7 +160,8 @@ class SalesOrder extends CRMEntity {
 		}
 		
 		//ED151210 gestion du solde
-		if($this->column_fields['typedossier'] !== 'Solde'){
+		if($this->column_fields['typedossier'] !== 'Solde'
+		&& $this->column_fields['typedossier'] !== 'Inventaire'){
 			$contactId = $this->column_fields["contact_id"];
 			$this->updateSaleOrderSolde($contactId);
 		}
@@ -184,6 +185,24 @@ class SalesOrder extends CRMEntity {
 		$log->debug("Entering refreshQtyInDemand(".print_r($productIdsList, true).") method ...");
 		if(!$recordId)
 			$recordId = $this->id;
+			
+		/* SalesOrder de réference (dernier Solde ou dernier Inventaire)*/
+		$sql = "SELECT salesorderid
+			FROM (
+				SELECT vtiger_salesorder.salesorderid, vtiger_salesorder.contactid, MAX(createdtime) AS createdtime
+				FROM vtiger_salesorder
+				JOIN vtiger_crmentity
+					ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_salesorder.typedossier IN ('Solde', 'Inventaire')
+				AND vtiger_salesorder.sostatus IN (" . generateQuestionMarks($this->statusForQtyInDemand) . ")
+				GROUP BY vtiger_salesorder.salesorderid, vtiger_salesorder.contactid
+			) ref_salesorder
+			JOIN vtiger_crmentity
+					ON ref_salesorder.salesorderid = vtiger_crmentity.crmid
+					AND ref_salesorder.createdtime = vtiger_crmentity.createdtime
+		";	
+		
 		/* Mise à jour de vtiger_products.qtyindemand pour tous les produits en question, même sans salesorder liée (d'où le LEFT) */
 		$sql = "UPDATE vtiger_products
 			LEFT JOIN (
@@ -199,9 +218,9 @@ class SalesOrder extends CRMEntity {
 					ON vtiger_salesorder.salesorderid = vtiger_inventoryproductrel.id
 				JOIN vtiger_crmentity
 					ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid
+				JOIN (".$sql.") ref_salesorder
+					ON vtiger_salesorder.salesorderid = ref_salesorder.salesorderid
 				WHERE vtiger_crmentity.deleted = 0
-				AND vtiger_salesorder.typedossier = 'Solde'
-				AND vtiger_salesorder.sostatus IN (" . generateQuestionMarks($this->statusForQtyInDemand) . ")
 			".($productIdsList
 				? " AND vtiger_inventoryproductrel.productid IN (" . generateQuestionMarks($productIdsList) . ")"
 				: ""
@@ -242,9 +261,10 @@ class SalesOrder extends CRMEntity {
 	
 	/**
 	 * Création du dossier de solde (typeddosier === 'Solde')
+	 * Un dossier d'inventaire est une référence non modifiable par cette procédure
 	 * 1) le dossier de solde est celui qui a la date de création la plus récente
-	 * 2) Si le saleorder le plus récent n'est pas de typedossier 'Solde', il est créé.
-	 * 3) Le dossier de solde reprend le précédent dossier de solde et ajoute les produits des dossiers de type 'Variation' suivants
+	 * 2) Si le saleorder le plus récent n'est pas de typedossier 'Solde' ou 'Inventaire', il est créé.
+	 * 3) Le dossier de solde reprend le précédent dossier de solde ou d'inventaire et ajoute les produits des dossiers de type 'Variation' ou 'Facture' suivants
 	 */
 	function updateSaleOrderSolde($contactId){
 		$dossiers = $this->getContactDepotsVentesInfos($contactId);
@@ -378,7 +398,7 @@ class SalesOrder extends CRMEntity {
 	
 	/**
 	 * Retourne les infos des derniers dossiers par ordre décroissant de date de création,
-	 * et pas au-delà du dernier dossier de Solde clôt.
+	 * et pas au-delà du dernier dossier de Solde clôt ou du premier Inventaire.
 	 * On peut avoir
 	 * 	1) Solde actif
 	 * 	2) Variation
@@ -406,13 +426,18 @@ class SalesOrder extends CRMEntity {
 		$soldeInactif = false;
 		while ($row = $adb->getNextRow($result, false)){
 			$row['createdtime'] = new DateTime($row['createdtime']);
-			if($row['typedossier'] === 'Solde'){
+			if($row['typedossier'] === 'Inventaire'
+			|| $row['typedossier'] === 'Solde'){
 				if($row['sostatus'] === 'Cancelled'){
 					if(count($dossiers) === 0){
 						//le dossier est annulé mais c'est le premier (peut être le seul)
 						$soldeInactif = $row;
 						continue;
 					}
+					$dossiers[] = $row;
+					break;
+				}
+				if($row['typedossier'] === 'Inventaire'){
 					$dossiers[] = $row;
 					break;
 				}
@@ -442,12 +467,16 @@ class SalesOrder extends CRMEntity {
 		$soldeInactif = false;
 		//recherche des dossiers par type et statut
 		foreach($dossiers as $dossier){
-			if($dossier['typedossier'] === 'Solde'){
+			if($dossier['typedossier'] === 'Inventaire'
+			|| $dossier['typedossier'] === 'Solde'){
 				if($dossier['sostatus'] === 'Cancelled'){
 					$soldeInactif = $dossier;
 				}
-				else
+				else{
 					$soldeActif = $dossier;
+					if($dossier['typedossier'] === 'Inventaire')
+						break;
+				}
 			}
 			elseif(!$variation){
 				//1er dossier de variation
@@ -506,12 +535,16 @@ class SalesOrder extends CRMEntity {
 		$soldeInactif = false;
 		//recherche des dossiers par type et statut
 		foreach($dossiers as $dossier){
-			if($dossier['typedossier'] === 'Solde'){
+			if($dossier['typedossier'] === 'Inventaire'
+			|| $dossier['typedossier'] === 'Solde'){
 				if($dossier['sostatus'] === 'Cancelled'){
 					$soldeInactif = $dossier;
 				}
-				else
+				else{
 					$soldeActif = $dossier;
+				}
+				if($dossier['typedossier'] === 'Inventaire')
+					break;
 			}
 			elseif(!$variation){
 				//1er dossier de variation
@@ -538,7 +571,8 @@ class SalesOrder extends CRMEntity {
 			return false;
 		}
 		else {
-			die("SalesOrder::getSoldeReferenceId : qu'est ce qu'on fait là ?");
+			//Le dossier de Solde n'existe pas, uniquement inventaire
+			return false;
 		}
 	}
 	
@@ -552,7 +586,8 @@ class SalesOrder extends CRMEntity {
 		$variations = array();
 		//recherche des dossiers par type et statut
 		foreach($dossiers as $dossier){
-			if($dossier['typedossier'] !== 'Solde'){
+			if($dossier['typedossier'] !== 'Inventaire'
+			&& $dossier['typedossier'] !== 'Solde'){
 				$variations[] = $dossier['crmid'];
 			}
 		}
