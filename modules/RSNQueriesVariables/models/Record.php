@@ -88,39 +88,13 @@ class RSNQueriesVariables_Record_Model extends Vtiger_Record_Model {
 		}
 		return null;
 	}
-
 	
-	// /* ED150117 */
-	// public function getSQLOperation(&$value, &$params = FALSE){
-	// 	//var_dump($this);
-	// 	switch(html_entity_decode ( $this->get('rsnvariableoperator') )){
-	// 		case '<' :
-	// 		case 'inférieur' :
-	// 			return ' < ?';
-	// 		case '>' :
-	// 		case 'supérieur' :
-	// 			return ' > ?';
-	// 		case '<=' :
-	// 		case 'inférieur ou égal' :
-	// 			return ' <= ?';
-	// 		case '>=' :
-	// 		case 'supérieur ou égal' :
-	// 			return ' >= ?';
-	// 		case '=' :
-	// 		case 'égal' :
-	// 			return ' = ?';
-	// 		case '<>' :
-	// 		case '!=' :
-	// 		case 'différent' :
-	// 			return ' != ?';
-	// 		case 'contient' :
-	// 			return ' LIKE CONCAT(\'%\', ?, \'%\')';
-	// 		case 'ne contient pas' :
-	// 			return ' NOT LIKE CONCAT(\'%\', ?, \'%\')';
-	// 		default:
-	// 			//var_dump(html_entity_decode ( $this->get('rsnvariableoperator') ));
-	// 			return ' # operateur "' . $this->get('rsnvariableoperator') . '" inconnu #';
-	// 			return $this->get('RSNVariableOperator');
-	// 	}
-	// }
+	/**
+	 * Function to check whether the entity has an quick create menu
+	 * @return <Boolean> true/false
+	 * ED141024
+	 */
+	public function isQuickCreateMenuVisible() {
+		return false ;
+	}
 }
