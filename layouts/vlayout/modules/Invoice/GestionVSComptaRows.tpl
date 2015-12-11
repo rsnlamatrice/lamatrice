@@ -15,7 +15,7 @@
 		{/foreach}</select>
 	</form>
 	<table class="table table-bordered equalSplit detailview-table">
-		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecritures dans La Matrice et Cogilog
+		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecritures dans la Gestion et la Compta
 			&nbsp;{if $SELECTED_COMPTE}pour le compte {$SELECTED_COMPTE}{/if}
 			&nbsp;{if $SELECTED_DATE}à la date du {$SELECTED_DATE}{/if}
 		<br><label>&nbsp;<input type="checkbox" style="display: inline;"

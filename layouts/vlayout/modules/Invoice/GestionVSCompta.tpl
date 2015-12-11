@@ -20,7 +20,7 @@
 		{/foreach}</select>
 	</form>
 	<table class="table table-bordered equalSplit detailview-table">
-		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecart entre La Matrice et Cogilog <small>(les écarts négatifs indiquent qu'il y a plus dans La Matrice que dans Cogilog)</small>
+		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecart entre la Gestion et la Compta <small>(les écarts négatifs indiquent qu'il y a plus dans La Matrice que dans Cogilog)</small>
 		
 		<br><label>&nbsp;<input type="checkbox" style="display: inline;"
 				  onchange="var $table = $(this).parents('table:first'), show = this.checked;
@@ -30,7 +30,7 @@
 		</caption>
 		<tr>
 			<td class="date"></td>
-			<td><table class="compte"><tr><td>Cogilog</td><td>La Matrice</td></tr></table></td>
+			<td><table class="compte"><tr><td>Compta</td><td>Gestion</td></tr></table></td>
 		</tr>
 		{foreach item=COMPTES key=DATE from=$ENTRIES}
 			{assign var=POINTEE value=abs($COMPTES['TOTAUX']['COG'] - $COMPTES['TOTAUX']['LAM']) < 0.01}

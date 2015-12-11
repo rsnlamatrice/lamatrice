@@ -15,12 +15,18 @@ table.compte {
 	border: 2px solid black;
 }
 table.compte th {
-	background-color: #5555AA !important;        
+	padding-left: 20px;
+	background-color: #5555AA !important;
+	border-top: 2px solid white;
+}
+table.compte tr:first-of-type th {
 	text-align: center;
-	border-top: 2px solid black;
 }
 table.compte th a {
 	color: white !important;
+}
+table.compte tr.pointee th a {
+	color: #AAF8AC !important;
 }
 
 table.compte td {
