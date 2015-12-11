@@ -20,19 +20,40 @@
 		{/foreach}</select>
 	</form>
 	<table class="table table-bordered equalSplit detailview-table">
-		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecart entre Lamatrice et Cogilog <small>(les écarts négatifs indiquent qu'il y a plus dans La Matrice que dans Cogilog)</small></caption>
+		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecart entre La Matrice et Cogilog <small>(les écarts négatifs indiquent qu'il y a plus dans La Matrice que dans Cogilog)</small>
+		
+		<br><label>&nbsp;<input type="checkbox" style="display: inline;"
+				  onchange="var $table = $(this).parents('table:first'), show = this.checked;
+				  if(show) $table.addClass('show-pointee');
+				  else $table.removeClass('show-pointee');
+				  ">Afficher les lignes équivalentes</label>
+		</caption>
+		<tr>
+			<td class="date"></td>
+			<td><table class="compte"><tr><td>Cogilog</td><td>La Matrice</td></tr></table></td>
+		</tr>
 		{foreach item=COMPTES key=DATE from=$ENTRIES}
-			<tr>
-				<td><b><a href="{$ROWS_URL}&date={$DATE}">{$DATE}</a></b></td>
+			{assign var=POINTEE value=abs($COMPTES['TOTAUX']['COG'] - $COMPTES['TOTAUX']['LAM']) < 0.01}
+			<tr {if $POINTEE}class="pointee"{/if}>
+				<td class="date"><b><a href="{$ROWS_URL}&date={$DATE}">{$DATE}</a></b></td>
+				<td><table class="compte">
 				{foreach item=SOURCES key=COMPTE from=$COMPTES}
-					<td><b><a href="{$ROWS_URL}&date={$DATE}&compte={$COMPTE}">{$COMPTE}</a></b>
-						<br>
-						{if count($SOURCES) eq 2}<span style="color:blue">écart&nbsp;:&nbsp;{money_format('%.2n', $SOURCES['LAM'] - $SOURCES['COG'])}</span>
-						{elseif $SOURCES['COG']}<span style="color:red">Cogilog&nbsp;:&nbsp;{money_format('%.2n', $SOURCES['COG'])}</span>
-						{elseif $SOURCES['LAM']}<span style="color:green">La Matrice&nbsp;:&nbsp;{money_format('%.2n', $SOURCES['LAM'])}</span>
+					{assign var=POINTEE value=count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) < 0.01}
+					<tr {if $POINTEE}class="pointee"{/if}>
+						<th colspan="2"><b><a href="{$ROWS_URL}&date={$DATE}&compte={$COMPTE}">
+						<b>{if $COMPTE neq "TOTAUX"}compte {/if}{$COMPTE}</b>
+						{if count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) >= 0.01 }
+							&nbsp;: {money_format('%.2n', $SOURCES['COG'] - $SOURCES['LAM'])} &euro;
 						{/if}
-					</td>
+						</a></b></th>
+					</tr>
+					<tr {if $POINTEE}class="pointee"{/if}>
+						<td>{if $SOURCES['COG']}{money_format('%.2n', $SOURCES['COG'])}{/if}</td>
+						<td>{if $SOURCES['LAM']}{money_format('%.2n', $SOURCES['LAM'])}{/if}</td>
+					</tr>
 				{/foreach}
+				</table>
+				</td>
 			</tr>
 		{/foreach}
 	</table>
