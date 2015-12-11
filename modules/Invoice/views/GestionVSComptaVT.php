@@ -81,8 +81,8 @@ class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
 					if($montant != 0)
 						$entries[$date][$compte] = array('COG' => $montant);
 				}
-				elseif(abs($entries[$date][$compte]['LAM'] - $montant) < $ecartMontants)
-					unset($entries[$date][$compte]);
+				//elseif(abs($entries[$date][$compte]['LAM'] - $montant) < $ecartMontants)
+				//	unset($entries[$date][$compte]);
 				else
 					$entries[$date][$compte]['COG'] = $montant;
 			}

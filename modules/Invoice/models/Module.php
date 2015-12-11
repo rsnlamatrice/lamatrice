@@ -25,12 +25,12 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaVT',
 				'linkicon' => '',
 			),
-			array(
-				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Gestion vs Compta ENC',
-				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaENC',
-				'linkicon' => '',
-			),
+			//array(
+			//	'linktype' => 'SIDEBARLINK',
+			//	'linklabel' => 'Gestion vs Compta ENC',
+			//	'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaENC',
+			//	'linkicon' => '',
+			//),
 			array(
 				'linktype' => 'SIDEBARLINK',
 				'linklabel' => 'Gestion vs Compta',
