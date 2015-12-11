@@ -21,7 +21,7 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 		$quickLinks = array(
 			array(
 				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Contr&ocirc;le du C.A.',
+				'linklabel' => 'Contr&ocirc;le par mode de r&egrave;glnt.',
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaCA',
 				'linkicon' => '',
 			),
@@ -33,7 +33,7 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 			//),
 			array(
 				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Contr&ocirc;le des produits',
+				'linklabel' => 'Contr&ocirc;le des ventes',
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSCompta',
 				'linkicon' => '',
 			),
