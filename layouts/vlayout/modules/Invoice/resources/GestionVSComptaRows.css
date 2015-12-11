@@ -11,10 +11,18 @@ table.show-pointee tr.pointee {
 	background-color: #AAF8AC;
 }
 
+table.compte {
+	border: 2px solid black;
+}
 table.compte th {
+	background-color: #5555AA !important;        
 	text-align: center;
 	border-top: 2px solid black;
 }
+table.compte th a {
+	color: white !important;
+}
+
 table.compte td {
 	padding-right: 8px;
 	padding-left: 8px;
