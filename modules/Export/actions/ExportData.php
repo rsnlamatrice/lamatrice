@@ -62,7 +62,7 @@ class Export_ExportData_Action extends Vtiger_ExportData_Action {
 		}
 	}
 
-	function sanitizeValues($arr, $exportStructure){
+	function sanitizeValues($arr, $exportStructure = false){
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 		$roleid = $currentUser->get('roleid');
 		if(empty ($this->fieldArray)){
@@ -81,7 +81,7 @@ class Export_ExportData_Action extends Vtiger_ExportData_Action {
 		$moduleName = $this->moduleInstance->getName();
 		foreach($arr as $label=>&$value){
 			$value = decode_html($value);
-			$fieldName = is_string($exportStructure[$label]) ? $exportStructure[$label] : "";
+			$fieldName = $exportStructure && is_string($exportStructure[$label]) ? $exportStructure[$label] : "";
 
 			if(isset($this->fieldArray[$fieldName])){
 				$fieldInfo = $this->fieldArray[$fieldName];

@@ -127,6 +127,7 @@ class RSNPanelsVariables_Record_Model extends Vtiger_Record_Model {
 				return " NOT LIKE '%$value%'";
 			case 'commence par' :
 			case 's' :
+			case '^' :
 				return " LIKE '$value%'";
 			case 'finit par' :
 			case 'ew' :

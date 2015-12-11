@@ -589,7 +589,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		for($i = 0; $i < count($search_fields) && $i < count($search_texts); $i++){
 			$fieldName = $search_fields[$i];
 			if(isset($listViewHeaders[$fieldName])
-			&&  !($search_texts[$i] == '' && $operators[$i] == 'e')){
+			&&  !($search_texts[$i] == '' && ($operators[$i] === 'c' || $operators[$i] === 's'))){
 				//var_dump($fieldName, $search_texts[$i]);
 				$listViewHeaders[$fieldName]->set('fieldvalue', $search_texts[$i]);
 				$listViewHeaders[$fieldName]->set('filterOperator', $operators[$i]);

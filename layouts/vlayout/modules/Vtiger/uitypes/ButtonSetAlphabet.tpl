@@ -11,7 +11,7 @@
 {assign var=FIELD_MODEL value=$ALPHABET_FIELD}
 {assign var=SELECTED_VALUE value=$FIELD_MODEL->get('fieldvalue')}
 		
-<div class="alphabetSorting noprint" {*ED150903*}data-searchkey="{$FIELD_MODEL->getFieldName()}">
+<div class="alphabetSorting noprint" {*ED150903*}data-searchkey="{$FIELD_MODEL->getFieldName()}" data-searchoperator="e">
 <table width="100%" class="table-bordered" style="border: 1px solid #ddd;table-layout: fixed;">
 	<tbody>
 		<tr>

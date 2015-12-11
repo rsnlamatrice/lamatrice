@@ -2375,7 +2375,7 @@ jQuery.Class("Vtiger_List_Js",{
 				return;
 			var searchType = $input.attr('data-field-type')
 			, searchKey = $input.attr('data-field-name')
-			, operator = /^\s*([\=\>\<\!\%]+|\%\-|[\!N]?IN\s|[\!N]?PARMIS\s)\s*(.*)$/i.exec(searchValue);
+			, operator = /^\s*([\^\=\>\<\!\%]+|\%\-|[\!N]?IN\s|[\!N]?PARMIS\s)\s*(.*)$/i.exec(searchValue);
 			if (operator === null) {
 				operator = $input.attr('data-operator');
 			}
@@ -2390,6 +2390,9 @@ jQuery.Class("Vtiger_List_Js",{
 			if (operator != null) {
 				//see include\QueryGenerator\QueryGenerator.php : line 1051
 				switch(operator){
+				 case '^' :
+					operator = 's';
+					break;
 				 case '=' :
 					operator = 'e';
 					break;
