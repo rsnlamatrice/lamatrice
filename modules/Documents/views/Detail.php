@@ -10,27 +10,27 @@
 
 class Documents_Detail_View extends Vtiger_Detail_View {
 	
-	function preProcess(Vtiger_Request $request) {
-		$viewer = $this->getViewer($request);
-		$viewer->assign('NO_SUMMARY', true);
-		parent::preProcess($request);
-	}
-	
-	/**
-	 * Function to get Ajax is enabled or not
-	 * @param Vtiger_Record_Model record model
-	 * @return <boolean> true/false
-	 */
-	public function isAjaxEnabled($recordModel) {
-		return false;
-	}
-
-	/**
-	 * Function shows basic detail for the record
-	 * @param <type> $request
-	 */
-	function showModuleBasicView($request) {
-		return $this->showModuleDetailView($request);
-	}
-
+	//function preProcess(Vtiger_Request $request) {
+	//	$viewer = $this->getViewer($request);
+	//	$viewer->assign('NO_SUMMARY', true);
+	//	parent::preProcess($request);
+	//}
+	//
+	///**
+	// * Function to get Ajax is enabled or not
+	// * @param Vtiger_Record_Model record model
+	// * @return <boolean> true/false
+	// */
+	//public function isAjaxEnabled($recordModel) {
+	//	return false;
+	//}
+	//
+	///**
+	// * Function shows basic detail for the record
+	// * @param <type> $request
+	// */
+	//function showModuleBasicView($request) {
+	//	return $this->showModuleDetailView($request);
+	//}
+	//
 }

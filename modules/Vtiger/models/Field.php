@@ -1360,7 +1360,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		switch($filterOperator){
 			case 'e': return '=';
 			case 'n': return '<>';
-			case 's': return '';
+			case 's': return '^';
 			case 'ew': return '%-';
 			case 'c': return '%';
 			case 'k': return '<>%'; //"NOT LIKE %$value%"

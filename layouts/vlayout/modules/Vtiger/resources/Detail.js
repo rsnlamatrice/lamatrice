@@ -896,7 +896,7 @@ jQuery.Class("Vtiger_Detail_Js",{
 			});
 			
 			//var relatedController = new Contacts_RelatedList_Js(this.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
-			var relatedController = thisInstance.getRelatedListController(e);
+			var relatedController = thisInstance.getRelatedListController();
 			relatedController.registerEventsMultiDates();
 		}
 	},

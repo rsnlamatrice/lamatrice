@@ -88,6 +88,8 @@ class RSNQueriesVariables_Record_Model extends Vtiger_Record_Model {
 		}
 		return null;
 	}
+<<<<<<< HEAD
+=======
 	
 	/**
 	 * Function to check whether the entity has an quick create menu
@@ -97,4 +99,5 @@ class RSNQueriesVariables_Record_Model extends Vtiger_Record_Model {
 	public function isQuickCreateMenuVisible() {
 		return false ;
 	}
+>>>>>>> 94fa78818f6d8653c64b228ceec1fdfa502e0197
 }

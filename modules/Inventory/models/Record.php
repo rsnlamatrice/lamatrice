@@ -89,48 +89,49 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		//Updating Tax details
 		$taxtype = $relatedProducts[1]['final_details']['taxtype'];
 
-		for ($i=1;$i<=$productsCount; $i++) {
-			$product = $relatedProducts[$i];
-			$productId = $product['hdnProductId'.$i];
-			$totalAfterDiscount = $product['totalAfterDiscount'.$i];
-
-			if ($taxtype == 'individual') {
-				$taxDetails = getTaxDetailsForProduct($productId, 'all');
-				$taxCount = count($taxDetails);
-				$taxTotal = '0.00';
-
-				for($j=0; $j<$taxCount; $j++) {
-					$taxValue = $product['taxes'][$j]['percentage'];
-
-					$taxAmount = $totalAfterDiscount * $taxValue / 100;
-					$taxTotal = $taxTotal + $taxAmount;
-
-					$relatedProducts[$i]['taxes'][$j]['amount'] = number_format($taxAmount, $no_of_decimal_places,'.','');
-					$relatedProducts[$i]['taxTotal'.$i] = number_format($taxTotal, $no_of_decimal_places,'.','');
+		if($productsCount){
+			for ($i=1;$i<=$productsCount; $i++) {
+				$product = $relatedProducts[$i];
+				$productId = $product['hdnProductId'.$i];
+				$totalAfterDiscount = $product['totalAfterDiscount'.$i];
+	
+				if ($taxtype == 'individual') {
+					$taxDetails = getTaxDetailsForProduct($productId, 'all');
+					$taxCount = count($taxDetails);
+					$taxTotal = '0.00';
+	
+					for($j=0; $j<$taxCount; $j++) {
+						$taxValue = $product['taxes'][$j]['percentage'];
+	
+						$taxAmount = $totalAfterDiscount * $taxValue / 100;
+						$taxTotal = $taxTotal + $taxAmount;
+	
+						$relatedProducts[$i]['taxes'][$j]['amount'] = number_format($taxAmount, $no_of_decimal_places,'.','');
+						$relatedProducts[$i]['taxTotal'.$i] = number_format($taxTotal, $no_of_decimal_places,'.','');
+					}
+					$netPrice = $totalAfterDiscount + $taxTotal;
+					$relatedProducts[$i]['netPrice'.$i] = number_format($netPrice, $no_of_decimal_places,'.','');
 				}
-				$netPrice = $totalAfterDiscount + $taxTotal;
-				$relatedProducts[$i]['netPrice'.$i] = number_format($netPrice, $no_of_decimal_places,'.','');
+				
+				// ED151019 2 decimals
+				foreach(array('productTotal', 'discountTotal', 'totalAfterDiscount', 'taxTotal') as $fieldName)
+					if(!array_key_exists($fieldName.$i, $relatedProducts[$i]))
+						var_dump("Le champ $fieldName.$i n'existe pas");
+					else
+						$relatedProducts[$i][$fieldName.$i] = number_format($relatedProducts[$i][$fieldName.$i], $no_of_decimal_places,'.','');
 			}
 			
+			//ED150129
+			$relatedProducts[1]['final_details']['balance'] = number_format($this->get('balance'), $no_of_decimal_places,'.','');
+			
+		
 			// ED151019 2 decimals
-			foreach(array('productTotal', 'discountTotal', 'totalAfterDiscount', 'taxTotal') as $fieldName)
-				if(!array_key_exists($fieldName.$i, $relatedProducts[$i]))
-					var_dump("Le champ $fieldName.$i n'existe pas");
+			foreach(array('hdnSubTotal', 'discountTotal_final', 'shipping_handling_charge', 'adjustment', 'grandTotal') as $fieldName)
+				if(!array_key_exists($fieldName, $relatedProducts[1]['final_details']))
+					var_dump("Le champ $fieldName n'existe pas");
 				else
-					$relatedProducts[$i][$fieldName.$i] = number_format($relatedProducts[$i][$fieldName.$i], $no_of_decimal_places,'.','');
+					$relatedProducts[1]['final_details'][$fieldName] = number_format($relatedProducts[1]['final_details'][$fieldName], $no_of_decimal_places,'.','');
 		}
-		
-		//ED150129
-		$relatedProducts[1]['final_details']['balance'] = number_format($this->get('balance'), $no_of_decimal_places,'.','');
-		
-	
-		// ED151019 2 decimals
-		foreach(array('hdnSubTotal', 'discountTotal_final', 'shipping_handling_charge', 'adjustment', 'grandTotal') as $fieldName)
-			if(!array_key_exists($fieldName, $relatedProducts[1]['final_details']))
-				var_dump("Le champ $fieldName n'existe pas");
-			else
-				$relatedProducts[1]['final_details'][$fieldName] = number_format($relatedProducts[1]['final_details'][$fieldName], $no_of_decimal_places,'.','');
-		
 		return $relatedProducts;
 	}
 

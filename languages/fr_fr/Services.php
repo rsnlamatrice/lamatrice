@@ -32,5 +32,6 @@ $languageStrings = array(
 	'Price'                        => 'Prix'                        , 
 	'Usage Unit'                   => 'Unité de vente'             , 
 	'Tax Class'                    => 'Type de taxe'                , 
-	'Website'                      => 'Site WEB'                    , 
+	'Website'                      => 'Site WEB'                    ,
+	'LBL_HELP_USAGEUNIT' => 'Unité de vente. Sélectionnez "unique" pour verrouiller la quantité à 1 dans la saisie de facture',
 );

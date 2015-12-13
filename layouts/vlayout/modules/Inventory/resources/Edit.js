@@ -355,6 +355,32 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.quantityChangeActions(lineItemRow);
 	},
 
+	/*ED151213
+	 * Une unité de vente définie sur "unique" impose la quantité à 1
+	 */
+	setLineItemUsageUnit : function(lineItemRow, usageUnit){
+		var $qty = lineItemRow.find('.qty');
+		$qty.attr('data-usageunit', usageUnit);
+		
+		if (usageUnit === 'unique') {
+			$qty
+				.attr('disabled', 'disabled');
+			
+			var $price = this.getListPriceValue(lineItemRow);
+			//Si la quantité est à zéro et le prix est défini, laisse la possibilité d'utiliser le +1
+			if ( ! ($qty.val() == 0 && $price != 0)) {
+				$qty.nextAll('.qty_helper_plus,.qty_helper_minus')
+					.addClass('hide')
+				;
+			}
+		} else {
+			$qty
+				.removeAttr('disabled')
+				.nextAll('.qty_helper_plus,.qty_helper_minus')//qty_helper + et -
+					.removeClass('hide');
+		}
+	},
+
 	/**
 	 * Function which will set the discount total value for line item
 	 * @params : lineItemRow - row which represents the line item
@@ -713,8 +739,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		for(var id in responseData){
 			var recordId = id;
 			var recordData = responseData[id];
-			var selectedName = recordData.name;
+			var productcode = recordData.productcode
+			, selectedName = productcode + ' - ' + recordData.name;
 			var unitPrice = recordData.listprice;
+			var usageUnit = recordData.usageunit;
 			var taxes = recordData.taxes;
 			//ED151016
 			if (app.getModuleName() === 'PurchaseOrder'
@@ -735,7 +763,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var description = recordData.description;
 			jQuery('input.selectedModuleId',parentRow).val(recordId);
 			jQuery('input.lineItemType',parentRow).val(referenceModule);
-			lineItemNameElment.val(selectedName);
+			lineItemNameElment
+				.val(selectedName)
+				.attr('title', selectedName);
 			lineItemNameElment.attr('disabled', 'disabled');
 			jQuery('input.listPrice',parentRow).val(unitPrice);
 			jQuery('textarea.lineItemCommentBox',parentRow).val(description);
@@ -747,6 +777,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			    parentRow.find('.productTaxTotal').addClass('hide')
 			}
 			this.setLineItemDiscountPercentage(parentRow, discountpc);
+			this.setLineItemUsageUnit(parentRow, usageUnit);
 		}
 		if(referenceModule == 'Products'){
 			this.loadSubProducts(parentRow);
@@ -2067,7 +2098,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var elem = jQuery(e.currentTarget);
 			var parentElem = elem.closest('td');
 			thisInstance.clearLineItemDetails(parentElem);
-			parentElem.find('input.productName').removeAttr('disabled').val('');
+			parentElem.find('input.productName')
+				.removeAttr('disabled')
+				.removeAttr('title')
+				.val('');
 			e.preventDefault();
 		});
 	},

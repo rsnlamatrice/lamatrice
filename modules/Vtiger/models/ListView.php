@@ -174,10 +174,11 @@ class Vtiger_ListView_Model extends Vtiger_Base_Model {
 			$fieldName = $search_fields[$i];
 			if(is_string($fieldName)
 			&& isset($listViewHeaders[$fieldName])
-			&&  !($search_texts[$i] == '' && $operators[$i] == 'e')){
+			&&  !($search_texts[$i] == '' && ($operators[$i] === 'c' || $operators[$i] === 's'))){
 				$listViewHeaders[$fieldName]->set('fieldvalue', $search_texts[$i]);
-				if(!$search_inputs)//sinon double l'opérateur
+				if(!$search_inputs[$i] || $search_inputs[$i] == $search_texts[$i]){//sinon double l'opérateur
 					$listViewHeaders[$fieldName]->set('filterOperator', $operators[$i]);
+				}
 			}
 		}
 		return $listViewHeaders;

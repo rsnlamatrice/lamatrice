@@ -17,10 +17,9 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 		$sourceRecord = $request->get('sourceRecord');
 		$sourceModule = $request->get('sourceModule');
 
-		if(!empty($record)  && $request->get('isDuplicate') == true) {
+		if(!empty($record) && $request->get('isDuplicate') == true) {
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
 			
-		
 			//ED150630
 			if($recordModel->get('sent2compta'))
 				$recordModel->set('sent2compta', null);
@@ -82,6 +81,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			
 			if($request->get('salesorder_id')){
 				$this->reverseAmountFields($relatedProducts, $recordModel);
+				$recordModel->set('invoicestatus', 'Created');
 			}
 			$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
 			
