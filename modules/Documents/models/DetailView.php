@@ -117,6 +117,20 @@ class Documents_DetailView_Model extends Vtiger_DetailView_Model {
 			);
 		}
 
+		$documentsInstance = Vtiger_Module_Model::getInstance('Documents');
+		if($userPrivilegesModel->hasModuleActionPermission($documentsInstance->getId(), 'DetailView')) {
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'Documents',
+					'linkName'	=> $documentsInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule='.$documentsInstance->getName().'&mode=showRelatedRecords&page=1&limit=10',
+					'action'	=> array('Select'),
+					'actionlabel'	=> array('Sélectionner'),
+					'actionURL' =>	$documentsInstance->getListViewUrl()
+			);
+		}
+
 		$invoicesInstance = Vtiger_Module_Model::getInstance('Invoice');
 		if($userPrivilegesModel->hasModuleActionPermission($invoicesInstance->getId(), 'DetailView')) {
 			$relatedField = 'notesid';
