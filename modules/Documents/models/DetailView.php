@@ -88,20 +88,18 @@ class Documents_DetailView_Model extends Vtiger_DetailView_Model {
 					'actionURL' =>	$productsInstance->getListViewUrl()
 			);
 		}
-
-		$invoicesInstance = Vtiger_Module_Model::getInstance('Invoice');
-		if($userPrivilegesModel->hasModuleActionPermission($invoicesInstance->getId(), 'DetailView')) {
-			$relatedField = 'notesid';
+			
+		$campaignsInstance = Vtiger_Module_Model::getInstance('Campaigns');
+		if($userPrivilegesModel->hasModuleActionPermission($campaignsInstance->getId(), 'DetailView')) {
 			$widgets[] = array(
 					'linktype' => 'DETAILVIEWWIDGET',
-					'linklabel' => 'Invoice',
-					'linkName'	=> $invoicesInstance->getName(),
+					'linklabel' => 'Campaigns',
+					'linkName'	=> $campaignsInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
-							'&relatedModule=Invoice&mode=showRelatedRecords&page=1&limit=10',
-					'action'	=> array('Add'),
-					'actionlabel'	=> array('Créer'),
-					'actionURL' =>	$invoicesInstance->getCreateRecordUrl() . '&sourceModule='.$this->getModuleName().'&sourceRecord='.$this->getRecord()->getId()
-						. '&relationOperation=true&' . $relatedField .'='.$this->getRecord()->getId(),
+							'&relatedModule='.$campaignsInstance->getName().'&mode=showRelatedRecords&page=1&limit=10',
+					'action'	=> array('Select'),
+					'actionlabel'	=> array('Sélectionner'),
+					'actionURL' =>	$campaignsInstance->getListViewUrl()
 			);
 		}
 			
@@ -116,6 +114,22 @@ class Documents_DetailView_Model extends Vtiger_DetailView_Model {
 					'action'	=> array('Select'),
 					'actionlabel'	=> array('Sélectionner'),
 					'actionURL' =>	$servicesInstance->getListViewUrl()
+			);
+		}
+
+		$invoicesInstance = Vtiger_Module_Model::getInstance('Invoice');
+		if($userPrivilegesModel->hasModuleActionPermission($invoicesInstance->getId(), 'DetailView')) {
+			$relatedField = 'notesid';
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'Invoice',
+					'linkName'	=> $invoicesInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule=Invoice&mode=showRelatedRecords&page=1&limit=10',
+					'action'	=> array('Add'),
+					'actionlabel'	=> array('Créer'),
+					'actionURL' =>	$invoicesInstance->getCreateRecordUrl() . '&sourceModule='.$this->getModuleName().'&sourceRecord='.$this->getRecord()->getId()
+						. '&relationOperation=true&' . $relatedField .'='.$this->getRecord()->getId(),
 			);
 		}
 			
