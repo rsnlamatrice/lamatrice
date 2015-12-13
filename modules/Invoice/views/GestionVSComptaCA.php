@@ -10,7 +10,7 @@
 
 include_once('modules/RSN/models/DBCogilog.php');
  
-class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
+class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 
 
 	public function process(Vtiger_Request $request) {
@@ -40,8 +40,8 @@ class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
 		$viewer->assign('SELECTED_DATE', $dateDebut);
 		
 		$viewer->assign('DATES', $dates);
-		$viewer->assign('FORM_VIEW', 'GestionVSComptaVT');
-		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaVTRows');
+		$viewer->assign('FORM_VIEW', 'GestionVSComptaCA');
+		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaCARows');
 	}
 	
 	public function initComptesEntries(Vtiger_Request $request) {
@@ -81,8 +81,8 @@ class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
 					if($montant != 0)
 						$entries[$date][$compte] = array('COG' => $montant);
 				}
-				elseif(abs($entries[$date][$compte]['LAM'] - $montant) < $ecartMontants)
-					unset($entries[$date][$compte]);
+				//elseif(abs($entries[$date][$compte]['LAM'] - $montant) < $ecartMontants)
+				//	unset($entries[$date][$compte]);
 				else
 					$entries[$date][$compte]['COG'] = $montant;
 			}
@@ -100,15 +100,25 @@ class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
 			if(count($entries[$date]) === 0)
 				unset($entries[$date]);
 		}
+		$totauxGlobaux = array('TOTAUX' => array('LAM'=>0.0,'COG'=>0.0,));
 		foreach($entries as $date => $comptes){
 			$totaux = array('LAM'=>0.0,'COG'=>0.0,);
 			foreach($comptes as $compte => $data){
 				$totaux['LAM'] += $data['LAM'];
 				$totaux['COG'] += $data['COG'];
+				if(!$totauxGlobaux[$compte])
+					$totauxGlobaux[$compte] = array('LAM'=>0.0,'COG'=>0.0,);
+				$totauxGlobaux[$compte]['LAM'] += $data['LAM'];
+				$totauxGlobaux[$compte]['COG'] += $data['COG'];
 			}
+			$totauxGlobaux['TOTAUX']['LAM'] += $totaux['LAM'];
+			$totauxGlobaux['TOTAUX']['COG'] += $totaux['COG'];
+			
 			$entries[$date] = array('TOTAUX' => $totaux) + $entries[$date];
 		}
 		
+		$label = 'Totaux du mois de '. $dateDebut->format('M Y');
+		$entries = array_merge(array($label => $totauxGlobaux), $entries);
 		
 		$viewer->assign('COMPTES', $allComptes);
 		$viewer->assign('ENTRIES', $entries);
@@ -181,6 +191,7 @@ class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
 	
 	/* A noter "ligne"."id_cjourn" = 18 */
 	public function getCogilogComptesEntries($dateDebut, $dateFin){
+		$whereComptes = '( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )';
 		
 		$query = '
 		SELECT "ligne"."ladate" AS "Date"
@@ -189,7 +200,7 @@ class Invoice_GestionVSComptaVT_View extends Invoice_GestionVSCompta_View {
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
-		WHERE ( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )
+		WHERE '.$whereComptes.'
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
 		AND "ligne"."id_cjourn" = 18

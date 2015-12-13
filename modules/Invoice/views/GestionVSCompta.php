@@ -102,8 +102,8 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 					if($montant != 0)
 						$entries[$date][$compte] = array('COG' => $montant);
 				}
-				elseif(abs($entries[$date][$compte]['LAM'] - $montant) < $ecartMontants)
-					unset($entries[$date][$compte]);
+				//elseif(abs($entries[$date][$compte]['LAM'] - $montant) < $ecartMontants)
+				//	unset($entries[$date][$compte]);
 				else
 					$entries[$date][$compte]['COG'] = $montant;
 			}
@@ -121,15 +121,24 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 			if(count($entries[$date]) === 0)
 				unset($entries[$date]);
 		}
+		$totauxGlobaux = array('TOTAUX' => array('LAM'=>0.0,'COG'=>0.0,));
 		foreach($entries as $date => $comptes){
 			$totaux = array('LAM'=>0.0,'COG'=>0.0,);
 			foreach($comptes as $compte => $data){
 				$totaux['LAM'] += $data['LAM'];
 				$totaux['COG'] += $data['COG'];
+				if(!$totauxGlobaux[$compte])
+					$totauxGlobaux[$compte] = array('LAM'=>0.0,'COG'=>0.0,);
+				$totauxGlobaux[$compte]['LAM'] += $data['LAM'];
+				$totauxGlobaux[$compte]['COG'] += $data['COG'];
 			}
+			$totauxGlobaux['TOTAUX']['LAM'] += $totaux['LAM'];
+			$totauxGlobaux['TOTAUX']['COG'] += $totaux['COG'];
 			$entries[$date] = array('TOTAUX' => $totaux) + $entries[$date];
 		}
 		
+		$label = 'Totaux du mois de '. $dateDebut->format('M Y');
+		$entries = array_merge(array($label => $totauxGlobaux), $entries);
 		
 		$viewer->assign('COMPTES', $allComptes);
 		$viewer->assign('ENTRIES', $entries);

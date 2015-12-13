@@ -1,8 +1,42 @@
 
+.detailViewInfo {
+	margin-left: 18px;
+}
+
 tr.pointee {
 	display: none;
 }
 table.show-pointee tr.pointee {
 	display: table-row;
-	background-color: #88D68A;
+	background-color: #AAF8AC;
+}
+
+table.compte {
+	border: 2px solid black;
+}
+table.compte th {
+	padding-left: 20px;
+	background-color: #5555AA !important;
+	border-top: 2px solid white;
+}
+table.compte tr:first-of-type th {
+	text-align: center;
+}
+table.compte th a {
+	color: white !important;
+}
+table.compte tr.pointee th a {
+	color: #AAF8AC !important;
+}
+
+table.compte td {
+	padding-right: 8px;
+	padding-left: 8px;
+	width: 8em;
+}
+table.compte td:first-of-type {
+	text-align: right;
+}
+th.date, td.date {
+	width: 7%;
 }

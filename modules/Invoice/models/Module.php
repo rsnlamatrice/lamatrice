@@ -21,19 +21,19 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 		$quickLinks = array(
 			array(
 				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Gestion vs Compta VT',
-				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaVT',
+				'linklabel' => 'Contr&ocirc;le par mode de r&egrave;glnt.',
+				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaCA',
 				'linkicon' => '',
 			),
+			//array(
+			//	'linktype' => 'SIDEBARLINK',
+			//	'linklabel' => 'Gestion vs Compta ENC',
+			//	'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaENC',
+			//	'linkicon' => '',
+			//),
 			array(
 				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Gestion vs Compta ENC',
-				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaENC',
-				'linkicon' => '',
-			),
-			array(
-				'linktype' => 'SIDEBARLINK',
-				'linklabel' => 'Gestion vs Compta',
+				'linklabel' => 'Contr&ocirc;le des ventes',
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSCompta',
 				'linkicon' => '',
 			),

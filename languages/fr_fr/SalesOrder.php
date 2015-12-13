@@ -60,4 +60,5 @@ $languageStrings = array(
         
 	'socomment' => 'Commentaire',
 	'LBL_RECEIVED' => 'Reçu',
+	'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
 );
