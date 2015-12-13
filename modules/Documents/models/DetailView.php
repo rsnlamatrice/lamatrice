@@ -57,4 +57,74 @@ class Documents_DetailView_Model extends Vtiger_DetailView_Model {
 		return $linkModelList;
 	}
 
+	/**
+	 * Function to get the detail view widgets
+	 * @return <Array> - List of widgets , where each widget is an Vtiger_Link_Model
+	 *
+	 * Ajout des blocks Widgets
+	 * La table _Links ne semble pas tre utilise pour initialiser le tableau
+	 * nécessite l'existence des fichiers Vtiger/%RelatedModule%SummaryWidgetContents.tpl (tout attach)
+	 */
+	public function getWidgets() {
+		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+		$widgetLinks = parent::getWidgets();
+		
+		foreach($widgetLinks as $index => &$widgetLink)
+			if($widgetLink->get('linklabel') === 'LBL_UPDATES'){
+				unset($widgetLinks[$index]);
+				$widgetUpdatesLink = $widgetLink;
+			}
+			
+		$productsInstance = Vtiger_Module_Model::getInstance('Products');
+		if($userPrivilegesModel->hasModuleActionPermission($productsInstance->getId(), 'DetailView')) {
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'Products',
+					'linkName'	=> $productsInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule='.$productsInstance->getName().'&mode=showRelatedRecords&page=1&limit=20',
+					'action'	=> array('Select'),
+					'actionlabel'	=> array('Sélectionner'),
+					'actionURL' =>	$productsInstance->getListViewUrl()
+			);
+		}
+
+		$invoicesInstance = Vtiger_Module_Model::getInstance('Invoice');
+		if($userPrivilegesModel->hasModuleActionPermission($invoicesInstance->getId(), 'DetailView')) {
+			$relatedField = 'notesid';
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'Invoice',
+					'linkName'	=> $invoicesInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule=Invoice&mode=showRelatedRecords&page=1&limit=10',
+					'action'	=> array('Add'),
+					'actionlabel'	=> array('Créer'),
+					'actionURL' =>	$invoicesInstance->getCreateRecordUrl() . '&sourceModule='.$this->getModuleName().'&sourceRecord='.$this->getRecord()->getId()
+						. '&relationOperation=true&' . $relatedField .'='.$this->getRecord()->getId(),
+			);
+		}
+			
+		$servicesInstance = Vtiger_Module_Model::getInstance('Services');
+		if($userPrivilegesModel->hasModuleActionPermission($servicesInstance->getId(), 'DetailView')) {
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'Services',
+					'linkName'	=> $servicesInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule='.$servicesInstance->getName().'&mode=showRelatedRecords&page=1&limit=10',
+					'action'	=> array('Select'),
+					'actionlabel'	=> array('Sélectionner'),
+					'actionURL' =>	$servicesInstance->getListViewUrl()
+			);
+		}
+			
+		foreach ($widgets as $widgetDetails) {
+			$widgetLinks[] = Vtiger_Link_Model::getInstanceFromValues($widgetDetails);
+		}
+		if($widgetUpdatesLink)
+			$widgetLinks[] = $widgetUpdatesLink;
+			
+		return $widgetLinks;
+	}
 }

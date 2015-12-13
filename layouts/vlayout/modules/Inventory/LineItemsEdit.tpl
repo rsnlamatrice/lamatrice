@@ -38,8 +38,11 @@
 			</div>
 		{/if}
 		{if $RECORD->get('typedossier') === 'Avoir'
-		 || $RECORD->get('typedossier') === 'Remboursement'}
+		|| $RECORD->get('typedossier') === 'Remboursement'}
 		    </th><th><b style="border: 1px solid red; padding: 1px 2px;">Ceci est un {vtranslate($RECORD->get('typedossier'), $MODULE)}</b>
+		{elseif $MODULE === 'SalesOrder'
+		&& $RECORD->get('typedossier') === 'Facture'}
+		    </th><th>En facture de dépôt-vente, <br>les quantités doivent être saisies en négatif
 		{/if}				
 	    </th>
             <td colspan="1" class="chznDropDown">

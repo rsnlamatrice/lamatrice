@@ -43,4 +43,16 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 		}
 		return $links;
 	}
+	
+	/**
+	 * Function to delete a given record model of the current module
+	 * @param Vtiger_Record_Model $recordModel
+	 */
+	public function deleteRecord(Vtiger_Record_Model $recordModel) {
+		if($recordModel->get('invoicestatus') === 'Compta'
+		|| $recordModel->get('invoicestatus') === 'Validated')
+			return false;
+		return parent::deleteRecord($recordModel);
+	}
+
 }

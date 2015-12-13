@@ -26,6 +26,23 @@ class Inventory_RelationListView_Model extends Vtiger_RelationListView_Model {
 					'linkurl' => $this->getCreateTaskRecordUrl(),
 					'linkicon' => '',
 			);
+		}elseif($relatedModel->get('label') == 'SalesOrder'){
+			$addLinkList = array(
+				array(
+					'linktype' => 'LISTVIEWBASIC',
+					'linklabel' => vtranslate('LBL_ADD')." ".vtranslate($relatedModel->get('label')),
+					'linkurl' => $this->getCreateViewUrl(),
+					'linkicon' => '',
+				)
+			);
+			$addLinkList = array(
+				array(
+					'linktype' => 'LISTVIEWBASIC',
+					'linklabel' => 'Ajouter un mouvement',
+					'linkurl' => $this->getCreateViewUrl() & "&typedossier=Variation",
+					'linkicon' => '',
+				)
+			);
 		}else{
 			$addLinkList = array(
 				array(

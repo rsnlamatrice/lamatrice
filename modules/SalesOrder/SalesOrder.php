@@ -264,7 +264,7 @@ class SalesOrder extends CRMEntity {
 	 * Un dossier d'inventaire est une référence non modifiable par cette procédure
 	 * 1) le dossier de solde est celui qui a la date de création la plus récente
 	 * 2) Si le saleorder le plus récent n'est pas de typedossier 'Solde' ou 'Inventaire', il est créé.
-	 * 3) Le dossier de solde reprend le précédent dossier de solde ou d'inventaire et ajoute les produits des dossiers de type 'Variation' ou 'Facture' suivants
+	 * 3) Le dossier de solde reprend le précédent dossier de solde ou d'inventaire et ajoute les produits des dossiers de type 'Commande' ou 'Facture' suivants
 	 */
 	function updateSaleOrderSolde($contactId){
 		$dossiers = $this->getContactDepotsVentesInfos($contactId);
@@ -649,7 +649,10 @@ class SalesOrder extends CRMEntity {
 	/* ED150928
 	 */
 	function trash($module, $id) {
+		$sourceRecordModel = Vtiger_Record_Model::getInstanceById($id, $module);
+		$contactId =$sourceRecordModel->get("contact_id");
 		parent::trash($module, $id);
+		$this->updateSaleOrderSolde($contactId);
 		$this->refreshQtyInDemand(false, $id);
 	}
 	

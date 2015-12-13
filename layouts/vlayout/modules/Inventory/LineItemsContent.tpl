@@ -51,7 +51,10 @@
 		<input type="hidden" name="hidtax_row_no{$row_no}" id="hidtax_row_no{$row_no}" value="{$tax_row_no}"/>
 		<!-- Product Re-Ordering Feature Code Addition ends -->
 		<div>
-			<input type="text" id="{$productName}" name="{$productName}" value="{if $data.$hdnProductId}{$data.$productCode} - {$data.$productName}{/if}" class="productName {if $row_no neq 0} autoComplete {/if}" placeholder="{vtranslate('LBL_TYPE_SEARCH',$MODULE)}" data-validation-engine="validate[required]" {if !empty($data.$productName)} disabled="disabled" {/if}/>
+			<input type="text" id="{$productName}" name="{$productName}" value="{if $data.$hdnProductId}{$data.$productCode} - {$data.$productName}{/if}"
+				    title="{if $data.$hdnProductId}{$data.$productCode} - {$data.$productName}{/if}"
+					class="productName {if $row_no neq 0} autoComplete {/if}" placeholder="{vtranslate('LBL_TYPE_SEARCH',$MODULE)}" data-validation-engine="validate[required]"
+					{if !empty($data.$productName)} disabled="disabled" {/if}/>
 			<input type="hidden" id="{$hdnProductId}" name="{$hdnProductId}" value="{$data.$hdnProductId}" class="selectedModuleId"/>
 			<input type="hidden" id="lineItemType{$row_no}" name="lineItemType{$row_no}" value="{$entityType}" class="lineItemType"/>
 			{if $row_no eq 0}

@@ -141,7 +141,6 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 	 * nécessite l'existence des fichiers Vtiger/%RelatedModule%SummaryWidgetContents.tpl (tout attach)
 	 */
 	public function getWidgets() {
-		
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$widgetLinks = parent::getWidgets();
 		

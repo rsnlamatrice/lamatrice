@@ -40,7 +40,7 @@ class SalesOrder_Record_Model extends Inventory_Record_Model {
 				return array(
 					'Inventaire' => array( 'label' => 'Inventaire', 'icon' => 'ui-icon ui-icon-pin-s ' . ($cancelledStatus ? 'red' : 'darkgreen') ),
 					'Solde' => array( 'label' => 'Solde', 'icon' => 'ui-icon ui-icon-flag ' . ($cancelledStatus ? 'red' : 'darkgreen') ),
-					'Variation' => array( 'label' => 'Variation', 'icon' => 'ui-icon ui-icon-transferthick-e-w ' . ($cancelledStatus ? 'red' : 'blue') ),
+					'Commande' => array( 'label' => 'Commande', 'icon' => 'ui-icon ui-icon-transferthick-e-w ' . ($cancelledStatus ? 'red' : 'blue') ),
 					'Facture' => array( 'label' => 'Facture', 'icon' => 'ui-icon ui-icon-print ' . ($cancelledStatus ? 'red' : 'blue') ),
 				);
 				break;

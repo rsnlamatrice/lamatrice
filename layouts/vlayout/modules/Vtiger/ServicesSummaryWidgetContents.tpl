@@ -15,20 +15,20 @@
 			<ul class="unstyled">
 				<li>
 					<div class="row-fluid">
+						<span class="span2 textOverflowEllipsis">
+							{$RELATED_RECORD->getDisplayValue('servicecategory')}
+						</span>
 						<span class="span6 textOverflowEllipsis">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
-								{$RELATED_RECORD->getDisplayValue('productname')}
+								{$RELATED_RECORD->getDisplayValue('servicename')}
 							</a>
 						</span>
-						<span class="span2">
-							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
-								<span class="pull-right">{$RELATED_RECORD->getDisplayValue('productcode')}</span>
-							</a>
-						</span>
-						<span class="span2">
-							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
-								<span class="pull-right">{$RELATED_RECORD->getDisplayValue('unit_price')}</span>
-							</a>
+						<span class="span2 textOverflowEllipsis">
+							<span class="pull-right">
+								<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
+									{$RELATED_RECORD->getDisplayValue('productcode')}
+								</a>
+							</span>
 						</span>
 					</div>
 				</li>
@@ -36,7 +36,7 @@
 		</div>
 	{/foreach}
 	{assign var=NUMBER_OF_RECORDS value=count($RELATED_RECORDS)}
-	{if $NUMBER_OF_RECORDS eq 5}
+	{if $NUMBER_OF_RECORDS eq 10}
 		<div class="row-fluid">
 			<div class="pull-right">
 				<a class="moreRecentProducts cursorPointer">{vtranslate('LBL_MORE',$MODULE_NAME)}</a>

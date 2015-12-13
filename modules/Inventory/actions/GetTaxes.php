@@ -39,13 +39,16 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				$purchasePrice = $listPrice;
 
 			$data = array(
-				'id'=>$recordId, 'name'=>decode_html($recordModel->getName()),
+				'id'=>$recordId,
+				'name'=>decode_html($recordModel->getName()),
 				'taxes'=>$taxes,
 				'listprice'=>$listPrice,
 				'purchaseprice'=>$purchasePrice,
 				'description' => decode_html($recordModel->get('description')),
 				'quantityInStock' => $recordModel->get('qtyinstock'),
 				'priceBook' => getPriceBookDetailsForProduct($recordId),
+				'usageunit' => $recordModel->get('usageunit') ? $recordModel->get('usageunit') : $recordModel->get('service_usageunit'),
+				'productcode' => $recordModel->get('productcode'),
 			);
 			//ED150602
 			if($accountdiscounttype
@@ -72,13 +75,16 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				else
 					$purchasePrice = $listPrice;
 				$data = array(
-					'id'=>$id, 'name'=>decode_html($recordModel->getName()),
+					'id'=>$id,
+					'name'=>decode_html($recordModel->getName()),
 					'taxes'=>$taxes,
 					'listprice'=>$listPrice,
 					'purchaseprice'=>$purchasePrice,
 					'description' => $recordModel->get('description'),
 					'quantityInStock' => $recordModel->get('qtyinstock'),
 					'priceBook' => getPriceBookDetailsForProduct($id),
+					'usageunit' => $recordModel->get('usageunit') ? $recordModel->get('usageunit') : $recordModel->get('service_usageunit'),
+					'productcode' => $recordModel->get('productcode'),
 				);
 				//ED150602
 				if($accountdiscounttype

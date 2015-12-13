@@ -525,6 +525,31 @@ jQuery.Class("Vtiger_List_Js",{
 
 	},
 
+	/* ED151213
+	 * Exécute une requête action et recharge, sans interaction
+	 */
+	triggerMassUpdate : function(massEditUrl) {
+		Vtiger_List_Js.triggerMassAction(massEditUrl, false, function(data){
+			var listInstance = Vtiger_List_Js.getInstance()
+			, msg = 'Ok';
+			
+			if (typeof data === 'string'
+			&& /^\{[\s\S]*\}$/.test(data)) {
+				data = eval('('+data+')');
+				if (data.result !== true) {
+					msg = data.result;
+				}
+			}
+			else
+				msg = data;
+			Vtiger_Helper_Js.showMessage(msg);
+			
+			listInstance.getListViewRecords();
+			Vtiger_List_Js.clearList();
+		
+		});
+	},
+
 	triggerMassEdit : function(massEditUrl) {
 		Vtiger_List_Js.triggerMassAction(massEditUrl, function(container){
 			var massEditForm = container.find('#massEdit');
@@ -542,6 +567,7 @@ jQuery.Class("Vtiger_List_Js",{
 			listInstance.postMassEdit(container);
 
 			listInstance.registerSlimScrollMassEdit();
+			return false;
 		},{'width':'65%'});
 	},
 
