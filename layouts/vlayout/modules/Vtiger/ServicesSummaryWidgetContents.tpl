@@ -15,20 +15,22 @@
 			<ul class="unstyled">
 				<li>
 					<div class="row-fluid">
-						<span class="span2 textOverflowEllipsis">
-							{$RELATED_RECORD->getDisplayValue('servicecategory')}
-						</span>
-						<span class="span6 textOverflowEllipsis">
+						<span class="span7 textOverflowEllipsis">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
 								{$RELATED_RECORD->getDisplayValue('servicename')}
 							</a>
 						</span>
-						<span class="span2 textOverflowEllipsis">
-							<span class="pull-right">
-								<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
-									{$RELATED_RECORD->getDisplayValue('productcode')}
-								</a>
-							</span>
+						<span class="span2">
+							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
+								<span class="pull-right">{$RELATED_RECORD->getDisplayValue('productcode')}</span>
+							</a>
+						</span>
+						<span class="span2">
+							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
+								{if (float)$RELATED_RECORD->get('unit_price') neq 0}
+									<span class="pull-right">{$RELATED_RECORD->getDisplayValue('unit_price')} &euro;</span>
+								{/if}
+							</a>
 						</span>
 					</div>
 				</li>

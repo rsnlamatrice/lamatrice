@@ -663,17 +663,22 @@ class Documents extends CRMEntity {
 	       else
 		       $returnset = '&return_module='.$this_module.'&return_action=CallRelatedList&return_id='.$id;
 	
-	       $button = '';
-	       $userNameSql = getSqlForNameInDisplayFormat(array('first_name'=> 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
-	       $query = "SELECT $other->table_name.*,
+			if($other->customFieldTable)
+				$joinQuery = 'LEFT JOIN '.$other->customFieldTable[0].'
+					ON '.$other->customFieldTable[0].'.'.$other->customFieldTable[1].' = vtiger_crmentity.crmid';
+			else
+				$joinQuery = '';
+			$button = '';
+			$userNameSql = getSqlForNameInDisplayFormat(array('first_name'=> 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
+			$query = "SELECT $other->table_name.*,
 				vtiger_crmentity.crmid,
 				vtiger_crmentity.smownerid,
 				case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
 				FROM $other->table_name
 				INNER JOIN vtiger_senotesrel
 					ON vtiger_senotesrel.crmid = $other->table_name.$other->table_index				
-				
 				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = $other->table_name.$other->table_index
+				$joinQuery
 				LEFT JOIN vtiger_groups	ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 				LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
 				WHERE vtiger_crmentity.deleted = 0
