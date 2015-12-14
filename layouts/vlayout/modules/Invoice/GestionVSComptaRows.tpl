@@ -10,7 +10,7 @@
 		<input type="hidden" name="module" value="{$MODULE_NAME}"/>
 		<input type="hidden" name="view" value="{$FORM_VIEW}"/>
 		<label>Mois à analyser :</label>
-		<select name="date" onchange="$(this).parents('form:first').submit();" value="{$SELECTED_DATE}>{foreach item=DATE_LABEL key=DATE from=$DATES}
+		<select name="date" onchange="$(this).parents('form:first').submit();">{foreach item=DATE_LABEL key=DATE from=$DATES}
 			<option value="{$DATE}" {if $SELECTED_DATE eq $DATE}selected="selected"{/if}>{$DATE_LABEL}</option>
 		{/foreach}</select>
 	</form>
