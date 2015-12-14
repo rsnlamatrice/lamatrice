@@ -45,6 +45,8 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 			'RSNAboRevues' => true,
 			'RSNDonateursWeb' => true,
 			
+			'RSNEmailListes' => true,
+			
 			'Calendar' => false,
 			'Emails' => false,
 			//never 'Faq' => false,
@@ -245,6 +247,21 @@ class RSN_GrandePurge_View extends Vtiger_Index_View {
 					ON vtiger_senotesrel.crmid = vtiger_crmentity.crmid
 				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
 					ON vtiger_senotesrel.notesid = vtiger_crmentity2.crmid
+				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
+				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
+				
+			$queries[$tab_name] = $query;
+			$queriesParams[$tab_name] = $params;
+		}
+		if($moduleModel && ($moduleModel->getName() === 'RSNEmailListes' || $moduleModel->getName() === 'ContactEmails')){
+			$tab_name = 'vtiger_rsnemaillistesrel';
+			$params = array();
+			$query = 'SELECT vtiger_rsnemaillistesrel.rsnemaillistesid
+				FROM vtiger_rsnemaillistesrel
+				LEFT JOIN vtiger_crmentity
+					ON vtiger_rsnemaillistesrel.rsnemaillistesid = vtiger_crmentity.crmid
+				LEFT JOIN vtiger_crmentity AS vtiger_crmentity2
+					ON vtiger_rsnemaillistesrel.contactemailsid = vtiger_crmentity2.crmid
 				WHERE vtiger_crmentity.crmid IS NULL OR vtiger_crmentity.deleted = 1
 				OR vtiger_crmentity2.crmid IS NULL OR vtiger_crmentity2.deleted = 1';
 				

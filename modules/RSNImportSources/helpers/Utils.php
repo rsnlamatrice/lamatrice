@@ -999,9 +999,11 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			return false;
 		}
 		
-		//Affectation du compte
-		$reglement->set('account_id', $invoice->get('account_id'));
+		//Affectation du compte et passage au statut Validated
 		$reglement->set('mode', 'edit');
+		$reglement->set('account_id', $invoice->get('account_id'));
+		if($reglement->get('reglementstatus') === 'Created')
+			$reglement->set('reglementstatus', 'Validated');
 		$reglement->save();
 		
 		return true;

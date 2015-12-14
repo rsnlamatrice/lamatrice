@@ -2061,7 +2061,9 @@ jQuery.Class("Vtiger_List_Js",{
 			/* ED150903 defined search key in one ancestor */
 			var $container = $target.parents('.alphabetSorting[data-searchkey]');
 			var specificSearchKey = $container.attr('data-searchkey');
-			var specificSearchOperator = $container.attr('data-searchoperator');
+			var specificSearchOperator = $alphabet.attr('data-searchoperator');
+			if(!specificSearchOperator)
+				specificSearchOperator = $container.attr('data-searchoperator');
 			var AlphabetSearchKey = specificSearchKey ? specificSearchKey : thisInstance.getAlphabetSearchField();
 			
 			//ED150903 this search complete header filters

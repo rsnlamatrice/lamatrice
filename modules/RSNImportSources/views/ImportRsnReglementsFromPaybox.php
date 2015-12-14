@@ -544,6 +544,12 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				$record->set('error', 1);
 				$record->set('errormsg', $reglement['paymentstatus'] . ' (' . $reglement['errorcode'] . ')');
 			}
+			$record->set('reglementstatus', $record->get('error')
+						 ? 'Cancelled'
+						 : $invoice
+							? 'Validated'
+							: 'Created'
+						);
 			
 			//$db->setDebug(true);
 			$record->save();
@@ -551,7 +557,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 			if(!$reglementId){
 				//TODO: manage error
-				echo "<pre><code>Impossible d'enregistrer le nouveau réglement</code></pre>";
+				echo "<pre><code>Impossible d'enregistrer le nouveau règlement</code></pre>";
 				foreach ($reglementData as $reglementLine) {
 					$entityInfo = array(
 						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,

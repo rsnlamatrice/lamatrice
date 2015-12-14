@@ -23,7 +23,7 @@ ED141024
 		<tr>
 			{if $FIELD_MODEL->isEmptyPicklistOptionAllowed() && !array_key_exists('', $PICKLIST_DATA)}
 				<td class="alphabetSearch textAlignCenter cursorPointer" style="padding : 0px !important;">
-					<a href="#" data-searchvalue="">
+					<a href="#" data-searchvalue="" data-searchoperator="c">
 						<label title="{vtranslate('LBL_ALL')}">({vtranslate('LBL_ALL')})</label>
 					</a>
 				</td>

@@ -6,11 +6,12 @@
 	- TODO Finir le module. A vérifier si toutes les tables sont bien vides.
 	
 - Importer les données
-	- Fichiers Adresse[-*].csv
-	- TODO AdressesSupprimées
-	- TODO Historique des adresses
+	- Fichiers Adresse.[.*]csv
+	- AdressesSupprimées
+	- Historique des adresses
 	- Fichier Groupe.csv
-	- Fichiers Emails[-*].csv
+	- Fichiers Emails.[.*]csv
+	- Fichiers Emails_liste.[.*]csv
 	- TODO Emails_liste 4D
 	- Fichier LienRef4DdonateursWeb.csv ( Liens des Donateurs Web )
 	- Fichier InscriptionDonateurWeb.csv
@@ -27,7 +28,7 @@
 		- Exécuter la mise à jour des périodicités depuis le module La Matrice
 	- Fichiers Prélèvements_HistoDétail[-*].csv ( Ordres de virement )
 	- Fichier Critères.csv ( Critères de contacts )
-	- Fichiers Critères_Adr[-*].csv ( Relation entre Critères et contacts )
+	- Fichiers Critères_Adr.[.*]csv ( Relation entre Critères et contacts )
 	- Cogilog Produits (depuis module La Matrice)
 	- TODO Faut il faire Cogilog Clients (depuis module La Matrice) ? et est ce que c'est déboggué ?
 	- Cogilog Factures

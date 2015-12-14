@@ -27,7 +27,7 @@
         data-operator="="
         >
         <option value=" "></option>
-        <option value="">(tous)</option>
+        <option value="" data-searchoperator="c">(tous)</option>
 	{foreach item=PICKLIST_ITEM key=PICKLIST_KEY from=$PICKLIST_LABELS}
 	    {if is_array($PICKLIST_ITEM)}
 		{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM['label']}

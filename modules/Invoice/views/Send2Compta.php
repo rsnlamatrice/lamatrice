@@ -7,8 +7,13 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  *************************************************************************************/
-define('ROWSEPAR', "\r\n");//'<tr><td>');
-define('COLSEPAR', "\t");//'<td>');
+if(1){
+	define('ROWSEPAR', "\r\n");
+	define('COLSEPAR', "\t");
+} else {//debug
+	define('ROWSEPAR', '<tr><td>');
+	define('COLSEPAR', '<td>');
+}
 
 class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	function __construct() {
@@ -225,6 +230,11 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$query .= ', vtiger_inventoryproductrel.tax' . $taxes[$nTax]['taxid'];
 		}
 		$query .= '
+			, reglements.rsnreglementsid
+			, reglements.reglementamount
+			, reglements.reglementstatus';
+		
+		$query .= '
 			FROM vtiger_invoice
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
@@ -243,7 +253,33 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			LEFT JOIN vtiger_service
 				ON vtiger_inventoryproductrel.productid = vtiger_service.serviceid
 			LEFT JOIN vtiger_servicecf
-				ON vtiger_servicecf.serviceid = vtiger_service.serviceid
+				ON vtiger_servicecf.serviceid = vtiger_service.serviceid';
+		
+		// Réglements (en tant que vtiger_rsnreglements) associés.
+		// rappel : les réglements ne sont pas forcément définis dans vtiger_rsnreglements, ils peuvent étre uniquement présent par invoice.received et invoice.receivedmoderegl
+		// il peut y avoir plusieurs vtiger_rsnreglements pour une facture, et inversement
+		$query .= '
+			LEFT JOIN (SELECT invoiceid
+				, GROUP_CONCAT(rsnreglementsid) AS rsnreglementsid
+				, GROUP_CONCAT(reglementstatus) AS reglementstatus
+				, SUM(vtiger_rsnreglements.amount) AS reglementamount
+				FROM vtiger_rsnreglements
+				JOIN vtiger_crmentity
+					ON vtiger_crmentity.crmid = vtiger_rsnreglements.rsnreglementsid
+				JOIN vtiger_crmentityrel
+					ON vtiger_crmentityrel.crmid = vtiger_rsnreglements.rsnreglementsid
+					OR vtiger_crmentityrel.relcrmid = vtiger_rsnreglements.rsnreglementsid
+				JOIN vtiger_invoice
+					ON vtiger_crmentityrel.crmid = vtiger_invoice.invoiceid
+					OR vtiger_crmentityrel.relcrmid = vtiger_invoice.invoiceid
+				WHERE vtiger_crmentity.deleted = 0
+				AND vtiger_rsnreglements.reglementstatus != "Cancelled"
+				AND vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
+				GROUP BY invoiceid
+			) reglements
+				ON reglements.invoiceid = vtiger_invoice.invoiceid';
+			
+		$query .= '
 			WHERE vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
 			AND vtiger_invoicecf.sent2compta IS NULL
 			AND vtiger_invoice.total <> 0
@@ -266,7 +302,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, vtiger_invoice.invoiceid
 			, vtiger_inventoryproductrel.sequence_no
 		';
-		$params = $selectedIds;
+		$params = $selectedIds;//reglements
+		$params = array_merge($params, $selectedIds);//invoices
 		$params = array_merge($params, $excludeInvoicestatus);
 		
 		$db = PearDatabase::getInstance();
@@ -299,7 +336,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			echo "**Compta\tEcritures";
 			
 			
-			/*
+			/* NOTE : les commentaires suivants ne sont pas forcément valables, ils datent du début du dév.
+			 * 
 			 * 1) Factures et le détail des lignes
 			 * Journal : "VT"
 			 * 1 ligne par ligne d'article
@@ -377,6 +415,16 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$basicSubject = $piece . ' ' . preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
 					$invoiceSubject = $basicSubject . ($codeAffaire ? ' - ' . $codeAffaire : '');
 					$date = self::formatDateForCogilog($invoice['invoicedate']);
+					//La facture est réglée
+					if($invoiceReceived){
+						//Si un règlement est associé et qu'il est déjà en compta, on ne traite pas le règlement
+						if(strpos($invoice['reglementstatus'], 'Compta') !== false)
+							$invoiceReceived = false;
+						//Si le montant des règlements associés n'est pas celui de la facture, on ne traite pas le règlement
+						if($invoice['reglementamount'] != $invoice['received'])
+							$invoiceReceived = false;
+					}
+					//Cumuls des règlements par mode de règlement
 					if($invoiceReceived){
 						$key = $invoiceModeRegl . ($invoiceCodeAnal ? '-' . $invoiceCodeAnal : '') . '-' . $date;
 					
@@ -535,7 +583,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				return $tax;
 		return false;
 	}
-		
+	
 	private static function getInvoiceCompteVenteSolde($invoiceData){
 		
 		$accountType = $invoiceData['account_type'];
@@ -647,10 +695,18 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		return str_replace('.', ',', round($amount, 2));
 	}
 	
-	//Marque les factures comme étant envoyées en compta (champ sent2compta)
+	/*********************************
+	 **		validateSend2Compta
+	 ********************************/
+	//Marque les factures et les règlements comme étant envoyées en compta (champs sent2compta)
 	function validateSend2Compta(Vtiger_Request $request){
-		$moduleName = $request->getModule();
-		$viewer = $this->getViewer($request);
+		//d'abord les règlements, pour garder les factures dans le statut valable
+		$this->validateSend2ComptaReglements($request);
+		$this->validateSend2ComptaInvoices($request);
+	}
+	
+	//Marque les factures comme étant envoyées en compta (champ sent2compta)
+	function validateSend2ComptaInvoices(Vtiger_Request $request){
 		
 		$excludeInvoicestatus = array('Created', 'Cancelled');
 		$selectedIds = $request->get('selected_ids');
@@ -681,6 +737,82 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$response->emit();
 		}
 	}
+	
+	//Marque les règlements comme étant envoyées en compta (champ sent2compta)
+	function validateSend2ComptaReglements(Vtiger_Request $request){
+		
+		$excludeInvoicestatus = array('Created', 'Cancelled');
+		$selectedIds = $request->get('selected_ids');
+		//
+		// Réglements (en tant que vtiger_rsnreglements) associés.
+		// rappel : les réglements ne sont pas forcément définis dans vtiger_rsnreglements, ils peuvent étre uniquement présent par invoice.received et invoice.receivedmoderegl
+		// il peut y avoir plusieurs vtiger_rsnreglements pour une facture, et inversement
+		$query .= 'SELECT vtiger_invoice.invoiceid, vtiger_invoice.received
+			, GROUP_CONCAT(rsnreglementsid) AS rsnreglementsid
+			, GROUP_CONCAT(reglementstatus) AS reglementstatus
+			, SUM(vtiger_rsnreglements.amount) AS reglementamount
+			FROM vtiger_rsnreglements
+			JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = vtiger_rsnreglements.rsnreglementsid
+			JOIN vtiger_crmentityrel
+				ON vtiger_crmentityrel.crmid = vtiger_rsnreglements.rsnreglementsid
+				OR vtiger_crmentityrel.relcrmid = vtiger_rsnreglements.rsnreglementsid
+			JOIN vtiger_invoice
+				ON vtiger_crmentityrel.crmid = vtiger_invoice.invoiceid
+				OR vtiger_crmentityrel.relcrmid = vtiger_invoice.invoiceid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_rsnreglements.reglementstatus != "Cancelled"
+			AND vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
+			GROUP BY vtiger_invoice.invoiceid, vtiger_invoice.received
+			HAVING SUM(vtiger_rsnreglements.amount) = vtiger_invoice.received
+			AND NOT GROUP_CONCAT(reglementstatus) LIKE "%Compta%"
+		';
+		$params = array();
+		$params = array_merge($params, $selectedIds);
+		$params = array_merge($params, $excludeInvoicestatus);
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$response = new Vtiger_Response();
+			$response->setError('Erreur de requête');
+			$response->emit();
+			die();
+		}
+		//reconstitue le tableau des règlements à valider
+		$reglementIds = array();
+		while($invoice = $db->getNextRow($result)){
+			$reglementIds = array_merge($reglementIds, explode(',', $invoice['rsnreglementsid']));
+		}
+		if($reglementIds){
+			
+			$query = 'UPDATE vtiger_rsnreglements
+				SET vtiger_rsnreglements.sent2compta = NOW()
+				, vtiger_rsnreglements.reglementstatus = ?
+				WHERE vtiger_rsnreglements.rsnreglementsid IN ('. generateQuestionMarks( $reglementIds ) . ')
+				AND vtiger_rsnreglements.sent2compta IS NULL
+			';
+			$params = array('Compta');
+			$params = array_merge($params, $reglementIds);
+			$result = $db->pquery($query, $params);
+			if(!$result){
+				$db->echoError();
+				echo "<pre>$query</pre>";
+				var_dump($params);
+				$response = new Vtiger_Response();
+				$response->setError('Erreur de requête');
+				$response->emit();
+				die();
+			}
+		}
+		
+	}
+	/*********************************
+	 fin de validateSend2Compta		**
+	 ********************************/
 	
 	//regénère le fichier et l'enregistre dans le répertoire storage
 	function storeFile(Vtiger_Request $request){

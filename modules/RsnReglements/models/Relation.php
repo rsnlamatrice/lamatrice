@@ -26,4 +26,17 @@ class RsnReglements_Relation_Model extends Vtiger_Relation_Model {
 					   , 'relatedSourceFieldName' => 'crmid'),
 		);
 	}
+	public function addRelation($sourcerecordId, $destinationRecordId) {
+		$destinationModuleName = $this->getRelationModuleModel()->get('name');
+		if($destinationModuleName === 'Invoice'){
+			$sourceModule = $this->getParentModuleModel();
+			$sourceModuleName = $sourceModule->get('name');
+			$invoiceRecordModel = Vtiger_Record_Model::getInstanceById($destinationRecordId, $destinationModuleName);
+			$reglementRecordModel = Vtiger_Record_Model::getInstanceById($sourcerecordId, $sourceModuleName);
+			$reglementRecordModel->set('mode', 'edit');
+			$reglementRecordModel->set('account_id', $invoiceRecordModel->get('account_id'));
+			$reglementRecordModel->save();
+		}
+		parent::addRelation($sourcerecordId, $destinationRecordId);
+	}
 }

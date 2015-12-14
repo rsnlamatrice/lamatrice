@@ -659,6 +659,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					}
 					else
 						$record->set('error', 0);
+					$record->set('reglementstatus', $record->get('error') ? 'Cancelled' : 'Validated');
 					
 					//$db->setDebug(true);
 					$record->save();
@@ -666,7 +667,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 					if(!$reglementId){
 						//TODO: manage error
-						echo "<pre><code>Impossible d'enregistrer le nouvel règlement</code></pre>";
+						echo "<pre><code>Impossible d'enregistrer le nouveau règlement</code></pre>";
 						foreach ($reglementData as $reglementLine) {
 							$entityInfo = array(
 								'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
