@@ -218,4 +218,8 @@ $RSNPreconfiguredExport_share_read_permission=array('ROLE'=>array(),'GROUP'=>arr
 
 $RSNPreconfiguredExport_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$RSNEmailListes_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNEmailListes_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 ?>
