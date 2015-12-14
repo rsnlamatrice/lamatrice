@@ -48,7 +48,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		$viewer->assign('SELECTED_COMPTE', $compte);
 		
-		$viewer->assign('SELECTED_DATE', $dateDebut->format('d/m/Y'));
+		$viewer->assign('SELECTED_DATE', $dateDebut->format('Y-m-d'));
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_VIEW', 'GestionVSComptaRows');

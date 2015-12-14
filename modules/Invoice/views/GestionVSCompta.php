@@ -86,7 +86,7 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 			}
 		}
 		list($dateDebut, $dateFin) = $this->getDates($request);
-		$viewer->assign('SELECTED_DATE', $dateDebut);
+		$viewer->assign('SELECTED_DATE', $dateDebut->format('Y-m-d'));
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_VIEW', 'GestionVSCompta');
