@@ -280,7 +280,7 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$isDebug = COLSEPAR;
 			$isDebug = $isDebug[0] === '<';
 			
-			$fileName = 'LAMAT_vers_COG.Reglements.Compta.'.date('Ymd_His').'.csv';
+			$fileName = 'EcrituresCompta.Reglements.Compta.'.date('Ymd_His').'.csv';
 			$exportType = 'text/csv';
 			if($isDebug)
 				echo '<table border="1"><tr><td>';//debug

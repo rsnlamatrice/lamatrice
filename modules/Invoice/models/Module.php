@@ -37,6 +37,12 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSCompta',
 				'linkicon' => '',
 			),
+			array(
+				'linktype' => 'SIDEBARLINK',
+				'linklabel' => 'Contr&ocirc;le de gestion',
+				'linkurl' => 'index.php?module='.$this->get('name').'&view=ControleGestion',
+				'linkicon' => '',
+			),
 		);
 		foreach($quickLinks as $quickLink) {
 			$links['SIDEBARLINK'][] = Vtiger_Link_Model::getInstanceFromValues($quickLink);

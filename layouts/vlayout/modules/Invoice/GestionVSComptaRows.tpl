@@ -15,18 +15,20 @@
 		{/foreach}</select>
 	</form>
 	<table class="table table-bordered equalSplit detailview-table">
-		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecritures dans la Gestion et la Compta
+		<caption style="text-align: left; font-weight: bold; font-size: larger;">{$TITLE}
 			&nbsp;{if $SELECTED_COMPTE}pour le compte {$SELECTED_COMPTE}{/if}
 			&nbsp;{if $SELECTED_DATE}à la date du {$SELECTED_DATE}{/if}
-		<br><label>&nbsp;<input type="checkbox" style="display: inline;"
+		{if count($ALL_SOURCES) > 1}
+			<br><label>&nbsp;<input type="checkbox" style="display: inline;"
 				  onchange="var $table = $(this).parents('table:first'), show = this.checked;
 				  if(show) $table.addClass('show-pointee');
 				  else $table.removeClass('show-pointee');
 				  ">Afficher les lignes équivalentes</label></caption>
+		{/if}
 		{foreach item=SOURCES_ENTRIES key=DATE from=$ENTRIES}
 			<tr>
 				<td class="date"><b>{$DATE}</b></td>
-				{foreach item=SOURCE_LABEL key=SOURCE from=$SOURCES}
+				{foreach item=SOURCE_LABEL key=SOURCE from=$ALL_SOURCES}
 					<td style="vertical-align: top;"><b>{$SOURCE_LABEL}</b>
 						{if $SOURCES_ENTRIES[$SOURCE]}
 							<table>
@@ -36,7 +38,7 @@
 								</tr>
 								<tr {if $ECRITURE['pointee']}class="pointee"{/if}>
 									<td style="text-align: right;">{$ECRITURE['compte']}</td>
-									<td style="text-align: right;">{$ECRITURE['montant']}</td>
+									<td style="text-align: right;">{$ECRITURE['montant']} &euro;</td>
 								</tr>
 							{/foreach}
 							</table>

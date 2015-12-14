@@ -9,7 +9,8 @@
  *************************************************************************************/
 
 include_once('modules/RSN/models/DBCogilog.php');
- 
+include_once('libraries/PHPExcel/PHPExcel/Calculation/Functions.php');
+
 class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 
 	public function preProcess(Vtiger_Request $request, $display = true) {
@@ -46,6 +47,33 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		$viewer->view('GestionVSCompta.tpl', $request->getModule());
 	}
 	
+	public function getDates(Vtiger_Request $request, $dateFinOffest = '+1 month') {
+		$dateDebut = $request->get('date');
+		if(!$dateDebut)
+			$dateDebut = date('Y-m-01');
+		if(is_numeric($dateDebut[0])){
+			$dateDebut = new DateTime($dateDebut);
+			$dateFin = clone $dateDebut;
+			$dateFin->modify($dateFinOffest);
+		} else {
+			//mois sous la forme "Totaux du mois de Dec 2015"
+			$yearDebut = preg_replace('/^.+(\d{4})$/', '$1', $dateDebut);
+			$monthDebut = preg_replace('/^.+\s(\S+).(\d{4})$/', '$1', $dateDebut);
+			if(is_numeric($monthDebut)){
+				$dateDebut = new DateTime("$yearDebut-$monthDebut-01");
+			} else {
+				$dateDebut = new DateTime("$yearDebut-01-01");
+				for($nMonth = 1; $nMonth <= 12; $nMonth++)
+					if($monthDebut == $dateDebut->format('M'))
+						break;
+					else
+						$dateDebut->modify('+1 month');
+			}
+			$dateFin = clone $dateDebut;
+			$dateFin->modify('+1 month');
+		}
+		return array($dateDebut, $dateFin);
+	}
 	
 	public function initFormData(Vtiger_Request $request) {
 		
@@ -57,12 +85,13 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 				$dates[$y . '-' . $m . '-' . '01'] = date('M Y', strtotime($y . '-' . $m . '-' . '01'));
 			}
 		}
-		$dateDebut = $request->get('date');
+		list($dateDebut, $dateFin) = $this->getDates($request);
 		$viewer->assign('SELECTED_DATE', $dateDebut);
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_VIEW', 'GestionVSCompta');
 		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaRows');
+		$viewer->assign('TITLE', "Ecart entre la Gestion et la Compta <small>(les écarts négatifs indiquent qu'il y a plus dans La Matrice que dans Cogilog)</small>");
 	}
 	
 	public function initComptesEntries(Vtiger_Request $request) {
@@ -70,12 +99,7 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		$viewer = $this->getViewer($request);
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		
-		$dateDebut = $request->get('date');
-		if(!$dateDebut)
-			$dateDebut = date('Y-m-01');
-		$dateDebut = new DateTime($dateDebut);
-		$dateFin = clone $dateDebut;
-		$dateFin->modify('+1 month');
+		list($dateDebut, $dateFin) = $this->getDates($request);
 		
 		$ecartMontants = $request->get('ecartMontants');
 		if($ecartMontants)
@@ -142,6 +166,7 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		
 		$viewer->assign('COMPTES', $allComptes);
 		$viewer->assign('ENTRIES', $entries);
+		$viewer->assign('ALL_SOURCES', array('COG' => 'Compta', 'LAM' => 'Gestion'));
 	}
 	
 	function getComptesString(){

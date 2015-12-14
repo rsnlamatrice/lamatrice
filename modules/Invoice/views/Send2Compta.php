@@ -321,7 +321,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$isDebug = COLSEPAR;
 			$isDebug = $isDebug[0] === '<';
 			
-			$fileName = 'LAMAT_vers_COG.Factures.Compta.'.date('Ymd_His').'.csv';
+			$fileName = 'EcrituresCompta.Factures.Compta.'.date('Ymd_His').'.csv';
 			$exportType = 'text/csv';
 			if($isDebug)
 				echo '<table border="1"><tr><td>';//debug
