@@ -36,7 +36,7 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 				$dates[$y . '-' . $m . '-' . '01'] = date('M Y', strtotime($y . '-' . $m . '-' . '01'));
 			}
 		}
-		$dateDebut = $request->get('date');
+		list($dateDebut, $dateFin) = $this->getDates($request);
 		$viewer->assign('SELECTED_DATE', $dateDebut);
 		
 		$viewer->assign('DATES', $dates);
@@ -49,12 +49,7 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 		$viewer = $this->getViewer($request);
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		
-		$dateDebut = $request->get('date');
-		if(!$dateDebut)
-			$dateDebut = date('Y-m-01');
-		$dateDebut = new DateTime($dateDebut);
-		$dateFin = clone $dateDebut;
-		$dateFin->modify('+1 month');
+		list($dateDebut, $dateFin) = $this->getDates($request);
 		
 		$ecartMontants = $request->get('ecartMontants');
 		if($ecartMontants)
@@ -112,6 +107,7 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 		
 		$viewer->assign('COMPTES', $allComptes);
 		$viewer->assign('ENTRIES', $entries);
+		$viewer->assign('ALL_SOURCES', array('COG' => 'Compta', 'LAM' => 'Gestion'));
 	}
 	
 	function getComptesString(){

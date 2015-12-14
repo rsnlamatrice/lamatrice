@@ -30,10 +30,8 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		$viewer = $this->getViewer($request);
 		
-		$dateDebut = $request->get('date');
-		if(!$dateDebut)
-			$dateDebut = date('Y-m-d');
-		$dateRef = new DateTime($dateDebut);
+		list($dateDebut, $dateFin) = $this->getDates($request, '+1 day');
+		$dateRef = clone $dateDebut;
 		$dateRef->modify('-1 month');
 		
 		$dates = array();
@@ -50,10 +48,11 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		
 		$viewer->assign('SELECTED_COMPTE', $compte);
 		
-		$viewer->assign('SELECTED_DATE', $dateDebut);
+		$viewer->assign('SELECTED_DATE', $dateDebut->format('d/m/Y'));
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_VIEW', 'GestionVSComptaRows');
+		$viewer->assign('TITLE', 'Ecritures dans la Gestion et la Compta');
 	}
 	
 	public function initRowsEntries(Vtiger_Request $request) {
@@ -61,12 +60,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		$viewer = $this->getViewer($request);
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		
-		$dateDebut = $request->get('date');
-		if(!$dateDebut)
-			$dateDebut = date('Y-m-01');
-		$dateDebut = new DateTime($dateDebut);
-		$dateFin = clone $dateDebut;
-		$dateFin->modify('+1 day');
+		list($dateDebut, $dateFin) = $this->getDates($request, '+1 day');
 		
 		$compte = $request->get('compte');
 		
@@ -121,7 +115,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 					}
 			}
 		}
-		$viewer->assign('SOURCES', array('COG'=>'Cogilog', 'LAM'=>'La Matrice'));
+		$viewer->assign('ALL_SOURCES', array('COG'=>'Compta', 'LAM'=>'Gestion'));
 		$viewer->assign('ENTRIES', $entries);
 	}
 	

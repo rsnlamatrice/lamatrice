@@ -37,6 +37,11 @@ table.compte td {
 table.compte td:first-of-type {
 	text-align: right;
 }
+table.sources-count-1 table.compte td {
+	padding-right: 3em;
+	border-right: 2px solid black;
+}
 th.date, td.date {
 	width: 7%;
+	vertical-align: top !important;
 }

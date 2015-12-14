@@ -10,7 +10,7 @@
 
 include_once('modules/RSN/models/DBCogilog.php');
  
-class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaENC_View {
+class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View {
 
 
 	public function process(Vtiger_Request $request) {
@@ -25,15 +25,12 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaENC_View
 		$viewer->view('GestionVSComptaRows.tpl', $request->getModule());
 	}
 	
-	
 	public function initFormData(Vtiger_Request $request) {
 		
 		$viewer = $this->getViewer($request);
 		
-		$dateDebut = $request->get('date');
-		if(!$dateDebut)
-			$dateDebut = date('Y-m-d');
-		$dateRef = new DateTime($dateDebut);
+		list($dateDebut, $dateFin) = $this->getDates($request, '+1 day');
+		$dateRef = clone $dateDebut;
 		$dateRef->modify('-1 month');
 		
 		$dates = array();
@@ -50,7 +47,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaENC_View
 		
 		$viewer->assign('SELECTED_COMPTE', $compte);
 		
-		$viewer->assign('SELECTED_DATE', $dateDebut);
+		$viewer->assign('SELECTED_DATE', $dateDebut->format('d/m/Y'));
 		
 		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_VIEW', 'GestionVSComptaCARows');
@@ -61,12 +58,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaENC_View
 		$viewer = $this->getViewer($request);
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		
-		$dateDebut = $request->get('date');
-		if(!$dateDebut)
-			$dateDebut = date('Y-m-01');
-		$dateDebut = new DateTime($dateDebut);
-		$dateFin = clone $dateDebut;
-		$dateFin->modify('+1 day');
+		list($dateDebut, $dateFin) = $this->getDates($request, '+1 day');
 		
 		$compte = $request->get('compte');
 		
@@ -121,7 +113,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaENC_View
 					}
 			}
 		}
-		$viewer->assign('SOURCES', array('COG'=>'Cogilog', 'LAM'=>'La Matrice'));
+		$viewer->assign('ALL_SOURCES', array('COG'=>'Compta', 'LAM'=>'Gestion'));
 		$viewer->assign('ENTRIES', $entries);
 	}
 	

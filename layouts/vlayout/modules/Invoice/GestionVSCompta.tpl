@@ -19,37 +19,45 @@
 			<option value="{$DATE}" {if $SELECTED_DATE eq $DATE}selected="selected"{/if}>{$DATE_LABEL}</option>
 		{/foreach}</select>
 	</form>
-	<table class="table table-bordered equalSplit detailview-table">
-		<caption style="text-align: left; font-weight: bold; font-size: larger;">Ecart entre la Gestion et la Compta <small>(les écarts négatifs indiquent qu'il y a plus dans La Matrice que dans Cogilog)</small>
+	<table class="table table-bordered equalSplit detailview-table sources-count-{count($ALL_SOURCES)}">
+		<caption style="text-align: left; font-weight: bold; font-size: larger;">{$TITLE}
 		
-		<br><label>&nbsp;<input type="checkbox" style="display: inline;"
-				  onchange="var $table = $(this).parents('table:first'), show = this.checked;
-				  if(show) $table.addClass('show-pointee');
-				  else $table.removeClass('show-pointee');
-				  ">Afficher les lignes équivalentes</label>
-		</caption>
-		<tr>
-			<td class="date"></td>
-			<td><table class="compte"><tr><td>Compta</td><td>Gestion</td></tr></table></td>
-		</tr>
+		{if count($ALL_SOURCES) > 1}
+			<br><label>&nbsp;<input type="checkbox" style="display: inline;"
+					  onchange="var $table = $(this).parents('table:first'), show = this.checked;
+					  if(show) $table.addClass('show-pointee');
+					  else $table.removeClass('show-pointee');
+					  ">Afficher les lignes équivalentes</label>
+			</caption>
+			<tr>
+				<td class="date"></td>
+				<td><table class="compte">
+					<tr>
+						{foreach item=SOURCE_NAME from=$ALL_SOURCES}<td>{$SOURCE_NAME}</td>{/foreach}
+					</tr>
+					</table>
+				</td>
+			</tr>
+		{/if}
 		{foreach item=COMPTES key=DATE from=$ENTRIES}
-			{assign var=POINTEE value=abs($COMPTES['TOTAUX']['COG'] - $COMPTES['TOTAUX']['LAM']) < 0.01}
+			{assign var=POINTEE value=count($ALL_SOURCES) > 1 && abs($COMPTES['TOTAUX']['COG'] - $COMPTES['TOTAUX']['LAM']) < 0.01}
 			<tr {if $POINTEE}class="pointee"{/if}>
 				<td class="date"><b><a href="{$ROWS_URL}&date={$DATE}">{$DATE}</a></b></td>
 				<td><table class="compte">
 				{foreach item=SOURCES key=COMPTE from=$COMPTES}
-					{assign var=POINTEE value=count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) < 0.01}
+					{assign var=POINTEE value=count($ALL_SOURCES) > 1 && count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) < 0.01}
 					<tr {if $POINTEE}class="pointee"{/if}>
 						<th colspan="2"><b><a href="{$ROWS_URL}&date={$DATE}&compte={$COMPTE}">
-						<b>{if $COMPTE neq "TOTAUX"}compte {/if}{$COMPTE}</b>
-						{if count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) >= 0.01 }
+						{if $COMPTE neq "TOTAUX"}compte {/if}{$COMPTE}
+						{if count($ALL_SOURCES) eq 2 && count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) >= 0.01 }
 							&nbsp;: {money_format('%.2n', $SOURCES['COG'] - $SOURCES['LAM'])} &euro;
 						{/if}
 						</a></b></th>
 					</tr>
 					<tr {if $POINTEE}class="pointee"{/if}>
-						<td>{if $SOURCES['COG']}{money_format('%.2n', $SOURCES['COG'])} &euro;{/if}</td>
-						<td>{if $SOURCES['LAM']}{money_format('%.2n', $SOURCES['LAM'])} &euro;{/if}</td>
+						{foreach item=SOURCE_NAME key=SOURCE_KEY from=$ALL_SOURCES}
+							<td>{if $SOURCES[$SOURCE_KEY]}{money_format('%.2n', $SOURCES[$SOURCE_KEY])} &euro;{/if}</td>
+						{/foreach}
 					</tr>
 				{/foreach}
 				</table>
