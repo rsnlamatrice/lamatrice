@@ -799,6 +799,8 @@ $languageStrings = array(
 	'LBL_DOWNLOAD' => 'Télécharger',
 	
 	'AllMenuEditor' => 'Editeur du menu \'Tout\'',
+	
+	'LBL_INSCRIPTIONS' => 'Inscriptions',
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 

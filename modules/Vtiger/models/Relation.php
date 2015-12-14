@@ -183,6 +183,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		$sourceModuleName = $sourceModule->get('name');
 		$destinationModuleName = $this->getRelationModuleModel()->get('name');
 		$destinationModuleFocus = CRMEntity::getInstance($destinationModuleName);
+		
 		DeleteEntity($destinationModuleName, $sourceModuleName, $destinationModuleFocus, $relatedRecordId, $sourceRecordId);
 		return true;
 	}

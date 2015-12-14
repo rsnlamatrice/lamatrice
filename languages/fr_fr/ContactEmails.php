@@ -21,6 +21,7 @@ $languageStrings = array(
 	'LBL_COMMENTS' => 'Commentaire',
 	'LBL_IPADDRESS' => 'IP',
 	'LBL_CONTACTID' => 'Contact',
+	'Email Opt Out' => 'Ok/Erreur',
 
 );
 

@@ -214,4 +214,12 @@ $RSNStatisticsResults_share_read_permission=array('ROLE'=>array(),'GROUP'=>array
 
 $RSNStatisticsResults_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
 
+$RSNPreconfiguredExport_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNPreconfiguredExport_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNEmailListes_share_read_permission=array('ROLE'=>array(),'GROUP'=>array());
+
+$RSNEmailListes_share_write_permission=array('ROLE'=>array(),'GROUP'=>array());
+
 ?>

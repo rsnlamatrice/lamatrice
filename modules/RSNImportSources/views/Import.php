@@ -654,42 +654,10 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		
 		
 		if($logFailedOrSkippedPreImport){
-			$this->logFailedData($tableName);
+			RSNImportSources_Utils_Helper::logFailedTableData($tableName);
 		}
 		
 		return $record;
-	}
-	/**
-	 * Crée un commentaire pour l'import
-	 * Archive les données qui dont l'import a échoués
-	 */
-	private function logFailedData($tableName){
-		$adb = PearDatabase::getInstance();
-		
-		global $root_directory;
-		$logFile = str_replace('\\', '/', $root_directory . 'logs/RSNImportSources_' . $tableName . '_' . date('Ymd_His') . '.log');
-		
-		$query = 'SELECT *
-			'./*INTO OUTFILE \'' . $logFile . '\' ne fonctionne pas pour cause de droits d\'accès */'
-			FROM ' . $tableName . '
-			WHERE status IN ( '. RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED
-					. ',  '. RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED . ' )
-			ORDER BY id';
-			
-		$result = $adb->query($query);
-		if(!$result){
-			var_dump($query);
-			$adb->echoError();
-		}
-		
-		$hFile = fopen($logFile, 'w');
-		$nRow = 0;
-		while($row = $adb->fetchByAssoc($result, $nRow, false)){
-			if($nRow++ === 0)
-				fputcsv($hFile, array_keys($row), ';');
-			fputcsv($hFile, $row, ';');
-		}
-		fclose($hFile);
 	}
 	
 	/**
