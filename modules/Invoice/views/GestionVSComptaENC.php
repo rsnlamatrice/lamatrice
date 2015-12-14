@@ -27,19 +27,9 @@ class Invoice_GestionVSComptaENC_View extends Invoice_GestionVSCompta_View {
 	
 	
 	public function initFormData(Vtiger_Request $request) {
+		parent::initFormData($request);
 		
 		$viewer = $this->getViewer($request);
-		
-		$dates = array();
-		for($y = date('Y'); $y >= date('Y') - 2; $y--){
-			for($m = $y == date('Y') ? date('n') : 12; $m >= 1; $m--){
-				$dates[$y . '-' . $m . '-' . '01'] = date('M Y', strtotime($y . '-' . $m . '-' . '01'));
-			}
-		}
-		list($dateDebut, $dateFin) = $this->getDates($request);
-		$viewer->assign('SELECTED_DATE', $dateDebut);
-		
-		$viewer->assign('DATES', $dates);
 		$viewer->assign('FORM_VIEW', 'GestionVSComptaENC');
 		$viewer->assign('ROWS_URL', 'index.php?module='.$request->get('module').'&view=GestionVSComptaENCRows');
 	}
