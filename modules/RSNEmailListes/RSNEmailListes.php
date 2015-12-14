@@ -55,17 +55,17 @@ class RSNEmailListes extends Vtiger_CRMEntity {
 
 	// For Popup listview and UI type support
 	var $search_fields = Array(
+		'LBL_NAME' => array('rsnemaillistes', 'name'),
 		'LBL_LASTTIME' => array('rsnemaillistes', 'lasttime'),
 		'LBL_COMMENT' => array('rsnemaillistes', 'comment'),
 		'LBL_ENABLE' => array('rsnemaillistes', 'enable'),
-		'LBL_NAME' => array('rsnemaillistes', 'name'),
 
 	);
 	var $search_fields_name = Array (
+		'LBL_NAME' => 'name',
 		'LBL_LASTTIME' => 'lasttime',
 		'LBL_COMMENT' => 'comment',
 		'LBL_ENABLE' => 'enable',
-		'LBL_NAME' => 'name',
 
 	);
 
@@ -163,5 +163,118 @@ class RSNEmailListes extends Vtiger_CRMEntity {
 		}
 		
 		$log->debug("Invoking deleteDuplicatesFromPickList(".$pickListName.") method ...DONE");
+	}
+	
+	/** Returns a list of the associated campaigns, ...
+	 * saved in vtiger_senotesrel
+	* ED141018
+	*/
+	function get_related_contactemails($id, $cur_tab_id, $rel_tab_id, $actions=false) {
+	       global $log, $singlepane_view,$currentModule,$current_user;
+	       $log->debug("Entering Documents get_related_contactemails(".$id.") method ...");
+	       $this_module = $currentModule;
+	
+	       $related_module = vtlib_getModuleNameById($rel_tab_id);
+	       require_once("modules/$related_module/$related_module.php");
+	       $other = new $related_module();
+	       vtlib_setup_modulevars($related_module, $other);
+	       $singular_modname = vtlib_toSingular($related_module);
+	
+	       $parenttab = getParentTab();
+	
+	       if($singlepane_view == 'true')
+		       $returnset = '&return_module='.$this_module.'&return_action=DetailView&return_id='.$id;
+	       else
+		       $returnset = '&return_module='.$this_module.'&return_action=CallRelatedList&return_id='.$id;
+	
+	       $button = '';
+	       $userNameSql = getSqlForNameInDisplayFormat(array('first_name'=> 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
+	       $query = "SELECT vtiger_contactemails.*, vtiger_contactemailscf.*,
+		       vtiger_crmentity.crmid,
+		       vtiger_crmentity.smownerid,
+		       case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
+		       FROM vtiger_contactemails
+			   INNER JOIN vtiger_rsnemaillistesrel
+				ON vtiger_rsnemaillistesrel.contactemailsid = vtiger_contactemails.contactemailsid
+			   INNER JOIN vtiger_contactemailscf
+				ON vtiger_contactemails.contactemailsid = vtiger_contactemailscf.contactemailsid
+		       INNER JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = vtiger_contactemails.contactemailsid
+		       INNER JOIN vtiger_crmentity vtiger_contacts_crmentity
+				ON vtiger_contacts_crmentity.crmid = vtiger_contactemails.contactid
+		       LEFT JOIN vtiger_groups	ON vtiger_groups.groupid = vtiger_crmentity.smownerid
+		       LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id
+		       WHERE vtiger_crmentity.deleted = 0
+			   AND vtiger_contacts_crmentity.deleted = 0
+		       AND vtiger_rsnemaillistesrel.rsnemaillistesid = ".$id
+		;
+		
+	       $return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
+	
+	       if($return_value == null) $return_value = Array();
+	       $return_value['CUSTOM_BUTTON'] = $button;
+	
+	       $log->debug("Exiting Documents get_related_contactemails method ...");
+	       
+	       /*print_r($query);
+		$db = PearDatabase::getInstance();	$db->setDebug(true);
+		echo_callstack();*/
+	
+	       return $return_value;
+	}
+
+	/* addRelation
+	 */
+	function save_related_module($module, $crmid, $with_module, $with_crmids) {
+		if($with_module !== 'ContactEmails') 
+			return parent::save_related_module($module, $crmid, $with_module, $with_crmids);
+		
+		$adb = PearDatabase::getInstance();
+		
+		if(!is_array($with_crmids)) $with_crmids = Array($with_crmids);
+		foreach($with_crmids as $with_crmid) {
+			$adb->pquery("INSERT INTO vtiger_rsnemaillistesrel (rsnemaillistesid, contactemailsid, datesubscribe)
+					 VALUES(?,?, NOW())", array($crmid, $with_crmid));
+		}
+	}
+
+	/**
+	 * Delete the related module record information. Triggered from updateRelations.php
+	 * @param String This module name
+	 * @param Integer This module record number
+	 * @param String Related module name
+	 * @param mixed Integer or Array of related module record number
+	 */
+	function delete_related_module($module, $crmid, $with_module, $with_crmid) {
+		if($return_module !== 'ContactEmails')
+			return parent::delete_related_module($module, $crmid, $with_module, $with_crmid);
+		global $adb;
+		$params = Array($crmid);
+		
+		$query = "DELETE FROM vtiger_rsnemaillistesrel
+			WHERE rsnemaillistesid = ?
+			AND contactemailsid IN ("
+				.(is_array($with_crmid) ? generateQuestionMarks($with_crmid) : '?')
+			. ')'
+		;
+		if (!is_array($with_crmid))
+			array_push($params, $with_crmid);
+		else
+			$params = array_merge($params, $with_crmid);
+		
+		$result = $adb->pquery($query, $params);
+	}
+
+	// Function to unlink an entity with given Id from another entity
+	function unlinkRelationship($id, $return_module, $return_id) {
+		if($return_module !== 'ContactEmails')
+			return parent::unlinkRelationship($id, $return_module, $return_id);
+		
+		if(empty($return_module) || empty($return_id)) return;
+
+		$sql = 'DELETE FROM vtiger_rsnemaillistesrel WHERE rsnemaillistesid = ? AND contactemailsid = ?';
+		$params = array($id, $return_id);
+		$this->db->pquery($sql, $params);
+	
 	}
 }

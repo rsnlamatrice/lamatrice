@@ -1743,8 +1743,10 @@ var_dump($params);*/
 			$with_crmid = Array($with_crmid);
 		foreach ($with_crmid as $relcrmid) {
 
-			if ($with_module == 'Documents') {
+			if ($with_module === 'Documents') {
 				$adb->pquery("DELETE FROM vtiger_senotesrel WHERE crmid=? AND notesid=?", Array($crmid, $relcrmid));
+			} elseif ($with_module === 'RSNEmailListes') {
+				$adb->pquery("DELETE FROM vtiger_rsnemaillistesrel WHERE contactemailsid = ? AND rsnemaillistesid=?", Array($crmid, $relcrmid));
 			} else {
 				$adb->pquery("DELETE FROM vtiger_crmentityrel WHERE (crmid=? AND module=? AND relcrmid=? AND relmodule=?) OR (relcrmid=? AND relmodule=? AND crmid=? AND module=?)",
 					Array($crmid, $module, $relcrmid, $with_module,$crmid, $module, $relcrmid, $with_module));
