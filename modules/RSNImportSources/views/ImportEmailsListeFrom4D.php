@@ -364,7 +364,10 @@ class RSNImportSources_ImportEmailsListeFrom4D_View extends RSNImportSources_Imp
 				ON vtiger_contactemails_main.contactemailsid = `$tableName`._contactemailsid
 			JOIN vtiger_contactemails 
 				ON vtiger_contactemails.email = vtiger_contactemails_main.email
-			WHERE `$tableName`._rsnemaillistesid IS NOT NULL AND `$tableName`._rsnemaillistesid != ''
+			JOIN vtiger_crmentity
+				ON vtiger_contactemails.contactemailsid = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`._rsnemaillistesid IS NOT NULL AND `$tableName`._rsnemaillistesid != ''
 			AND `$tableName`._contactemailsid IS NOT NULL AND `$tableName`._contactemailsid != ''
 		";
 		if($rsnemaillistesId){

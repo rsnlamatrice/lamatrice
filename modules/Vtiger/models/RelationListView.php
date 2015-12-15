@@ -530,14 +530,14 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		
 		switch($relatedModuleModel->name){
 		case "Documents":
-			$headerFields = array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
-		    	
-			break;
-	
 		case "Campaigns":
 			$headerFields = array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
 		    	
 			break;
+		//TODO case "RSNEmailListes":
+		//	$headerFields = array_merge($headerFields, $relatedModuleModel->getRelationHeaders());
+		//  	
+		//	break;
 		
 		//AUR_TMP AV150702
 		case "RSNStatistics":
@@ -564,14 +564,14 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		}
 		
 		//ED150704
-		$this->initListViewHeadersFilters($listViewHeaders);
-		
-		return $headerFields;
+		return $this->initListViewHeadersFilters($headerFields);
 	}
 
 	/** ED150414
 	 * Function to init fields as list view header filters
 	 * @return <Array> - List of Vtiger_Field_Model instances
+	 *
+	 * Je crois qu'à cette heure, le filtrage des en-têtes de liste liée n'est pas vraiment opérationnelle
 	 */
 	protected function initListViewHeadersFilters($listViewHeaders) {
 		

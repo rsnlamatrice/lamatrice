@@ -681,10 +681,10 @@ class Vtiger_Module_Model extends Vtiger_Module {
 	    return $entityInstance->search_fields_name;
 	}
 
-    /**
-     * Function that returns related list header fields that will be showed in the Related List View
-     * @return <Array> returns related fields list.
-     */
+	/**
+	 * Function that returns related list header fields that will be showed in the Related List View
+	 * @return <Array> returns related fields list.
+	 */
 	public function getRelatedListFields() {
 		$entityInstance = CRMEntity::getInstance($this->getName());
 		$list_fields_name = $entityInstance->list_fields_name;
