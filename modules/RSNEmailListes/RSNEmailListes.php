@@ -36,10 +36,10 @@ class RSNEmailListes extends Vtiger_CRMEntity {
 	 * Mandatory for Listing (Related listview)
 	 */
 	var $list_fields = Array (
-		'LBL_NAME' => array('rsnemaillistes', 'name'),
-		'LBL_ENABLE' => array('rsnemaillistes', 'enable'),
-		'LBL_COMMENT' => array('rsnemaillistes', 'comment'),
-		'LBL_LASTTIME' => array('rsnemaillistes', 'lasttime'),
+		'LBL_NAME' => array('rsnemaillistes' => 'name'),
+		'LBL_ENABLE' => array('rsnemaillistes' => 'enable'),
+		'LBL_COMMENT' => array('rsnemaillistes' => 'comment'),
+		'LBL_LASTTIME' => array('rsnemaillistes' => 'lasttime'),
 
 	);
 	var $list_fields_name = Array (
