@@ -535,7 +535,14 @@ function str_to_float($str){
 	if(!is_string($str))
 		return $str;
 	try {
-		if(!is_numeric($str[0]) && $str[0] != '-' && $str[0] != '+')//TODO ".50"
+		if($str[0] === ' ')
+			$str = trim($str);
+		if($str[0] === '.')
+			$str = '0'.$str;
+		elseif($str[0] === ',')
+			$str = '0.'.substr($str, 1);
+		
+		if(!is_numeric($str[0]) && $str[0] !== '-' && $str[0] !== '+')
 			return false;
 		return (float)str_replace(',', '.', $str);
 	}

@@ -896,19 +896,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 			$db->echoError('clearDuplicatesInTable');
 	}
 	
-	//TODO replace call with global function str_to_float defined in include/utils/CommonUtils.php
 	static function str_to_float($str){
-		if(!is_string($str))
-			return $str;
-		try {
-			if(!is_numeric($str[0]) && $str[0] != '-' && $str[0] != '+')//TODO ".50"
-				return false;
-			return (float)str_replace(',', '.', $str);
-		}
-		catch(Exception $ex){
-			var_dump($ex, $str);
-			die("str_to_float");
-		}
+		return str_to_float($str);//include/utils/CommonUtils.php
 	}
 	
 	/**
@@ -918,94 +907,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	public static function addInvoiceReglementRelation($invoiceId, $rsnReglementsId, $receivedComments){
 		if(!$rsnReglementsId)
 			return;
-		if(is_numeric($rsnReglementsId))
-			$reglement = Vtiger_Record_Model::getInstanceById($rsnReglementsId, 'RsnReglements');
-		else{
-			$reglement = $rsnReglementsId;
-			$rsnReglementsId = $reglement->getId();
-		}
-		if(!$reglement){
-			echo("\nImpossible de retrouver le règlement " . $rsnReglementsId);
-			return;
-		}
-		if(is_numeric($invoiceId))
-			$invoice = Vtiger_Record_Model::getInstanceById($invoiceId, 'Invoice');
-		else{
-			$invoice = $invoiceId;
-			$invoiceId = $invoice->getId();
-		}
-		if(!$reglement){
-			echo("\nImpossible de retrouver la facture " . $invoiceId);
-			return;
-		}
-		
-		global $adb;
-		$query = 'INSERT INTO vtiger_crmentityrel (crmid, module, relcrmid, relmodule)
-			VALUES ( ?, \'Invoice\', ?, \'RsnReglements\')';
-		$params = array($invoice->getId(), $reglement->getId());
-		$result = $adb->pquery($query, $params);
-		if(!$result) {//duplicate
-			$adb->echoError();
-			return false;
-		}
-		
-		//mise à jour de la facture
-		$query = 'UPDATE vtiger_invoice
-			JOIN vtiger_invoicecf
-				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
-			SET received = IFNULL(received,0) + ?
-			, balance = received - total
-			/*, invoicestatus = IF(ABS(balance) < 0.01, \'Paid\', invoicestatus)*/
-			WHERE vtiger_invoice.invoiceid = ?
-			AND (IFNULL(receivedreference, \'\') = \'\' OR receivedreference <> ?)';
-			
-		$amount = self::str_to_float($reglement->get('amount'));
-		
-		$params = array(
-			$amount
-			, $invoice->getId()
-			, $reglement->get('numpiece')
-		);
-		
-		$result = $adb->pquery($query, $params);
-		
-		if(!$result) {
-			var_dump(/*$query,*/ $params);
-			$adb->echoError();
-			return false;
-		}
-		
-		//mise à jour de la facture
-		$query = 'UPDATE vtiger_invoicecf
-			SET receivedreference = IF(receivedreference IS NULL OR receivedreference = \'\', ?, CONCAT(receivedreference, \', \', ?))
-			, receivedcomments = IF(receivedcomments IS NULL OR receivedcomments = \'\', ?, CONCAT(receivedcomments, \'\\n\', ?))
-			, receivedmoderegl = ?
-			WHERE invoiceid = ?
-			AND (IFNULL(receivedreference, \'\') = \'\' OR receivedreference <> ?)';
-		
-		$params = array(
-			$reglement->get('numpiece'), $reglement->get('numpiece')
-			, $receivedComments, $receivedComments
-			, $reglement->get('rsnmoderegl')
-			, $invoice->getId()
-			, $reglement->get('numpiece')
-		);
-		
-		$result = $adb->pquery($query, $params);
-		
-		if(!$result) {
-			var_dump(/*$query,*/ $params);
-			$adb->echoError();
-			return false;
-		}
-		
-		//Affectation du compte et passage au statut Validated
-		$reglement->set('mode', 'edit');
-		$reglement->set('account_id', $invoice->get('account_id'));
-		if($reglement->get('reglementstatus') === 'Created')
-			$reglement->set('reglementstatus', 'Validated');
-		$reglement->save();
-		
+		Invoice_Relation_Model::addInvoiceReglementRelation($invoiceId, $rsnReglementsId, $receivedComments);
 		return true;
 	}
 

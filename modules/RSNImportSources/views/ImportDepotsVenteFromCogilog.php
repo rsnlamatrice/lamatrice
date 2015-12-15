@@ -245,8 +245,8 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	 */
 	function importSalesOrderLine($salesorder, $salesorderLine, $sequence, &$totalAmountHT, &$totalTax){
         
-		$qty = self::str_to_float($salesorderLine['quantity']);
-		$listprice = self::str_to_float($salesorderLine['prix_unit_ht']);
+		$qty = str_to_float($salesorderLine['quantity']);
+		$listprice = str_to_float($salesorderLine['prix_unit_ht']);
 		
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
@@ -725,9 +725,9 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 		$product = array(
 			'productcode'	=> $product[$this->columnName_indexes['code_produit']],
 			'productname'	=> $product[$this->columnName_indexes['nom_produit']],
-			'unit_price'	=> self::str_to_float($product[$this->columnName_indexes['prixvente_produit']]),//TTC, TODO HT
+			'unit_price'	=> str_to_float($product[$this->columnName_indexes['prixvente_produit']]),//TTC, TODO HT
 			'qty_per_unit'	=> 1,
-			'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['tva_produit']]),
+			'taxrate'	=> str_to_float($product[$this->columnName_indexes['tva_produit']]),
 			'rsnsectionanal' => $product[$this->columnName_indexes['section_produit']],
 			'qtyinstock' => $product[$this->columnName_indexes['stock_produit']],
 			'glacct' => $product[$this->columnName_indexes['glacct']],
@@ -780,16 +780,16 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			//var_dump($product);
 			$isProduct = null;
 			$product_name = '';
-			$taxrate = self::str_to_float($product[$this->columnName_indexes['tva_produit']])/100;
-			$qty = self::str_to_float($product[$this->columnName_indexes['quantite']]);
+			$taxrate = str_to_float($product[$this->columnName_indexes['tva_produit']])/100;
+			$qty = str_to_float($product[$this->columnName_indexes['quantite']]);
 			array_push($salesorderValues, array_merge($salesorderHeader, array(
 				'productcode'	=> $product[$this->columnName_indexes['code_produit']],
 				'productid'	=> $this->getProductId($product[$this->columnName_indexes['code_produit']], $isProduct, $product_name),
 				'quantity'	=> $qty,
 				'article'	=> $product_name,
-				'prix_unit_ht'	=> self::str_to_float($product[$this->columnName_indexes['total_ligne_ht']]) / $qty /* / (1 + $taxrate) */,
+				'prix_unit_ht'	=> str_to_float($product[$this->columnName_indexes['total_ligne_ht']]) / $qty /* / (1 + $taxrate) */,
 				'isproduct'	=> $isProduct,
-				'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['tva_produit']]),
+				'taxrate'	=> str_to_float($product[$this->columnName_indexes['tva_produit']]),
             
 			)));
 		}

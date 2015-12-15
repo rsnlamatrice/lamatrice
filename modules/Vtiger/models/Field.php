@@ -553,7 +553,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	public function getFieldInfoForContext($context = false) {
 		
 		//ED151107 : utilisation du cache, car chargements multiples pour l'éditeur de CustomView
-        $fieldInfo = Vtiger_Cache::get('FieldInfoForContext::'.$context, $this->id);
+		$fieldInfo = Vtiger_Cache::get('FieldInfoForContext::'.$context, $this->id);
 		if($fieldInfo){
 			if(is_array($this->fieldInfo))
 				return array_merge($this->fieldInfo, $fieldInfo);
@@ -1382,5 +1382,13 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 */
 	public function getPopupSearchInfo(){
 		return '';
+	}
+	
+	/** ED151215
+	 * Returns true if ui reference field in Edit view enables "create related record".
+	 * see invoice Field_Model
+	 */
+	public function canCreateReferenceRecord(){
+		return true;
 	}
 }
