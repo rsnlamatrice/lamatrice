@@ -40,9 +40,11 @@ class Invoice_GestionVSComptaTVA_View extends Invoice_GestionVSComptaCA_View {
 			
 			$query .= "SELECT `vtiger_invoice`.`invoicedate` AS `Date`
 				, `vtiger_inventorytaxinfo`.`account` AS `Compte`
-				, SUM( ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`, 2 )
+				, SUM( ROUND( (`vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount` )
 					* `vtiger_inventoryproductrel`.tax$TAXID / 100
+					, 2)
 				) AS `Montant`
+				, COUNT(`vtiger_invoice`.`invoice_no`) AS `nombre`
 				FROM `vtiger_invoice`
 				INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
 					ON `vtiger_invoice`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`

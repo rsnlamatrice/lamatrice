@@ -154,7 +154,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`)
 		, IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)
 		
-		ORDER BY `date`, `montant`
+		ORDER BY `date`, `montant`, `nomfacture`
 		
 		";
 		
@@ -204,7 +204,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 		, "ligne"."libelle" || \' - \' || "ligne"."piece"
 		, "ligne"."compte"
 		
-		ORDER BY "ligne"."ladate", "montant"
+		ORDER BY "ligne"."ladate", "montant", "nomfacture"
 		';
 		
 		

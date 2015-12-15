@@ -156,7 +156,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`)
 		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` )
 		
-		ORDER BY `date`, `montant`
+		ORDER BY `date`, `montant`, `nomfacture`
 		
 		";
 		
@@ -203,7 +203,7 @@ class Invoice_GestionVSComptaRows_View extends Invoice_GestionVSCompta_View {
 		, "ligne"."libelle" || \' - \' || "ligne"."piece"
 		, "ligne"."compte"
 		
-		ORDER BY "ligne"."ladate", "montant"
+		ORDER BY "ligne"."ladate", "montant", "nomfacture"
 		';
 		
 		

@@ -136,9 +136,9 @@ class Invoice_GestionVSComptaTVARows_View extends Invoice_GestionVSComptaTVA_Vie
 			$query .= "SELECT `vtiger_invoice`.`invoicedate` AS `Date`
 				, `vtiger_inventorytaxinfo`.`account` AS `Compte`
 				, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`) AS `nomfacture`
-				, SUM( ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`, 2 )
-					* `vtiger_inventoryproductrel`.tax$TAXID / 100
-				) AS `Montant`
+				, ROUND( SUM( (`vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`)
+					* `vtiger_inventoryproductrel`.tax$TAXID / 100)
+				, 2 ) AS `Montant`
 				FROM `vtiger_invoice`
 				INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
 					ON `vtiger_invoice`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
@@ -165,7 +165,7 @@ class Invoice_GestionVSComptaTVARows_View extends Invoice_GestionVSComptaTVA_Vie
 			array_push($params, $dateDebut, $dateFin);
 		}
 		$query .= "
-			ORDER BY `Date`, `Compte`
+			ORDER BY `Date`, `Compte`, `Montant`, `nomfacture`
 		";
 		
 		
@@ -186,7 +186,7 @@ class Invoice_GestionVSComptaTVARows_View extends Invoice_GestionVSComptaTVA_Vie
 		return $entries;
 	}
 	
-	
+	/* copier-coller de GestionVSComptaRows.php */
 	public function getCogilogRowsEntries($dateDebut, $dateFin, $compte){
 		if($compte)
 			$compte = "'$compte'";
@@ -213,7 +213,7 @@ class Invoice_GestionVSComptaTVARows_View extends Invoice_GestionVSComptaTVA_Vie
 		, "ligne"."libelle" || \' - \' || "ligne"."piece"
 		, "ligne"."compte"
 		
-		ORDER BY "ligne"."ladate", "montant"
+		ORDER BY "ligne"."ladate", "montant", "nomfacture"
 		';
 		
 		
