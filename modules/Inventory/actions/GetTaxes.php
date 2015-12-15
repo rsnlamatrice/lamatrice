@@ -49,6 +49,7 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				'priceBook' => getPriceBookDetailsForProduct($recordId),
 				'usageunit' => $recordModel->get('usageunit') ? $recordModel->get('usageunit') : $recordModel->get('service_usageunit'),
 				'productcode' => $recordModel->get('productcode'),
+				'gestionerror' => $recordModel->getGestionError(),
 			);
 			//ED150602
 			if($accountdiscounttype
@@ -85,6 +86,7 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 					'priceBook' => getPriceBookDetailsForProduct($id),
 					'usageunit' => $recordModel->get('usageunit') ? $recordModel->get('usageunit') : $recordModel->get('service_usageunit'),
 					'productcode' => $recordModel->get('productcode'),
+					'gestionerror' => $recordModel->getGestionError(),
 				);
 				//ED150602
 				if($accountdiscounttype

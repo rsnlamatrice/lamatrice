@@ -684,13 +684,24 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		}
 		$query = 'SELECT productid
 			FROM vtiger_products p
-			JOIN vtiger_crmentity e on p.productid = e.crmid
+			JOIN vtiger_crmentity e ON p.productid = e.crmid
 			WHERE p.'.$searchKey.' = ?
 			AND e.deleted = FALSE
+			AND (IFNULL(p.unit_price, 0) = 0
+				OR (
+					IFNULL(p.taxclass, "") != ""
+					AND p.taxclass != "0"
+					AND IFNULL(p.glacct, "") != ""
+				)
+			)
 			ORDER BY discontinued
 			LIMIT 1';
 		$result = $db->pquery($query, array($searchValue));
 		
+		if (!$result) {
+			$db->echoError($query);
+			return false;
+		}
 		if ($db->num_rows($result) == 1) {
 			return true;
 		}
@@ -704,12 +715,27 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		}
 		$query = 'SELECT *
 			FROM vtiger_service s
-			JOIN vtiger_crmentity e on s.serviceid = e.crmid
+			JOIN vtiger_crmentity e ON s.serviceid = e.crmid
+			JOIN vtiger_servicecf scf ON scf.serviceid = e.crmid
 			WHERE s.'.$searchKey.' = ?
 			AND e.deleted = FALSE
+			AND (IFNULL(s.unit_price, 0) = 0
+				OR (
+					IFNULL(s.taxclass, "") != ""
+					AND s.taxclass != "0"
+					AND IFNULL(scf.glacct, "") != ""
+				)
+			)
 			ORDER BY discontinued
 			LIMIT 1';
 		$result = $db->pquery($query, array($searchValue));
+		if (!$result) {
+			$db->echoError($query);
+			return false;
+		}
+		if ($db->num_rows($result) == 1) {
+			return true;
+		}
 		
 		return ($db->num_rows($result) === 1);
 	}
