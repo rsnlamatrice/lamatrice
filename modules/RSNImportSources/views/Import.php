@@ -911,7 +911,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 	static function getTax($rate){
 		if(!$rate)
 			return false;
-		$rate = self::str_to_float($rate);
+		$rate = str_to_float($rate);
 		if(!self::$allTaxes)
 			self::$allTaxes = getAllTaxes();
 		foreach(self::$allTaxes as $tax)
@@ -1004,11 +1004,6 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 
 		Vtiger_Cache::set('ProductCode::Info', $ini_productcode, array('productid'=>false, 'productcode'=>$productcode, 'isProduct'=>$isProduct));
 		return null;
-	}
-	
-	//TODO replace call with global function str_to_float defined in include/utils/CommonUtils.php
-	static function str_to_float($str){
-		return RSNImportSources_Utils_Helper::str_to_float($str);
 	}
 	
 	/** ABSTRACT

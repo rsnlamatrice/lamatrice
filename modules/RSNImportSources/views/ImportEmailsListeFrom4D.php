@@ -165,7 +165,6 @@ class RSNImportSources_ImportEmailsListeFrom4D_View extends RSNImportSources_Imp
 		$record->set('name', $listeName);
 		$record->set('enable', 1);
 		
-		//$db->setDebug(true);
 		$record->save();
 		$rsnemaillistesId = $record->getId();
 		
@@ -359,8 +358,12 @@ class RSNImportSources_ImportEmailsListeFrom4D_View extends RSNImportSources_Imp
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNEmailListes');
 		
 		$query = "INSERT INTO vtiger_rsnemaillistesrel (`rsnemaillistesid`, `contactemailsid`, `datesubscribe`, `dateunsubscribe`, `data`)
-			SELECT `_rsnemaillistesid`, `_contactemailsid`, `datesubscribe`, `dateunsubscribe`, '4D'
+			SELECT `_rsnemaillistesid`, vtiger_contactemails.`contactemailsid`, `datesubscribe`, `dateunsubscribe`, '4D'
 			FROM `$tableName`
+			JOIN vtiger_contactemails vtiger_contactemails_main
+				ON vtiger_contactemails_main.contactemailsid = `$tableName`._contactemailsid
+			JOIN vtiger_contactemails 
+				ON vtiger_contactemails.email = vtiger_contactemails_main.email
 			WHERE `$tableName`._rsnemaillistesid IS NOT NULL AND `$tableName`._rsnemaillistesid != ''
 			AND `$tableName`._contactemailsid IS NOT NULL AND `$tableName`._contactemailsid != ''
 		";
@@ -368,7 +371,7 @@ class RSNImportSources_ImportEmailsListeFrom4D_View extends RSNImportSources_Imp
 			$query .= " AND _rsnemaillistesId = ?";
 			$params = array($rsnemaillistesId);
 		} else {
-			$query .= " AND status = ?";
+			$query .= " AND `$tableName`.status = ?";
 			$params = array(RSNImportSources_Data_Action::$IMPORT_RECORD_NONE);
 		}
 		$query .= " ON DUPLICATE KEY

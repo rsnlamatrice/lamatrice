@@ -45,7 +45,8 @@
 </span>
 {assign var=QUICKCREATE_RESTRICTED_MODULES value=['SalesOrder','Quotes','Invoice','PurchaseOrder']}
 <!-- Show the add button only if it is edit view  -->
-{if $smarty.request.view eq 'Edit' && !in_array($REFERENCE_LIST[0],$QUICKCREATE_RESTRICTED_MODULES)}
+{if $smarty.request.view eq 'Edit' && !in_array($REFERENCE_LIST[0],$QUICKCREATE_RESTRICTED_MODULES)
+	&& $FIELD_MODEL->canCreateReferenceRecord()}
 <span class="add-on cursorPointer createReferenceRecord">
 	<i id="{$MODULE}_editView_fieldName_{$FIELD_NAME}_create" class='icon-plus' title="{vtranslate('LBL_CREATE', $MODULE)}"></i>
 </span>

@@ -2226,4 +2226,5 @@ function montant_en_toutes_lettres($nombre){
 return $nblet;
 
 }
+
 ?>

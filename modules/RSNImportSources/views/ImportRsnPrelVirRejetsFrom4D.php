@@ -369,7 +369,7 @@ class RSNImportSources_ImportRsnPrelVirRejetsFrom4D_View extends RSNImportSource
 			'mois'	=> $rsnprelvirements['prlvInformations'][2],
 			'daterejet'	=> $this->getMySQLDate($rsnprelvirements['prlvInformations'][3]),
 			'motifrejet'	=> ucfirst($rsnprelvirements['prlvInformations'][4]),
-			'montant'	=> self::str_to_float($rsnprelvirements['prlvInformations'][5]),
+			'montant'	=> str_to_float($rsnprelvirements['prlvInformations'][5]),
 			'daterejet'	=> $this->getMySQLDate($rsnprelvirements['prlvInformations'][6]),
 		);
 		$rsnprelvirementsHeader['dateexport'] = $rsnprelvirementsHeader['annee'] . '-' . $rsnprelvirementsHeader['mois'] . '-06';

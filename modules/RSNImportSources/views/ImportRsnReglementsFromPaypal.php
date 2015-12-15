@@ -1335,8 +1335,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	function isValidInformationLine($line) {
 		if (sizeof($line) > 0 && $line[0] != ""
 		    && $this->isDate($line[0]) //date
-		    && self::str_to_float($line[7]) !== FALSE
-		    && self::str_to_float($line[7]) > 0 //ignore les lignes avec un montant négatif
+		    && str_to_float($line[7]) !== FALSE
+		    && str_to_float($line[7]) > 0 //ignore les lignes avec un montant négatif
 		) {
 			return true;
 		}
@@ -1633,8 +1633,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'dateregl'		=> $date,
 			'email'			=> mb_strtolower($reglement[10]),
 			'phone'			=> $reglement[39],
-			'amount'		=> self::str_to_float($reglement[7]),
-			'commission'		=> self::str_to_float($reglement[8]),
+			'amount'		=> str_to_float($reglement[7]),
+			'commission'		=> str_to_float($reglement[8]),
 			'currency_id'		=> $currencyId,
 			'typeregl'		=> $typeregl,
 			'rsnmoderegl'		=> 'PayPal',

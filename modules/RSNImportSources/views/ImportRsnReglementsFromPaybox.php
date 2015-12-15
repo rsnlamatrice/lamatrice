@@ -216,8 +216,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 */
 	function importInvoiceLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
         
-		$qty = self::str_to_float($invoiceLine['quantity']);
-		$listprice = self::str_to_float($invoiceLine['prix_unit_ht']);
+		$qty = str_to_float($invoiceLine['quantity']);
+		$listprice = str_to_float($invoiceLine['prix_unit_ht']);
 		
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
@@ -1245,7 +1245,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'dateoperation'		=> $dateoperation,
 			'email'			=> $reglement[13],
 			'autorisation'		=> $reglement[14],
-			'amount'		=> self::str_to_float($reglement[17]) / 100,
+			'amount'		=> str_to_float($reglement[17]) / 100,
 			'currency_id'		=> $currencyId,
 			'payment'		=> $reglement[23],
 			'paymentstatus'		=> $reglement[28],

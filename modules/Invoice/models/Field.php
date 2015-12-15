@@ -24,4 +24,12 @@ class Invoice_Field_Model extends Inventory_Field_Model {
 		}
 		return parent::getPopupSearchInfo();
 	}
+	
+	/** ED151215
+	 * Returns true if ui reference field in Edit view enables "create related record".
+	 */
+	public function canCreateReferenceRecord(){
+		$restrictedFields = array('notesid', 'campaign_no');
+		return !in_array($this->getName(), $restrictedFields);
+	}
 }
