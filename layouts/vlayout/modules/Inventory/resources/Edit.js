@@ -380,6 +380,19 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 					.removeClass('hide');
 		}
 	},
+	
+	//Affiche une erreur sur le produit
+	showLineItemGestionError : function(lineItemRow, title, error){
+		if(!error) return;
+		$('<pre></pre>')
+			.html(error)
+			.dialog({
+				modal: true,
+				title : title,
+				width: 'auto',
+				height: 'auto',
+			});
+	},
 
 	/**
 	 * Function which will set the discount total value for line item
@@ -737,17 +750,22 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var lineItemNameElment = jQuery('input.productName',parentRow);
 
 		for(var id in responseData){
-			var recordId = id;
-			var recordData = responseData[id];
-			var productcode = recordData.productcode
-			, selectedName = productcode + ' - ' + recordData.name;
-			var unitPrice = recordData.listprice;
-			var usageUnit = recordData.usageunit;
-			var taxes = recordData.taxes;
+			var recordId = id
+			, recordData = responseData[id]
+			, productcode = recordData.productcode
+			, selectedName = productcode + ' - ' + recordData.name
+			, unitPrice = recordData.listprice
+			, usageUnit = recordData.usageunit
+			, taxes = recordData.taxes
+			, gestionError = recordData.gestionerror;
 			//ED151016
 			if (app.getModuleName() === 'PurchaseOrder'
 			&&  recordData.purchaseprice) {
 				unitPrice = recordData.purchaseprice;
+			}
+			if (gestionError) {
+				this.showLineItemGestionError(parentRow, selectedName, gestionError);
+				selectedName = 'ERREUR ' + selectedName;
 			}
 			
 			//ED151208

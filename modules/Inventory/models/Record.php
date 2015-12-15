@@ -250,7 +250,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			$data['accountdiscounttype'] = $parentRecordModel->get('discounttype');
 		}
 		elseif($moduleName === 'Documents'){
-			//Coupon : load related products && services
+			//Coupon : load related products && services : ok mais où ? côté js ?
 		}
 		return $this->setData($data);
 	}

@@ -534,4 +534,12 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		return parent::save();
 	}
 	
+	/* Identifie une erreur de donnée manquante : compte de vente, compte d'achat, TVA
+	 */
+	public function getGestionError(){
+		if(!$this->get('glacct'))
+			return "Le compte de vente est manquant.";
+		if($this->get('unit_price') && !$this->getTaxes())
+			return "Aucune taxe n'est définie.";
+	}
 }

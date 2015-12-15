@@ -30,6 +30,12 @@ class Products_RelationListView_Model extends Vtiger_RelationListView_Model {
 	
 	//ED150630 buttons add for each potype
 	public function getAddRelationLinks() {
+		$parentRecordModel = $this->parentRecordModel;
+		if($parentRecordModel && $parentRecordModel->getGestionError()){
+			echo '<code>'.htmlspecialchars($parentRecordModel->getGestionError()).'</code>';
+			return array();
+		}
+		
 		$addLinkModels = parent::getAddRelationLinks();
 		
 		$relationModel = $this->getRelationModel();
