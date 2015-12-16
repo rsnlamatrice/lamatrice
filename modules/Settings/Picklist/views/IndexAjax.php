@@ -118,6 +118,13 @@ class Settings_Picklist_IndexAjax_View extends Settings_Vtiger_IndexAjax_View {
 			$viewer->assign('PROPERTIES_UICOLOR', $properties["uicolor"]);
 			$viewer->assign('PROPERTIES_UIICON', $properties["uiicon"]);
 		}
+		
+		$settingFieldModels = $fieldModel->getSettingFieldModels($sourceModule);
+		if($settingFieldModels){
+			//var_dump($settingFieldModels);
+			$viewer->assign('SETTING_TABLE_FIELDS_MODELS', $settingFieldModels);
+		}
+		
         $viewer->view('PickListValueDetail.tpl',$qualifiedName);
     }
     

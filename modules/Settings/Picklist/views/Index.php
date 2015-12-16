@@ -31,20 +31,26 @@ class Settings_Picklist_Index_View extends Settings_Vtiger_Index_View {
             $selectedPickListFieldModel = reset($pickListFields);
 
             /* ED141127
-	     * Ajout des données supplémentaires (uicolor, uiicon, ...)
-	     */
-	    $selectedFieldAllPickListData = array();
-            $selectedFieldAllPickListValues = Vtiger_Util_Helper::getPickListValues($selectedPickListFieldModel->getName(), $selectedFieldAllPickListData);
-	    $viewer->assign('PICKLIST_FIELDS',$pickListFields);
-            $viewer->assign('SELECTED_PICKLIST_FIELDMODEL',$selectedPickListFieldModel);
-            $viewer->assign('SELECTED_PICKLISTFIELD_ALL_VALUES',$selectedFieldAllPickListValues);
-            $viewer->assign('SELECTED_PICKLISTFIELD_ALL_DATA',$selectedFieldAllPickListData);
-	
-	    $properties = getPicklistProperties($selectedPickListFieldModel);
-	    if($properties){
-		$viewer->assign('PROPERTIES_UICOLOR', $properties["uicolor"]);
-		$viewer->assign('PROPERTIES_UIICON', $properties["uiicon"]);
-	    }
+			* Ajout des données supplémentaires (uicolor, uiicon, ...)
+			*/
+			$selectedFieldAllPickListData = array();
+			$selectedFieldAllPickListValues = Vtiger_Util_Helper::getPickListValues($selectedPickListFieldModel->getName(), $selectedFieldAllPickListData);
+			$viewer->assign('PICKLIST_FIELDS',$pickListFields);
+			$viewer->assign('SELECTED_PICKLIST_FIELDMODEL',$selectedPickListFieldModel);
+			$viewer->assign('SELECTED_PICKLISTFIELD_ALL_VALUES',$selectedFieldAllPickListValues);
+			$viewer->assign('SELECTED_PICKLISTFIELD_ALL_DATA',$selectedFieldAllPickListData);
+			
+			$properties = getPicklistProperties($selectedPickListFieldModel);
+			if($properties){
+			   $viewer->assign('PROPERTIES_UICOLOR', $properties["uicolor"]);
+			   $viewer->assign('PROPERTIES_UIICON', $properties["uiicon"]);
+			}
+			
+			$settingFieldModels = $selectedPickListFieldModel->getSettingFieldModels($sourceModule);
+			if($settingFieldModels){
+			   //var_dump($settingFieldModels);
+			   $viewer->assign('SETTING_TABLE_FIELDS_MODELS', $settingFieldModels);
+			}
 	    
             $viewer->assign('ROLES_LIST', Settings_Roles_Record_Model::getAll());
         }else{
@@ -65,6 +71,19 @@ class Settings_Picklist_Index_View extends Settings_Vtiger_Index_View {
         
 		$viewer->view('Index.tpl',$qualifiedName);
     }
+	
+	function getHeaderCSS(Vtiger_Request $request) {
+		$headerCssInstances = parent::getHeaderCss($request);
+		$moduleName = $request->getModule();
+
+		$cssFileNames = array(
+			"~/layouts/vlayout/modules/Settings/$moduleName/resources/$moduleName.css",
+		);
+		$cssInstances = $this->checkAndConvertCssStyles($cssFileNames);
+		$headerCssInstances = array_merge($headerCssInstances, $cssInstances);
+		
+		return $headerCssInstances;
+	}
 	
 	function getHeaderScripts(Vtiger_Request $request) {
 		$headerScriptInstances = parent::getHeaderScripts($request);

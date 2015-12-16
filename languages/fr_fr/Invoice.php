@@ -84,6 +84,10 @@ $languageStrings = array(
 	'LBL_DUPLICATE_AS_CREDIT_INVOICE' => 'Générer un avoir',
 	'LBL_DUPLICATE_AS_REFUND' => 'Générer un remboursement',
 	'LBL_REFUND' => 'Remboursement',
+	
+	'comptevente' => 'Compte de vente',
+	'compteencaissement' => 'Compte d\'encaissement',
+	'journalencaissement' => 'Journal d\'encaissement',
 );
 
 $jsLanguageStrings = array(
