@@ -343,15 +343,6 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 					$record->set($vField, $value);
 			}
 			
-		$fieldName = 'remarque';//vtiger_crmentity.description
-		if($contactsData[0][$fieldName]){
-			$vField = $fieldsMapping[$fieldName];
-			$value = $contactsData[0][$fieldName];
-			var_dump(ord($value[0]), dechex(ord($value[0])), ord($value[1]), dechex(ord($value[1])), $value);
-			$value = $contactsData[0][$fieldName];
-			$record->set($vField, $value);
-		}
-		
 		$fieldName = 'lastname';
 		if(!$contactsData[0]['nom']){
 			if( $contactsData[0]['nomassoentreprisealaplacedenomp']
