@@ -36,7 +36,7 @@ class Vtiger_DuplicatesRelations_View extends Vtiger_Popup_View {
 		$headerFields = array();
 		if(count($recordModelsByType['group']))
 			$headerFields['mailingstreet2'] = array('class'=>'span2');
-		$headerFields['accounttype'] = array('class'=>'span2');
+		$headerFields['contacttype'] = array('class'=>'span2');
 		$headerFields['rsnnpai'] = array('class'=>'span1');
 		$headerFields['mailingstreet'] = array('class'=>'span2');
 		$headerFields['mailingzip'] = array('class'=>'span1');

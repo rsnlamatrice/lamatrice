@@ -38,7 +38,10 @@
 		{assign var=PICKLIST_LABEL value=$PICKLIST_ITEM}
 	    {/if}
             <option value="{Vtiger_Util_Helper::toSafeHTML($PICKLIST_KEY)}"
-                {if in_array(Vtiger_Util_Helper::toSafeHTML($PICKLIST_KEY), $FIELD_VALUE_LIST)} selected {/if}>{vtranslate($PICKLIST_LABEL, $MODULE)}
+                {if in_array(Vtiger_Util_Helper::toSafeHTML($PICKLIST_KEY), $FIELD_VALUE_LIST)} selected {/if}
+				{if $PICKLIST_ITEM['operator']} data-searchoperator="{$PICKLIST_ITEM['operator']}"{/if}
+				{if isset($PICKLIST_ITEM['searchvalue'])} data-searchvalue="{$PICKLIST_ITEM['searchvalue']}"{/if}>
+				{vtranslate($PICKLIST_LABEL, $MODULE)}
             </option>
         {/foreach}
 </select>

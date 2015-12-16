@@ -428,7 +428,8 @@ class SalesOrder extends CRMEntity {
 			$row['createdtime'] = new DateTime($row['createdtime']);
 			if($row['typedossier'] === 'Inventaire'
 			|| $row['typedossier'] === 'Solde'){
-				if($row['sostatus'] === 'Cancelled'){
+				if($row['sostatus'] === 'Cancelled'
+				|| $row['sostatus'] === 'Archived'){
 					if(count($dossiers) === 0){
 						//le dossier est annulé mais c'est le premier (peut être le seul)
 						$soldeInactif = $row;
@@ -442,7 +443,8 @@ class SalesOrder extends CRMEntity {
 					break;
 				}
 			}
-			elseif($row['sostatus'] === 'Cancelled')
+			elseif($row['sostatus'] === 'Cancelled'
+				|| $row['sostatus'] === 'Archived')
 				//skip dossier Annulé qui n'est pas de type Solde
 				continue;
 			$dossiers[] = $row;
@@ -469,7 +471,8 @@ class SalesOrder extends CRMEntity {
 		foreach($dossiers as $dossier){
 			if($dossier['typedossier'] === 'Inventaire'
 			|| $dossier['typedossier'] === 'Solde'){
-				if($dossier['sostatus'] === 'Cancelled'){
+				if($dossier['sostatus'] === 'Cancelled'
+				|| $dossier['sostatus'] === 'Archived'){
 					$soldeInactif = $dossier;
 				}
 				else{
@@ -498,7 +501,7 @@ class SalesOrder extends CRMEntity {
 			//Le dossier de Solde est plus vieux que le dossier de variation
 			//on ferme le dossier de solde
 			//on duplique le dossier de variation (pour l'adresse qui est plus à jour) pour en créer le nouveau solde
-			$this->setSalesOrderStatus($soldeActif['crmid'], 'Cancelled');
+			$this->setSalesOrderStatus($soldeActif['crmid'], 'Archived');
 			$soldeRecordModel = $this->duplicateSalesOrder($variation['crmid'], 'Approved', 'Solde');
 			return $soldeRecordModel->getId();
 		}
@@ -537,7 +540,8 @@ class SalesOrder extends CRMEntity {
 		foreach($dossiers as $dossier){
 			if($dossier['typedossier'] === 'Inventaire'
 			|| $dossier['typedossier'] === 'Solde'){
-				if($dossier['sostatus'] === 'Cancelled'){
+				if($dossier['sostatus'] === 'Cancelled'
+				|| $dossier['sostatus'] === 'Archived'){
 					$soldeInactif = $dossier;
 				}
 				else{
@@ -650,9 +654,15 @@ class SalesOrder extends CRMEntity {
 	 */
 	function trash($module, $id) {
 		$sourceRecordModel = Vtiger_Record_Model::getInstanceById($id, $module);
-		$contactId =$sourceRecordModel->get("contact_id");
+		$contactId = $sourceRecordModel->get("contact_id");
+		$typeDossier = $sourceRecordModel->get("typedossier");
+		
 		parent::trash($module, $id);
-		$this->updateSaleOrderSolde($contactId);
+		
+		if($typeDossier !== 'Solde'
+		&& $contactId){
+			$this->updateSaleOrderSolde($contactId);
+		}
 		$this->refreshQtyInDemand(false, $id);
 	}
 	

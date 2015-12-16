@@ -130,7 +130,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			"email" => "email",
 			'phone' => 'phone',
 			'mobile' => 'mobile',
-			'accounttype' => 'accounttype',
+			'contacttype' => 'contacttype',
 			'leadsource' => 'leadsource',
 			'isgroup' => 'isgroup',
 			
@@ -153,7 +153,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$fields = $this->getContactsFieldsMapping();
 		unset($fields['importsourceid']);
 		unset($fields['isgroup']);
-		unset($fields['accounttype']);
+		unset($fields['contacttype']);
 		unset($fields['leadsource']);
 		unset($fields['phone']);
 		unset($fields['mobile']);
@@ -1111,7 +1111,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'mailingcountry' 	=> $invoice['country'],
 			'phone'			=> $phone,
 			'mobile'		=> $mobile,
-			'accounttype'		=> 'Donateur Web',
+			'contacttype'		=> 'Donateur Web',
 			'leadsource'		=> 'PAYPAL',
 			'date'		=> $invoice['invoicedate'],
 		);

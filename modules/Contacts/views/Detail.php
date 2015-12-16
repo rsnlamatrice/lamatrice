@@ -115,7 +115,7 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 			'isgroup',
 			'account_id',
 			'reference',
-			'accounttype',
+			'contacttype',
 			'leadsource',
 			'email',
 			'phone',

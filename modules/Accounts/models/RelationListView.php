@@ -12,6 +12,46 @@
 
 class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 
+	public function getAddRelationLinks() {
+		$relationModel = $this->getRelationModel();
+		$addLinkModel = array();
+
+		if(!$relationModel->isAddActionSupported()) {
+			return $addLinkModel;
+		}
+		$relatedModel = $relationModel->getRelationModuleModel();
+		
+		if($relatedModel->get('label') == 'SalesOrder'){
+			$addLinkList = array(
+				array(
+					'linktype' => 'LISTVIEWBASIC',
+					'linklabel' => 'Ajouter une commande',
+					'linkurl' => $this->getCreateViewUrl() . "&typedossier=Variation",
+					'linkicon' => '',
+				),
+				array(
+					'linktype' => 'LISTVIEWBASIC',
+					'linklabel' => 'Ajouter une facture',
+					'linkurl' => $this->getCreateViewUrl() . "&typedossier=Facture",
+					'linkicon' => '',
+				),
+				array(
+					'linktype' => 'LISTVIEWBASIC',
+					'linklabel' => 'Ajouter un inventaire',
+					'linkurl' => $this->getCreateViewUrl() . "&typedossier=Inventaire",
+					'linkicon' => '',
+				),
+			);
+		}
+		else
+			return parent::getAddRelationLinks();
+		
+		foreach($addLinkList as $addLink) {
+			$addLinkModel[] = Vtiger_Link_Model::getInstanceFromValues($addLink);
+		}
+		return $addLinkModel;
+	}
+	
 	/* Retourne les en-tÍtes des colonnes des tables liÈes
 	 * Ajoute les champs de la relation
 	 * */
@@ -139,6 +179,10 @@ class Accounts_RelationListView_Model extends Vtiger_RelationListView_Model {
 			$relatedRecordIdsList = array_keys($relatedRecordModelsList);
 
 			switch($relatedModuleName){
+			  case "Invoice":
+			  case "RSNAboRevues":
+			  case "SalesOrder":
+				return $relatedRecordModelsList;
 			case "Documents":
 				$query = "SELECT dateapplication,
 					data AS rel_data, $fieldName

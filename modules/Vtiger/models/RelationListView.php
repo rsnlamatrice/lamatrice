@@ -744,7 +744,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			//TODO
 			//cas particulier, conversion fieldname -> columnname
 			switch($searchKey[$i]){
-			 case 'accounttype':
+			 case 'contacttype':
 				$searchKey[$i] = 'contacttype';
 				break;
 			}

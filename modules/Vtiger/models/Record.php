@@ -582,6 +582,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 	
 	/** ED150828 for abstract
 	* getPicklistValues called on HeaderFilter context
+	* see modules\Contacts\models\Record.php
 	*/
 	public function getPicklistValuesDetailsForHeaderFilter($fieldname){
 		return $this->getPicklistValuesDetails($fieldname);

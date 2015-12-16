@@ -42,6 +42,36 @@ class Contacts_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 	}
 	
 	/**
+	 * Function to delete the relation for specified source record id and related record id list
+	 * @param <array> $request
+	 *		keys					Content
+	 *		src_module				source module name
+	 *		src_record				source record id
+	 *		related_module			related module name
+	 *		related_record_list		json encoded of list of related record ids
+	 *
+	 *		ED151216
+	 *			SalesOrder : delete record et non la relation
+	 */
+	function deleteRelation($request) {
+
+		$relatedModule = $request->get('related_module');
+		switch($relatedModule){
+		case "SalesOrder":
+			/* Suppression complète du dépôt-vente */
+			$relatedRecordIds = $request->get('related_record_list');
+			foreach($relatedRecordIds as $relatedRecordId){
+				$relatedRecordModel = Vtiger_Record_Model::getInstanceById($relatedRecordId, $relatedModule);
+				$relatedRecordModel->delete();
+			}
+			break;
+		default:
+			parent::deleteRelation($request);
+			break;
+		}
+	}
+
+	/**
 	 * Function to update Relation DateApplication
 	 * @param Vtiger_Request $request
 	 */

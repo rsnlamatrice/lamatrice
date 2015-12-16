@@ -525,6 +525,6 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	 * Function to get Alphabet Search Field 
 	 */
 	public function getAlphabetSearchField(){
-		return 'isgroup,lastname';//accounttype trop d'éléments
+		return 'isgroup,lastname';//contacttype trop d'éléments
 	}
 }

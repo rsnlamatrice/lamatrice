@@ -19,5 +19,6 @@ class SalesOrder_Module_Model extends Inventory_Module_Model{
 	public function getRefreshQtyInDemandUrl() {
 		return 'index.php?module=Products&view=List&mode=refreshQtyInDemand';
 	}
+
 }
 ?>

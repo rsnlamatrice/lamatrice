@@ -38,7 +38,7 @@ class RSNImportSources_ImportContactsSupprimesFrom4D_View extends RSNImportSourc
 			'remarque' => 'description',
 			'associationcourt' => 'grpnomllong',
 			'datecreation' => '',//updated post creation
-			'conventionnef' => '',//0 ou 1. accounttype += 'Convention NEF'
+			'conventionnef' => '',//0 ou 1. contacttype += 'Convention NEF'
 			'datemodification' => '',//updated post creation. TODO ? MAX(datemodifadresse, datemodification)
 			'presse' => '',//type de contact += 'Média'
 			'p_militante' => '',//type de contact += 'Militant'
@@ -84,7 +84,7 @@ class RSNImportSources_ImportContactsSupprimesFrom4D_View extends RSNImportSourc
 			'top_rnvp' => '',
 			'pasderelancefinanciereweb' => '',
 			'vtiger' => '',
-			'partenaire' => '',//si vrai accounttype += 'Partenaire'
+			'partenaire' => '',//si vrai contacttype += 'Partenaire'
 			'partenairedate' => '',//à mettre dans partenairedescription si ! partenaire 
 			'signatairedate' => '',
 			
@@ -109,7 +109,7 @@ class RSNImportSources_ImportContactsSupprimesFrom4D_View extends RSNImportSourc
 		
 		parent::updateContactRecordModelFromData($record, $contactsData);
 		
-		$fieldName = 'accounttype';
+		$fieldName = 'contacttype';
 		$contactType = TYPE_CONTACT_SUPPRIME;
 		//set
 		$record->set($fieldName, $contactType);

@@ -26,7 +26,7 @@ class Campaigns_RelationListView_Model extends Vtiger_RelationListView_Model {
 		  case "Contacts": //TODO regrouper avec Contacts/models/RelationListView.php
 		    
 		      $headerFieldNames = array(
-			  'isgroup', 'firstname', 'lastname', 'accounttype', 'mailingzip', 'mailingcity', 'mailingcountry'
+			  'isgroup', 'firstname', 'lastname', 'contacttype', 'mailingzip', 'mailingcity', 'mailingcountry'
 		      );
 		      foreach($headerFieldNames as $fieldName) {
 			  $headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
