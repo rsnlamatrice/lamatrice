@@ -33,16 +33,16 @@ class RSN {
 			$this->add_fielduirelation_table();
 			$this->add_rsncity_table();
 		} else if ($eventType == 'module.enabled') {
-			//$this->_registerLinks($moduleName);
-			//$this->setTablesDefaultOwner($moduleName);
+			$this->_registerLinks($moduleName);
+			$this->registerEvents();
+			$this->add_invoice_handler();
+			$this->setTablesDefaultOwner($moduleName);
 			//$this->add_uiclass_field();
 			//$this->add_fielduirelation_table();
 			//$this->add_rsncity_table();
-			//$this->add_invoice_handler();
 			//$this->add_customview_description_field();
 			//$this->add_customview_orderbyfields_field();
 			//$this->add_customview_lockstatus_field();
-			//$this->registerEvents();
 			//self::add_mysql_function_levenshtein();
 			//$this->add_users_default_module_field();
 			//$this->add_vendors_fields();
