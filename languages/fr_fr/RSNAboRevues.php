@@ -19,6 +19,7 @@ $languageStrings = array(
 	'LBL_NBEXEMPLAIRES' => 'Nbre d\'exemplaires',
 	'LBL_FINABO' => 'Fin',
 	'LBL_RSNABOTYPE' => 'Type',
+	'LBL_PARRAINE_PAR' => 'Parrainé(e) par'
 );
 
 ?>
