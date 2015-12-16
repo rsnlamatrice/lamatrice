@@ -33,35 +33,36 @@ class RSN {
 			$this->add_fielduirelation_table();
 			$this->add_rsncity_table();
 		} else if ($eventType == 'module.enabled') {
-			$this->_registerLinks($moduleName);
-			$this->setTablesDefaultOwner($moduleName);
-			$this->add_uiclass_field();
-			$this->add_fielduirelation_table();
-			$this->add_rsncity_table();
-			$this->add_invoice_handler();
-			$this->add_customview_description_field();
-			$this->add_customview_orderbyfields_field();
-			$this->add_customview_lockstatus_field();
-			$this->registerEvents();
-			self::add_mysql_function_levenshtein();
-			$this->add_users_default_module_field();
-			$this->add_vendors_fields();
-			$this->add_salesorder_fields();
-			$this->add_purchaseorders_fields();
-			$this->add_duplicateentities_table();
-			$this->add_products_fields();
-			$this->add_rsnstatisticsfields_fields();
-			$this->add_isabonnable_rsnabotype();
-			$this->add_rsnsqlqueries_fields();
-			$this->add_rsnstatistics_relatedlist();
-			$this->add_organizationparams_table();
-			$this->add_crontasks_fields();
-			$this->add_rsnreglements_fields();
-			$this->add_RSNStatisticsResults_Extension();
-			$this->add_documents_fields();
-			$this->add_parenttab_label_index();
-			$this->add_emaildomains_table();
-			$this->add_contacts_fields();
+			//$this->_registerLinks($moduleName);
+			//$this->setTablesDefaultOwner($moduleName);
+			//$this->add_uiclass_field();
+			//$this->add_fielduirelation_table();
+			//$this->add_rsncity_table();
+			//$this->add_invoice_handler();
+			//$this->add_customview_description_field();
+			//$this->add_customview_orderbyfields_field();
+			//$this->add_customview_lockstatus_field();
+			//$this->registerEvents();
+			//self::add_mysql_function_levenshtein();
+			//$this->add_users_default_module_field();
+			//$this->add_vendors_fields();
+			//$this->add_salesorder_fields();
+			//$this->add_purchaseorders_fields();
+			//$this->add_duplicateentities_table();
+			//$this->add_products_fields();
+			//$this->add_rsnstatisticsfields_fields();
+			//$this->add_isabonnable_rsnabotype();
+			//$this->add_rsnsqlqueries_fields();
+			//$this->add_rsnstatistics_relatedlist();
+			//$this->add_organizationparams_table();
+			//$this->add_crontasks_fields();
+			//$this->add_rsnreglements_fields();
+			//$this->add_RSNStatisticsResults_Extension();
+			//$this->add_documents_fields();
+			//$this->add_parenttab_label_index();
+			//$this->add_emaildomains_table();
+			//$this->add_contacts_fields();
+			$this->add_rsnaborevues_fields();
 		} else if($eventType == 'module.disabled') {
 			// TODO Handle actions before this module is being uninstalled.
 			$this->_deregisterLinks($moduleName);
@@ -785,4 +786,17 @@ ON UPDATE RESTRICT";
 		
 	}
 		
+	
+	static function add_rsnaborevues_fields() {
+		$module = Vtiger_Module_Model::getInstance('RSNAboRevues');
+		foreach( $module->getBlocks() as $block1)
+				break;
+		$existingFields = $module->getFields();
+		$newFields = array(
+			'parraincontactid' 	=> array( 'columntype' => 'INT(19)', 'uitype' => '10', 'tablename' => 'vtiger_rsnaborevues', 'label' => 'LBL_PARRAINE_PAR', 'typeofdata' => 'V~O', 'relatedTo' => 'Contacts' ),
+		);
+		foreach($newFields as $newFieldName => $newField){
+			self::add_new_field($newFieldName, $newField, $block1, $existingFields);
+		}
+	}
 }
