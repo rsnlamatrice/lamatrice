@@ -20,7 +20,8 @@ $languageStrings = array(
 	'LBL_FINABO' => 'Fin',
 	'LBL_RSNABOTYPE' => 'Type',
 	'LBL_PARRAINE_PAR' => 'Parrainé(e) par',
-	'isabonnable' => 'Type abonnable',
+	
+	'isabonnable' => 'Ce type est abonnable',
 );
 
 ?>

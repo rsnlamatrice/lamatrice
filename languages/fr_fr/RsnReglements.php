@@ -30,6 +30,10 @@ $languageStrings = array(
 	'Cancelled' => 'Annulé',
 	'Compta' => 'Comptabilisé',
 	'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
+	
+	'comptevente' => 'Compte de vente',
+	'compteencaissement' => 'Compte d\'encaissement',
+	'journalencaissement' => 'Journal d\'encaissement',
 );
 
 ?>
