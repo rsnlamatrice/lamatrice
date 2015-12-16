@@ -27,7 +27,7 @@ class RSNImportSources_ImportCriteresFrom4D_View extends RSNImportSources_Import
 	 * @return string - the default file encoding.
 	 */
 	public function getDefaultFileEncoding() {
-		return 'ISO-8859-1';
+		return 'WINDOWS-1252';
 	}
 
 	/**

@@ -64,7 +64,7 @@
 									{if $smarty.foreach.more.last OR ($smarty.foreach.more.index+1) % 4 == 0}
 										</div>
 									{/if}
-									{/foreach}
+								{/foreach}
 								{if $USER_MODEL->isAdminUser()}
 									<div class="row-fluid">
 										<a id="menubar_item_moduleManager" href="index.php?module=MenuEditor&parent=Settings&view=Index" class="pull-right">{vtranslate('LBL_CUSTOMIZE_MAIN_MENU',$MODULE)}</a>
