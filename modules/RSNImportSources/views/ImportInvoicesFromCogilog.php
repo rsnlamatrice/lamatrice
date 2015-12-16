@@ -176,7 +176,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	//		'mailingcountry',
 	//		'phone',
 	//		'mobile',
-	//		'accounttype',
+	//		'contacttype',
 	//		'leadsource',
 	//	);
 	//}
@@ -844,7 +844,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'mailingcountry' 	=> $invoiceInformations[$this->columnName_indexes['pays']],
 			'phone'			=> '',
 			'mobile'		=> '',
-			'accounttype'		=> 'Boutique',
+			'contacttype'		=> 'Boutique',
 			'leadsource'		=> 'BOUTIQUE',
 			);
 		$codeClient = preg_replace('/^0+/', '', $contactMapping['reffiche']);

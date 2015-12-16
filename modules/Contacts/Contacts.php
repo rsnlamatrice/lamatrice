@@ -117,7 +117,7 @@ class Contacts extends CRMEntity {
 		'First Name' => 'firstname',
 		'Last Name' => 'lastname',
 		'Compte' => 'accountid',
-		'Type de contact' => 'accounttype',
+		'Type de contact' => 'contacttype',
 		'Ville' => 'mailingcity',
 		'Code postal' => 'mailingzip',
 	);

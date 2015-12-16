@@ -63,7 +63,7 @@
 					<span class="pull-right" style="padding-right:4px;">
 						{$RECORD->get('contact_no')}
 					</span>
-				{elseif $FIELD_NAME == 'accounttype'}
+				{elseif $FIELD_NAME == 'contacttype'}
 					Type de contact / origine
 				{elseif $FIELD_NAME == 'mailingcity'}
 					Adresse
@@ -191,7 +191,7 @@
 								{/if}
 								
 							{* type de contact + origin *}
-							{elseif $FIELD_NAME == 'accounttype'}
+							{elseif $FIELD_NAME == 'contacttype'}
 								{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 								{* origin *}
 								{if $RECORD->get('leadsource')}
@@ -308,7 +308,7 @@
 										<input type="hidden" class="fieldname" value='{$FIELD_NAME}' data-prev-value='{$FIELD_MODEL->get('fieldvalue')}' />
 									</span>
 								{* type de contact -> origin *}
-								{elseif $FIELD_NAME == 'accounttype'}
+								{elseif $FIELD_NAME == 'contacttype'}
 									{assign var=FIELD_NAME value='leadsource'}
 									{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
 									<span class="hide edit span10">{* ED141010 : add RECORD_MODEL=$RECORD*}

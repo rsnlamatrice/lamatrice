@@ -121,7 +121,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			"email" => "email",
 			'phone' => 'phone',
 			'mobile' => 'mobile',
-			'accounttype' => 'accounttype',
+			'contacttype' => 'contacttype',
 			'leadsource' => 'leadsource',
 			'isgroup' => 'isgroup',
 			
@@ -144,7 +144,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		$fields = $this->getContactsFieldsMapping();
 		unset($fields['externalid']);
 		unset($fields['isgroup']);
-		unset($fields['accounttype']);
+		unset($fields['contacttype']);
 		unset($fields['leadsource']);
 		unset($fields['phone']);
 		unset($fields['mobile']);
@@ -890,7 +890,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 			'mailingcountry' 	=> $country == 'France' ? '' : $country,
 			'phone'			=> isset($phone) ? $phone : '',
 			'mobile'		=> isset($mobile) ? $mobile : '',
-			'accounttype'		=> 'Donateur Web',
+			'contacttype'		=> 'Donateur Web',
 			'leadsource'		=> $this->getContactOrigine($rsndonateurswebInformations),
 			'isgroup'			=> 0,
 			'date'				=> $date,

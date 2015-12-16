@@ -127,7 +127,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'email' => 'email',
 			'phone' => 'phone',
 			'mobile' => 'mobile',
-			'accounttype' => 'accounttype',
+			'contacttype' => 'contacttype',
 			'leadsource' => 'leadsource',
 			'date' => '',//createdtime
 			
@@ -157,7 +157,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$fields = $this->getContactsFieldsMapping();
 		unset($fields['sourceid']);
 		unset($fields['isgroup']);
-		unset($fields['accounttype']);
+		unset($fields['contacttype']);
 		unset($fields['leadsource']);
 		unset($fields['phone']);
 		unset($fields['mobile']);
@@ -389,7 +389,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		//'mailingcountry' => 'mailingcountry',
 		//'phone' => 'phone',
 		//'mobile' => 'mobile',
-		//'accounttype' => 'accounttype',
+		//'contacttype' => 'contacttype',
 		//'leadsource' => 'leadsource',
 		//
 		////champ supplémentaire
@@ -1041,7 +1041,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'mailingcountry' 	=> $invoiceInformations[19],
 			'phone'			=> $invoiceInformations[20],
 			'mobile'		=> $invoiceInformations[21],
-			'accounttype'		=> 'Boutique',
+			'contacttype'		=> 'Boutique',
 			'leadsource'		=> 'BOUTIQUE',
 			'date'		=> $date,
 		);

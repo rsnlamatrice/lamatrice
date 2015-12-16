@@ -101,7 +101,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 		
 		      //$headerFieldNames = $relatedModuleModel->getRelatedListFields();
 			$headerFieldNames = array(
-				'isgroup', 'firstname', 'lastname', 'accounttype', 'mailingstreet2',
+				'isgroup', 'firstname', 'lastname', 'contacttype', 'mailingstreet2',
 			);
 		      
 			foreach($headerFieldNames as $fieldName) {

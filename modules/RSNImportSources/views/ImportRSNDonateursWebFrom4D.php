@@ -204,7 +204,7 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 			'mailingcountry' 	=> $country == 'FR' ? '' : $country,
 			'phone'			=> isset($phone) ? $phone : '',
 			'mobile'		=> isset($mobile) ? $mobile : '',
-			'accounttype'		=> 'Donateur Web',
+			'contacttype'		=> 'Donateur Web',
 			'leadsource'		=> $this->getContactOrigine($rsndonateurswebInformations),
 		);
 		return $contactMapping;
