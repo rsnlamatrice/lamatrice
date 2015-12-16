@@ -250,7 +250,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	public function getPicklistValuesDetailsForHeaderFilter($fieldname){
 		if($fieldname == 'isgroup'){
 			$valuesData = $this->getPicklistValuesDetails($fieldname);
-			$valuesData['<>0'] = array( 'label' => '(toutes struct.)', 'icon' => 'icon-rsn-small-collectif' );
+			$valuesData['<>0'] = array( 'label' => '(toutes struct.)', 'icon' => 'icon-rsn-small-collectif', 'operator' => 'k', 'searchvalue' => '0' );
 			return $valuesData;
 		}
 		else

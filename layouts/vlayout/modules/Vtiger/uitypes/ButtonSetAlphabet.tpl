@@ -46,7 +46,15 @@
 								border-style: inset;
 						{/if}
 					{/if}">
-					<a href="#" data-searchvalue="{if $PICKLIST_KEY === 0}0{elseif $PICKLIST_KEY neq '%'}{$PICKLIST_KEY}{/if}">
+						
+					<a href="#" 
+						{if $PICKLIST_ITEM['operator']} data-searchoperator="{$PICKLIST_ITEM['operator']}"{/if}
+						{if isset($PICKLIST_ITEM['searchvalue'])}
+							data-searchvalue="{$PICKLIST_ITEM['searchvalue']}"
+							data-searchinput="{if $PICKLIST_KEY === 0}0{elseif $PICKLIST_KEY neq '%'}{$PICKLIST_KEY}{/if}"
+						{else}
+							data-searchvalue="{if $PICKLIST_KEY === 0}0{elseif $PICKLIST_KEY neq '%'}{$PICKLIST_KEY}{/if}"
+						{/if}>
 						<label class="{$PICKLIST_CLASS}" title="{$PICKLIST_TITLE}">
 						{if $PICKLIST_ICON}<span class="{$PICKLIST_ICON}"></span>&nbsp;{/if}
 						{$PICKLIST_LABEL}</label>

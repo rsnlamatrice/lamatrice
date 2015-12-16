@@ -2057,6 +2057,7 @@ jQuery.Class("Vtiger_List_Js",{
 			var $target = jQuery(e.currentTarget);
 			var $alphabet = $target.find('a');
 			var alphabet = $alphabet.attr('data-searchvalue') !== undefined ? $alphabet.attr('data-searchvalue') : $target.find('a').text();
+			var alphabetInput = $alphabet.attr('data-searchinput') !== undefined ? $alphabet.attr('data-searchinput') : alphabet;
 			var cvId = thisInstance.getCurrentCvId();
 			/* ED150903 defined search key in one ancestor */
 			var $container = $target.parents('.alphabetSorting[data-searchkey]');
@@ -2064,7 +2065,7 @@ jQuery.Class("Vtiger_List_Js",{
 			var specificSearchOperator = $alphabet.attr('data-searchoperator');
 			if(!specificSearchOperator)
 				specificSearchOperator = $container.attr('data-searchoperator');
-			var AlphabetSearchKey = specificSearchKey ? specificSearchKey : thisInstance.getAlphabetSearchField();
+			var alphabetSearchKey = specificSearchKey ? specificSearchKey : thisInstance.getAlphabetSearchField();
 			
 			//ED150903 this search complete header filters
 			var urlParams = thisInstance.getHeadersFiltersUrlParams(e, {
@@ -2077,17 +2078,17 @@ jQuery.Class("Vtiger_List_Js",{
 			});
 			var addKey = true;
 			for(i = 0; i < urlParams.search_key.length; i++)
-				if(urlParams.search_key[i] == AlphabetSearchKey){
+				if(urlParams.search_key[i] == alphabetSearchKey){
 					addKey = false;
 					urlParams.search_value[i] = alphabet;
-					urlParams.search_input[i] = alphabet;
+					urlParams.search_input[i] = alphabetInput;
 					urlParams.operator[i] = specificSearchOperator ? specificSearchOperator : 's';
 					break;
 				}
 			if (addKey) {
-				urlParams.search_key.push( AlphabetSearchKey );
+				urlParams.search_key.push( alphabetSearchKey );
 				urlParams.search_value.push( alphabet );
-				urlParams.search_input.push( alphabet );
+				urlParams.search_input.push( alphabetInput );
 				urlParams.operator.push( specificSearchOperator ? specificSearchOperator : 's' );
 			}
 			
