@@ -38,7 +38,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 	 * @return string - the default file encoding.
 	 */
 	public function getDefaultFileEncoding() {
-		return 'ISO-8859-1';
+		return 'WINDOWS-1252';
 	}
 
 	/**
@@ -93,7 +93,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			'groupe' => '',//NON SIGTR, PROSPECT : quasi sûr que ça ne serve pas
 			'nomassoentreprisealaplacedenomp' => 'mailingaddressformat', //ckeck it
 			'reffiche' => '', //REF UNIQUE -> contact_no
-			'nbabosgroupes' => '', //REVUES EN PLUS DE L'ABONNEMENT
+			'nbabosgroupes' => '', //REVUES DANS L'ABONNEMENT
 			'remarque' => 'description',
 			'associationcourt' => 'grpnomllong',
 			'datecreation' => '',//updated post creation
@@ -343,6 +343,15 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 					$record->set($vField, $value);
 			}
 			
+		$fieldName = 'remarque';//vtiger_crmentity.description
+		if($contactsData[0][$fieldName]){
+			$vField = $fieldsMapping[$fieldName];
+			$value = $contactsData[0][$fieldName];
+			var_dump(ord($value[0]), dechex(ord($value[0])), ord($value[1]), dechex(ord($value[1])), $value);
+			$value = $contactsData[0][$fieldName];
+			$record->set($vField, $value);
+		}
+		
 		$fieldName = 'lastname';
 		if(!$contactsData[0]['nom']){
 			if( $contactsData[0]['nomassoentreprisealaplacedenomp']
@@ -485,7 +494,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		//'groupe' => '',//NON SIGTR, PROSPECT : quasi sûr que ça ne serve pas
 		//'nomassoentreprisealaplacedenomp' => 'mailingaddressformat', //ckeck it
 		//'reffiche' => 'contact_no', //REF UNIQUE, + préfixe
-		//'nbabosgroupes' => '', //REVUES EN PLUS DE L'ABONNEMENT
+		//'nbabosgroupes' => '', //REVUES DANS L'ABONNEMENT
 		//'remarque' => 'description',
 		//'associationcourt' => 'grpnomllong',
 		//'datecreation' => '',//updated post creation
@@ -614,7 +623,10 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		$record->set('assigned_user_id', ASSIGNEDTO_ALL);
 		
 		$fieldName = 'rsnabotype';
-		$value = $typeAbo;
+		if($typeAbo == TYPEABONNE_STANDARD && $contactsData[0]['nbabosgroupes'] > 1)
+			$value = TYPEABONNE_ABOGROUPE;
+		else
+			$value = $typeAbo;
 		$record->set($fieldName, $value);
 		
 		$fieldName = 'account_id';
@@ -647,14 +659,28 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		
 		$fieldName = 'nbexemplaires';
 		if ($typeAbo == 'Ne pas abonner')
-			$value =0 ;
+			$value = 0 ;
 		else
-			$value = $contactsData[0]['nbabosgroupes'] + 1;
+			$value = $contactsData[0]['nbabosgroupes'];
 		$record->set($fieldName, $value);
 				
 		$record->save();
 		$record->set('mode', 'edit');
 		
+		//date de création
+		$value = $dateDebut
+			? (is_string($dateDebut)
+			   ? $dateDebut
+			   : $dateDebut->format('Y-m-d')
+			) : null;
+		if($value){
+			global $adb;
+			$query = 'UPDATE vtiger_entity
+				SET createdtime = ?
+				, modifiedtime = ?
+				WHERE crmid = ?';
+			$adb->pquery($query, array($value, $value, $record->getId()));
+		}
 		return $record;
 	}
 	

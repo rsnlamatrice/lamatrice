@@ -9,7 +9,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 	static $AUTO_MERGE_OVERWRITE = 2;
 	static $AUTO_MERGE_MERGEFIELDS = 3;
 
-	static $supportedFileEncoding = array('UTF-8'=>'UTF-8', 'ISO-8859-1'=>'ISO-8859-1', 'macintosh'=> 'macintosh');
+	static $supportedFileEncoding = array('UTF-8'=>'UTF-8', 'ISO-8859-1'=>'ISO-8859-1', 'WINDOWS-1252'=>'WINDOWS-1252', 'macintosh'=> 'macintosh');
 	static $supportedDelimiters = array(','=>'LBL_COMMA', ';'=>'LBL_SEMICOLON', '	'=>'LBL_TAB');
 	static $supportedFileExtensions = array('csv','xml','json');
 	static $supportedDBTypes = array('postgresql','mysql','mysqli');
@@ -188,7 +188,7 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
             $fieldObject = $moduleFields[$fieldName];
             if (is_object($fieldObject)) {
             	$columnsListQuery .= RSNImportSources_Utils_Helper::getDBColumnType($fieldObject, $fieldTypes);
-            } elseif($fieldName == 'remarque' || $fieldName == 'description') {
+            } elseif($fieldName == 'remarque' || $fieldName == 'description' || $fieldName == 'descriptifgroupe') {
             	$columnsListQuery .= ','.$fieldName.' TEXT';
 			} elseif($fieldName == '_contactid_status') {
             	$columnsListQuery .= ','.$fieldName.' INT(11) DEFAULT NULL';

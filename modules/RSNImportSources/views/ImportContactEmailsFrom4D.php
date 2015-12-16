@@ -27,7 +27,7 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 	 * @return string - the default file encoding.
 	 */
 	public function getDefaultFileEncoding() {
-		return 'ISO-8859-1';
+		return 'WINDOWS-1252';
 	}
 
 	/**

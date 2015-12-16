@@ -25,7 +25,7 @@ class Vtiger_Language_Handler {
 	 */
 	public static function getTranslatedString($key, $module='',$currentLanguage=''){
         if(empty($currentLanguage)) {
-		$currentLanguage = self::getLanguage();
+			$currentLanguage = self::getLanguage();
         }
 		$translatedString = self::getLanguageTranslatedString($currentLanguage, $key, $module);
 
@@ -118,7 +118,7 @@ class Vtiger_Language_Handler {
 	 * @return <array> - array if module has language strings else returns empty array
 	 */
 	public static function getModuleStringsFromFile($language, $module='Vtiger'){
-        $module = str_replace(':', '.', $module);
+		 $module = str_replace(':', '.', $module);
 		if(empty(self::$languageContainer[$language][$module])){
 			$qualifiedName = 'languages.'.$language.'.'.$module;
 			$file = Vtiger_Loader::resolveNameToPath($qualifiedName);
