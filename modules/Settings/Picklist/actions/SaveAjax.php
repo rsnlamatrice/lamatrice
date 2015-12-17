@@ -17,6 +17,7 @@ class Settings_Picklist_SaveAjax_Action extends Settings_Vtiger_Basic_Action {
         $this->exposeMethod('assignValueToRole');
         $this->exposeMethod('saveOrder');
         $this->exposeMethod('enableOrDisable');
+        $this->exposeMethod('saveTableSettingFields');
     }
 
     public function process(Vtiger_Request $request) {
@@ -133,6 +134,20 @@ class Settings_Picklist_SaveAjax_Action extends Settings_Vtiger_Basic_Action {
         } catch (Exception $e) {
             $response->setError($e->getCode(), $e->getMessage());
         }
+        $response->emit();
+    }
+    
+    public function saveTableSettingFields(Vtiger_Request $request) {
+        $pickFieldId = $request->get('pickListFieldId');
+        $fieldModel = Settings_Picklist_Field_Model::getInstance($pickFieldId);
+        
+        $picklistValue = $request->get('picklistvalue');
+        $result = $fieldModel->saveSettingFieldValue($picklistValue, $request);
+        $response = new Vtiger_Response();
+        if($result === true)
+            $response->setResult(array('success',true));
+        else
+            $response->setError($result);
         $response->emit();
     }
     

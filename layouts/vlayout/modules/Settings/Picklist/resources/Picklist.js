@@ -572,6 +572,7 @@ var Settings_Picklist_Js = {
 	},
 	
 	registerSelectPickListValueEvent : function() {
+		var thisInstance = this;
 		jQuery("#pickListValuesTable").on('click','.pickListValue',function(event) {
 			var currentRow = jQuery(event.currentTarget);
 			var currentRowTd = currentRow.find('td');
@@ -583,6 +584,7 @@ var Settings_Picklist_Js = {
 				jQuery(".pickListValue").find('td').not(currentRowTd).removeClass("selectedListItem");
 				currentRowTd.toggleClass('selectedListItem');       
 			}
+			thisInstance.handleSelectedItemFromSettingTableFields(currentRowTd);
 		});
 	},
 	
@@ -664,7 +666,89 @@ var Settings_Picklist_Js = {
 			jQuery('#saveSequence').removeAttr('disabled');
 		});
 	},
+	/**
+	 * Function to register picklist table setting fields events
+	 * ED151216
+	 */
+	registerEventForSettingTableFields : function() {
+		
+		var form = jQuery('#picklistsettingfields');
+		
+		if(form.length == 0)
+			return;
+			
+		//show save button
+		form.on('change', 'input', function(){
+			jQuery('#saveSettingTableFields').removeAttr('disabled');
+		});
+			
+		//Submit
+		form.on('click', '#saveSettingTableFields', function(){
+			var params = form.serializeFormData();
+			AppConnector.request(params).then(function(data) {
+				if(data){
+					jQuery('#saveSettingTableFields').attr('disabled');
+					var params = {
+						title : app.vtranslate('JS_MESSAGE'),
+						text: data.error ? data.error.message : 'Ok',
+						animation: 'show',
+						type: data.error ? 'error' : 'info'
+					};
+					Vtiger_Helper_Js.showPnotify(params);
+				}
+			});
+			return false;
+		});
+	},
 	
+	handleSelectedItemFromSettingTableFields : function(currentRowTd){
+		var form = jQuery('#picklistsettingfields');
+		
+		if(form.length == 0)
+			return;
+		jQuery('#saveSettingTableFields').attr('disabled', 'disabled');
+		var selectedItems = currentRowTd ? currentRowTd.filter('.selectedListItem') : false;
+		form.addClass('no-item-selected');
+		if (selectedItems && selectedItems.length) {
+			var keys = []
+			, pickListFieldId = form.find('input[name="pickListFieldId"]').val();
+			selectedItems.each(function(){ keys.push(this.parentNode.getAttribute('data-key')); });
+			var params = {
+				'parent' : 'Settings',
+				'module' : 'Picklist',
+				'action' : 'GetData',
+				'mode' : 'getSettingFields',
+				'pickListFieldId' : pickListFieldId,
+				'picklistValues' : keys,
+			};
+			AppConnector.request(params).then(function(data) {
+				if(typeof data.result != 'undefined' &&  data.result.success){
+					for ( var picklistValue in data.result.data ) {
+						var fields = data.result.data[picklistValue];
+						form.find(':input[name="picklistvalue"]').val(picklistValue);
+						for (var field in fields) {
+							var $input = form.find(':input[name="' + field + '"]')
+							, value = fields[field];
+							if ($input.length) {
+								if ($input.is(':checkbox')) {
+									$input.filter(':visible').get(0).checked = value == '1';
+								}
+								else
+									$input.val(value);
+							}
+						}
+											 
+						break;//first value only
+					}
+					form.removeClass('no-item-selected');
+				}
+			});
+		}
+		
+	},
+	
+	/** Sortable
+	*/
 	registerPickListValuesSortableEvent : function() {
 		var tbody = jQuery( "tbody",jQuery('#pickListValuesTable'));
 		tbody.sortable({
@@ -746,6 +830,7 @@ var Settings_Picklist_Js = {
 		/* ED141127 */
 		Settings_Picklist_Js.registerEventForColorPickerFields();
 		Settings_Picklist_Js.registerEventForUIProperties();
+		Settings_Picklist_Js.registerEventForSettingTableFields();
 		
 		Settings_Picklist_Js.registerAssingValueToRuleEvent();
 		Settings_Picklist_Js.registerChangeRoleEvent();

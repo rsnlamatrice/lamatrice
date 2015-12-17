@@ -411,28 +411,28 @@ class Vtiger_Util_Helper {
         }
         $db = PearDatabase::getInstance();
 
-	//$query = 'SELECT '.$fieldName.', uicolor FROM vtiger_'.$fieldName.' order by sortorderid';
-	$query = 'SHOW COLUMNS FROM vtiger_'.$fieldName.' LIKE \'ui%\' ';
-	$columns = $db->pquery($query, array());
-	$num_rows = $db->num_rows($columns);
-
-	$ui = array();
-	for($i=0; $i<$num_rows; $i++) {
-	    $row = $db->query_result_rowdata($columns,$i);
-	    $ui[$row['field']] = TRUE;
-	}
-	/*var_dump( $ui );
-	unset($ui['uicolor']);*/
-	/* add missing columns */
-	foreach(array('uicolor'/*, 'uiicon'*/) as $uicolumn){
-	    if(!isset($ui[$uicolumn])){
-		$query = 'ALTER TABLE `vtiger_'.$fieldName.'` ADD `'.$uicolumn.'` VARCHAR(128) NULL';
-		//var_dump( $query );
-		$result = $db->pquery($query, array());
-		$ui[$uicolumn] = $result;
-	    }
-	}
-	$cache->setPicklistUIColumns($fieldName, $ui);
+		//$query = 'SELECT '.$fieldName.', uicolor FROM vtiger_'.$fieldName.' order by sortorderid';
+		$query = 'SHOW COLUMNS FROM vtiger_'.$fieldName.' LIKE \'ui%\' ';
+		$columns = $db->pquery($query, array());
+		$num_rows = $db->num_rows($columns);
+		
+		$ui = array();
+		for($i=0; $i<$num_rows; $i++) {
+			$row = $db->query_result_rowdata($columns,$i);
+			$ui[$row['field']] = TRUE;
+		}
+		/*var_dump( $ui );
+		unset($ui['uicolor']);*/
+		/* add missing columns */
+		foreach(array('uicolor'/*, 'uiicon'*/) as $uicolumn){
+			if(!isset($ui[$uicolumn])){
+				$query = 'ALTER TABLE `vtiger_'.$fieldName.'` ADD `'.$uicolumn.'` VARCHAR(128) NULL';
+				//var_dump( $query );
+				$result = $db->pquery($query, array());
+				$ui[$uicolumn] = $result;
+			}
+		}
+		$cache->setPicklistUIColumns($fieldName, $ui);
         return $ui;
     }
 	

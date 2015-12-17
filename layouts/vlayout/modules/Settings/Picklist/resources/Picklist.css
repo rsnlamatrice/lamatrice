@@ -1,0 +1,11 @@
+
+form#picklistsettingfields.no-item-selected > *{
+	opacity: 0.8;
+}
+form#picklistsettingfields.no-item-selected button {
+	display: none;
+}
+td.selectedListItem {
+	background-color: #E0DAB2 !important;
+	background-image: none !important;
+}

@@ -514,6 +514,9 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
 .popover-content .ui-icon {
   display: inline-block;
 }
+.popover-tooltip td {
+  padding: 4px;
+}
 
 /* popup */
 #searchableColumnsListContainer {
