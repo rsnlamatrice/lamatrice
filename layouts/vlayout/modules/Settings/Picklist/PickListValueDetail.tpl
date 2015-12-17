@@ -83,6 +83,7 @@
 			</div>	
 				
 			{if $SETTING_TABLE_FIELDS_MODELS}
+			<div class="row-fluid">
 				<br><br>{* ED151216 champs complémentaires de la table *}
 				<form id="picklistsettingfields" class="no-item-selected">
 				<fieldset class="padding20">
@@ -105,6 +106,7 @@
 					<span class="span2"><button class="btn btn-success span10 marginLeftZero" disabled="" id="saveSettingTableFields">{vtranslate('LBL_SAVE',$QUALIFIED_MODULE)}</button><br><br>
 					</span>
 				</fieldset></form>
+			</div>	
 			{/if}
 		</div>	
 		<div id="createViewContents" class="hide">
