@@ -642,5 +642,15 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			. (strpos($fields, 'lastname') !== false ? $this->getName() : '')
 			. (strpos($fields, 'mailingstreet2') !== false && $this->get('isgroup') > 0 && $this->get('mailingstreet2') ? ' - ' . $this->get('mailingstreet2') : '');
 		return $html;
-	}	
+	}
+	
+	/** ED150507
+	 * Function to get RSNAboRevues array for this contact, order by decreasing date
+	 */
+	public function getRSNAboRevues($isabonneOnly = false, $dateAbo = false){
+		$account = $this->getAccountRecordModel(false);
+		if(!$account)
+			return false;
+		return $account->getRSNAboRevues($isabonneOnly, $dateAbo);
+	}
 }

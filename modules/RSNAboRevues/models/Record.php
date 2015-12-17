@@ -8,6 +8,7 @@
  *************************************************************************************/
 
 //Valeurs exactes des items de la picklist rsnabotype
+define('RSNABOREVUES_TYPE_ABONNE', 'Abonné(e)');
 define('RSNABOREVUES_TYPE_ABO_PAYANT', 'Abonné(e) payant');
 define('RSNABOREVUES_TYPE_ABO_A_VIE', 'Abonné(e) à vie');
 define('RSNABOREVUES_TYPE_ABO_ADHERENT', 'Abonné(e) comme adhérent(e)');
@@ -98,8 +99,24 @@ class RSNAboRevues_Record_Model extends Vtiger_Record_Model {
 	 * @return <Boolean> - 
 	 */
 	public function isTypeAbo($abotype) {
-		return $this->get('rsnabotype') == $abotype
-			|| $this->get('rsnabotype') == to_html($abotype);
+		return $this->getTypeAbo() == $abotype
+		    || $this->getTypeAbo() == to_html($abotype);
+	}
+	
+	/**
+	 * Function to get abotype
+	 * @return <string> - 
+	 */
+	public function getTypeAbo() {
+		return $this->get('rsnabotype');
+	}
+	
+	/**
+	 * Function to set abotype
+	 * @return $this 
+	 */
+	public function setTypeAbo($abotype) {
+		return $this->set('rsnabotype', $abotype);
 	}
 	
 	/**

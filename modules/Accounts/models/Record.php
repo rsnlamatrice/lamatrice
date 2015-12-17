@@ -180,7 +180,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	/** ED150507
 	 * Function to get RSNAboRevues array for this account, order by decreasing date
 	 */
-	public function getRSNAboRevues($isabonneOnly = false){
+	public function getRSNAboRevues($isabonneOnly = false, $dateAbo = false){
 		
 		$moduleName = $this->getModuleName();
 		$relatedModuleName = 'RSNAboRevues';
@@ -201,14 +201,30 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 //$db = PearDatabase::getInstance();
 //$db->setDebug(true);
 		$allEntries = $relationListView->getEntries($pagingModel);
-		if(!$isabonneOnly)
-			return $allEntries;
+		
 		$entries = array();
-		foreach($allEntries as $id=>$entry)
-			if($entry->get('isabonne'))
-				$entries[$id] = $entry;
-			else
-				break;
+		if($dateAbo){
+			if(is_string($dateAbo))
+				$dateAbo = new DateTime($dateAbo);
+			foreach($allEntries as $id=>$entry)
+				if($entry->getDebutAbo() <= $dateAbo
+				&& (!$entry->getFinAbo() || $entry->getFinAbo() >= $dateAbo)
+				&& (!$isabonneOnly || $entry->get('isabonne')))
+					$entries[$id] = $entry;
+				else
+					break;
+			
+		}
+		elseif(!$isabonneOnly){
+			return $allEntries;
+		}
+		else {
+			foreach($allEntries as $id=>$entry)
+				if($entry->get('isabonne'))
+					$entries[$id] = $entry;
+				else
+					break;
+		}
 		return $entries;
 	}
 	

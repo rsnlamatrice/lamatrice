@@ -210,23 +210,27 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			
 			$db = PearDatabase::getInstance();
 			
-			if($notesId){
-				$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
-						VALUES(?, ?, ?, ?)
-						ON DUPLICATE KEY UPDATE data = ?
-				";
-				$params = array($notesId, $contactId, $dateApplication, $relData, $relData);
-			}
-			else {
-				$query = "INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication, data)
-						VALUES(?, ?, ?, ?)
-						ON DUPLICATE KEY UPDATE data = ?
-				";
-				$params = array($critere4dId, $contactId, $dateApplication, $relData, $relData);
-			}
-			$result = $db->pquery($query, $params);
+			$skipInsertRelation = false;
+			$this->specialCases($critere4dsData, $skipInsertRelation);
 			
-			if(!$result){
+			if(!$skipInsertRelation){
+				if($notesId){
+					$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
+							VALUES(?, ?, ?, ?)
+							ON DUPLICATE KEY UPDATE data = ?
+					";
+					$params = array($notesId, $contactId, $dateApplication, $relData, $relData);
+				}
+				else {
+					$query = "INSERT INTO vtiger_critere4dcontrel (critere4did, contactid, dateapplication, data)
+							VALUES(?, ?, ?, ?)
+							ON DUPLICATE KEY UPDATE data = ?
+					";
+					$params = array($critere4dId, $contactId, $dateApplication, $relData, $relData);
+				}
+				$result = $db->pquery($query, $params);
+			}
+			if(!$skipInsertRelation && !$result){
 				//TODO: manage error
 				$db->echoError();
 				echo "<pre><code>Impossible d'enregistrer la relation du critere4d</code></pre>";
@@ -250,7 +254,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 				);
 				$importDataController->updateImportStatus($critere4dsLine[id], $entityInfo);
 			}
-
+			
 			$log->debug("" . basename(__FILE__) . " update imported critere4ds (contactId=" . $contactId . ", Ref 4D=$sourceId , date=" . $critere4dsData[0]['dateapplication']
 					. ", result=" . ($result ? " true" : "false"). " )");
 			if( ! $result)
@@ -565,29 +569,96 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	/** Traitements spéciaux de migration
 	 *
 	 */
-	function specialCases($critereName, $contact){
+	function specialCases($critere4dsData, &$skipInsertRelation){
+		$critereName = decode_html($critere4dsData[0]['critere']);
 		switch($critereName){
-			case 'courrier_électroniqu':
-				//Coche
-				//	Ne pas envoyer d'email (emailoptout) : si, on peut
-				//	Pas d appel à don Courrier (donotappeldoncourrier) : Ne pas
-				$contact->set('mode', 'edit');
-				$contact->set('emailoptout', false);
-				$contact->set('donotappeldoncourrier', true);
-				//save
-				$contact->save();
-				break;
-			case 'Reçu fiscal spécial':
-				//réflechir pour 2 adresses différente (postale et fiscale)
-				//set use_address2_for_recu_fiscal
-				$contact->set('mode', 'edit');
-				$contact->set('use_address2_for_recu_fiscal', true);
-				//check adresse 2 ou alerte admin
-				//save
-				$contact->save();
-				break;
-			default:
-				break;
+		case 'courrier_électroniqu':
+			//Coche
+			//	Ne pas envoyer d'email (emailoptout) : si, on peut
+			//	Pas d appel à don Courrier (donotappeldoncourrier) : Ne pas
+			$contact = Vtiger_Record_Model::getInstanceById($critere4dsData[0]['_contactid'], 'Contacts');
+			$contact->set('mode', 'edit');
+			$contact->set('emailoptout', false);
+			$contact->set('donotappeldoncourrier', true);
+			//save
+			$contact->save();
+			break;
+		case 'Reçu fiscal spécial':
+			//réflechir pour 2 adresses différente (postale et fiscale)
+			//set use_address2_for_recu_fiscal
+			$contact = Vtiger_Record_Model::getInstanceById($critere4dsData[0]['_contactid'], 'Contacts');
+			$contact->set('mode', 'edit');
+			$contact->set('use_address2_for_recu_fiscal', true);
+			//check adresse 2 ou alerte admin
+			//save
+			$contact->save();
+			break;
+		case 'Parainage_de_la_part':
+			//le critère est ambigü, le parrainage ne correspond pas qu'au abonnement
+			//Affectation du parrain présent dans Data dans le champ parraincontactid de l'abonnement
+			//Modification du type d'abonnement : de Abonné(e) à Abonné(e) parrainé(e)
+			//Si pas d'abo à la date, on crée juste une relation entre les contacts
+			$contact = Vtiger_Record_Model::getInstanceById($critere4dsData[0]['_contactid'], 'Contacts');
+			$dateApplication = $critere4dsData[0]['dateapplication'];
+			$ref4DParrain = $critere4dsData[0]['champcomplementaire'];
+			if(is_numeric($ref4DParrain)){
+				$parrainContactId = $this->getContactIdFromRef4D($ref4DParrain);
+				if($parrainContactId){
+					$dateApplication = new DateTime($dateApplication);
+					$abosRevues = $contact->getRSNAboRevues(false, $dateApplication);
+					if($abosRevues){
+						foreach($abosRevues as $aboRevue){
+							if($aboRevue->isTypeAbo(RSNABOREVUES_TYPE_ABONNE)
+							&& $aboRevue->getDebutAbo() == $dateApplication){
+								$aboRevue->set('mode', 'edit');
+								$aboRevue->setTypeAbo(RSNABOREVUES_TYPE_ABO_PARRAINE);
+								$aboRevue->set('parraincontactid', $parrainContactId);
+								$aboRevue->save();
+								break;//first only
+							}
+						}
+					}
+					$this->insertContactsRelation($contact->getId(), $parrainContactId, $dateApplication, $contact->get('firstname') . ' est parrainé(e)');
+					$skipInsertRelation = true;
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
+	function insertContactsRelation($contactId1, $contactId2, $dateApplication, $contRelType){
+		global $adb;
+		$query = 'SELECT 1
+			FROM vtiger_contactscontrel
+			WHERE (contactid = ? AND relcontid = ?
+				OR contactid = ? AND relcontid = ?)
+			AND dateapplication = ?';
+		$params = array($contactId1, $contactId2, $contactId2, $contactId1);
+		if(is_object($dateApplication))
+			array_push($params, $dateApplication->format('Y-m-d'));
+		else
+			array_push($params, $dateApplication);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			$adb->echoError();
+			die();
+		}
+		if($adb->getRowCount($result))
+			return;
+		
+		$query = 'INSERT INTO vtiger_contactscontrel(`contactid`, `relcontid`, `contreltype`, `dateapplication`, `data`)
+			VALUES (?, ?, ?, ?, NULL)';
+		$params = array($contactId1, $contactId2, $contRelType);
+		if(is_object($dateApplication))
+			array_push($params, $dateApplication->format('Y-m-d'));
+		else
+			array_push($params, $dateApplication);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			$adb->echoError();
+			die();
 		}
 	}
 	
