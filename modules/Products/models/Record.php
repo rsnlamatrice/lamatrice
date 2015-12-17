@@ -539,7 +539,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 	public function getGestionError(){
 		if(!$this->get('glacct'))
 			return "Le compte de vente est manquant.";
-		if($this->get('unit_price') && !$this->getTaxes())
+		if($this->get('listprice') && !$this->getTaxes())
 			return "Aucune taxe n'est définie.";
 	}
 }
