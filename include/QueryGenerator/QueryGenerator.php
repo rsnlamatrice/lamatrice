@@ -447,6 +447,7 @@ class QueryGenerator {
 									$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
 									//get view query, adding filters
 									$relatedSql = $listView->getQuery();
+									$relatedSql_OR = false;
 									//SELECT `id`  only
 									$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
 									if(strpos($relationInfos['fieldName'], '.') === FALSE)
@@ -461,17 +462,32 @@ class QueryGenerator {
 										$relSourceFieldName = isset($relationInfos['sourceFieldNameInRelation']) ? $relationInfos['sourceFieldNameInRelation'] : $relationInfos['fieldName'];
 										
 										$relationTableName = $relationInfos['relationTableName'];
+										$joinField = $relationTableName . '.' . $relationInfos['relatedSourceFieldName'];
 										
+										$subRelatedSql = $relatedSql;
 										
-										$relatedSql = 'SELECT ' . $relSourceFieldName
-											. ' FROM `' . $relationTableName . '`'
-											. ' JOIN (' . $relatedSql . ') ' . $subQueryTable
-											. ' 	ON ' . $relationTableName . '.' . $relationInfos['relatedSourceFieldName']
-											. '		= ' . $subQueryField
+										$relatedSql = 'SELECT ' . $relSourceFieldName . ' 
+											FROM ' . $relationTableName . '
+											JOIN ( ' . $subRelatedSql . ') ' . $subQueryTable . '
+											 	ON ' . $joinField . '
+													= ' . $subQueryField
 										;
-										
 										if($relationFilters)
 											$relatedSql .= $this->getRelationFiltersSQLWhere($relationTableName, $relationFilters);
+										//Même modules (Contact->Contacts, Document->Documents) : reverse SELECT et JOIN
+										if($this->module == $filter['relatedmodulename']){
+											$relatedSql_OR = '
+											SELECT ' . $joinField . ' 
+											FROM ' . $relationTableName . '
+											JOIN ( ' . $subRelatedSql . ') ' . $subQueryTable . '
+											 	ON ' . $relSourceFieldName . '
+													= ' . $subQueryField
+											;
+											if($relationFilters)
+												$relatedSql_OR .= $this->getRelationFiltersSQLWhere($relationTableName, $relationFilters);
+											
+										}
+										
 									}
 									else {
 										$selectColumnSql = 'SELECT ' . $relationInfos['fieldName'];
@@ -500,6 +516,12 @@ class QueryGenerator {
 								$this->addCondition($sourceFieldName
 											, $relatedSql
 											, $filter['comparator']);
+								if($relatedSql_OR){
+									$this->addConditionGlue('OR');
+									$this->addCondition($sourceFieldName
+												, $relatedSql_OR
+												, $filter['comparator']);
+								}
 								$this->endGroup($filter['viewname']);
 									
 								//column_condition

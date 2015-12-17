@@ -68,6 +68,8 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 	
 	/**
 	 * Function to edit related DateApplication for modules of contacts
+	 *
+	 * ED151217, il semble que c'est Vtiger/resources/RelatedList.js::registerEventToEditMultiDatesDateApplication() qui est utilisé
 	 */
 	registerEventToEditContactsDateApplication : function(){
 		var thisInstance = this;
@@ -105,10 +107,9 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 					if(responseData.result[0]){
 			
 						Vtiger_Helper_Js.showPnotify('Ok, c\'est enregistré');
-						
 						element.attr('dateapplication', newValue);
 						//modifie tous les inputs relatifs
-						element.parents('td:first').nextAll('td')
+						element.parents('tr:first')
 							.find('[dateapplication="' + oldValue + '"]')
 								.attr('dateapplication', newValue);
 					}

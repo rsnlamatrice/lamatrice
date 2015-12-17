@@ -104,12 +104,12 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 					'value' => valeur))
 	 */
 	public function updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|data') {
-		//var_dump($sourceRecordId, $data, $fieldToUpdate);
+		//var_dump(__FILE__, $sourceRecordId, $data, $fieldToUpdate);
 		if ($sourceRecordId && $data) {
 			
 			$relatedModuleName = $this->getRelationModuleModel()->getName();
 			if($relatedModuleName !== 'Documents')
-				return parent::updateRelatedField($sourceRecordId, $data = array(), $fieldToUpdate = 'dateapplication|data');
+				return parent::updateRelatedField($sourceRecordId, $data, $fieldToUpdate);
 			
 			switch($fieldToUpdate){
 				case 'rel_data': $fieldToUpdate = 'data'; break;
@@ -145,6 +145,7 @@ class Documents_Relation_Model extends Vtiger_Relation_Model {
 					$params[] = $datum['dateapplication'];
 				}
 				//var_dump($updateQuery, $params);
+				//$db->setDebug(true);
 				if($db->pquery($updateQuery, $params) === FALSE){
 					$db->echoError();
 					return false;

@@ -1052,7 +1052,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 						
 						element.attr('dateapplication', newValue);
 						//modifie tous les inputs relatifs
-						element.parents('td:first').nextAll('td')
+						element.parents('tr:first')
 							.find('[dateapplication="' + oldValue + '"]')
 								.attr('dateapplication', newValue);
 					}

@@ -341,33 +341,32 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 					
 					//TODO AND dataapplication
 					$updateQuery = "UPDATE $tableName
-						SET $fieldToUpdate = ?
-						WHERE (($fieldName = ?
-						AND $sourceFieldNameInRelation = ?"
-					;
-					if($keyDateFieldName && $datum[$keyDateFieldName])
-						$updateQuery .= " AND $keyDateFieldName = ?";
-					$updateQuery .= ")";
-					
-					if($relatedModuleName == "Contacts")
-						$updateQuery .= " OR ($fieldName = ?
-								AND contactid = ?))
-								AND dateapplication = ?";
-					else
-						$updateQuery .= ')';
-						
+						SET $fieldToUpdate = ?";
 					$params[] = $datum['value'];
-					$params[] = $relatedRecordId;
-					$params[] = $sourceRecordId;
-					if($keyDateFieldName && $datum[$keyDateFieldName])
-						$params[] = $datum[$keyDateFieldName];
 					
 					if($relatedModuleName == "Contacts"){
+						$updateQuery .= " WHERE (relcontid = ? AND contactid = ? OR relcontid = ? AND contactid = ?)
+								AND dateapplication = ?";
 						$params[] = $sourceRecordId;
 						$params[] = $relatedRecordId;
+						$params[] = $relatedRecordId;
+						$params[] = $sourceRecordId;
 						$params[] = $datum['dateapplication'];
 					}
-					//	var_dump($updateQuery, $params);
+					else {
+						$updateQuery .= " WHERE $fieldName = ?
+							AND $sourceFieldNameInRelation = ?"; 
+						$params[] = $relatedRecordId;
+						$params[] = $sourceRecordId;
+						
+						if($keyDateFieldName && $datum[$keyDateFieldName]){
+							$updateQuery .= " AND $keyDateFieldName = ?"; 
+							$params[] = $datum[$keyDateFieldName];
+						}
+					}
+					
+				//var_dump($updateQuery, $params);
+				//$db->setDebug(true);
 					if($db->pquery($updateQuery, $params) === FALSE){
 						$db->echoError();
 						var_dump($updateQuery, $params);
