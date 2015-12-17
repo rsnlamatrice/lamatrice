@@ -364,6 +364,7 @@ class QueryGenerator {
 							if(!$filter['subQueryColumn']){//[xx:xx:xx]:subQueryColumn...
 								//echo '<br><br><br><br>'.__FILE__;
 								$relationModel = false;
+								$relatedSql_OR = false;
 								//RSNContactsPanels
 								if($filter['relatedIsPanel']){
 									$sourceFieldName = $this->getSQLColumn('id');
@@ -447,7 +448,6 @@ class QueryGenerator {
 									$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
 									//get view query, adding filters
 									$relatedSql = $listView->getQuery();
-									$relatedSql_OR = false;
 									//SELECT `id`  only
 									$newQuery = preg_split('/\sFROM\s/i', $relatedSql); //ED150226
 									if(strpos($relationInfos['fieldName'], '.') === FALSE)
