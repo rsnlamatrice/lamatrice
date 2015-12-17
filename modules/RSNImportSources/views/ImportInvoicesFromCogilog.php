@@ -471,8 +471,8 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 */
 	function importInvoiceLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
         
-		$qty = self::str_to_float($invoiceLine['quantity']);
-		$listprice = self::str_to_float($invoiceLine['prix_unit_ht']);
+		$qty = str_to_float($invoiceLine['quantity']);
+		$listprice = str_to_float($invoiceLine['prix_unit_ht']);
 		
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
@@ -480,7 +480,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			return;
 		
 		$discount_amount = 0;
-		$discount_percent = self::str_to_float($invoiceLine['remise_ligne']);
+		$discount_percent = str_to_float($invoiceLine['remise_ligne']);
 		$amountHT = $qty * $listprice;
 		$tax = self::getTax($invoiceLine['taxrate']);
 		if($tax){
@@ -866,14 +866,14 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$product = array(
 			'productcode'	=> $product[$this->columnName_indexes['code_produit']],
 			'productname'	=> $product[$this->columnName_indexes['nom_produit']],
-			'unit_price'	=> self::str_to_float($product[$this->columnName_indexes['prixvente_produit']]),//TTC, TODO HT
+			'unit_price'	=> str_to_float($product[$this->columnName_indexes['prixvente_produit']]),//TTC, TODO HT
 			'qty_per_unit'	=> 1,
-			'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['tva_produit']]),
+			'taxrate'	=> str_to_float($product[$this->columnName_indexes['tva_produit']]),
 			'rsnsectionanal' => $product[$this->columnName_indexes['section_produit']],
 			'qtyinstock' => $product[$this->columnName_indexes['stock_produit']],
 			'glacct' => $product[$this->columnName_indexes['glacct']],
 			'discontinued' => $product[$this->columnName_indexes['indisponible']], //TODO n'est ce pas l'inverse ?
-			'remise_ligne'	=> self::str_to_float($product[$this->columnName_indexes['remise_ligne']]),
+			'remise_ligne'	=> str_to_float($product[$this->columnName_indexes['remise_ligne']]),
 		);
 		return $product;
 	}
@@ -907,7 +907,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			'invoicedate'		=> $date,
 			'affaire_code' 	=> $invoiceInformations[$this->columnName_indexes['affaire_code']],
 			'modereglement' => $this->getModeReglement($invoiceInformations[$this->columnName_indexes['compteclient']], $invoiceInformations[$this->columnName_indexes['paiementpropose']], $receivedcomments),
-			'solde'	=> self::str_to_float($invoiceInformations[$this->columnName_indexes['solde']]),
+			'solde'	=> str_to_float($invoiceInformations[$this->columnName_indexes['solde']]),
 			'_receivedcomments' => $receivedcomments,
 			
 		);
@@ -925,17 +925,17 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			//var_dump($product);
 			$isProduct = null;
 			$product_name = '';
-			$taxrate = self::str_to_float($product[$this->columnName_indexes['taux_tva']])/100;
-			$qty = self::str_to_float($product[$this->columnName_indexes['quantite']]);
+			$taxrate = str_to_float($product[$this->columnName_indexes['taux_tva']])/100;
+			$qty = str_to_float($product[$this->columnName_indexes['quantite']]);
 			array_push($invoiceValues, array_merge($invoiceHeader, array(
 				'productcode'	=> $product[$this->columnName_indexes['code_produit']],
 				'productid'	=> $this->getProductId($product[$this->columnName_indexes['code_produit']], $isProduct, $product_name),
 				'quantity'	=> $qty,
 				'article'	=> $product_name,
-				'prix_unit_ht'	=> self::str_to_float($product[$this->columnName_indexes['prix_unit_ht']]),
+				'prix_unit_ht'	=> str_to_float($product[$this->columnName_indexes['prix_unit_ht']]),
 				'isproduct'	=> $isProduct,
-				'taxrate'	=> self::str_to_float($product[$this->columnName_indexes['taux_tva']]),
-				'remise_ligne'	=> self::str_to_float($product[$this->columnName_indexes['remise_ligne']]),
+				'taxrate'	=> str_to_float($product[$this->columnName_indexes['taux_tva']]),
+				'remise_ligne'	=> str_to_float($product[$this->columnName_indexes['remise_ligne']]),
             
 			)));
 		}

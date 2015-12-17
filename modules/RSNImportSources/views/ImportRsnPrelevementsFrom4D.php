@@ -492,7 +492,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			'codebanque'	=> $rsnprelevements['prlvInformations'][3],
 			'codeguichet'	=> $rsnprelevements['prlvInformations'][4],
 			'clerib'	=> $rsnprelevements['prlvInformations'][5],
-			'montant'	=> self::str_to_float($rsnprelevements['prlvInformations'][6]),
+			'montant'	=> str_to_float($rsnprelevements['prlvInformations'][6]),
 			'periodicite'	=> $this->getPeriodiciteFrom4D($rsnprelevements['prlvInformations'][7], $this->getMySQLDate($rsnprelevements['prlvInformations'][11])),
 			'msg'	=> $rsnprelevements['prlvInformations'][8],
 			'datedernmodif'	=> $this->getMySQLDate($rsnprelevements['prlvInformations'][9]),

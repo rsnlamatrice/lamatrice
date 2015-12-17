@@ -541,15 +541,15 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 */
 	function getRsnPrelVirementValues($rsnprelvirements) {
 	//TODO end implementation of this method
-		/*if(!self::str_to_float($rsnprelvirements['prlvInformations'][3]))
-			var_dump('getRsnPrelVirementValues', self::str_to_float($rsnprelvirements['prlvInformations'][3]), $rsnprelvirements['prlvInformations'][3]);
+		/*if(!str_to_float($rsnprelvirements['prlvInformations'][3]))
+			var_dump('getRsnPrelVirementValues', str_to_float($rsnprelvirements['prlvInformations'][3]), $rsnprelvirements['prlvInformations'][3]);
 		*/
 		
 		$rsnprelvirementsHeader = array(
 			'annee'	=> $rsnprelvirements['prlvInformations'][0],
 			'mois'	=> $rsnprelvirements['prlvInformations'][1],
 			'reffiche'	=> $rsnprelvirements['prlvInformations'][2],
-			'montant'	=> self::str_to_float($rsnprelvirements['prlvInformations'][3]),
+			'montant'	=> str_to_float($rsnprelvirements['prlvInformations'][3]),
 			'periodicite'	=> $this->getPeriodiciteFrom4D($rsnprelvirements['prlvInformations'][4], $this->getMySQLDate($rsnprelvirements['prlvInformations'][6])),
 			'separum'	=> $rsnprelvirements['prlvInformations'][5],
 			'dateexport'	=> $this->getMySQLDate($rsnprelvirements['prlvInformations'][6]),
