@@ -13,6 +13,10 @@ require_once 'vtlib/Vtiger/Mailer.php';
 
 class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 	
+	public static function getDefautEmail(){
+		return RSNSysControls_Record_Model::getDefautEmail();
+	}
+	
 	public function checkPermission(){
 		return true;
 	}
@@ -32,20 +36,17 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 		global $current_user;
 		$scheduledSysControls = self::getScheduledSysControls($checkLastTestTime);
 		//un tableau par utilisateur concerné
-		$mailBodies = array( 1 => "");
+		$mailBodies = array();
 		$mailBodyPos = 0;
-		$users = array();
+		$defaultEmail = self::getDefautEmail();
 		foreach ($scheduledSysControls as $scheduledId => $sysControl) {
-			
-			$user = $sysControl->getAssignedUser();
-			$users[$user->getId()] = $user;
 			
 			self::executeSysControl($sysControl, $mailBodies);
 			if($verbose){
-				if($mailBodyPos < strlen($mailBodies[1])){
+				if($mailBodyPos < strlen($mailBodies[$defaultEmail])){
 					echo '<h3>'.$sysControl->getName().'</h3>';
-					echo '<pre>'.substr($mailBodies[1], $mailBodyPos).'</pre>';
-					$mailBodyPos = strlen($mailBodies[1]);
+					echo '<pre>'.substr($mailBodies[$defaultEmail], $mailBodyPos).'</pre>';
+					$mailBodyPos = strlen($mailBodies[$defaultEmail]);
 				}
 			}
 			if($checkLastTestTime){
@@ -54,9 +55,8 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 						->save();
 			}
 		}
-		if($mailBodies[1] && !$verbose){
-			
-			global $HELPDESK_SUPPORT_EMAIL_ID ;
+		
+		if($mailBodies[$defaultEmail] && !$verbose){
 			
 			$server = $GLOBALS['dev_title'];
 			if($server)
@@ -64,16 +64,8 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 			else
 				$server = 'La Matrice';
 			
-			foreach($mailBodies as $userId => $mailBody){
-				$user = $users[$userId];
-				if($user->getId() == 1){
-					$address = $HELPDESK_SUPPORT_EMAIL_ID;
-					$destName = 'Administrateur';
-				}
-				else{
-					$address = $user->get('email1');
-					$destName = $user->get('user_name');
-				}
+			foreach($mailBodies as $address => $mailBody){
+				list($destName) = explode('.', ucfirst($address));
 				echo "
 				Envoi d'un email à $address suite aux contrôles périodiques du système de données.
 				";
@@ -148,15 +140,20 @@ La requête de contrôle \"" . $sysControl->getName() . "\" retourne $result enr
 			}
 		}
 		if($mailBody){
-			$user = $sysControl->getAssignedUser();
-			if(!$mailBodies[$user->getId()])
-				$mailBodies[$user->getId()] = $mailBody;
-			else{
-				$mailBodies[$user->getId()] .= $mailBody;
+			
+			$emails = $sysControl->getDestinationEmails();
+			foreach($emails as $email){
+				if(!$mailBodies[$email])
+					$mailBodies[$email] = $mailBody;
+				else{
+					$mailBodies[$email] .= $mailBody;
+				}
+				if($email != self::getDefautEmail()){
+					list($email) = explode('.', $email);
+					$mailBodies[self::getDefautEmail()] .= $mailBody
+						. "\r\n(suivi par ". $email . ")\r\n\r\n";
+				}
 			}
-			if($user->getId() != 1)
-				$mailBodies[1] .= $mailBody
-					. "\r\n(suivi par ". $user->getName() . ")\r\n\r\n";
 		}
 	}
 }

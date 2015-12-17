@@ -9,7 +9,13 @@
  * Vtiger Entity Record Model Class
  */
 class RSNSysControls_Record_Model extends Vtiger_Record_Model {
-
+	
+	public static function getDefautEmail(){
+		global $HELPDESK_SUPPORT_EMAIL_ID;
+		return $HELPDESK_SUPPORT_EMAIL_ID;
+	}
+	
+	
 	/** ED150609
 	 * return SELECT COUNT(*) query
 	 */
@@ -35,5 +41,14 @@ class RSNSysControls_Record_Model extends Vtiger_Record_Model {
 		}
 		
 		return $user;
+	}
+	
+	public function getDestinationEmails(){
+		$emails = array(self::getDefautEmail());
+		$strEmails = $this->get('destinationemails');
+		if($strEmails)
+			foreach(preg_split('/[,;]/', $strEmails) as $email)
+				$emails[$email] = $email;
+		return $emails;
 	}
 }

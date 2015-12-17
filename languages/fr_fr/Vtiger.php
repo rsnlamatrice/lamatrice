@@ -801,6 +801,8 @@ $languageStrings = array(
 	'AllMenuEditor' => 'Editeur du menu \'Tout\'',
 	
 	'LBL_INSCRIPTIONS' => 'Inscriptions',
+        'RSNSysControls' => 'Contrôles d\'intégrité du système',
+	
 );
 $jsLanguageStrings = array(
 	'JS_EMAIL_SERVER_CONFIGURATION' => 'Veuillez configurer le serveur de messagerie sortant (SMTP)', 
