@@ -1375,12 +1375,15 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 			
 			$query = "SELECT vtiger_crmentity.crmid
-				FROM vtiger_campaignscf
+				, IF(campaignstatus = 'Active', 1, 0)
+				FROM vtiger_campaign
+				JOIN vtiger_campaignscf
+				    ON vtiger_campaignscf.campaignid = vtiger_campaign.campaignid
 				JOIN vtiger_crmentity
-				    ON vtiger_campaignscf.campaignid = vtiger_crmentity.crmid
+				    ON vtiger_campaign.campaignid = vtiger_crmentity.crmid
 				WHERE codeaffaire = ?
 				AND vtiger_crmentity.deleted = 0
-				ORDER BY createdtime DESC
+				ORDER BY IF(campaignstatus = 'Active', 1, 0) DESC, createdtime DESC
 				LIMIT 1
 			";
 			$db = PearDatabase::getInstance();

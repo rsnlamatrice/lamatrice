@@ -11,6 +11,61 @@
 class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 
 	/**
+	 * Function to get the detail view widgets
+	 * @return <Array> - List of widgets , where each widget is an Vtiger_Link_Model
+	 *
+	 * Ajout des blocks Widgets
+	 * La table _Links ne semble pas ?tre utilis?e pour initialiser le tableau
+	 * n?écessite l'existence des fichiers Vtiger/%RelatedModule%SummaryWidgetContents.tpl (tout attach?)
+	 */
+	public function getWidgets() {
+		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
+		$widgetLinks = parent::getWidgets();
+		
+		foreach($widgetLinks as $index => &$widgetLink)
+			if($widgetLink->get('linklabel') === 'LBL_UPDATES'){
+				unset($widgetLinks[$index]);
+				$widgetUpdatesLink = $widgetLink;
+			}
+			
+		$productsInstance = Vtiger_Module_Model::getInstance('Products');
+		if($userPrivilegesModel->hasModuleActionPermission($productsInstance->getId(), 'DetailView')) {
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'Products',
+					'linkName'	=> $productsInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule='.$productsInstance->getName().'&mode=showRelatedRecords&page=1&limit=20',
+					'action'	=> array('Select'),
+					'actionlabel'	=> array('Sélectionner'),
+					'actionURL' =>	$productsInstance->getListViewUrl()
+			);
+		}
+			
+		$servicesInstance = Vtiger_Module_Model::getInstance('Services');
+		if($userPrivilegesModel->hasModuleActionPermission($servicesInstance->getId(), 'DetailView')) {
+			$widgets[] = array(
+					'linktype' => 'DETAILVIEWWIDGET',
+					'linklabel' => 'Services',
+					'linkName'	=> $servicesInstance->getName(),
+					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
+							'&relatedModule='.$servicesInstance->getName().'&mode=showRelatedRecords&page=1&limit=10',
+					'action'	=> array('Select'),
+					'actionlabel'	=> array('Sélectionner'),
+					'actionURL' =>	$servicesInstance->getListViewUrl()
+			);
+		}
+			
+		foreach ($widgets as $widgetDetails) {
+			$widgetLinks[] = Vtiger_Link_Model::getInstanceFromValues($widgetDetails);
+		}
+		if($widgetUpdatesLink)
+			$widgetLinks[] = $widgetUpdatesLink;
+			
+		return $widgetLinks;
+	}
+
+	/**
 	 * Function to get the detail view links (links and widgets)
 	 * @param <array> $linkParams - parameters which will be used to calicaulate the params
 	 * @param boolean $countRelatedEntity - AV150619
