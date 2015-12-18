@@ -472,9 +472,15 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		// ED15015 : un seul contact peut être référent du compte
 		$recordModel->ensureAccountHasOnlyOneMainContact();
 		
+		//via SaveAjax, modification du mail : archive du précédent
 		if($recordModel->get('email_add_history'))
 			$recordModel->createContactEmailsRecord(true, $recordModel->get('email_add_history'), 'Ancienne adresse');
 			
+		//mise à jour (TODO) du mail : définition en Principal
+		if($recordModel->get('email')){
+			//TODO un seul en Principal
+			$recordModel->createContactEmailsRecord(true, $recordModel->get('email'), 'Principal');
+		}
 		return $return;
 	}
 	
