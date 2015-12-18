@@ -30,19 +30,7 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 		echo parent::showModuleDetailView($request);
 		$this->showLineItemDetails($request);
 	}
-
-	/**
-	 * Function returns Inventory details
-	 * @param Vtiger_Request $request
-	 * @return type
-	 */
-	function showDetailViewByMode(Vtiger_Request $request) {
-		return $this->showModuleDetailView($request);
-	}
-
-	//function showModuleBasicView($request) {
-	//	return $this->showModuleDetailView($request);
-	//}
+	
 	/**
 	 * Function returns Inventory Line Items
 	 * @param Vtiger_Request $request

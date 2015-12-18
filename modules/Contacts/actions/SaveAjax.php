@@ -62,6 +62,14 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
+		if(!empty($recordId) && $request->get('fields')) {
+			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+			$fields = $request->get('fields');
+			if(array_key_exists('email', $fields)){
+				$oldEmail = $recordModel->get('email');
+			}
+		}
+		
 		$recordModel = parent::getRecordModelFromRequest($request);
 		
 		if(empty($recordId) && $recordModel->get('donotprospect')) {
@@ -73,6 +81,11 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 			}
 			$fieldName = 'donototherdocuments';
 			$recordModel->set($fieldName, 'Reçu fiscal seul');
+		}
+		if(!empty($recordId) && $request->get('fields')) {
+			if(isset($oldEmail) && $oldEmail != $recordModel->get('email')){
+				$recordModel->set('email_add_history', $oldEmail);
+			}
 		}
 		return $recordModel;
 	}

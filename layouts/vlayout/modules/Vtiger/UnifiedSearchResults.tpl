@@ -54,8 +54,19 @@
 				{assign var="ID" value="{$module}_globalSearch_row_{$smarty.foreach.globalSearch.index+1}"}
 				{assign var=DETAILVIEW_URL value=$recordObject->getDetailViewUrl()}
 				<li id="{$ID}">
-					<a target="_blank" id="{$ID}_link" class="cursorPointer" {if stripos($DETAILVIEW_URL, 'javascript:')===0} 
-							onclick='{$DETAILVIEW_URL|substr:strlen("javascript:")}' {else} onclick='window.location.href="{$DETAILVIEW_URL}"' {/if}>{$recordObject->getName()}
+					<a id="{$ID}_link" class="cursorPointer"
+						style="display: inline-block;"
+						{if stripos($DETAILVIEW_URL, 'javascript:')===0}
+							onclick='{$DETAILVIEW_URL|substr:strlen("javascript:")}'
+						{else}
+							onclick='window.location.href="{$DETAILVIEW_URL}"'
+						{/if}
+						>{$recordObject->getName()}
+					{if stripos($DETAILVIEW_URL, 'javascript:')===false}
+						</a>
+						<a target="_blank" id="{$ID}_link-newwindow" class="cursorPointer pull-right " href='{$DETAILVIEW_URL}'>
+						<span class="ui-icon ui-icon-newwin pull-right" title="ouvrir dans un nouvel onglet"></span>
+					{/if}	
 						<span id="{$ID}_time" class="pull-right" title="{Vtiger_Util_Helper::formatDateTimeIntoDayString($recordObject->get('createdtime'))}">{Vtiger_Util_Helper::formatDateDiffInStrings($recordObject->get('createdtime'))}</span>
 					</a>
 				</li>

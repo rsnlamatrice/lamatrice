@@ -492,7 +492,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * used by Contacts_Save_Action::process
 	 */
-	public function createContactEmailsRecord($save = true, $email = false){
+	public function createContactEmailsRecord($save = true, $email = false, $emailaddressorigin = false){
 		global $adb;
 		if(!$email && !$this->get('email'))
 			return false;
@@ -508,8 +508,15 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			
 		$addressModule = Vtiger_Module_Model::getInstance('ContactEmails');
 		$addressRecord = $addressModule->getRecordModelFromContactAndEmail($this->getId(), $email);
-		if($addressRecord)//already exists
+		if($addressRecord){//already exists
+			if($emailaddressorigin && $emailaddressorigin != $addressRecord->get('')){
+				$addressRecord->set('mode', 'edit');
+				$addressRecord->set('emailaddressorigin', $emailaddressorigin);
+				if($save)
+					$addressRecord->save();
+			}
 			return $addressRecord;
+		}
 		
 		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactEmails');
 		$addressRecord->set('mode', 'create');
@@ -524,6 +531,10 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		}
 		$destField = 'email';
 		$addressRecord->set($destField, $email);
+		
+		$destField = 'emailaddressorigin';
+		if($emailaddressorigin)
+			$addressRecord->set($destField, $emailaddressorigin);
 		
 		if($save){
 			$addressRecord->save();

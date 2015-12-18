@@ -48,3 +48,5 @@
 - Les contacts SUPPRIMES ne doivent plus apparaître dans les relations
 
 - Supprimer le champ contactdetails.ref4d et les triggers liés. bof pour ref4d, non ?...
+
+- Réactiver les contrôles du système (Adresses secondaires)
