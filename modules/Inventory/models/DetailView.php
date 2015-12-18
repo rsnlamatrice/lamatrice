@@ -26,6 +26,7 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 			if($widgetLink->get('linklabel') === 'LBL_UPDATES'){
 				unset($widgetLinks[$index]);
 				$widgetUpdatesLink = $widgetLink;
+				break;
 			}
 			
 		$productsInstance = Vtiger_Module_Model::getInstance('Products');
@@ -41,6 +42,9 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 					'actionURL' =>	$productsInstance->getListViewUrl()
 			);
 		}
+		
+		if($widgetUpdatesLink)
+			$widgets[] = $widgetUpdatesLink;
 			
 		$servicesInstance = Vtiger_Module_Model::getInstance('Services');
 		if($userPrivilegesModel->hasModuleActionPermission($servicesInstance->getId(), 'DetailView')) {
@@ -57,10 +61,11 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 		}
 			
 		foreach ($widgets as $widgetDetails) {
-			$widgetLinks[] = Vtiger_Link_Model::getInstanceFromValues($widgetDetails);
+			if(is_array($widgetDetails))
+				$widgetLinks[] = Vtiger_Link_Model::getInstanceFromValues($widgetDetails);
+			else
+				$widgetLinks[] = $widgetDetails;
 		}
-		if($widgetUpdatesLink)
-			$widgetLinks[] = $widgetUpdatesLink;
 			
 		return $widgetLinks;
 	}

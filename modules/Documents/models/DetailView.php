@@ -73,6 +73,7 @@ class Documents_DetailView_Model extends Vtiger_DetailView_Model {
 			if($widgetLink->get('linklabel') === 'LBL_UPDATES'){
 				unset($widgetLinks[$index]);
 				$widgetUpdatesLink = $widgetLink;
+				break;
 			}
 			
 		$productsInstance = Vtiger_Module_Model::getInstance('Products');

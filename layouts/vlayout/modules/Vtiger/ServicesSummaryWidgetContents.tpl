@@ -25,6 +25,13 @@
 								<span class="pull-right">{$RELATED_RECORD->getDisplayValue('productcode')}</span>
 							</a>
 						</span>
+						{if $RELATED_RECORD->getDisplayValue('quantity')}
+						<span class="span2">
+							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
+								<span class="pull-right">{$RELATED_RECORD->getDisplayValue('quantity')}</span>
+							</a>
+						</span>
+						{/if}
 						<span class="span2">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
 								{if (float)$RELATED_RECORD->get('unit_price') neq 0}

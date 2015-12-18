@@ -40,9 +40,9 @@ class Inventory_Detail_View extends Vtiger_Detail_View {
 		return $this->showModuleDetailView($request);
 	}
 
-	function showModuleBasicView($request) {
-		return $this->showModuleDetailView($request);
-	}
+	//function showModuleBasicView($request) {
+	//	return $this->showModuleDetailView($request);
+	//}
 	/**
 	 * Function returns Inventory Line Items
 	 * @param Vtiger_Request $request

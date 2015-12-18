@@ -11,6 +11,13 @@
 class SalesOrder_Module_Model extends Inventory_Module_Model{
 
 	
+	/**
+	 * Function to check whether the module is summary view supported
+	 * @return <Boolean> - true/false
+	 */
+	public function isSummaryViewSupported() {
+		return true;
+	}
 
 	/** ED150928
 	 * Function to get the url pour le recalcul des quantités en demande

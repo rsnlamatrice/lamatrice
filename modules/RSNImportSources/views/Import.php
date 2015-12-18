@@ -1375,7 +1375,6 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			}
 			
 			$query = "SELECT vtiger_crmentity.crmid
-				, IF(campaignstatus = 'Active', 1, 0)
 				FROM vtiger_campaign
 				JOIN vtiger_campaignscf
 				    ON vtiger_campaignscf.campaignid = vtiger_campaign.campaignid
