@@ -259,7 +259,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOneInvoice($invoiceData, $importDataController) {
-					
+		
 		global $log;
 		
 		//TODO check sizeof $invoiceata
@@ -770,14 +770,14 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 *  It cache the value in the $this->coupon attribute.
 	 * @return the coupon.
 	 */
-	protected function getCoupon($reglement){
-		$typeregl = $this->getInvoiceType($reglement['reference']);
-		switch($typeregl){
+	protected function getCoupon($invoiceData){
+		$invoicetype = $invoiceData['invoicetype'];
+		switch($invoicetype){
 		 case 'DR':
 			$codeAffaire='PAYBOX';
 			break;
 		 case 'DP':
-			$codeAffaire='PAYBOXR';
+			$codeAffaire='PAYBOXP';
 			break;
 		 default:
 			$codeAffaire='BOUTIQUE';
@@ -982,9 +982,9 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		
 		$query = "SELECT COUNT(*)
-		FROM $tableName
-		WHERE `_contactid` IS NULL
-		AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			FROM $tableName
+			WHERE `_contactid` IS NULL
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
 		$result = $db->pquery($query, array());
 		if(!$result){
@@ -997,6 +997,22 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		if($count){
 			echo '<br><br><br><br>';
 			echo '<code>Attention, '.$count.' donateur'.($count > 1 ? 's' : '').' web introuvable'.($count > 1 ? 's' : '').'.</code>';
+			$query = "SELECT *
+				FROM $tableName
+				WHERE `_contactid` IS NULL
+				AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+				LIMIT 12
+			";
+			echo "<table>";
+			$result = $db->pquery($query, array());
+			while ($row = $db->getNextRow($result)){
+				echo "<tr>";
+				foreach($row as $column=>$value)
+					if(!is_numeric($column))
+						echo "<td>$value</td>";
+				echo "</tr>";
+			}
+			echo "</table>";
 			exit;
 		}
         
@@ -1079,9 +1095,11 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @return boolean - true if the line is a validated receipt.
 	 */
 	function isValidInformationLine($line) {
+		$emailTests = array('sabine@pustule.org');
 		if (sizeof($line) > 0 && is_numeric($line[2])
 		    && $this->isDate($line[9]) //date
 		    && $line[3] == 1 //Rank
+		    && !in_array($line[13], $emailTests)
 		) {
 			return true;
 		}

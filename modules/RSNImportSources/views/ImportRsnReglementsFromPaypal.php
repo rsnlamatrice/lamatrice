@@ -811,7 +811,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOneInvoice($invoiceData, $importDataController) {
-					
+	
 		global $log;
 		
 		//TODO check sizeof $invoiceata
@@ -1304,6 +1304,17 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		return parent::getCoupon($codeAffaire);
 	}
         
+	function getFinalCodeAffaire($codeAffaire){
+		switch($codeAffaire){
+		case 'FONLFDS2':
+		case 'FONLFDS1':
+			return 'FONLFDS';
+		default:
+			return $codeAffaire;
+		}
+		
+	}
+	
 	/**
 	 * Method that check if a string is a formatted date (DD/MM/YYYY).
 	 * @param string $string : the string to check.
@@ -1521,7 +1532,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				break;
 			}
 			$modeRegl = $reglement['rsnmoderegl'];
-			
+			$codeAffaire = $this->getFinalCodeAffaire($clickSource);
 			$typeDossier = $this->getInvoiceTypeDossier($invoiceType);
 			$invoiceValues = array(
 				'importsourceid'		=> $importSourceId,
@@ -1530,7 +1541,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				'invoicetype'		=> $invoiceType,
 				'subject'		=> $product['name'],
 				'invoicedate'		=> $date,
-				'affaire_code' => $clickSource,
+				'affaire_code' => $codeAffaire,
 				'typedossier' => $typeDossier,
 				'receivedmoderegl' => $modeRegl,
 			);

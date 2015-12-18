@@ -17,6 +17,36 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 	detailViewContainer : false,
 	relatedContentContainer : false,
 	
+	//ED151218 : tentative de reproduction du modele de Vtiger_List_Js.getInstance
+	relatedListInstance : false,
+	getInstance: function(){
+		if(Vtiger_RelatedList_Js.relatedListInstance == false){
+			var module = app.getModuleName();
+			var parentModule = app.getParentModuleName();
+			if(parentModule == 'Settings'){
+				var moduleClassName = parentModule+"_"+module+"_RelatedList_Js";
+				if(typeof window[moduleClassName] == 'undefined'){
+					moduleClassName = module+"_RelatedList_Js";
+				}
+				var fallbackClassName = parentModule+"_Vtiger_RelatedList_Js";
+				if(typeof window[fallbackClassName] == 'undefined') {
+					fallbackClassName = "Vtiger_RelatedList_Js";
+				}
+			} else {
+				moduleClassName = module+"_RelatedList_Js";
+				fallbackClassName = "Vtiger_RelatedList_Js";
+			}
+			if(typeof window[moduleClassName] != 'undefined'){
+				var instance = new window[moduleClassName]();
+			}else{
+				var instance = new window[fallbackClassName]();
+			}
+			Vtiger_RelatedList_Js.relatedListInstance = instance;
+			return instance;
+		}
+		return Vtiger_RelatedList_Js.relatedListInstance;
+	},
+	
 	setSelectedTabElement : function(tabElement) {
 		this.selectedRelatedTabElement = tabElement;
 	},
@@ -383,7 +413,7 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 	addRelatedRecord : function(element){
 		var aDeferred = jQuery.Deferred();
 		var thisInstance = this;
-		var	referenceModuleName = this.relatedModulename;
+		var referenceModuleName = this.relatedModulename;
 		var parentId = this.getParentId();
 		var parentModule = this.parentModuleName;
 		var quickCreateParams = {};
@@ -1017,11 +1047,11 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 	 */
 	registerEventToEditMultiDatesDateApplication : function(){
 		var thisInstance = this;
-		jQuery('.dateapplication').on('click',function(e){
+		var listViewPageDiv = thisInstance.relatedContentContainer;
+		listViewPageDiv.on('click', ':input', function(e){
 			e.stopImmediatePropagation();
 		});
-		var $input = jQuery('.dateapplication');
-		$input.on('change',':input:visible',function(e){
+		listViewPageDiv.on('click', ':input.dateapplication:visible',function(e){
 			e.stopImmediatePropagation();
 			var element = jQuery(e.currentTarget);
 			var inputid = this.id;
@@ -1080,12 +1110,9 @@ jQuery.Class("Vtiger_RelatedList_Js",{},{
 	 */
 	registerEventToEditMultiDatesInformation : function(){
 		var thisInstance = this;
-		jQuery('.rel_data').on('click',function(e){
-			e.stopImmediatePropagation();
-		});
 	
-		var $input = jQuery('.rel_data');
-		$input.on('change', null, function(e){
+		var listViewPageDiv = thisInstance.relatedContentContainer;
+		listViewPageDiv.on('change', ':input.rel_data',function(e){
 			e.stopImmediatePropagation();
 			var element = jQuery(e.currentTarget);
 			var value = this.value;

@@ -73,11 +73,11 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 	 */
 	registerEventToEditContactsDateApplication : function(){
 		var thisInstance = this;
-		jQuery('.dateapplication').on('click',function(e){
+		var listViewPageDiv = thisInstance.relatedContentContainer;
+		listViewPageDiv.on('click', ':input', function(e){
 			e.stopImmediatePropagation();
 		});
-		var $input = jQuery('.dateapplication');
-		$input.on('change',':input:visible',function(e){
+		listViewPageDiv.on('click', ':input.dateapplication:visible',function(e){
 			e.stopImmediatePropagation();
 			var element = jQuery(e.currentTarget);
 			var inputid = this.id;
@@ -138,12 +138,8 @@ Vtiger_RelatedList_Js("Contacts_RelatedList_Js",{
 	 */
 	registerEventToEditContactsInformation : function(){
 		var thisInstance = this;
-		jQuery('.contreltype').on('click',function(e){
-			e.stopImmediatePropagation();
-		});
-	
-		var $input = jQuery('.contreltype');
-		$input.on('change', null, function(e){
+		var listViewPageDiv = thisInstance.relatedContentContainer;
+		listViewPageDiv.on('change', ':input.contreltype',function(e){
 			e.stopImmediatePropagation();
 			var element = jQuery(e.currentTarget);
 			var value = this.value;

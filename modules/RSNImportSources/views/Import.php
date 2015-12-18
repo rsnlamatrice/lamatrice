@@ -1341,9 +1341,12 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			LIMIT 1
 		";
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($codeAffaire, COUPON_FOLDERID));
-		if(!$result)
-			$db->echoError();
+		$params = array($codeAffaire, COUPON_FOLDERID);
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError(__FILE__ . '::getCoupon()');
+			return;
+		}
 		if($db->num_rows($result)){
 			$row = $db->fetch_row($result, 0);
 			$coupon = Vtiger_Record_Model::getInstanceById($row['crmid'], 'Documents');
@@ -1377,6 +1380,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				    ON vtiger_campaignscf.campaignid = vtiger_crmentity.crmid
 				WHERE codeaffaire = ?
 				AND vtiger_crmentity.deleted = 0
+				ORDER BY createdtime DESC
 				LIMIT 1
 			";
 			$db = PearDatabase::getInstance();
@@ -1396,7 +1400,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		
 		//Pas de campagne, on cherche sans le coupon
 		if(count($campaigns) === 0)
-			return $this->getCampaign($srcRow, null);
+			return $this->getCampaign($codeAffaire, null);
 		
 		//Cherche celui qui aurait le même ode affaire
 		foreach($campaigns as $campaign){

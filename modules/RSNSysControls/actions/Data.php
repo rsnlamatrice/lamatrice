@@ -142,13 +142,14 @@ La requête de contrôle \"" . $sysControl->getName() . "\" retourne $result enr
 		if($mailBody){
 			
 			$emails = $sysControl->getDestinationEmails();
+			$defaultEmail = self::getDefautEmail();
 			foreach($emails as $email){
 				if(!$mailBodies[$email])
 					$mailBodies[$email] = $mailBody;
 				else{
 					$mailBodies[$email] .= $mailBody;
 				}
-				if($email != self::getDefautEmail()){
+				if($email != $defaultEmail){
 					list($email) = explode('.', $email);
 					$mailBodies[self::getDefautEmail()] .= $mailBody
 						. "\r\n(suivi par ". $email . ")\r\n\r\n";
