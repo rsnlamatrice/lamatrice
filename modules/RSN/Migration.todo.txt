@@ -1,0 +1,6 @@
+- Après import, vérifier vtiger_rsnemaillistesrel
+
+vtiger_critere4dcontrel : 0
+vtiger_contactscontrel : 0
+
+- Commandes fournisseurs !
