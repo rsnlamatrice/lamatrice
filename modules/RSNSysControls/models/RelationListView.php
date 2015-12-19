@@ -153,7 +153,7 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 		$queryGenerator->setFields($relatedListFields);
 		$query = $queryGenerator->getQuery();
 		
-		$query = 'SELECT vtiger_crmentity.crmid, ' . substr($query, stripos('SELECT ') + 6);
+		$query = 'SELECT vtiger_crmentity.crmid, ' . substr($query, stripos($query, 'SELECT ') + 6);
 		
 		$query .= ' AND vtiger_crmentity.crmid IN (SELECT crmid FROM (
 			/*SysControl*/'.$ctrlQuery.'/*/SysControl*/

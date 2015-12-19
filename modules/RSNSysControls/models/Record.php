@@ -15,6 +15,15 @@ class RSNSysControls_Record_Model extends Vtiger_Record_Model {
 		return $HELPDESK_SUPPORT_EMAIL_ID;
 	}
 	
+	public function getResultsUrl(){
+		global $site_URL;
+		return $site_URL."index.php"
+			."?module=".$this->getModuleName()
+			."&view=Detail"
+			."&relatedModule=".$this->get('relatedmodule')
+			."&record=".$this->getId()
+			."&mode=showSysControlsResult";
+	}
 	
 	/** ED150609
 	 * return SELECT COUNT(*) query
@@ -45,6 +54,8 @@ class RSNSysControls_Record_Model extends Vtiger_Record_Model {
 	
 	public function getDestinationEmails(){
 		$emails = array(self::getDefautEmail());
+		if($GLOBALS['dev_title'])
+			return $emails;
 		$strEmails = $this->get('destinationemails');
 		if($strEmails)
 			foreach(preg_split('/[,;]/', $strEmails) as $email)

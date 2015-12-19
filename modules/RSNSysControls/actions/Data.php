@@ -71,10 +71,12 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 				";
 				$vtigerMailer = new Vtiger_Mailer();
 				$vtigerMailer->initialize();
-				$vtigerMailer->IsHTML(false);
+				$vtigerMailer->IsHTML(true);
 				$vtigerMailer->AddAddress($address, $destName);
 				$vtigerMailer->Subject ='['.$server.'] Requetes de controle : Alerte !';
-				$vtigerMailer->Body = "Bonjour $destName, \r\n".$mailBody;
+				$vtigerMailer->Body = "<pre>Bonjour $destName, \r\n".$mailBody."</pre>";
+				//echo "<pre>Bonjour $destName, \r\n".$mailBody."</pre>";
+				//return;
 				$vtigerMailer->Send();
 			}
 			//tmp mail
@@ -136,6 +138,7 @@ Erreur dans la requête de contrôle \"" . $sysControl->getName() . "\"
 				$mailBody .= "
 ************
 La requête de contrôle \"" . $sysControl->getName() . "\" retourne $result enregistrement(s).
+<a href=\"".$sysControl->getResultsUrl()."\"/>cliquer ici pour voir la liste des enregistrements</a>
 ***********";
 			}
 		}
