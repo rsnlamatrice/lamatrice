@@ -130,6 +130,7 @@ class Contacts extends CRMEntity {
 		'Street2'=>Array('contactaddress'=>'mailingstreet2'),
 		'Zip code'=>Array('contactaddress'=>'mailingzip'),
 		'City'=>Array('contactaddress'=>'mailingcity'),
+		'Email'=>Array('contactdetails'=>'email'),
 	);
 
 	//Champs affichés dans les fenêtres popup
@@ -141,6 +142,7 @@ class Contacts extends CRMEntity {
 		'Street2'=>'mailingstreet2',
 		'Zip code'=>'mailingzip',
 		'City' => 'mailingcity',
+		'Email' => 'email',
 	);
 
 	// This is the list of vtiger_fields that are required

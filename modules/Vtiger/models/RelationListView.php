@@ -643,10 +643,6 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		if(strpos($query,'vtiger_attachmentsfolder'))
 			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
 			
-		////Quantité des articles en table de relation aux produits et services
-		//if(strpos($query,'vtiger_inventoryproductrel'))
-		//	$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_inventoryproductrel.quantity, ', $query, 1);
-			
 		//var_dump(get_class($relationModel));
 		//print_r("<pre>$query</pre>");
 		return $query;

@@ -36,7 +36,7 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 			);
 		}
 		
-		//skip view column
+		//skip column in summary view
 		$widgets[] = null;
 		
 		$servicesInstance = Vtiger_Module_Model::getInstance('Services');

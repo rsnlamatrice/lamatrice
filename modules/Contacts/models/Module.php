@@ -275,7 +275,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			
 			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 			$query = 'SELECT vtiger_crmentity.crmid,vtiger_invoice.subject, vtiger_invoice.invoice_no, vtiger_invoicecf.typedossier
-			, vtiger_invoice.invoicestatus, vtiger_invoice.invoicedate, vtiger_invoicecf.campaign_no, vtiger_invoicecf.notesid, vtiger_invoice.total
+			, vtiger_invoice.invoicestatus, vtiger_invoice.invoicedate, vtiger_invoicecf.campaign_no, vtiger_invoicecf.notesid, vtiger_invoice.total, vtiger_invoice.balance
 			FROM vtiger_invoice
 			INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
 			LEFT OUTER JOIN vtiger_invoicecf ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid

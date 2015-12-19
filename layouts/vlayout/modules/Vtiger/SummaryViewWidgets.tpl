@@ -19,7 +19,7 @@
 {/if}
 {* ED141210
  * ajout de $NO_ACTIVITIES_WIDGET
- * en conséquence, l'ordre des colonnes change, d'où $MODULO_LEFT
+ * en cons¬équence, l'ordre des colonnes change, d'o¬ù $MODULO_LEFT
  *}
 {if $NO_ACTIVITIES_WIDGET}
 	{assign var=MODULO_LEFT value=1}

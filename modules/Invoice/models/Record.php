@@ -118,4 +118,25 @@ class Invoice_Record_Model extends Inventory_Record_Model {
 			return;
 		}
 	}
+	
+		/**
+	 * ED141109
+	 * getPicklistValuesDetails
+	 */
+	public function getPicklistValuesDetails($fieldname){
+		switch($fieldname){
+			
+			case 'invoicestatus':
+				return array(
+					'Created' => array( 'label' => 'Créé', 'icon' => 'ui-icon ui-icon-check orange' ),
+					'Validated' => array( 'label' => 'Validé', 'icon' => 'ui-icon ui-icon-check darkgreen' ),
+					'Compta' => array( 'label' => 'Archivé', 'icon' => 'ui-icon ui-icon-close blue' ),
+					'Cancelled' => array( 'label' => 'Annulé', 'icon' => 'ui-icon ui-icon-close darkred' ),
+					'Credit Invoice' => array( 'label' => 'Avoir', 'icon' => 'ui-icon ui-icon-check orange' ),
+				);
+			
+			default:
+				return array();
+		}
+	}
 }
