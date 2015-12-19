@@ -103,7 +103,10 @@
             {include file="LineItemsContent.tpl"|@vtemplate_path:'Inventory' row_no=0 data=[]}
         </tr>
         {foreach key=row_no item=data from=$RELATED_PRODUCTS}
-            <tr id="row{$row_no}" class="lineItemRow" {if $data["entityType$row_no"] eq 'Products'}data-quantity-in-stock={$data["qtyInStock$row_no"]}{/if}>
+            <tr id="row{$row_no}" class="lineItemRow"
+				{if $data["entityType$row_no"] eq 'Products'}data-quantity-in-stock="{$data["qtyInStock$row_no"]}"{/if}
+				{if array_key_exists('priceBookDetails', $data)} data-pricebookdetails="{htmlentities(Zend_Json::encode($data['priceBookDetails']))}"{/if}
+			>
                 {include file="LineItemsContent.tpl"|@vtemplate_path:'Inventory' row_no=$row_no data=$data}
             </tr>
         {/foreach}

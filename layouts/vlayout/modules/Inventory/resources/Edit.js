@@ -770,7 +770,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			
 			//ED151208
 			var priceBookDetails = recordData.priceBook;
-			parentRow.data('priceBookDetails', priceBookDetails);
+			parentRow.data('pricebookdetails', priceBookDetails);
 			
 			//ED150602 discount % from account discount type
 			var discountpc = recordData.discountpc;
@@ -1383,11 +1383,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	
 	getProductPriceBookDetails : function(lineItemRow){
 		
-		var priceBookDetails = lineItemRow.data('priceBookDetails');
+		var priceBookDetails = lineItemRow.data('pricebookdetails');
 		if (priceBookDetails === undefined){
 			
-			var productId = lineItemRow.find('input.selectedModuleId').val()
-			, currency_id = jQuery('#currency_id option:selected').val()
+			var productId = lineItemRow.find('input.selectedModuleId').val();
+			if (!productId)
+				return;
+			var currency_id = jQuery('#currency_id option:selected').val()
 			, account_discount_type = this.getAccountDiscountType()
 			, params = {
 				url: "index.php",
@@ -1407,12 +1409,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 						if(typeof data.result[id] == "object"){
 							var recordData = data.result[id];
 							priceBookDetails = recordData.priceBook;
-							lineItemRow.data('priceBookDetails', priceBookDetails);
+							lineItemRow.data('pricebookdetails', priceBookDetails);
 						}
 					}
 				},
 				function(error,err){
-					lineItemRow.data('priceBookDetails', false);
+					lineItemRow.data('pricebookdetails', false);
 				}
 			);
 		}

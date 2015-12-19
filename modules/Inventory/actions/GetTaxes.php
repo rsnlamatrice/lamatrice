@@ -58,6 +58,9 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 				
 			$response->setResult(array( $recordId => $data ));
 		} else {
+			
+			$priceBookDetails = getPriceBookDetailsForProduct($idList);
+		
 			foreach($idList as $id) {
 				$recordModel = Vtiger_Record_Model::getInstanceById($id);
 				$taxes = $recordModel->getTaxes();
@@ -83,7 +86,7 @@ class Inventory_GetTaxes_Action extends Vtiger_Action_Controller {
 					'purchaseprice'=>$purchasePrice,
 					'description' => $recordModel->get('description'),
 					'quantityInStock' => $recordModel->get('qtyinstock'),
-					'priceBook' => getPriceBookDetailsForProduct($id),
+					'priceBook' => $priceBookDetails[$id],
 					'usageunit' => $recordModel->get('usageunit') ? $recordModel->get('usageunit') : $recordModel->get('service_usageunit'),
 					'productcode' => $recordModel->get('productcode'),
 					'gestionerror' => $recordModel->getGestionError(),

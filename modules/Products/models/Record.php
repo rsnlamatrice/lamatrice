@@ -180,6 +180,9 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		
 		if($productDetails[1]['entityType1'] === 'Services')
 			unset($productDetails[1]['qtyInStock1']);
+		
+		$productDetails[1]['priceBookDetails'] = getPriceBookDetailsForProduct($productId);
+		
 		return $productDetails;
 	}
 

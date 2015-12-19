@@ -182,6 +182,13 @@ class Documents_Record_Model extends Vtiger_Record_Model {
 		$products = $this->getRelatedProductsAndServices();
 		$index = 1;
 		$relatedProducts = array();
+		
+		//Mise en cache des priceBookDetails
+		$productIds = array();
+		foreach($products as $product)
+			$productIds[] = $product->getId();
+		getPriceBookDetailsForProduct($productIds);
+		
 		foreach($products as $product){
 			$productDetails = $product->getDetailsForInventoryModule($inventory);
 			if($productDetails){

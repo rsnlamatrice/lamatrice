@@ -1558,13 +1558,32 @@ function getModeReglementInfo($modeRegl = false, $parameter = false){
 
 /** ED151208
  * Retourne le paramètrage de la grille tarifaire du produit
- * 
+ * @param $productId <int> | <array>
+ * @return <array> | <array($productId=>array>
  */
-function getPriceBookDetailsForProduct($productid){
+function getPriceBookDetailsForProduct($productId){
+	if(is_array($productId))
+		$productIds = $productId;
+	else
+		$productIds = array($productId);
+
+	$cachedData = Vtiger_Cache::get('PriceBookDetailsForProduct', 1);
+	if($cachedData){
+		$products = array();
+		foreach($productIds as $id)
+			if(array_key_exists($id, $cachedData))
+				$products[$id] = $cachedData[$id];
+		if(count($products) === count($productIds))
+			if(is_array($productId))
+				return $products;
+			else
+				return $products[$productId];
+	}
 	
 	global $adb;
 
-	$sql = 'SELECT vtiger_pricebook.*
+	$sql = 'SELECT vtiger_pricebookproductrel.productid
+		, vtiger_pricebook.*
 		, vtiger_pricebookproductrel.listprice
 		, IFNULL(vtiger_products.unit_price, vtiger_service.unit_price) AS unit_price
 		, IFNULL(vtiger_products.currency_id, vtiger_service.currency_id) AS unit_price_currency_id
@@ -1579,29 +1598,31 @@ function getPriceBookDetailsForProduct($productid){
 			ON vtiger_service.serviceid = vtiger_pricebookproductrel.productid
 		WHERE vtiger_crmentity.deleted = 0
 		AND vtiger_pricebook.active = 1
-		AND vtiger_pricebookproductrel.productid = ?
+		AND vtiger_pricebookproductrel.productid IN ('.generateQuestionMarks($productIds).')
 		ORDER BY vtiger_pricebook.modeapplication, vtiger_pricebook.minimalqty';
-	$result = $adb->pquery($sql, array($productid));
+	$result = $adb->pquery($sql, $productIds);
 	if(!$result){
 		$adb->echoError();
 		die(__FILE__.'::getPriceBookDetailsForProduct()');
 	}
-	$priceDetails = array();
+	$products = array();
 	$num_rows = $adb->num_rows($result);
 	if($num_rows > 0){
-		//Tarif par défaut
-		$priceDetails[] = array(
-			'name' => 'basic',
-			'modeapplication' => 'qty',
-			'minimalqty' => 0,
-			'applycondition' => null,
-			'listprice' => $adb->query_result($result,$i, 'unit_price'),
-			'currency_id' => $adb->query_result($result,$i, 'unit_price_currency_id'),
-		);
-
 		//Tarif par quantité ou par critère
 		for($i=0; $i<$num_rows; $i++){
-			$priceDetails[] = array(
+			$rowProductId = $adb->query_result($result,$i, 'productid');			
+			if(!$products[$rowProductId])
+				//Tarif par défaut
+				$products[$rowProductId] = array(array(
+					'name' => 'basic',
+					'modeapplication' => 'qty',
+					'minimalqty' => 0,
+					'applycondition' => null,
+					'listprice' => $adb->query_result($result,$i, 'unit_price'),
+					'currency_id' => $adb->query_result($result,$i, 'unit_price_currency_id'),
+				));
+			
+			$products[$rowProductId][] = array(
 				'name' => $adb->query_result($result,$i, 'bookname'),
 				'modeapplication' => $adb->query_result($result,$i, 'modeapplication'),
 				'minimalqty' => $adb->query_result($result,$i, 'minimalqty'),
@@ -1611,7 +1632,19 @@ function getPriceBookDetailsForProduct($productid){
 			);
 		}
 	}
-	return $priceDetails;
+	if(!$cachedData)
+		$cachedData = array();
+	foreach($productIds as $id){
+		if(!array_key_exists($id, $products))
+			$cachedData[$id] = false;
+		else
+			$cachedData[$id] = $products[$id];
+	}
+	Vtiger_Cache::set('PriceBookDetailsForProduct', 1, $cachedData);
+	if(is_array($productId))
+		return $products;
+	else
+		return $products[$productId];
 }
 
 ?>
