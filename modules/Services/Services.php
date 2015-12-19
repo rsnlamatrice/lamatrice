@@ -627,6 +627,8 @@ class Services extends CRMEntity {
 			case when (vtiger_users.user_name not like '') then $userNameSql
 				else vtiger_groups.groupname end as user_name
 			FROM vtiger_salesorder
+			INNER JOIN vtiger_salesordercf
+				ON vtiger_salesordercf.salesorderid = vtiger_salesorder.salesorderid
 			INNER JOIN vtiger_crmentity
 				ON vtiger_crmentity.crmid = vtiger_salesorder.salesorderid
 			INNER JOIN vtiger_inventoryproductrel
