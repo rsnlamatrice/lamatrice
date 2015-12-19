@@ -2,8 +2,12 @@
 
 - Générer les fichiers 4D
 
-- Purger la Matrice
+- Désactiver tous les imports auto
+
+- Purger la Matrice x 2
 	- TODO Finir le module. A vérifier si toutes les tables sont bien vides.
+
+! Ne pas importer en lançant le cron par une fenêrte de Terminal !
 	
 - Importer les données
 	- Fichiers Adresse.[.*]csv

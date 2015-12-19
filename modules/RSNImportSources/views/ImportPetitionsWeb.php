@@ -386,6 +386,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			$contactRecordModel->save();
 		} else {
 			$emailRecordModel = $contactRecordModel->createContactEmailsRecord(false, $email);
+			if(!$emailRecordModel->getId())
+				$emailRecordModel->set('emailaddressorigin', 'Pétition');
 		}
 		$rsnMediaDocuments 	= $emailRecordModel->get('rsnmediadocuments');
 		$rsnMediaDocumentsDoNot = $emailRecordModel->get('rsnmediadocumentsdonot');
@@ -422,7 +424,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		$rsnMediaDocumentsDoNot = implode(' |##| ', $rsnMediaDocumentsDoNot);
 		if($emailRecordModel->get('rsnmediadocuments') != $rsnMediaDocuments
 		|| $emailRecordModel->get('rsnmediadocumentsdonot') != $rsnMediaDocumentsDoNot){
-			if(!$emailRecordModel->get('mode'))
+			if($emailRecordModel->getId() && !$emailRecordModel->get('mode'))
 				$emailRecordModel->set('mode', 'edit');
 			$emailRecordModel->set('rsnmediadocuments', $rsnMediaDocuments);
 			$emailRecordModel->set('rsnmediadocumentsdonot', $rsnMediaDocumentsDoNot);

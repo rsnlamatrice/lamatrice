@@ -45,5 +45,35 @@ class ContactEmails_Module_Model extends Vtiger_Module_Model{
 		}
 		return false;
 	}
+	
+	/**
+	 * Function to save a given record model of the current module
+	 * @param Vtiger_Record_Model $recordModel
+	 */
+	public function saveRecord(Vtiger_Record_Model $recordModel) {
+		$return = parent::saveRecord($recordModel);
+		if($recordModel->get('emailaddressorigin') === 'Principale'){
+			$this->ensureOnlyOnePrincipale($recordModel);
+		}
+		return $return;
+	}
+	
+	public function ensureOnlyOnePrincipale(Vtiger_Record_Model $recordModel){
+		
+		global $adb;
+		$query = 'UPDATE `vtiger_contactemails`
+			INNER JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = `vtiger_contactemails`.`contactemailsid`
+			SET emailaddressorigin = "Ancienne adresse"
+			WHERE vtiger_crmentity.deleted = 0
+			AND `vtiger_contactemails`.contactemailsid != ?
+			AND `vtiger_contactemails`.contactid = ?
+			AND `vtiger_contactemails`.emailaddressorigin = "Principale"'
+		;
+		$params = array($recordModel->getId(), $recordModel->get('contactid'));
+		$result = $adb->pquery($query, $params);
+		if(!$result)
+			die($adb->echoError(__FILE__.'::ensureOnlyOnePrincipale()', true));
+	}
 }
 ?>

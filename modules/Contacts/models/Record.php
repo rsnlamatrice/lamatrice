@@ -531,7 +531,6 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		}
 		$destField = 'email';
 		$addressRecord->set($destField, $email);
-		
 		$destField = 'emailaddressorigin';
 		if($emailaddressorigin)
 			$addressRecord->set($destField, $emailaddressorigin);

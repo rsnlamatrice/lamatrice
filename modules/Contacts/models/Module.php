@@ -473,13 +473,20 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		$recordModel->ensureAccountHasOnlyOneMainContact();
 		
 		//via SaveAjax, modification du mail : archive du précédent
-		if($recordModel->get('email_add_history'))
+		if($recordModel->get('email_add_history')){
 			$recordModel->createContactEmailsRecord(true, $recordModel->get('email_add_history'), 'Ancienne adresse');
-			
-		//mise à jour (TODO) du mail : définition en Principal
+		}
+		
+		//mise à jour (TODO) du mail : définition en Principale
 		if($recordModel->get('email')){
-			//TODO un seul en Principal
-			$recordModel->createContactEmailsRecord(true, $recordModel->get('email'), 'Principal');
+			//TODO un seul en Principale
+			$emailRecordModel = $recordModel->createContactEmailsRecord(true, $recordModel->get('email'), 'Principale');
+			if($recordModel->get('emailoptout') != $emailRecordModel->get('emailoptout')){
+				$emailRecordModel->set('mode', 'edit');
+				$emailRecordModel->set('emailoptout', $recordModel->get('emailoptout'));
+				$emailRecordModel->save();
+			}
+			
 		}
 		return $return;
 	}

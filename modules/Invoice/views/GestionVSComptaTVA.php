@@ -32,7 +32,9 @@ class Invoice_GestionVSComptaTVA_View extends Invoice_GestionVSComptaCA_View {
 		global $adb;
 		$params = array();
 		$query = '';
-		for($TAXID = 1; $TAXID <= 6; $TAXID++){
+		$allTaxes = getAllTaxes();
+		foreach($allTaxes => $tax){
+			$TAXID = $tax['taxid'];
 			if($query !== '')
 				$query .= "
 					UNION
