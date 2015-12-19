@@ -770,6 +770,29 @@ var Settings_Picklist_Js = {
 		});
 	},
 	
+	/** Sort all rows
+	*/
+	registerPickListValuesSortAllEvent : function() {
+		$('#sort-values-asc,#sort-values-desc').on('click',function(e){
+			var $td = jQuery('#pickListValuesTable tbody tr > td:first-of-type')
+			, inverse = /-desc$/.test(this.id);
+			$td.sortElements(function(a, b){
+
+                if( $.text([a]) == $.text([b]) )
+                    return 0;
+
+                return $.text([a]) > $.text([b]) ?
+                    inverse ? -1 : 1
+                    : inverse ? 1 : -1;
+
+            }, function(){
+                // parentNode is the element we want to move
+                return this.parentNode; 
+            });
+			jQuery('#saveSequence').removeAttr('disabled');
+		});
+	},
+	
 	registerSaveSequenceClickEvent : function() {
 		jQuery('#saveSequence').on('click',function(e) {
 			var progressIndicatorElement = jQuery.progressIndicator({
@@ -837,6 +860,8 @@ var Settings_Picklist_Js = {
 		Settings_Picklist_Js.registerAssingValueToRoleTabClickEvent();
 		Settings_Picklist_Js.registerPickListValuesSortableEvent();
 		Settings_Picklist_Js.registerSaveSequenceClickEvent();
+		//ED151219
+		Settings_Picklist_Js.registerPickListValuesSortAllEvent();
 	},
 	
 	
@@ -891,3 +916,51 @@ Vtiger_Base_Validator_Js("Vtiger_FieldLabel_Validator_Js",{
 	}
 });
 
+//
+if (!jQuery.fn.sortElements) {
+	jQuery.fn.sortElements = (function(){
+		
+		var sort = [].sort;
+		
+		return function(comparator, getSortable) {
+			
+			getSortable = getSortable || function(){return this;};
+			
+			var placements = this.map(function(){
+				
+				var sortElement = getSortable.call(this),
+					parentNode = sortElement.parentNode,
+					
+					// Since the element itself will change position, we have
+					// to have some way of storing it's original position in
+					// the DOM. The easiest way is to have a 'flag' node:
+					nextSibling = parentNode.insertBefore(
+						document.createTextNode(''),
+						sortElement.nextSibling
+					);
+				
+				return function() {
+					
+					if (parentNode === this) {
+						throw new Error(
+							"You can't sort elements if any one is a descendant of another."
+						);
+					}
+					
+					// Insert before flag:
+					parentNode.insertBefore(this, nextSibling);
+					// Remove flag:
+					parentNode.removeChild(nextSibling);
+					
+				};
+				
+			});
+		   
+			return sort.call(this, comparator).each(function(i){
+				placements[i].call(getSortable.call(this));
+			});
+			
+		};
+		
+	})();
+}

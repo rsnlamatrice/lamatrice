@@ -20,7 +20,11 @@
 			<div class="span5 marginLeftZero textOverflowEllipsis">
 				<table id="pickListValuesTable" class="table table-bordered table-condensed table-striped" style="table-layout: fixed">
 					<thead>
-						<tr class="listViewHeaders"><th>{vtranslate($SELECTED_PICKLIST_FIELDMODEL->get('label'),$SELECTED_MODULE_NAME)}&nbsp;{vtranslate('LBL_ITEMS',$QUALIFIED_MODULE)}</th></tr>
+						<tr class="listViewHeaders">
+							<th>{vtranslate($SELECTED_PICKLIST_FIELDMODEL->get('label'),$SELECTED_MODULE_NAME)}
+							<a class="pull-right cursorPointer" id="sort-values-desc"><span class="ui-icon ui-icon-triangle-1-n"></span></a>
+							<a class="pull-right cursorPointer" id="sort-values-asc"><span class="ui-icon ui-icon-triangle-1-s"></span></a>
+							</th></tr>
 					</thead>
 					<tbody>
 					<input type="hidden" id="dragImagePath" value="{vimage_path('drag.png')}" />

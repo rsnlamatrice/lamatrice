@@ -217,7 +217,7 @@ class Settings_Picklist_Field_Model extends Vtiger_Field_Model {
 		$query = 'SHOW COLUMNS FROM '.$tableName;
 		$result = $adb->pquery($query);
 		$fieldModels = array();
-		while($row = $adb->getNextRow($result)){
+		while($row = $adb->getNextRow($result,false)){
 			$settingFieldName = $settingFieldNames[$row['field']];
 			if(!$settingFieldName)
 				continue;
@@ -247,6 +247,12 @@ class Settings_Picklist_Field_Model extends Vtiger_Field_Model {
 			elseif($settingFieldName['fieldmodel']){
 				//type de données
 				//TODO
+				switch($settingFieldName['fieldmodel']){
+				case 'bool':
+				case 'boolean':
+					$field->set('uitype', 56);
+					break;
+				}
 			}
 			
 			$fieldModels[$row['field']] = $field;
@@ -283,7 +289,7 @@ class Settings_Picklist_Field_Model extends Vtiger_Field_Model {
 			$adb->echoError(__FILE.'::getSettingFieldValue()');
 			die();
 		}
-		if($row = $adb->getNextRow($result)){
+		if($row = $adb->getNextRow($result, false)){
 			$data = array();
 			foreach($settingFieldNames as $settingFieldName => $settingFieldInfo){
 				$data[$settingFieldName] = $row[$settingFieldName];

@@ -7,6 +7,8 @@
 - Purger la Matrice x 2
 	- TODO Finir le module. A vérifier si toutes les tables sont bien vides.
 
+- Mise à jour des produits (module La Matrice)
+
 ! Ne pas importer en lançant le cron par une fenêrte de Terminal !
 	
 - Importer les données
