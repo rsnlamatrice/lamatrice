@@ -136,7 +136,7 @@ class Invoice_Record_Model extends Inventory_Record_Model {
 				);
 			
 			default:
-				return array();
+				return parent::getPicklistValuesDetails($fieldname);
 		}
 	}
 }
