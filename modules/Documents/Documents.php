@@ -844,41 +844,5 @@ class Documents extends CRMEntity {
 		}
 		return parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
 	}
-
-	//AUR_TMP
-	function get_statistics_data($id, $cur_tab_id, $rel_tab_id, $actions=false) {//tmp (do not put this method here -> need a generic method not depanding to the module!!!!!!!!!!!!
-		global $log, $singlepane_view,$currentModule,$current_user;
-		$log->debug("Entering get_statistics(".$id.") method ...");
-		$this_module = $currentModule;
-
-		$related_module = vtlib_getModuleNameById($rel_tab_id);
-		require_once("modules/$related_module/$related_module.php");
-		$other = new $related_module();
-		vtlib_setup_modulevars($related_module, $other);
-		$singular_modname = vtlib_toSingular($related_module);
-
-		$parenttab = getParentTab();
-
-		if($singlepane_view == 'true')
-			$returnset = '&return_module='.$this_module.'&return_action=DetailView&return_id='.$id;
-		else
-			$returnset = '&return_module='.$this_module.'&return_action=CallRelatedList&return_id='.$id;
-
-		$button = '';
-		
-		$relatedStatsTablesNames = RSNStatistics_Utils_Helper::getRelatedStatsTablesNames($this_module);
-
-			//AUR_TMP
-		$query = "SELECT * FROM " . $relatedStatsTablesNames[0] . " WHERE crmid=".$id;
-		//echo $query;
-
-		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
-
-		if($return_value == null) $return_value = Array();
-		$return_value['CUSTOM_BUTTON'] = $button;
-
-		$log->debug("Exiting get_invoices method ...");
-		return $return_value;
-	}
 }
 ?>
