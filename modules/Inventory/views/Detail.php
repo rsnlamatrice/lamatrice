@@ -11,7 +11,7 @@
 class Inventory_Detail_View extends Vtiger_Detail_View {
 	function preProcess(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
-		$viewer->assign('NO_SUMMARY', true);
+		//$viewer->assign('NO_SUMMARY', true);
 		parent::preProcess($request);
 	}
 

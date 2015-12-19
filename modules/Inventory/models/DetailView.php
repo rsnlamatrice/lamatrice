@@ -22,13 +22,6 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$widgetLinks = parent::getWidgets();
 		
-		foreach($widgetLinks as $index => &$widgetLink)
-			if($widgetLink->get('linklabel') === 'LBL_UPDATES'){
-				unset($widgetLinks[$index]);
-				$widgetUpdatesLink = $widgetLink;
-				break;
-			}
-			
 		$productsInstance = Vtiger_Module_Model::getInstance('Products');
 		if($userPrivilegesModel->hasModuleActionPermission($productsInstance->getId(), 'DetailView')) {
 			$widgets[] = array(
@@ -43,9 +36,9 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 			);
 		}
 		
-		if($widgetUpdatesLink)
-			$widgets[] = $widgetUpdatesLink;
-			
+		//skip view column
+		$widgets[] = null;
+		
 		$servicesInstance = Vtiger_Module_Model::getInstance('Services');
 		if($userPrivilegesModel->hasModuleActionPermission($servicesInstance->getId(), 'DetailView')) {
 			$widgets[] = array(

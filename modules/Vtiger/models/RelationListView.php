@@ -392,6 +392,17 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			if(count($relatedColumnFields) <= 0){
 				$relatedColumnFields = $relationModule->getRelatedListFields();
 			}
+			
+			////Quantit√© dans Invoice->Products
+			//switch($relationModule->getName()) {
+			//case "Products":
+			//case "Services":
+			//	if(is_a($parentModule, 'Inventory_Module_Model')){
+			//		$relatedColumnFields['quantity'] = 'quantity';
+			//	}
+			//	break;
+			//}
+			
 			$query = $this->getRelationQuery();
 			break;
 		}
@@ -468,9 +479,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 				elseif($col === 'rsnstatisticsid'){
 					$newRow[$col] = $val;
 				}
-					
 			}
-
 			//AV150702
 			switch($relationModule->getName()) {
 			case "RSNStatistics":
@@ -488,6 +497,25 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 					var_dump($newRow);*/
 				$relatedRecordList[$row['crmid']] = $record;	
 			}
+		}
+		
+		switch($relationModule->getName()){
+		  case "Services":
+		  case "Products":
+			
+			switch($parentModule->getName()){
+			  case "PurchaseOrder":
+			  case "Invoice":
+			  case "SalesOrder":
+				$parentRecordModel->setSoldPrice_to_UnitPrice($relatedRecordList, $relatedColumnFields);
+				break;
+			  default:
+				$relationModule->addVAT_to_UnitPrice($relatedRecordList);
+				break;
+			}
+			break;
+		  default:
+			break;
 		}
 		//var_dump($relatedColumnFields, $relatedRecordList);
 		/* ED140917
@@ -574,7 +602,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 	 * Function to init fields as list view header filters
 	 * @return <Array> - List of Vtiger_Field_Model instances
 	 *
-	 * Je crois qu'à cette heure, le filtrage des en-têtes de liste liée n'est pas vraiment opérationnelle
+	 * Je crois qu'¬à cette heure, le filtrage des en-t¬êtes de liste li¬ée n'est pas vraiment op¬érationnelle
 	 */
 	protected function initListViewHeadersFilters($listViewHeaders) {
 		
@@ -615,9 +643,9 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 		if(strpos($query,'vtiger_attachmentsfolder'))
 			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_attachmentsfolder.uicolor, ', $query, 1);
 			
-		//Quantité des articles en table de relation aux produits et services
-		if(strpos($query,'vtiger_inventoryproductrel'))
-			$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_inventoryproductrel.quantity, ', $query, 1);
+		////Quantit√©¬é des articles en table de relation aux produits et services
+		//if(strpos($query,'vtiger_inventoryproductrel'))
+		//	$query = preg_replace('/(^|\sUNION\s+)SELECT\s/i', '$1SELECT vtiger_inventoryproductrel.quantity, ', $query, 1);
 			
 		//var_dump(get_class($relationModel));
 		//print_r("<pre>$query</pre>");

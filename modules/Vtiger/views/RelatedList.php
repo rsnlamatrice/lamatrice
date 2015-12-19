@@ -27,7 +27,7 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		$pagingModel->set('page',$requestedPage);
 		if($request->get('limit')) /* ED140921 */
 			$pagingModel->set('limit',$request->get('limit'));
-			
+		
 		$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 		$relationListView = Vtiger_RelationListView_Model::getInstance($parentRecordModel, $relatedModuleName, $label);
 
@@ -87,10 +87,10 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			  case "PurchaseOrder":
 			  case "Invoice":
 			  case "SalesOrder":
-				$this->setSoldPrice_to_UnitPrice($parentRecordModel, $models, $header);
+				$parentRecordModel->setSoldPrice_to_UnitPrice($models, $header);
 				break;
 			  default:
-				$this->addVAT_to_UnitPrice($models);
+				$relatedModuleModel->addVAT_to_UnitPrice($models);
 				break;
 			}
 			break;
@@ -214,85 +214,5 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 		}
 		
 		return $viewer->view($tpl, $moduleName, 'true');
-	}
-	
-	/** ED150000
-	 * Change la valeur du prix unitaire pour afficher le prix TTC
-	 */
-	function addVAT_to_UnitPrice(&$records){
-		if(!$records)
-			return;
-		
-		global $adb;
-		$productIds = array_keys($records);
-		
-		$query = 'SELECT vtiger_producttaxrel.productid, MAX(vtiger_producttaxrel.taxpercentage) AS percentage
-			FROM vtiger_inventorytaxinfo
-			LEFT JOIN vtiger_producttaxrel
-				ON vtiger_inventorytaxinfo.taxid = vtiger_producttaxrel.taxid
-			WHERE vtiger_producttaxrel.productid IN (' . generateQuestionMarks($productIds) . ')
-			AND vtiger_inventorytaxinfo.deleted=0
-			GROUP BY vtiger_producttaxrel.productid';
-		
-		$params = $productIds;
-		$res = $adb->pquery($query, $params);
-		if(!$res)
-			$adb->echoError();
-		for($i=0;$i<$adb->num_rows($res);$i++){
-			$productId = $adb->query_result($res,$i,'productid');
-			$record = $records[$productId];
-			if(!$record)
-				continue;
-			$price = $record->get('unit_price');
-			$tax = $adb->query_result($res,$i,'percentage');
-			if(!$price || !$tax)
-				continue;
-			$price += $price * $tax/100;
-			$record->set('unit_price', $price);
-		}
-	}
-	
-	//Change la valeur du prix unitaire pour afficher le prix TTC vendu
-	function setSoldPrice_to_UnitPrice($parentRecordModel, &$records, &$headers){
-		
-		if(array_key_exists('qty_per_unit', $headers))
-			unset($headers['qty_per_unit']);
-		if(!array_key_exists('quantity', $headers)){
-			$field = new Vtiger_Field_Model();
-			$field->set('name', 'quantity');
-			$field->set('column', 'vtiger_inventoryproductrel:quantity');
-			$field->set('label', 'Quantité');
-			$field->set('typeofdata', 'V~O');
-			$field->set('uitype', 7);
-			$headers['quantity'] = $field;
-		}
-		global $adb;
-		$productIds = array_keys($records);
-		
-		$query = 'SELECT productid, quantity, IFNULL(tax1, IFNULL(tax2, IFNULL(tax3, IFNULL(tax4, IFNULL(tax5, tax6))))) AS percentage
-			FROM vtiger_inventoryproductrel
-			WHERE vtiger_inventoryproductrel.id = ?';
-		
-		$params = array(
-			$parentRecordModel->getId()
-		);
-		//var_dump($query, $params);
-		$res = $adb->pquery($query, $params);
-		if(!$res)
-			$adb->echoError();
-		for($i=0;$i<$adb->num_rows($res);$i++){
-			$productId = $adb->query_result($res,$i,'productid');
-			$record = $records[$productId];
-			if(!$record)
-				continue;
-			$record->set('quantity', $adb->query_result($res,$i,'quantity'));
-			$price = $record->get('unit_price');
-			$tax = $adb->query_result($res,$i,'percentage');
-			//var_dump($tax);
-			if(!$price || !$tax)
-				continue;
-			$price += $price * $tax/100;
-			$record->set('unit_price', $price);
-		}
 	}
 }

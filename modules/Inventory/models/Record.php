@@ -361,4 +361,58 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function updateReceivedFromRelated(){		
 	}
+	
+	
+	
+	//Change la valeur du prix unitaire pour afficher le prix TTC vendu
+	function setSoldPrice_to_UnitPrice(&$records, &$headers){
+		
+		if(array_key_exists('qty_per_unit', $headers))
+			unset($headers['qty_per_unit']);
+		if(!array_key_exists('quantity', $headers)){
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'quantity');
+			$field->set('column', 'vtiger_inventoryproductrel:quantity');
+			$field->set('label', 'Quantité');
+			$field->set('typeofdata', 'V~O');
+			$field->set('uitype', 7);
+			$headers['quantity'] = $field;
+		}
+		//Teste si on est déjà passé par ici (RelatedList appelle RelationListView, qui tout deux appellent cette fonction)
+		foreach($records as $record)
+			if($record->get('unit_price_istaxed') && $record->get('quantity') !== null)
+				return;
+			
+		global $adb;
+		$productIds = array_keys($records);
+		
+		$query = 'SELECT productid, quantity, IFNULL(tax1, IFNULL(tax2, IFNULL(tax3, IFNULL(tax4, IFNULL(tax5, tax6))))) AS percentage
+			FROM vtiger_inventoryproductrel
+			WHERE vtiger_inventoryproductrel.id = ?';
+		
+		$params = array(
+			$this->getId()
+		);
+		//var_dump($query, $params);
+		$res = $adb->pquery($query, $params);
+		if(!$res)
+			$adb->echoError();
+		for($i=0;$i<$adb->num_rows($res);$i++){
+			$productId = $adb->query_result($res,$i,'productid');
+			$record = $records[$productId];
+			if(!$record)
+				continue;
+			$record->set('quantity', $adb->query_result($res,$i,'quantity'));
+			$price = $record->get('unit_price');
+			$tax = $adb->query_result($res,$i,'percentage');
+			//var_dump($tax);
+			if(!$price
+			|| !$tax
+			|| $record->get('unit_price_istaxed'))
+				continue;
+			$price += $price * $tax/100;
+			$record->set('unit_price', $price);
+			$record->set('unit_price_istaxed', true);
+		}
+	}
 }

@@ -78,7 +78,10 @@ class CurrencyField {
      * @param Number $value
      */
     public function  __construct($value) {
-        $this->value = $value;
+		if(strpos($value, ','))
+			$this->value = str_replace(',', '.', $value);
+        else
+			$this->value = $value;
     }
 
     /**

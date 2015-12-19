@@ -203,4 +203,45 @@ class Products_Module_Model extends Vtiger_Module_Model {
 					$relationQuery .
 			') `' . $relatedModule->getName() . '_' . $functionName . '_query`';
 	}
+	
+	
+	/** ED150000
+	 * Change la valeur du prix unitaire pour afficher le prix TTC
+	 */
+	function addVAT_to_UnitPrice(&$records){
+		if(!$records)
+			return;
+		//Teste si on est déjà passé par ici (RelatedList appelle RelationListView, qui tout deux appellent cette fonction)
+		foreach($records as $record)
+			if($record->get('unit_price_istaxed'))
+				return;
+		global $adb;
+		$productIds = array_keys($records);
+		
+		$query = 'SELECT vtiger_producttaxrel.productid, MAX(vtiger_producttaxrel.taxpercentage) AS percentage
+			FROM vtiger_inventorytaxinfo
+			LEFT JOIN vtiger_producttaxrel
+				ON vtiger_inventorytaxinfo.taxid = vtiger_producttaxrel.taxid
+			WHERE vtiger_producttaxrel.productid IN (' . generateQuestionMarks($productIds) . ')
+			AND vtiger_inventorytaxinfo.deleted=0
+			GROUP BY vtiger_producttaxrel.productid';
+		
+		$params = $productIds;
+		$res = $adb->pquery($query, $params);
+		if(!$res)
+			$adb->echoError();
+		for($i=0;$i<$adb->num_rows($res);$i++){
+			$productId = $adb->query_result($res,$i,'productid');
+			$record = $records[$productId];
+			if(!$record)
+				continue;
+			$price = $record->get('unit_price');
+			$tax = $adb->query_result($res,$i,'percentage');
+			if(!$price || !$tax)
+				continue;
+			$price += $price * $tax/100;
+			$record->set('unit_price', $price);
+			$record->set('unit_price_istaxed', true);
+		}
+	}
 }

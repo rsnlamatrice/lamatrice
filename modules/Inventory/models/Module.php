@@ -26,7 +26,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	 * @return <Boolean> - true/false
 	 */
 	public function isSummaryViewSupported() {
-		return false;
+		return true;
 	}
 
 	static function getAllCurrencies() {
@@ -200,5 +200,5 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	 */
 	public function getAlphabetSearchField(){
 		return 'account_id'; //TODO invoicestatus ne fonctionne pas
-	}	
+	}
 }

@@ -47,4 +47,5 @@ class Inventory_Relation_Model extends Vtiger_Relation_Model {
 	
 	public static function getAllRelations($parentModuleModel, $selected = true, $onlyActive = true) {
 	}
+	
 }

@@ -27,7 +27,7 @@
 	{assign var=MODULO_LEFT value=0}
 {/if}
 			{foreach item=DETAIL_VIEW_WIDGET from=$DETAILVIEW_LINKS['DETAILVIEWWIDGET'] name=count}
-				{if $smarty.foreach.count.index % 2 == $MODULO_LEFT}
+				{if $smarty.foreach.count.index % 2 == $MODULO_LEFT && $DETAIL_VIEW_WIDGET}
 					<div class="summaryWidgetContainer">
 						<div class="widgetContainer_{$smarty.foreach.count.index}" data-url="{$DETAIL_VIEW_WIDGET->getUrl()}"
 						     data-name="{$DETAIL_VIEW_WIDGET->getLabel()}" data-module="{$DETAIL_VIEW_WIDGET->get('linkName')}">
@@ -76,7 +76,7 @@
 				</div>
 			{/if}
 			{foreach item=DETAIL_VIEW_WIDGET from=$DETAILVIEW_LINKS['DETAILVIEWWIDGET'] name=count}
-				{if $smarty.foreach.count.index % 2 != $MODULO_LEFT}
+				{if $smarty.foreach.count.index % 2 != $MODULO_LEFT && $DETAIL_VIEW_WIDGET}
 					<div class="summaryWidgetContainer">
 						<div class="widgetContainer_{$smarty.foreach.count.index}" data-url="{$DETAIL_VIEW_WIDGET->getUrl()}"
 						     data-name="{$DETAIL_VIEW_WIDGET->getLabel()}" data-module="{$DETAIL_VIEW_WIDGET->get('linkName')}">
