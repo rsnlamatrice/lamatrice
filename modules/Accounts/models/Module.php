@@ -184,7 +184,7 @@ class Accounts_Module_Model extends Vtiger_Module_Model {
 			  WHERE vtiger_crmentity.deleted = 0
 			  AND a.accountid = ".$recordId;*/
 			$query = 'SELECT vtiger_crmentity.crmid,vtiger_invoice.subject, vtiger_invoice.invoice_no, vtiger_invoicecf.typedossier
-			, vtiger_invoice.invoicestatus, vtiger_invoice.invoicedate, vtiger_invoicecf.campaign_no, vtiger_invoicecf.notesid, vtiger_invoice.total
+			, vtiger_invoice.invoicestatus, vtiger_invoice.invoicedate, vtiger_invoicecf.campaign_no, vtiger_invoicecf.notesid, vtiger_invoice.total, vtiger_invoice.balance
 			FROM vtiger_invoice
 			INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
 			LEFT OUTER JOIN vtiger_invoicecf ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid

@@ -27,7 +27,7 @@ class Contacts_Save_Action extends Vtiger_Save_Action {
 			$contactModule = Vtiger_Module_Model::getInstance('Contacts');
 			//"old" means "before saved"
 			$contactOldRecord = Vtiger_Record_Model::getInstanceById($request->get('record'), $contactModule);
-			$contactOldRecord->createContactAddressesRecord('mailing');
+			$contactOldRecord->createContactAddressesRecord('mailing', true, $request);
 		}
 		
 		parent::process($request);

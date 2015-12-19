@@ -452,7 +452,10 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * used by Contacts_Save_Action::process
 	 */
-	public function createContactAddressesRecord($fieldPrefix = 'mailing', $save = true){
+	public function createContactAddressesRecord($fieldPrefix = 'mailing', $save = true, $compareWithRequest = true){
+		//on ne crée pas d'archive si on avait pas de code postal
+		if($save && !$this->get($fieldPrefix.'zip'))
+			return false;
 		
 		$addressModule = Vtiger_Module_Model::getInstance('ContactAddresses');
 		$addressRecord = Vtiger_Record_Model::getCleanInstance('ContactAddresses');
@@ -475,12 +478,22 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		);
 		//echo '<pre>';
 		foreach($mapping as $sourceField => $destField){
+			//Comparaison aux valeurs passées par un Request
+			// des champs mailing (préfixe) sauf pour addressformat
+			if($compareWithRequest
+			&& strpos($sourceField, $fieldPrefix) === 0
+			&& strpos($sourceField, 'addressformat') === false
+			&& $this->get($sourceField) != $compareWithRequest->get($sourceField)
+			)
+				$hasChanges = true;
 			$addressRecord->set($destField, $this->get($sourceField));
 			//var_dump($sourceField, $destField, $this->get($sourceField), $addressRecord->get($destField));
 		}
-		//echo '</pre>';
-		//die();
-		if($save){
+		
+		if($compareWithRequest && !$hasChanges)
+			return false;
+		
+		if($hasChanges && $save){
 			$addressRecord->save();
 			$addressRecord->set('mode', '');
 		}

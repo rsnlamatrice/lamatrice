@@ -70,7 +70,7 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 				|| array_key_exists('mailingzip', $rowData['update'.$moduleName])
 				|| array_key_exists('mailingcity', $rowData['update'.$moduleName])
 				){
-					$addressRecord = $recordModel->createContactAddressesRecord('mailing', true);
+					$recordModel->createContactAddressesRecord('mailing', true);
 				}
 				
 				//email

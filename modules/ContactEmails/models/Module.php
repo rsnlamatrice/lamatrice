@@ -58,6 +58,7 @@ class ContactEmails_Module_Model extends Vtiger_Module_Model{
 		return $return;
 	}
 	
+	//S'assure qu'une seule adresse est Principale
 	public function ensureOnlyOnePrincipale(Vtiger_Record_Model $recordModel){
 		
 		global $adb;
