@@ -35,8 +35,9 @@ $languageStrings = array(
 	'Sub Total'                    => 'Sous-total'                  , 
 	'AutoCreated'                  => 'Créé automatiquement'       , 
 	'Sent'                         => 'Envoyé'                     , 
-	'Credit Invoice'               => 'Facture au Crédit'          , 
-	'Paid'                         => 'Soldé'                      , 
+	'Credit Invoice'               => 'Avoir', 
+	'Paid'                         => 'Soldé', 
+	'Validated'                         => 'Validé', 
 	
 	//Translations used for Export to Pdf
 	'Valid Date' => 'Date de validité',

@@ -801,7 +801,8 @@ $languageStrings = array(
 	'AllMenuEditor' => 'Editeur du menu \'Tout\'',
 	
 	'LBL_INSCRIPTIONS' => 'Inscriptions',
-        'RSNSysControls' => 'Contrôles d\'intégrité du système',
+    
+	'RSNSysControls' => 'Contrôles d\'intégrité du système',
 	
 );
 $jsLanguageStrings = array(
