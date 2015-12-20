@@ -1,6 +1,7 @@
 <?php
 /*+**********************************************************************************
- * 
+ *
+ * hérité par RsnPrelevements_GenererPrelVirements_View
  ************************************************************************************/
 
 class RsnPrelevements_Statistics_View extends Vtiger_Index_View {
@@ -21,6 +22,9 @@ class RsnPrelevements_Statistics_View extends Vtiger_Index_View {
 		$viewer->assign('PERIODICITES', $periodicites);
 		$viewer->assign('PRELEVEMENTS_ACTIFS', $prelevementsActifs);
 		$viewer->assign('FIRST_RECUR_LIST', array('first', 'recur', 'total'));
+		
+		$viewer->assign('DUPLICATES_VIREMENTS', $this->getDoublonsInPrelevementsToGenerateVirnts($moduleModel, $dateVir));
+		$viewer->assign('DUPLICATES_PRELVIREMENTS', $this->getDoublonsInExistingPrelVirements($moduleModel, $dateVir));
 	
 		echo $viewer->view('Statistics.tpl',$moduleName,true);
 		
@@ -88,17 +92,109 @@ class RsnPrelevements_Statistics_View extends Vtiger_Index_View {
 			//	$rows[$periodicite][$row['is_first'] ? 'first' : 'recur'] = $row;
 			//}
 		}
+		$rows['* Totaux pour le '.$dateVir->format('d/m/Y')] = $periodicitesDateVirTotals;
 		$rows['Totaux'] = $totals;
-		$rows['Totaux au '.$dateVir->format('d/m/Y')] = $periodicitesDateVirTotals;
 		
 		foreach($rows as $rowKey=>&$row){
 			$row['total'] = array('nombre'=>0, 'montant'=>0);
 			foreach(array('first', 'recur') as $first_recur){
-				$row['total']['nombre'] = $row[$first_recur]['nombre'];
-				$row['total']['montant'] = $row[$first_recur]['montant'];
+				$row['total']['nombre'] += $row[$first_recur]['nombre'];
+				$row['total']['montant'] += $row[$first_recur]['montant'];
 			}
 		}
 		
+		return $rows;
+	}
+	
+	function getDoublonsInPrelevementsToGenerateVirnts($moduleModel, $dateVir){
+		$db = PearDatabase::getInstance();
+		
+		$params = array();
+		$query = $moduleModel->getPrelevementsToGenerateVirntsQuery($dateVir, $params);
+		$query = 'SELECT vtiger_crmentity_contact.crmid as contactid, vtiger_crmentity_contact.label as contactname, vtiger_contactdetails.contact_no
+			, COUNT(*) AS nombre
+			FROM vtiger_rsnprelevements
+			JOIN vtiger_crmentity AS vtiger_crmentity_prelevements
+				ON vtiger_crmentity_prelevements.crmid = vtiger_rsnprelevements.rsnprelevementsid
+			JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_rsnprelevements.accountid
+			JOIN vtiger_crmentity AS vtiger_crmentity_account
+				ON vtiger_crmentity_account.crmid = vtiger_account.accountid
+			JOIN vtiger_contactdetails
+				ON vtiger_account.accountid = vtiger_contactdetails.accountid
+				AND vtiger_contactdetails.reference = 1
+			JOIN vtiger_crmentity AS vtiger_crmentity_contact
+				ON vtiger_crmentity_contact.crmid = vtiger_contactdetails.contactid
+			WHERE vtiger_rsnprelevements.rsnprelevementsid IN (' . $query . ')
+			AND vtiger_crmentity_prelevements.deleted = FALSE
+			AND vtiger_crmentity_account.deleted = FALSE
+			AND vtiger_crmentity_contact.deleted = FALSE
+			GROUP BY vtiger_crmentity_contact.crmid, vtiger_crmentity_contact.label, vtiger_contactdetails.contact_no
+			HAVING COUNT(*) > 1';
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError($query);
+			return;
+		}
+		$rows = array();
+		$nbRows = $db->num_rows($result);
+		if(!$nbRows)
+			return false;
+		$contactModule = Vtiger_Module_Model::getInstance('Contacts');
+		for($nRow = 0; $nRow < $nbRows; $nRow++){
+			$row = $db->fetchByAssoc($result, $nRow);
+			$row['url'] = $contactModule->getDetailViewUrl($row['contactid']) . '&mode=showRelatedList&relatedModule=RsnPrelevements&tab_label=RsnPrelevements';
+			$rows[$row['contactid']] = $row;
+		}
+		return $rows;
+	}
+	
+	function getDoublonsInExistingPrelVirements($moduleModel, $dateVir){
+		$db = PearDatabase::getInstance();
+		
+		$params = array();
+		$query = $moduleModel->getExistingPrelVirementsQuery($dateVir, false, $params);
+		$query = 'SELECT vtiger_crmentity_contact.crmid as contactid, vtiger_crmentity_contact.label as contactname, vtiger_contactdetails.contact_no
+			, COUNT(*) AS nombre
+			FROM vtiger_rsnprelvirement
+			JOIN vtiger_crmentity AS vtiger_crmentity_prelvir
+				ON vtiger_crmentity_prelvir.crmid = vtiger_rsnprelvirement.rsnprelvirementid
+			JOIN vtiger_rsnprelevements
+				ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_rsnprelvirement.rsnprelevementsid
+			JOIN vtiger_crmentity AS vtiger_crmentity_prelevements
+				ON vtiger_crmentity_prelevements.crmid = vtiger_rsnprelevements.rsnprelevementsid
+			JOIN vtiger_account
+				ON vtiger_account.accountid = vtiger_rsnprelevements.accountid
+			JOIN vtiger_crmentity AS vtiger_crmentity_account
+				ON vtiger_crmentity_account.crmid = vtiger_account.accountid
+			JOIN vtiger_contactdetails
+				ON vtiger_account.accountid = vtiger_contactdetails.accountid
+				AND vtiger_contactdetails.reference = 1
+			JOIN vtiger_crmentity AS vtiger_crmentity_contact
+				ON vtiger_crmentity_contact.crmid = vtiger_contactdetails.contactid
+			WHERE vtiger_rsnprelvirement.rsnprelvirementid IN (' . $query . ')
+			AND vtiger_crmentity_prelvir.deleted = FALSE
+			AND vtiger_crmentity_prelevements.deleted = FALSE
+			AND vtiger_crmentity_account.deleted = FALSE
+			AND vtiger_crmentity_contact.deleted = FALSE
+			GROUP BY vtiger_crmentity_contact.crmid, vtiger_crmentity_contact.label, vtiger_contactdetails.contact_no
+			HAVING COUNT(*) > 1';
+		
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError($query);
+			return;
+		}
+		$rows = array();
+		$nbRows = $db->num_rows($result);
+		if(!$nbRows)
+			return false;
+		$contactModule = Vtiger_Module_Model::getInstance('Contacts');
+		for($nRow = 0; $nRow < $nbRows; $nRow++){
+			$row = $db->fetchByAssoc($result, $nRow);
+			$row['url'] = $contactModule->getDetailViewUrl($row['contactid']) . '&mode=showRelatedList&relatedModule=RsnPrelevements&tab_label=RsnPrelevements';
+			$rows[$row['contactid']] = $row;
+		}
 		return $rows;
 	}
 }
