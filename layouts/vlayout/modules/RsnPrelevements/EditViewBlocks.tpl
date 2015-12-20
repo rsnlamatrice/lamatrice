@@ -256,20 +256,21 @@
 									</div>
 								</td>
 							</tr>
-							<tr>
+							{if $RECORD_MODEL->get('separum')}
 								{* RUM non modifiable *}
-								{assign var=FIELD_NAME value='separum'}
-								<td class="fieldLabel {$WIDTHTYPE}">
-									<label class="muted pull-right marginRight10px">
-										RUM
-									</label>
-								</td>
-								<td>
-									<div style="width:300px;">
-										{$RECORD_MODEL->get($FIELD_NAME)}
-									</div>
-								</td>
-							</tr>
+								<tr>
+									<td class="fieldLabel {$WIDTHTYPE}">
+										<label class="muted pull-right marginRight10px">
+											RUM
+										</label>
+									</td>
+									<td>
+										<div style="width:300px;">
+											{$RECORD_MODEL->get('separum')}
+										</div>
+									</td>
+								</tr>
+							{/if}
 						</table>
 					</td>
 

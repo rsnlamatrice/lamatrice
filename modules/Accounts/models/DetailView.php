@@ -40,7 +40,8 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 		foreach($linkModelList['DETAILVIEW'] as $link) {
 			if($link->linklabel == 'View History' || $link->linklabel == 'Send SMS') {
 				unset($linkModelList['DETAILVIEW'][$index]);
-			} else if($link->linklabel == 'LBL_SHOW_ACCOUNT_HIERARCHY') {
+			
+			} elseif($link->linklabel == 'LBL_SHOW_ACCOUNT_HIERARCHY') {
 				$linkURL = 'index.php?module=Accounts&view=AccountHierarchy&record='.$recordModel->getId();
 				$link->linkurl = 'javascript:Accounts_Detail_Js.triggerAccountHierarchy("'.$linkURL.'");';
 				unset($linkModelList['DETAILVIEW'][$index]);

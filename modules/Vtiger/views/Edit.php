@@ -81,6 +81,10 @@ Class Vtiger_Edit_View extends Vtiger_Index_View {
 				list($startDate, $startTime) = explode(' ', $startDateTime);
 				$fieldValue = Vtiger_Date_UIType::getDisplayDateValue($startDate);
 			}
+			
+			if ($moduleName == 'RsnPrelevements') { 
+				$specialField = $fieldName === 'separum' || $fieldName === 'dejapreleve';
+			}
 			if($fieldModel->isEditable() || $specialField) {
 				$recordModel->set($fieldName, $fieldModel->getDBInsertValue($fieldValue));
 			}
