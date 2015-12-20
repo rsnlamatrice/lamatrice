@@ -514,8 +514,6 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 			'datedernierpvt'	=> $rsnprelevements['prlvInformations'][25],
 			'heuretraitementpvt'	=> $rsnprelevements['prlvInformations'][26],
 		);
-		if($rsnprelevementsHeader['dejapreleve'])
-			$rsnprelevementsHeader['dejapreleve'] = $rsnprelevementsHeader['datedernierpvt'];
 		return $rsnprelevementsHeader;
 	}
 	
