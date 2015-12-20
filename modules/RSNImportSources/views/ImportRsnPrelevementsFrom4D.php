@@ -483,8 +483,9 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 	 */
 	function getRsnPrelevementsValues($rsnprelevements) {
 	//TODO end implementation of this method
-		$dejapreleve = $rsnprelevements['prlvInformations'][12] == '1' && $rsnprelevements['prlvInformations'][25] != '00/00/00'
-			?  $this->getMySQLDate($rsnprelevements['prlvInformations'][25]) : null;
+		//affectation de la date de création comme date de 1er prélèvement
+		$dejapreleve = $rsnprelevements['prlvInformations'][12] == '1' && $rsnprelevements['prlvInformations'][11] != '00/00/00'
+			?  $this->getMySQLDate($rsnprelevements['prlvInformations'][11]) : null;
 		$rsnprelevementsHeader = array(
 			'reffiche'	=> $rsnprelevements['prlvInformations'][0],
 			'nom'	=> $rsnprelevements['prlvInformations'][1],
