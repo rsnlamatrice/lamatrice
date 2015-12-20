@@ -16,18 +16,18 @@ class Invoice_Record_Model extends Inventory_Record_Model {
 	
 	/**
 	 * ED151022
-	 * Mise ˆ jour des ŽlŽments de rŽglements d'aprs les RsnReglements liŽs
+	 * Mise Âˆ jour des ÂŽlÂŽments de rÂŽglements d'aprÂs les RsnReglements liÂŽs
 	 */
 	public function updateReceivedFromRelated(){
 		if(str_to_float($this->get('received')))
-			return 'Cette facture contient dŽjˆ un montant de rŽglement. Veuillez modifier manuellement le montant.'; //dŽjˆ une affectation
+			return 'Cette facture contient dÂŽjÂˆ un montant de rÂŽglement. Veuillez modifier manuellement le montant.'; //dÂŽjÂˆ une affectation
 		
 		$invoiceAmount = str_to_float($this->get('hdnGrandTotal'));
 		if(!$invoiceAmount)
 			return;
 		
 		$relatedModule = 'RsnReglements';
-		//Recherche des rŽglements relatifs qui ne soient pas liŽs ˆ d'autres factures
+		//Recherche des rÂŽglements relatifs qui ne soient pas liÂŽs Âˆ d'autres factures
 		$query = 'SELECT vtiger_rsnreglements.rsnreglementsid, vtiger_rsnreglements.numpiece, vtiger_rsnreglements.rsnmoderegl, vtiger_rsnreglements.dateregl
 			, vtiger_rsnreglements.amount
 			, vtiger_rsnreglements.amount - IFNULL(others_invoices.total, 0) AS available_amount
@@ -38,7 +38,7 @@ class Invoice_Record_Model extends Inventory_Record_Model {
 				ON vtiger_crmentityrel.relcrmid = vtiger_rsnreglements.rsnreglementsid
 			JOIN vtiger_crmentity vtiger_crmentity_invoice
 				ON vtiger_crmentityrel.crmid = vtiger_crmentity_invoice.crmid
-			LEFT JOIN ( /* Calcul des utilisations des mmes rŽglements pour d autres factures */
+			LEFT JOIN ( /* Calcul des utilisations des mÂmes rÂŽglements pour d autres factures */
 				SELECT vtiger_crmentityrel.relcrmid AS rsnreglementsid
 				, SUM(vtiger_invoice.total) AS total
 				FROM vtiger_crmentityrel
@@ -91,7 +91,7 @@ class Invoice_Record_Model extends Inventory_Record_Model {
 		$this->set('receivedmoderegl', $reglTypeRegl);
 		$this->set('receivedreference', implode(', ', $reglRefs));
 		$this->set('receivedcomments', implode(', ', $reglComments));
-		//$this->save(); ne fonctionne pas, il faut initialiser toutes les donnŽes des lignes
+		//$this->save(); ne fonctionne pas, il faut initialiser toutes les donnÂŽes des lignes
 		
 		$query = "UPDATE vtiger_invoice
             JOIN vtiger_invoicecf
@@ -128,10 +128,10 @@ class Invoice_Record_Model extends Inventory_Record_Model {
 			
 			case 'invoicestatus':
 				return array(
-					'Created' => array( 'label' => 'Créé', 'icon' => 'ui-icon ui-icon-check orange' ),
-					'Validated' => array( 'label' => 'Validé', 'icon' => 'ui-icon ui-icon-check darkgreen' ),
-					'Compta' => array( 'label' => 'Archivé', 'icon' => 'ui-icon ui-icon-close blue' ),
-					'Cancelled' => array( 'label' => 'Annulé', 'icon' => 'ui-icon ui-icon-close darkred' ),
+					'Created' => array( 'label' => 'CrÃ©Ã©', 'icon' => 'ui-icon ui-icon-check orange' ),
+					'Validated' => array( 'label' => 'ValidÃ©', 'icon' => 'ui-icon ui-icon-check darkgreen' ),
+					'Compta' => array( 'label' => 'ArchivÃ©', 'icon' => 'ui-icon ui-icon-arrowthick-1-e blue' ),
+					'Cancelled' => array( 'label' => 'AnnulÃ©', 'icon' => 'ui-icon ui-icon-close darkred' ),
 					'Credit Invoice' => array( 'label' => 'Avoir', 'icon' => 'ui-icon ui-icon-check orange' ),
 				);
 			
