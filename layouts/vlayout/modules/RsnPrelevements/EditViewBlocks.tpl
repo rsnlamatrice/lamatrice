@@ -257,20 +257,16 @@
 								</td>
 							</tr>
 							<tr>
+								{* RUM non modifiable *}
 								{assign var=FIELD_NAME value='separum'}
-								{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
 								<td class="fieldLabel {$WIDTHTYPE}">
 									<label class="muted pull-right marginRight10px">
-									{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}
 										RUM
 									</label>
 								</td>
 								<td>
 									<div style="width:300px;">
-										{* SEPA RUM *}
-										{assign var=TITLE value=''}
-										{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-										{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
+										{$RECORD_MODEL->get($FIELD_NAME)}
 									</div>
 								</td>
 							</tr>
