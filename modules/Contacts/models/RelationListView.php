@@ -180,6 +180,10 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				$this->set('orderby', 'createdtime');
 				$this->set('sortorder', 'DESC');
 				break;
+			 case "RsnPrelevements":
+				$this->set('orderby', 'createdtime');
+				$this->set('sortorder', 'DESC');
+				break;
 			 case "Campaigns":
 			 case "Contacts":
 			 case "Documents":

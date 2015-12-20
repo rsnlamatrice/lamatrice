@@ -113,8 +113,7 @@ class RsnPrelevements_GenererPrelVirements_View extends Vtiger_Index_View {
 			FROM vtiger_rsnprelevements
 			WHERE vtiger_rsnprelevements.rsnprelevementsid IN (' . $query . ')
 			GROUP BY IF(vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = \'0000-00-00\', 0, 1)';
-		echo "<pre>$query</pre>";
-		var_dump($params);
+		
 		$result = $db->pquery($query, $params);
 		if(!$result){
 			$db->echoError($query);

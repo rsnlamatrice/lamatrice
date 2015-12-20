@@ -282,7 +282,7 @@ Vtiger_Detail_Js("Contacts_Detail_Js",{},{
 		});
 
 		// ED141008
-		var relatedModuleName = this.getRelatedModuleName(detailContentsHolder);
+		var relatedModuleName = this.getSelectedTab().data('module');
 		switch (relatedModuleName ){
 		  case "Documents":
 		  case "Critere4D":
