@@ -130,6 +130,10 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				echo_callstack();
 				var_dump(__FILE__ . ' ERREUR dans queryParams_decode(), variables non interprétables par json_decode', $string, $array);
 			}
+			elseif(!is_array($array)){
+				echo_callstack();
+				var_dump(__FILE__ . ' ERREUR dans queryParams_decode(), variables !is_array', $string, $array);
+			}
 			else
 				foreach($array as $variable)
 					$variables[$variable[0]] = array(
@@ -385,7 +389,6 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			return null;
 		if(!is_array($paramsDetails))
 			$paramsDetails = array();
-		
 		$sql = $this->getPanelQuery();
 		$queryVariables = $this->getVariablesFromQuery($sql);// array() extrait de la requête
 		//var_dump($queryVariables);
@@ -481,7 +484,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			}
 			else {
 				$variable = $variables[$variableName];
-				$value = str_replace('&quot;', '"', $variable->get('defaultvalue'));
+				$value = decode_html($variable->get('defaultvalue'));//str_replace('&quot;', '"', 
 				//Variable déjà traitée
 				if(!isset($variablesId[$variable->getId()])){
 					$paramsDetails[$queryVariable['name']] = array(
@@ -498,6 +501,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			if(isset($variables[$variableName])){
 				$value = $variables[$variableName]->getValueForSQL($value);
 			}
+			
 			// commentaire en préfixe
 			$comment = ' /*[[' . str_replace('?', '!', $queryVariable['operation'] . ' ' . $variable->get('path') . $variableName) . ']]*/ ';
 			
@@ -545,7 +549,17 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				$subPanelRecord = self::getInstanceByNamePath($panelName, $this->get('rsncontactspanelsdomains'));
 				if($subPanelRecord){
 					/* affectation des valeurs passées par paramètres */
-					$paramsPriorValues = self::queryParams_decode( $value );
+					/* TODO $value == 1 ou 0 provient de l'éditeur de CustomView qui n'a pas anticipé le type PANEL */
+					if($value === 0 || $value === '0'){
+						//TODO Exclude from PANEL
+						$paramsPriorValues = array();
+					}
+					elseif($value == 1){
+						$paramsPriorValues = array();
+					}
+					else{
+						$paramsPriorValues = self::queryParams_decode( $value );
+					}
 					/* arguments suivis */
 					if(isset($followParamsPriorValues)){
 						foreach($followParamsPriorValues as $followParamName => $followParamPriorValue){

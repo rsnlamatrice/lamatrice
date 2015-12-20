@@ -60,7 +60,9 @@ class RSNImportSources_ImportRSNDonateursWebFrom4D_View extends RSNImportSources
 	 * @return boolean - true if the line is a client information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[14])) {
+		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[14])
+		&& !($line[0] >= 5363 && $line[0] <= 5365)// 'sabine.li@sortirdunucleaire.Fr' && $line[9] === '2015-06-12')
+			) {
 			return true;
 		}
 

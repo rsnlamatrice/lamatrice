@@ -59,7 +59,8 @@
 					<div class="row-fluid">
 						{if !empty($SELECTED_IDS)}
 						<div class="row-fluid" style="height:30px">
-							<label><input type="radio" name="among_ids" value="AmongSelectedRecords"/>
+							<label><input type="radio" name="among_ids" value="AmongSelectedRecords"
+									{if !empty($SELECTED_IDS) && count($SELECTED_IDS) == 2} checked="checked"{/if} />
 							&nbsp;Parmi les enregistrements sélectionnés
 							</label>
 							{if empty($SELECTED_IDS)}&nbsp; <span class="redColor">{vtranslate('LBL_NO_RECORD_SELECTED',$MODULE)}</span>{/if}
@@ -72,7 +73,7 @@
 						</div>
 						<div class="row-fluid" style="height:30px">
 							<label><input type="radio"  name="among_ids" value="AmongAllView"
-										   checked="checked" />
+									{if empty($SELECTED_IDS) || count($SELECTED_IDS) != 2} checked="checked"{/if} />
 							&nbsp;Depuis toutes les données de la vue
 							</label>
 						</div>
@@ -89,8 +90,16 @@
         <div class="row-fluid">
 			<div class="span">&nbsp;</div>
 			<div class="span10 control-group">
-				<h4>Champs de comparaison</h4>
-				<div class="well exportContents marginLeftZero controls">
+				<label style="font-weight: bold; font-size: larger;">
+					{if !empty($SELECTED_IDS) && count($SELECTED_IDS) == 2}
+						<input type="checkbox" value="compare_fields"
+							onchange="$(this).parents('.control-group:first').children('.controls').toggleClass('hide');"/>
+						&nbsp;
+					{/if}
+					Champs de comparaison
+				</label>
+				
+				<div class="well exportContents marginLeftZero controls {if !empty($SELECTED_IDS) && count($SELECTED_IDS) == 2}hide{/if}">
 					<div class="row-fluid">
 						<span class="span6">
 							<select id="fieldList" class="select2 row-fluid" multiple="true" name="fields[]"
@@ -117,6 +126,11 @@
 			<button class="btn btn-success" type="submit" disabled="true">
 				<strong>{vtranslate('LBL_FIND_DUPLICATES', $MODULE)}</strong>
 			</button>
+			{if !empty($SELECTED_IDS) && count($SELECTED_IDS) == 2}
+				<button class="btn btn-success" type="submit">
+					<strong>{vtranslate('LBL_MERGE', $MODULE)}</strong>
+				</button>
+			{/if}
 		</div>
 	</form>
 </div>

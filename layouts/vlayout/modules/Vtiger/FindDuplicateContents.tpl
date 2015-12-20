@@ -50,6 +50,7 @@
 			</tr>
 		</thead>
 		{assign var=mergeRecordCount value=0}
+		{assign var=groupsCount value=$LISTVIEW_ENTRIES|@sizeof}
 		{foreach item=LISTVIEW_ENTRY key=GROUP_NAME from=$LISTVIEW_ENTRIES}
 			{assign var=groupCount value=$LISTVIEW_ENTRY|@sizeof}
 			{assign var=recordCount value=0}
@@ -71,13 +72,15 @@
 						{/if}
 					{/foreach}
 					<td style='border-bottom:1px solid #DDD;'>
-						<input type="checkbox" data-id='{$RECORD.recordid}' name="mergeRecord" data-group="{$GROUP_NAME}"/>
+						<input type="checkbox" data-id='{$RECORD.recordid}' name="mergeRecord" data-group="{$GROUP_NAME}"
+							{if $groupsCount == 1} checked="checked"{/if}/>
 					</td>
 					{if $recordCount eq 0}
 						<td align='center' rowspan="{$groupCount}" style="border-left:1px solid #DDD;border-bottom:1px solid #DDD;vertical-align: middle;text-align: center">
 							<input type="button" value="{vtranslate('LBL_MERGE', $MODULE)}" name="merge" class="btn btn-success" data-group="{$GROUP_NAME}">
 							{if $MODULE == "Contacts"}
-								&nbsp;<input type="button" value="{vtranslate('LBL_MERGE_ACCOUNTS', $MODULE)}" name="merge" class="btn btn-success" data-group="{$GROUP_NAME}"
+								<br><br>
+								<input type="button" value="{vtranslate('LBL_MERGE_ACCOUNTS', $MODULE)}" name="merge" class="btn btn-success" data-group="{$GROUP_NAME}"
 											data-view="MergeAccounts"{*ED150910*}>
 							{/if}
 						</td>

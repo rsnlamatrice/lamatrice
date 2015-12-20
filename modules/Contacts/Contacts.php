@@ -72,7 +72,6 @@ class Contacts extends CRMEntity {
 		'First Name' => Array('contactdetails'=>'firstname'),
 		'Last Name' => Array('contactdetails'=>'lastname'),
 		'Title' => Array('contactdetails'=>'title'),
-		'Account Name' => Array('account'=>'accountid'),
 		'Email' => Array('contactdetails'=>'email'),
 		'Office Phone' => Array('contactdetails'=>'phone'),
 		'Assigned To' => Array('crmentity'=>'smownerid'),

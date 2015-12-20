@@ -523,7 +523,7 @@ var_dump($listResult);*/
 		if($duplicatePermission) {
 			$advancedLinks[] = array(
 				'linktype' => 'LISTVIEWMASSACTION',
-				'linklabel' => 'LBL_FIND_DUPLICATES',
+				'linklabel' => 'LBL_MENU_FIND_DUPLICATES',
 				'linkurl' => 'Javascript:Vtiger_List_Js.showDuplicateSearchForm("index.php?module='.$moduleModel->getName().
 								'&view=MassActionAjax&mode=showDuplicatesSearchForm")',
 				'linkicon' => ''
