@@ -56,23 +56,19 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 		$source_query = $this->get('source_query');//selected ids
 		$among_query = $this->get('among_query');//among selected ids
 		
-		/*echo('<pre>');
-		echo('source_query : '. $source_query);
-		echo('</pre>');
-		echo('<pre>');
-		echo('among_query : '. $among_query);
-		echo('</pre>');*/
+		
+		//ED151220 : possibilité de ne choisir que 2 enregistrements à fusionner, sans recherche de doublon
+		$focus = CRMEntity::getInstance($module);
+		$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
 			
-        $focus = CRMEntity::getInstance($module);
-        $query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
-/*echo(__FILE__);
-echo('<pre>');
-echo($query);
-echo('</pre>');
-die(__FILE__);*/
-
 		$query .= " LIMIT $startIndex, ". ($pageLimit+1);
 		$result = $db->pquery($query, array());
+		if(!$result){
+			echo $db->echoError($query);
+			die();
+		}
+		//echo "<br><br><br><br><br><pre>$query</pre>";
+		
         $rows = $db->num_rows($result);
 		$this->result = $result;
 
@@ -96,7 +92,7 @@ die(__FILE__);*/
 
 		for ($i=0; $i<$rows; $i++) {
 			$row = $entries[$i];
-            if($i != 0) {
+            if($i != 0 && $tableColumns) {
                 //ED150910 I have added a record_label column $slicedArray = array_slice($row, 2);
 				// nota : $row[0] and $row['recordid'] exist, so double counter
                 $slicedArray = array_slice($row, 4);
@@ -121,7 +117,7 @@ die(__FILE__);*/
             }
             $fieldValues[$group][$groupRecordCount++] = $resultRow;
         }
-
+		//var_dump($fieldValues);
         return $fieldValues;
     }
 
@@ -153,12 +149,13 @@ die(__FILE__);*/
 			$focus = CRMEntity::getInstance($module);
 			$ignoreEmpty = $this->get('ignoreEmpty');
 
+			//ED151220 : possibilité de ne choisir que 2 enregistrements à fusionner, sans recherche de doublon
 			//ED150910
 			$source_query = $this->get('source_query');//selected ids
 			$among_query = $this->get('among_query');//among selected ids
 			
 			$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
-
+				
 			$position = stripos($query, 'from');
 			if ($position) {
 				$split = spliti('from ', $query);

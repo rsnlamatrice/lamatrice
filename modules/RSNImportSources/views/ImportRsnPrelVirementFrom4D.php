@@ -199,7 +199,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				
 				if(strlen($prelevement->get('separum')) > 3){
 					$oldRUM = $record->get('separum');
-					if($prelevement->get('separum') != $oldRUM && $oldRUM && !is_numeric($oldRUM)){
+					if($prelevement->get('separum') != $oldRUM && $oldRUM && !is_numeric($oldRUM[0])){
 						if($comments) $comments .= "\r\n";
 						$comments .= 'Dans 4D, la RUM était ' . $oldRUM . ', maintenant c\'est '.$prelevement->get('separum').'.';
 					}

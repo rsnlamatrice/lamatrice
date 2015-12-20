@@ -292,16 +292,16 @@ class RSNImportSources_ImportContactEmailsFrom4D_View extends RSNImportSources_I
 			}
 		
 		
-		$fieldName = 'comments';
+		/*$fieldName = 'comments';
 		if($contactemailsData[0]['erreur']){
 			$value = '4D indique Erreur';
 		}
 		else
 			$value = '';
 		if($contactemailsData[0]['date_modification'] != $contactemailsData[0]['date_creation'])
-		$value = '4D - modifié le ' . $contactemailsData[0]['date_modification'] . "\r"
-			. $value;
-		$record->set($fieldName, $value);
+			$value = '4D - modifié le ' . $contactemailsData[0]['date_modification'] . "\r"
+				. $value;
+		$record->set($fieldName, $value);*/
 		
 		
 		$fieldName = 'emailaddressorigin';

@@ -2763,10 +2763,25 @@ var_dump($params);*/
 	 * @param <String> $among_query : Query instead of "in $tableName"
 	 * @return string
 	 * ED150910 : vtiger_users_last_import seams to be useless
+	 * 
+	 * ED151220 : possibilité de ne choisir que 2 enregistrements à fusionner, sans recherche de doublon, alors $tableColumns est vide
 	 */
     function getQueryForDuplicates($module, $tableColumns, $selectedColumns = '', $ignoreEmpty = false
 										   , $source_query = false, $among_query = false) {
-		if(is_array($tableColumns)) {
+		$noCompareFields = !$tableColumns;
+		if($noCompareFields){
+			$tableColumnsString = '';
+			foreach($this->list_fields as $field){
+				if($tableColumnsString)
+					$tableColumnsString .= ',';
+				foreach($field as $tableName=>$fieldName){
+					if(strpos($tableName, 'vtiger_') !== 0)
+						$tableName = 'vtiger_'.$tableName;
+					$tableColumnsString .= $tableName.'.'.$fieldName;
+				}
+			}
+		}
+		elseif(is_array($tableColumns)) {
 			$tableColumnsString = implode(',', $tableColumns);
 		}
         $selectClause = "SELECT " . $this->table_name . "." . $this->table_index . " AS recordid,"
@@ -2797,14 +2812,14 @@ var_dump($params);*/
         $whereClause = " WHERE vtiger_crmentity.deleted = 0";
         $whereClause .= $this->getListViewSecurityParameter($module);
 
-		if($ignoreEmpty) {
+		if($ignoreEmpty && !$noCompareFields) {
 			foreach($tableColumns as $tableColumn){
 				$whereClause .= " AND ($tableColumn IS NOT NULL AND $tableColumn != '') ";
 			}
 		}
 
 		if($source_query){
-			if($source_query == $among_query){
+			if($source_query == $among_query || $noCompareFields){
 				$fromClause .= " INNER JOIN ($source_query) AS t_source
 					ON t_source." . $this->table_index . " = vtiger_crmentity.crmid";
 			}
@@ -2839,18 +2854,23 @@ var_dump($params);*/
             $sub_query = "SELECT $tableColumnsString $fromClause $whereClause GROUP BY $tableColumnsString HAVING COUNT(*)>1";
         }
 
-		$i = 1;
-		foreach($tableColumns as $tableColumn){
-			$tableInfo = explode('.', $tableColumn);
-			$duplicateCheckClause .= " ifnull($tableColumn,'null') = ifnull(temp.$tableInfo[1],'null')";
-			if (count($tableColumns) != $i++) $duplicateCheckClause .= " AND ";
-		}
-        $query = $selectClause . $fromClause .
+		if($noCompareFields){
+			$query = $selectClause . $fromClause .
+                " ORDER BY $tableColumnsString," . $this->table_name . "." . $this->table_index . " ASC";
+		} else {
+			$i = 1;
+			foreach($tableColumns as $tableColumn){
+				$tableInfo = explode('.', $tableColumn);
+				$duplicateCheckClause .= " ifnull($tableColumn,'null') = ifnull(temp.$tableInfo[1],'null')";
+				if (count($tableColumns) != $i++) $duplicateCheckClause .= " AND ";
+			}
+			$query = $selectClause . $fromClause .
                 //ED150910 useless " LEFT JOIN vtiger_users_last_import ON vtiger_users_last_import.bean_id=" . $this->table_name . "." . $this->table_index .
                 " INNER JOIN (" . $sub_query . ") AS temp
-					ON " . $duplicateCheckClause .
-                $whereClause .
+						ON " . $duplicateCheckClause .
+					$whereClause .
                 " ORDER BY $tableColumnsString," . $this->table_name . "." . $this->table_index . " ASC";
+		}
         return $query;
     }
 
