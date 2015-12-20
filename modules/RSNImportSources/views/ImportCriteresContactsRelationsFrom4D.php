@@ -104,6 +104,9 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importCritere4D($importDataController) {
+		
+		$this->importMissingCritere4D($importDataController);
+		
 		global $VTIGER_BULK_SAVE_MODE;
 		$VTIGER_BULK_SAVE_MODE = true;
 		$config = new RSNImportSources_Config_Model();
@@ -125,7 +128,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		$perf = new RSN_Performance_Helper($numberOfRecords);
 		for ($i = 0; $i < $numberOfRecords; ++$i) {
 			$row = $adb->raw_query_result_rowdata($result, $i);
-			$this->importOneCritere4D(array($row), $importDataController);
+			$this->importOneCritere4DRelation(array($row), $importDataController);
 			$perf->tick();
 			if(Import_Utils_Helper::isMemoryUsageToHigh()){
 				$this->skipNextScheduledImports = true;
@@ -143,44 +146,116 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	}
 
 	/**
-	 * Method to process to the import of a one prelevement.
-	 * @param $critere4dsData : the data of the prelevement to import
+	 * Method to process to the import of the Critere4D module.
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importMissingCritere4D($importDataController) {
+		global $VTIGER_BULK_SAVE_MODE;
+		$VTIGER_BULK_SAVE_MODE = true;
+		$config = new RSNImportSources_Config_Model();
+		
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Critere4D');
+		$sql = 'SELECT critere, MIN(dateapplication) AS dateapplication
+			FROM ' . $tableName . '
+			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
+			AND (_notesid IS NULL AND _critere4did IS NULL)
+			GROUP BY critere
+			ORDER BY dateapplication';
+
+		$result = $adb->query($sql);
+		$numberOfRecords = $adb->num_rows($result);
+
+		if ($numberOfRecords <= 0) {
+			return;
+		}
+
+		$perf = new RSN_Performance_Helper($numberOfRecords);
+		for ($i = 0; $i < $numberOfRecords; ++$i) {
+			$row = $adb->raw_query_result_rowdata($result, $i);
+			
+			echo('
+				 <br>Création du critère manquant
+				 '.print_r($row, true).'
+				 ');
+			
+			
+			$this->importOneCritere4D(array($row), $importDataController);
+			$perf->tick();
+			if(Import_Utils_Helper::isMemoryUsageToHigh()){
+				$this->skipNextScheduledImports = true;
+				$keepScheduledImport = true;
+				break;
+			}
+		}
+		$perf->terminate();
+		
+		self::setPreImportDataCritere4DIdByNom(
+			$this->user,
+			'Critere4D',
+			'critere',
+			'_critere4did',
+			/*$changeStatus*/ false
+		);
+	}
+
+	/**
+	 * Method to process to the import of a one critere 4D.
+	 * @param $critere4dsData : the data of the critere 4D to import
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOneCritere4D($critere4dsData, $importDataController) {
+		global $log;
+		$record = Vtiger_Record_Model::getCleanInstance('Critere4D');
+		$record->set('mode', 'create');
+		
+		$name = $critere4dsData[0]['critere'];
+		$record->set('nom', $name);
+		$dateApplication = $critere4dsData[0]['dateapplication'];
+		$record->set('usage_debut', $dateApplication);
+		
+		//$db->setDebug(true);
+		$record->save();
+		$critere4dId = $record->getId();
+		
+		if(!$critere4dId){
+			return false;
+		}
+				
+		$record->set('mode','edit');
+		$db = PearDatabase::getInstance();
+		$query = "UPDATE vtiger_crmentity
+			JOIN vtiger_critere4d
+				ON vtiger_crmentity.crmid = vtiger_critere4d.critere4did
+			SET smownerid = ?
+			, createdtime = ?
+			WHERE vtiger_crmentity.crmid = ?
+		";
+		$result = $db->pquery($query, array(ASSIGNEDTO_ALL
+							, $dateApplication
+							, $critere4dId));
+		
+		$log->debug("" . basename(__FILE__) . " update imported critere4ds (id=" . $record->getId() . ", Ref 4D=$sourceId , date=" . $critere4dsData[0]['datecreation']
+				. ", result=" . ($result ? " true" : "false"). " )");
+		if( ! $result)
+			$db->echoError();
+		else {
+		}
+		return $record;
+	}
+					
+	/**
+	 * Method to process to the import of a one relation.
+	 * @param $critere4dsData : the data of the relation to import
+	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
+	 */
+	function importOneCritere4DRelation($critere4dsData, $importDataController) {
 					
 		global $log;
 		
 		$critere4dId = $critere4dsData[0]['_critere4did'];
 		$notesId = $critere4dsData[0]['_notesid'];
 		$contactId = $critere4dsData[0]['_contactid'];
-		
-		//Le post-préImport fait déjà le ménage */
-		/*//test sur nom == $sourceId
-		$query = "SELECT crmid
-			FROM vtiger_critere4dcontrel
-			WHERE critere4did = ?
-			AND contactid = ?
-			AND dateapplication = ?
-			LIMIT 1
-		";
-		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($critere4dId, $contactId, $dateApplication));
-		if($db->num_rows($result)){
-			//already imported !!
-			$row = $db->fetch_row($result, 0); 
-			$entryId = $this->getEntryId("Critere4D", $row['crmid']);
-			foreach ($critere4dsData as $critere4dsLine) {
-				$entityInfo = array(
-					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED,
-					'id'		=> $entryId
-				);
-				
-				//TODO update all with array
-				$importDataController->updateImportStatus($critere4dsLine[id], $entityInfo);
-			}
-		}
-		*/
 		
 		if(!$contactId || (!$critere4dId && !$notesId)){
 			//var_dump("One is null", $contactId, $critere4dId, $critere4dsData);
@@ -246,13 +321,13 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 				return false;
 			}
 			
-			$entryId = $this->getEntryId("Critere4D", $critere4dId);
+			$entryId = $contactId;
 			foreach ($critere4dsData as $critere4dsLine) {
 				$entityInfo = array(
 					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
 					'id'		=> $entryId
 				);
-				$importDataController->updateImportStatus($critere4dsLine[id], $entityInfo);
+				$importDataController->updateImportStatus($critere4dsLine['id'], $entityInfo);
 			}
 			
 			$log->debug("" . basename(__FILE__) . " update imported critere4ds (contactId=" . $contactId . ", Ref 4D=$sourceId , date=" . $critere4dsData[0]['dateapplication']
@@ -342,7 +417,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			/*$changeStatus*/ false
 		);
 	
-		self::failPreImportDataForNonExistingCritere4DOrContact(
+		self::failPreImportDataForNonExistingContact(
 			$this->user,
 			'Critere4D'
 		);
@@ -428,7 +503,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	/**
 	 * Méthode qui court-circuite tous enregistrements pour lesquels on ne connait pas le critère ou le contact
 	 */
-	public static function failPreImportDataForNonExistingCritere4DOrContact($user, $moduleName) {
+	public static function failPreImportDataForNonExistingContact($user, $moduleName) {
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
 		
@@ -440,8 +515,6 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		$query .= "
 			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 			AND (`$tableName`._contactid IS NULL OR `$tableName`._contactid = ''
-				OR ((`$tableName`._critere4did IS NULL OR `$tableName`._critere4did = '')
-					AND (`$tableName`._notesid IS NULL OR `$tableName`._notesid = ''))
 			)
 		";
 		$result = $db->query($query);

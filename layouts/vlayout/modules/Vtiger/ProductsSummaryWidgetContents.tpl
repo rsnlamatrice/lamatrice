@@ -27,13 +27,9 @@
 						</span>
 						{if $RELATED_RECORD->get('quantity')}
 						<span class="span1">
-							{if (float)$RELATED_RECORD->get('quantity') != 1}
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
 								<span class="pull-right">x {(float)$RELATED_RECORD->get('quantity')}</span>
 							</a>
-							{else}
-							&nbsp;
-							{/if}
 						</span>
 						{/if}
 						<span class="span2">
