@@ -34,7 +34,11 @@ class RsnPrelevements_Statistics_View extends Vtiger_Index_View {
 		$prelvtypes = $moduleModel->getTypesPrelvntsToGenerateVirnts();
 		
 		$query = 'SELECT vtiger_rsnprelevements.periodicite
-			, IF(vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = \'0000-00-00\', 0, 1) AS is_recur
+			, IF(vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = \'0000-00-00\', 0,
+				IF(dejapreleve 
+					BETWEEN DATE_SUB( ?, INTERVAL 7 DAY)
+					AND DATE_ADD( ?, INTERVAL 7 DAY), 0, 1)
+				) AS is_recur
 			, COUNT(*) AS nombre
 			, SUM(montant) AS montant
 			, IFNULL(vtiger_periodicite.sortorderid, 999) AS sortorderid
@@ -46,9 +50,11 @@ class RsnPrelevements_Statistics_View extends Vtiger_Index_View {
 			WHERE vtiger_crmentity.deleted  = 0
 			AND vtiger_rsnprelevements.etat = 0
 			AND vtiger_rsnprelevements.prelvtype IN (' . generateQuestionMarks($prelvtypes) . ')
-			GROUP BY vtiger_rsnprelevements.periodicite
+			GROUP BY is_recur, vtiger_rsnprelevements.periodicite
 			ORDER BY sortorderid, vtiger_rsnprelevements.periodicite
 			';
+		$params[] = $dateVir->format('Y-m-d');
+		$params[] = $dateVir->format('Y-m-d');
 		$params = array_merge($params, $prelvtypes);
 		$result = $db->pquery($query, $params);
 		if(!$result){
