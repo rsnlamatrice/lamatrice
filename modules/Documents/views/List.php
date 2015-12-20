@@ -74,6 +74,12 @@ class Documents_List_View extends Vtiger_List_View {
 		$pagingModel = new Vtiger_Paging_Model();
 		$pagingModel->set('page', $pageNumber);
 
+		//ED150622
+		if(empty($orderBy) && $cvId) {
+			$customView = CustomView_Record_Model::getInstanceById($cvId);
+			list($orderBy, $sortOrder) = $customView->getOrderByFieldsInfos();
+		}
+		
 		if(!empty($orderBy)) {
 			$listViewModel->set('orderby', $orderBy);
 			$listViewModel->set('sortorder',$sortOrder);
