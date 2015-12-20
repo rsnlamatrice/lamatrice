@@ -8,6 +8,27 @@
  * All Rights Reserved.
  ************************************************************************************/
 
+ /*
+UPDATE `vtiger_rsnprelevements` 
+JOIN (
+	SELECT `rsnprelevementsid`, MIN(dateexport) AS dateexport
+	FROM `vtiger_rsnprelvirement`
+	GROUP BY `rsnprelevementsid`
+	) `vtiger_rsnprelvirement`
+	ON `vtiger_rsnprelevements`.`rsnprelevementsid` = `vtiger_rsnprelvirement`.`rsnprelevementsid`
+SET dejapreleve = dateexport
+WHERE `etat` = 0
+AND (vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = '0000-00-00')
+  
+  
+  SELECT `vtiger_rsnprelevements`.*
+FROM `vtiger_rsnprelevements` 
+LEFT JOIN `vtiger_rsnprelvirement` 
+	ON `vtiger_rsnprelevements`.`rsnprelevementsid` = `vtiger_rsnprelvirement`.`rsnprelevementsid`
+WHERE `etat` = 0
+AND (vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = '0000-00-00')
+AND `vtiger_rsnprelvirement`.`rsnprelevementsid` IS NULL
+*/
 class RsnPrelevements_GenererPrelVirements_View extends Vtiger_Index_View {
 
 	public function process(Vtiger_Request $request) {
@@ -92,6 +113,8 @@ class RsnPrelevements_GenererPrelVirements_View extends Vtiger_Index_View {
 			FROM vtiger_rsnprelevements
 			WHERE vtiger_rsnprelevements.rsnprelevementsid IN (' . $query . ')
 			GROUP BY IF(vtiger_rsnprelevements.dejapreleve IS NULL OR vtiger_rsnprelevements.dejapreleve = \'0000-00-00\', 0, 1)';
+		echo "<pre>$query</pre>";
+		var_dump($params);
 		$result = $db->pquery($query, $params);
 		if(!$result){
 			$db->echoError($query);

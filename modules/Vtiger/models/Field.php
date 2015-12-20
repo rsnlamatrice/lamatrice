@@ -1347,10 +1347,13 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		if(!$this->filterOperator)
 			return '';
 		$filterOperator = self::getOperatorFromOperatorCode($this->filterOperator);
+		$filterOperatorHtml = to_html($filterOperator);
 		//var_dump($this->get('fieldvalue'), $this->filterOperator, $filterOperator, strlen($filterOperator));
 		//si fieldvalue commence déjà par l'opérateur, on annule 
 		if($this->get('fieldvalue')
-		&& strcasecmp(substr($this->get('fieldvalue'), 0, strlen($filterOperator)), $filterOperator) === 0){
+		&& (strcasecmp(substr($this->get('fieldvalue'), 0, strlen($filterOperator)), $filterOperator) === 0
+		 || ($filterOperator != $filterOperatorHtml
+			&& strcasecmp(substr($this->get('fieldvalue'), 0, strlen($filterOperatorHtml)), $filterOperatorHtml) === 0))){
 			return '';
 		}
 		return $filterOperator;

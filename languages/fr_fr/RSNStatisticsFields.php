@@ -13,6 +13,7 @@ $languageStrings = array(
 	'SINGLE_RSNStatisticsFields' => 'Champ statistique',
 	'LBL_BLOCK_GENERAL_INFORMATION' => 'Informations générales',
 	'LBL_BLOCK_SYSTEM_INFORMATION' => 'Informations système',
+	'LBL_DESCRIPTION' => 'Description',
 	'LBL_FIELDNAME' => 'nom du champ',
 	'LBL_FIELDTYPE' => 'type de champ',
 	'LBL_UNIQUECODE' => 'champ retourné par la requête',

@@ -77,7 +77,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			'iban',
 			'bic',
 			
-			/* post prÃ© import */
+			/* post pré import */
 			'_contactid',
 		);
 	}
@@ -121,7 +121,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 		}
 		$perf->terminate();
 		
-		//ED150826 : d'autres donnÃ©es sont disponibles, empÃªche la suppression de l'import programmÃ©
+		//ED150826 : d'autres données sont disponibles, empêche la suppression de l'import programmé
 		/*var_dump("\n\n\n\n\n\n\n\n\nnumberOfRecords\n\n\n\n\n\n\n\n\n\n\n", $numberOfRecords, $config->get('importBatchLimit')
 				, '$this->getNumberOfRecords()', $this->getNumberOfRecords());*/
 		if($numberOfRecords == $config->get('importBatchLimit')){
@@ -260,7 +260,11 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 				if( ! $result)
 					$db->echoError();
 					
-					
+				if(!$prelevement->get('dejapreleve') || $prelevement->get('dejapreleve') == '0000-00-00' || $prelevement->get('dejapreleve') == '00-00-0000'){
+					$prelevement->set('mode', 'edit');
+					$prelevement->set('dejapreleve', $record->get('dateexport'));
+					$prelevement->save();
+				}
 				
 				return $record;
 			}
@@ -415,7 +419,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 			return true;
 		} else {
 			//TODO: manage error
-			echo "<code>le fichier n'a pas pu Ãªtre ouvert...</code>";
+			echo "<code>le fichier n'a pas pu être ouvert...</code>";
 		}
 		return false;
 	}
@@ -425,7 +429,7 @@ class RSNImportSources_ImportRsnPrelVirementFrom4D_View extends RSNImportSources
 	 *  This method must be overload in the child class.
 	 */
 	function postPreImportData() {
-		// PrÃ©-identifie les contacts
+		// Pré-identifie les contacts
 		
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,

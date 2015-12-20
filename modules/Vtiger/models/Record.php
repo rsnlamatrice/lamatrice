@@ -532,6 +532,11 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 					'0' => array( 'label' => 'non', 'icon' => 'ui-icon ui-icon-check green' ),
 					'1' => array( 'label' => 'Erreur', 'icon' => 'ui-icon ui-icon-close red' ),
 				);
+			case 'disabled':
+				return array(
+					'0' => array( 'label' => 'non', 'icon' => 'ui-icon ui-icon-check green' ),
+					'1' => array( 'label' => 'Désactivé', 'icon' => 'ui-icon ui-icon-close red' ),
+				);
 			case 'enabled':
 				return array(
 					'0' => array( 'label' => 'Erreur', 'icon' => 'ui-icon ui-icon-locked red' ),

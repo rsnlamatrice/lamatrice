@@ -273,6 +273,12 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	
 	
 	private function defineMissingLabels(){
+		global $php_max_memory_limit;
+		ini_set("memory_limit", empty($php_max_memory_limit) ? "1G" : $php_max_memory_limit);
+
+		global $php_max_execution_time;
+		set_time_limit($php_max_execution_time);
+
 		$db = PearDatabase::getInstance();
 		
 		$query = 'SELECT vtiger_crmentity.crmid, vtiger_crmentity.setype
