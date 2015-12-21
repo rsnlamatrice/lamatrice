@@ -153,9 +153,9 @@ class Vtiger_PDF_InventoryHeaderViewer extends Vtiger_PDF_HeaderViewer {
 				
 			$location = array(
 					'x' => 210 * (100 / 210),
-					'y' => 297 * (50 / 297),
+					'y' => 297 * (40 / 297),
 					'w' => 210 * (80 / 210),
-					'h' => 297 * (35 / 297),
+					'h' => 297 * (40 / 297),
 				);
 			
 			//rectangle $pdf->MultiCell($location['w'], $location['h'], ' ', 1/*border*/, 'L', 0, 1, $location['x'], $location['y']);

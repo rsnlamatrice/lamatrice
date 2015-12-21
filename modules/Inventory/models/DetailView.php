@@ -99,7 +99,7 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 
 		if(Users_Privileges_Model::isPermitted($moduleName, 'DetailView', $recordModel->getId())) {
 			$detailViewLinks = array(
-					'linklabel' => vtranslate('LBL_EXPORT_TO_PDF', $moduleName),
+					'linklabel' => vtranslate('LBL_PRINT_TO_PDF', $moduleName),
 					'linkurl' => $recordModel->getExportPDFURL(),
 					'linkicon' => ''
 			);
