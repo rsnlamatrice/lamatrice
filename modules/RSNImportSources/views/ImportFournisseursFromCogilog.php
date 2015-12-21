@@ -3,6 +3,8 @@
 
 /* Phase de migration
  * Importation des fournisseurs depuis le fichier provenant de Cogilog
+ *
+ * L'export s'effectue depuis le menu Fichier de Cogilog
  */
 class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSources_ImportFromFile_View {
         
@@ -69,37 +71,81 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	function getVendorsFieldsMapping() {
 		//laisser exactement les colonnes du fichier, dans l'ordre 
 		return array (
-			"code" => "",//useless
-			"nom" => "vendorname",
-			"cp" => "postalcode",
-			"ville" => "city",
-			"telephone" => "phone",
-			"num_intracom" => "intracom",//TODO fusion avec compte ?
-			"num_client" => "",//vide
-			"compte" => "glacct",//TODO  ? completer A voir avec Bate
+			"categorie" => "vendorscategory",//vide check picklist
+			"code" => "vendorcode",//Code Fournisseur
 			"prefixe_fournisseur" => "",//vide
-			"complement" => "street2",
+			"nom" => "vendorname",
 			"num_rue" => "",//à concaténer avec Rue
 			"rue" => "street",
-			"complement2" => "street3",//si BP*, dans pobox
+			"complement" => "street2",
+			"complement2" => "street3",//si BP*, dans pobox			
+			"cp" => "postalcode",
+			"ville" => "city",
 			"cedex" => "pobox",
 			"pays" => "country",//vider si FR
+			"sexe" => "",
+			"contactcivilite" => "",//CONCAT contactname
 			"contact" => "contactname",//TODO
-			"contactbis" => "",//ignorer
-			"telephone2" => "phone2",//TODO
+			"contactprenom" => "",//CONCAT contactname
+			"contactfunction" => "",//ignore
+			"telephone1" => "phone",//
+			"telephone2" => "phone2",//
 			"fax" => "fax",//TODO
-			"email" => "email",
-			"categorie" => "vendorscategory",//vide check picklist
-			"facturation" => "paymode",//TODO mode de facturation HT+TVA, TTC, Import HT
-			"r_pc" => "",//vide
-			"e_pc" => "",//vide
-			"solde" => "",//ignorer 
-			"paiement" => "paycomment",//TODO remarque sur le paiement
-			"notation" => "",//vide
-			"d" => "paydelay",//TODO délai de paiement
+			"email" => "email",			
+			"num_intracom" => "intracom",//TODO fusion avec compte ?
+			"siret" => "",//à mettre dans glacct si glacct est vide
+			"compte" => "glacct",
 			"banque1" => "",//vide
-			"iban1" => "",//vide
-			"bic1" => "",//vide
+			"banquecode1" => "",//vide
+			"banqueguichet1" => "",//vide
+			"banquecompte1" => "",//vide
+			"banquecptecle1" => "",//vide
+			"facturation" => "paymode",//TODO mode de facturation HT+TVA, TTC, Import HT
+			"paiement" => "paycomment",//TODO remarque sur le paiement			
+			"r_pc" => "",//vide taux de remise
+			"delai" => "",//vide
+			"nbjours" => "paydelay",//TODO délai de paiement
+			"paiementcode" => "",// 	
+			"jour" => "",//
+			"commande" => "",//ignorer 
+			"br" => "",//ignorer 
+			"fact" => "",//ignorer 
+			"ar" => "",//Étiquettes adresses 
+			"notation" => "",//ignorer 
+			"notes" => "description",
+			"monnumclient" => "",//ignorer 
+			"nbexemplaires" => "",//vide
+			"texte1" => "",//vide
+			"texte2" => "",//vide
+			"texte3" => "",//vide
+			"texte4" => "",//vide
+			"texte5" => "",//vide
+			"texte6" => "",//vide
+			"texte7" => "",//vide
+			"texte8" => "",//vide
+			"texte9" => "",//vide
+			"nombre1" => "",//vide
+			"nombre2" => "",//vide
+			"nombre3" => "",//vide
+			"nombre4" => "",//vide
+			"nombre5" => "",//vide
+			"nombre6" => "",//vide
+			"nombre7" => "",//vide
+			"nombre8" => "",//vide
+			"nombre9" => "",//vide
+			"date1" => "",//vide
+			"date2" => "",//vide
+			"date3" => "",//vide
+			"date4" => "",//vide
+			"date5" => "",//vide
+			"date6" => "",//vide
+			"date7" => "",//vide
+			"date8" => "",//vide
+			"date9" => "",//vide			
+			"iban1" => "",
+			"bic1" => "",
+			"iban2" => "",
+			"dossierattache" => "",
 			"banque2" => "",
 			"iban2" => "",
 			"bic2" => "",
@@ -109,19 +155,14 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 			"banque4" => "",
 			"iban4" => "",
 			"bic4" => "",
-			"notes" => "description",
-			"dossier" => "",//vide
-			"date_saisie" => "createdtime",
-			"date_modif" => "modifiedtime",
-			"cree" => "creatoruser",
-			"mod_user" => "",//ignore
+			"nbexbc" => "",
+			"nbexbr" => "",
+			"nbexar" => "",
 		);
 	}
 	
 	function getVendorsDateFields(){
-		return array(
-			'date_saisie', 'date_modif',
-		);
+		return array();
 	}
 	
 	/**
@@ -246,7 +287,7 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 				$importDataController->updateImportStatus($vendorsLine[id], $entityInfo);
 			}
 			
-			$record->set('mode','edit');
+			/*$record->set('mode','edit');
 			$db = PearDatabase::getInstance();
 			$query = "UPDATE vtiger_crmentity
 				JOIN vtiger_vendor
@@ -266,7 +307,7 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 			if( ! $result)
 				$db->echoError();
 			else {
-			}
+			}*/
 			return $record;
 		}
 
@@ -294,53 +335,130 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 		
 		$fieldName = 'enable';
 		$record->set($fieldName, 1);
-			
-		//"code" => "",//useless
+		
+		$fieldName = 'pobox';
+		if(!$record->get($fieldName)){
+			$value = $record->get('street3');
+			if(strpos($value,'BP') === 0){
+				$record->set('street3', '');
+				$record->set($fieldName, $value);
+			}
+			else
+			{				
+				$value = $record->get('street2');
+				if(strpos($value,'BP') === 0){
+					$record->set('street2', '');
+					$record->set($fieldName, $value);
+				}
+			}
+		}
+		
+		$fieldName = 'contactname';
+		$contactName = $record->get($fieldName);
+		$value = $vendorsData[0]['contactprenom'];
+		if($value){
+			$contactName = $value . ' ' . $contactName;
+		}
+		$value = $vendorsData[0]['contactcivilite'];
+		if($value){
+			$contactName = $value . ' ' . $contactName;
+		}
+		$record->set($fieldName, trim($contactName));
+		
+		
+		$fieldName = 'glacct';
+		if(!$record->get($fieldName)){
+			$value = $vendorsData[0]['siret'];
+			if($value)
+				$record->set($fieldName, $value);
+		}
+		//"categorie" => "vendorscategory",//vide check picklist
+		//"prefixe_fournisseur" => "",//vide
+		//"code" => "vendorcode",//Code Fournisseur
 		//"nom" => "vendorname",
-		//"cp" => "postalcode",
-		//"ville" => "city",
-		//"telephone" => "phone",
-		//"num_rue intracom." => "intracom",//TODO fusion avec compte ?
-		//"num_rue client" => "",//vide
-		//"prefixe fournisseur" => "",//vide
-		//"complement" => "street2",
 		//"num_rue" => "",//à concaténer avec Rue
 		//"rue" => "street",
-		//"complement 2" => "street3",
+		//"complement" => "street2",
+		//"complement2" => "street3",//si BP*, dans pobox			
+		//"cp" => "postalcode",
+		//"ville" => "city",
 		//"cedex" => "pobox",
 		//"pays" => "country",//vider si FR
+		//"sexe" => "",
+		//"contactcivilite" => "",//CONCAT contactname
 		//"contact" => "contactname",//TODO
-		//"contact bis" => "",//ignorer
-		//"telephone 2" => "phone2",//TODO
-		//"fax" => "fax",//TODO
-		//"e-mail" => "email",
-		//"compte" => "glacct",//TODO  ? completer A voir avec Bate
-		//"categorie" => "vendorscategory",//vide check picklist
+		//"contactprenom" => "",//CONCAT contactname
+		//"contactfunction" => "",//ignore
+		//"telephone1" => "phone",//
+		//"telephone2" => "phone2",//
+		//"fax" => "fax",
+		//"email" => "email",			
+		//"num_intracom" => "intracom",//TODO fusion avec compte ?
+		//"siret" => "",//à mettre dans glacct si glacct est vide
+		//"compte" => "glacct",
+		//"banque1" => "",//vide
+		//"banquecode1" => "",//vide
+		//"banqueguichet1" => "",//vide
+		//"banquecompte1" => "",//vide
+		//"banquecptecle1" => "",//vide
 		//"facturation" => "paymode",//TODO mode de facturation HT+TVA, TTC, Import HT
-		//"r %" => "",//vide
-		//"e %" => "",//vide
-		//"solde" => "",//ignorer 
-		//"paiement" => "paycomment",//TODO remarque sur le paiement
-		//"notation" => "",//vide
-		//"d" => "paydelay",//TODO délai de paiement
-		//"banque 1" => "",//vide
-		//"iban 1" => "",//vide
-		//"bic 1" => "",//vide
-		//"banque 2" => "",
-		//"iban 2" => "",
-		//"bic 2" => "",
-		//"banque 3" => "",
-		//"iban 3" => "",
-		//"bic 3" => "",
-		//"banque 4" => "",
-		//"iban 4" => "",
-		//"bic 4" => "",
+		//"paiement" => "paycomment",//TODO remarque sur le paiement			
+		//"r_pc" => "",//vide taux de remise
+		//"delai" => "",//vide
+		//"nbjours" => "paydelay",//TODO délai de paiement
+		//"paiementcode" => "",// 	
+		//"jour" => "",//
+		//"commande" => "",//ignorer 
+		//"br" => "",//ignorer 
+		//"fact" => "",//ignorer 
+		//"ar" => "",//Étiquettes adresses 
+		//"notation" => "",//ignorer 
 		//"notes" => "description",
-		//"dossier" => "",//vide
-		//"date_saisie" => "createdtime",
-		//"date_modif" => "modifiedtime",
-		//"cree" => "creatoruser",
-		//"mod" => "",//ignore
+		//"monnumclient" => "",//ignorer 
+		//"nbexemplaires" => "",//vide
+		//"texte1" => "",//vide
+		//"texte2" => "",//vide
+		//"texte3" => "",//vide
+		//"texte4" => "",//vide
+		//"texte5" => "",//vide
+		//"texte6" => "",//vide
+		//"texte7" => "",//vide
+		//"texte8" => "",//vide
+		//"texte9" => "",//vide
+		//"nombre1" => "",//vide
+		//"nombre2" => "",//vide
+		//"nombre3" => "",//vide
+		//"nombre4" => "",//vide
+		//"nombre5" => "",//vide
+		//"nombre6" => "",//vide
+		//"nombre7" => "",//vide
+		//"nombre8" => "",//vide
+		//"nombre9" => "",//vide
+		//"date1" => "",//vide
+		//"date2" => "",//vide
+		//"date3" => "",//vide
+		//"date4" => "",//vide
+		//"date5" => "",//vide
+		//"date6" => "",//vide
+		//"date7" => "",//vide
+		//"date8" => "",//vide
+		//"date9" => "",//vide			
+		//"iban1" => "",
+		//"bic1" => "",
+		//"iban2" => "",
+		//"dossierattache" => "",
+		//"banque2" => "",
+		//"iban2" => "",
+		//"bic2" => "",
+		//"banque3" => "",
+		//"iban3" => "",
+		//"bic3" => "",
+		//"banque4" => "",
+		//"iban4" => "",
+		//"bic4" => "",
+		//"nbexbc" => "",
+		//"nbexbr" => "",
+		//"nbexar" => "",
 	}
 	
 	/**
@@ -416,8 +534,7 @@ class RSNImportSources_ImportFournisseursFromCogilog_View extends RSNImportSourc
 	 * @return boolean - true if the line is a vendors information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		
-		if (sizeof($line) > 0 && $line[1] && $this->isDate($line[42])) {
+		if (sizeof($line) > 0 && !$line[2] && $line[3]) {
 			return true;
 		}
 
