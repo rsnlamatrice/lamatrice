@@ -6,8 +6,17 @@
  * The Initial Developer of the Original Code is vtiger.
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
+ *
+ *
+ * 
  ************************************************************************************/
 
+ // INSERT INTO `vtiger_modtracker_tabs` (`tabid`, `visible`) VALUES ('68', '1'); /* RSNAboRevues */
+ // INSERT INTO `vtiger_modtracker_tabs` (`tabid`, `visible`) VALUES ('52', '1'); /* Prelevements */
+ // INSERT INTO `vtiger_modtracker_tabs` (`tabid`, `visible`) VALUES ('58', '1'); /* Media */
+ // INSERT INTO `vtiger_modtracker_tabs` (`tabid`, `visible`) VALUES ('59', '1'); /* MediaC */
+ // INSERT INTO `vtiger_modtracker_tabs` (`tabid`, `visible`) VALUES ('69', '1'); /* MediaR */
+ 
 //modifications ini_set('mbstring',)
 // de sorte que $zipCode = mb_strtoupper('iété'); returns "IÉTÉ" et non "IéTé"
 ini_set('mbstring.language', 'UTF-8');

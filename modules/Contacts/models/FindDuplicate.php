@@ -99,7 +99,8 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 	 */
 	public function runCleanDuplicateTable(){
 		$duplicateTableName = $this->getDuplicateEntitiesTable();
-		$query = "DELETE $duplicateTableName FROM $duplicateTableName
+		$query = "DELETE $duplicateTableName
+			FROM $duplicateTableName
 			JOIN vtiger_contactdetails c1
 				ON $duplicateTableName.crmid1 = c1.contactid
 			JOIN vtiger_contactdetails c2

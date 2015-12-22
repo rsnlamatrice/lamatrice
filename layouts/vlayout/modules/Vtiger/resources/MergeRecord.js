@@ -74,20 +74,28 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 	registerSelectButton : function(){
 		var popupPageContentsContainer = this.getPopupPageContainer();
 		var thisInstance = this;
+		
 		popupPageContentsContainer.on('click','button[type="submit"]', function(e){
+		
+			var progressIndicatorElement = jQuery.progressIndicator({
+				'position' : 'html',
+				'blockInfo' : {
+					'enabled' : true
+				}
+			});
 			var $form = $('form', popupPageContentsContainer)
 			, data = $form.serializeFormData();
 			AppConnector.request(data).then(
 			    function(data){
-				if (data.success && data.result) {
-				    thisInstance.done(data, thisInstance.getEventName());
-				}else{
-					
-				}
+					if (data.success && data.result) {
+						thisInstance.done(data, thisInstance.getEventName());
+					}else{
+						progressIndicatorElement.progressIndicator({'mode': 'hide'});
+					}
 				
 			    },
 			    function(error,err){
-
+					progressIndicatorElement.progressIndicator({'mode': 'hide'});
 			    }
 			);
 			e.preventDefault();

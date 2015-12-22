@@ -123,4 +123,13 @@ class RSNAboRevues_Module_Model extends Vtiger_Module_Model {
 			
 		return $this->createAboRevue($sourceRecordModel, $account, $toDay, $dateFin, 1, $aboType);
 	}
+	
+	public function isTypeAbonnable($aboType){
+		global $adb;
+		$query = "SELECT isabonnable
+			FROM vtiger_rsnabotype
+			WHERE rsnabotype IN (?, ?)";
+		$result = $adb->pquery($query, array($aboType, decode_html($aboType)));
+		return $adb->query_result($result, 0, 0);
+	}
 }
