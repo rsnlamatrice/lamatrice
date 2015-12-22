@@ -17,7 +17,8 @@ Numéro	Date	Code fournisseur	Fournisseur	Code produit	Produit	Prix unitaire ht	
 //TODO : end the implementation of this import!
 class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_ImportFromFile_View {
 
-	private $coupon = null;
+	protected $potype = 'invoice';
+	protected $potypePrefix = 'FF';
 
 	/**
 	 * Method to get the source import label to display.
@@ -82,21 +83,23 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	function getPurchaseOrderFields() {
 		return array(
 			//header
-			'sourceid',//à composer FF<année><num>
+			'sourceid',//à composer <potype><année><num>
 			'num_ligne',//n° de ligne (0 pour l'en-tête). Sert à détecter les doublons de factures quand on importe plusieurs fichiers à la fois
+			'subject',
 			'duedate',
 			'vendorcode',
-			'vendorname',
+			'description',
+			'productid',
+			'isproduct',
 			'productcode',
 			'productname',
-			'unit_price',
+			'prix_unit_ht',
 			'quantity',
 			'unit',
 			'discount',
 			'amount',
 			
 			'_vendorid',
-			'_productid',
 		);
 	}
 	
@@ -106,14 +109,6 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	 */
 	function importPurchaseOrder($importDataController) {
 
-		if($this->needValidatingStep()){
-			$this->skipNextScheduledImports = true;
-			$this->keepScheduledImport = true;
-			return;
-		}
-		
-		$this->beforeImportPurchaseOrders();
-		
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'PurchaseOrder');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
@@ -136,12 +131,14 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 			if ($previousSourceId == $sourceId) {
 				array_push($purchaseorderData, $row);
 			} else {
+				//précédente
 				$this->importOnePurchaseOrder($purchaseorderData, $importDataController);
+				//nouvelle
 				$purchaseorderData = array($row);
 				$previousSourceId = $sourceId;
 			}
 		}
-
+		//dernière
 		$this->importOnePurchaseOrder($purchaseorderData, $importDataController);
 	}
 
@@ -167,7 +164,8 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 		$incrementOnDel = $purchaseorderLine['isproduct'] ? 1 : 0;
 		
 		$db = PearDatabase::getInstance();
-		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel) VALUES(?,?,?,?,?,?,?,?)";
+		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel)
+				VALUES(?,?,?,?,?,?,?)";
 		$qparams = array($purchaseorder->getId(), $purchaseorderLine['productid'], $sequence, $qty, $listprice, $discount_amount, $incrementOnDel);
 		//$db->setDebug(true);
 		$db->pquery($query, $qparams);
@@ -183,153 +181,122 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 		global $log;
 		
 		//TODO check sizeof $purchaseorderata
-		$vendor = $this->getVendor($purchaseorderData);
-		if ($vendor != null) {
-			$account = $vendor->getAccountRecordModel();
+		$vendorId = $purchaseorderData[0]['_vendorid'];
+		if ($vendorId) {
+			$sourceId = $purchaseorderData[0]['sourceid'];
+	
+			//test sur importsourceid == $sourceId
+			$query = "SELECT crmid, purchaseorderid
+				FROM vtiger_purchaseordercf
+				JOIN vtiger_crmentity
+					ON vtiger_purchaseordercf.purchaseorderid = vtiger_crmentity.crmid
+				WHERE importsourceid = ? AND deleted = FALSE
+				LIMIT 1
+			";
+			$db = PearDatabase::getInstance();
+			$result = $db->pquery($query, array($sourceId));//$purchaseorderData[0]['subject']
+			if($db->num_rows($result)){
+				//already imported !!
+				$row = $db->fetch_row($result, 0); 
+				$entryId = $this->getEntryId("PurchaseOrder", $row['crmid']);
+				foreach ($purchaseorderData as $purchaseorderLine) {
+					$entityInfo = array(
+						'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED,
+						'id'		=> $entryId
+					);
+					
+					//TODO update all with array
+					$importDataController->updateImportStatus($purchaseorderLine[id], $entityInfo);
+				}
+			}
+			else {
+				$record = Vtiger_Record_Model::getCleanInstance('PurchaseOrder');
+				$record->set('mode', 'create');
+				$record->set('potype', $this->potype);
+				$record->set('subject', $purchaseorderData[0]['subject']);
+				$record->set('duedate', $purchaseorderData[0]['duedate']);
+				$record->set('vendor_id', $vendorId);
+				$record->set('postatus', 'Approved');//TODO
+				$record->set('currency_id', CURRENCY_ID);
+				$record->set('conversion_rate', CONVERSION_RATE);
+				$record->set('hdnTaxType', 'individual');
+						
+				$record->set('importsourceid', $sourceId);
+				
+				//$db->setDebug(true);
+				$record->saveInBulkMode();
+				$purchaseorderId = $record->getId();
 
-			if ($account != null) {
-				$sourceId = $purchaseorderData[0]['sourceid'];
-		
-				//test sur importsourceid == $sourceId
-				$query = "SELECT crmid, purchaseorderid
-					FROM vtiger_purchaseordercf
+				if(!$purchaseorderId){
+					//TODO: manage error
+					echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
+					foreach ($purchaseorderData as $purchaseorderLine) {
+						$entityInfo = array(
+							'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
+						);
+						
+						//TODO update all with array
+						$importDataController->updateImportStatus($purchaseorderLine[id], $entityInfo);
+					}
+
+					return false;
+				}
+				
+				$entryId = $this->getEntryId("PurchaseOrder", $purchaseorderId);
+				$sequence = 0;
+				$totalAmount = 0.0;
+				$totalTax = 0.0;
+				foreach ($purchaseorderData as $purchaseorderLine) {
+					$this->importPurchaseOrderLine($record, $purchaseorderLine, ++$sequence, $totalAmount, $totalTax);
+					$entityInfo = array(
+						'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
+						'id'		=> $entryId
+					);
+					//TODO update all with array
+					$importDataController->updateImportStatus($purchaseorderLine[id], $entityInfo);
+				}
+				
+				$record->set('mode','edit');
+				
+				//set dates, purchaseorder_no
+				$query = "UPDATE vtiger_purchaseorder
 					JOIN vtiger_crmentity
-					    ON vtiger_purchaseordercf.purchaseorderid = vtiger_crmentity.crmid
-					WHERE importsourceid = ? AND deleted = FALSE
-					LIMIT 1
+						ON vtiger_crmentity.crmid = vtiger_purchaseorder.purchaseorderid
+					SET potype = ?
+					, total = ?
+					, subtotal = ?
+					, taxtype = ?
+					, smownerid = ?
+					, createdtime = ?
+					, modifiedtime = ?
+					, label = subject
+					WHERE purchaseorderid = ?
 				";
-				$db = PearDatabase::getInstance();
-				$result = $db->pquery($query, array($sourceId));//$purchaseorderData[0]['subject']
-				if($db->num_rows($result)){
-					//already imported !!
-					$row = $db->fetch_row($result, 0); 
-					$entryId = $this->getEntryId("PurchaseOrder", $row['crmid']);
-					foreach ($purchaseorderData as $purchaseorderLine) {
-						$entityInfo = array(
-							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED,
-							'id'		=> $entryId
-						);
-						
-						//TODO update all with array
-						$importDataController->updateImportStatus($purchaseorderLine[id], $entityInfo);
-					}
-				}
-				else {
-					$record = Vtiger_Record_Model::getCleanInstance('PurchaseOrder');
-					$record->set('mode', 'create');
-					$record->set('bill_street', $purchaseorderData[0]['street']);
-					$record->set('bill_street2', $purchaseorderData[0]['street2']);
-					$record->set('bill_street3', $purchaseorderData[0]['street3']);
-					$record->set('bill_city', $purchaseorderData[0]['city']);
-					$record->set('bill_code', $purchaseorderData[0]['zip']);
-					$record->set('bill_country', $purchaseorderData[0]['country']);
-					$record->set('subject', $purchaseorderData[0]['subject']);
-					$record->set('duedate', $purchaseorderData[0]['duedate']);
-					$record->set('vendor_id', $vendor->getId());
-					$record->set('account_id', $account->getId());
-					//$record->set('received', str_replace('.', ',', $srcRow['netht']+$srcRow['nettva']));
-					//$record->set('hdnGrandTotal', $srcRow['netht']+$srcRow['nettva']);//TODO non enregistré : à cause de l'absence de ligne ?
-					$record->set('typedossier', 'Facture'); //TODO
-					$record->set('purchaseorderstatus', 'Validated');//TODO
-					$record->set('currency_id', CURRENCY_ID);
-					$record->set('conversion_rate', CONVERSION_RATE);
-					$record->set('hdnTaxType', 'individual');
-		                    
-					$record->set('importsourceid', $sourceId);
-				    
-					$coupon = $this->getCoupon($purchaseorderData[0]);
-					if($coupon){
-						$record->set('notesid', $coupon->getId());
-						$campagne = $this->getCampaign($purchaseorderData[0]['affaire_code'], $coupon);
-						if($campagne)
-							$record->set('campaign_no', $campagne->getId());
-						
-					}
-					/*$campagne = self::findCampagne($srcRow, $coupon);
-					if($campagne)
-						$record->set('campaign_no', $campagne->getId());*/
-					
-					//$db->setDebug(true);
-					$record->saveInBulkMode();
-					$purchaseorderId = $record->getId();
-
-					if(!$purchaseorderId){
-						//TODO: manage error
-						echo "<pre><code>Impossible d'enregistrer la nouvelle facture</code></pre>";
-						foreach ($purchaseorderData as $purchaseorderLine) {
-							$entityInfo = array(
-								'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
-							);
-							
-							//TODO update all with array
-							$importDataController->updateImportStatus($purchaseorderLine[id], $entityInfo);
-						}
-
-						return false;
-					}
-					
-					$entryId = $this->getEntryId("PurchaseOrder", $purchaseorderId);
-					$sequence = 0;
-					$totalAmount = 0.0;
-					$totalTax = 0.0;
-					foreach ($purchaseorderData as $purchaseorderLine) {
-						$this->importPurchaseOrderLine($record, $purchaseorderLine, ++$sequence, $totalAmount, $totalTax);
-						$entityInfo = array(
-							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
-							'id'		=> $entryId
-						);
-						//TODO update all with array
-						$importDataController->updateImportStatus($purchaseorderLine[id], $entityInfo);
-					}
-					
-					$record->set('mode','edit');
-					
-					$purchaseorderNo = $record->getEntity()->setModuleSeqNumber("increment", $record->getModuleName());
-					
-					//set dates, purchaseorder_no
-					$query = "UPDATE vtiger_purchaseorder
-						JOIN vtiger_crmentity
-							ON vtiger_crmentity.crmid = vtiger_purchaseorder.purchaseorderid
-						SET purchaseorder_no = ?
-						, total = ?
-						, subtotal = ?
-						, taxtype = ?
-						, smownerid = ?
-						, createdtime = ?
-						, modifiedtime = ?
-						, balance = total - received
-						/*, purchaseorderstatus = IF(balance = 0, 'Paid', purchaseorderstatus)*/
-						WHERE purchaseorderid = ?
-					";
-					$total = $totalAmount + $totalTax;
-					$result = $db->pquery($query, array(
-										  $purchaseorderNo
-									    , $total
-									    , $total
-									    , 'individual'
-									    , ASSIGNEDTO_ALL
-									    , $purchaseorderData[0]['purchaseorderdate']
-									    , $purchaseorderData[0]['purchaseorderdate']
-									    , $purchaseorderId));
-					
-					$log->debug("" . basename(__FILE__) . " update imported purchaseorder (id=" . $record->getId() . ", sourceId=$sourceId , total=$total, date=" . $purchaseorderData[0]['purchaseorderdate']
-						    . ", result=" . ($result ? " true" : "false"). " )");
-					if( ! $result)
-						$db->echoError();
-						
-					RSNImportSources_Utils_Helper::addPurchaseOrderReglementRelation($record, $purchaseorderData[0]['_rsnreglementsid'], 'Import Boutique');
-					
-					//raise trigger instead of ->save() whose need purchaseorder rows
-					
-					$log->debug("BEFORE " . basename(__FILE__) . " raise event handler(" . $record->getId() . ", " . $record->get('mode') . " )");
-					//raise event handler
-					$record->triggerEvent('vtiger.entity.aftersave');
-					$log->debug("AFTER " . basename(__FILE__) . " raise event handler");
-					return $record;//tmp 
-				}
-			} else {
-				//TODO: manage error
-				echo "<pre><code>Unable to find Account</code></pre>";
+				$total = $totalAmount + $totalTax;
+				$result = $db->pquery($query, array(
+									$this->potype
+									, $total
+									, $total
+									, 'individual'
+									, ASSIGNEDTO_ALL
+									, $purchaseorderData[0]['duedate']
+									, $purchaseorderData[0]['duedate']
+									, $purchaseorderId));
+				
+				$log->debug("" . basename(__FILE__) . " update imported purchaseorder (id=" . $record->getId() . ", sourceId=$sourceId , total=$total, date=" . $purchaseorderData[0]['purchaseorderdate']
+						. ", result=" . ($result ? " true" : "false"). " )");
+				if( ! $result)
+					$db->echoError();
+				
+				//purchaseorder_no
+				$poNo = $record->getEntity()->setModuleSeqNumber("increment", $record->getModuleName());
+				$query = "UPDATE vtiger_purchaseorder
+					SET purchaseorder_no = ?
+					WHERE purchaseorderid = ?
+				";
+				$result = $db->pquery($query, array($poNo, $purchaseorderId));
+				
+				return $record;//tmp 
 			}
 		} else {
 			foreach ($purchaseorderData as $purchaseorderLine) {//TODO: remove duplicated code
@@ -364,15 +331,16 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 				return false;
 			}
 		}
-		$query = 'SELECT productid
+		$query = 'SELECT p.productid
 			FROM vtiger_products p
 			JOIN vtiger_crmentity e ON p.productid = e.crmid
+			LEFT JOIN vtiger_producttaxrel
+				ON vtiger_producttaxrel.productid = e.crmid
 			WHERE p.'.$searchKey.' = ?
 			AND e.deleted = FALSE
 			AND (IFNULL(p.unit_price, 0) = 0
 				OR (
-					IFNULL(p.taxclass, "") != ""
-					AND p.taxclass != "0"
+					vtiger_producttaxrel.productid IS NOT NULL
 					AND IFNULL(p.glacct, "") != ""
 				)
 			)
@@ -399,12 +367,13 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 			FROM vtiger_service s
 			JOIN vtiger_crmentity e ON s.serviceid = e.crmid
 			JOIN vtiger_servicecf scf ON scf.serviceid = e.crmid
+			LEFT JOIN vtiger_producttaxrel
+				ON vtiger_producttaxrel.productid = e.crmid
 			WHERE s.'.$searchKey.' = ?
 			AND e.deleted = FALSE
 			AND (IFNULL(s.unit_price, 0) = 0
 				OR (
-					IFNULL(s.taxclass, "") != ""
-					AND s.taxclass != "0"
+					vtiger_producttaxrel.productid IS NOT NULL
 					AND IFNULL(scf.glacct, "") != ""
 				)
 			)
@@ -453,9 +422,6 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	 */
 	function getVendor($purchaseorderData) {
 		$id = $purchaseorderData[0]['_vendorid'];
-		if(!$id){
-			$id = $this->getVendorId($purchaseorderData[0]['vendorcode']);
-		}
 		if($id){
 			return Vtiger_Record_Model::getInstanceById($id, 'Vendors');
 		}
@@ -585,8 +551,9 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	 * @param array $line : the data of the file line.
 	 * @return boolean - true if the line is a client information line.
 	 */
-	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[1])) {
+	function isRecordHeaderInformationLine($line, $previousHeader) {
+		if (sizeof($line) > 0 && $this->isDate($line[1])
+		&& is_numeric($line[0]) && (!$previousHeader || $previousHeader[0] != $line[0])) {
 			return true;
 		}
 
@@ -599,6 +566,7 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	 * @return boolean - false if error or if no purchaseorder found.
 	 */
 	function moveCursorToNextPurchaseOrder(RSNImportSources_FileReader_Reader $fileReader) {
+		$previous = array();
 		do {
 			$cursorPosition = $fileReader->getCurentCursorPosition();
 			$nextLine = $fileReader->readNextDataLine($fileReader);
@@ -606,8 +574,10 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 			if ($nextLine == false) {
 				return false;
 			}
-
-		} while(!$this->isRecordHeaderInformationLine($nextLine));
+			if($this->isRecordHeaderInformationLine($nextLine, $previous))
+				break;
+			$previous = $nextLine;
+		} while(true);
 
 		$fileReader->moveCursorTo($cursorPosition);
 
@@ -625,14 +595,20 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 			$purchaseorder = array(
 				'header' => $nextLine,
 				'detail' => array());
+			if($nextLine[4])
+				array_push($purchaseorder['detail'], $nextLine);
 			do {
 				$cursorPosition = $fileReader->getCurentCursorPosition();
 				$nextLine = $fileReader->readNextDataLine($fileReader);
 
-				if (!$this->isRecordHeaderInformationLine($nextLine)) {
-					if (!$nextLine[0] && $nextLine[2]) {
+				if (!$this->isRecordHeaderInformationLine($nextLine, $purchaseorder['header'])) {
+					if ($nextLine[0] && $nextLine[4]) {
 						array_push($purchaseorder['detail'], $nextLine);
 					}
+					elseif ($nextLine[0] && !$nextLine[4] && $nextLine[5]) {
+						$purchaseorder['header'][5] .= "\r\n" . $nextLine[5];
+					}
+					
 				} else {
 					break;
 				}
@@ -642,7 +618,6 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 			if ($nextLine != false) {
 				$fileReader->moveCursorTo($cursorPosition);
 			}
-
 			return $purchaseorder;
 		}
 
@@ -658,7 +633,7 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 		$product = array(
 			'productcode'	=> $product[4],
 			'productname'	=> $product[5],
-			'unit_price'	=> str_to_float($product[6]),//TTC, TODO HT
+			'prix_unit_ht'	=> str_to_float($product[6]),//TTC, TODO HT
 			'qty_per_unit'	=> 1,
 		);
 		return $product;
@@ -672,44 +647,32 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	 */
 	function getPurchaseOrderValues($purchaseorder) {
 		$purchaseorderValues = array();
-		$date = $this->getMySQLDate($purchaseorder['header'][0]);
-		$sourceId = $purchaseorder['header'][41];
-		$numcart = explode('-',$sourceId);
-		if(count($numcart) == 2)
-			$numcart = $numcart[1];
-		else	$numcart = null;
+		$date = $this->getMySQLDate($purchaseorder['header'][1]);
+		$dateT = new DateTime($date);
+		$sourceId = $this->potypePrefix . $dateT->format('y') . str_pad($purchaseorder['header'][0], 5, '0', STR_PAD_LEFT);
+		
 		$numLigne = 0;
 		$purchaseorderHeader = array(
 			'sourceid'		=> $sourceId,
-			'numcart'		=> $numcart,
 			'num_ligne'		=> $numLigne++,
-			'lastname'		=> $purchaseorder['header'][46],
-			'firstname'		=> $purchaseorder['header'][45],
-			'email'			=> $purchaseorder['header'][22],
-			'street'		=> $purchaseorder['header'][13],
-			'street2'		=> $purchaseorder['header'][14],
-			'street3'		=> $purchaseorder['header'][15],
-			'zip'			=> $purchaseorder['header'][16],
-			'city'			=> $purchaseorder['header'][17],
-			'country' 		=> $purchaseorder['header'][19],
-			'subject'		=> $purchaseorder['header'][11],
-			'purchaseorderdate'		=> $date,
+			'subject'		=> $this->potypePrefix . ' ' . $purchaseorder['header'][3] . ' - ' . $dateT->format('d/m/Y'),
+			'description'	=> $purchaseorder['header'][5],
+			'vendorcode'	=> $purchaseorder['header'][2],
+			'duedate'		=> $date,
 		);
 		foreach ($purchaseorder['detail'] as $product) {
 			$isProduct = null;
-			$productCode = $product[1];
-			$productName = $product[2];
+			$productCode = $product[4];
+			$productName = $product[5];
 			$productId = $this->getProductId($productCode, $isProduct, $productName);
-			$taxrate = str_to_float($product[8])/100;
 			array_push($purchaseorderValues, array_merge($purchaseorderHeader, array(
 				'num_ligne'	=> $numLigne++,
 				'productid'	=> $productId,
 				'productcode'	=> $productCode,
 				'productname'	=> $productName,
 				'isproduct'	=> $isProduct,
-				'quantity'	=> str_to_float($product[5]),
-				'prix_unit_ht'	=> str_to_float($product[3]) / (1 + $taxrate),
-				'taxrate'	=> str_to_float($product[8]),
+				'quantity'	=> str_to_float($product[7]),
+				'prix_unit_ht'	=> str_to_float($product[6]),
             
 			)));
 		}
@@ -750,7 +713,8 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 		";
 		$query .= " SET `$tableName`.status = ?
 		, `$tableName`.recordid = vtiger_purchaseorder.purchaseorderid
-		, _vendorid = vtiger_purchaseorder.vendorid";
+		, _vendorid = vtiger_purchaseorder.vendorid
+		";
 		$query .= "
 			WHERE vtiger_crmentity.deleted = 0
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
@@ -765,7 +729,6 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 		
 		return true;
 	}
-
 
 	/**
 	 * Method called after the file is processed.

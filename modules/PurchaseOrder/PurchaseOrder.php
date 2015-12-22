@@ -200,9 +200,36 @@ class PurchaseOrder extends CRMEntity {
 		if(strpos($module, '_') === FALSE){
 			if(!$this->column_fields['potype'])
 				die('potype manquant');
-			$module .= '_' . $this->column_fields['potype'];
+			$module .= '_' . $this->getPOTypeCode($this->column_fields['potype']);
+			
+			if($mode === 'increment'){
+				$year = preg_replace('/^.*\d{2}(\d{2}).*$/', '$1', $this->column_fields['duedate']);
+				$module .= '_'.$year;
+			}
 		}
-		return parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
+		$no = parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
+		if($no === false
+		&& $mode === 'increment'){
+			$req_no = $year . '00001';
+			$req_str = $this->getPOTypeCode($this->column_fields['potype']);
+			parent::setModuleSeqNumber('configure', $module, $req_str, $req_no);
+			$req_no = '';
+			$no = parent::setModuleSeqNumber($mode, $module, $req_str, $req_no);
+		}
+		return $no;
+	}
+	
+	function getPOTypeCode($potype){
+		switch($potype){
+		case 'invoice' :
+			return 'FF';
+		case 'receipt' :
+			return 'BR';
+		case 'order' :
+			return 'CMF';
+		default:
+			return $potype;
+		}
 	}
 	
 	/** Function to get activities associated with the Purchase Order
