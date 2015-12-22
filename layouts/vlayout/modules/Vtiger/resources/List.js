@@ -1843,6 +1843,10 @@ jQuery.Class("Vtiger_List_Js",{
 		var listViewContentDiv = this.getListViewContentContainer();
 		listViewContentDiv.on('click','.listViewEntries',function(e){
 			if(jQuery(e.target, jQuery(e.currentTarget)).is('td:first-child')) return;
+			//ED151222 un click sur un <A/> est prioritaire
+			if(jQuery(e.target, jQuery(e.currentTarget)).is('a[href]')) return;
+			if(jQuery(e.target.parentNode, jQuery(e.currentTarget)).is('a[href]')) return;
+			
 			if(jQuery(e.target).is('input[type="checkbox"]')) return;
 			var elem = jQuery(e.currentTarget);
 			var recordUrl = elem.data('recordurl');
