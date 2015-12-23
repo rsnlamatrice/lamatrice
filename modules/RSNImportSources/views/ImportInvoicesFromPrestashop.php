@@ -682,15 +682,16 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 				return false;
 			}
 		}
-		$query = 'SELECT productid
+		$query = 'SELECT p.productid
 			FROM vtiger_products p
 			JOIN vtiger_crmentity e ON p.productid = e.crmid
+			LEFT JOIN vtiger_producttaxrel
+				ON vtiger_producttaxrel.productid = e.crmid
 			WHERE p.'.$searchKey.' = ?
 			AND e.deleted = FALSE
 			AND (IFNULL(p.unit_price, 0) = 0
 				OR (
-					IFNULL(p.taxclass, "") != ""
-					AND p.taxclass != "0"
+					vtiger_producttaxrel.productid IS NOT NULL
 					AND IFNULL(p.glacct, "") != ""
 				)
 			)
@@ -717,12 +718,13 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			FROM vtiger_service s
 			JOIN vtiger_crmentity e ON s.serviceid = e.crmid
 			JOIN vtiger_servicecf scf ON scf.serviceid = e.crmid
+			LEFT JOIN vtiger_producttaxrel
+				ON vtiger_producttaxrel.productid = e.crmid
 			WHERE s.'.$searchKey.' = ?
 			AND e.deleted = FALSE
 			AND (IFNULL(s.unit_price, 0) = 0
 				OR (
-					IFNULL(s.taxclass, "") != ""
-					AND s.taxclass != "0"
+					vtiger_producttaxrel.productid IS NOT NULL
 					AND IFNULL(scf.glacct, "") != ""
 				)
 			)

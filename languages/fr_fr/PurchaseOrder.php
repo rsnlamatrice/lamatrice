@@ -12,13 +12,13 @@
  ************************************************************************************/
 $languageStrings = array(
 	'SINGLE_PurchaseOrder'         => 'Document fournisseur'        , 
-	'LBL_EXPORT_TO_PDF'            => 'Export PDF'                  , 
-	'LBL_SEND_MAIL_PDF'            => 'Envoi PDF par Email'         , 
+	'LBL_EXPORT_TO_PDF'            => 'Imprimer en PDF'                  , 
+	'LBL_SEND_MAIL_PDF'            => 'Envoi du PDF par Email'         , 
 	'LBL_ADD_RECORD'               => 'Ajouter un document fournisseur'          , 
 	'LBL_RECORDS_LIST'             => 'Liste des Documents fournisseur'                       , 
 	'LBL_COPY_SHIPPING_ADDRESS'    => 'Copier l\'adresse de livraison'       , 
 	'LBL_COPY_BILLING_ADDRESS'     => 'Copier l\'adresse de facturation'        , 
-	'LBL_PO_INFORMATION'           => 'Détail du document'            , 
+	'LBL_PO_INFORMATION'           => 'Détail du document fournisseur'            , 
 	'PurchaseOrder No'             => 'Document N°'                , 
 	'Requisition No'               => 'Ref demande'                 , 
 	'Tracking Number'              => 'Ref de suivi'                , 

@@ -12,11 +12,11 @@
  ************************************************************************************/
 $languageStrings = array(
 	'SINGLE_Quotes'                => 'Devis'                       , 
-	'LBL_EXPORT_TO_PDF'            => 'Export PDF'                  , 
-	'LBL_SEND_MAIL_PDF'            => 'Envoi PDF par Email'         , 
-	'LBL_ADD_RECORD'               => 'Ajouter devis'                   , 
-	'LBL_RECORDS_LIST'             => 'Liste devis'                 , 
-	'LBL_QUOTE_INFORMATION'        => 'Détail devis'               , 
+	'LBL_EXPORT_TO_PDF'            => 'Imprimer en PDF'                  , 
+	'LBL_SEND_MAIL_PDF'            => 'Envoi du PDF par Email'         , 
+	'LBL_ADD_RECORD'               => 'Ajouter un devis'                   , 
+	'LBL_RECORDS_LIST'             => 'Liste des devis'                 , 
+	'LBL_QUOTE_INFORMATION'        => 'Détail du devis'               , 
 	'Quote No'                     => 'Devis N°'                   , 
 	'Quote Stage'                  => 'Phase'                       , 
 	'Valid Till'                   => 'Echéance'                   , 

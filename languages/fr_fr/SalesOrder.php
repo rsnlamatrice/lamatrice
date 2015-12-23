@@ -12,8 +12,8 @@
  ************************************************************************************/
 $languageStrings = array(
 	'SINGLE_SalesOrder'            => 'Dépôt-vente'             , 
-	'LBL_EXPORT_TO_PDF'            => 'Export PDF'                  , 
-	'LBL_SEND_MAIL_PDF'            => 'Envoi PDF par Email'         , 
+	'LBL_EXPORT_TO_PDF'            => 'Imprimer en PDF'                  , 
+	'LBL_SEND_MAIL_PDF'            => 'Envoi du PDF par Email'         , 
 	'LBL_ADD_RECORD'               => 'Ajouter un Dépôt-vente'             , 
 	'LBL_RECORDS_LIST'             => 'Liste des dépôts-vente'                       , 
 	'LBL_SO_INFORMATION'           => 'Détail du Dépôt-vente'     , 
