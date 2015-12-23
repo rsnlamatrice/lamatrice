@@ -134,8 +134,10 @@
 						{elseif	$UITYPE eq '401'}
 						{*ED140000 Particulier / Structure *}
 						{elseif $IS_GROUP_FIELD}
-							<div style="overflow: hidden; color: transparent;">{* hides text *}
-								{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+							<div>
+								<a href="{$LISTVIEW_ENTRY->getDetailViewUrl()}" target="_blank" style="{* hides text *}overflow: hidden; color: transparent;">
+									{$LISTVIEW_ENTRY->get($LISTVIEW_HEADERNAME)}
+								</a>
 							</div>
 						
 						{* ED150000 *}

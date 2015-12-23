@@ -37,7 +37,7 @@ class Vtiger_DuplicatesListView_Model extends Vtiger_ListView_Model {
 		$queryGenerator = $this->get('query_generator');
 		$listViewContoller = $this->get('listview_controller');
 
-		//echo "<br><br><br><br>".__FILE__;
+	//echo "<br><br><br><br>".__FILE__;
 	
 		$startIndex = $pagingModel->getStartIndex();
 		$pageLimit = $pagingModel->getPageLimit();

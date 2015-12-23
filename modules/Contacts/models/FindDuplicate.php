@@ -6,6 +6,7 @@
 class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 	
 	
+	
 	/* Fields to find duplicates
 	 * @returns $tableColumns
 	 * 	May be an array of column names or an array of array of column names for multiple search
@@ -35,6 +36,14 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 		$fields = $tableColumns;
 		$fields[] = 'id';
 		$queryGenerator->setFields($fields);
+		
+		//Exclu les supprimés
+		$queryGenerator->startGroup('');
+		$queryGenerator->addCondition('lastname'
+					, "[SUPPRIM"
+					, 'k');
+		$queryGenerator->endGroup();
+		
 		
 		$query = $queryGenerator->getQuery();
 		
@@ -75,6 +84,7 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 				AND crm1.'.$focus->table_index . ' = vtiger_contactscontrel.relcontid
 			)';
 	}
+	
 	/**
 	 * Retourne un filtre sur la requête de recherche de doublon.
 	 * Cette requête est utilisée pour effectuer la recherche de doublons.
@@ -82,4 +92,40 @@ class Contacts_FindDuplicate_Model extends Vtiger_FindDuplicate_Model {
 	function getScheduledSearchWhereQuery($moduleName, $tableColumns){
 		return 'vtiger_contactscontrel.contactid IS NULL';
 	}
+
+
+
+	/* nettoie la table des duplicates
+	 */
+	public function runCleanDuplicateTable(){
+		$duplicateTableName = $this->getDuplicateEntitiesTable();
+		$query = "DELETE $duplicateTableName
+			FROM $duplicateTableName
+			JOIN vtiger_contactdetails c1
+				ON $duplicateTableName.crmid1 = c1.contactid
+			JOIN vtiger_contactdetails c2
+				ON $duplicateTableName.crmid2 = c2.contactid
+			JOIN vtiger_crmentity crm1
+				ON $duplicateTableName.crmid1 = crm1.crmid
+			JOIN vtiger_crmentity crm2
+				ON $duplicateTableName.crmid1 = crm2.crmid
+			LEFT JOIN vtiger_contactscontrel
+			ON (crm1.crmid = vtiger_contactscontrel.contactid
+				AND crm2.crmid = vtiger_contactscontrel.relcontid
+			) OR (
+				crm2.crmid = vtiger_contactscontrel.contactid
+				AND crm1.crmid = vtiger_contactscontrel.relcontid
+			)
+			WHERE c1.lastname LIKE '%[SUPPRIM%%'
+			OR c2.lastname LIKE '%[SUPPRIM%%'
+			OR crm1.deleted = 1
+			OR crm2.deleted = 1
+			OR vtiger_contactscontrel.contactid IS NOT NULL
+		";
+		$db = PearDatabase::getInstance();
+		$result = $db->query($query);
+		if(!$result){
+			$db->echoError();
+		}
+	}	
 }

@@ -233,7 +233,7 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 					WHERE ' . $queryWhere;
 				
 			//echo "<pre>$query</pre>";
-			
+			//die();
 			$query = 'INSERT INTO ' . $duplicateTableName . '
 				(`crmid1`, `crmid2`, `duplicatestatus`, `duplicatefields`, `mergeaction`, `checkdate`)
 				' . $query . '
@@ -248,6 +248,8 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			if(!$result){
 				$db->echoError();
 			}
+			
+			$this->runCleanDuplicateTable();
 		}
 	}
 	
@@ -317,5 +319,11 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 		$moduleName = $this->getModule()->getName();
 		$focus = CRMEntity::getInstance($moduleName);
 		return $focus->duplicate_entities_table;
+	}
+	
+	/* nettoie la table des duplicates
+	 */
+	public function runCleanDuplicateTable(){
+		
 	}
 }

@@ -21,13 +21,11 @@ class RSNAboRevues_GetData_Action extends Vtiger_GetData_Action {
 	
 	//Retourne la valeur du champ isabonnable du type d'abonnement fourni
 	public function getTypeIsAbonnable(Vtiger_Request $request){
-		global $adb;
+		$moduleModel = Vtiger_Module_Model::getInstance($request->getModule());
+		
 		$rsnabotype = $request->get('rsnabotype');
-		$query = "SELECT isabonnable
-			FROM vtiger_rsnabotype
-			WHERE rsnabotype = ?";
-		$result = $adb->pquery($query, array($rsnabotype));
-		$data = $adb->query_result($result, 0, 0);
+		$data = $moduleModel->isTypeAbonnable($rsnabotype);
+		
 		$response = new Vtiger_Response();
 		$response->setResult($data);
 		$response->emit();

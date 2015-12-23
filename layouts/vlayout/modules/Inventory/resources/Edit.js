@@ -2308,14 +2308,14 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		},
 	
 	/**
-	 * Function to check for relation operation
-	 * if relation exist calculation should happen by default
+	 * Function to check for relation operation (création d'une facture à partir d'un coupon, par exemple)
+	 * if relation exist, calculation should happen by default
 	 */
-	registerForRelationOperation : function(){
+	initializeForRelationOperation : function(){
 		var form = this.getForm();
 		var relationExist = form.find('[name="relationOperation"]').val();
 		if(relationExist){
-			jQuery('.qty').trigger('focusout');
+			jQuery('.qty:first').trigger('focusout');
 		}
 	},
 	
@@ -2537,6 +2537,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		//TODO : this might be costier operation. This we added to calculate tax for each line item
 		this.makeLineItemsSortable();
 		this.checkLineItemRow();
-		this.registerForRelationOperation();
+		this.initializeForRelationOperation();
     }
 });

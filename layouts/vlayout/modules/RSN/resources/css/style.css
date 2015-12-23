@@ -245,15 +245,6 @@ td.listViewEntryValue[data-field-type="currency"]
   padding-left: 1em;
 }
 
-/* Contacts EditViewBlocks.tpl */
-.fieldLabel .subFieldLabel {
-  display: block;
-  line-height: 18px;
-  vertical-align: middle;
-  text-align: right;
-  margin: 10px 0;
-}
-
 /* les enfants de cette classe passent en ligne
   utilisé par layouts/vlayout/modules/Contacts/SummaryViewContents.tpl
 */
@@ -524,4 +515,16 @@ Correction : c'est uniquement quand il y a un var_dump qui traine */
 }
 #searchableColumnsListContainer .chzn-container .chzn-results li {
   line-height: 100%;
+}
+
+/* Contacts EditViewBlocks.tpl */
+#EditView .fieldLabel .subFieldLabel {
+  display: block;
+  line-height: 18px;
+  vertical-align: middle;
+  text-align: right;
+  margin: 10px 0;
+}
+#EditView .field-street input {
+  width: 20em;
 }

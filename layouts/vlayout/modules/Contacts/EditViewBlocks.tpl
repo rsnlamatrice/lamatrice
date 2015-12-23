@@ -211,7 +211,8 @@
 				{if $FIELD_MODEL->get('uitype') neq "83"}
 					<td class="fieldValue {$WIDTHTYPE}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20' or $FIELD_NAME eq 'rsnnpai' or $FIELD_NAME eq 'isgroup'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
 						<div class="row-fluid">
-							<span class="{if $FIELD_NAME eq 'rsnnpai'}span6{else}span10{/if}">{* ED141005 *}
+							<span class="{if $FIELD_NAME eq 'rsnnpai'}span6{else}span10{/if} {* ED141005 *}
+								{if strpos($FIELD_NAME, 'street') !== false} field-street{/if}{* ED151222 *}">
 								{* street2/3*}
 								{if $FIELD_NAME eq 'otherstreet'
 								|| $FIELD_NAME eq 'mailingstreet'}

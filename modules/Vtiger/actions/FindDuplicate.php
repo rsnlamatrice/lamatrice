@@ -23,6 +23,7 @@ class Vtiger_FindDuplicate_Action extends Vtiger_Action_Controller {
 		parent::__construct();
 		$this->exposeMethod('runScheduledSearch');
 		$this->exposeMethod('updateDuplicatesStatus');
+		$this->exposeMethod('runCleanDuplicateTable');
 	}
 	public function process(Vtiger_Request $request) {
 		$mode = $request->get('mode');
@@ -40,6 +41,17 @@ class Vtiger_FindDuplicate_Action extends Vtiger_Action_Controller {
 		foreach($moduleNames as $moduleName){
 			$dataModelInstance = Vtiger_FindDuplicate_Model::getInstance($moduleName);
 			$dataModelInstance->runScheduledSearch();
+		}
+	}
+
+	/* ED151222
+	 * for debug
+	 */ 
+	public function runCleanDuplicateTable(){
+		$moduleNames = Vtiger_FindDuplicate_Model::getScheduledSearchModules();
+		foreach($moduleNames as $moduleName){
+			$dataModelInstance = Vtiger_FindDuplicate_Model::getInstance($moduleName);
+			$dataModelInstance->runCleanDuplicateTable();
 		}
 	}
 	
