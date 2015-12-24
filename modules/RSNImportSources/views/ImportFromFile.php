@@ -170,17 +170,16 @@ class RSNImportSources_ImportFromFile_View extends RSNImportSources_Import_View 
 		
 		$autoFilesMax = $this->getDefaultAutoFilesMax();
 		
+		// Define the custom sort function
+		function sort_files_without_extension($a,$b) {
+		     return pathinfo($a, PATHINFO_FILENAME)>pathinfo($b, PATHINFO_FILENAME);
+		}
 		$files = array();
 		foreach( explode(';',$this->recordModel->get('autosourcedata')) as $path){
 			try {
 				$pathFiles = glob($path, GLOB_MARK | GLOB_ERR);
 				//Tri par nom
-				asort($files);
-				/*//Tri par date
-				usort($files, function($a, $b) {
-					return filemtime($a) < filemtime($b);
-				});*/
-				//var_dump(__FILE__, 'prepareAutoPreImportData $pathFiles', $pathFiles);
+				usort($pathFiles, 'sort_files_without_extension');
 				foreach($pathFiles as $fileName){
 					// Contrôle qu'on a bien un .csv qui n'est pas déjà été traité
 					if(!($fileName[strlen($fileName)-1] === '/' || $fileName[strlen($fileName)-1] === '\\')

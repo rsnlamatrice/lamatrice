@@ -85,14 +85,21 @@
 						{include file=vtemplate_path($UITYPEMODEL,$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL}
 						&nbsp;{vtranslate($FIELD_NAME, $MODULE)}
 						</label>
-					{elseif $BLOCK_LABEL eq 'LBL_ADDRESS_INFORMATION' && ($RECORD_MODEL->get('use_address2_for_revue') || $RECORD_MODEL->get('use_address2_for_recu_fiscal'))}
-						{* ED150912 notification de l'existence d'une adresse secondaire spécifique *}
-						<div style="display: inline-block; margin-left: 5em; opacity: 0.6;">
-							<a href="#adresse_secondaire">{vtranslate('LBL_ADDRESS2_EXISTS', $MODULE)} : 
-								{if $RECORD_MODEL->get('use_address2_for_revue')}&nbsp;{vtranslate('USE ADDRESS2 FOR REVUE', $MODULE)}{/if}
-								{if $RECORD_MODEL->get('use_address2_for_recu_fiscal')}&nbsp;{vtranslate('USE ADDRESS2 FOR RECU FISCAL', $MODULE)}{/if}
-							</a>
-						</div>
+					{elseif $BLOCK_LABEL eq 'LBL_ADDRESS_INFORMATION'}
+						{if $RECORD_MODEL->get('mailingmodifiedtime')}
+							<div style="display: inline-block; margin-left: 2em; opacity: 0.8;">
+								{$RECORD_MODEL->getDisplayValue('mailingmodifiedtime')}
+							</div>
+						{/if}
+						{if $RECORD_MODEL->get('use_address2_for_revue') || $RECORD_MODEL->get('use_address2_for_recu_fiscal')}
+							{* ED150912 notification de l'existence d'une adresse secondaire spécifique *}
+							<div style="display: inline-block; margin-left: 4em; opacity: 0.6;">
+								<a href="#adresse_secondaire">{vtranslate('LBL_ADDRESS2_EXISTS', $MODULE)} : 
+									{if $RECORD_MODEL->get('use_address2_for_revue')}&nbsp;{vtranslate('USE ADDRESS2 FOR REVUE', $MODULE)}{/if}
+									{if $RECORD_MODEL->get('use_address2_for_recu_fiscal')}&nbsp;{vtranslate('USE ADDRESS2 FOR RECU FISCAL', $MODULE)}{/if}
+								</a>
+							</div>
+						{/if}
 					{elseif $BLOCK_LABEL eq 'LBL_BLOCK_DO_NOT'}
 						{* ED150912 sélection de tous ou aucun *}
 						{assign var=UID value='change-all-donot'}
@@ -119,12 +126,14 @@
 				|| $FIELD_NAME eq 'otheraddressformat'
 				|| $FIELD_NAME eq 'mailingaddressformat'
 				|| $FIELD_NAME eq 'mailingzip'
+				|| $FIELD_NAME eq 'mailingmodifiedtime'
 				|| $FIELD_NAME eq 'otherzip'
 				|| $FIELD_NAME eq 'mailingpobox'
 				|| $FIELD_NAME eq 'otherpobox'
 				|| $FIELD_NAME eq 'mailingcountry'
 				|| $FIELD_NAME eq 'othercountry'
 				|| $FIELD_NAME eq 'rsnnpaicomment'
+				|| $FIELD_NAME eq 'rsnnpaidate'
 				|| $FIELD_NAME eq 'use_address2_for_revue'
 				|| $FIELD_NAME eq 'use_address2_for_recu_fiscal'}
 					{continue}
@@ -202,6 +211,9 @@
 								<button class="address-sna-check ui-button" title="Contrôle externe de l'adresse">SNA</button>
 								&gt;&gt;
 							</span>
+						{elseif $FIELD_NAME eq 'rsnnpai'}
+							{vtranslate($FIELD_MODEL->get('label'), $MODULE)}
+							{if $RECORD_MODEL->get('rsnnpaidate')} au {$RECORD_MODEL->getDisplayValue('rsnnpaidate')}{/if}
 						{else}
 							{vtranslate($FIELD_MODEL->get('label'), $MODULE)}
 						{/if}
