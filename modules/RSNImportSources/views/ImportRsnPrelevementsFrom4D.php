@@ -145,7 +145,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 		global $log;
 		
 		//TODO check sizeof $rsnprelevementsata
-		$sourceId = $rsnprelevementsData[0]['separum'];
+		$sepaRUM = $rsnprelevementsData[0]['separum'];
 		$contact = $this->getContact($rsnprelevementsData);
 		if ($contact != null) {
 			$account = $contact->getAccountRecordModel();
@@ -156,7 +156,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 				$numcompte = $rsnprelevementsData[0]['numcompte'];
 				$sepabic = $rsnprelevementsData[0]['sepabic'];
 				$montant = $rsnprelevementsData[0]['montant'];
-				//test sur separum == $sourceId
+				//test sur separum == $sepaRUM
 				$query = "SELECT crmid
 					FROM vtiger_rsnprelevements
 					JOIN vtiger_crmentity
@@ -172,7 +172,7 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 					LIMIT 1
 				";
 				$db = PearDatabase::getInstance();
-				$result = $db->pquery($query, array($sourceId, $account->getId(), $datesign, $etat, $numcompte, $sepabic, $montant));
+				$result = $db->pquery($query, array($sepaRUM, $account->getId(), $datesign, $etat, $numcompte, $sepabic, $montant));
 				if($db->num_rows($result)){
 					//already imported !!
 					$row = $db->fetch_row($result, 0); 
@@ -242,14 +242,16 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 						SET smownerid = ?
 						, modifiedtime = ?
 						, createdtime = ?
+						, separum = ?
 						WHERE vtiger_crmentity.crmid = ?
 					";
 					$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 									    , $rsnprelevementsData[0]['datedernmodif']
 									    , $rsnprelevementsData[0]['datecreation']
+										, $sepaRUM
 									    , $rsnprelevementsId));
 					
-					$log->debug("" . basename(__FILE__) . " update imported rsnprelevements (id=" . $record->getId() . ", sourceId=$sourceId , date=" . $rsnprelevementsData[0]['datecreation']
+					$log->debug("" . basename(__FILE__) . " update imported rsnprelevements (id=" . $record->getId() . ", sourceId=$sepaRUM , date=" . $rsnprelevementsData[0]['datecreation']
 						    . ", result=" . ($result ? " true" : "false"). " )");
 					if( ! $result)
 						$db->echoError();
@@ -260,13 +262,13 @@ class RSNImportSources_ImportRsnPrelevementsFrom4D_View extends RSNImportSources
 				}
 			} else {
 				//TODO: manage error
-				$log->debug("" . basename(__FILE__) . " error importing rsnprelevements (sourceId=$sourceId , date=" . $rsnprelevementsData[0]['datecreation']
+				$log->debug("" . basename(__FILE__) . " error importing rsnprelevements (sourceId=$sepaRUM , date=" . $rsnprelevementsData[0]['datecreation']
 						    . ", result=Compte inconnu pour ContactId=".$contact->getId());
 					
 				echo "<pre><code>Unable to find Account</code></pre>";
 			}
 		} else {
-			$log->debug("" . basename(__FILE__) . " error importing rsnprelevements (sourceId=$sourceId , date=" . $rsnprelevementsData[0]['datecreation']
+			$log->debug("" . basename(__FILE__) . " error importing rsnprelevements (sourceId=$sepaRUM , date=" . $rsnprelevementsData[0]['datecreation']
 						. ", result=Contact inconnu");
 			foreach ($rsnprelevementsData as $rsnprelevementsLine) {//TODO: remove duplicated code
 				$entityInfo = array(
