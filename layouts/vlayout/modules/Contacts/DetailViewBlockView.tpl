@@ -64,6 +64,11 @@ A noter que les champs d'adresses sont triés dans modules\Contacts\models\Detai
 				
 				{* ED150810 *}
 				{elseif $BLOCK_LABEL_KEY eq 'Adresse secondaire'}
+					{if $RECORD_MODEL->get('mailingmodifiedtime')}
+						<label style="margin-left: 2em; display: inline-block; color: white;">
+							{$RECORD_MODEL->getDisplayValue('mailingmodifiedtime')}
+						</label>
+					{/if}
 					{assign var=FIELD_NAME value='use_address2_for_revue'}
 					{if $RECORD->get($FIELD_NAME)}
 						<label style="margin-left: 4em; display: inline-block; color: white;">

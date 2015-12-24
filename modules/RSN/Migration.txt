@@ -55,7 +55,9 @@
 
 - Prélèvements FIRST
 
-- Supprimer le champ contactdetails.ref4d et les triggers liés. bof pour ref4d, non ?...
+- Mise à jour des tarifs groupés et des remises des articles.
+
+- NON ! Supprimer le champ contactdetails.ref4d et les triggers liés. bof pour ref4d, non ?...
 
 - Réactiver les contrôles du système (Adresses secondaires)
 

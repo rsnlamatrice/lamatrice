@@ -127,10 +127,10 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 			'evaladr' => '',
 			'charade' => '',
 			'statutnpai' => 'rsnnpai',
-			'datestatutnpai' => 'rsnnpaicomment', //bof
+			'datestatutnpai' => 'rsnnpaidate',
 			'date_finabn_rezo' => '',//RSNAboRevues finabo
 			'depotvente' => '',//type de contact += 'Dépôt-vente'
-			'datemodifadresse' => '',//TODO ? MAX(datemodifadresse, datemodification)
+			'datemodifadresse' => 'mailingmodifiedtime',
 			'typecontact' => 'isgroup',//
 			'pasautornvp' => '',// TODO
 			'pasrelancefinancierecourrier' => 'donotappeldoncourrier',
@@ -490,7 +490,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		//'associationcourt' => 'grpnomllong',
 		//'datecreation' => '',//updated post creation
 		//'conventionnef' => '',//0 ou 1. contacttype += 'Convention NEF'
-		//'datemodification' => '',//updated post creation. TODO ? MAX(datemodifadresse, datemodification)
+		//'datemodification' => 'mailingmodifiedtime',
 		//'presse' => '',//type de contact += 'Média'
 		//'p_militante' => '',//type de contact += 'Militant'
 		//'abonne_rezo' => '',//0 ou 1. RSNAboRevues->isabonne
@@ -519,7 +519,7 @@ class RSNImportSources_ImportContactsFrom4D_View extends RSNImportSources_Import
 		//'evaladr' => '',
 		//'charade' => '',
 		//'statutnpai' => 'rsnnpai',
-		//'datestatutnpai' => 'rsnnpaicomment', //bof
+		//'datestatutnpai' => 'rsnnpaidate', //bof
 		//'date_finabn_rezo' => '',//RSNAboRevues finabo
 		//'depotvente' => '',//type de contact += 'Dépôt-vente'
 		//'datemodifadresse' => '',//TODO ? MAX(datemodifadresse, datemodification)
