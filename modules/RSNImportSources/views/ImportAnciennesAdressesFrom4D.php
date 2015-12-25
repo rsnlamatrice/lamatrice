@@ -92,7 +92,7 @@ class RSNImportSources_ImportAnciennesAdressesFrom4D_View extends RSNImportSourc
 			'typevoie_v' => '',
 			'libellevoie_v' => '',
 			'pays_new' => '',
-			'dateenregistrement' => '',
+			'dateenregistrement' => 'mailingmodifiedtime',
 			'prénom_new' => '',
 			'pays_r' => 'mailingcountry',
 			'asso_new' => '',
