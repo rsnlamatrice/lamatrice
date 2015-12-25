@@ -686,7 +686,10 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		//Parse dates
 		foreach($this->getCritere4DDateFields() as $fieldName)
 			$critere4DHeader[$fieldName] = $this->getMySQLDate($critere4DHeader[$fieldName]);
-				
+		
+		if(!$critere4DHeader['dateapplication'])
+			$critere4DHeader['dateapplication'] = '2000-01-01';
+			
 		return $critere4DHeader;
 	}
 	
