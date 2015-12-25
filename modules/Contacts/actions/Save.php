@@ -21,13 +21,21 @@ class Contacts_Save_Action extends Vtiger_Save_Action {
 			$request->set('salutationtype', '');
 		}
 		
-		//ED150312
-		//duplicate address data to a new ContactAddresses record
-		if($request->get('_archive_address') && $request->get('record')){
+		if( $request->get('record') && !$request->get('isDuplicate') ){
 			$contactModule = Vtiger_Module_Model::getInstance('Contacts');
 			//"old" means "before saved"
 			$contactOldRecord = Vtiger_Record_Model::getInstanceById($request->get('record'), $contactModule);
-			$contactOldRecord->createContactAddressesRecord('mailing', true, $request);
+			
+			if($contactOldRecord->get('rsnnpai') != $request->get('rsnnpai')
+			&& !(!$contactOldRecord->get('rsnnpai') && !$request->get('rsnnpai'))){
+				$request->set('rsnnpaidate', date('Y-m-d'));
+			}
+			
+			//ED150312
+			//duplicate address data to a new ContactAddresses record
+			if($request->get('_archive_address') && $request->get('record')){
+				$contactOldRecord->createContactAddressesRecord('mailing', true, $request);
+			}
 		}
 		
 		parent::process($request);

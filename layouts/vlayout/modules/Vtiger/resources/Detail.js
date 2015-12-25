@@ -180,11 +180,18 @@ jQuery.Class("Vtiger_Detail_Js",{
 	deleteRecord : function(deleteRecordActionUrl) {
 		var message = app.vtranslate('LBL_DELETE_CONFIRMATION');
 		Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(function(data) {
+				var progressIndicatorElement = jQuery.progressIndicator({
+					'position' : 'html',
+					'blockInfo' : {
+						'enabled' : true
+					}
+				});
 				AppConnector.request(deleteRecordActionUrl+'&ajaxDelete=true').then(
 				function(data){
 					if(data.success == true){
 						window.location.href = data.result;
 					}else{
+						progressIndicatorElement.progressIndicator({'mode':'hide'});
 						Vtiger_Helper_Js.showPnotify(data.error.message);
 					}
 				});

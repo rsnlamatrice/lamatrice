@@ -452,7 +452,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * used by Contacts_Save_Action::process
 	 */
-	public function createContactAddressesRecord($fieldPrefix = 'mailing', $save = true, $compareWithRequest = true){
+	public function createContactAddressesRecord($fieldPrefix = 'mailing', $save = true, &$compareWithRequest = true){
 		//on ne crée pas d'archive si on avait pas de code postal
 		if($save && !$this->get($fieldPrefix.'zip'))
 			return false;
@@ -495,6 +495,10 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		
 		if($compareWithRequest && !$hasChanges)
 			return false;
+		
+		if($compareWithRequest && $hasChanges){
+			$compareWithRequest->set($fieldPrefix.'modifiedtime', date('Y-m-d'));
+		}
 		
 		if($hasChanges && $save){
 			$addressRecord->save();

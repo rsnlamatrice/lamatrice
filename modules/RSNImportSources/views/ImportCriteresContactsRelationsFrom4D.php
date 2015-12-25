@@ -422,7 +422,10 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			'Critere4D'
 		);
 		
-		
+		self::skipPreImportDataForAlreadyImported(
+			$this->user,
+			'Critere4D'
+		);
 		
 	}
 	
@@ -501,7 +504,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	}
 
 	/**
-	 * Méthode qui court-circuite tous enregistrements pour lesquels on ne connait pas le critère ou le contact
+	 * Méthode qui court-circuite tous enregistrements pour lesquels on ne connait pas le contact
 	 */
 	public static function failPreImportDataForNonExistingContact($user, $moduleName) {
 		$db = PearDatabase::getInstance();
@@ -516,6 +519,53 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 			AND (`$tableName`._contactid IS NULL OR `$tableName`._contactid = ''
 			)
+		";
+		$result = $db->query($query);
+		if(!$result)
+			$db->echoError($query);
+			
+		return !!$result;
+	}
+
+	/**
+	 * Méthode qui court-circuite tous enregistrements pour lesquels l'import a déjà était fait
+	 */
+	public static function skipPreImportDataForAlreadyImported($user, $moduleName) {
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($user, $moduleName);
+		
+		/* Valide les enregistrements pour lesquels c'est déjà fait*/
+		$query = "UPDATE $tableName
+			JOIN vtiger_critere4dcontrel
+				ON vtiger_critere4dcontrel.critere4did = `$tableName`._critere4did
+				AND vtiger_critere4dcontrel.contactid = `$tableName`._contactid
+				AND vtiger_critere4dcontrel.dateapplication = `$tableName`.dateapplication
+		";
+		$query .= " SET ";
+		$query .= "`$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_UPDATED;
+		$query .= "
+			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND (`$tableName`._contactid IS NOT NULL)
+			AND (`$tableName`._critere4did IS NOT NULL)
+		";
+		$result = $db->query($query);
+		if(!$result)
+			$db->echoError($query);
+			
+		
+		/* Valide les enregistrements pour lesquels c'est déjà fait*/
+		$query = "UPDATE $tableName
+			JOIN vtiger_senotesrel
+				ON vtiger_senotesrel.notesid = `$tableName`._notesid
+				AND vtiger_senotesrel.crmid = `$tableName`._contactid
+				AND vtiger_senotesrel.dateapplication = `$tableName`.dateapplication
+		";
+		$query .= " SET ";
+		$query .= "`$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_UPDATED;
+		$query .= "
+			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			AND (`$tableName`._contactid IS NOT NULL)
+			AND (`$tableName`._notesid IS NOT NULL)
 		";
 		$result = $db->query($query);
 		if(!$result)
