@@ -885,9 +885,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 * @return array : the formated data of the invoice.
 	 */
 	function getInvoiceValues($invoice) {
+		$invoiceInformations = $invoice['invoiceInformations'];
 		$this->erreurSaisieCodeClient($invoiceInformations);
 		$invoiceValues = array();
-		$invoiceInformations = $invoice['invoiceInformations'];
 		$date = $this->getMySQLDate($invoiceInformations[$this->columnName_indexes['datepiece']]);
 		$receivedcomments = null;
 		$invoiceHeader = array(
