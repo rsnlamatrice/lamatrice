@@ -48,8 +48,13 @@ A noter que les champs d'adresses sont triés dans modules\Contacts\models\Detai
 				
 				{* ED150810 *}
 				{elseif $BLOCK_LABEL_KEY eq 'LBL_ADDRESS_INFORMATION'}
+					{if $RECORD->get('mailingmodifiedtime')}
+						<label style="margin-left: 2em; display: inline-block; color: white;">
+							{$RECORD->getDisplayValue('mailingmodifiedtime')}
+						</label>
+					{/if}s
 					{if $RECORD->get('use_address2_for_revue') || $RECORD->get('use_address2_for_recu_fiscal')}
-						<label style="margin-left: 4em; display: inline-block; color: white;">
+						<label style="margin-left: 3em; display: inline-block; color: white;">
 							cf adresse secondaire 
 							{assign var=FIELD_NAME value='use_address2_for_revue'}
 							{if $RECORD->get($FIELD_NAME)}
@@ -64,18 +69,13 @@ A noter que les champs d'adresses sont triés dans modules\Contacts\models\Detai
 				
 				{* ED150810 *}
 				{elseif $BLOCK_LABEL_KEY eq 'Adresse secondaire'}
-					{if $RECORD_MODEL->get('mailingmodifiedtime')}
-						<label style="margin-left: 2em; display: inline-block; color: white;">
-							{$RECORD_MODEL->getDisplayValue('mailingmodifiedtime')}
-						</label>
-					{/if}
 					{assign var=FIELD_NAME value='use_address2_for_revue'}
 					{if $RECORD->get($FIELD_NAME)}
 						<label style="margin-left: 4em; display: inline-block; color: white;">
 						&nbsp;{vtranslate($FIELD_NAME, $MODULE_NAME)}
 						</label>
 					{/if}
-					
+					s
 					{assign var=FIELD_NAME value='use_address2_for_recu_fiscal'}
 					{if $RECORD->get($FIELD_NAME)}
 						<label style="margin-left: 2em; display: inline-block; color: white;">
