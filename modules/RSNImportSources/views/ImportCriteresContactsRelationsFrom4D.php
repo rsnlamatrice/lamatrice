@@ -159,7 +159,8 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 		$sql = 'SELECT critere, MIN(dateapplication) AS dateapplication
 			FROM ' . $tableName . '
 			WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . '
-			AND (_notesid IS NULL AND _critere4did IS NULL)
+			AND (_notesid IS NULL OR _notesid = "")
+			AND (_critere4did IS NULL OR _critere4did = "")
 			GROUP BY critere
 			ORDER BY dateapplication';
 
@@ -602,7 +603,7 @@ class RSNImportSources_ImportCriteresContactsRelationsFrom4D_View extends RSNImp
 	 * @return boolean - true if the line is a critere4d information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && is_numeric($line[0]) && $this->isDate($line[4])) {
+		if (sizeof($line) > 0 && is_numeric($line[0]) && $line[0] != 0 && $this->isDate($line[4])) {
 			return true;
 		}
 
