@@ -14,13 +14,13 @@ class RSNImportSources_ImportRecusFiscauxFrom4D_View extends RSNImportSources_Im
 			JOIN vtiger_crmentity
 				ON vtiger_notes.notesid = vtiger_crmentity.crmid
 			WHERE deleted = false
-			AND folderid = 4
-			AND title LIKE \'Recu_Fiscal_%\'';
+			AND folderid = 17
+			AND (title LIKE \'Recu_Fiscal_%\' OR title LIKE \'Reçu fiscal%\')';
 		$result = $adb->query($query);
 		if(!$result)
 			$adb->echoError();
 		while ($row = $adb->fetch_row($result)){
-			$annee = preg_replace('/^.*(20\d+)(_env)?$/', '$1', $row['title']);
+			$annee = preg_replace('/^.*(20\d\d)(_env)?$/', '$1', $row['title']);
 			if(is_numeric($annee)){
 				$notesIds[$annee] = $row['notesid'];
 			}
