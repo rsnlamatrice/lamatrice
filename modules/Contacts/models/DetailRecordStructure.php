@@ -21,8 +21,10 @@ class Contacts_DetailRecordStructure_Model extends Vtiger_DetailRecordStructure_
 		//sort fields for detail view
 		foreach($structure as $blockId => &$block){
 			if($blockId === 'LBL_ADDRESS_INFORMATION'
-			|| $blockId === 'Adresse secondaire')
+			|| $blockId === 'Adresse secondaire'){
 				uksort($block, array('Contacts_DetailRecordStructure_Model', 'uksortDetailViewFields'));
+				break;
+			}
 		}
 		return $structure;
 	}
@@ -30,7 +32,9 @@ class Contacts_DetailRecordStructure_Model extends Vtiger_DetailRecordStructure_
 	static function uksortDetailViewFields($a, $b){
 		$orderedFieldNames = array(
 			'rsnnpai',
+			'rsnnpaidate',
 			'rsnnpaicomment',
+			'mailingmodifiedtime',
 			'mailingaddressformat',
 			'mailingzip',
 			'mailingstreet2',
@@ -43,6 +47,7 @@ class Contacts_DetailRecordStructure_Model extends Vtiger_DetailRecordStructure_
 			
 			'use_address2_for_revue',
 			'use_address2_for_recu_fiscal',
+			'othermodifiedtime',
 			'otheraddressformat',
 			'otherzip',
 			'otherstreet2',

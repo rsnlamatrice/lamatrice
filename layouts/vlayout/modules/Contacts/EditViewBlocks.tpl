@@ -69,8 +69,13 @@
 					{/if}
 					{vtranslate($BLOCK_LABEL, $MODULE)}
 					{if $BLOCK_LABEL eq 'Adresse secondaire'}
+						{if $RECORD_MODEL->get('othermodifiedtime')}
+							<div style="display: inline-block; margin-left: 2em; opacity: 0.8;">
+								{$RECORD_MODEL->getDisplayValue('othermodifiedtime')}
+							</div>
+						{/if}
 						<a id="adresse_secondaire"/>
-						<label class="blockToggler" style="margin-left: 4em; display: inline-block; color: white;">
+						<label class="blockToggler" style="margin-left: 3em; display: inline-block; color: white;">
 						{assign var=FIELD_NAME value='use_address2_for_revue'}
 						{assign var=FIELD_MODEL value=$BLOCK_FIELDS[$FIELD_NAME]}
 						{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
@@ -127,6 +132,7 @@
 				|| $FIELD_NAME eq 'mailingaddressformat'
 				|| $FIELD_NAME eq 'mailingzip'
 				|| $FIELD_NAME eq 'mailingmodifiedtime'
+				|| $FIELD_NAME eq 'othermodifiedtime'
 				|| $FIELD_NAME eq 'otherzip'
 				|| $FIELD_NAME eq 'mailingpobox'
 				|| $FIELD_NAME eq 'otherpobox'
@@ -338,7 +344,7 @@
 									{assign var=FIELD_NAME value='mailingstreet2'}
 									{assign var=FIELD_MODEL value=$RECORD_STRUCTURE_MODEL->getField($FIELD_NAME)}
 									{assign var=UITYPEMODEL value=$FIELD_MODEL->getUITypeModel()->getTemplateName()}
-									{include file=vtemplate_path($UITYPEMODEL,$MODULE) FORCE_FIELD_NAME='mailingstreet2_synchronize' BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-medium'}
+									{include file=vtemplate_path($UITYPEMODEL,$MODULE) FORCE_FIELD_NAME='mailingstreet2_synchronize' BLOCK_FIELDS=$BLOCK_FIELDS RECORD_MODEL=$RECORD_MODEL INPUT_CLASS='input-large'}
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
 					       

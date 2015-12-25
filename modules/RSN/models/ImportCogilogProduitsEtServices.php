@@ -192,7 +192,7 @@ class RSN_CogilogProduitsEtServices_Import {
 		$record->set('taxclass', $srcRow['tva_produit']);
 		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
 		$record->set('purchaseprice', str_replace('.', ',', $srcRow['prixachat_produit'])); //Attention, il faut la virgule...
-		
+		self::setProductCategory($record, $srcRow);
 	    
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
@@ -218,6 +218,7 @@ class RSN_CogilogProduitsEtServices_Import {
 		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
 		$record->set('taxclass', $srcRow['tva_produit']);
 		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
+		self::setProductCategory($record, $srcRow);
 	    
 		//$db->setDebug(true);
 		$record->save();
@@ -247,7 +248,8 @@ class RSN_CogilogProduitsEtServices_Import {
 		$record->set('taxclass', $srcRow['tva_produit']);
 		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
 		$record->set('purchaseprice', str_replace('.', ',', $srcRow['prixachat_produit'])); //Attention, il faut la virgule...
-	    
+		self::setProductCategory($record, $srcRow);
+		
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
 		$record->save();
@@ -260,6 +262,18 @@ class RSN_CogilogProduitsEtServices_Import {
 		self::updateProductDates($record, $srcRow);
 		self::updateProductTaxRel($record, $srcRow);
 		return $record;
+	}
+	
+	private static function setProductCategory($record, $srcRow){
+		if($record->getModuleName() == "Services")
+			$fieldName = 'servicecategory';
+		else
+			$fieldName = 'productcategory';
+		$record->set($fieldName, decode_html($srcRow['produit_famille']));
+	    
+		RSNImportSources_Utils_Helper::checkPickListValue($record->getModuleName() , $fieldName, $fieldName, $record->get($fieldName));
+			
+		
 	}
 	
 	private static function updateProductDates($record, $srcRow){

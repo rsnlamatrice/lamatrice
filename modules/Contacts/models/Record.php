@@ -465,7 +465,9 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			'id' => 'contactid',
 			'modifiedtime' => 'createdtime',
 			'rsnnpai' => 'rsnnpai',
+			'rsnnpaidate' => 'rsnnpaidate',
 			'rsnnpaicomment' => 'rsnnpaicomment',
+			$fieldPrefix.'modifiedtime' => 'mailingmodifiedtime',
 			$fieldPrefix.'street' => 'mailingstreet',
 			$fieldPrefix.'street2' =>'mailingstreet2',
 			$fieldPrefix.'street3' => 'mailingstreet3',
@@ -483,6 +485,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			if($compareWithRequest
 			&& strpos($sourceField, $fieldPrefix) === 0
 			&& strpos($sourceField, 'addressformat') === false
+			&& strpos($sourceField, 'modifiedtime') === false
 			&& $this->get($sourceField) != $compareWithRequest->get($sourceField)
 			)
 				$hasChanges = true;
