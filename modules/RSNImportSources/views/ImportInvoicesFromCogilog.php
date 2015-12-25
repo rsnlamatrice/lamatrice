@@ -917,6 +917,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			$nomClient = preg_replace($regexp,'$1', $invoiceHeader['lastname']);
 			$invoiceHeader['lastname'] = $nomClient;
 		}
+		if(is_numeric($invoiceHeader['subject']))
+			$invoiceHeader['subject'] .= ' ' . $invoiceInformations[$this->columnName_indexes['nom2']];
+		
 		$invoiceHeader['reffiche'] = $codeClient;
 		
 		//var_dump($this->columnName_indexes);
