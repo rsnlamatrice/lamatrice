@@ -617,6 +617,13 @@ jQuery.Class("Vtiger_Edit_Js",{
 			} else {
 				var module = jQuery(e.currentTarget).find('[name="module"]').val();
 				if(editViewForm.validationEngine('validate')) {
+					//ED151225 : TODO à voir si ça a des conséquences (genre retour d'erreur côté serveur). Peut-être faut il déplacer cet affichage ?
+					var progressIndicatorElement = jQuery.progressIndicator({
+						'position' : 'html',
+						'blockInfo' : {
+							'enabled' : true
+						}
+					});
 					//Once the form is submiting add data attribute to that form element
 					editViewForm.data('submit', 'true');
 					//on submit form trigger the recordPreSave event

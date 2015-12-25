@@ -28,11 +28,17 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 			foreach($contactData as $critereId => $critereData){
 				$contact = Vtiger_Record_Model::getInstanceById($contactId, 'Contacts');
 				if($critereId == 'NPAI'){
-					$contact->set('mode', 'edit');
-					$contact->set('rsnnpai', $critereData['value']);
-					if(array_key_exists('comment', $critereData))
-						$contact->set('rsnnpaicomment', $critereData['comment']);
-					$contact->save();
+					$npaiChanged = $contact->get('rsnnpai') != $critereData['value']
+						&& !($contact->get('rsnnpai') ===null && $critereData['value'] ==0);
+					if($npaiChanged || $critereData['comment']){
+						$contact->set('mode', 'edit');
+						$contact->set('rsnnpai', $critereData['value']);
+						if($npaiChanged)
+							$contact->set('rsnnpaidate', date('Y-m-d'));
+						if(array_key_exists('comment', $critereData))
+							$contact->set('rsnnpaicomment', $critereData['comment']);
+						$contact->save();
+					}
 				}
 				elseif(is_numeric($critereId)){
 					$contact->assignRelatedCritere4D($critereId, $critereData['date'], $critereData['data']);
@@ -68,6 +74,9 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 			if(array_key_exists('email', $fields)){
 				$oldEmail = $recordModel->get('email');
 			}
+			if(array_key_exists('rsnnpai', $fields)){
+				$oldNPAI = $recordModel->get('rsnnpai');
+			}
 		}
 		
 		$recordModel = parent::getRecordModelFromRequest($request);
@@ -85,6 +94,10 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 		if(!empty($recordId) && $request->get('fields')) {
 			if(isset($oldEmail) && $oldEmail != $recordModel->get('email')){
 				$recordModel->set('email_add_history', $oldEmail);
+			}
+			if(isset($oldNPAI) && $oldNPAI != $recordModel->get('rsnnpai')
+			   && !(!$oldNPAI && !$recordModel->get('rsnnpai'))){
+				$recordModel->set('rsnnpaidate', date('Y-m-d'));
 			}
 		}
 		return $recordModel;
