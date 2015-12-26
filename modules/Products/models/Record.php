@@ -219,7 +219,20 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		$this->set('taxClassDetails', $taxClassDetails);
 		return $taxClassDetails;
 	}
-
+	/** ED151226
+	 * Function to get the taxes price
+	 * @return <float> 
+	 */
+	public function getTaxedPrice() {
+		$details = $this->getTaxClassDetails();
+		$unitPrice = $this->get('unit_price');
+		foreach($details as $detail){
+			$unitPrice *= 1 + $detail['percentage']/100;
+			break;
+		}
+		return $unitPrice;
+	}
+	
 	/**
 	 * Function to get all taxes
 	 * @return <Array> List of taxes

@@ -389,6 +389,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			break;
 		default:
 			$relatedColumnFields = $relationModule->getConfigureRelatedListFields();
+			
 			if(count($relatedColumnFields) <= 0){
 				$relatedColumnFields = $relationModule->getRelatedListFields();
 			}
@@ -558,7 +559,6 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 				$headerFields[$fieldName] = $relatedModuleModel->getField($fieldName);
 			}
 		}
-		
 		switch($relatedModuleModel->name){
 		case "Documents":
 		case "Campaigns":

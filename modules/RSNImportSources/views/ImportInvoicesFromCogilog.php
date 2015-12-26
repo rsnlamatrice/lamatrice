@@ -949,6 +949,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	//erreurs trouvés dans les logs
 	function erreurSaisieCodeClient(&$data){
 		switch($data[$this->columnName_indexes['codeclient']]){
+		case '2395372':
 		case '1552052':
 		case '2416112':
 		case '2146702':

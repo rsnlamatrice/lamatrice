@@ -96,7 +96,9 @@
 							<td nowrap class="{$WIDTHTYPE}">
                             {if $HEADER_FIELD->get('name') == 'listprice'}
                                 {$RELATED_RECORD->get($HEADER_FIELD->get('name'))}
+                                &nbsp;{vtranslate($RELATED_RECORD->get('listpriceunit'), $MODULE)}
                                 {assign var="LISTPRICE" value=$RELATED_RECORD->get($HEADER_FIELD->get('name'))}
+                                {assign var="LISTPRICE_UNIT" value=$RELATED_RECORD->get('listpriceunit')}
                             {else if $HEADER_FIELD->isNameField() eq true or $HEADER_FIELD->get('uitype') eq '4'}
                                 <a href="{$RELATED_RECORD->getDetailViewUrl()}">{$RELATED_RECORD->getDisplayValue($RELATED_HEADERNAME)}</a>
                             {else}
@@ -107,8 +109,8 @@
                                 <div class="pull-right actions">
                                     <span class="actionImages">
                                         <a href="{$RELATED_RECORD->getFullDetailViewUrl()}"><i title="{vtranslate('LBL_SHOW_COMPLETE_DETAILS', $MODULE)}" class="icon-th-list alignMiddle"></i></a>&nbsp;
-                                        <a data-url="index.php?module=PriceBooks&view=ListPriceUpdate&record={$PARENT_RECORD->getId()}&relid={$RELATED_RECORD->getId()}&currentPrice={$LISTPRICE}"
-                                           class="editListPrice cursorPointer" data-related-recordid='{$RELATED_RECORD->getId()}' data-list-price={$LISTPRICE}>
+                                        <a data-url="index.php?module=PriceBooks&view=ListPriceUpdate&record={$PARENT_RECORD->getId()}&relid={$RELATED_RECORD->getId()}&currentPrice={$LISTPRICE}&currentPriceUnit={$LISTPRICE_UNIT}"
+                                           class="editListPrice cursorPointer" data-related-recordid='{$RELATED_RECORD->getId()}' data-list-price={$LISTPRICE} data-list-price-unit={$LISTPRICE_UNIT}>
                                             <i class="icon-pencil alignMiddle" title="{vtranslate('LBL_EDIT', $MODULE)}"></i>
                                         </a>
                                         <a class="relationDelete"><i title="{vtranslate('LBL_DELETE', $MODULE)}" class="icon-trash alignMiddle"></i></a>

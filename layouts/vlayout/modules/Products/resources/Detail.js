@@ -9,6 +9,8 @@
 
 Vtiger_Detail_Js("Products_Detail_Js",{},{
 	
+	
+	
 	/**
 	 * Function to register event for image graphics
 	 */
@@ -25,6 +27,26 @@ Vtiger_Detail_Js("Products_Detail_Js",{},{
 		 }).on('mouseout',function(){
 			 imageContainer.cycle('resume');
 		 })
+	},
+	
+	/**
+	 * Function to register event for PriceBooks
+	 */
+	registerEventForPriceBooks : function(){
+		var thisInstance = this;
+		var relatedModuleName = thisInstance.getRelatedModuleName();
+		if (relatedModuleName === 'PriceBooks') {
+			var selectedTabElement = thisInstance.getSelectedTab();
+			var relatedController = new Products_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
+			relatedController.registerEventForPriceBooks();
+		}
+	},
+	
+	/**
+	 * Function to register Event for Sorting
+	 */
+	registerEventForRelatedList : function(){
+		this.registerEventForPriceBooks();
 	},
 	
 	/**

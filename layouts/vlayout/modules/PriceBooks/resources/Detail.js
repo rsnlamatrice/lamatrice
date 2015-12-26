@@ -21,7 +21,6 @@ Vtiger_Detail_Js("PriceBooks_Detail_Js",{},{
 	/**
 	 * Function to register event for select button click on pricebooks related list
 	 */
-	
 	registerEventForSelectRecords : function(){
 		var thisInstance = this;
 		var detailContentsHolder = this.getContentHolder();
@@ -47,7 +46,8 @@ Vtiger_Detail_Js("PriceBooks_Detail_Js",{},{
 				var idList = new Array();
 				var relid = container.find('input[name="relid"]').val();
 				var listPriceVal = container.find('input[name="currentPrice"]').val();
-				idList.push({'id' : relid,'price' : listPriceVal});
+				var listPriceUnitVal = container.find(':input[name="currentPriceUnit"]').val();//ED151226
+				idList.push({'id' : relid, 'price' : listPriceVal, 'priceunit' : listPriceUnitVal});
 				var relatedListInstance = new PriceBooks_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), thisInstance.getSelectedTab(), thisInstance.getRelatedModuleName());
 				relatedListInstance.addRelations(idList);
 				app.hideModalWindow();
@@ -103,10 +103,12 @@ Vtiger_Detail_Js("PriceBooks_Detail_Js",{},{
 			thisInstance.getListPriceEditForm(requestUrl).then(
 				function(data){
 					var relid = elem.data('relatedRecordid');
-					var listPrice = elem.data('listPrice');
+					var listPrice = elem.data('listPrice')
+					, listPriceUnit = elem.data('listPriceUnit');//ED151226
 					var form = jQuery(data);
 					form.find('input[name="relid"]').val(relid);
 					form.find('input[name="currentPrice"]').val(listPrice);
+					form.find(':input[name="currentPriceUnit"]').val(listPriceUnit);//ED151226
 					thisInstance.showListPriceUpdate(form);
 				},
 				function(error,err){

@@ -405,6 +405,8 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	/**
 	 * ED141005
 	 * getListViewPicklistValues
+	 * 
+	 * discounttype est défini dans Vtiger_Record_Model
 	 */
 	public function getPicklistValuesDetails($fieldname){
 		switch($fieldname){

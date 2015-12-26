@@ -208,6 +208,18 @@ class Vtiger_RelatedList_View extends Vtiger_Index_View {
 			}
 			break;
 		
+		case "Services" :
+		case "Products" :
+			switch($relatedModuleName){
+			  case "PriceBooks":
+				$tpl = 'RelatedPriceBooks.tpl';
+				break;
+			  default:
+				$tpl = "RelatedList.tpl";
+				break;
+			}
+			break;
+		
 		default:
 			$tpl = 'RelatedList.tpl';
 			break;
