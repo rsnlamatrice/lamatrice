@@ -100,4 +100,8 @@
 		font-style: italic;
 		font-family: Courier New;
 	}
+	#related-pricebooks #add-quantity {
+		font-size: large;
+		padding: 6px;
+	}
 </style>

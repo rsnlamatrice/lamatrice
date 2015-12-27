@@ -14,7 +14,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	directAmountDiscountType : 'amount',
 
 	individualTaxType : 'individual',
-	groupTaxType :  'group'
+	groupTaxType :  'group',
+	
+	discountTypes : {
+		'SANS' : 'sans',
+		'DEPOT-VENTE' : 'dv',
+		'GROUPE' : 'grp',
+	}
 },{
 
 	//Container which stores the line item elements
@@ -239,6 +245,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * inventory_accountdiscounttype_holder
 	 */
 	getAccountDiscountType : function(){
+		if (app.getModuleName() == 'SalesOrder') {
+			return Inventory_Edit_Js.discountTypes['DEPOT-VENTE'];
+		}
 		return $('#inventory_accountdiscounttype_holder :radio:checked:first').val();
 	},
 

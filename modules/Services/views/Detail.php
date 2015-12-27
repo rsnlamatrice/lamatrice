@@ -17,10 +17,19 @@ class Services_Detail_View extends Products_Detail_View {
 		$moduleName = $request->getModule();
 		$modulePopUpFile = 'modules.'.$moduleName.'.resources.Edit';
 		unset($headerScriptInstances[$modulePopUpFile]);
+		$modulePopUpFile = 'modules.'.$moduleName.'.resources.Detail';
+		unset($headerScriptInstances[$modulePopUpFile]);
+		$modulePopUpFile = 'modules.'.$moduleName.'.resources.RelatedList';
+		unset($headerScriptInstances[$modulePopUpFile]);
 
 
 		$jsFileNames = array(
 				'modules.Products.resources.Edit',
+				'modules.Products.resources.Detail',
+				'modules.Products.resources.RelatedList',
+				"modules.$moduleName.resources.Edit",
+				"modules.$moduleName.resources.Detail",
+				"modules.$moduleName.resources.RelatedList",
 		);
 		$jsFileNames[] = $modulePopUpFile;
 
