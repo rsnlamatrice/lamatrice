@@ -135,7 +135,7 @@ class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 	public function getLaMatriceComptesEntries($dateDebut, $dateFin){
 		global $adb;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `Date`
-		, IF(`vtiger_account`.account_type = 'Dépôt-vente', '411DEP', IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)) AS `Compte`
+		, IF(`vtiger_account`.account_type = 'Depot-vente', '411DEP', IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)) AS `Compte`
 		, SUM( ROUND( `vtiger_invoice`.`total`, 2 ) ) AS `Montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`

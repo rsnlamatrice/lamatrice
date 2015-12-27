@@ -413,7 +413,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			case 'accounttype':
 				return array(
 					'' => array( 'label' => 'Normal'),
-					'Dépôt-vente' => array( 'label' => 'Dépôt-vente' ),
+					'Depot-vente' => array( 'label' => 'Dépôt-vente' ),
 				);
 			default:
 				return parent::getPicklistValuesDetails($fieldname);

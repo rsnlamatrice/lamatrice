@@ -126,13 +126,15 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 			$compte = false;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `date`
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`) AS `nomfacture`
-		, IF(`vtiger_account`.account_type = 'Dépôt-vente', '411DEP', IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)) AS `Compte`
+		, IF(`vtiger_account`.account_type = 'Depot-vente', '411DEP', IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)) AS `Compte`
 		, SUM(ROUND( `vtiger_invoice`.`total`, 2 )) AS `montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
 			ON `vtiger_invoice`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
 		INNER JOIN `vtiger_invoicecf`
 			ON `vtiger_invoicecf`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
+		INNER JOIN `vtiger_account`
+			ON `vtiger_account`.`accountid` = `vtiger_invoice`.`accountid`
 		LEFT JOIN `vtiger_notescf`
 			ON `vtiger_notescf`.`notesid` = `vtiger_invoicecf`.`notesid`
 		LEFT JOIN `vtiger_campaignscf`
@@ -146,7 +148,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 			if($compte === '411DEP')
 				$query .= " AND (vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
 							OR vtiger_receivedmoderegl.comptevente IN ( ".$compte." )
-							OR `vtiger_account`.account_type = 'Dépôt-vente'
+							OR `vtiger_account`.account_type = 'Depot-vente'
 						)";
 			else
 				$query .= " AND (vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
