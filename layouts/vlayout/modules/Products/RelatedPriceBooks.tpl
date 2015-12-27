@@ -54,10 +54,9 @@
 			</tr>
 		{/foreach}		
 	</table>
-	<div class="commentaires">
-		Les tarifs par quantité sont entendus à l'unité.
-		<br>Exemple : le tarif de 100 autocollants doit être saisi à 0,50 €HT, et non 50,00 €HT.
-	</div>
+	{if $COMMENTS}
+	<div class="commentaires">{$COMMENTS}</div>
+	{/if}
 </div>
 {/strip}
 <style>
@@ -99,6 +98,7 @@
 		margin-top : 2em;
 		font-style: italic;
 		font-family: Courier New;
+		white-space: pre;
 	}
 	#related-pricebooks #add-quantity {
 		font-size: large;
