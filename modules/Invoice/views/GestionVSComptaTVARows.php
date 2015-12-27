@@ -215,7 +215,7 @@ class Invoice_GestionVSComptaTVARows_View extends Invoice_GestionVSComptaTVA_Vie
 		, "ligne"."libelle" || \' - \' || "ligne"."piece"
 		, "ligne"."compte"
 		
-		ORDER BY "ligne"."ladate", "montant", "nomfacture"
+		ORDER BY "ligne"."ladate", "compte", "montant", "nomfacture"
 		';
 		
 		
