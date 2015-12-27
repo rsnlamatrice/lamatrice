@@ -374,7 +374,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			 * Seuls les comptes en 6 ou en 7 on une section analytique
 			 *
 			 * Le type de compte est prioritaire pour définir le compte de Vente :
-			 * 	- Dépôt-vente 411DEP
+			 * 	- Depot-vente 411DEP
 			 * 
 			 */
 			
@@ -588,7 +588,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		
 		$accountType = $invoiceData['account_type'];
 		switch($accountType){
-		case 'Dépôt-vente' :
+		case 'Depot-vente' :
+		//case 'Dépôt-vente' :
 			return '411DEP';
 		
 		default :

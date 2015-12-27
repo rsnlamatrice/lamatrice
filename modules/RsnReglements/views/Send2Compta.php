@@ -423,7 +423,7 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		
 		$accountType = $reglementData['account_type'];
 		switch($accountType){
-		case 'Dépôt-vente' :
+		case 'Depot-vente' :
 			return '411DEP';
 		
 		default :
