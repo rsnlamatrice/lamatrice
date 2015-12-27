@@ -17,6 +17,9 @@ Vtiger_RelatedList_Js("Products_RelatedList_Js",{},{
 	getContainer: function(){
 		return $('#related-pricebooks');
 	},
+	getForm: function(){
+		return $('#detailView');
+	},
 	getTable: function(){
 		return this.getContainer().find('table:first');
 	},
@@ -50,8 +53,8 @@ Vtiger_RelatedList_Js("Products_RelatedList_Js",{},{
 		var $tr = $cell.parents('tr:first');
 		return $tr.data('discounttype');
 	},
-	parseFloat: function($value){
-		return $value ? parseFloat($value.replace(',', '.')) : $value;
+	parseFloat: function(value){
+		return value && typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
 	},
 	getBasicPrice: function(){
 		return this.parseFloat($('#product_price').val());
@@ -163,7 +166,7 @@ Vtiger_RelatedList_Js("Products_RelatedList_Js",{},{
 			var $row = $(e.target).parents('tr:first')
 			, $cells = $row.children('td.price:gt(0)')
 			, basicPrice = thisInstance.getBasicPrice();
-			thisInstance.setPrice($cells, basicPrice);
+			thisInstance.setPrice($cells, basicPrice, 'HT');
 		});
 	},
 	
@@ -304,11 +307,32 @@ Vtiger_RelatedList_Js("Products_RelatedList_Js",{},{
 		var thisInstance = this;
 		$(container).on('click', 'button[name="saveButton"]', function(e){
 			e.stopImmediatePropagation();
+			e.preventDefault();
 			
+			var $form = thisInstance.getForm();
+			if ($form.length === 0) {
+				alert('Form introuvable ! erreur html depuis le template');
+				return false;
+			}
 			var related_data = thisInstance.getSubmitData();
 			console.log(JSON.stringify(related_data));
+			$form.find('input[name="related_data"]').val(JSON.stringify(related_data));
 			
-			$(container).find('input.related_data').val(JSON.stringify(related_data));
+			var element = jQuery(e.currentTarget);
+			element.progressIndicator({});
+			
+			var params = $form.serializeFormData();
+			
+			AppConnector.request(params).then(
+				function(data) {
+					element.progressIndicator({'mode': 'hide'});
+					if(data.result){
+						Vtiger_Helper_Js.showPnotify('Ok, c\'est enregistré');
+					}else{
+						Vtiger_Helper_Js.showMessage(data);
+					}
+				}
+			);
 			
 			return false;
 		});

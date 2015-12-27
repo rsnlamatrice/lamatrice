@@ -23,43 +23,41 @@
 		<input type="hidden" class="related-pricebooks" data-id="{$RELATED_RECORD->getId()}"
 			   value="{Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($RELATED_RECORD->getData()))}"/>
 	{/foreach}
-	<form class="form-horizontal" method="post" action="index.php">
-		<input type="hidden" name="module" value="{$MODULE}" />
-		<input type="hidden" name="related_module" value="{$RELATED_MODULE->getName()}" />
-		<input type="hidden" name="action" value="RelationAjax" />
-		<input type="hidden" name="record" value="{$PARENT_RECORD->getId()}" />
-		<input type="hidden" name="mode" value="saveRelatedPriceBooks" />
-		<input type="hidden" name="related_data" value="" />
-		<table class="table table-bordered listViewEntriesTable">
-			<caption>Tarif de base : {$PRODUCT_PRICE} &euro;HT {if $PRODUCT_PRICE_TAXED != PRODUCT_PRICE}, {$PRODUCT_PRICE_TAXED} &euro;TTC{/if}
-			<div class="pull-right">
-				<button class="btn btn-success"  name="saveButton"><strong>Enregistrer</strong></button>
-			</div>
-			</caption>
-			<thead>
-				<tr class="listViewHeaders">
-					<th class="discounttype" style="text-align: center">
-						<span style="float: right">Quantité</span>
-						/
-						<span style="float: left">Remise</span>
-					</th>
-					<th class="quantity" data-quantity="1">1</th>
-					<th class="span1"><a id="add-quantity" class="pull-right" title="cliquer ici pour ajouter une quantité"><b>+</b></a></th>
-				</tr>
-			</thead>
-			{foreach item=DISCOUNT_TYPE key=DISCOUNT_TYPE_ID from=$DISCOUNT_TYPES}
-				<tr class="listViewEntries" data-discounttype='{$DISCOUNT_TYPE_ID}'>
-					<td class="discounttype">{$DISCOUNT_TYPE['label']}</td>
-					<td class="price">{$PRODUCT_PRICE} &euro;HT</td>
-					<td class="span1"><a class="clear-row pull-right"><span class="ui-icon ui-icon-trash"></span></a></td>
-				</tr>
-			{/foreach}		
-		</table>
-		<div class="commentaires">
-			Les tarifs par quantité sont entendus à l'unité.
-			<br>Exemple : le tarif de 100 autocollants doit être saisi à 0,50 €HT, et non 50,00 €HT.
+	<input type="hidden" name="module" value="{$MODULE}" />
+	<input type="hidden" name="related_module" value="{$RELATED_MODULE->getName()}" />
+	<input type="hidden" name="action" value="RelationAjax" />
+	<input type="hidden" name="record" value="{$PARENT_RECORD->getId()}" />
+	<input type="hidden" name="mode" value="saveRelatedPriceBooks" />
+	<input type="hidden" name="related_data" value="" />
+	<table class="table table-bordered listViewEntriesTable">
+		<caption>Tarif de base : {$PRODUCT_PRICE} &euro;HT {if $PRODUCT_PRICE_TAXED != PRODUCT_PRICE}, {$PRODUCT_PRICE_TAXED} &euro;TTC{/if}
+		<div class="pull-right">
+			<button class="btn btn-success"  name="saveButton"><strong>Enregistrer</strong></button>
 		</div>
-	</form>
+		</caption>
+		<thead>
+			<tr class="listViewHeaders">
+				<th class="discounttype" style="text-align: center">
+					<span style="float: right">Quantité</span>
+					/
+					<span style="float: left">Remise</span>
+				</th>
+				<th class="quantity" data-quantity="1">1</th>
+				<th class="span1"><a id="add-quantity" class="pull-right" title="cliquer ici pour ajouter une quantité"><b>+</b></a></th>
+			</tr>
+		</thead>
+		{foreach item=DISCOUNT_TYPE key=DISCOUNT_TYPE_ID from=$DISCOUNT_TYPES}
+			<tr class="listViewEntries" data-discounttype='{$DISCOUNT_TYPE_ID}'>
+				<td class="discounttype">{$DISCOUNT_TYPE['label']}</td>
+				<td class="price">{$PRODUCT_PRICE} &euro;HT</td>
+				<td class="span1"><a class="clear-row pull-right"><span class="ui-icon ui-icon-trash"></span></a></td>
+			</tr>
+		{/foreach}		
+	</table>
+	<div class="commentaires">
+		Les tarifs par quantité sont entendus à l'unité.
+		<br>Exemple : le tarif de 100 autocollants doit être saisi à 0,50 €HT, et non 50,00 €HT.
+	</div>
 </div>
 {/strip}
 <style>

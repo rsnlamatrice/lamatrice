@@ -85,9 +85,9 @@ class PriceBooks_Record_Model extends Vtiger_Record_Model {
 				return array(
 					'' => array( 'label' => 'Manuelle'),
 					'qty' => array( 'label' => 'Par quantité' ),
-					'qty,typeremise' => array( 'label' => 'Par type de remise et par quantité' ),
+					'qty,discounttype' => array( 'label' => 'Par type de remise et par quantité' ),
 					//'accounttype' => array( 'label' => 'Par type de compte' ),
-					'typeremise' => array( 'label' => 'Par type de remise' ),
+					'discounttype' => array( 'label' => 'Par type de remise' ),
 				);
 			default:
 				return parent::getPicklistValuesDetails($fieldname);

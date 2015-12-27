@@ -96,17 +96,20 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 		}
 	}
 	
+	//Il est important que tous les champs soient transmis à l'éditeur de tarifs (Product->relatedPriceBooks)
 	public function getConfigureRelatedListFields(){
-		return array_merge(parent::getConfigureRelatedListFields(), array(
-			'listprice'=>'listprice',
-			'listpriceunit'=>'listpriceunit',
-		));
+		$fieldNames = array_keys($this->getFields());
+		return array_merge(
+			array_combine($fieldNames, $fieldNames),
+			parent::getConfigureRelatedListFields(),
+			array(
+				'listprice'=>'listprice',
+				'listpriceunit'=>'listpriceunit',
+			));
 	}
+	//Il est important que tous les champs soient transmis à l'éditeur de tarifs (Product->relatedPriceBooks)
 	public function getRelatedListFields(){
-		return array_merge(parent::getRelatedListFields(), array(
-			'listprice'=>'listprice',
-			'listpriceunit'=>'listpriceunit',
-		));
+		return $this->getConfigureRelatedListFields();
 	}
 
 }
