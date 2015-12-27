@@ -319,9 +319,9 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 		 */
 		if((!$module || $module == 'Contacts')
 		&& ($searchKey
-		    && (is_numeric($searchKey)
+		    && (is_numeric(trim($searchKey))
 			|| (($searchKey[0] == 'c' || $searchKey[0] == 'C')
-			    && is_numeric(substr($searchKey,1))))
+			    && is_numeric(substr(trim($searchKey),1))))
 		)){
 			$query = 'SELECT CONCAT(vtiger_crmentity.label, " (", vtiger_contactdetails.contact_no, ")") AS label
 				, vtiger_crmentity.crmid, vtiger_crmentity.setype, vtiger_crmentity.createdtime
@@ -331,7 +331,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 				WHERE (vtiger_crmentity.crmid = ?
 					OR vtiger_contactdetails.contact_no = CONCAT(\'C\', ?))
 				AND vtiger_crmentity.deleted = 0';
-			if(!is_numeric($searchKey))
+			if(!is_numeric(trim($searchKey)))
 				$searchKey = substr($searchKey,1);
 			$params = array(trim($searchKey), trim($searchKey));
 		}
