@@ -128,19 +128,22 @@ class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 //511ETAL	Encaissement des dons ŽtalŽs
 //511NEF	Encaissements des dons Nef
 //511VIR	Virements reus (dons)
-		return "'411000', '511101', '511104', '511105', '511300', '511103', '511102', '511106', '511200', '511400', '511BOU', '511CB', '511ETAL', '511NEF', '511VIR'";
+		//NOT USED
+		return "'411000', '411DEP', '511101', '511104', '511105', '511300', '511103', '511102', '511106', '511200', '511400', '511BOU', '511CB', '511ETAL', '511NEF', '511VIR'";
 	}
 	
 	public function getLaMatriceComptesEntries($dateDebut, $dateFin){
 		global $adb;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `Date`
-		, IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl) AS `Compte`
+		, IF(`vtiger_account`.account_type = 'Dépôt-vente', '411DEP', IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)) AS `Compte`
 		, SUM( ROUND( `vtiger_invoice`.`total`, 2 ) ) AS `Montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
 			ON `vtiger_invoice`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
 		INNER JOIN `vtiger_invoicecf`
 			ON `vtiger_invoicecf`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
+		INNER JOIN `vtiger_account`
+			ON `vtiger_account`.`accountid` = `vtiger_invoice`.`accountid`
 		LEFT JOIN `vtiger_notescf`
 			ON `vtiger_notescf`.`notesid` = `vtiger_invoicecf`.`notesid`
 		LEFT JOIN `vtiger_campaignscf`
@@ -153,7 +156,7 @@ class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 		AND `vtiger_invoice`.`invoicedate` >= ?
 		AND `vtiger_invoice`.`invoicedate` < ?
 		
-		GROUP BY `vtiger_invoice`.`invoicedate`, IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)
+		GROUP BY `vtiger_invoice`.`invoicedate`, `Compte`
 		
 		ORDER BY `Date`, `Compte`
 		";

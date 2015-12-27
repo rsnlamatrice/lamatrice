@@ -126,7 +126,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 			$compte = false;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `date`
 		, CONCAT(`vtiger_invoice`.`subject`, ' - ', `vtiger_invoice`.`invoice_no`) AS `nomfacture`
-		, IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl) AS `compte`
+		, IF(`vtiger_account`.account_type = 'Dépôt-vente', '411DEP', IFNULL(vtiger_receivedmoderegl.comptevente, vtiger_invoicecf.receivedmoderegl)) AS `Compte`
 		, SUM(ROUND( `vtiger_invoice`.`total`, 2 )) AS `montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
@@ -143,9 +143,15 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 		AND vtiger_invoice.invoicestatus != 'Cancelled'
 		";
 		if($compte)
-			$query .= " AND (vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
-						OR vtiger_receivedmoderegl.comptevente IN ( ".$compte." )
-					)";
+			if($compte === '411DEP')
+				$query .= " AND (vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
+							OR vtiger_receivedmoderegl.comptevente IN ( ".$compte." )
+							OR `vtiger_account`.account_type = 'Dépôt-vente'
+						)";
+			else
+				$query .= " AND (vtiger_invoicecf.receivedmoderegl IN ( ".$compte." )
+							OR vtiger_receivedmoderegl.comptevente IN ( ".$compte." )
+						)";
 		$query .= "
 		AND `vtiger_invoice`.`invoicedate` >= ?
 		AND `vtiger_invoice`.`invoicedate` < ?
