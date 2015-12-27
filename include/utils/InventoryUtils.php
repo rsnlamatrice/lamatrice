@@ -1585,6 +1585,7 @@ function getPriceBookDetailsForProduct($productId){
 	$sql = 'SELECT vtiger_pricebookproductrel.productid
 		, vtiger_pricebook.*
 		, vtiger_pricebookproductrel.listprice
+		, vtiger_pricebookproductrel.listpriceunit
 		, IFNULL(vtiger_products.unit_price, vtiger_service.unit_price) AS unit_price
 		, IFNULL(vtiger_products.currency_id, vtiger_service.currency_id) AS unit_price_currency_id
 		FROM vtiger_pricebookproductrel
@@ -1608,26 +1609,29 @@ function getPriceBookDetailsForProduct($productId){
 	$products = array();
 	$num_rows = $adb->num_rows($result);
 	if($num_rows > 0){
-		//Tarif par quantité ou par critère
+		//Tarif par quantité et/ou par critère
 		for($i=0; $i<$num_rows; $i++){
 			$rowProductId = $adb->query_result($result,$i, 'productid');			
-			if(!$products[$rowProductId])
-				//Tarif par défaut
+			if(!$products[$rowProductId]){
+				//Tarif par défaut (qty === 0)
+				$basicPrice = $adb->query_result($result,$i, 'unit_price');
 				$products[$rowProductId] = array(array(
 					'name' => 'basic',
 					'modeapplication' => 'qty',
 					'minimalqty' => 0,
 					'applycondition' => null,
-					'listprice' => $adb->query_result($result,$i, 'unit_price'),
+					'listprice' => $basicPrice,
 					'currency_id' => $adb->query_result($result,$i, 'unit_price_currency_id'),
 				));
-			
+			}
 			$products[$rowProductId][] = array(
 				'name' => $adb->query_result($result,$i, 'bookname'),
 				'modeapplication' => $adb->query_result($result,$i, 'modeapplication'),
 				'minimalqty' => $adb->query_result($result,$i, 'minimalqty'),
+				'discounttype' => $adb->query_result($result,$i, 'discounttype'),
 				'applycondition' => $adb->query_result($result,$i, 'applycondition'),
 				'listprice' => $adb->query_result($result,$i, 'listprice'),
+				'listpriceunit' => $adb->query_result($result,$i, 'listpriceunit'),
 				'currency_id' => $adb->query_result($result,$i, 'currency_id'),
 			);
 		}

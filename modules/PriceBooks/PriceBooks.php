@@ -74,7 +74,10 @@ class PriceBooks extends CRMEntity {
 	}
 
 	/* Function to Update the List prices for all the products of a current price book
-	   with its Unit price, if the Currency for Price book has changed. */
+	   with its Unit price, if the Currency for Price book has changed.
+	
+		ED151226 adds field listpriceunit
+	*/
 	function updateListPrices() {
 		global $log, $adb;
 		$log->debug("Entering function updateListPrices...");
@@ -86,6 +89,7 @@ class PriceBooks extends CRMEntity {
 		for($i=0;$i<$numRows;$i++) {
 			$product_id = $adb->query_result($prod_res,$i,'productid');
 			$list_price = $adb->query_result($prod_res,$i,'listprice');
+			$list_price_unit = $adb->query_result($prod_res,$i,'listpriceunit');
 			$used_currency = $adb->query_result($prod_res,$i,'usedcurrency');
 			$product_currency_info = getCurrencySymbolandCRate($used_currency);
 			$product_conv_rate = $product_currency_info['rate'];
@@ -94,8 +98,8 @@ class PriceBooks extends CRMEntity {
 			$conversion_rate = $pb_conv_rate / $product_conv_rate;
 			$computed_list_price = $list_price * $conversion_rate;
 
-			$query = "update vtiger_pricebookproductrel set listprice=?, usedcurrency=? where pricebookid=? and productid=?";
-			$params = array($computed_list_price, $pricebook_currency, $this->id, $product_id);
+			$query = "update vtiger_pricebookproductrel set listprice=?, listpriceunit=?, usedcurrency=? where pricebookid=? and productid=?";
+			$params = array($computed_list_price, $list_price_unit, $pricebook_currency, $this->id, $product_id);
 			$adb->pquery($query, $params);
 		}
 		$log->debug("Exiting function updateListPrices...");
@@ -318,13 +322,13 @@ class PriceBooks extends CRMEntity {
 			if ($checkpresence && $adb->num_rows($checkpresence))
 				continue;
 
-			$query = "INSERT INTO vtiger_pricebookproductrel(`pricebookid`, `productid`, `listprice`, `usedcurrency`)";
+			$query = "INSERT INTO vtiger_pricebookproductrel(`pricebookid`, `productid`, `listprice`, `listpriceunit`, `usedcurrency`)";
 			if($with_module === 'Products')
-				$query .= " SELECT ?, productid, unit_price, currency_id
+				$query .= " SELECT ?, productid, unit_price, 'HT', currency_id
 						 FROM vtiger_products
 						 WHERE productid = ?";
 			elseif($with_module === 'Services')
-				$query .= " SELECT ?, serviceid, unit_price, currency_id
+				$query .= " SELECT ?, serviceid, unit_price, 'HT', currency_id
 						 FROM vtiger_service
 						 WHERE serviceid = ?";
 			$result = $adb->pquery($query, Array($crmid, $relcrmid));

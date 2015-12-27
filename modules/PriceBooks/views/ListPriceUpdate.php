@@ -29,15 +29,21 @@ class PriceBooks_ListPriceUpdate_View extends Vtiger_View_Controller {
 		$relId = $request->get('relid');
 		$currentPrice = $request->get('currentPrice');
 
+		//ED151226
+		$currentPriceUnit = $request->get('currentPriceUnit');
+		$priceUnits = PriceBooks_Relation_Model::getPriceUnits();
+		
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE',$moduleName);
 		$viewer->assign('PRICEBOOK_ID', $priceBookId);
 		$viewer->assign('REL_ID', $relId);
 		$viewer->assign('CURRENT_PRICE', $currentPrice);
+		$viewer->assign('CURRENT_PRICE_UNIT', $currentPriceUnit);
+		$viewer->assign('PRICE_UNITS', $priceUnits);
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->view('ListPriceUpdate.tpl', $moduleName);
 	}
-
+	
 	function postProcess(Vtiger_Request $request) {
 	}
 }

@@ -18,5 +18,8 @@ $languageStrings = array(
 	'LBL_PRICEBOOK_INFORMATION'    => 'Grille tarifaire'            , 
 	'LBL_EDIT_LIST_PRICE'          => 'Editer les tarifs'             , 
 	'Price Book Name'              => 'Objet'                       , 
-	'PriceBook No'                 => 'Grille tarifaire N°'        , 
+	'PriceBook No'                 => 'Grille tarifaire N°'        ,
+	
+	'HT'                 => '€ HT', 
+	'TTC'                 => '€ TTC', 
 );

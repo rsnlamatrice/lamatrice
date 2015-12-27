@@ -174,6 +174,23 @@ class Products_Module_Model extends Vtiger_Module_Model {
 		return 'productcategory';
 	}
 	
+	/** ED151226
+	 * Function to get relation query for particular module with function name
+	 */
+	public function getRelationQuery($recordId, $functionName, $relatedModule) {
+		
+		
+		switch($relatedModule->getName()){
+		 case 'PriceBooks':
+			$relationQuery = parent::getRelationQuery($recordId, $functionName, $relatedModule);
+
+			$relationQuery = preg_replace('/^SELECT\s/i', 'SELECT vtiger_pricebookproductrel.listprice, vtiger_pricebookproductrel.listpriceunit, ', $relationQuery);
+			return $relationQuery;
+		 default:
+			return parent::getRelationQuery($recordId, $functionName, $relatedModule);
+		}
+	}
+	
 	/** ED150619
 	 * Function to get relation query for particular module with function name
 	 * Similar to getRelationQuery but overridable.

@@ -69,6 +69,7 @@ class PriceBooks_RelationListView_Model extends Vtiger_RelationListView_Model {
 			$newRow['id'] = $recordId;
 			//Added to support List Price
 			$newRow['listprice'] = CurrencyField::convertToUserFormat($row['listprice'], null, true);
+			$newRow['listpriceunit'] = $row['listpriceunit'];
 
 			$record = Vtiger_Record_Model::getCleanInstance($relationModule->get('name'));
 			$relatedRecordList[$recordId] = $record->setData($newRow)->setModuleFromInstance($relationModule);

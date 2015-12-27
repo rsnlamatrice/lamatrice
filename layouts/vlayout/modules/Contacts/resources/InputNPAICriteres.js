@@ -7,12 +7,14 @@
  * All Rights Reserved.
  *************************************************************************************/
 Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
-		
+	
+	//cf  Vtiger_Record_Model.getPicklistValuesDetails()
 	NPAI_values : {
 		'0' : { 'label' : 'Ok', 'icon' : 'ui-icon ui-icon-check green' },
 		'1' : { 'label' : 'Supposée', 'icon' : 'ui-icon ui-icon-check darkgreen' },
 		'2' : { 'label' : 'Confirmée', 'icon' : 'ui-icon ui-icon-close orange' },
 		'3' : { 'label' : 'Définitive', 'icon' : 'ui-icon ui-icon-close darkred' },
+		'4' : { 'label' : 'Incomplète', 'icon' : 'ui-icon ui-icon-close darkred' },
 	},
 
 	/** ED150813

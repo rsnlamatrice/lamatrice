@@ -559,7 +559,7 @@ class Vtiger_Record_Model extends Vtiger_Base_Model {
 			case 'discounttype':
 			case 'accountdiscounttype':
 				return array(
-					'0' => array( 'label' => 'sans' ),
+					'0' => array( 'label' => 'Normal' ),
 					'dv' => array( 'label' => 'Dépôt-vente'),
 					'grp' => array( 'label' => 'Groupe'),
 				);

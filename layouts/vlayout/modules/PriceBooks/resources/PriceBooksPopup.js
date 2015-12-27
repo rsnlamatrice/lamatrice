@@ -47,8 +47,12 @@ Vtiger_Popup_Js("PriceBook_Products_Popup_Js",{
 					var row = checkBoxJqueryObject.closest('tr');
 					var rowListPrice = row.find('input[name=listPrice]');
 					var listPrice = rowListPrice.val();
+					//ED151226
+					var rowListPriceUnit = row.find(':input[name=listPriceUnit]');
+					var listPriceUnit = rowListPriceUnit.val();
+					
 					var id = row.data('id');
-					selectedRecordDetails.push({'id' : id,'price' : listPrice});
+					selectedRecordDetails.push({'id' : id,'price' : listPrice, 'priceunit' : listPriceUnit});
 				});
 				thisInstance.done(selectedRecordDetails, thisInstance.getEventName());
 			}

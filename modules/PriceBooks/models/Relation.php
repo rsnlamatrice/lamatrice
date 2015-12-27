@@ -38,12 +38,13 @@ class PriceBooks_Relation_Model extends Vtiger_Relation_Model{
 	 * @param <Integer> $sourceRecordId
 	 * @param <Integer> $destinationRecordId
 	 * @param <Integer> $listPrice
+	 * @param <String> $listPriceUnit (ED151226)
 	 */
-	public function addListPrice($sourceRecordId, $destinationRecordId, $listPrice) {
+	public function addListPrice($sourceRecordId, $destinationRecordId, $listPrice, $listPriceUnit) {
 		$sourceModuleName = $this->getParentModuleModel()->get('name');
 
 		$priceBookModel = Vtiger_Record_Model::getInstanceById($sourceRecordId, $sourceModuleName);
-		$priceBookModel->updateListPrice($destinationRecordId, $listPrice);
+		$priceBookModel->updateListPrice($destinationRecordId, $listPrice, $listPriceUnit);
 	}
 
 	/**
@@ -60,5 +61,10 @@ class PriceBooks_Relation_Model extends Vtiger_Relation_Model{
 		} else {
 			parent::deleteRelation($sourceRecordId, $relatedRecordId);
 		}
+	}
+
+	//ED151226
+	public static function getPriceUnits(){
+		return array('HT', 'TTC', '%');
 	}
 }

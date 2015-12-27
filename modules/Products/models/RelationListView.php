@@ -59,4 +59,29 @@ class Products_RelationListView_Model extends Vtiger_RelationListView_Model {
 		}
 		return $addLinkModels;
 	}
+	public function getHeaders(){
+		$relationModel = $this->getRelationModel();
+		$relatedModuleModel = $relationModel->getRelationModuleModel();
+		
+		if($relatedModuleModel->getName() === 'PriceBooks'){
+			$headerFields = parent::getHeaders();
+			
+			//Added to support List Price
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'listprice');
+			$field->set('column', 'listprice');
+			$field->set('label', 'List Price');	
+			array_push($headerFields, $field);
+			
+			//Added to support List Price Unit
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'listpriceunit');
+			$field->set('column', 'listpriceunit');
+			$field->set('label', '');	
+			array_push($headerFields, $field);
+			
+			return $headerFields;
+		}
+		return parent::getHeaders();
+	}
 }

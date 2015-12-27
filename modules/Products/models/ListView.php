@@ -179,6 +179,13 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 			$operator = 	array(array($operator, 'OR', 's'));
 		}
 		if(!empty($searchKey)) {
+			foreach($searchKey as $index => $searchKeyName){
+				if($searchKeyName === 'rsnsectionanal'
+				&& $searchValue[$index] === '(aucune)'){
+					$operator[$index] = 'y';
+					$searchValue[$index] = '';
+				}
+			}
 			$this->set('search_key', $searchKey);
 			$this->set('search_value', $searchValue);
 			$this->set('operator', $operator);
