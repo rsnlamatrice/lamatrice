@@ -127,7 +127,9 @@ class Invoice_GestionVSComptaTVARows_View extends Invoice_GestionVSComptaTVA_Vie
 		
 		$params = array();
 		$query = '';
-		for($TAXID = 1; $TAXID <= 6; $TAXID++){
+		$allTaxes = getAllTaxes();
+		foreach($allTaxes as $tax){
+			$TAXID = $tax['taxid'];
 			if($query !== '')
 				$query .= "
 					UNION

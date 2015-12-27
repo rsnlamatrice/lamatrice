@@ -20,5 +20,6 @@
 		data-field-name="{$FIELD_MODEL->getFieldName()}"
 		value="{$FIELD_MODEL->getFilterOperatorDisplayValue()}{$FIELD_MODEL->get('fieldvalue')}"
 		{if isset($TITLE)} title="{$TITLE}" placeholder="{$TITLE}"{/if}
+		{if $HEADERFILTER_SEARCH_OPERATOR} data-operator="{$HEADERFILTER_SEARCH_OPERATOR}"{/if}
 />
 {/strip}
