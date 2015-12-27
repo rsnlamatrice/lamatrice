@@ -65,6 +65,7 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		$module = $request->getModule();
 		$recordId = $request->get('record');
 		$relatedModule = $request->get('related_module');//PriceBooks
+		$relatedModuleModel = Vtiger_Module_Model::getInstance($relatedModule);
 		$related_data = $request->get('related_data');
 		
 		global $adb;
@@ -77,7 +78,7 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		//
 		foreach($related_data as $discountType => $quantities){
 			foreach($quantities as $quantity => $priceData){
-				$pricebookId = $this->getPriceBookRecordId($discountType, $quantity);
+				$pricebookId = $relatedModuleModel->getPriceBookRecordId($discountType, $quantity);
 				if(!$pricebookId)
 					throw new Exception('Impossible de trouver le pricebook');
 				
@@ -97,71 +98,6 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 		$response->emit();
 	}
 	
-	function getPriceBookRecordId($discountType, $quantity){
-		global $adb;
-		
-		//Clear DB data
-		$query = "SELECT vtiger_crmentity.crmid
-			FROM vtiger_pricebook
-			JOIN vtiger_crmentity
-				ON vtiger_pricebook.pricebookid = vtiger_crmentity.crmid
-			WHERE vtiger_crmentity.deleted = 0
-			AND vtiger_pricebook.active = true
-			AND IFNULL(discounttype, '') = ?
-			AND IFNULL(minimalqty, 0) = ?
-			AND IFNULL(modeapplication, '') = ?
-			LIMIT 1";
-		
-		if($discountType || $discountType === 0 || $discountType === "0"){
-			if($quantity)
-				$modeapplication = 'qty,discounttype';
-			else
-				$modeapplication = 'discounttype';
-		}
-		elseif($quantity)
-			$modeapplication = 'qty';
-		else
-			$modeapplication = '';
-		
-		$params = array($discountType, $quantity, $modeapplication);
-		//var_dump($params);
-		$result = $adb->pquery($query, $params);
-		if(!$result){
-			$adb->echoError();
-			die();
-		}
-		if($adb->getRowCount($result)){
-			return $adb->query_result($result, 0, 'crmid');
-		}
-		
-		//Création d'un nouveau record
-		$recordModel = Vtiger_Record_Model::getCleanInstance('PriceBooks');
-		$discountTypes = $recordModel->getPicklistValuesDetails('discounttype');
-		$name = "";
-		if($discountType){
-			if($discountTypes[$discountType]){
-				$name = vtranslate($discountTypes[$discountType]['label'], 'PriceBooks');
-			} else {
-				$name = vtranslate($discountType, 'PriceBooks');
-			}
-		}
-		if($quantity){
-			if($name)
-				$name .= ', à';
-			else
-				$name = 'A';
-			$name .= ' partir de ' . $quantity;
-		}
-		$recordModel->set('bookname', $name);
-		$recordModel->set('currency_id', 1);
-		$recordModel->set('active', 1);
-		$recordModel->set('modeapplication', $modeapplication);
-		$recordModel->set('minimalqty', $quantity);
-		$recordModel->set('discounttype', $discountType);
-		$recordModel->save();
-		
-		return $recordModel->getId();
-	}
 }
 
 ?>

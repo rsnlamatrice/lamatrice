@@ -76,11 +76,14 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 		return array (
 			"productcode"=>"productcode",
 			"productname" => "",
-			"remise"=>"",
-			"id_gprodu"=>"",
-			"id_gtremi"=>"",
-			"rate"=>"",
-			"quantite" => "quantity",
+			"moderemise"=>"listpriceunit",//0 : %, 1 : HT, 2 : TTC
+			"quantiteddef"=>"",//1 : avec qty
+			"nomremise"=>"",//Aucune remise : 0, depôt : dv, groupe signataire : grp
+			"taux"=>"listprice",
+			"quantite" => "minimalqty",
+			
+			"_productid" => "",
+			"_module" => "",
 		);
 	}
 	
@@ -105,6 +108,8 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 		global $VTIGER_BULK_SAVE_MODE;
 		$VTIGER_BULK_SAVE_MODE = true;
 		$config = new RSNImportSources_Config_Model();
+		
+		$this->beforeImportData();
 		
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Products');
@@ -149,27 +154,14 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 					
 		global $log;
 		
-		$sourceId = $productsData[0]['productcode'];
+		$productId = $productsData[0]['_productid'];
 		
-		//test sur nom == $sourceId
-		$query = "SELECT crmid
-			FROM vtiger_product
-			JOIN vtiger_crmentity
-				ON vtiger_product.productid = vtiger_crmentity.crmid
-			WHERE deleted = FALSE
-			AND productname = ?
-			LIMIT 1
-		";
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery($query, array($sourceId));
-		if($db->num_rows($result)){
+		if(!$productId){
 			//already imported !!
-			$row = $db->fetch_row($result, 0); 
-			$entryId = $this->getEntryId("Products", $row['crmid']);
 			foreach ($productsData as $productsLine) {
 				$entityInfo = array(
-					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED,
-					'id'		=> $entryId
+					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
 				);
 				
 				//TODO update all with array
@@ -177,31 +169,37 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 			}
 		}
 		else {
-			$record = Vtiger_Record_Model::getCleanInstance('Products');
-			$record->set('mode', 'create');
 			
-			$this->updateProductsRecordModelFromData($record, $productsData);
+			$relatedModuleModel = Vtiger_Module_Model::getInstance('PriceBooks');
 			
-			//$db->setDebug(true);
-			$record->save();
-			$productsId = $record->getId();
+			//
+			//"moderemise"=>"listpriceunit",//0 : %, 1 : HT, 2 : TTC
+			//"quantiteddef"=>"",//1 : avec qty
+			//"nomremise"=>"",//Aucune remise : 0, depôt : dv, groupe signataire : grp
+			//"taux"=>"listprice",
+			//"quantite" => "minimalqty",
+			//
+			$discountType = $productsData[0]['nomremise'];
+			$quantity = $productsData[0]['quantite'];
+			$price = str_to_float($productsData[0]['taux']);
+			$priceUnit = $productsData[0]['moderemise'];
 			
-			if(!$productsId){
-				//TODO: manage error
-				echo "<pre><code>Impossible d'enregistrer le fournisseur</code></pre>";
-				foreach ($productsData as $productsLine) {
-					$entityInfo = array(
-						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
-					);
-					
-					//TODO update all with array
-					$importDataController->updateImportStatus($productsLine[id], $entityInfo);
-				}
-
-				return false;
+			$pricebookId = $relatedModuleModel->getPriceBookRecordId($discountType, $quantity);
+			if(!$pricebookId)
+				throw new Exception('Impossible de trouver le pricebook');
+			
+			$query = "INSERT INTO vtiger_pricebookproductrel (`pricebookid`, `productid`, `listprice`, `listpriceunit`, `usedcurrency`)
+				VALUES( ?, ?, ?, ?, 1)";
+			$params = array($pricebookId, $productId, $price, $priceUnit);
+			$result = $db->pquery($query, $params);
+			if(!$result){
+				echo "<pre>$query</pre>";
+				var_dump($params);
+				$db->echoError();
+				die();
 			}
 			
-			$entryId = $this->getEntryId("Products", $productsId);
+			$entryId = $productId;
 			foreach ($productsData as $productsLine) {
 				$entityInfo = array(
 					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
@@ -210,180 +208,12 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 				$importDataController->updateImportStatus($productsLine[id], $entityInfo);
 			}
 			
-			/*$record->set('mode','edit');
-			$db = PearDatabase::getInstance();
-			$query = "UPDATE vtiger_crmentity
-				JOIN vtiger_product
-					ON vtiger_crmentity.crmid = vtiger_product.productid
-				SET smownerid = ?
-				, createdtime = ?
-				, modifiedtime = ?
-				WHERE vtiger_crmentity.crmid = ?
-			";
-			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
-								, $productsData[0]['date_saisie']
-								, $productsData[0]['date_modif'] ? $productsData[0]['date_modif'] : $productsData[0]['date_saisie']
-								, $productsId));
-			
-			$log->debug("" . basename(__FILE__) . " update imported products (id=" . $record->getId() . ", Ref 4D=$sourceId , date=" . $productsData[0]['date_saisie']
-					. ", result=" . ($result ? " true" : "false"). " )");
-			if( ! $result)
-				$db->echoError();
-			else {
-			}*/
-			return $record;
+			return true;
 		}
 
 		return true;
 	}
 
-	//Mise à jour des données du record model nouvellement créé à partir des données d'importation
-	private function updateProductsRecordModelFromData($record, $productsData){
-		
-		$fieldsMapping = $this->getProductsFieldsMapping();
-		foreach($productsData[0] as $fieldName => $value)
-			if(!is_numeric($fieldName) && $fieldName != 'id'){
-				$vField = $fieldsMapping[$fieldName];
-				if($vField)
-					$record->set($vField, $value);
-			}
-		
-		//cast des DateTime
-		foreach($this->getProductsDateFields() as $fieldName){
-			$value = $record->get($fieldName);
-			if( is_object($value) )
-				$record->set($fieldsMapping[$fieldName], $value->format('Y-m-d'));
-		}
-		
-		
-		$fieldName = 'enable';
-		$record->set($fieldName, 1);
-		
-		$fieldName = 'pobox';
-		if(!$record->get($fieldName)){
-			$value = $record->get('street3');
-			if(strpos($value,'BP') === 0){
-				$record->set('street3', '');
-				$record->set($fieldName, $value);
-			}
-			else
-			{				
-				$value = $record->get('street2');
-				if(strpos($value,'BP') === 0){
-					$record->set('street2', '');
-					$record->set($fieldName, $value);
-				}
-			}
-		}
-		
-		$fieldName = 'contactname';
-		$contactName = $record->get($fieldName);
-		$value = $productsData[0]['contactprenom'];
-		if($value){
-			$contactName = $value . ' ' . $contactName;
-		}
-		$value = $productsData[0]['contactcivilite'];
-		if($value){
-			$contactName = $value . ' ' . $contactName;
-		}
-		$record->set($fieldName, trim($contactName));
-		
-		
-		$fieldName = 'glacct';
-		if(!$record->get($fieldName)){
-			$value = $productsData[0]['siret'];
-			if($value)
-				$record->set($fieldName, $value);
-		}
-		//"categorie" => "productscategory",//vide check picklist
-		//"prefixe_fournisseur" => "",//vide
-		//"code" => "productcode",//Code Fournisseur
-		//"nom" => "productname",
-		//"num_rue" => "",//à concaténer avec Rue
-		//"rue" => "street",
-		//"complement" => "street2",
-		//"complement2" => "street3",//si BP*, dans pobox			
-		//"cp" => "postalcode",
-		//"ville" => "city",
-		//"cedex" => "pobox",
-		//"pays" => "country",//vider si FR
-		//"sexe" => "",
-		//"contactcivilite" => "",//CONCAT contactname
-		//"contact" => "contactname",//TODO
-		//"contactprenom" => "",//CONCAT contactname
-		//"contactfunction" => "",//ignore
-		//"telephone1" => "phone",//
-		//"telephone2" => "phone2",//
-		//"fax" => "fax",
-		//"email" => "email",			
-		//"num_intracom" => "intracom",//TODO fusion avec compte ?
-		//"siret" => "",//à mettre dans glacct si glacct est vide
-		//"compte" => "glacct",
-		//"banque1" => "",//vide
-		//"banquecode1" => "",//vide
-		//"banqueguichet1" => "",//vide
-		//"banquecompte1" => "",//vide
-		//"banquecptecle1" => "",//vide
-		//"facturation" => "paymode",//TODO mode de facturation HT+TVA, TTC, Import HT
-		//"paiement" => "paycomment",//TODO remarque sur le paiement			
-		//"r_pc" => "",//vide taux de remise
-		//"delai" => "",//vide
-		//"nbjours" => "paydelay",//TODO délai de paiement
-		//"paiementcode" => "",// 	
-		//"jour" => "",//
-		//"commande" => "",//ignorer 
-		//"br" => "",//ignorer 
-		//"fact" => "",//ignorer 
-		//"ar" => "",//Étiquettes adresses 
-		//"notation" => "",//ignorer 
-		//"notes" => "description",
-		//"monnumclient" => "",//ignorer 
-		//"nbexemplaires" => "",//vide
-		//"texte1" => "",//vide
-		//"texte2" => "",//vide
-		//"texte3" => "",//vide
-		//"texte4" => "",//vide
-		//"texte5" => "",//vide
-		//"texte6" => "",//vide
-		//"texte7" => "",//vide
-		//"texte8" => "",//vide
-		//"texte9" => "",//vide
-		//"nombre1" => "",//vide
-		//"nombre2" => "",//vide
-		//"nombre3" => "",//vide
-		//"nombre4" => "",//vide
-		//"nombre5" => "",//vide
-		//"nombre6" => "",//vide
-		//"nombre7" => "",//vide
-		//"nombre8" => "",//vide
-		//"nombre9" => "",//vide
-		//"date1" => "",//vide
-		//"date2" => "",//vide
-		//"date3" => "",//vide
-		//"date4" => "",//vide
-		//"date5" => "",//vide
-		//"date6" => "",//vide
-		//"date7" => "",//vide
-		//"date8" => "",//vide
-		//"date9" => "",//vide			
-		//"iban1" => "",
-		//"bic1" => "",
-		//"iban2" => "",
-		//"dossierattache" => "",
-		//"banque2" => "",
-		//"iban2" => "",
-		//"bic2" => "",
-		//"banque3" => "",
-		//"iban3" => "",
-		//"bic3" => "",
-		//"banque4" => "",
-		//"iban4" => "",
-		//"bic4" => "",
-		//"nbexbc" => "",
-		//"nbexbr" => "",
-		//"nbexar" => "",
-	}
-	
 	/**
 	 * Method that pre import an invoice.
 	 *  It adds one row in the temporary pre-import table by invoice line.
@@ -425,31 +255,110 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 		}
 		return false;
 	}
-        
-	
+    
+
 	/**
-	 * Method that check if a string is a formatted date (DD/MM/YYYY).
-	 * @param string $string : the string to check.
-	 * @return boolean - true if the string is a date.
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
 	 */
-	function isDate($string) {
-		//TODO do not put this function here ?
-		return preg_match("/^[0-3]?[0-9][-\/][0-1]?[0-9][-\/](20)?[0-9][0-9]/", $string);//only true for french format
-	}
-	/**
-	 * Method that returns a formatted date for mysql (Y-m-d).
-	 * @param string $string : the string to format.
-	 * @return string - formated date.
-	 */
-	function getMySQLDate($string) {
-		if(!$string || $string === '00/00/00')
-			return null;
-		$dateArray = preg_split('/[-\/\s]/', trim($string));
-		if(strlen($dateArray[2])<4)
-			$dateArray[2] += 2000;
-		return $dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0];
+	function postPreImportData() {
+		// Pré-identifie les produits
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Products');
+		
+		/* Affecte l'id du produit
+		*/
+		$query = "UPDATE $tableName
+		JOIN  vtiger_products
+			ON  vtiger_products.productcode = `$tableName`.productcode
+		JOIN vtiger_crmentity
+			ON vtiger_products.productid = vtiger_crmentity.crmid
+		";
+		$query .= " SET `_productid` = vtiger_crmentity.crmid
+		, _module = vtiger_crmentity.setype";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+
+		$result = $db->pquery($query, array());
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		/* Affecte l'id du service
+		*/
+		$query = "UPDATE $tableName
+		JOIN  vtiger_service
+			ON  vtiger_service.productcode = `$tableName`.productcode
+		JOIN vtiger_crmentity
+			ON vtiger_service.serviceid = vtiger_crmentity.crmid
+		";
+		$query .= " SET `_productid` = vtiger_crmentity.crmid
+		, _module = vtiger_crmentity.setype";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+
+		$result = $db->pquery($query, array());
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		/* productid manquant
+		*/
+		$query = "UPDATE $tableName
+		";
+		$query .= " SET status = ?";
+		$query .= "
+			WHERE _productid IS NULL
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		return true;
 	}
 
+	/**
+	 * Method called after the file is processed.
+	 *  This method must be overload in the child class.
+	 */
+	function beforeImportData() {
+		// Pré-identifie les produits
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Products');
+		
+		//Clear DB data
+		$query = "DELETE vtiger_pricebookproductrel
+			FROM vtiger_pricebookproductrel
+			JOIN $tableName
+				ON $tableName._productid = vtiger_pricebookproductrel.productid
+			WHERE `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array());
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Method that check if a line of the file is a products information line.
 	 *  It assume that the line is a client information line only and only if the first data is a date.
@@ -457,7 +366,7 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 	 * @return boolean - true if the line is a products information line.
 	 */
 	function isRecordHeaderInformationLine($line) {
-		if (sizeof($line) > 0 && !$line[2] && $line[3]) {
+		if (sizeof($line) > 0 && $line[0] && is_numeric($line[2])) {
 			return true;
 		}
 
@@ -541,26 +450,53 @@ class RSNImportSources_ImportRemisesProduitsFromCogilog_View extends RSNImportSo
 		foreach($this->getProductsDateFields() as $fieldName)
 			$productHeader[$fieldName] = $this->getMySQLDate($productHeader[$fieldName]);
 		
-		$fieldName = "ville";
-		$productHeader[$fieldName] = strtoupper($productHeader[$fieldName]);
-			
-		$fieldName = "rue";
-		if($productHeader["num_rue"] && stripos($productHeader[$fieldName], $productHeader["num_rue"]) === false)
-			$productHeader[$fieldName] = trim($productHeader["num_rue"] . ' ' . $productHeader[$fieldName]);
+		$fieldName = "productname";
+		$productHeader[$fieldName] = substr($productHeader[$fieldName], 0, 64);
 		
-		$fieldName = "cedex";
-		//"cedex" => "pobox",
-		if($productHeader[$fieldName] && strcasecmp($productHeader[$fieldName], 'cedex') !== false)
-			$productHeader[$fieldName] = trim('Cedex ' . $productHeader[$fieldName]);
-		
-		$fieldName = "complement2";
-		//"complement2" => "street3",//si BP*, dans pobox
-		if(stripos($productHeader[$fieldName], 'TSA') === 0
-		|| stripos($productHeader[$fieldName], 'BP') === 0
-		|| stripos($productHeader[$fieldName], 'boite postale') === 0){
-			$productHeader['cedex'] = trim($productHeader[$fieldName] . ' ' . $productHeader['cedex']);
-			$productHeader[$fieldName] = '';
+		$fieldName = "moderemise";//=>"listpriceunit",//0 : %, 1 : HT, 2 : TTC
+		switch($productHeader[$fieldName]){
+			case '0' :
+				$productHeader[$fieldName] = '%';
+				break;
+			case '1' :
+				$productHeader[$fieldName] = 'HT';
+				break;
+			case '2' :
+				$productHeader[$fieldName] = 'TTC';
+				break;
+			default :
+				echo "Mode de remise inconnu : " . $productHeader[$fieldName];
+				break;
 		}
+		
+		$fieldName = "quantiteddef";//1 : avec qty
+		switch($productHeader[$fieldName]){
+			case '1' :
+				$productHeader[$fieldName] = 'HT';
+				break;
+			default :
+				echo "Mode de saisie inconnu : " . $productHeader[$fieldName];
+				break;
+		}
+		
+		//"nomremise"=>"",//Aucune remise : 0, depôt : dv, groupe signataire : grp
+		$fieldName = "nomremise";
+		switch($productHeader[$fieldName]){
+			case 'Aucune remise' :
+				$productHeader[$fieldName] = '0';
+				break;
+			case 'depôt' :
+				$productHeader[$fieldName] = 'dv';
+				break;
+			case 'groupe signataire' :
+				$productHeader[$fieldName] = 'grp';
+				break;
+			default :
+				echo "Type de remise inconnu : " . $productHeader[$fieldName];
+				break;
+		}
+		//"taux"=>"listprice",
+		//"quantite" => "minimalqty",
 		
 		return $productHeader;
 	}
