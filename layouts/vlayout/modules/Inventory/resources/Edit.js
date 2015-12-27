@@ -294,8 +294,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var listPrice = parseFloat(listPriceValue).toFixed(decimals);
 		lineItemRow.find('.listPrice').val(listPrice)
 		return this;
-	},	
-
+	},
+	
 	/**
 	 * Function which will set the line item total value excluding tax and discount
 	 * @params : lineItemRow - row which represents the line item
@@ -341,7 +341,14 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		}
 		this.setLineItemDiscount(lineItemRow, discountpc, Inventory_Edit_Js.percentageDiscountType);
 	},
-	setLineItemDiscount : function(lineItemRow, discountpc, discount_type){
+	/**
+	 *
+	 * ED151227 : @param raiseCalculation : enable to lock row calculation
+	 */
+	setLineItemDiscount : function(lineItemRow, discountpc, discount_type, raiseCalculation){
+		if (discountpc && typeof discountpc === 'string') {
+			discountpc = discountpc.replace(/[,|\.]0*$/, '');
+		}
 		lineItemRow.find('.discountUI input.discount_'+discount_type+'.discountVal').val(discountpc);
 		if (!discountpc){
 			discountpc = 0;
@@ -351,8 +358,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		lineItemRow.find('.discountUI input[type="radio"][data-discount-type="'+discount_type+'"].discounts').each(function(){
 			this.checked = true;
 		});
-		
-		this.quantityChangeActions(lineItemRow);
+		if (raiseCalculation !== false)
+			this.quantityChangeActions(lineItemRow);
 	},
 
 	/*ED151213
@@ -905,6 +912,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	/**
 	 * Function which will be used to handle price book popup
 	 * @params :  popupImageElement - popup image element
+	 *
+	 * ED151200 masqué, le calcul est automatique
 	 */
 	pricebooksPopupHandler : function(popupImageElement){
 		var thisInstance = this;
@@ -1000,7 +1009,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			if(individualTaxPercentage == ""){
 				individualTaxPercentage = "0.00";
 			}
-			var individualTaxPercentage = parseFloat(individualTaxPercentage);
+			individualTaxPercentage = parseFloat(individualTaxPercentage);
 			var individualTaxTotal = (individualTaxPercentage * totalAfterDiscount)/100;
 			//if (quantity <= 1)
 				individualTaxTotal = individualTaxTotal.toFixed(2);
@@ -1354,6 +1363,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 */
 	lineItemGetPriceFromPriceBook : function(lineItemRow){
 		var thisInstance = this;
+		//recursive for each row
 		if (lineItemRow.length > 1) {
 			lineItemRow.each(function(){
 				thisInstance.lineItemGetPriceFromPriceBook($(this));
@@ -1365,19 +1375,56 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			return;
 		
 		var qty = Math.abs(thisInstance.getQuantityValue(lineItemRow))
-		, unitPrice = undefined;
-		
+		, discountType = thisInstance.getAccountDiscountType()
+		, price = undefined
+		, priceUnit = undefined //HT, TTC ou %
+		;
+		if (!discountType) 
+			discountType = "0";
+			
 		for (var $i = 0; $i < priceBookDetails.length; $i++) {
-			if (priceBookDetails[$i].modeapplication == 'qty') {
+			if (((!discountType && priceBookDetails[$i].modeapplication == 'qty')
+			|| (discountType && priceBookDetails[$i].modeapplication == 'qty,discounttype'))
+			&&  (discountType == priceBookDetails[$i].discounttype)) {
 				if (priceBookDetails[$i].minimalqty > qty) {
 					break;
 				}
-				else
-					unitPrice = priceBookDetails[$i].listprice;
+				else{
+					price = priceBookDetails[$i].listprice;
+					priceUnit = priceBookDetails[$i].listpriceunit;
+				}
 			}
 		}
-		if (unitPrice !== undefined) {
-			thisInstance.setListPriceValue(lineItemRow, unitPrice, 4);
+		if (price === undefined && priceBookDetails.length) {	
+			price = priceBookDetails[0].listprice;
+			priceUnit = priceBookDetails[0].listpriceunit;
+		}
+		if (price !== undefined) {
+			var discountpc = 0;
+			switch(priceUnit){
+			case 'TTC':
+				//calcul du cumul des taxes
+				var taxPercentages = jQuery('.taxPercentage',lineItemRow);
+				var taxTotal = 0;
+				jQuery.each(taxPercentages,function(index,domElement){
+					var taxPercentage = jQuery(domElement);
+					var individualTaxRow = taxPercentage.closest('tr');
+					var individualTaxPercentage = thisInstance.parseFloat(taxPercentage.val());
+					if(individualTaxPercentage != ""){
+						taxTotal += parseFloat(individualTaxPercentage);
+					}
+				});
+				//TTC -> HT
+				price = price / (1 + taxTotal/100);
+				break;
+			case '%':
+				var basicPrice = priceBookDetails[0].listprice;
+				discountpc = price;
+				price = basicPrice;
+				break;
+			}
+			thisInstance.setLineItemDiscount(lineItemRow, discountpc, Inventory_Edit_Js.percentageDiscountType, false);
+			thisInstance.setListPriceValue(lineItemRow, price, 4);
 		}
 	},
 	
@@ -1398,7 +1445,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 					action: 'GetTaxes',
 					record: productId,
 					currency_id:currency_id,
-					accountdiscounttype:account_discount_type
+					accountdiscounttype:account_discount_type//ED151227 TODO peut-être ne devrions nous plus utiliser ce champ
 				},
 				async: false //TODO depreciated : defer
 			};
@@ -1537,9 +1584,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			if(response == true){
 				return;
 			}
-			var parentElem = jQuery(e.currentTarget).closest('td');
-			thisInstance.hideLineItemPopup();
-			parentElem.find('div.discountUI').removeClass('hide');
+			var parentElem = jQuery(e.currentTarget).closest('td')
+			, $UI = parentElem.find('div.discountUI')
+			, visible = $UI.is(':visible');
+			thisInstance.hideLineItemPopup()
+			if (!visible)
+				$UI.removeClass('hide');
 		});
 	},
 
@@ -1654,9 +1704,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			if(response == true){
 				return;
 			}
-			var parentElem = jQuery(e.currentTarget).closest('td');
+			var parentElem = jQuery(e.currentTarget).closest('td')
+			, $UI = parentElem.find('.taxUI')
+			, visible = $UI.is(':visible');
 			thisInstance.hideLineItemPopup()
-			parentElem.find('.taxUI').removeClass('hide');
+			if (!visible)
+				$UI.removeClass('hide');
 		});
 	 },
 
@@ -2421,11 +2474,17 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerAccountDiscountTypeSelectionEvent : function(container) {
 		var thisInstance = this;
 		jQuery('#inventory_accountdiscounttype_holder input', container).on('change', function(e, data){
-			jQuery('#inventory_accountdiscounttype_setter', container).css({'text-decoration' : 'underline'});
+			jQuery('#inventory_accountdiscounttype_setter', container).addClass('ui-active');
 		});
 		jQuery('#inventory_accountdiscounttype_setter', container).on('click', function(e, data){
 			//Affectation de la remise à tous les articles
 			/* ED150602 account discount type */
+			
+			/* ED151227 à l'origine (enfin au 150602), il n'y avait qu'une gestion par saisie de 2 remises dépôt-vente et groupe
+			 * Maintenant on gère les grilles tarifaires, qui sont prioritaires.
+			 * setLineItemDiscountPercentage() provoque le recalcul de chaque ligne, peut donc appeler la recherche par grille
+			*/
+			
 			var account_discount_type = thisInstance.getAccountDiscountType();
 			if (account_discount_type && account_discount_type !== '0') {
 				//liste des articles
@@ -2450,8 +2509,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 								for(var index in data)
 									if(typeof data[index] == "object")
 										for(var id in data[index])
-											if (data[index][id].discountpc !== undefined)
-												thisInstance.setLineItemDiscountPercentage(id, data[index][id].discountpc);
+											thisInstance.setLineItemDiscountPercentage(id, data[index][id].discountpc);
 							
 						},
 						function(error,err){
@@ -2468,6 +2526,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 					}
 				});
 			}
+			jQuery('#inventory_accountdiscounttype_setter', container).removeClass('ui-active');
 		});
 	},
 	

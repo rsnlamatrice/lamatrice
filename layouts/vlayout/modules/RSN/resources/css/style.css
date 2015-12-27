@@ -283,7 +283,12 @@ form#EditView table table th, .profileDetailView table table th, form#EditView t
 #inventory_accountdiscounttype_setter {
   cursor: pointer;
 }
-
+#inventory_accountdiscounttype_setter.ui-active {
+    border: 2px outset;
+    padding: 4px;
+    color: rgb(255, 0, 12);
+    border-radius: 3px;
+}
 
 /* layouts\vlayout\modules\Vtiger\ListViewContents.tpl
  */

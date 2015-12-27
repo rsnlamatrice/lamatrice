@@ -38,7 +38,8 @@
             <span class="paddingLeft10px"><strong>{vtranslate('LBL_SEARCH_FOR')}</strong></span>
             <span class="paddingLeft10px"></span>
             <input type="text" placeholder="{vtranslate('LBL_TYPE_SEARCH')}" id="searchvalue"
-                {if $SEARCH_VALUE}value="{$SEARCH_VALUE}"{/if}/>
+                {if $SEARCH_VALUE}value="{$SEARCH_VALUE}"{/if}
+                autofocus />
             <span class="paddingLeft10px"><strong>{vtranslate('LBL_IN')}</strong></span>
             <span class="paddingLeft10px help-inline pushDownHalfper" id="searchableColumnsListContainer">
                 <select style="width: 150px;" class="chzn-select help-inline" id="searchableColumnsList">

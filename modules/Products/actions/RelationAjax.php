@@ -112,7 +112,7 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 			AND IFNULL(modeapplication, '') = ?
 			LIMIT 1";
 		
-		if(!$discountType && $discountType !== "0"){
+		if($discountType || $discountType === 0 || $discountType === "0"){
 			if($quantity)
 				$modeapplication = 'qty,discounttype';
 			else
@@ -124,6 +124,7 @@ class Products_RelationAjax_Action extends Vtiger_RelationAjax_Action {
 			$modeapplication = '';
 		
 		$params = array($discountType, $quantity, $modeapplication);
+		//var_dump($params);
 		$result = $adb->pquery($query, $params);
 		if(!$result){
 			$adb->echoError();
