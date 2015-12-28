@@ -365,10 +365,11 @@ class QueryGenerator {
 								//echo '<br><br><br><br>'.__FILE__;
 								$relationModel = false;
 								$relatedSql_OR = false;
-								//RSNContactsPanels
+								
+								/* RSNContactsPanels */
 								if($filter['relatedIsPanel']){
 									$sourceFieldName = $this->getSQLColumn('id');
-									$viewFilters = false; //TODO sure ?
+									$viewFilters = array();
 									$panelRecord = Vtiger_Record_Model::getInstanceById($filter['viewid'], $filter['relatedmodulename']);
 									
 									
@@ -386,6 +387,7 @@ class QueryGenerator {
 													'comparator' => $nextFilter['subQueryColumn']['comparator'],
 												);
 												
+												//$viewFilters[] = $nextFilter['subQueryColumn']; ? Needed ?
 												$skipIndexes[] = $iNext;
 											}
 											else
@@ -398,6 +400,8 @@ class QueryGenerator {
 									$relatedSql  = $panelRecord->getExecutionQuery($paramsValues);
 									//var_dump('panel $relatedSql', $paramsValues); echo "<pre>$relatedSql</pre>";
 								}
+								
+								/* CustomView */
 								else { //"normal" relation
 									foreach($relationModels as $model)
 										if($model->getRelationModuleName() == $filter['relatedmodulename']){
@@ -527,15 +531,18 @@ class QueryGenerator {
 								//column_condition
 								//must use the last filter, even if skipped
 								if(count($viewFilters) || count($relationFilters)){
-									for($nextFilterIndex = $index + 1; $nextFilterIndex < count($filtercolumns); $nextFilterIndex++)
+									for($nextFilterIndex = $index + 1; $nextFilterIndex < count($filtercolumns); $nextFilterIndex++){
 										if(in_array($index, $skipIndexes)){
 											$columncondition = $filtercolumns[$nextFilterIndex]['column_condition'];
 										}
 										else
 											break;
+									}
 								}
 								else
 									$columncondition = $filter['column_condition'];
+								//echo "<br><br><br><br>";
+								//var_dump('column_condition', $columncondition, '$filtercolumns', $filtercolumns, '$viewFilters', $viewFilters, '$filter', $filter, '$relationFilters', $relationFilters);
 								if(!empty($columncondition)) {
 									$this->addConditionGlue($columncondition);
 								}
