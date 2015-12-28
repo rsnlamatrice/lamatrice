@@ -528,7 +528,15 @@ jQuery.Class("Vtiger_List_Js",{
 	/* ED151213
 	 * Exécute une requête action et recharge, sans interaction
 	 */
-	triggerMassUpdate : function(massEditUrl) {
+	triggerMassUpdate : function(massEditUrl, confirmMsg) {
+		if (confirmMsg) {
+			var thisInstance = this
+			, message = app.vtranslate(confirmMsg);
+			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(function(){
+				thisInstance.triggerMassUpdate(massEditUrl, false);
+			});
+			return;
+		}
 		Vtiger_List_Js.triggerMassAction(massEditUrl, false, function(data){
 			var listInstance = Vtiger_List_Js.getInstance()
 			, msg = 'Ok';

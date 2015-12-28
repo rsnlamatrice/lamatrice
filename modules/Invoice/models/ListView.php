@@ -17,6 +17,7 @@ class Invoice_ListView_Model extends Inventory_ListView_Model {
 	 */
 	public function getListViewMassActions($linkParams) {
 		$moduleModel = $this->getModule();
+		$currentUser = Users_Record_Model::getCurrentUserModel();
 
 		$links = parent::getListViewMassActions($linkParams);
 		
@@ -27,6 +28,17 @@ class Invoice_ListView_Model extends Inventory_ListView_Model {
 				break;
 			}
 		}
+		if($currentUser->isAdminUser()){
+			//Ajout du menu Rétablir en cours les Compta
+			$massActionLink = array(
+					'linktype' => 'LISTVIEWMASSACTION',
+					'linklabel' => 'Modifier de "Comptabilisé" à en "En cours"',
+					'linkurl' => 'javascript:Vtiger_List_Js.triggerMassUpdate("index.php?module='.$moduleModel->get('name').'&action=MassSave&mode=comptaStatusToEnCours", "Êtes vous sûr de vouloir perdre le statut Comptabilisé ?");',
+					'linkicon' => ''
+				);
+			array_unshift($links['LISTVIEWMASSACTION'], Vtiger_Link_Model::getInstanceFromValues($massActionLink));
+		}
+		
 		//Ajout du menu Valider les en cours
 		$massActionLink = array(
 				'linktype' => 'LISTVIEWMASSACTION',
