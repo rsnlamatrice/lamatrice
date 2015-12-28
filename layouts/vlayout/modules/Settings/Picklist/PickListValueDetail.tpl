@@ -55,39 +55,40 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="span2 row-fluid">
-				{if $SELECTED_PICKLIST_FIELDMODEL->isEditable()}
-					{if $SELECTED_PICKLIST_FIELDMODEL->isRoleBased()}
-						<button class="btn span10 marginLeftZero" id="assignValue">{vtranslate('LBL_ASSIGN_VALUE',$QUALIFIED_MODULE)}</button><br><br>
-					{/if}	
-					<button class="btn span10 marginLeftZero" id="addItem">{vtranslate('LBL_ADD_VALUE',$QUALIFIED_MODULE)}</button><br><br>
-					<button class="btn span10 marginLeftZero" id="renameItem">{vtranslate('LBL_RENAME_VALUE',$QUALIFIED_MODULE)}</button><br><br>
-					<button class="btn btn-danger span10 marginLeftZero"  id="deleteItem">{vtranslate('LBL_DELETE_VALUE',$QUALIFIED_MODULE)}</button><br><br>
-				{/if}
-				<button class="btn btn-success span10 marginLeftZero" disabled=""  id="saveSequence">{vtranslate('LBL_SAVE_ORDER',$QUALIFIED_MODULE)}</button><br><br>
-			</div>
-			<div class="span4">
-				<br><br><br>
-				<div><i class="icon-info-sign"></i>&nbsp;<span>{vtranslate('LBL_DRAG_ITEMS_TO_RESPOSITION',$QUALIFIED_MODULE)}</span></div>
-				<br><div>&nbsp;&nbsp;{vtranslate('LBL_SELECT_AN_ITEM_TO_RENAME_OR_DELETE',$QUALIFIED_MODULE)}</div> 
-				<br><div>&nbsp;&nbsp;{vtranslate('LBL_TO_DELETE_MULTIPLE_HOLD_CONTROL_KEY',$QUALIFIED_MODULE)}</div>
-					
-				<br><br>{* ED141129 champs uicolor et uiicon de vtiger_picklist *}
-				<form id="picklistproperties-ui"><fieldset>
-					<h3>Affichage</h3>
-					<table border=0>
-						<tr><td class="span2"><label for="picklistproperties-uicolor">Couleur</label>
-						<td><input type="checkbox" id="picklistproperties-uicolor" name="uicolor"
-						{if $PROPERTIES_UICOLOR} checked="checked"{/if}></td>
-						<tr style="opacity: 0.5"><td class="span2"><label for="picklistproperties-uiicon">Ic&ocirc;ne</label>
-						<td><input type="checkbox" id="picklistproperties-uiicon" name="uiicon"
-						{if $PROPERTIES_UIICON} checked="checked"{/if}></td>
-					</table>
-				</fieldset></form>
-			</div>	
-				
+			<table><tr class="row-fluid">
+				<td class="span4 padding20">
+					{if $SELECTED_PICKLIST_FIELDMODEL->isEditable()}
+						{if $SELECTED_PICKLIST_FIELDMODEL->isRoleBased()}
+							<button class="btn span10 marginLeftZero" id="assignValue">{vtranslate('LBL_ASSIGN_VALUE',$QUALIFIED_MODULE)}</button><br><br>
+						{/if}	
+						<button class="btn span10 marginLeftZero" id="addItem">{vtranslate('LBL_ADD_VALUE',$QUALIFIED_MODULE)}</button><br><br>
+						<button class="btn span10 marginLeftZero" id="renameItem">{vtranslate('LBL_RENAME_VALUE',$QUALIFIED_MODULE)}</button><br><br>
+						<button class="btn btn-danger span10 marginLeftZero"  id="deleteItem">{vtranslate('LBL_DELETE_VALUE',$QUALIFIED_MODULE)}</button><br><br>
+					{/if}
+					<button class="btn btn-success span10 marginLeftZero" disabled=""  id="saveSequence">{vtranslate('LBL_SAVE_ORDER',$QUALIFIED_MODULE)}</button><br><br>
+				</td>
+				<td class="span4">
+					<br><br><br>
+					<div><i class="icon-info-sign"></i>&nbsp;<span>{vtranslate('LBL_DRAG_ITEMS_TO_RESPOSITION',$QUALIFIED_MODULE)}</span></div>
+					<br><div>&nbsp;&nbsp;{vtranslate('LBL_SELECT_AN_ITEM_TO_RENAME_OR_DELETE',$QUALIFIED_MODULE)}</div> 
+					<br><div>&nbsp;&nbsp;{vtranslate('LBL_TO_DELETE_MULTIPLE_HOLD_CONTROL_KEY',$QUALIFIED_MODULE)}</div>
+						
+					<br><br>{* ED141129 champs uicolor et uiicon de vtiger_picklist *}
+					<form id="picklistproperties-ui"><fieldset>
+						<h3>Affichage</h3>
+						<table border=0>
+							<tr><td class="span2"><label for="picklistproperties-uicolor">Couleur</label>
+							<td><input type="checkbox" id="picklistproperties-uicolor" name="uicolor"
+							{if $PROPERTIES_UICOLOR} checked="checked"{/if}></td>
+							<tr style="opacity: 0.5"><td class="span2"><label for="picklistproperties-uiicon">Ic&ocirc;ne</label>
+							<td><input type="checkbox" id="picklistproperties-uiicon" name="uiicon"
+							{if $PROPERTIES_UIICON} checked="checked"{/if}></td>
+						</table>
+					</fieldset></form>
+				</td>	
+			</tr>
 			{if $SETTING_TABLE_FIELDS_MODELS}
-			<div class="row-fluid">
+				<tr><td colspan="2" class="span10">
 				<br><br>{* ED151216 champs complémentaires de la table *}
 				<form id="picklistsettingfields" class="no-item-selected">
 				<fieldset class="padding20">
@@ -110,8 +111,9 @@
 					<span class="span2"><button class="btn btn-success span10 marginLeftZero" disabled="" id="saveSettingTableFields">{vtranslate('LBL_SAVE',$QUALIFIED_MODULE)}</button><br><br>
 					</span>
 				</fieldset></form>
-			</div>	
+				</td></tr>
 			{/if}
+			</table>	
 		</div>	
 		<div id="createViewContents" class="hide">
 			{include file="CreateView.tpl"|@vtemplate_path:$QUALIFIED_MODULE}
