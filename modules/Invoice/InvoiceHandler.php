@@ -222,6 +222,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 			if($productCode === 'RSGR'){ //Abonnements groupés (supplémentaires)
 				$nbExemplairesGroupes += $lineItem['qty'.$nLine];
 			}
+			//$log->debug("handleAfterSaveInvoiceAbonnementsEvent productCode = $productCode : nbExemplairesGroupes = $nbExemplairesGroupes");
 		}
 		
 		$log->debug("handleAfterSaveInvoiceAbonnementsEvent rsnAboRevueCourant = " .($rsnAboRevueCourant ? 'oui' : 'non'));
@@ -476,13 +477,13 @@ class RSNInvoiceHandler extends VTEventHandler {
 				if($rsnAboRevue->isTypeAbonneAVie()){
 					$rsnAboRevueCourant = $rsnAboRevue;
 					$abonneAVie = true;
-					$log->debug("handleAfterSaveInvoiceAbonnementsEvent, abonneAVie");
+					$log->debug("handleAfterSaveInvoiceTotalEvent, abonneAVie");
 					break;
 				}
 				else {
 					$rsnAboRevueCourant = $rsnAboRevue;
 					$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
-					$log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
+					$log->debug("handleAfterSaveInvoiceTotalEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
 					//Rien de gratuit si un abonnement est en cours pendant encore 3 mois
 					if($startDateOfNextAbo > self::getDateFinAbo($toDay, 3))
 						$nbTrimestresGratos = 0;
@@ -490,7 +491,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 				}
 			}
 			elseif($rsnAboRevue->isTypeNePasAbonner()){
-				$log->debug("handleAfterSaveInvoiceAbonnementsEvent, isTypeNePasAbonner");
+				$log->debug("handleAfterSaveInvoiceTotalEvent, isTypeNePasAbonner");
 				$nbTrimestresGratos = 0;
 				break;
 			}
