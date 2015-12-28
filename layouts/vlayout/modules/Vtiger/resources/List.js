@@ -411,9 +411,11 @@ jQuery.Class("Vtiger_List_Js",{
 							var orderBy = jQuery('#orderBy').val();
 							var sortOrder = jQuery("#sortOrder").val();
 							var urlParams = {
-								"viewname": data.result.viewname,
 								"orderby": orderBy,
 								"sortorder": sortOrder
+							};
+							if (data.result.viewname) {
+								urlParams.viewname = data.result.viewname;
 							}
 							jQuery('#recordsCount').val('');
 							jQuery('#totalPageCount').text('');
