@@ -40,7 +40,8 @@ $languageStrings = array(
 	'LBL_ENABLE/DISABLE_MESSGAE'   => 'Cliquer sur la valeur pour activer/désactiver. Puis cliquer sur Enregistrer', 
 	'LBL_ASSIGN_VALUES_TO_ROLES'   => 'Assigner les valeurs aux rôles'      , 
 	'LBL_SELECTED_VALUES'          => 'Valeurs sélectionnées'             , 
-	'NO_PICKLIST_FIELDS'           => ' ne contient aucune valeur', 
+	'NO_PICKLIST_FIELDS'           => ' ne contient aucune valeur',
+        'comment' => 'Commentaire',
 );
 $jsLanguageStrings = array(
 	'JS_ITEM_RENAMED_SUCCESSFULLY' => 'Item renommé'   , 
