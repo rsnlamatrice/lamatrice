@@ -299,6 +299,7 @@ class QueryGenerator {
 				//1er passage pour parser
 				foreach ($filtercolumns as $index => &$filter){
 					$this->parseFilterInfos($filter, $customView, $dateSpecificConditions);
+					//var_dump('after parseFilterInfos $filter', $filter);
 				}
 				
 				foreach ($filtercolumns as $index => &$filter){
@@ -396,9 +397,10 @@ class QueryGenerator {
 											else
 												break;
 									}
-									
-									$relatedSql  = $panelRecord->getExecutionQuery($paramsValues);
-									//var_dump('panel $relatedSql', $paramsValues); echo "<pre>$relatedSql</pre>";
+									//echo "<br><br><br><br>";
+									//var_dump('panel '.$filter['columnname'].' $relatedSql', $paramsValues);
+									$relatedSql = $panelRecord->getExecutionQuery($paramsValues);
+									//echo "<pre>$relatedSql</pre>";
 								}
 								
 								/* CustomView */
@@ -668,7 +670,7 @@ class QueryGenerator {
 				} else {
 				}
 			}
-			else { //CustomView
+			else { //CustomView ou Panel
 				$filter['viewid'] = $viewName[2];
 				$filter['viewname'] = $viewName[1];
 				$filter['relatedmodule'] = Vtiger_Module_Model::getInstance($filter['relatedmodulename']);
@@ -732,7 +734,8 @@ class QueryGenerator {
 		//Traitement des dates et des opérateurs spécifiques
 		//Les 3 champs utilisés pour la fonction addCondition
 		$filter['condition_fieldname'] = $name;
-			
+		$isPanelVariable = $filter['isPanelVariable'];
+		
 		if(($filter['dataType'] === 'D' || $filter['dataType'] === 'DT') && in_array($filter['comparator'], $dateSpecificConditions)) {
 			$filter['stdfilter'] = $filter['comparator'];
 			$valueComponents = explode(',',$filter['value']);
@@ -753,7 +756,8 @@ class QueryGenerator {
 			$value[] = $this->fixDateTimeValue($name, $dateFilterResolvedList['enddate'], false);
 			$filter['value'] = $value;
 			$filter['comparator'] = 'BETWEEN';
-		} else if($filter['dataType'] === 'DT' && ($filter['comparator'] == 'e' || $filter['comparator'] == 'n')) {
+		
+		} else if($filter['dataType'] === 'DT' && ($filter['comparator'] == 'e' || $filter['comparator'] == 'n') && !$isPanelVariable) {
 			$filter['stdfilter'] = $filter['comparator'];
 			$dateTimeComponents = explode(' ',$filter['value']);
 			$filter['startdate'] = DateTimeField::convertToDBFormat($dateTimeComponents[0]);

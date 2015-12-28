@@ -428,7 +428,7 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 				else
 					$paramPriorValue = $paramPriorInfos;
 				//le nom de la variable contient un /
-				if(strpos($paramName, '/')){
+				if(strpos($paramName, '/') !== false){
 					//Destiné à un sous-panel
 					var_dump('sous panel', $paramPriorInfos, $paramPriorValue);
 					$followParamPriorValue = array_merge(array(), $paramPriorInfos, array(
@@ -484,7 +484,9 @@ class RSNContactsPanels_Record_Model extends Vtiger_Record_Model {
 			}
 			else {
 				$variable = $variables[$variableName];
-				$value = decode_html($variable->get('defaultvalue'));//str_replace('&quot;', '"', 
+				$value = $variable->get('defaultvalue');
+				if(is_string($value))
+					$value = decode_html($value); 
 				//Variable déjà traitée
 				if(!isset($variablesId[$variable->getId()])){
 					$paramsDetails[$queryVariable['name']] = array(
