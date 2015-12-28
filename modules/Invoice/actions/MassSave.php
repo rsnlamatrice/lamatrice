@@ -13,6 +13,8 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 	public function __construct() {
 		parent::__construct();
 		$this->exposeMethod('enCoursStatusToValidated');
+		$this->exposeMethod('comptaStatusToEnCours');
+		
 	}
 	
 	public function process(Vtiger_Request $request) {
@@ -83,9 +85,21 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 
 
 	/**
-	 * Changement du statut des des factures en cours en status Validée
+	 * Changement du statut des factures en cours en status Validée
 	 */
 	public function enCoursStatusToValidated(Vtiger_Request $request){
+		$this->changeInvoiceStatus($request, 'Created', 'Validated');
+	}
+	/**
+	 * Changement du statut des factures Compta en status en cours 
+	 */
+	public function comptaStatusToEnCours(Vtiger_Request $request){
+		$this->changeInvoiceStatus($request, 'Compta', 'Created');
+	}
+	/**
+	 * Changement du statut des factures 
+	 */
+	public function changeInvoiceStatus(Vtiger_Request $request, $fromStatus, $toStatus){
 		//Ajout du filtre "invoicestatus = 'Created'
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
@@ -103,7 +117,7 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 			$operator = array();
 		}
 		$searchKey[] = 'invoicestatus';
-		$searchValue[] = 'Created';
+		$searchValue[] = $fromStatus;
 		$operator[] = 'e';
 		
 		$request->set('search_key', $searchKey);
@@ -132,16 +146,25 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 			$query = 'UPDATE vtiger_invoice
 				JOIN vtiger_crmentity
 					ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+				JOIN vtiger_invoicecf
+					ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid
 				SET invoicestatus = ?
 				, modifiedtime = NOW()
+				, modifiedby = ?
+			';
+			if($fromStatus === 'Compta')
+				$query .= ', sent2compta = NULL';
+			$query .= '
 				WHERE invoicestatus = ?
 				AND vtiger_crmentity.deleted = 0
 				AND vtiger_crmentity.crmid IN ('.generateQuestionMarks($ids).')
 			';
+			$currentUser = Users_Record_Model::getCurrentUserModel();
 			$params = array_merge(
 				array(
-					'Validated',
-					'Created',
+					$toStatus,
+					$currentUser->getId(),
+					$fromStatus,
 				), $ids
 			);
 			$result = $adb->pquery($query, $params);
@@ -149,7 +172,7 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 				$response->setResult($adb->echoError('Erreur de modification des factures', true));
 			}
 			else{
-				$modified = $adb->getAffectedRowCount($result);
+				$modified = count($ids);//$adb->getAffectedRowCount($result) retourne 3x le nombre;
 				if($modified)
 					$response->setResult("$modified facture(s) modifiée(s)");
 				else
