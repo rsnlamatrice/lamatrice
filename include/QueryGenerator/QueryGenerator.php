@@ -306,7 +306,7 @@ class QueryGenerator {
 						$filter['skip'] = true;
 						continue;
 					}
-					
+					$columncondition = false;
 					/*ED150226
 					 * related module view field
 					 * ou statistique
@@ -357,7 +357,7 @@ class QueryGenerator {
 							}
 							continue;
 						}
-						else { //CustomView
+						else { //CustomView ou Panel
 							
 							$relationFilters = array();
 									
@@ -387,7 +387,7 @@ class QueryGenerator {
 													'comparator' => $nextFilter['subQueryColumn']['comparator'],
 												);
 												
-												//$viewFilters[] = $nextFilter['subQueryColumn']; ? Needed ?
+												$viewFilters[] = $nextFilter['subQueryColumn'];
 												$skipIndexes[] = $iNext;
 											}
 											else
@@ -532,17 +532,20 @@ class QueryGenerator {
 								//must use the last filter, even if skipped
 								if(count($viewFilters) || count($relationFilters)){
 									for($nextFilterIndex = $index + 1; $nextFilterIndex < count($filtercolumns); $nextFilterIndex++){
-										if(in_array($index, $skipIndexes)){
+										if(in_array($nextFilterIndex, $skipIndexes)){
+											//var_dump('ICICI CI C I');
 											$columncondition = $filtercolumns[$nextFilterIndex]['column_condition'];
 										}
 										else
 											break;
 									}
 								}
-								else
+								else{
+									//var_dump('LAALAAL');
 									$columncondition = $filter['column_condition'];
+								}
 								//echo "<br><br><br><br>";
-								//var_dump('column_condition', $columncondition, '$filtercolumns', $filtercolumns, '$viewFilters', $viewFilters, '$filter', $filter, '$relationFilters', $relationFilters);
+								//var_dump('column_condition', $columncondition, '$index', $index, '$filtercolumns', $filtercolumns, '$viewFilters', $viewFilters, '$filter', $filter, '$relationFilters', $relationFilters, '$skipIndexes', $skipIndexes);
 								if(!empty($columncondition)) {
 									$this->addConditionGlue($columncondition);
 								}
