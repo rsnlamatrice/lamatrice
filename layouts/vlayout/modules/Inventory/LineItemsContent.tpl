@@ -104,8 +104,13 @@
 		<div>
 			<input id="{$listPrice}" name="{$listPrice}" value="{if !empty($data.$listPrice)}{$data.$listPrice}{else}0{/if}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]"
 			class="listPrice tinyInputBox" onfocus="$(this).select()"/>
-			{*ED151208 seule la gestion automatique par quantité est opérationnelle.
-			En fait, cette sélection fonctionne mais nécessiterait de s'y pencher un peu mieux.			
+			<div id="mode-{$listPrice}" {if $row_no > 0}class="buttonset"{/if} style="display: inline-block; margin-right: 0; margin-left: 3px;">
+				<input type="radio" id="mode-ht-{$listPrice}" name="mode-{$listPrice}" checked="checked" class="listPrice-mode" data-mode="HT"/>
+				<label for="mode-ht-{$listPrice}" style="padding: 3px 7px 3px 5px;" class="ui-state-active">HT</label>
+				<input type="radio" id="mode-ttc-{$listPrice}" name="mode-{$listPrice}" class="listPrice-mode" data-mode="TTC"/>
+				<label for="mode-ttc-{$listPrice}" style="padding: 3px 5px 3px 3px;">TTC</label>
+			</div>
+			{*ED151208 désactivation de la sélection originale de grille tarifaire du fait de la gestion automatique par quantité et type de remise.
 			&nbsp;
 			{assign var=PRICEBOOK_MODULE_MODEL value=Vtiger_Module_Model::getInstance('PriceBooks')}
 			{if $PRICEBOOK_MODULE_MODEL->isPermitted('DetailView')}

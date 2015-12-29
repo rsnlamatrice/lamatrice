@@ -292,15 +292,30 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @params : lineItemRow - row which represents the line item
 	 * @return : string
 	 */
-	getListPriceValue : function(lineItemRow) {
-		return this.parseFloat(jQuery('.listPrice',lineItemRow).val());
+	getListPriceValue : function(lineItemRow, asListPriceMode) {
+		var listPrice = this.parseFloat(jQuery('.listPrice',lineItemRow).val());
+		if (asListPriceMode === undefined)
+			asListPriceMode = this.getListPriceMode(lineItemRow);
+		if (asListPriceMode === 'TTC') {
+			var taxRate = this.getLineItemTaxRate(lineItemRow);
+			return listPrice / (1 + taxRate / 100);
+		}
+		return listPrice;
 	},
 
 	setListPriceValue : function(lineItemRow, listPriceValue, decimals) {
 		if (typeof decimals !== 'number') {
 			decimals = 2;
 		}
-		var listPrice = parseFloat(listPriceValue).toFixed(decimals);
+		var listPrice = parseFloat(listPriceValue);
+		var listPriceMode = this.getListPriceMode(lineItemRow);
+		if (listPriceMode === 'TTC') {
+			var taxRate = this.getLineItemTaxRate(lineItemRow);
+			listPrice *= 1 + taxRate / 100;
+			listPrice = listPrice.toFixed(4);
+		}
+		else
+			listPrice = listPrice.toFixed(decimals);
 		lineItemRow.find('.listPrice').val(listPrice)
 		return this;
 	},
@@ -317,6 +332,31 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return this;
 	},
 
+	/** ED151229
+	 * Mode d'affichage du prix : HT ou TTC
+	 */
+	getListPriceMode : function(lineItemRow) {
+		return jQuery('.listPrice-mode:checked',lineItemRow).data('mode');
+	},
+	
+	/** ED151229
+	 * Calcul du taux total des taxes pour la ligne
+	 */
+	getLineItemTaxRate : function(lineItemRow){
+		var thisInstance = this;
+		var taxPercentages = jQuery('.taxPercentage',lineItemRow);
+		var taxTotal = 0;
+		jQuery.each(taxPercentages,function(index,domElement){
+			var taxPercentage = jQuery(domElement);
+			var individualTaxRow = taxPercentage.closest('tr');
+			var individualTaxPercentage = thisInstance.parseFloat(taxPercentage.val());
+			if(individualTaxPercentage != ""){
+				taxTotal += parseFloat(individualTaxPercentage);
+			}
+		});
+		return taxTotal;
+	},
+	
 	/**
 	 * Function which will get the value of line item total (qty*listprice)
 	 * @params : lineItemRow - row which represents the line item
@@ -1322,6 +1362,20 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	},
 
+	/* ED151229 sélection du mode HT ou TTC */
+	registerListPriceModeButtonsEvent: function(container) {
+		var thisInstance = this;
+		container.on('change','input.listPrice-mode',function(e){
+			var lineItemRow = jQuery(e.currentTarget).closest('tr.'+thisInstance.rowClass);
+			var selectedListPriceMode = thisInstance.getListPriceMode(lineItemRow)
+			, asListPriceMode = selectedListPriceMode === 'TTC' ? 'HT' : 'TTC';
+			var price = thisInstance.getListPriceValue(lineItemRow, asListPriceMode);
+			thisInstance.setListPriceValue(lineItemRow, price, 4);
+			thisInstance.lineItemRowCalculations(lineItemRow);
+			return;		
+		});
+	},
+
 	lineItemResultActions: function(){
 		var thisInstance = this;
 		var lineItemResultTab = this.getLineItemResultContainer();
@@ -1413,16 +1467,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			switch(priceUnit){
 			case 'TTC':
 				//calcul du cumul des taxes
-				var taxPercentages = jQuery('.taxPercentage',lineItemRow);
-				var taxTotal = 0;
-				jQuery.each(taxPercentages,function(index,domElement){
-					var taxPercentage = jQuery(domElement);
-					var individualTaxRow = taxPercentage.closest('tr');
-					var individualTaxPercentage = thisInstance.parseFloat(taxPercentage.val());
-					if(individualTaxPercentage != ""){
-						taxTotal += parseFloat(individualTaxPercentage);
-					}
-				});
+				var taxTotal = thisInstance.getLineItemTaxRate(lineItemRow);
 				//TTC -> HT
 				price = price / (1 + taxTotal/100);
 				break;
@@ -1549,7 +1594,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	/**
 	 * Function which will register change event for discounts radio buttons
 	 */
-	registerDisountChangeEvent : function() {
+	registerDiscountChangeEvent : function() {
 		var thisInstance = this;
 		var lineItemTable = this.getLineItemContentsContainer();
 		lineItemTable.on('change','.discounts',function(e){
@@ -1786,7 +1831,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	lineItemActions: function() {
 		var lineItemTable = this.getLineItemContentsContainer();
 
-		this.registerDisountChangeEvent();
+		this.registerDiscountChangeEvent();
 		this.registerDisountValueChange();
 		this.registerLineItemDiscountShowEvent();
 
@@ -1837,8 +1882,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var idFields = new Array('productName','subproduct_ids','hdnProductId',
 							   'comment','qty','listPrice','discount_type','discount_percentage',
 							   'discount_amount','lineItemType','searchIcon','netPrice','subprod_names',
-								'productTotal','discountTotal','totalAfterDiscount','taxTotal');
-
+								'productTotal','discountTotal','totalAfterDiscount','taxTotal'
+								,'mode-listPrice','mode-ht-listPrice','mode-ttc-listPrice');
+		
 		var nameFields = new Array('discount');
 		var classFields = new Array('taxPercentage');
 		//To handle variable tax ids
@@ -1852,6 +1898,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		}
 
 		var expectedRowId = 'row'+expectedSequenceNumber;
+		
 		for(var idIndex in idFields ) {
 			var elementId = idFields[idIndex];
 			var actualElementId = elementId + currentSequenceNumber;
@@ -1868,6 +1915,22 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		}
 
 
+		/* ED151229 buttonset listPrice-mode */
+		var idListPriceButtonSet = 'mode-listPrice';
+		var expectedElementId = idListPriceButtonSet + expectedSequenceNumber;
+		lineItemRow.find('#'+expectedElementId)
+			//remplacement dans l'attribute name des input radio
+			.children('input').each(function(){
+				this.setAttribute('name', this.getAttribute('name').replace(currentSequenceNumber, expectedSequenceNumber));
+			}).end()
+			//remplacement dans l'attributee for des labels
+			.children('label').each(function(){
+				this.setAttribute('for', this.getAttribute('for').replace(currentSequenceNumber, expectedSequenceNumber));
+			}).end()
+			.buttonset()
+		;
+		
+		
 		return lineItemRow.attr('id',expectedRowId);
 	},
 
@@ -2595,6 +2658,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.registerShippingChargeButtonsEvent(container); /* ED150708 */
 		this.registerQuantityButtonsEvent(container); /* ED150708 */
 		this.registerReceivedButtonsEvent(container); /* ED151014 */
+		this.registerListPriceModeButtonsEvent(container); /* ED151229 */
 	},
 	
     registerEvents: function(){
