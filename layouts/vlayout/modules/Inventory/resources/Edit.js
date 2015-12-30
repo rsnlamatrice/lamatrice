@@ -814,7 +814,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		);
 	},
 
-	mapResultsToFields: function(referenceModule,element,responseData){
+	mapResultsToFields: function(referenceModule,element,responseData, setFocus){
 		var parentRow = jQuery(element).closest('tr.'+this.rowClass);
 		var lineItemNameElment = jQuery('input.productName',parentRow);
 
@@ -870,7 +870,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			this.loadSubProducts(parentRow);
 		}
 		jQuery('.qty',parentRow).trigger('focusout');
-		this.setSelectedProductInputFocus(parentRow);
+		if (setFocus)
+			this.setSelectedProductInputFocus(parentRow);
 	},
 	
 	
@@ -2238,10 +2239,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			+"&accountdiscounttype="+account_discount_type;
 		AppConnector.request(dataUrl).then(
 			function(data){
+				var isFirst = true;
 				for(var id in data){
 					if(typeof data[id] == "object"){
 						var recordData = data[id];
-						thisInstance.mapResultsToFields(selectedModule, popupElement, recordData);
+						thisInstance.mapResultsToFields(selectedModule, popupElement, recordData, isFirst);
+						isFirst = false;
 					}
 				}
 			},

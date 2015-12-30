@@ -407,7 +407,39 @@ jQuery.Class("Vtiger_Header_Js", {
         jQuery('#globalSearchValue').keypress(function(e) {
             var currentTarget = jQuery(e.currentTarget)
             if (e.which == 13) {
+                var currentActive = thisInstance.getLabelSearchCurrentActive();
+                if (currentActive.length) {
+                    currentActive.children('a:first').click();
+                    return;
+                }
                 thisInstance.labelSearch(currentTarget);
+            }
+            else{
+                var currentActive = thisInstance.getLabelSearchCurrentActive();
+                if (currentActive.length) {
+                    currentActive.removeClass('ui-state-active');
+                }
+            }
+        });
+        //ED151230 sélection d'une réponse par flèche bas ou flèche haut
+        jQuery('#globalSearchValue').keydown(function(e) {
+            var currentTarget = jQuery(e.currentTarget)
+            if (e.which == 40 || e.which == 38) {
+                thisInstance.labelSearchActivateResultRow(currentTarget, e.which == 40 ? 1 : -1);
+            }
+        });
+        //si un résultat de recherche est trop long (> 100), le focus est sur un bouton "supprimer"
+        jQuery(document.body).on('keydown', '#globalmodal .globalSearchResults button', function(e) {
+            var currentTarget = jQuery(e.currentTarget)
+            if (e.which == 13) {
+                var currentActive = thisInstance.getLabelSearchCurrentActive();
+                if (currentActive.length) {
+                    currentActive.children('a:first').click();
+                    return false;
+                }
+            }
+            else if (e.which == 40 || e.which == 38) {
+                thisInstance.labelSearchActivateResultRow(currentTarget, e.which == 40 ? 1 : -1);
             }
         });
     },
@@ -427,6 +459,41 @@ jQuery.Class("Vtiger_Header_Js", {
             });
         });
     },
+    /* rend un résultat de recherche actif, et validable par Entrée */ 
+    labelSearchActivateResultRow: function(currentTarget, direction) {
+        var $searchResults = $('#globalmodal .globalSearchResults .contents li');
+        if ($searchResults.length === 0)
+            return;
+        var currentActive = $searchResults.filter('.ui-state-active');
+        if (currentActive.length) {
+            currentActive.removeClass('ui-state-active');
+            var getNext = false
+            , previous = false;
+            $searchResults.each(function(){
+                if (getNext) {
+                    currentActive = $(this);
+                    return false;
+                }
+                if (currentActive.get(0) === this) {
+                    if (direction === -1) {
+                        currentActive = $(previous);
+                        return false;
+                    }
+                    getNext = true;
+                }
+                if (direction === -1)
+                    previous = this;
+            });
+        }
+        if (currentActive.length === 0)         
+            currentActive = $searchResults.first();
+        currentActive.addClass('ui-state-active');
+    },
+    /* retourne le résultat de recherche actif */ 
+    getLabelSearchCurrentActive: function() {
+        return $('#globalmodal .globalSearchResults .contents li.ui-state-active');
+    },
+    
     registerEvents: function() {
         var thisInstance = this;
         jQuery('#globalSearch').click(function() {
