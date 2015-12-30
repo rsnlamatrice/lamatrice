@@ -186,7 +186,7 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 	}
 	
 	/* A noter 
-		AND "ligne"."id_cjourn" IN (9, 18, 10) */
+		AND "ligne"."id_cjourn" IN (9, 10, 11) LBP, BFC, NEF */
 	public function getCogilogRowsEntries($dateDebut, $dateFin, $compte){
 		if($compte)
 			$whereComptes = '"ligne"."compte" = \''.$compte.'\'';
@@ -197,14 +197,14 @@ class Invoice_GestionVSComptaCARows_View extends Invoice_GestionVSComptaCA_View 
 		SELECT "ligne"."ladate" AS "date"
 		, "ligne"."libelle" || \' - \' || "ligne"."piece" AS "nomfacture"
 		, "ligne"."compte" AS "compte"
-		, SUM(("ligne"."credit" - "ligne"."debit") * CASE "ligne"."id_cjourn" WHEN 18 THEN -1 ELSE 1 END) AS "montant"
+		, SUM("ligne"."credit") AS "montant"
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
 		WHERE '.$whereComptes.'
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
-		AND "ligne"."id_cjourn" IN (9, 18, 10)
+		AND "ligne"."id_cjourn" IN (9, 10, 11)
 		
 		AND "ligne"."ladate" >= \''.$dateDebut.'\'
 		AND "ligne"."ladate" < \''.$dateFin.'\'

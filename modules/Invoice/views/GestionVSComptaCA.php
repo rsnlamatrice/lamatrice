@@ -179,21 +179,22 @@ class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 		return $entries;
 	}
 	
-	/* A noter "ligne"."id_cjourn" IN (9, 18, 10) */
+	/* A noter 
+		AND "ligne"."id_cjourn" IN (9, 10, 11) LBP, BFC, NEF */
 	public function getCogilogComptesEntries($dateDebut, $dateFin){
 		$whereComptes = '( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )';
 		
 		$query = '
-		SELECT "ligne"."ladate" AS "Date"
-		, "ligne"."compte" AS "Compte"
-		, SUM(("ligne"."credit" - "ligne"."debit") * CASE "ligne"."id_cjourn" WHEN 18 THEN -1 ELSE 1 END) AS "montant"
+		SELECT "ligne"."ladate" AS "date"
+		, "ligne"."compte" AS "compte"
+		, SUM("ligne"."credit") AS "montant"
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
 		WHERE '.$whereComptes.'
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
-		AND "ligne"."id_cjourn" IN (9, 18, 10)
+		AND "ligne"."id_cjourn" IN (9, 10, 11)
 		
 		AND "ligne"."ladate" >= \''.$dateDebut.'\'
 		AND "ligne"."ladate" < \''.$dateFin.'\'
@@ -203,6 +204,7 @@ class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 		ORDER BY "ligne"."ladate", "ligne"."compte"
 		';
 		
+		//echo  "<pre>$query</pre>";
 		
 		$db = new RSN_DBCogilog_Module();
 		$rows = $db->getDBRows($query);
@@ -215,9 +217,9 @@ class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 		
 		$entries = array();
 		foreach($rows as $row){
-			if(!$entries[$row['Date']])
-				$entries[$row['Date']] = array();
-			$entries[$row['Date']][$row['Compte']] = $row['Montant'];
+			if(!$entries[$row['date']])
+				$entries[$row['date']] = array();
+			$entries[$row['date']][$row['compte']] = $row['montant'];
 		}
 		return $entries;
 	}
