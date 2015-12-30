@@ -734,6 +734,19 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			thisInstance.registerLineItemAutoComplete(newRow);
 		});
     },
+    
+    /* ED151230
+    Après avoir choisi un produit, focus sur la quantité ou tarif */
+    setSelectedProductInputFocus: function(newRow){
+	if (newRow) {
+		var $input = newRow.find('input.qty');
+		if ($input.attr('disabled')) {
+			$input = newRow.find('input.listPrice');
+		}
+		$input.select().focus();
+	}
+    },
+    
     getTaxDiv: function(taxObj,parentRow){
 		var rowNumber = jQuery('input.rowNumber',parentRow).val();
 		var loopIterator = 1;
@@ -856,8 +869,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		if(referenceModule == 'Products'){
 			this.loadSubProducts(parentRow);
 		}
-
 		jQuery('.qty',parentRow).trigger('focusout');
+		this.setSelectedProductInputFocus(parentRow);
 	},
 	
 	
@@ -933,6 +946,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.showPopup(params).then(function(data){
 			var responseData = JSON.parse(data);
 			var len = Object.keys(responseData).length;
+			var newRow = false;
 			if(len >1 ){
 				for(var i=0;i<len;i++){
 					if(i == 0){
@@ -944,12 +958,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 							var row1 = jQuery('#addService').trigger('click');
 						}
 						//TODO : CLEAN :  we might synchronus invocation since following elements needs to executed once new row is created
-						var newRow = jQuery('#lineItemTab > tbody > tr:last');
+						newRow = jQuery('#lineItemTab > tbody > tr:last');
 						var targetElem = jQuery('.lineItemPopup',newRow);
 						thisInstance.mapResultsToFields(referenceModule,targetElem,responseData[i]);
 						aDeferred.resolve();
 					}
 				}
+				thisInstance.setSelectedProductInputFocus(newRow);
 			}else{
 				thisInstance.mapResultsToFields(referenceModule,popupImageElement,responseData);
 				aDeferred.resolve();
