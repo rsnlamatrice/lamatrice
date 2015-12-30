@@ -871,12 +871,15 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			}
 			
 			//ED151208
-			var priceBookDetails = recordData.priceBook;
-			parentRow.data('pricebookdetails', priceBookDetails);
+			if (app.getModuleName() !== 'PurchaseOrder'){
+				var priceBookDetails = recordData.priceBook;
+				parentRow.data('pricebookdetails', priceBookDetails);
 			
-			//ED150602 discount % from account discount type
-			var discountpc = recordData.discountpc;
-			this.checkLineWithSameProduct(recordId, selectedName, parentRow);
+				//ED150602 discount % from account discount type
+				var discountpc = recordData.discountpc;
+				this.checkLineWithSameProduct(recordId, selectedName, parentRow);
+			}
+			
 			if(referenceModule == 'Products') {
 				parentRow.data('quantity-in-stock',recordData.quantityInStock);
 			}
