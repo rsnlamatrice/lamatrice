@@ -179,21 +179,21 @@ class Invoice_GestionVSComptaCA_View extends Invoice_GestionVSCompta_View {
 		return $entries;
 	}
 	
-	/* A noter "ligne"."id_cjourn" = 18 */
+	/* A noter "ligne"."id_cjourn" IN (9, 18, 10) */
 	public function getCogilogComptesEntries($dateDebut, $dateFin){
 		$whereComptes = '( "ligne"."compte" LIKE \'411%\' OR "ligne"."compte" LIKE \'511%\' )';
 		
 		$query = '
 		SELECT "ligne"."ladate" AS "Date"
 		, "ligne"."compte" AS "Compte"
-		, SUM( "ligne"."credit" - "ligne"."debit" ) * -1 AS "Montant"
+		, SUM(("ligne"."credit" - "ligne"."debit") * CASE "ligne"."id_cjourn" WHEN 18 THEN -1 ELSE 1 END) AS "montant"
 		FROM "cligne00002" "ligne"
 		INNER JOIN "ccompt00002" "compte"
 			ON "ligne"."compte" = "compte"."compte"
 		WHERE '.$whereComptes.'
 		AND "compte"."desactive" = FALSE
 		AND "compte"."nonsaisie" = FALSE
-		AND "ligne"."id_cjourn" = 18
+		AND "ligne"."id_cjourn" IN (9, 18, 10)
 		
 		AND "ligne"."ladate" >= \''.$dateDebut.'\'
 		AND "ligne"."ladate" < \''.$dateFin.'\'
