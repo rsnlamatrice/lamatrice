@@ -712,6 +712,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var thisInstance = this;
 		var lineItemTable = this.getLineItemContentsContainer();
 		jQuery('#addProduct').on('click',function(){
+			var buttonIsFocused = this === document.activeElement;
 			var newRow = thisInstance.getBasicRow().addClass(thisInstance.rowClass);
 			jQuery('.lineItemPopup[data-module-name="Services"]',newRow).remove();
 			var sequenceNumber = thisInstance.getNextLineItemRowNumber();
@@ -721,8 +722,13 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			thisInstance.updateLineItemsElementWithSequenceNumber(newRow,sequenceNumber);
 			newRow.find('input.productName').addClass('autoComplete');
 			thisInstance.registerLineItemAutoComplete(newRow);
+			if (buttonIsFocused) {
+				newRow.find('input.productName').focus();
+				thisInstance.scrollToView(this);
+			}
 		});
 		jQuery('#addService').on('click',function(){
+			var buttonIsFocused = this === document.activeElement;
 			var newRow = thisInstance.getBasicRow().addClass(thisInstance.rowClass);
 			jQuery('.lineItemPopup[data-module-name="Products"]',newRow).remove();
 			var sequenceNumber = thisInstance.getNextLineItemRowNumber();
@@ -732,8 +738,41 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			thisInstance.updateLineItemsElementWithSequenceNumber(newRow,sequenceNumber);
 			newRow.find('input.productName').addClass('autoComplete');
 			thisInstance.registerLineItemAutoComplete(newRow);
+			if (buttonIsFocused) {
+				newRow.find('input.productName').focus();
+				thisInstance.scrollToView(this);
+			}
 		});
     },
+    
+	//ED151230 : s'assure de la visibilité des boutons Ajouter, de sorte que la liste autoComplete soit assez visible
+    scrollToView: function(el){
+		if (el.jquery) {
+			if (el.length === 0)
+				return;
+			el = el.get(0);
+		}
+		var topOfPage = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+		var heightOfPage = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+		var elY = 0;
+		var elH = 0;
+		if (document.layers) { // NS4
+			elY = el.y;
+			elH = el.height;
+		}
+		else {
+			for(var p=el; p&&p.tagName!='BODY'; p=p.offsetParent){
+				elY += p.offsetTop;
+			}
+			elH = el.offsetHeight;
+		}
+		if ((topOfPage + heightOfPage) < (elY + elH)) {
+			el.scrollIntoView(false);
+		}
+		else if (elY < topOfPage) {
+			el.scrollIntoView(true);
+		}
+	},
     
     /* ED151230
     Après avoir choisi un produit, focus sur la quantité ou tarif */
