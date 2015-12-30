@@ -708,42 +708,36 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		return newRow.removeClass('hide lineItemCloneCopy');
 	},
 
+
 	registerAddingNewProductsAndServices: function(){
 		var thisInstance = this;
 		var lineItemTable = this.getLineItemContentsContainer();
-		jQuery('#addProduct').on('click',function(){
-			var buttonIsFocused = this === document.activeElement;
-			var newRow = thisInstance.getBasicRow().addClass(thisInstance.rowClass);
-			jQuery('.lineItemPopup[data-module-name="Services"]',newRow).remove();
-			var sequenceNumber = thisInstance.getNextLineItemRowNumber();
-			newRow = newRow.appendTo(lineItemTable);
-			thisInstance.checkLineItemRow();
-			newRow.find('input.rowNumber').val(sequenceNumber);
-			thisInstance.updateLineItemsElementWithSequenceNumber(newRow,sequenceNumber);
-			newRow.find('input.productName').addClass('autoComplete');
-			thisInstance.registerLineItemAutoComplete(newRow);
-			if (buttonIsFocused) {
-				newRow.find('input.productName').focus();
-				thisInstance.scrollToView(this);
-			}
+		jQuery('#addProduct').on('click',function(e){
+			thisInstance.addProductButtonClickHandler(e, lineItemTable, 'Products');
 		});
-		jQuery('#addService').on('click',function(){
-			var buttonIsFocused = this === document.activeElement;
-			var newRow = thisInstance.getBasicRow().addClass(thisInstance.rowClass);
-			jQuery('.lineItemPopup[data-module-name="Products"]',newRow).remove();
-			var sequenceNumber = thisInstance.getNextLineItemRowNumber();
-			newRow = newRow.appendTo(lineItemTable);
-			thisInstance.checkLineItemRow();
-			newRow.find('input.rowNumber').val(sequenceNumber);
-			thisInstance.updateLineItemsElementWithSequenceNumber(newRow,sequenceNumber);
-			newRow.find('input.productName').addClass('autoComplete');
-			thisInstance.registerLineItemAutoComplete(newRow);
-			if (buttonIsFocused) {
-				newRow.find('input.productName').focus();
-				thisInstance.scrollToView(this);
-			}
+		jQuery('#addService').on('click',function(e){
+			thisInstance.addProductButtonClickHandler(e, lineItemTable, 'Services');
 		});
     },
+	
+	addProductButtonClickHandler: function(e, lineItemTable, moduleName){
+		var thisInstance = this;
+		var buttonIsFocused = !e.isTrigger; //sous FireFox, document.activeElement n'est pas sur le bouton
+		var newRow = thisInstance.getBasicRow().addClass(thisInstance.rowClass);
+		var otherModule = moduleName === 'Products' ? 'Services' : 'Products';
+		jQuery('.lineItemPopup[data-module-name="' + otherModule + '"]',newRow).remove();
+		var sequenceNumber = thisInstance.getNextLineItemRowNumber();
+		newRow = newRow.appendTo(lineItemTable);
+		thisInstance.checkLineItemRow();
+		newRow.find('input.rowNumber').val(sequenceNumber);
+		thisInstance.updateLineItemsElementWithSequenceNumber(newRow,sequenceNumber);
+		newRow.find('input.productName').addClass('autoComplete');
+		thisInstance.registerLineItemAutoComplete(newRow);
+		if (buttonIsFocused) {
+			newRow.find('input.productName').focus();
+			thisInstance.scrollToView(e.target);
+		}
+	},
     
 	//ED151230 : s'assure de la visibilité des boutons Ajouter, de sorte que la liste autoComplete soit assez visible
     scrollToView: function(el){
