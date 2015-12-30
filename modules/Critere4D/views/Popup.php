@@ -74,9 +74,15 @@ class Critere4D_Popup_View extends Vtiger_Popup_View {
 	 */
 	public function initializeListViewContents(Vtiger_Request $request, Vtiger_Viewer $viewer) {
 		
-		if(!$this->listViewHeaders)
-			$this->listViewHeaders = $this->getHeaders($request);
-			
+		$orderBy = $request->get('orderby');
+		$sortOrder = $request->get('sortorder');
+		if(empty($orderBy)) {
+			$orderBy = 'usage_debut';
+			$sortOrder = 'desc';
+			$request->set('orderby', $orderBy);
+			$request->set('sortorder', $sortOrder);
+		}
+		
 		$return = parent::initializeListViewContents($request, $viewer);
 		
 		$listViewEntries = $this->listViewEntries;
@@ -86,7 +92,6 @@ class Critere4D_Popup_View extends Vtiger_Popup_View {
 			$record->set('dateapplication', $record->rawData['dateapplication']);
 			$record->set('_counter_vtiger_critere4dcontrel', $record->rawData['_counter_vtiger_critere4dcontrel']);
 		}
-		
 		return $return;
 	}
 }
