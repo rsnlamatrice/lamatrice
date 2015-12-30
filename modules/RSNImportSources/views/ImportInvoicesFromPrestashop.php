@@ -1201,6 +1201,30 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			die();
 		}
 		
+					
+		/* Post-migration : ne pas importer avant le 
+		vtiger_rsnreglements.numpiece LIKE <numcart>;CP;15-09-15-23:33:44
+		*/
+		//$query = "UPDATE $tableName
+		//JOIN  vtiger_rsnreglements
+		//	ON  vtiger_rsnreglements.numpiece LIKE CONCAT(`$tableName`.numcart, ';%')
+		//JOIN vtiger_crmentity
+		//	ON vtiger_rsnreglements.rsnreglementsid = vtiger_crmentity.crmid
+		//";
+		//$query .= " SET `_rsnreglementsid` = vtiger_crmentity.crmid";
+		//$query .= "
+		//	WHERE vtiger_crmentity.deleted = 0
+		//	AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		//";
+		//
+		//$result = $db->pquery($query, array());
+		//if(!$result){
+		//	echo '<br><br><br><br>';
+		//	$db->echoError($query);
+		//	echo("<pre>$query</pre>");
+		//	die();
+		//}
+		
 		return true;
 	}
 

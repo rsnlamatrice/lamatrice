@@ -374,9 +374,18 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 			$field->set('name', 'quantity');
 			$field->set('column', 'vtiger_inventoryproductrel:quantity');
 			$field->set('label', 'Quantité');
-			$field->set('typeofdata', 'V~O');
+			$field->set('typeofdata', 'N~O');
 			$field->set('uitype', 7);
 			$headers['quantity'] = $field;
+		}
+		if(!array_key_exists('listprice', $headers)){
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'listprice');
+			$field->set('column', 'vtiger_inventoryproductrel:listprice');
+			$field->set('label', 'Prix de vente');
+			$field->set('typeofdata', 'N~O');
+			$field->set('uitype', 71);
+			$headers['listprice'] = $field;
 		}
 		//Teste si on est déjà passé par ici (RelatedList appelle RelationListView, qui tout deux appellent cette fonction)
 		foreach($records as $record)
@@ -386,7 +395,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		global $adb;
 		$productIds = array_keys($records);
 		
-		$query = 'SELECT productid, quantity, IFNULL(tax1, IFNULL(tax2, IFNULL(tax3, IFNULL(tax4, IFNULL(tax5, tax6))))) AS percentage
+		$query = 'SELECT productid, quantity, listprice, IFNULL(tax1, IFNULL(tax2, IFNULL(tax3, IFNULL(tax4, IFNULL(tax5, tax6))))) AS percentage
 			FROM vtiger_inventoryproductrel
 			WHERE vtiger_inventoryproductrel.id = ?';
 		
@@ -400,15 +409,19 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		for($i=0;$i<$adb->num_rows($res);$i++){
 			$productId = $adb->query_result($res,$i,'productid');
 			$record = $records[$productId];
-			if(!$record)
+			if(!$record
+			|| $record->get('unit_price_istaxed'))
 				continue;
 			$record->set('quantity', $adb->query_result($res,$i,'quantity'));
-			$price = $record->get('unit_price');
 			$tax = $adb->query_result($res,$i,'percentage');
-			//var_dump($tax);
+			
+			$price = $adb->query_result($res,$i,'listprice');
+			if($price && $tax) $price += $price * $tax/100;
+			if($price) $record->set('listprice', $price);
+			
+			$price = $record->get('unit_price');
 			if(!$price
-			|| !$tax
-			|| $record->get('unit_price_istaxed'))
+			|| !$tax)
 				continue;
 			$price += $price * $tax/100;
 			$record->set('unit_price', $price);
