@@ -416,51 +416,6 @@ class RSNInvoiceHandler extends VTEventHandler {
 		
 		$toDay = new DateTime();
 		
-		$country = $account->get('billcountry');
-		$foreigner = $country && strcasecmp($country, 'France') !== 0;
-		
-		$nbTrimestresGratos = false; //càd, nbre de revues
-		$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
-		
-		//TODO : prélèvement == 1 an
-		
-		// Les étrangers, pour moins de 20€ n'ont le droit à rien
-		if($grandTotal < 20 && $foreigner){
-			//walou
-		}
-		// Pour moins de 4, nada  TODO A vérifier avec Bate
-		elseif($grandTotal < 4){
-			//walou
-		}
-		// Pour plus de 48 € de commande ou de dons, un an
-		elseif($grandTotal >= 48){
-			$nbTrimestresGratos = 4;
-		}
-		// Pour des dons de moins de 48 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
-		elseif($grandTotal >= 10 && $grandTotal < 48 && $totalDons >= 10 && $totalDons < 48){
-			$nbTrimestresGratos = 1;
-			//TODO
-		}
-		// Pour des dons de moins de 10 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
-		elseif($grandTotal >= 10 && $grandTotal < 48 && $totalDons < 10){
-			$nbTrimestresGratos = 1;
-			//TODO
-		}
-		// Pour moins de 48 € de commande, un n° de découverte si le dernier n° envoyé date d'un an au moins
-		elseif($grandTotal >= 10 && $grandTotal < 48){
-			$nbTrimestresGratos = 1;
-			//TODO
-		}
-		// Pour moins de 10 €, un n° de découverte si le dernier n° envoyé date d'un an au moins
-		elseif($grandTotal < 10){
-			$nbTrimestresGratos = 1;
-			//TODO
-		}
-		// Abonnement d'un an
-		else {
-			$nbTrimestresGratos = 4;
-		}
-		
 		$rsnAboRevues = $account->getRSNAboRevues();
 		
 		//Contrôle si cette facture a déjà généré un abonnement
@@ -471,32 +426,75 @@ class RSNInvoiceHandler extends VTEventHandler {
 		//Parcourt l'historique pour clôturer les en-cours périmés
 		self::check_IsAbonne_vs_DateFin($rsnAboRevues);
 		
-		//Parcourt l'historique par date décroissante
-		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
-			if($rsnAboRevue->isAbonne()){
-				if($rsnAboRevue->isTypeAbonneAVie()){
-					$rsnAboRevueCourant = $rsnAboRevue;
-					$abonneAVie = true;
-					$log->debug("handleAfterSaveInvoiceTotalEvent, abonneAVie");
-					break;
-				}
-				else {
-					$rsnAboRevueCourant = $rsnAboRevue;
-					$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
-					$log->debug("handleAfterSaveInvoiceTotalEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
-					//Rien de gratuit si un abonnement est en cours pendant encore 3 mois
-					if($startDateOfNextAbo > self::getDateFinAbo($toDay, 3))
-						$nbTrimestresGratos = 0;
-					break;
-				}
-			}
-			elseif($rsnAboRevue->isTypeNePasAbonner()){
-				$log->debug("handleAfterSaveInvoiceTotalEvent, isTypeNePasAbonner");
-				$nbTrimestresGratos = 0;
-				break;
-			}
+		$country = $account->get('billcountry');
+		$foreigner = $country && strcasecmp($country, 'France') !== 0;
+		
+		$nbTrimestresGratos = false; //càd, nbre de revues
+		$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
+		
+		//TODO : prélèvement == 1 an
+		
+		// Les étrangers, pour moins de 20€ n'ont le droit à rien
+		if($grandTotal < 20 && $foreigner){
+			//walou
+		}
+		// Pour moins de 4, nada  TODO A vérifier avec Bate
+		elseif($grandTotal < 12){
+			//walou
+		}
+		// Pour plus de 48 € de dons, un an
+		elseif($totalDons >= 48){
+			$nbTrimestresGratos = 4;
+			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
+		}
+		// Pour plus de 36 € de dons, 3 trimestres
+		elseif($totalDons >= 36){
+			$nbTrimestresGratos = 3;
+			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
+		}
+		// Pour plus de 24 € de dons, 2 trimestres
+		elseif($totalDons >= 24){
+			$nbTrimestresGratos = 2;
+			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
+		}
+		// Pour plus de 12 € de dons, 1 trimestre
+		elseif($totalDons >= 12){
+			$nbTrimestresGratos = 1;
+			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
+		}
+		// Pour plus de 48 € de commande hors dons, un n° découverte
+		elseif(($grandTotal - $totalDons) >= 48){
+			$nbTrimestresGratos = 1;
+			$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
 		}
 		
+		if($nbTrimestresGratos){
+			//Parcourt l'historique par date décroissante
+			foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
+				if($rsnAboRevue->isAbonne()){
+					if($rsnAboRevue->isTypeAbonneAVie()){
+						$rsnAboRevueCourant = $rsnAboRevue;
+						$abonneAVie = true;
+						$log->debug("handleAfterSaveInvoiceTotalEvent, abonneAVie");
+						break;
+					}
+					else {
+						$rsnAboRevueCourant = $rsnAboRevue;
+						$startDateOfNextAbo = $rsnAboRevueCourant->getStartDateOfNextAbo($prochaineRevue, $invoiceDate);
+						$log->debug("handleAfterSaveInvoiceTotalEvent startDateOfNextAbo = " .($startDateOfNextAbo->format('d/m/Y')));
+						//Rien de gratuit si un abonnement est en cours jusqu'à la fin
+						if($startDateOfNextAbo > self::getDateFinAbo($toDay, 3 * $nbTrimestresGratos))
+							$nbTrimestresGratos = 0;
+						break;
+					}
+				}
+				elseif($rsnAboRevue->isTypeNePasAbonner()){
+					$log->debug("handleAfterSaveInvoiceTotalEvent, isTypeNePasAbonner");
+					$nbTrimestresGratos = 0;
+					break;
+				}
+			}
+		}
 		
 		if($nbTrimestresGratos && !$abonneAVie){
 			$invoiceDate = new DateTime($invoice->get('invoicedate'));
