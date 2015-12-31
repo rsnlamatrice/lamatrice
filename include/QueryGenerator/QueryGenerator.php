@@ -942,7 +942,7 @@ class QueryGenerator {
 				$columns[] = $sql;
 			}
 		}
-		$this->columns = implode(', ',$columns);
+		$this->columns = implode(', ', $columns);
 		return $this->columns;
 	}
 
