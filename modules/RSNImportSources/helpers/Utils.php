@@ -1003,4 +1003,8 @@ class RSNImportSources_Utils_Helper extends  Import_Utils_Helper {
 		}
 		fclose($hFile);
 	}
+	
+	function getDateWithoutTime($dateTime){
+		return preg_replace('/^(\d+\D\d+\D\d+)/', '$1', $dateTime);
+	}
 }
