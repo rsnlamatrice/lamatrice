@@ -4,6 +4,28 @@ require_once ('modules/RSNImportSources/views/ImportFromDBCogilog.php');
 
 // ED150831 : TODO importer quand même les factures sans contact connu car il y a les décédés qui peuvent avoir disparu de 4D
 
+//SELECT facture.datepiece, facture.numero, facture.nom2, facture.compteclient , ligne_fact.*
+//			FROM gfactu00002 facture
+//			JOIN gclien00002 cl
+//				ON facture.id_gclien = cl.id
+//			JOIN glfact00002 ligne_fact
+//				ON ligne_fact.id_piece = facture.id
+//			LEFT JOIN gaffai00002 affaire
+//				ON affaire.id = facture.id_gaffai
+//			LEFT JOIN "gprodu00002" AS "produit"
+//				ON "ligne_fact"."id_gprodu" = "produit"."id"
+//			LEFT JOIN "gtprod00002" AS "famille"
+//				ON "famille"."id" = "produit"."id_gtprod"
+//			LEFT JOIN "gtvacg00002" AS "codetauxtva"
+//				ON "produit"."codetva" = "codetauxtva"."code"
+//		 WHERE "produit"."id" IS NULL
+//AND ligne_fact.nom  IS NOT NULL
+//AND ligne_fact.nom <> ''
+//AND facture.compteclient NOT IN ( '411DEP', '411dep', '411ATEL')
+//ORDER BY  facture.datepiece DESC
+//LIMIT 1000
+
+
 class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_ImportFromDBCogilog_View {
 
 	/**
@@ -98,9 +120,9 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 			LEFT JOIN "gtvacg00002" AS "codetauxtva"
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
-		if(false)
-			$query .= ' WHERE facture.numero IN ( 6130)
-				AND annee = 2015
+		if(true)
+			$query .= ' WHERE facture.numero IN ( 12918 )
+				AND annee = 2011
 			';
 		else {
 			/* Attention à ne pas importer une facture en cours de saisie */
@@ -113,7 +135,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
                     OFFSET ' . $this->getQueryLimitStart().'
 					LIMIT  ' . $this->getMaxQueryRows() ;
-		//echo("<pre>$query</pre>");
+		echo("<pre>$query</pre>");
 		return $query;
 	}
 	

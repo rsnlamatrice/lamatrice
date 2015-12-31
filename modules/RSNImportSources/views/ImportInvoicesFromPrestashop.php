@@ -1146,6 +1146,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 	function postPreImportInvoiceData() {
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
+		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		
 		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('sourceid', 'num_ligne'));
 		
@@ -1162,15 +1163,19 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			ON  vtiger_invoice.invoiceid = vtiger_invoicecf.invoiceid
 		JOIN vtiger_crmentity
 			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+		LEFT JOIN $contactsTableName
+			ON `$contactsTableName`.sourceid = `$tableName`.sourceid
 		";
 		$query .= " SET `$tableName`.status = ?
 		, `$tableName`.recordid = vtiger_invoice.invoiceid
-		, _contactid = vtiger_invoice.contactid";
+		, `$tableName`._contactid = vtiger_invoice.contactid
+		, `$contactsTableName`.recordid = vtiger_invoice.contactid
+		, `$contactsTableName`.status = ?";
 		$query .= "
 			WHERE vtiger_crmentity.deleted = 0
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
-		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
 		if(!$result){
 			echo '<br><br><br><br>';
 			$db->echoError($query);
@@ -1293,7 +1298,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			WHERE NOT (`$invoiceTableName`._contactid IS NULL AND `$contactsTableName`._contactid IS NULL)
 		";
 		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_NONE, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
-											, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+							, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
 		if(!$result){
 			echo '<br><br><br><br>';
 			$db->echoError($query);

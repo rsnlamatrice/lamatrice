@@ -214,6 +214,8 @@ class Products_Record_Model extends Vtiger_Record_Model {
 				$taxClassDetails[$i]['check_value'] = 0;
 				$taxClassDetails[$i]['percentage'] = getTaxPercentage($taxClassDetails[$i]['taxname']);
 			}
+			else
+				$taxClassDetails[$i]['related'] = true;
 		}
 
 		$this->set('taxClassDetails', $taxClassDetails);
@@ -227,8 +229,10 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		$details = $this->getTaxClassDetails();
 		$unitPrice = $this->get('unit_price');
 		foreach($details as $detail){
-			$unitPrice *= 1 + $detail['percentage']/100;
-			break;
+			if($detail['related']){
+				$unitPrice *= 1 + $detail['percentage']/100;
+				break;
+			}
 		}
 		return $unitPrice;
 	}

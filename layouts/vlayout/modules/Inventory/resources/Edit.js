@@ -879,6 +879,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				var discountpc = recordData.discountpc;
 				this.checkLineWithSameProduct(recordId, selectedName, parentRow);
 			}
+			else
+				parentRow.data('pricebookdetails', {});
 			
 			if(referenceModule == 'Products') {
 				parentRow.data('quantity-in-stock',recordData.quantityInStock);
@@ -1477,6 +1479,10 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * Affectation du tarif selon la grille
 	 */
 	lineItemGetPriceFromPriceBook : function(lineItemRow){
+		//Prix d'achat
+		if (app.getModuleName() === 'PurchaseOrder') 
+			return;
+		
 		var thisInstance = this;
 		//recursive for each row
 		if (lineItemRow.length > 1) {
