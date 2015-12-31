@@ -113,18 +113,23 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 				ON ligne_fact.id_piece = facture.id
 			JOIN gaffai00002 affaire
 				ON affaire.id = facture.id_gaffai
-			INNER JOIN "gprodu00002" AS "produit"
+			JOIN "gprodu00002" AS "produit"
 				ON "ligne_fact"."id_gprodu" = "produit"."id"
-			INNER JOIN "gtprod00002" AS "famille"
+			JOIN "gtprod00002" AS "famille"
 				ON "famille"."id" = "produit"."id_gtprod"
 			LEFT JOIN "gtvacg00002" AS "codetauxtva"
 				ON "produit"."codetva" = "codetauxtva"."code"
 		';
-		if(true)
-			$query .= ' WHERE facture.numero IN ( 12918 )
-				AND annee = 2011
+		if(true){
+			$query .= ' WHERE (
+				facture.numero IN ( 10106, 10108, 10107, 10109, 10110, 10111, 7031, 6774, 5958, 3126, 2960, 2387, 2334, 2359, 2072, 2072, 2073, 2004, 1419, 1373, 1274, 1251, 1221, 874, 514, 524, 512 )
+					AND annee = 2015
+				OR
+				facture.numero IN ( 7948, 7946, 7298, 6453, 6452, 1926, 1505, 1274, 1241 )
+					AND annee = 2014
+				)
 			';
-		else {
+		} else {
 			/* Attention à ne pas importer une facture en cours de saisie */
 			$query .= ' WHERE facture.datepiece < CURRENT_DATE 
 			';
@@ -135,7 +140,7 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$query .= ' ORDER BY facture.annee, facture.numero, position_ligne ASC
                     OFFSET ' . $this->getQueryLimitStart().'
 					LIMIT  ' . $this->getMaxQueryRows() ;
-		echo("<pre>$query</pre>");
+		//echo("<pre>$query</pre>");
 		return $query;
 	}
 	
@@ -1138,7 +1143,39 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 	 */
 	function postPreImportData() {
 		// Pré-identifie les contacts//
-			
+		
+		
+		$db = PearDatabase::getInstance();
+		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`sourceid`)";
+		$db->pquery($query);
+		
+		/* ATTENTION ! Supprime les factures déjà importées
+		*/
+		$query = "UPDATE $tableName
+		JOIN  vtiger_invoice
+			ON  vtiger_invoice.invoice_no = `$tableName`.sourceid
+		JOIN  vtiger_invoicecf
+			ON  vtiger_invoice.invoiceid = `vtiger_invoicecf`.invoiceid
+		JOIN vtiger_crmentity
+			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+		";
+		$query .= " SET vtiger_crmentity.deleted = 1";
+		$query .= "
+			WHERE vtiger_crmentity.deleted = 0
+			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+		";
+		$result = $db->pquery($query, array());
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,
 			'Invoice',

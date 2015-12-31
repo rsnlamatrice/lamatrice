@@ -381,8 +381,11 @@ var_dump($listResult);*/
 			$listQuery .= ' AND activitytype <> "Emails"';
 		}
 
-		//ED150507 : cou
-		$listQuery = 'SELECT count(*) AS count FROM (' . $listQuery . ') q';
+		//Ajoute un DISCTINCT au SELECT, ce qui augmente le temps de réponse
+		$listQuery = preg_replace('/^(SELECT)\s(?!\s*DISTINCT\s)/i', '$1 DISTINCT ', $listQuery);
+		
+		//ED150507 : count
+		$listQuery = 'SELECT COUNT(*) AS count FROM (' . $listQuery . ') q';
 		
 		$listResult = $db->pquery($listQuery, array());
 		if(!$listResult){
