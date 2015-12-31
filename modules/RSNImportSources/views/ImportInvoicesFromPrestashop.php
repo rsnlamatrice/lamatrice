@@ -331,11 +331,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			$db = PearDatabase::getInstance();
 			$query = "UPDATE vtiger_crmentity
 				SET smownerid = ?
-				, createdtime = ?
 				WHERE vtiger_crmentity.crmid = ?
 			";
 			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
-								, $contactsData[0]['date']
+								//, $contactsData[0]['date']
 								, $contactId));
 			
 			$log->debug("" . basename(__FILE__) . " update imported contacts (id=" . $record->getId() . ", date=" . $contactsData[0]['date']
@@ -529,6 +528,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					}
 				}
 				else {
+					$subject = $contact->get('contact_no') . ' ' . $invoiceData[0]['subject'];
+					
 					$record = Vtiger_Record_Model::getCleanInstance('Invoice');
 					$record->set('mode', 'create');
 					$record->set('bill_street', $invoiceData[0]['street']);
@@ -537,7 +538,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 					$record->set('bill_city', $invoiceData[0]['city']);
 					$record->set('bill_code', $invoiceData[0]['zip']);
 					$record->set('bill_country', $invoiceData[0]['country']);
-					$record->set('subject', $invoiceData[0]['subject']);
+					$record->set('subject', $subject);
 					//$record->set('receivedcomments', $srcRow['paiementpropose']);
 					$record->set('receivedmoderegl', 'PayBox BOU');
 					//$record->set('description', $srcRow['notes']);
@@ -613,8 +614,6 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 						, subtotal = ?
 						, taxtype = ?
 						, smownerid = ?
-						, createdtime = ?
-						, modifiedtime = ?
 						, balance = total - received
 						/*, invoicestatus = IF(balance = 0, 'Paid', invoicestatus)*/
 						WHERE invoiceid = ?
@@ -626,8 +625,8 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 									    , $total
 									    , 'individual'
 									    , ASSIGNEDTO_ALL
-									    , $invoiceData[0]['invoicedate']
-									    , $invoiceData[0]['invoicedate']
+									    //, $invoiceData[0]['invoicedate']
+									    //, $invoiceData[0]['invoicedate']
 									    , $invoiceId));
 					
 					$log->debug("" . basename(__FILE__) . " update imported invoice (id=" . $record->getId() . ", sourceId=$sourceId , total=$total, date=" . $invoiceData[0]['invoicedate']
@@ -1170,18 +1169,50 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		, `$tableName`.recordid = vtiger_invoice.invoiceid
 		, `$tableName`._contactid = vtiger_invoice.contactid
 		, `$contactsTableName`.recordid = vtiger_invoice.contactid
-		, `$contactsTableName`.status = ?";
+		, `$contactsTableName`.status = ?
+		, `$contactsTableName`._contactid_status = ?";
 		$query .= "
 			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_invoice.contactid IS NOT NULL AND vtiger_invoice.contactid <> 0
 			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
 		";
-		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
+						    , RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
+						    , RSNImportSources_Import_View::$RECORDID_STATUS_SELECT));
 		if(!$result){
 			echo '<br><br><br><br>';
 			$db->echoError($query);
 			echo("<pre>$query</pre>");
 			die();
 		}
+		
+		/* Supprime les factures déjà importées (sinon c'est pas propre en sortie de validation des nouveaux contacts)
+		*/
+		$query = "DELETE FROM $tableName
+			WHERE `$tableName`.status = ?";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+		
+		
+		/* Supprime les contacts des factures déjà importées (sinon c'est pas propre en sortie de validation des nouveaux contacts)
+		*/
+		$query = "DELETE FROM $contactsTableName
+			WHERE `$contactsTableName`.status = ?
+			AND `$contactsTableName`._contactid_status = ?";
+		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
+						    , RSNImportSources_Import_View::$RECORDID_STATUS_SELECT));
+		if(!$result){
+			echo '<br><br><br><br>';
+			$db->echoError($query);
+			echo("<pre>$query</pre>");
+			die();
+		}
+					
 					
 		/* Affecte l'id du règlement
 		vtiger_rsnreglements.numpiece LIKE <numcart>;CP;15-09-15-23:33:44
@@ -1298,7 +1329,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			WHERE NOT (`$invoiceTableName`._contactid IS NULL AND `$contactsTableName`._contactid IS NULL)
 		";
 		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_NONE, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
-							, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED));
+							, RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED, RSNImportSources_Import_View::$RECORDID_STATUS_SELECT));
 		if(!$result){
 			echo '<br><br><br><br>';
 			$db->echoError($query);

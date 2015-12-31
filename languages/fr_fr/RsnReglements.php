@@ -25,6 +25,7 @@ $languageStrings = array(
 	'LBL_ORIGIN' => 'Origine',
 	'LBL_ERROR_MESSAGE' => 'Message d\'erreur',
 	'LBL_CONTACT_NAME' => 'Nom du contact',
+	'CLICKSOURCE' => 'Clic d\'origine',
 	'Created' => 'En cours',
 	'Validated' => 'Validé',
 	'Cancelled' => 'Annulé',

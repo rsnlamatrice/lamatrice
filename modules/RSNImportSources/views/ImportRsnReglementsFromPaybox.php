@@ -380,8 +380,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 						, subtotal = ?
 						, taxtype = ?
 						, smownerid = ?
-						, createdtime = ?
-						, modifiedtime = ?
 						, balance = total - received
 						/*, invoicestatus = IF(balance = 0, 'Paid', invoicestatus)*/
 						WHERE invoiceid = ?
@@ -393,8 +391,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 									    , $total
 									    , 'individual'
 									    , ASSIGNEDTO_ALL
-									    , $invoiceData[0]['invoicedate']
-									    , $invoiceData[0]['invoicedate']
+									    //, $invoiceData[0]['invoicedate']
+									    //, $invoiceData[0]['invoicedate']
 									    , $invoiceId));
 					
 					$log->debug("" . basename(__FILE__) . " update imported invoice (id=" . $record->getId() . ", invoiceNo=$importSourceId , total=$total, date=" . $invoiceData[0]['invoicedate']
@@ -546,9 +544,9 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			}
 			$record->set('reglementstatus', $record->get('error')
 						 ? 'Cancelled'
-						 : $invoice
+						 : ($invoice
 							? 'Validated'
-							: 'Created'
+							: 'Created')
 						);
 			
 			//$db->setDebug(true);
@@ -831,9 +829,13 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 					
 		/* Affecte l'id de la facture
 		*/
-		$query = "UPDATE $tableName
-		JOIN  vtiger_invoicecf
+		$query = "UPDATE  vtiger_invoicecf
+		JOIN  vtiger_invoice
+			ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+		JOIN $tableName
 			ON  (vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
+			OR (vtiger_invoicecf.importsourceid = `$tableName`.numpiece
+				AND `$tableName`.dateoperation = vtiger_invoice.invoicedate) /* [migration] via Cogilog */
 			OR vtiger_invoicecf.importsourceid LIKE CONCAT('BOU%-', `$tableName`.refboutique)
 		)
 		JOIN vtiger_crmentity
@@ -893,11 +895,13 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		
 		/* Affecte l'id de la facture déjà connue
 		*/
-		$query = "UPDATE $tableName
-		JOIN  vtiger_invoicecf
-			ON  vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
+		$query = "UPDATE  vtiger_invoicecf
 		JOIN  vtiger_invoice
-			ON  vtiger_invoice.invoiceid = vtiger_invoicecf.invoiceid
+			ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+		JOIN $tableName
+			ON  vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
+			OR (vtiger_invoicecf.importsourceid = `$tableName`.refdonateursweb
+				AND `$tableName`.invoicedate = vtiger_invoice.invoicedate) /* [migration] via Cogilog */
 		JOIN vtiger_crmentity
 			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
 		JOIN $reglementsTableName

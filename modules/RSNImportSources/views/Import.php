@@ -1559,6 +1559,23 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 			RSNImportSources_Utils_Helper::checkPickListValue($moduleName, $pickListName, $pickListName, $row[$fieldName]);
 		}
 	}
+	
+        
+	function getFinalCodeAffaire($codeAffaire){
+		switch($codeAffaire){
+		case 'FONLFDSsite':
+		case 'FONLFDS4':
+		case 'FONLFDS3':
+		case 'FONLFDS2':
+		case 'FONLFDS1':
+			return 'FONLFDS';
+		case 'MOBCOP21':
+			return 'COP21';
+		default:
+			return $codeAffaire;
+		}
+		
+	}
 }
 
 ?>

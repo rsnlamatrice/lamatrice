@@ -4,26 +4,28 @@ require_once ('modules/RSNImportSources/views/ImportFromDBCogilog.php');
 
 // ED150831 : TODO importer quand même les factures sans contact connu car il y a les décédés qui peuvent avoir disparu de 4D
 
-//SELECT facture.datepiece, facture.numero, facture.nom2, facture.compteclient , ligne_fact.*
-//			FROM gfactu00002 facture
-//			JOIN gclien00002 cl
-//				ON facture.id_gclien = cl.id
-//			JOIN glfact00002 ligne_fact
-//				ON ligne_fact.id_piece = facture.id
-//			LEFT JOIN gaffai00002 affaire
-//				ON affaire.id = facture.id_gaffai
-//			LEFT JOIN "gprodu00002" AS "produit"
-//				ON "ligne_fact"."id_gprodu" = "produit"."id"
-//			LEFT JOIN "gtprod00002" AS "famille"
-//				ON "famille"."id" = "produit"."id_gtprod"
-//			LEFT JOIN "gtvacg00002" AS "codetauxtva"
-//				ON "produit"."codetva" = "codetauxtva"."code"
-//		 WHERE "produit"."id" IS NULL
-//AND ligne_fact.nom  IS NOT NULL
-//AND ligne_fact.nom <> ''
-//AND facture.compteclient NOT IN ( '411DEP', '411dep', '411ATEL')
-//ORDER BY  facture.datepiece DESC
-//LIMIT 1000
+/*
+SELECT facture.datepiece, facture.numero, facture.nom2, facture.compteclient , ligne_fact.*
+			FROM gfactu00002 facture
+			JOIN gclien00002 cl
+				ON facture.id_gclien = cl.id
+			JOIN glfact00002 ligne_fact
+				ON ligne_fact.id_piece = facture.id
+			LEFT JOIN gaffai00002 affaire
+				ON affaire.id = facture.id_gaffai
+			LEFT JOIN "gprodu00002" AS "produit"
+				ON "ligne_fact"."id_gprodu" = "produit"."id"
+			LEFT JOIN "gtprod00002" AS "famille"
+				ON "famille"."id" = "produit"."id_gtprod"
+			LEFT JOIN "gtvacg00002" AS "codetauxtva"
+				ON "produit"."codetva" = "codetauxtva"."code"
+		 WHERE "produit"."id" IS NULL
+AND ligne_fact.nom  IS NOT NULL
+AND ligne_fact.nom <> ''
+AND facture.compteclient NOT IN ( '411DEP', '411dep', '411ATEL')
+ORDER BY  facture.datepiece DESC
+LIMIT 1000
+*/
 
 
 class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_ImportFromDBCogilog_View {
@@ -1152,29 +1154,30 @@ class RSNImportSources_ImportInvoicesFromCogilog_View extends RSNImportSources_I
 		$query = "ALTER TABLE `$tableName` ADD INDEX(`sourceid`)";
 		$db->pquery($query);
 		
-		/* ATTENTION ! Supprime les factures déjà importées
-		*/
-		$query = "UPDATE $tableName
-		JOIN  vtiger_invoice
-			ON  vtiger_invoice.invoice_no = `$tableName`.sourceid
-		JOIN  vtiger_invoicecf
-			ON  vtiger_invoice.invoiceid = `vtiger_invoicecf`.invoiceid
-		JOIN vtiger_crmentity
-			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
-		";
-		$query .= " SET vtiger_crmentity.deleted = 1";
-		$query .= "
-			WHERE vtiger_crmentity.deleted = 0
-			AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
-		";
-		$result = $db->pquery($query, array());
-		if(!$result){
-			echo '<br><br><br><br>';
-			$db->echoError($query);
-			echo("<pre>$query</pre>");
-			die();
+		if(false){
+			/* ATTENTION ! Supprime les factures déjà importées
+			*/
+			$query = "UPDATE $tableName
+			JOIN  vtiger_invoice
+				ON  vtiger_invoice.invoice_no = `$tableName`.sourceid
+			JOIN  vtiger_invoicecf
+				ON  vtiger_invoice.invoiceid = `vtiger_invoicecf`.invoiceid
+			JOIN vtiger_crmentity
+				ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
+			";
+			$query .= " SET vtiger_crmentity.deleted = 1";
+			$query .= "
+				WHERE vtiger_crmentity.deleted = 0
+				AND `$tableName`.status = ".RSNImportSources_Data_Action::$IMPORT_RECORD_NONE."
+			";
+			$result = $db->pquery($query, array());
+			if(!$result){
+				echo '<br><br><br><br>';
+				$db->echoError($query);
+				echo("<pre>$query</pre>");
+				die();
+			}
 		}
-		
 		
 		RSNImportSources_Utils_Helper::setPreImportDataContactIdByRef4D(
 			$this->user,
