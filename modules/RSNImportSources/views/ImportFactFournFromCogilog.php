@@ -143,32 +143,68 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	}
 
 	/**
-	 * Method to process to the import a line of the purchaseorder.
-	 * @param $purchaseorder : the concerned purchaseorder.
-	 * @param $purchaseorderLine : the line to import.
-	 * @param int $sequence : the line number of this purchaseorder.
+	 * Method to process to the import a line of the invoice.
+	 * @param $invoice : the concerned invoice.
+	 * @param $invoiceLine : the line to import.
+	 * @param int $sequence : the line number of this invoice.
 	 */
-	function importPurchaseOrderLine($purchaseorder, $purchaseorderLine, $sequence, &$totalAmountHT, &$totalTax){
+	function importPurchaseOrderLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
         
-		$qty = str_to_float($purchaseorderLine['quantity']);
-		$listprice = str_to_float($purchaseorderLine['prix_unit_ht']);
+		$qty = str_to_float($invoiceLine['quantity']);
+		$listprice = str_to_float($invoiceLine['prix_unit_ht']);
 		
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
-		&& $purchaseorderLine['productcode'] === 'ZFPORT')
+		&& $invoiceLine['productcode'] == 'ZFPORT')
 			return;
 		
 		$discount_amount = 0;
-		$totalAmountHT += $qty * $listprice;
+		$discount_percent = str_to_float($invoiceLine['remise_ligne']);
+		$amountHT = $qty * $listprice;
 		
-		$incrementOnDel = $purchaseorderLine['isproduct'] ? 1 : 0;
+		$product = $this->getProduct($invoiceLine['productid'], $invoiceLine['isproduct']);
+		
+		$taxName = $product ? $product->get('taxName') : false;
+		if($taxName){
+			$taxValue = $product->get('taxPercentage');
+			$amountTTC = $amountHT * (1 + $taxValue/100);
+			$taxAmount = $amountTTC - $amountHT;
+			//var_dump('$totalTax', $totalTax, "$qty * $listprice * ($taxValue/100)");
+		}
+		else {
+			$taxName = 'tax1';
+			$taxValue = null;
+			$taxAmount = 0.0;
+			$amountTTC = $amountHT;
+		}
+		$totalTax += $taxAmount * (1 - $discount_percent/100);
+		$totalAmountHT += $amountHT * (1 - $discount_percent/100);
+		$listprice = ($amountTTC - $taxAmount) / $qty;
+		
+		$incrementOnDel = $invoiceLine['isproduct'] ? 1 : 0;
 		
 		$db = PearDatabase::getInstance();
-		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel)
-				VALUES(?,?,?,?,?,?,?)";
-		$qparams = array($purchaseorder->getId(), $purchaseorderLine['productid'], $sequence, $qty, $listprice, $discount_amount, $incrementOnDel);
+		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_percent, discount_amount, incrementondel, $taxName)
+			VALUES(?,?,?,?,?,?,?,?,?)";
+		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $qty, $listprice, $discount_percent, $discount_amount, $incrementOnDel, $taxValue);
 		//$db->setDebug(true);
 		$db->pquery($query, $qparams);
+	}
+	
+	function getProduct($productId, $isProduct){
+		$recordModel = Vtiger_Record_Model::getInstanceById($productId, $isProduct ? 'Products' : 'Services');
+		if(!$recordModel)
+			return false;
+		
+		$details = $recordModel->getTaxClassDetails();
+		foreach($details as $detail){
+			if($detail['related']){
+				$recordModel->set('taxPercentage', $detail['percentage']);
+				$recordModel->set('taxName', $detail['taxname']);
+				break;
+			}
+		}
+		return $recordModel;
 	}
 
 	/**
@@ -177,7 +213,6 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOnePurchaseOrder($purchaseorderData, $importDataController) {
-					
 		global $log;
 		
 		//TODO check sizeof $purchaseorderata
@@ -272,7 +307,8 @@ class RSNImportSources_ImportFactFournFromCogilog_View extends RSNImportSources_
 					, label = subject
 					WHERE purchaseorderid = ?
 				";
-				$total = $totalAmount + $totalTax;
+				
+				$total = round($totalAmount + $totalTax,2);
 				$result = $db->pquery($query, array(
 									$this->potype
 									, $total
