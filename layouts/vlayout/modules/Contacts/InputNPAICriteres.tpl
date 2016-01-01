@@ -18,6 +18,9 @@
 	#EditView .buttonset {
 	    margin-bottom: 5px;
 	}
+	#EditView th label {
+		color: white;
+	}
 </style>
 <div class='container-fluid editViewContainer'>
 <form class="form-horizontal" id="EditView" name="EditView" method="post" action="index.php" enctype="multipart/form-data">
@@ -34,7 +37,15 @@
 	<table class="table">
 		<thead>
 			<th>Contact</th>
-			<th class="critere-NPAI" data-critere="NPAI">NPAI
+			<th class="critere-NPAI" data-critere="NPAI"><a href="#">NPAI</a>
+				<input type="hidden" id="npai_notesid" name="npai_notesid" value="{$NPAI_NOTESID}"/>
+				<a href="" id="select-document" style="margin-left: 2em;" title="Cliquez ici pour sélectionner le courrier">
+					{if $NPAI_NOTESID}
+						{$NPAI_NOTE_NAME}
+					{else}
+						<span class="ui-icon ui-icon-alert red"></span><span style="color: red">Sélectionner le courrier</span>
+					{/if}
+				</a>
 				<a href="" class="remove-column" style="margin-left: 2em;" title="Supprimer la saisie des NPAI"><span class="icon-trash"></span></a>
 			</th>
 			<th class="critere-model critere hide"></th>
@@ -51,8 +62,8 @@
 					onchange="var $this=$(this), $table=$this.parent().nextAll('table:first');
 						if(this.checked) $table.removeClass('hide'); else $table.addClass('hide');"/>&nbsp;attribuer</label>
 				<table class="hide">
-					<tr><td>date : </td><td><input name="critere-dateapplication[]" class="input-small" value="{date('d-m-Y')}"/></td></tr>
-					<tr><td>info : </td><td><input name="critere-reldata[]" class="input-medium"/></td></tr>
+					<tr><td>date : </td><td><input name="critere-dateapplication[]" class="input-medium" value="{date('d-m-Y')}"/></td></tr>
+					<tr><td>info : </td><td><input name="critere-reldata[]" class="input-large"/></td></tr>
 				</table>
 			</td>
 			<td class="actions"><a href onclick="var $tr = $(this).parents('tr:first'); $tr.remove(); return false;" title="supprimer la ligne"><span class="icon-trash"></span></a></td>
@@ -60,7 +71,7 @@
 		</tbody>
 		<tfoot>
 		<tr class="inputs">
-			<td colspan="3"><input class="contact_no" value=""/></td>
+			<td colspan="3"><input class="contact_no input-medium" value=""/></td>
 		</tr>
 		</tbody>
 	</table>

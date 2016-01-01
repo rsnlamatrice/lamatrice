@@ -687,4 +687,66 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			return false;
 		return $account->getRSNAboRevues($isabonneOnly, $dateAbo);
 	}
+	
+	
+	
+	/* ED150515
+	 * Returns related data to this record
+	 * @param $dataNames : array or string width ',' separator
+	 * 	module name or suffix of function name (getRelated<dataName>)
+	 * @returns an associative array of entries
+	 *
+	 * Used from modules\Vtiger\actions\GetData.php, responding to vlayout\modules\Vtiger\resources\Edit.js, getRecordDetails({related_data : dataNames})
+	 *
+	 * ED160101 : saisie des NPAI : fournit le notesid pour lequel on veut la date de relation
+	 */
+	public function getRelatedData($dataNames){
+		
+		if(strpos($dataNames, 'notesid_') === 0){
+			$notesId = substr($dataNames, strlen('notesid_'));
+			global $adb;
+			$query = 'SELECT MAX(dateapplication), vtiger_crmentity.crmid, vtiger_crmentity.label
+				FROM vtiger_senotesrel
+				JOIN vtiger_crmentity
+					ON vtiger_senotesrel.notesid = vtiger_crmentity.crmid
+				WHERE vtiger_senotesrel.crmid = ?
+				AND notesid = ?
+				GROUP BY vtiger_crmentity.crmid, vtiger_crmentity.label';
+			$params = array($this->getId(), $notesId);
+			$result = $adb->pquery($query, $params);
+			if(!$result){
+				$adb->echoError();
+				die();
+			}
+			$date = $adb->query_result($result, 0, 0);
+			$label = $adb->query_result($result, 0, 'label');
+			$documents = array(
+				array('notesid' => $notesId, 'date' => $date, 'name' => $label),
+			);
+		
+			//documents postérieurs au NPAI
+			$dateNPAI = $this->get('rsnnpaidate');
+			if($dateNPAI){
+				$query = 'SELECT MAX(dateapplication) AS dateapplication, vtiger_crmentity.crmid, vtiger_crmentity.label
+					FROM vtiger_senotesrel
+					JOIN vtiger_crmentity
+						ON vtiger_senotesrel.notesid = vtiger_crmentity.crmid
+					WHERE vtiger_crmentity.deleted = 0
+					AND vtiger_senotesrel.crmid = ?
+					AND dateapplication > ?
+					GROUP BY vtiger_crmentity.crmid, vtiger_crmentity.label
+					ORDER BY dateapplication ASC';
+				$params = array($this->getId(), $dateNPAI);
+				$result = $adb->pquery($query, $params);
+				if(!$result){
+					$adb->echoError();
+					die();
+				}
+				while($row = $adb->getNextRow($result))
+					$documents[] = array('notesid' => $row['crmid'], 'date' => $row['dateapplication'], 'name' => $row['label']);
+			}
+			return array('Documents' => $documents);
+		}
+		return parent::getRelatedData($dataNames);
+	}
 }
