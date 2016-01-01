@@ -271,4 +271,32 @@ abstract class Vtiger_View_Controller extends Vtiger_Action_Controller {
 		$moduleName = $request->getModule(false);
 		return Vtiger_Language_Handler::export($moduleName, 'jsLanguageStrings');
 	}
+	
+	
+	/* ED160101 */
+	function ensureSearchParamsAreArray(Vtiger_Request &$request) {		
+		$searchKey = $request->get('search_key');
+		if(!is_array($searchKey)){
+			$searchValue = $request->get('search_value');
+			$searchInput = $request->get('search_input');
+			$searchOperator = $request->get('operator');
+			if($searchKey){
+				$searchKey = array($searchKey);
+				$searchValue = array($searchValue);
+				$searchInput = array($searchInput);
+				$searchOperator = array($searchOperator);
+			}
+			else {
+				$searchKey = array();
+				$searchValue = array();
+				$searchInput = array();
+				$searchOperator = array();
+			}
+				
+			$request->set('search_key', $searchKey);
+			$request->set('search_value', $searchValue);
+			$request->set('search_input', $searchInput);
+			$request->set('operator', $searchOperator);
+		}
+	}
 }

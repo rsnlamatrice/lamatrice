@@ -38,9 +38,17 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	 * Function returns list of folders
 	 * @return <Array> folder list
 	 */
-	public static function getAllFolders() {
+	public static function getAllFolders($folderName = false) {
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery('SELECT * FROM vtiger_attachmentsfolder ORDER BY sequence', array());
+		
+		$params = array();
+		$query = 'SELECT *
+				FROM vtiger_attachmentsfolder';
+		if($folderName){
+			$query .= ' WHERE foldername = ?';
+			$params[] = $folderName;
+		}
+		$result = $db->pquery($query, $params);
 
 		$folderList = array();
 		for($i=0; $i<$db->num_rows($result); $i++) {

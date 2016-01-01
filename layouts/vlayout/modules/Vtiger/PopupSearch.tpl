@@ -34,28 +34,13 @@
         </div>
     </div>
     <form class="form-horizontal popupSearchContainer">
-        <div class="control-group margin0px">
-            <span class="paddingLeft10px"><strong>{vtranslate('LBL_SEARCH_FOR')}</strong></span>
-            <span class="paddingLeft10px"></span>
-            <input type="text" placeholder="{vtranslate('LBL_TYPE_SEARCH')}" id="searchvalue"
-                {if $SEARCH_VALUE}value="{$SEARCH_VALUE}"{/if}
-                autofocus />
-            <span class="paddingLeft10px"><strong>{vtranslate('LBL_IN')}</strong></span>
-            <span class="paddingLeft10px help-inline pushDownHalfper" id="searchableColumnsListContainer">
-                <select style="width: 150px;" class="chzn-select help-inline" id="searchableColumnsList">
-                    {foreach key=block item=fields from=$RECORD_STRUCTURE}
-                        {foreach key=fieldName item=fieldObject from=$fields}
-                                <option value="{$fieldName}"
-                                {if $SEARCH_KEY eq $fieldName}selected="selected"{/if}
-                                >{vtranslate($fieldObject->get('label'),$MODULE)}</option>
-                        {/foreach}
-                    {/foreach}
-                </select>
-            </span>
-            <span class="paddingLeft10px cursorPointer help-inline" id="popupSearchButton"><img src="{vimage_path('search.png')}" alt="{vtranslate('LBL_SEARCH_BUTTON')}" title="{vtranslate('LBL_SEARCH_BUTTON')}" /></span>
-            <!-- TODO span class="paddingLeft10px cursorPointer help-inline" id="popupAddSearchButton"><img src="{vimage_path('plus.png')}" alt="{vtranslate('LBL_ADDSEARCH_BUTTON')}" title="{vtranslate('LBL_SEARCH_BUTTON')}" /></span-->
-        </div>
-
+        {if !$SEARCH_KEY}
+            {include file=vtemplate_path('PopupSearchItem.tpl',$MODULE) SEARCH_KEY='' SEARCH_VALUE='' IS_SEARCH_FIRST_ITEM=true IS_SEARCH_LAST_ITEM=true}
+        {else}
+            {foreach item=SEARCH_KEY_ITEM from=$SEARCH_KEY name=search_list}
+                {include file=vtemplate_path('PopupSearchItem.tpl',$MODULE) SEARCH_VALUE=$SEARCH_VALUE[$smarty.foreach.search_list.index] SEARCH_KEY=$SEARCH_KEY_ITEM IS_SEARCH_FIRST_ITEM=$smarty.foreach.search_list.first IS_SEARCH_LAST_ITEM=$smarty.foreach.search_list.last}
+            {/foreach}
+        {/if}
         {foreach item=ALPHABET_FIELD from=$ALPHABET_FIELDS}
             {include file=vtemplate_path($ALPHABET_FIELD->getUITypeModel()->getAlphabetTemplateName(),$MODULE)}
         {/foreach}

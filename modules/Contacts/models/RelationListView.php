@@ -268,9 +268,12 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 						ON c1.accountid = account.crmid
 					JOIN vtiger_contactdetails
 						ON vtiger_contactdetails.accountid = account.crmid
+					JOIN vtiger_crmentity
+						ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
 					WHERE c1.contactid = ".$contactId."
-					AND  vtiger_contactdetails.contactid <> ".$contactId."
+					AND vtiger_contactdetails.contactid <> ".$contactId."
 					AND account.deleted = 0
+					AND vtiger_crmentity.deleted = 0
 				
 					UNION
 					
@@ -280,7 +283,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					FROM vtiger_contactscf
 					JOIN vtiger_crmentity
 						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
-					WHERE vtiger_contactscf.contactid = ".$contactId."
+					WHERE vtiger_crmentity.deleted = 0
+					AND  vtiger_contactscf.contactid = ".$contactId."
 					AND vtiger_contactscf.transfererrevue IS NOT NULL
 					
 					UNION
@@ -291,7 +295,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					FROM vtiger_contactscf
 					JOIN vtiger_crmentity
 						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
-					WHERE vtiger_contactscf.contactid = ".$contactId."
+					WHERE vtiger_crmentity.deleted = 0
+					AND vtiger_contactscf.contactid = ".$contactId."
 					AND vtiger_contactscf.transfererdons IS NOT NULL
 				
 					UNION
@@ -302,7 +307,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					FROM vtiger_contactscf
 					JOIN vtiger_crmentity
 						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
-					WHERE vtiger_contactscf.transfererrevue = ".$contactId."
+					WHERE vtiger_crmentity.deleted = 0
+					AND vtiger_contactscf.transfererrevue = ".$contactId."
 					
 					UNION
 					
@@ -312,7 +318,8 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 					FROM vtiger_contactscf
 					JOIN vtiger_crmentity
 						ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
-					WHERE vtiger_contactscf.transfererdons = ".$contactId."
+					WHERE vtiger_crmentity.deleted = 0
+					AND vtiger_contactscf.transfererdons = ".$contactId."
 					
 					ORDER BY dateapplication desc
 					";
@@ -344,30 +351,31 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 						$recordId = $db->query_result($result, $i, "contactid");
 				
 					$relatedRecordModel = $relatedRecordModelsList[$recordId];
-					if($relatedRecordModel)
-					foreach($fieldRels as $fieldRel){
-						
-						$fieldRelType = $fieldRel->get('typeofdata');
-						$fieldRel = $fieldRel->get('name');
-						$value = $db->query_result($result, $i, strtolower( $fieldRel ));
-						switch($fieldRelType){
-						  case "D":
-						  case "DATETIME":
-						      if($value)
-							      $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
-						    break;
-						  default:
-						    $value = preg_replace('/\\r\\n?/', '<br/>', $value);
-						    break;
+					if($relatedRecordModel){
+						foreach($fieldRels as $fieldRel){
+							
+							$fieldRelType = $fieldRel->get('typeofdata');
+							$fieldRel = $fieldRel->get('name');
+							$value = $db->query_result($result, $i, strtolower( $fieldRel ));
+							switch($fieldRelType){
+							  case "D":
+							  case "DATETIME":
+								  if($value)
+									  $value = new DateTime($value);//preg_match('/0{1,4}[-\/]0{1,2}[-\/]0{1,4}/', $value) ? '0000-00-00' : (new DateTime($value))->format('Y-m-d H:i:s');
+								break;
+							  default:
+								$value = preg_replace('/\\r\\n?/', '<br/>', $value);
+								break;
+							}
+							$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
+							if(!is_array($values))//1er tour
+								$values = array($value);
+							else
+								$values[] = $value;
+							$relatedRecordModel->set($fieldRel, $values);
 						}
-						$values = $relatedRecordModel->get($fieldRel);//valeur précédemment affectée
-						if(!is_array($values))//1er tour
-							$values = array($value);
-						else
-							$values[] = $value;
-						$relatedRecordModel->set($fieldRel, $values);
-					}		
-					$relatedRecordModelsList[$recordId] = $relatedRecordModel;
+						$relatedRecordModelsList[$recordId] = $relatedRecordModel;
+					}
 				}
 			}
 		}

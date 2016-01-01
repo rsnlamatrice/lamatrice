@@ -53,7 +53,10 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 					}
 				}
 				elseif($moduleName == 'Contacts' && $field->getName() === 'description'
-				       && $primaryRecordModel->get($field->getName())){
+					&& $primaryRecordModel->get($field->getName())
+					&& $primaryRecordModel->get($field->getName()) != $fieldValue
+					&& decode_html($primaryRecordModel->get($field->getName())) != $fieldValue
+				){
 					$fieldValue = $primaryRecordModel->get($field->getName()) . "\r\n" . $fieldValue;
 				}
 				elseif($moduleName == 'Contacts' && $field->getName() === 'email'
@@ -70,9 +73,18 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 		foreach($deleteRecords as $deleteRecord) {
 			$recordPermission = Users_Privileges_Model::isPermitted($moduleName, 'Delete', $deleteRecord);
 			if($recordPermission) {
+				if($moduleName == 'Contacts'){
+					//Avant la fusion, archive l'adresse du contact qui va disparaitre. Cette archive est transférée comme enregistrement lié.
+					$deleteRecordModel = Vtiger_Record_Model::getInstanceById($deleteRecord);
+					$addressRecordModel = $deleteRecordModel->createContactAddressesRecord('mailing', false, $primaryRecordModel);
+					if($addressRecordModel){
+						$addressRecordModel->set('comments', trim($addressRecordModel->get('comments') . ' ' . 'Fusion de ' . $deleteRecordModel->get('contact_no') . ' ' . $deleteRecordModel->getName()));
+						$addressRecordModel->save();
+					}
+				}
 				$primaryRecordModel->transferRelationInfoOfRecords(array($deleteRecord));
-				$record = Vtiger_Record_Model::getInstanceById($deleteRecord);
-				$record->delete();
+				$deleteRecordModel = Vtiger_Record_Model::getInstanceById($deleteRecord);
+				$deleteRecordModel->delete();
 			}
 		}
 

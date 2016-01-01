@@ -28,7 +28,7 @@
 						<span class="span1">
 						{if $RELATED_RECORD->get('quantity') && (float)$RELATED_RECORD->get('quantity') != 1}
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
-								<span class="pull-right">x {(float)$RELATED_RECORD->get('quantity')}</span>
+								<span class="pull-right">x{if (float)$RELATED_RECORD->get('quantity') < 100}&nbsp;{/if}{(float)$RELATED_RECORD->get('quantity')}</span>
 							</a>
 						{else}&nbsp;
 						{/if}
@@ -36,7 +36,7 @@
 						<span class="span2">
 							<a href="{$RELATED_RECORD->getDetailViewUrl()}" id="{$MODULE}_{$RELATED_MODULE}_Related_Record_{$RELATED_RECORD->get('id')}" title="{$RELATED_RECORD->getDisplayValue('productname')}">
 								{if (float)$RELATED_RECORD->get('listprice') neq 0}
-									<span class="pull-right">{CurrencyField::convertToUserFormat($RELATED_RECORD->get('listprice'))} &euro;</span>
+									<span class="pull-right">{CurrencyField::convertToUserFormat($RELATED_RECORD->get('listprice'), null, false, false, 2)} &euro;</span>
 								{/if}
 							</a>
 						</span>
