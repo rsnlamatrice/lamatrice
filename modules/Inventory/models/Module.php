@@ -134,7 +134,6 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	 * @param Vtiger_Record_Model $recordModel
 	 */
 	public function saveRecord(Vtiger_Record_Model $recordModel) {
-		
 		//ED150707 : missing account_id
 		if($this->getName() !== 'PurchaseOrder'
 		&& (!$recordModel->get('account_id') || $recordModel->get('account_id') =='0')){
