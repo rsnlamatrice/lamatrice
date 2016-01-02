@@ -21,6 +21,9 @@
 	#EditView th label {
 		color: white;
 	}
+	#EditView thead th.helper {
+		text-align: right;
+	}
 </style>
 <div class='container-fluid editViewContainer'>
 <form class="form-horizontal" id="EditView" name="EditView" method="post" action="index.php" enctype="multipart/form-data">
@@ -49,7 +52,10 @@
 				<a href="" class="remove-column" style="margin-left: 2em;" title="Supprimer la saisie des NPAI"><span class="icon-trash"></span></a>
 			</th>
 			<th class="critere-model critere hide"></th>
-			<th class="helper"><button class="add-critere">ajouter un critère</button></th>
+			<th class="helper">
+				<button class="add-critere">ajouter un critère</button>
+				<a href="" class="clear-list" style="margin-left: 2em;" title="Retirer les lignes de contacts déjà traités"><span class="icon-trash"></span></a>
+			</th>
 		</thead>
 		<tbody>
 		<tr class="row-model hide">

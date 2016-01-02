@@ -708,7 +708,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		if(strpos($dataNames, 'notesid_') === 0){
 			$notesId = substr($dataNames, strlen('notesid_'));
 			global $adb;
-			$query = 'SELECT MAX(dateapplication), vtiger_crmentity.crmid, vtiger_crmentity.label
+			$query = 'SELECT MIN(dateapplication), vtiger_crmentity.crmid, vtiger_crmentity.label
 				FROM vtiger_senotesrel
 				JOIN vtiger_crmentity
 					ON vtiger_senotesrel.notesid = vtiger_crmentity.crmid
@@ -730,7 +730,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			//documents postérieurs au NPAI
 			$dateNPAI = $this->get('rsnnpaidate');
 			if($dateNPAI){
-				$query = 'SELECT MAX(dateapplication) AS dateapplication, vtiger_crmentity.crmid, vtiger_crmentity.label
+				$query = 'SELECT MIN(dateapplication) AS dateapplication, vtiger_crmentity.crmid, vtiger_crmentity.label
 					FROM vtiger_senotesrel
 					JOIN vtiger_crmentity
 						ON vtiger_senotesrel.notesid = vtiger_crmentity.crmid

@@ -54,11 +54,37 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		var $this = $(e.currentTarget)
 		, $th = $this.parents('th:first')
 		, $table = $this.parents('table:first')
-		, critere = $th.attr('data-critere');
-		if (!confirm("Êtes vous sûr de vouloir supprimer cette colonne '" + critere + "' ?"))
+		, critere = $th.attr('data-critere')
+		, confirmMsg = "Êtes vous sûr de vouloir supprimer cette colonne '" + critere + "' ?";
+		if (critere === 'NPAI') {
+			var $inputNotesId = $('#npai_notesid');
+			if ($inputNotesId.length && !$inputNotesId.val()) {
+				confirmMsg = false;
+			} 
+		}
+		if (confirmMsg && !confirm(confirmMsg))
 			return;
 		$table.find('th[data-critere="' + critere + '"], td[data-critere="' + critere + '"]')
 			.remove();
+	},
+	
+	/** ED160102
+	 * Function to register events
+	 */
+	registerClearListEvent : function(container){
+		var thisInstance = this;
+		$('table > thead .clear-list').on('click', function(e){
+			var $table = $(e.currentTarget).parents('table:first');
+			//supprime toutes les lignes déjà enregistrées ou avec un contact inconnu
+			$table.find('tbody input[name="contactid[]"]').each(function(){
+				var $tr = $(this).parents('tr:first');
+				if ((!this.value
+				|| $tr.is('.save-done'))
+				&& !$tr.is('.row-model'))
+					$tr.remove();
+			});
+			return false;
+		});
 	},
 
 	/** ED150813
@@ -366,8 +392,8 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		;
 		if (documentDate) {
 			documentDate = documentDate.split(' ')[0];//sans l'heure
-			if (addressDate && addressDate >= documentDate
-			|| npaiDate && npaiDate >= documentDate) 
+			if (addressDate && addressDate > documentDate
+			|| npaiDate && npaiDate > documentDate) 
 				new_npai = cur_npai;
 			
 			if (cur_npai == 1 && npaiDate) {
@@ -388,7 +414,7 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 				var npaiDateObject = new Date(npaiDate)
 				, delay = (documentDateObject - npaiDateObject) / 1000 / 3600 / 24 / 30;
 				if (docsList
-				&& delay > 3) { //si on a d'autres documents dans les 3 mois au moins
+				&& delay >= 3) { //si on a d'autres documents dans les 3 mois au moins
 					new_npai = cur_npai;
 				}
 			}
@@ -416,10 +442,10 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		}
 		else {
 			documentDate = documentDate.split(' ')[0];//sans l'heure
-			if (npaiDate && npaiDate >= documentDate) {
+			if (npaiDate && npaiDate > documentDate) {
 				radios += '<code>Le statut NPAI est plus récent que le courrier</code>';
 			}
-			else if (addressDate && addressDate >= documentDate) {
+			else if (addressDate && addressDate > documentDate) {
 				radios += '<code>L\'adresse a été modifiée depuis le courrier</code>';
 			}
 			if (docsList) {
@@ -678,5 +704,6 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		this.registerAddCritereColumnEvent(container);
 		this.registerContactInputEvent(container);
 		this.registerSelectDocumentEvent(container);
+		this.registerClearListEvent(container);
 	}
 })
