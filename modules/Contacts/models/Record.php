@@ -702,6 +702,9 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function getRelatedData($dataNames){
 		
+		//Spécial saisie des NPAI
+		//retourne la date d'application du document et les documents depuis le NPAI
+		//paramètre passé dans l'url sous la forme &related_data=notesid_<notesid>
 		if(strpos($dataNames, 'notesid_') === 0){
 			$notesId = substr($dataNames, strlen('notesid_'));
 			global $adb;

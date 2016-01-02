@@ -75,12 +75,19 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 			if($recordPermission) {
 				if($moduleName == 'Contacts'){
 					//Avant la fusion, archive l'adresse du contact qui va disparaitre. Cette archive est transférée comme enregistrement lié.
+					//TODO éviter les doublons
 					$deleteRecordModel = Vtiger_Record_Model::getInstanceById($deleteRecord);
 					$addressRecordModel = $deleteRecordModel->createContactAddressesRecord('mailing', false, $primaryRecordModel);
 					if($addressRecordModel){
 						$addressRecordModel->set('comments', trim($addressRecordModel->get('comments') . ' ' . 'Fusion de ' . $deleteRecordModel->get('contact_no') . ' ' . $deleteRecordModel->getName()));
 						$addressRecordModel->save();
 					}
+					//archive email
+					//TODO sans doublon...
+					
+					//commentaire
+					$text = 'Fusion de ' . $deleteRecordModel->get('contact_no') . ' ' . $deleteRecordModel->getName() . ' dans ' . $primaryRecordModel->get('contact_no') . ' ' . $primaryRecordModel->getName();
+					$this->createModComment($primaryRecordModel, $text);
 				}
 				$primaryRecordModel->transferRelationInfoOfRecords(array($deleteRecord));
 				$deleteRecordModel = Vtiger_Record_Model::getInstanceById($deleteRecord);
@@ -92,4 +99,24 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 		$response->setResult(true);
 		$response->emit();
 	}
+	
+	/**
+	 * Crée un commentaire 
+	 */
+	function createModComment($parentRecordModel, $text){
+		$currentUserModel = Users_Record_Model::getCurrentUserModel();
+		
+		$record = Vtiger_Record_Model::getCleanInstance('ModComments');
+		$record->set('mode', 'create');
+		
+		$record->set('commentcontent', $text);
+		$record->set('related_to', $parentRecordModel->getId());
+		
+		$record->set('userid', $currentUserModel->getId());
+		
+		$record->save();
+		
+		return $record;
+	}
+
 }

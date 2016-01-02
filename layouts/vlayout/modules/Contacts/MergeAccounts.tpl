@@ -5,7 +5,7 @@
  ********************************************************************************/
 -->*}
 {strip}
-<div style='background: white;'>
+<div id="popupPageContainer" style='background: white;'>
 	<div>
 		<br>
 		<div style='margin-left:10px'><h3>{vtranslate('LBL_MERGE_ACCOUNTS_TITLE', $MODULE)}</h3></div><br>
@@ -22,10 +22,13 @@
 	</div>
 
 	{if ! $ALREADY_COMPTE_COMMUN}
+	<input id="popUpClassName" type="hidden" value="Contacts_MergeAccounts_Js"/>
 	<form class="form-horizontal contentsBackground" name="massMerge" method="post" action="index.php">
 		<input type="hidden" name=module value="{$MODULE}" />
 		<input type="hidden" name="action" value="ProcessDuplicatesAccounts" />
 		<input type="hidden" name="records" value={Zend_Json::encode($RECORDS)} />
+		<input type="hidden" name="isAjax" value="1" />
+		<input type="hidden" class="triggerEventName" name="triggerEventName" value="{$smarty.request.triggerEventName}"/>
 
 	<div>
 		<table class='table table-bordered table-condensed'>
