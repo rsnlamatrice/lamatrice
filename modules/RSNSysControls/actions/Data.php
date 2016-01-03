@@ -30,8 +30,12 @@ class RSNSysControls_Data_Action extends Vtiger_Action_Controller {
 	/**
 	 * Method called by the cron when there is scheduled sys control.
 	 *  It process to the import of all sys controls.
+	 *
+	 *  @param $checkLastTestTime : teste la date de dernière exécution (c'est le cas pour le cron)
+	 *  @param $verbose : si true, n'envoie pas d'email
 	 */
 	public static function runScheduledSysControls($checkLastTestTime = true, $verbose = false) {
+		
 		//TODO email or log when schedule control is running and ended !!
 		global $current_user;
 		$scheduledSysControls = self::getScheduledSysControls($checkLastTestTime);

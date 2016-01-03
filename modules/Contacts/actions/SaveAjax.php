@@ -20,6 +20,7 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 		parent::process($request);
 	}
 	
+	//Enregistrement de la saisie des NPAI et critères
 	public function saveNPAICriteres(Vtiger_Request $request) {
 	
 		$result = array();
@@ -89,7 +90,7 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 		else
 			$critereNPAI = Vtiger_Record_Model::getInstanceById($adb->query_result($result, 0, 0), 'Critere4D');
 	}
-	//Retrouve le document et le critère de contact à associer
+	// Crée un nouveau critère NPAI rattaché au document
 	private function createCritere4dNPAIFForDocument($notesId, &$document){
 		$critereNPAI = Vtiger_Record_Model::getCleanInstance('Critere4D');
 		if($document->get('codeaffaire'))
@@ -110,8 +111,10 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 	
 	//Retrouve le document et le critère de contact à associer
 	private function createContactRelationNPAI(&$contact, &$document, &$critereNPAI){
+		//Critère
 		$contact->assignRelatedCritere4D($critereNPAI->getId(), date('d-m-Y'), $document->getName());
 		
+		//Document, la relation existe déjà
 		global $adb;
 		$query = "UPDATE vtiger_senotesrel
 			SET data = CONCAT(IFNULL(data, ''), IF(IFNULL(data, '') = '', '', ' - '), ?)

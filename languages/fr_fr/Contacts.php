@@ -74,13 +74,13 @@ $languageStrings = array(
 	
 	'LBL_ASSIGN_Critere4D'        	=> 'Affecter un critère',
 	'LBL_ASSIGN_Critere4D_MULTI'  	=> 'Affecter des critères',
-	'LBL_UNASSIGN_Critere4D'        => 'Supprimer un critère affecté',
+	'LBL_UNASSIGN_Critere4D'        => 'Supprimer l\'affectation à un critère',
 	'LBL_UNASSIGN_Critere4D_MULTI'  => 'Supprimer les affectations de critères',
 	'LBL_IN_RELATION_WITH'			=> 'en relation avec',
 	
 	'LBL_ASSIGN_Documents'        	=> 'Affecter un document',
 	'LBL_ASSIGN_Documents_MULTI'  	=> 'Affecter des documents',
-	'LBL_UNASSIGN_Documents'        => 'Supprimer un document affecté',
+	'LBL_UNASSIGN_Documents'        => 'Supprimer l\'affectation à un document',
 	'LBL_UNASSIGN_Documents_MULTI'  => 'Supprimer les affectations de documents',
         
     'USE ADDRESS2 FOR REVUE'        => 'Spécifiquement pour la Revue',

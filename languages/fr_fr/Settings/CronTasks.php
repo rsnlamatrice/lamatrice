@@ -35,4 +35,7 @@ $languageStrings = array(
 	'MailScanner' => 'Réception des emails', 
 	'Start hour' => 'Heure de démarrage',
 	'LBL_START_HOUR_HELP_MSG' => 'Laisser à \'00:00\' pour ignorer',
+	'Exclude week-end' => 'Exclu le week-end',
+	'LBL_EXCLUDE_WEEKEND_HELP_MSG' => 'Cocher pour ne pas exécuter la tâche pendant le week-end',
+	'LBL_NOT_ON_WEEKEND' => 'Pas le week-end',
 );

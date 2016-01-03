@@ -310,4 +310,77 @@ class Critere4D extends Vtiger_CRMEntity {
 		
 		$log->debug("Invoking deleteDuplicatesFromPickList(".$pickListName.") method ...DONE");
 	}
+	
+	
+	/**
+	 * Move the related records of the specified list of id's to the given record.
+	 * @param String This module name
+	 * @param Array List of Entity Id's from which related records need to be transfered
+	 * @param Integer Id of the the Record to which the related records are to be moved
+	 * //ED151013
+	 * @param Array If set with an array, count related but does not execute transfer. Returns array of module
+	 *
+	 *ED141012 TODO transfert Contacts avec champs inversés
+	 * 
+	 */
+	function transferRelatedRecords($module, $transferEntityIds, $entityId, &$countingOnly = false) {
+		global $adb,$log;
+		$log->debug("Entering function transferRelatedRecords ($module, $transferEntityIds, $entityId)");
+
+		$rel_table_arr = Array(
+			"Critere4D"=>"vtiger_critere4dcontrel",
+		);
+
+		$tbl_field_arr = Array(
+			"vtiger_critere4dcontrel"=>"contactid",
+		);
+
+		$entity_tbl_field_arr = Array(
+			"vtiger_critere4dcontrel"=>"critere4did",
+		);
+
+		//ED150910
+		$do_fields_reverse = Array();
+		
+		foreach($transferEntityIds as $transferId) {
+			foreach($rel_table_arr as $rel_module=>$rel_table) {
+				//ED150910 vtiger_contactscontrel dans les deux sens
+				$do_reverse = array_key_exists($rel_table, $do_fields_reverse) ? 1 : 0;
+				for($reverse = 0; $reverse <= 1; $reverse++){
+					if($reverse === 0){
+						//original
+						$id_field = $tbl_field_arr[$rel_table];
+						$entity_id_field = $entity_tbl_field_arr[$rel_table];
+					}
+					else {
+						//reverse
+						$entity_id_field = $tbl_field_arr[$rel_table];
+						$id_field = $entity_tbl_field_arr[$rel_table];
+					}
+					// IN clause to avoid duplicate entries
+					$sel_result =  $adb->pquery("select $id_field from $rel_table where $entity_id_field=? " .
+							" and $id_field not in (select $id_field from $rel_table where $entity_id_field=?)",
+							array($transferId,$entityId));
+					$res_cnt = $adb->num_rows($sel_result);
+					if($res_cnt > 0) {
+						if(is_array($countingOnly)){
+							if(!array_key_exists($rel_module, $countingOnly))
+								$countingOnly[$rel_module] = $res_cnt;
+							else
+								$countingOnly[$rel_module] += $res_cnt;
+						}
+						else {
+							for($i=0;$i<$res_cnt;$i++) {
+								$id_field_value = $adb->query_result($sel_result,$i,$id_field);
+								$adb->pquery("update $rel_table set $entity_id_field=? where $entity_id_field=? and $id_field=?",
+									array($entityId,$transferId,$id_field_value));
+							}
+						}
+					}
+				}
+			}
+		}
+		parent::transferRelatedRecords($module, $transferEntityIds, $entityId, $countingOnly);
+		$log->debug("Exiting transferRelatedRecords...");
+	}
 }

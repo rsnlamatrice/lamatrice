@@ -32,7 +32,7 @@
 				{foreach key=RELATED_KEY item=RELATED_RECORD from=$RELATED_ENTRIES}
 					<div class="row-fluid">
 						<label class="span3"><input type="hidden" name="related_ids[]" value="{$RELATED_RECORD->getId()}"/>{$RELATED_RECORD->getName()}</label>
-						<span class="span3">date : <input type="text" name="dateapplication[]" value="{$CURRENT_DATE}" class="input-small" /></span>
+						<span class="span3">date : <input type="text" name="dateapplication[]" value="{$CURRENT_DATE}" class="input-medium" /></span>
 						<span class="span6">info : <input type="text" name="reldata[]" value="" class="input-large" /></span>
 					</div>
 				{/foreach}

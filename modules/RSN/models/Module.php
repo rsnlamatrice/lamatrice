@@ -177,7 +177,8 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 	 * Liste des templates dans vlayout/modules/RSN/Outils/
 	 */
 	public function getOutilsList(){
-		if(date('Y') == '2015' || (date('Y') == '2016' && date('n') == '1')){
+		if(false
+		&& (date('Y') == '2015' || (date('Y') == '2016' && date('n') == '1'))){
 			$list[] = array(
 				'sub' => 'ImportCogilog',
 				'label' => 'Importation Cogilog',
@@ -233,7 +234,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		
 		$list[] = array(
 				'sub' => 'EditCustomView',
-				'label' => 'Edition de vue',
+				'label' => 'Edition de vue (debug)',
 				'params' => array(
 					'viewid' => 182,//exemple
 					'viewmodule' => 'Contacts'
@@ -241,11 +242,13 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			)
 		;
 		
-		$list[] = array(
-				'sub' => 'TestsED',
-				'label' => 'Tests ED'
-			)
-		;
+		if(false){
+			$list[] = array(
+					'sub' => 'TestsED',
+					'label' => 'Tests ED'
+				)
+			;
+		}
 		
 		$list[] = array(
 				'sub' => 'DefineMissingLabels',
@@ -261,7 +264,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		
 		$list[] = array(
 				'sub' => 'PicklistValuesTransfer',
-				'label' => 'Transfert des listes de valeurs'
+				'label' => 'Transfert des listes de valeurs (banques)'
 			)
 		;
 		

@@ -73,7 +73,7 @@ class Contacts_MassActionAjax_View extends Accounts_MassActionAjax_View {
 	function unassignRelatedEntities(Vtiger_Request $request){
 		$module = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($module);
-		$relatedModuleName = 'Critere4D';
+		$relatedModuleName = $request->get('relatedmodule');
 		$relatedRecords = Vtiger_Module_Model::getInstance($module);
 		
 		$cvId = $request->get('viewname');
