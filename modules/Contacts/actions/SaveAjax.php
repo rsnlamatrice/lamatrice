@@ -20,9 +20,13 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 		parent::process($request);
 	}
 	
+	//Enregistrement de la saisie des NPAI et critères
 	public function saveNPAICriteres(Vtiger_Request $request) {
 	
 		$result = array();
+		
+		$document = false;
+		$critereNPAI = false;
 
 		foreach($request->get('contacts') as $contactId=>$contactData){
 			foreach($contactData as $critereId => $critereData){
@@ -30,6 +34,8 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 				if($critereId == 'NPAI'){
 					$npaiChanged = $contact->get('rsnnpai') != $critereData['value']
 						&& !($contact->get('rsnnpai') ===null && $critereData['value'] ==0);
+					$notesId = $critereData['notesid'];
+					$this->getNPAIDocumentAndCritere4D($notesId, $document, $critereNPAI);
 					if($npaiChanged || $critereData['comment']){
 						$contact->set('mode', 'edit');
 						$contact->set('rsnnpai', $critereData['value']);
@@ -39,6 +45,7 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 							$contact->set('rsnnpaicomment', $critereData['comment']);
 						$contact->save();
 					}
+					$this->createContactRelationNPAI($contact, $document, $critereNPAI);
 				}
 				elseif(is_numeric($critereId)){
 					$contact->assignRelatedCritere4D($critereId, $critereData['date'], $critereData['data']);
@@ -55,6 +62,71 @@ class Contacts_SaveAjax_Action extends Vtiger_SaveAjax_Action {
 		$response->emit();
 	}
 	
+	//Retrouve le document et le critère de contact à associer
+	private function getNPAIDocumentAndCritere4D($notesId, &$document, &$critereNPAI){
+		if($document && $document->getId() == $notesId)
+			return true;
+		$document = Vtiger_Record_Model::getInstanceById($notesId, 'Documents');
+		if(!$document)
+			return false;
+		global $adb;
+		$query = 'SELECT crmid
+			FROM vtiger_critere4d
+			JOIN vtiger_crmentity
+				ON vtiger_critere4d.critere4did = vtiger_crmentity.crmid
+			WHERE vtiger_crmentity.deleted = false
+			AND vtiger_critere4d.notesid = ?
+			AND categorie = ?
+			ORDER BY createdtime DESC
+			LIMIT 1';
+		$result = $adb->pquery($query, array($notesId, 'NPAI'));
+		if(!$result){
+			$adb->echoError();
+			die();
+		}
+		if($adb->getRowCount($result) === 0){
+			$critereNPAI = $this->createCritere4dNPAIFForDocument($notesId, $document);
+		}
+		else
+			$critereNPAI = Vtiger_Record_Model::getInstanceById($adb->query_result($result, 0, 0), 'Critere4D');
+	}
+	// Crée un nouveau critère NPAI rattaché au document
+	private function createCritere4dNPAIFForDocument($notesId, &$document){
+		$critereNPAI = Vtiger_Record_Model::getCleanInstance('Critere4D');
+		if($document->get('codeaffaire'))
+			$name = 'NPAI ' . $document->get('codeaffaire');
+		else
+			$name = 'NPAI ' . $document->getName();
+		$critereNPAI->set('nom', $name);
+		$critereNPAI->set('categorie', 'NPAI');
+		$critereNPAI->set('ordredetri', 99);
+		$critereNPAI->set('usage_debut', $document->get('createdtime'));
+		$critereNPAI->set('notesid', $document->getId());
+		$critereNPAI->save();
+		if(!$critereNPAI->getId()){
+			die("Le critère n'a pas pu être créé !");
+		}
+		return $critereNPAI;
+	}
+	
+	//Retrouve le document et le critère de contact à associer
+	private function createContactRelationNPAI(&$contact, &$document, &$critereNPAI){
+		//Critère
+		$contact->assignRelatedCritere4D($critereNPAI->getId(), date('d-m-Y'), $document->getName());
+		
+		//Document, la relation existe déjà
+		global $adb;
+		$query = "UPDATE vtiger_senotesrel
+			SET data = CONCAT(IFNULL(data, ''), IF(IFNULL(data, '') = '', '', ' - '), ?)
+			WHERE crmid = ?
+			AND notesid = ?
+		";
+		$result = $adb->pquery($query, array('NPAI', $contact->getId(), $document->getId()));
+		if(!$result){
+			$adb->echoError();
+			die();
+		}
+	}
 
 	/** ED151208 depuis le QuickCreate, la sélection de "Ne pas prospecter" impacte les autres Ne Pas
 	 * 

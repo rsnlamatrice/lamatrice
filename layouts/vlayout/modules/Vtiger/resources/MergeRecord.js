@@ -76,6 +76,8 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 		var thisInstance = this;
 		
 		popupPageContentsContainer.on('click','button[type="submit"]', function(e){
+			e.stopImmediatePropagation();//needed for Contacts_MergeAccounts_Js
+			e.preventDefault();
 		
 			var progressIndicatorElement = jQuery.progressIndicator({
 				'position' : 'html',
@@ -92,13 +94,11 @@ Vtiger_Popup_Js("Vtiger_MergeRecord_Js",{
 					}else{
 						progressIndicatorElement.progressIndicator({'mode': 'hide'});
 					}
-				
 			    },
 			    function(error,err){
 					progressIndicatorElement.progressIndicator({'mode': 'hide'});
 			    }
 			);
-			e.preventDefault();
 			return false;
 		});
 	},

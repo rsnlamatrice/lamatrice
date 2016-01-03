@@ -53,7 +53,10 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 					}
 				}
 				elseif($moduleName == 'Contacts' && $field->getName() === 'description'
-				       && $primaryRecordModel->get($field->getName())){
+					&& $primaryRecordModel->get($field->getName())
+					&& $primaryRecordModel->get($field->getName()) != $fieldValue
+					&& decode_html($primaryRecordModel->get($field->getName())) != $fieldValue
+				){
 					$fieldValue = $primaryRecordModel->get($field->getName()) . "\r\n" . $fieldValue;
 				}
 				elseif($moduleName == 'Contacts' && $field->getName() === 'email'
@@ -70,9 +73,25 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 		foreach($deleteRecords as $deleteRecord) {
 			$recordPermission = Users_Privileges_Model::isPermitted($moduleName, 'Delete', $deleteRecord);
 			if($recordPermission) {
+				if($moduleName == 'Contacts'){
+					//Avant la fusion, archive l'adresse du contact qui va disparaitre. Cette archive est transférée comme enregistrement lié.
+					//TODO éviter les doublons
+					$deleteRecordModel = Vtiger_Record_Model::getInstanceById($deleteRecord);
+					$addressRecordModel = $deleteRecordModel->createContactAddressesRecord('mailing', false, $primaryRecordModel);
+					if($addressRecordModel){
+						$addressRecordModel->set('comments', trim($addressRecordModel->get('comments') . ' ' . 'Fusion de ' . $deleteRecordModel->get('contact_no') . ' ' . $deleteRecordModel->getName()));
+						$addressRecordModel->save();
+					}
+					//archive email
+					//TODO sans doublon...
+					
+					//commentaire
+					$text = 'Fusion de ' . $deleteRecordModel->get('contact_no') . ' ' . $deleteRecordModel->getName() . ' dans ' . $primaryRecordModel->get('contact_no') . ' ' . $primaryRecordModel->getName();
+					$this->createModComment($primaryRecordModel, $text);
+				}
 				$primaryRecordModel->transferRelationInfoOfRecords(array($deleteRecord));
-				$record = Vtiger_Record_Model::getInstanceById($deleteRecord);
-				$record->delete();
+				$deleteRecordModel = Vtiger_Record_Model::getInstanceById($deleteRecord);
+				$deleteRecordModel->delete();
 			}
 		}
 
@@ -80,4 +99,24 @@ class Vtiger_ProcessDuplicates_Action extends Vtiger_Action_Controller {
 		$response->setResult(true);
 		$response->emit();
 	}
+	
+	/**
+	 * Crée un commentaire 
+	 */
+	function createModComment($parentRecordModel, $text){
+		$currentUserModel = Users_Record_Model::getCurrentUserModel();
+		
+		$record = Vtiger_Record_Model::getCleanInstance('ModComments');
+		$record->set('mode', 'create');
+		
+		$record->set('commentcontent', $text);
+		$record->set('related_to', $parentRecordModel->getId());
+		
+		$record->set('userid', $currentUserModel->getId());
+		
+		$record->save();
+		
+		return $record;
+	}
+
 }

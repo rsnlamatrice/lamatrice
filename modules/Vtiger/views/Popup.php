@@ -32,6 +32,12 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		return $moduleName;
 	}
 
+	/* ED160101 */
+	function preProcess(Vtiger_Request $request) {		
+		$this->ensureSearchParamsAreArray($request);
+		parent::preProcess($request);
+	}
+	
 	function process (Vtiger_Request $request) {
 		$viewer = $this->getViewer ($request);
 		$moduleName = $this->getModule($request);
@@ -42,7 +48,13 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 
 		$viewer->assign('COMPANY_LOGO',$companyLogo);
 
-		$viewer->view('Popup.tpl', $moduleName);
+		$template = $this->getTemplateName($request);
+		
+		$viewer->view($template, $moduleName);
+	}
+	
+	function getTemplateName (Vtiger_Request $request) {
+		return 'Popup.tpl';
 	}
 
 	function postProcess(Vtiger_Request $request) {

@@ -162,6 +162,13 @@ class Vtiger_Cron {
         return (float)date('H') + (float)date('i') / 60;
     }
 
+    /** ED160103
+     * get if cron is not runnable on week-end
+     */
+    function getExcludeWeekEnd(){
+        return $this->data['excludeweekend'];
+    }
+
     /**
      * Check if task is right state for running.
      */
@@ -169,9 +176,9 @@ class Vtiger_Cron {
 		$runnable = false;
 
 		if (!$this->isDisabled()) {
-			/*//ED151009
-			if($this->getFrequency() >= 86400 && date('H') > 5 ) // >= 24 H : avant 5H du mat'
-				return false;*/
+			//ED160103
+			if($this->getExcludeWeekEnd() && date('N') >= 6 ) // week-end
+				return false;
 			//ED151021
 			$currentHour = $this->getCurrentHour();
 			if($this->getStartHour()
@@ -305,6 +312,7 @@ class Vtiger_Cron {
 					name VARCHAR(100) UNIQUE KEY, handler_file VARCHAR(100) UNIQUE KEY,
 					frequency int,
 					/*ED151021*/ start_hour FLOAT NULL COMMENT \'Start hour for daily task\',
+					/*ED160103*/ excludeweekend TINYINT(1) NULL DEFAULT NULL COMMENT \'Exclude run on week end\',
 					laststart int(11) unsigned, lastend int(11) unsigned, status int,module VARCHAR(100),
                     sequence int,description TEXT )',true);
             }

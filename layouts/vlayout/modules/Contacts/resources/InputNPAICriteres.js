@@ -23,6 +23,28 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 	registerRemoveColumnEvent : function(container){
 		$('table > thead .remove-column').on('click', this.triggerRemoveColumnEvent);
 	},
+
+	/** ED160101
+	 * Function to register events
+	 */
+	registerSelectDocumentEvent : function(container){
+		var thisInstance = this;
+		$('table > thead #select-document').on('click', function(e){
+			e.preventDefault();
+			var $target = $(e.currentTarget)
+			, $table = $target.parents('table:first');
+			var $inputId = $table.find('#npai_notesid');
+			var relatedModuleName = 'Documents';
+			thisInstance.showSelectRelationPopup(relatedModuleName).then(function(data){
+				for(var i in data){
+					$inputId.val(i);
+					$target.html(data[i].name);
+					break;
+				}
+			});
+			return false;
+		});
+	},
 	
 	/** ED150813
 	 * Function to remove a column
@@ -32,11 +54,37 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		var $this = $(e.currentTarget)
 		, $th = $this.parents('th:first')
 		, $table = $this.parents('table:first')
-		, critere = $th.attr('data-critere');
-		if (!confirm("Êtes vous sûr de vouloir supprimer cette colonne '" + critere + "' ?"))
+		, critere = $th.attr('data-critere')
+		, confirmMsg = "Êtes vous sûr de vouloir supprimer cette colonne '" + critere + "' ?";
+		if (critere === 'NPAI') {
+			var $inputNotesId = $('#npai_notesid');
+			if ($inputNotesId.length && !$inputNotesId.val()) {
+				confirmMsg = false;
+			} 
+		}
+		if (confirmMsg && !confirm(confirmMsg))
 			return;
 		$table.find('th[data-critere="' + critere + '"], td[data-critere="' + critere + '"]')
 			.remove();
+	},
+	
+	/** ED160102
+	 * Function to register events
+	 */
+	registerClearListEvent : function(container){
+		var thisInstance = this;
+		$('table > thead .clear-list').on('click', function(e){
+			var $table = $(e.currentTarget).parents('table:first');
+			//supprime toutes les lignes déjà enregistrées ou avec un contact inconnu
+			$table.find('tbody input[name="contactid[]"]').each(function(){
+				var $tr = $(this).parents('tr:first');
+				if ((!this.value
+				|| $tr.is('.save-done'))
+				&& !$tr.is('.row-model'))
+					$tr.remove();
+			});
+			return false;
+		});
 	},
 
 	/** ED150813
@@ -192,11 +240,21 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		$('table > tfoot input.contact_no').on('keypress', function(e){
 			if (e.keyCode != 13) 
 				return;
+			var $inputNotesId = $('#npai_notesid');
+			if ($inputNotesId.length && !$inputNotesId.val()) {
+				var data = {
+					text: "Veuillez sélectionner un courrier",
+					type: 'error',
+				};
+				Vtiger_Helper_Js.showMessage(data);
+				return;
+			}
 			var $input = $(e.currentTarget)
 			, $table = $input.parents('table:first');
 			var value = this.value.trim();
-			if (value) 
+			if (value){ 
 				thisInstance.getContactDetails(value, thisInstance.addRowEvent, $table);
+			}
 			$input.select().focus();
 			e.preventDefault();
 		});
@@ -214,6 +272,10 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 			'record' : contact_no
 			, 'source_module' : 'Contacts'
 		};
+		var $inputNotesId = $('#npai_notesid');
+		if ($inputNotesId.val()) {
+			params.related_data = 'notesid_' + $inputNotesId.val();//return dateapplication
+		}
 		var progressIndicatorElement = jQuery.progressIndicator({
 			'message' : 'Recherche en cours...',
 			'position' : 'html',
@@ -226,13 +288,26 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 				progressIndicatorElement.progressIndicator({ 'mode' : 'hide' });
 		
 				var response = data['result']
-				, contact = response.data;
+				, contact = response.data
+				;
 				if (!contact) 
 					return;
 				
 				//Teste si existe déjà
 				if ($table && $table.find('input[name="contactid[]"][value="' + contact.record_id + '"]').length) {
 					contact.record_id = "";
+				}
+				if ($inputNotesId.length) {
+					if(response.related_data && response.related_data.Documents){
+						contact.documents = response.related_data && response.related_data.Documents ? response.related_data.Documents : false
+						var notesid = $inputNotesId.val();
+						for(var i in contact.documents){
+							if(contact.documents[i].notesid == notesid){
+								contact.documentDate = contact.documents[i].date;
+								break;
+							}
+						}
+					}
 				}
 				callback.call(thisInstance, contact);
 			},
@@ -253,7 +328,8 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		var $table = $('#EditView table:first')
 		, $model = $table.find('tr.row-model')
 		, $newRow = $model.clone().insertBefore($model)
-		, details = this.getContactHtmlDetails(contact_details);
+		, details = this.getContactHtmlDetails(contact_details)
+		, $inputContactNo = $table.find('tfoot input.contact_no');
 		
 		$newRow
 			.removeClass('hide')
@@ -267,6 +343,8 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		;
 		this.initNPAICell($newRow.find('td.critere-NPAI:first'), contact_details);
 		this.initCritereCells($newRow);
+		if (contact_details.record_id)
+			$inputContactNo.val('');
 	},
 	
 	//lorsqu'on ajoute une ligne
@@ -297,7 +375,8 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 	},
 	
 	initNPAICell : function($cell, contact_details){
-		if (!contact_details.record_id)
+		if (!contact_details.record_id
+		|| $cell.length === 0)
 			return;
 		var uniqKey = contact_details.record_id;
 		
@@ -305,11 +384,48 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		, new_npai = cur_npai > 2 ? cur_npai : cur_npai + 1
 		, counter = 0
 		, radios = '<div class="buttonset ui-buttonset">';
-		for(npai = 0; npai <= 3; npai++){
+		
+		var addressDate = contact_details.mailingmodifiedtime
+		, documentDate = contact_details.documentDate
+		, npaiDate = contact_details.rsnnpaidate
+		, docsList = '';
+		;
+		if (documentDate) {
+			documentDate = documentDate.split(' ')[0];//sans l'heure
+			if (addressDate && addressDate > documentDate
+			|| npaiDate && npaiDate > documentDate) 
+				new_npai = cur_npai;
+			
+			if (cur_npai == 1 && npaiDate) {
+				//Dans le cas d'un NPAI supposé, on doit se poser la question de savoir si, entre la date du NPAI et le courrier, d'autres courriers sont parvenus au destinataire sans erreur.
+				//Ceci voulant dire que la Poste merdouille de temps en temps sur cette adresse mais que l'adresse est quand même bonne.
+				var documentDateObject = new Date(documentDate)
+				//Documents depuis le NPAI
+				for(var i in contact_details.documents){
+					var otherDocDateObject = new Date(contact_details.documents[i].date.split(' ')[0])
+					if ((documentDateObject - otherDocDateObject ) != 0) {
+						console.log(contact_details.documents[i].name);
+						console.log(documentDateObject - otherDocDateObject );
+						if(docsList)
+							docsList += '\r\n';
+						docsList += contact_details.documents[i].name + ', le ' + this.getUserFormatDate(contact_details.documents[i].date, true);
+					}
+				}
+				var npaiDateObject = new Date(npaiDate)
+				, delay = (documentDateObject - npaiDateObject) / 1000 / 3600 / 24 / 30;
+				if (docsList
+				&& delay >= 3) { //si on a d'autres documents dans les 3 mois au moins
+					new_npai = cur_npai;
+				}
+			}
+		} else {
+			new_npai = cur_npai;
+		}
+		for(npai = 0; npai <= 4; npai++){
 			var NPAI_value = this.NPAI_values[''+npai];
 			radios += '<label';
 			if (npai == cur_npai) 
-				radios += ' style="font-style: italic;"';
+				radios += ' style="text-decoration: underline;"';
 			radios += '><input type="radio" name="rsnnpai_' + uniqKey + '" value="' + npai + '"';
 			if (npai == new_npai) 
 				radios += ' checked="checked"';
@@ -320,9 +436,29 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 			;
 		}
 		radios += '</div>';
+		
+		if (!documentDate) {
+			radios += '<pre>Ce contact n\'a pas reçu ce courrier !</pre>';
+		}
+		else {
+			documentDate = documentDate.split(' ')[0];//sans l'heure
+			if (npaiDate && npaiDate > documentDate) {
+				radios += '<code>Le statut NPAI est plus récent que le courrier</code>';
+			}
+			else if (addressDate && addressDate > documentDate) {
+				radios += '<code>L\'adresse a été modifiée depuis le courrier</code>';
+			}
+			if (docsList) {
+				radios += '<pre><b>Documents entre le NPAI et le courrier : </b>\r\n' + docsList + '</pre>';
+			}
+			if (cur_npai <= 1 && cur_npai == new_npai) {
+				radios += '<code>statut NPAI proposé identique</code>';
+			}
+		}
+		
 		$cell.html(radios);
 		
-		$cell.append($('<a href="" title="ajouter un commentaire">+ commentaire</a>')
+		$cell.append($('<br><a href="" title="ajouter un commentaire">+ commentaire</a>')
 			.attr('data-rsnnpaicomment', contact_details.rsnnpaicomment)
 			.click(this.triggerShowNPAIComment)
 		);
@@ -367,9 +503,23 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 			details += "\r\n" + contact_details.mailingzip + " " + contact_details.mailingcity;
 			if (contact_details.mailingcountry && contact_details.mailingcountry != 'France')
 				details += "\r\n" + contact_details.mailingcountry;
-			details += "\r\n" + this.getNPAILabel(contact_details.rsnnpai);
+				
+			if (contact_details.mailingmodifiedtime)
+				details += "<span style=\"float: right;\" title=\"Date de modification de l'adresse\">" + this.getUserFormatDate(contact_details.mailingmodifiedtime) + '</span>';
+			
+			details += "\r\n<span title=\"Statut NPAI\">" + this.getNPAILabel(contact_details.rsnnpai);
+			if (contact_details.rsnnpaidate)
+				details += " (" + this.getUserFormatDate(contact_details.rsnnpaidate) + ')';
+			details += "</span>"
 			if (contact_details.rsnnpaicomment)
 				details += "\r\n<code>" + this.safe_tags(contact_details.rsnnpaicomment) + '</code>';
+				
+			var documentDate = contact_details.documentDate;
+			if (documentDate) {
+				documentDate = this.getUserFormatDate(documentDate, true);//sans l'heure
+				details += "<span style=\"float: right;\" title=\"Date de réception du courrier\">courrier au " + documentDate + '</span>';
+			}
+			
 			//Autre adresse à afficher si coupon revue ou reçu fiscal
 			if ((contact_details.use_address2_for_recu_fiscal || contact_details.use_address2_for_revue) && contact_details.otherstreet){
 				details += "\r\nSpécifiquement pour ";
@@ -405,6 +555,12 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
 	},
 	
+	getUserFormatDate : function(mySQLDate, truncateTime) {
+		if (truncateTime)
+			mySQLDate = mySQLDate.split(' ')[0];
+		return mySQLDate.replace(/^(\d+)\D(\d+)\D(\d+)/, '$3-$2-$1', mySQLDate) ;
+	},
+	
 	getNPAILabel : function(npai){
 		var NPAI_value = this.NPAI_values[npai];
 		return '<span class="' + NPAI_value.icon + '"></span>' + NPAI_value.label;
@@ -424,6 +580,10 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		form.on('click', 'button[type="submit"]', function(e){
 			
 			e.preventDefault();
+			
+			if (!thisInstance.validateForm(form)) 
+				return;
+			
 			var element = jQuery(e.currentTarget);
 			element.progressIndicator({});
 			
@@ -445,6 +605,33 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		})
 	},
 	
+	validateForm : function(form){
+		var $inputId = form.find('#npai_notesid');
+		if ($inputId.length && !$inputId.val()) {
+			var data = {
+				text: "Veuillez sélectionner un courrier",
+				type: 'error',
+			};
+			Vtiger_Helper_Js.showMessage(data);
+			return false;
+		}
+		var error = false;
+		var $dates = form.find('input[name="critere-dateapplication[]"]:visible');
+		$dates.each(function(){
+			if (!/^\d\d?\D\d\d?\D(20\d{2}|\d{4})/.test(this.value)) {
+				error = true;
+				var data = {
+					text: "Veuillez saisir une date valide",
+					type: 'error',
+				};
+				Vtiger_Helper_Js.showMessage(data);
+				$(this).focus().select();
+				return false;
+			}
+		});
+		return !error;
+	},
+	
 	/** data to submit
 	 */
 	getSaveData : function(form){
@@ -454,7 +641,9 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 			, action : form.find('input[name="action"]').val()
 			, contacts : {}
 		}
-		, $criteres = form.find('thead th.critere[data-critere]');
+		, $criteres = form.find('thead th.critere[data-critere]')
+		, $inputId = form.find('#npai_notesid');
+		
 		//each contact
 		form.find('tbody input[name="contactid[]"]').each(function(){
 			if (!this.value)
@@ -472,6 +661,7 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 				contactData['NPAI'] = {
 					value : $npai.find('input[type="radio"]:checked:first').val()
 					, comment : $npai.find('textarea:first').val()
+					, notesid : $inputId.val()
 				}
 			}
 			//Autres critères
@@ -513,5 +703,7 @@ Vtiger_Edit_Js("Contacts_InputNPAICriteres_Js",{},{
 		this.registerRemoveColumnEvent(container);
 		this.registerAddCritereColumnEvent(container);
 		this.registerContactInputEvent(container);
+		this.registerSelectDocumentEvent(container);
+		this.registerClearListEvent(container);
 	}
 })

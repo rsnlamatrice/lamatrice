@@ -139,4 +139,11 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 	public function getAlphabetSearchField(){
 		return 'campaigntype,campaignname'; 
 	}
+	/** ED151105
+	 * Function returns the default column for Alphabetic search for popup
+	 * @return <String> columnname
+	 */
+	public function getAlphabetSearchFieldForPopup(){
+		return 'campaigntype'; 
+	}
 }

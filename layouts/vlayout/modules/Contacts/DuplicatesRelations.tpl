@@ -19,7 +19,7 @@
 		<input type="hidden" name=module value="{$MODULE}" />
 		<input type="hidden" name="view" value="DuplicatesRelations" />
 		<input type="hidden" name="mode" value="saveRelations" />
-		<input type="hidden" class="triggerEventName" value="{$smarty.request.triggerEventName}"/>
+		<input type="hidden" class="triggerEventName" name="triggerEventName" value="{$smarty.request.triggerEventName}"/>
 
 	<div>
 		<table class='table table-bordered table-condensed'>

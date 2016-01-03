@@ -90,11 +90,12 @@ jQuery.Class("Vtiger_Popup_Js",{
 	 * Function to get Search key
 	 */
 	getSearchKey : function(){
-		var keys = this.getAlphabetSearchKeys()
-		, key = jQuery('#searchableColumnsList').val()
-		, value = jQuery('#searchvalue').val();
-		if(value)
-			keys.push(key);
+		var keys = this.getAlphabetSearchKeys();
+		jQuery('.searchableColumnsList').each(function(){
+			var $input = $(this).parents('.control-group:first').find('.searchvalue');
+			if($input.val())
+				keys.push(this.value);
+		});
 		return keys;
 	},
 	/**
@@ -102,9 +103,10 @@ jQuery.Class("Vtiger_Popup_Js",{
 	 */
 	getSearchValue : function(){
 		var values = this.getAlphabetSearchValues()
-		, value = jQuery('#searchvalue').val();
-		if(value)
-			values.push(value);
+		jQuery('.searchvalue').each(function(){
+			if(this.value)
+				values.push(this.value);
+		});
 		return values;
 	},
 	
@@ -504,7 +506,7 @@ jQuery.Class("Vtiger_Popup_Js",{
 	 */
 	registerEventForSearch : function(){
 		var thisInstance = this;
-		jQuery('#searchvalue').on('keyup', function(e){
+		jQuery('input.searchvalue').on('keyup', function(e){
 			if (e.which == 13)
 				jQuery('#popupSearchButton').click();
 		});

@@ -73,6 +73,16 @@
 					<i>&nbsp;{vtranslate('LBL_START_HOUR_HELP_MSG',$QUALIFIED_MODULE)}</i>
 				</div>	
 			</div>
+			<div class="control-group">
+				<div class="control-label">
+					{vtranslate('Exclude week-end',$QUALIFIED_MODULE)}
+				</div>
+				<div class="controls row-fluid">
+					{assign var=FIELD_VALUE value=$RECORD_MODEL->getDisplayValue('excludeweekend')}
+					<input type="checkbox" class="span2" {if $FIELD_VALUE} checked="checked"{/if} id="excludeweekendValue" name="excludeweekend"
+						title="{vtranslate('LBL_EXCLUDE_WEEKEND_HELP_MSG',$QUALIFIED_MODULE)}"/>
+				</div>	
+			</div>
 			{*<div class="alert alert-info">{vtranslate($RECORD_MODEL->get('description'),$QUALIFIED_MODULE)}</div>*}
 			<div class="control-group">
 				<div class="control-label">

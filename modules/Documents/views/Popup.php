@@ -15,7 +15,7 @@ class Documents_Popup_View extends Vtiger_Popup_View {
 	 */
 	public function initializeListViewContents(Vtiger_Request $request, Vtiger_Viewer $viewer) {
 		$this->initViewerFolders ($request);
-		return parent::initializeListViewContents($request, $viewer);
+		parent::initializeListViewContents($request, $viewer);
 	}
 	
 	/* ED150903 dans includes/main/WebUI.php function triggerPreProcess() conditionne le preProcess à !isAjax
@@ -26,8 +26,34 @@ class Documents_Popup_View extends Vtiger_Popup_View {
 		$moduleName = $request->getModule();
 		$documentModuleModel = Vtiger_Module_Model::getInstance($moduleName);
 		$defaultCustomFilter = $documentModuleModel->getDefaultCustomFilter();
-		$folderList = Documents_Module_Model::getAllFolders();
 		$viewer->assign('DEFAULT_CUSTOM_FILTER_ID', $defaultCustomFilter);
+		
+		$searchKeys = $request->get('search_key');
+		if(in_array('folderid', $searchKeys)){
+			foreach($searchKeys as $index => $searchKey)
+				if($searchKey === 'folderid'){
+					$folderName = decode_html($request->get('search_value')[$index]);
+					$viewer->assign('FOLDER_NAME', $folderName);
+					break;
+				}
+			if(count($searchKeys) === 1){
+				$searchValues = $request->get('search_value');
+				$searchOperators = $request->get('operator');
+				$searchInputs = $request->get('search_input');
+				$searchKeys[] = 'notes_title';
+				$searchValues[] = '';
+				$searchOperators[] = 's';
+				$searchInputs[] = '';
+				$request->set('search_key', $searchKeys);
+				$request->set('search_value', $searchValues);
+				$request->set('operator', $searchOperators);
+				$request->set('search_input', $searchInputs);
+			}
+			$folderList = Documents_Module_Model::getAllFolders($folderName);
+		}
+		else{
+			$folderList = Documents_Module_Model::getAllFolders();
+		}
 		$viewer->assign('FOLDERS', $folderList);
 	}
     

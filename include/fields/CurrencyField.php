@@ -126,9 +126,11 @@ class CurrencyField {
      * @global Users $current_user
      * @param Users $user
 	 * @param Boolean $skipConversion
+	 * @param $skipFormatting
+	 * @param numberOfDecimal : force numberOfDecimal //ED151601
      * @return String - Formatted Currency
      */
-    public static function convertToUserFormat($value, $user=null, $skipConversion=false, $skipFormatting=false) {
+    public static function convertToUserFormat($value, $user=null, $skipConversion=false, $skipFormatting=false, $numberOfDecimal = false) {
 		// To support negative values
 		$negative = false;
 		if(strpos($value, '-') === 0) {
@@ -136,7 +138,7 @@ class CurrencyField {
 			$value = substr($value, 1);
 		}
         $self = new self($value);
-		$value = $self->getDisplayValue($user,$skipConversion,$skipFormatting);
+		$value = $self->getDisplayValue($user,$skipConversion,$skipFormatting, $numberOfDecimal);
 		return ($negative) ? '-'.$value : $value;
     }
 
@@ -144,14 +146,19 @@ class CurrencyField {
      * Function that converts the Number into Users Currency
      * @param Users $user
 	 * @param Boolean $skipConversion
+	 * @param $skipFormatting
+	 * @param numberOfDecimal : force numberOfDecimal //ED151601
      * @return Formatted Currency
      */
-    public function getDisplayValue($user=null, $skipConversion=false, $skipFormatting=false) {
+    public function getDisplayValue($user=null, $skipConversion=false, $skipFormatting=false, $numberOfDecimal = false) {
         global $current_user;
 		if(empty($user)) {
 			$user = $current_user;
 		}
 		$this->initialize($user);
+		
+		if($numberOfDecimal !== false)
+			$this->numberOfDecimal = $numberOfDecimal;
 
 		$value = $this->value;
 		if($skipConversion == false) {

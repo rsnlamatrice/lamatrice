@@ -20,35 +20,77 @@ class Contacts_UnassignRelatedEntities_Action extends Vtiger_Mass_Action {
 		//var_dump($request);	die();
 		$moduleName = $request->getModule();
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		
+		$relatedModuleName = $request->get('relatedmodule');
+		switch($relatedModuleName){
+		 case 'Critere4D':
+			$tableName = 'vtiger_critere4dcontrel';
+			$relatedColumnName = 'critere4did';
+			$parentColumnName = 'contactid';
+			$dateColumnName = 'dateapplication';
+			break;
+		 case 'Documents':
+			$tableName = 'vtiger_senotesrel';
+			$relatedColumnName = 'notesid';
+			$parentColumnName = 'crmid';
+			$dateColumnName = 'dateapplication';
+			break;
+		}
+		
 		$asColumnName = 'contactid';
 		$sourceIdsQuery = $this->getRecordsQueryFromRequest($request, $asColumnName);
 		
 		$related_ids = $request->get('related_ids');
 		
-		//Count
-		$query = 'SELECT COUNT(*) FROM `vtiger_critere4dcontrel`
-		WHERE critere4did IN (' . generateQuestionMarks($related_ids) . ')
-		AND contactid IN (' . $sourceIdsQuery . ')';
-		$params = $related_ids;
-		$sourceCounter = $adb->getOne($query);
+		$dateApplications = array();
 		
-		//Delete
-		$query = 'DELETE FROM `vtiger_critere4dcontrel`
-		WHERE critere4did IN (' . generateQuestionMarks($related_ids) . ')
-		AND contactid IN ( SELECT ' . $asColumnName . ' FROM (' . $sourceIdsQuery . ') source_records )';
-		$params = $related_ids;
+		//Regroupe les id par date d'application
+		foreach($related_ids as $index => $related_id){
+			if($request->get('use_dateapplication_'.$related_id)){
+				$date = $request->get('dateapplication')[$index];
+				if($date)
+					$date = DateTimeField::convertToDBFormat($date);
+			}
+			else
+				$date = '';
+			if(!$dateApplications[$date])
+				$dateApplications[$date] = array();
+			$dateApplications[$date][] = $related_id;
+		}
+		$sourceCounter = 0;
+		foreach($dateApplications as $date => $related_ids){
+			
+			$queryFromWhere = 'FROM `'.$tableName.'`
+				WHERE '.$relatedColumnName.' IN (' . generateQuestionMarks($related_ids) . ')
+				AND '.$parentColumnName.' IN ( SELECT ' . $asColumnName . ' FROM (' . $sourceIdsQuery . ') source_records )';
+			$params = $related_ids;
+			if($date){
+				$queryFromWhere .= ' AND '.$dateColumnName.' = ?';
+				$params[] = $date;
+			}
+			
+			//Count
+			$query = 'SELECT COUNT(*) ' . $queryFromWhere;
+			$result = $adb->pquery($query, $params);
+			$sourceCounter += $adb->query_result($result, 0, 0);
+			
+			//Delete
+			$query = 'DELETE ' . $queryFromWhere;
+			$result = $adb->pquery($query, $params);
+			if(!$result)
+				break;
+		}
 		
-		/*echo '<pre>'; print_r($query); echo '</pre>'; 
-		var_dump($params);*/
-		
-		$result = $adb->pquery($query, $params);
 		$response = new Vtiger_Response();
 		if(!$result){
 			$response->setError($adb->echoError('Erreur lors de la suppression des relations', true));
 		}
-		else{
+		elseif($sourceCounter === 0)
+			$response->setError('Aucune suppression !');
+		else {
 			$result = sprintf('Suppression de %s relation', $sourceCounter);
-			if($sourceCounter > 1) $result .= 's';
+			if($sourceCounter > 1)
+				$result .= 's';
 			$response->setResult($result);
 		}
 		$response->emit();

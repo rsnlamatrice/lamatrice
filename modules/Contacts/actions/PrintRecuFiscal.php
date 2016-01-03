@@ -19,7 +19,6 @@ class Contacts_PrintRecuFiscal_Action extends Accounts_PrintRecuFiscal_Action {
 		$notes_ids = $request->get('related_ids');
 		$asColumnName = 'contactid';
 		$sourceIdsQuery = $this->getRecordsQueryFromRequest($request, $asColumnName);
-		
 		$documentRecordModel = Vtiger_Record_Model::getInstanceById($notes_ids[0], 'Documents');
 		
 		$this->generatePDF($request, $sourceIdsQuery, $documentRecordModel);

@@ -150,6 +150,13 @@ class Settings_CronTasks_Record_Model extends Settings_Vtiger_Record_Model {
 									  $fieldValue = '00:00';
 								  }
 								  break;
+			case 'excludeweekend'	: if ($fieldValue) {
+										$moduleModel = $this->getModule();
+										$fieldValue = vtranslate('LBL_NOT_ON_WEEKEND', $moduleModel->getParentName().':'.$moduleModel->getName());
+								  } else {
+									  $fieldValue = '';
+								  }
+								  break;
 		}
 		return $fieldValue;
 	}
@@ -171,11 +178,13 @@ class Settings_CronTasks_Record_Model extends Settings_Vtiger_Record_Model {
 			SET frequency = ?
 			, status = ?
 			, start_hour = ?
+			, excludeweekend = ?
 			, description = ?
 			WHERE id = ?";
 		$params = array($this->get('frequency')
 						, $this->get('status')
 						, self::parseStartHour($this->get('start_hour'))
+						, $this->get('excludeweekend') ? 1 : 0
 						, $this->get('description')
 						, $this->getId());
 		$db->pquery($updateQuery, $params);

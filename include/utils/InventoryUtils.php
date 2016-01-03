@@ -615,8 +615,11 @@ function saveInventoryProductDetails(&$focus, $module, $update_prod_stock='false
 			$desc_res = $adb->pquery($desc_duery,array($prod_id));
 			$description = $adb->query_result($desc_res,0,"product_description");
 		}	*/
-		$qty = $_REQUEST['qty'.$i];
 		$listprice = $_REQUEST['listPrice'.$i];
+		if(!array_key_exists('qty'.$i, $_REQUEST))
+			$qty = 1; //ED160102 : en ajoutant disabled sur le input, la donnée n'est plus transmise.
+		else
+			$qty = $_REQUEST['qty'.$i];
 		$comment = $_REQUEST['comment'.$i];
 
 		//we have to update the Product stock for PurchaseOrder if $update_prod_stock is true

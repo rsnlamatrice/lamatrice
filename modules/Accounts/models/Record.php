@@ -280,7 +280,6 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			LIMIT 1";
 		$params = array($documentRecordModel->getId(), $this->getId(), $contactRecordModel->getId());
 		$result = $adb->pquery($query, $params);
-		
 		if($adb->num_rows($result) === 0){
 			return $this->createRecuFiscalRelation($year, $documentRecordModel);
 		}
@@ -290,7 +289,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		
 		//Montant : 
 		$matches = array();
-		if(! preg_match_all('/Montant : (?<montant>\d+([,\.]\d+)?)(\D|$)/', $data, $matches)){
+		if(! preg_match_all('/Montant\s*:\s*(?<montant>\d+([,\.]\d+)?)(\D|$)/i', $data, $matches)){
 			die('Erreur regex Montant');
 		}
 		$montant = $matches['montant'][0];
@@ -335,6 +334,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 				AND vtiger_service.servicecategory = 'Dons'
 				AND vtiger_invoice.accountid = ?
 				AND vtiger_invoice.invoicedate BETWEEN ? AND ?
+				AND vtiger_invoice.invoicestatus != 'Cancelled'
 			UNION
 				SELECT SUM(vtiger_rsnprelvirement.montant)
 				FROM vtiger_rsnprelvirement
