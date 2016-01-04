@@ -557,6 +557,11 @@ class Products_Record_Model extends Vtiger_Record_Model {
 	/* Identifie une erreur de donnée manquante : compte de vente, compte d'achat, TVA
 	 */
 	public function getGestionError(){
+		if($this->getModuleName() === 'Products' && $this->get('productcategory') === 'Gratuits'
+		|| $this->getModuleName() === 'Services' && ($this->get('servicecategory') === 'Gratuits'
+							|| $this->get('servicecategory') === 'Action-mobilisation')
+		)
+			return false;
 		if(!$this->get('glacct'))
 			return "Le compte de vente est manquant.";
 		if($this->get('listprice') && !$this->getTaxes())
