@@ -241,10 +241,12 @@ class RSN_CogilogProduitsEtServices_Import {
 			$record->set('servicename', $srcRow['nom_produit']);
 		}
 		else{
+		self::updateProductTaxRel($record, $srcRow);
 			$record->set('compteachat', $srcRow['compteachat_produit']);
 			$record->set('productname', $srcRow['nom_produit']);
 			$record->set('qtyinstock', $srcRow['stock_produit']);
 		}
+		return;
 		$record->set('glacct', $srcRow['compte_produit']);
 		$record->set('rsnsectionanal', $srcRow['section_produit']);
 		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
