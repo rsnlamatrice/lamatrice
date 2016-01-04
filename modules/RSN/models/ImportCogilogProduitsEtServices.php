@@ -238,21 +238,20 @@ class RSN_CogilogProduitsEtServices_Import {
 		echo ("<pre>Mise à jour ".$srcRow['nom_produit']." (".$srcRow['code_produit'].") : ".$srcRow['prixvente_produit']." &euro;</pre>");
 		$record->set('mode','edit');
 		if($record->getModuleName() == "Services"){
-			return;
 			$record->set('servicename', $srcRow['nom_produit']);
 		}
 		else{
 			$record->set('compteachat', $srcRow['compteachat_produit']);
-			//$record->set('productname', $srcRow['nom_produit']);
-			//$record->set('qtyinstock', $srcRow['stock_produit']);
+			$record->set('productname', $srcRow['nom_produit']);
+			$record->set('qtyinstock', $srcRow['stock_produit']);
 		}
-		//$record->set('glacct', $srcRow['compte_produit']);
-		//$record->set('rsnsectionanal', $srcRow['section_produit']);
-		//$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
-		//$record->set('taxclass', $srcRow['tva_produit']);
-		//$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
-		//$record->set('purchaseprice', str_replace('.', ',', $srcRow['prixachat_produit'])); //Attention, il faut la virgule...
-		//self::setProductCategory($record, $srcRow);
+		$record->set('glacct', $srcRow['compte_produit']);
+		$record->set('rsnsectionanal', $srcRow['section_produit']);
+		$record->set('unit_price', str_replace('.', ',', $srcRow['prixvente_produit'])); //Attention, il faut la virgule...
+		$record->set('taxclass', $srcRow['tva_produit']);
+		$record->set('discontinued', $srcRow['indisponible'] == 't' ? 0 : 1);
+		$record->set('purchaseprice', str_replace('.', ',', $srcRow['prixachat_produit'])); //Attention, il faut la virgule...
+		self::setProductCategory($record, $srcRow);
 		
 		$db = PearDatabase::getInstance();
 		//$db->setDebug(true);
@@ -262,7 +261,6 @@ class RSN_CogilogProduitsEtServices_Import {
 		    echo "<pre><code>Impossible de mettre à jour le produit</code></pre>";
 		    return false;
 		}
-		return;
 		$record->set('mode','');
 		self::updateProductDates($record, $srcRow);
 		self::updateProductTaxRel($record, $srcRow);
