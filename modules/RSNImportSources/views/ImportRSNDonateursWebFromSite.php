@@ -284,6 +284,15 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		if(is_numeric($entryId)){
 			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
 			
+			if(!$record->get('email') && $contactsData[0]['email']){
+				$record->set('mode', 'edit');
+				$record->set('email', $contactsData[0]['email']);
+				$record->save();
+			}
+			//elseif($record->get('email') != $contactsData[0]['email'] && $contactsData[0]['email']){
+			//	$record->createContactEmailsRecord(true, $contactsData[0]['email'], 'Donateur web');
+			//}
+			
 			//already imported !!
 			foreach ($contactsData as $contactsLine) {
 				$entityInfo = array(
@@ -881,13 +890,13 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		$contactMapping = array(
 			'externalid'		=> $rsndonateurswebInformations[0],
 			'lastname'		=> mb_strtoupper($rsndonateurswebInformations[2]),
-			'firstname'		=> $prenom,
-			'email'			=> $rsndonateurswebInformations[8],
-			'mailingstreet'		=> $rsndonateurswebInformations[3],
-			'mailingstreet3'	=> $rsndonateurswebInformations[4],
-			'mailingzip'		=> $rsndonateurswebInformations[5],
+			'firstname'		=> ucfirst($prenom),
+			'email'			=> trim(strtolower($rsndonateurswebInformations[8])),
+			'mailingstreet'		=> mb_strtoupper($rsndonateurswebInformations[3]),
+			'mailingstreet3'	=> mb_strtoupper($rsndonateurswebInformations[4]),
+			'mailingzip'		=> mb_strtoupper($rsndonateurswebInformations[5]),
 			'mailingcity'		=> mb_strtoupper($rsndonateurswebInformations[6]),
-			'mailingcountry' 	=> $country == 'France' ? '' : $country,
+			'mailingcountry' 	=> $country == 'France' ? '' : ucfirst($country),
 			'phone'			=> isset($phone) ? $phone : '',
 			'mobile'		=> isset($mobile) ? $mobile : '',
 			'contacttype'		=> 'Donateur Web',

@@ -282,6 +282,12 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		if(is_numeric($entryId)){
 			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
 			
+			if(!$record->get('email') && $contactsData[0]['email']){
+				$record->set('mode', 'edit');
+				$record->set('email', $contactsData[0]['email']);
+				$record->save();
+			}
+			
 			//already imported !!
 			foreach ($contactsData as $contactsLine) {
 				$entityInfo = array(
