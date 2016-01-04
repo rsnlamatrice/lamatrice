@@ -8,6 +8,14 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 		$this->exposeMethod('addContactRelation');
 	}
 	
+	public function checkPermission(Vtiger_Request $request) {
+		$moduleName = $request->get('for_module');
+		$record = $request->get('record');
+		if($moduleName && !Users_Privileges_Model::isPermitted($moduleName, 'Save', $record)) {
+			throw new AppException('LBL_PERMISSION_DENIED');
+		}
+	}
+	
 	public function process(Vtiger_Request $request) {
 		$mode = $request->get('mode');
 		if(!empty($mode)) {
@@ -67,6 +75,9 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 			switch($moduleName){
 			case 'Contacts' :
 				if(array_key_exists('mailingstreet', $rowData['update'.$moduleName])
+				|| array_key_exists('mailingstreet2', $rowData['update'.$moduleName])
+				|| array_key_exists('mailingstreet3', $rowData['update'.$moduleName])
+				|| array_key_exists('mailingpobox', $rowData['update'.$moduleName])
 				|| array_key_exists('mailingzip', $rowData['update'.$moduleName])
 				|| array_key_exists('mailingcity', $rowData['update'.$moduleName])
 				){

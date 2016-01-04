@@ -184,3 +184,8 @@ a.address-sna-check:active {
 .importPreview .all-rows-selection {
   margin-right: 8px;
 }
+
+.contact-no {
+  font-size: 10px;
+  display: inline-block;
+}

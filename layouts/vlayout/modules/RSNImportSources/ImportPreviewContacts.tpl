@@ -61,7 +61,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 										</th>
 										{*foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE*}
 										{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
-											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
+											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status' || $FIELD_NAME === 'isgroup'}
 												{continue}
 											{/if}
 											<th>{$FIELD_NAME|@vtranslate:$MODULE_NAME}</th>
@@ -94,7 +94,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 										</th>
 										{*foreach key=FIELD_NAME item=VALUE from=$ROW*}
 										{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
-											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status'}
+											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status' || $FIELD_NAME === 'isgroup'}
 												{continue}
 											{/if}
 											<td data-fieldname="{$FIELD_NAME}"
@@ -146,7 +146,9 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<th class="enlarge-click-container">
 													<a href="{$CONTACTS_MODULE_MODEL->getDetailViewUrl($CONTACT_ID)}" target="_blank">
 														<span class="icon-rsn-small-isgroup{$CONTACT_ROW['isgroup']}"></span>
+														<label class="contact-no">{$CONTACT_ROW['contact_no']}</label>
 													</a>
+															
 												</th>
 												{*foreach key=FIELD_NAME item=VALUE from=$ROW*}
 												{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
