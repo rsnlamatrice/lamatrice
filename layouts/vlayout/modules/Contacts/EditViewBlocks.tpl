@@ -96,6 +96,11 @@
 								{$RECORD_MODEL->getDisplayValue('mailingmodifiedtime')}
 							</div>
 						{/if}
+						{if $RECORD_MODEL->initRNVPLabel()}
+							<div style="display: inline-block; margin-left: 2em; opacity: 0.8;">
+								RNVP : {$RECORD_MODEL->get('mailingRNVPLabel')}
+							</div>
+						{/if}
 						{if $RECORD_MODEL->get('use_address2_for_revue') || $RECORD_MODEL->get('use_address2_for_recu_fiscal')}
 							{* ED150912 notification de l'existence d'une adresse secondaire spécifique *}
 							<div style="display: inline-block; margin-left: 4em; opacity: 0.6;">

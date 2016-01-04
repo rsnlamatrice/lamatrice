@@ -99,6 +99,8 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 		
 	}
 	
+	
+	
 	/* ED151116
 	 * Permet le tri des champs
 	 */

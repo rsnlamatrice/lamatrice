@@ -49,8 +49,13 @@ A noter que les champs d'adresses sont triés dans modules\Contacts\models\Detai
 				{* ED150810 *}
 				{elseif $BLOCK_LABEL_KEY eq 'LBL_ADDRESS_INFORMATION'}
 					{if $RECORD->get('mailingmodifiedtime')}
-						<label style="margin-left: 2em; display: inline-block; color: white;">
+						<label style="margin-left: 2em; display: inline-block; color: white; opacity: 0.8;">
 							{$RECORD->getDisplayValue('mailingmodifiedtime')}
+						</label>
+					{/if}
+					{if $RECORD->initRNVPLabel()}
+						<label style="margin-left: 1em; display: inline-block; color: white; opacity: 0.8;">
+							RNVP : {$RECORD->get('mailingRNVPLabel')}
 						</label>
 					{/if}
 					{if $RECORD->get('use_address2_for_revue') || $RECORD->get('use_address2_for_recu_fiscal')}
@@ -99,7 +104,12 @@ A noter que les champs d'adresses sont triés dans modules\Contacts\models\Detai
 			{if !$FIELD_MODEL->isViewableInDetailView()}
 				 {continue}
 			 {/if}
-			{if $FIELD_NAME eq 'contact_no'}
+			{if $FIELD_NAME eq 'contact_no'
+			
+			|| $FIELD_NAME eq 'mailingrnvpeval'
+			|| $FIELD_NAME eq 'mailingrnvpcharade'
+			|| $FIELD_NAME eq 'otherrnvpeval'
+			|| $FIELD_NAME eq 'otherrnvpcharade'}
 				 {continue}
 			 {/if}
 			{if $FIELD_MODEL->get('uitype') eq "69" || $FIELD_MODEL->get('uitype') eq "105"}

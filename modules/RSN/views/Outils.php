@@ -125,7 +125,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$this->updateContactsFromDonnes4D();
+		
 	}
 	
 	//Post-Migration : met à jour des données dans la Matrice à partir des données présentes dans le commentaire initial des contacts importés
@@ -138,6 +138,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		$maxLoop = 100;
 		$testCounter = 0;
 		$updCounter = 0;
+		//Contacts venant de 4D avec leurs commentaires initiaux (il y en a de deux types : contact et groupe)
 		$query = 'SELECT crmid, vtiger_modcomments.commentcontent
 			FROM vtiger_contactaddress
 			JOIN vtiger_crmentity
@@ -149,7 +150,6 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			WHERE vtiger_crmentity.deleted = 0
 			AND vtiger_crmentity.crmid > ?
 			AND vtiger_contactdetails.ref4d IS NOT NULL
-			AND vtiger_contactaddress.mailingrnvpeval IS NULL
 			AND vtiger_modcomments.userid = 1
 			AND vtiger_modcomments.commentcontent LIKE "Donn%"
 			ORDER BY crmid
