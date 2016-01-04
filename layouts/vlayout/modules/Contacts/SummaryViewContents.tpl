@@ -17,7 +17,7 @@
 -->*}
 {strip}
 {* champs Ne pas... *}
-{assign var=DONOT_FIELDS value=array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb', 'donototherdocuments')}
+{assign var=DONOT_FIELDS value=array('emailoptout', 'donotcall', 'donotprospect', 'donotrelanceadh', 'donotappeldoncourrier', 'donotrelanceabo', 'donotappeldonweb', 'donotrecufiscal', 'donototherdocuments')}
 {* ED150515 : account_id needed for 'reference' changing confirmation *}
 <input type=hidden name="account_id" data-value='{$RECORD->get('account_id')}' />
 	
@@ -36,6 +36,7 @@
 		&& $FIELD_NAME neq 'donotappeldoncourrier'
 		&& $FIELD_NAME neq 'donotrelanceabo'
 		&& $FIELD_NAME neq 'donotappeldonweb'
+		&& $FIELD_NAME neq 'donotrecufiscal'
 		&& $FIELD_NAME neq 'donototherdocuments'
 		
 		&& $FIELD_NAME neq 'reference'

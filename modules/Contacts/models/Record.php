@@ -197,6 +197,11 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 					'0' => array( 'label' => 'si, on peut', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
 					'1' => array( 'label' => 'Pas de courrier AG', 'icon' => 'ui-icon ui-icon-locked darkred' )
 				);
+			case 'donotrecufiscal':
+				return array(
+					'0' => array( 'label' => 'si, on peut', 'icon' => 'ui-icon ui-icon-unlocked darkgreen' ),
+					'1' => array( 'label' => 'Pas de reçu fiscal', 'icon' => 'ui-icon ui-icon-locked darkred' )
+				);
 			case 'contreltype':
 				return array(
 					'REF' => array( 'label' => 'Référence', 'icon' => 'ui-icon ui-icon-locked darkred' ),
