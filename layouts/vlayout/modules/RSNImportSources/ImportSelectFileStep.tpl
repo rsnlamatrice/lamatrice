@@ -16,7 +16,7 @@
 			<input type="radio"  id="import_file_mode_upload" name="import_file_src_mode" value="upload" checked="checked"/>&nbsp;
 				<input type="file" name="import_file[]" id="import_file" multiple
 					onchange="if(this.value) $('#import_file_mode_upload').get(0).checked = true;"/>
-			{*if $IS_ADMIN*}
+			{if $IS_ADMIN}
 			<br>
 			<input type="radio" id="import_file_mode_localpath" name="import_file_src_mode" value="localpath"/>&nbsp;
 				<input type="text" name="import_file_localpath" id="import_file_localpath"
@@ -24,7 +24,7 @@
 					value="{$IMPORT_FILE_LOCALPATH}"
 					onchange="if(this.value) $('#import_file_mode_localpath').get(0).checked = true;"
 					style="width: 90%;"/>
-			{*/if $IS_ADMIN*}
+			{/if}
 		</td>
 	</tr>
 	<tr>
