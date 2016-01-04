@@ -242,7 +242,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			)
 		;
 		
-		if(false){
+		if(1){
 			$list[] = array(
 					'sub' => 'TestsED',
 					'label' => 'Tests ED'

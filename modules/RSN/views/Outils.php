@@ -125,63 +125,81 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$contactRecordModel = Vtiger_Record_Model::getInstanceById(1822469, 'Contacts');
-		$contactsData = array(array(
-			'email' => 'test.manu222.p.chesneau@test.test ',
-			'listesn' => '0',
-			'listesd' => '1',
-		));
-		//function addContactEmail($contactRecordModel, $contactsData){
-			$email = $contactsData[0]['email'];
-			if(!$contactRecordModel->get('email')){
-				$emailRecordModel = $contactRecordModel->createContactEmailsRecord(false, $email);
-				$contactRecordModel->set('mode','edit');
-				$contactRecordModel->save();
+		$this->updateContactsFromDonnes4D();
+	}
+	
+	//Post-Migration : met à jour des données dans la Matrice à partir des données présentes dans le commentaire initial des contacts importés
+	function updateContactsFromDonnes4D(){
+		global $adb;
+		
+		$contactId = 0;
+		$limit = 10000;
+		$loop = 0;
+		$maxLoop = 100;
+		$testCounter = 0;
+		$updCounter = 0;
+		$query = 'SELECT crmid, vtiger_modcomments.commentcontent
+			FROM vtiger_contactaddress
+			JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = vtiger_contactaddress.contactaddressid
+			JOIN vtiger_contactdetails
+				ON vtiger_contactdetails.contactid = vtiger_contactaddress.contactaddressid
+			JOIN vtiger_modcomments
+				ON vtiger_contactdetails.contactid = vtiger_modcomments.related_to
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_crmentity.crmid > ?
+			AND vtiger_contactdetails.ref4d IS NOT NULL
+			AND vtiger_contactaddress.mailingrnvpeval IS NULL
+			AND vtiger_modcomments.userid = 1
+			AND vtiger_modcomments.commentcontent LIKE "Donn%"
+			ORDER BY crmid
+			LIMIT '. $limit;
+		
+		$queryUpdate = 'UPDATE vtiger_contactaddress
+			SET mailingrnvpeval = ?
+			, mailingrnvpcharade = ?
+			WHERE contactaddressid = ?';
+		do {
+			$result = $adb->pquery($query, array($contactId));
+			if(!$result){
+				$adb->echoError();
+				return;
 			}
-			else
-				$emailRecordModel = $contactRecordModel->createContactEmailsRecord(false, $email);
-			$rsnMediaDocuments = $emailRecordModel->get('rsnmediadocuments');
-			$rsnMediaDocumentsDoNot = $emailRecordModel->get('rsnmediadocumentsdonot');
-			$rsnMediaDocuments = $rsnMediaDocuments 		? explode(' |##| ', $rsnMediaDocuments) : array();
-			$rsnMediaDocumentsDoNot = $rsnMediaDocumentsDoNot 	? explode(' |##| ', $rsnMediaDocumentsDoNot) : array();
+			$contactsCount = $adb->getRowCount($result);
+				echo "<br>Query : " . $contactsCount;
 			
-			$listes = array(
-					'rezo-info' => $contactsData[0]['listesn'],
-					'Liste régionale' => $contactsData[0]['listesd'],
-			);
+			while($row = $adb->getNextRow($result)){
+				$testCounter++;
+				$contactId = $row['crmid'];
+				$evalAdr = preg_replace('/^([\s\S]+evaladr\s=\s)(\d*)([\s\S]+)$/', '$2', $row['commentcontent']);
+				$charade = preg_replace('/^([\s\S]+charade\s=\s)(\d*)([\s\S]+)$/', '$2', $row['commentcontent']);
+				if(is_numeric($evalAdr) || is_numeric($charade)){
+					if(!is_numeric($evalAdr))
+						$evalAdr = null;
+					if(!is_numeric($charade))
+						$charade = null;
+					//echo "<br>$contactId : $evalAdr, $charade";
+					$updCounter++;
+					$resultUpd = $adb->pquery($queryUpdate, array($evalAdr, $charade, $contactId));
+					if(!$resultUpd){
+						$adb->echoError('UPDATE');
+						return;
+					}
+					
+				}
+			}
 			
-			foreach($listes as $document => $inscription){
-				$document = to_html($document);
-				if($inscription === '1'){
-					if(!in_array($document, $rsnMediaDocuments)){
-						$rsnMediaDocuments[] = $document;
-					}
-					if(in_array($document, $rsnMediaDocumentsDoNot)){
-						unset($rsnMediaDocumentsDoNot[array_search($document, $rsnMediaDocumentsDoNot)]);
-					}
-				}
-				else { //désinscription
-					if(!in_array($document, $rsnMediaDocumentsDoNot)){
-						$rsnMediaDocumentsDoNot[] = $document;
-					}
-					if(in_array($document, $rsnMediaDocuments)){
-						
-						unset($rsnMediaDocuments[array_search($document, $rsnMediaDocuments)]);
-					}
-				}
+			if($contactsCount < $limit){
+				echo "<br>TERMINE $limit > " . $contactsCount;
+				break;
 			}
-			//save
-			$rsnMediaDocuments = implode(' |##| ', $rsnMediaDocuments);
-			$rsnMediaDocumentsDoNot = implode(' |##| ', $rsnMediaDocumentsDoNot);
-			if($emailRecordModel->get('rsnmediadocuments') != $rsnMediaDocuments
-			|| $emailRecordModel->get('rsnmediadocumentsdonot') != $rsnMediaDocumentsDoNot){
-				if(!$emailRecordModel->get('mode'))
-					$emailRecordModel->set('mode', 'edit');
-				$emailRecordModel->set('rsnmediadocuments', $rsnMediaDocuments);
-				$emailRecordModel->set('rsnmediadocumentsdonot', $rsnMediaDocumentsDoNot);
-				$emailRecordModel->save();
+			if(++$loop >= $maxLoop){
+				break;
 			}
-		//}
+			
+		} while(true);
+		echo "<br>Fin au bout de $loop boucles / $limit contacts";
+		echo "<br>Tests : $testCounter, Mises à jour : $updCounter";
 	}
 	
 	
