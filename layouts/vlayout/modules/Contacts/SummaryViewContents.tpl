@@ -29,6 +29,8 @@
 		&& $FIELD_NAME neq 'mailingcountry'
 		&& $FIELD_NAME neq 'mailingzip'
 		&& $FIELD_NAME neq 'mailingstreet2'
+		&& $FIELD_NAME neq 'mailingrnvpeval'
+		&& $FIELD_NAME neq 'mailingrnvpcharade'
 		
 		&& $FIELD_NAME neq 'donotcall'
 		&& $FIELD_NAME neq 'donotprospect'
@@ -83,6 +85,12 @@
 						</span>
 						{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
 						{assign var=FIELD_NAME value=$FIELD_NAME_TMP}	
+					{/if}
+					{* RNVP *}
+					{if $RECORD->initRNVPLabel()}
+						<div style="padding-left:4px;">
+							RNVP : {$RECORD->get('mailingRNVPLabel')}
+						</div>
 					{/if}
 				{else}
 					{vtranslate($FIELD_MODEL->get('label'),$MODULE_NAME)}

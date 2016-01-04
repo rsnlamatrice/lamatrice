@@ -44,6 +44,8 @@ class Contacts_DetailRecordStructure_Model extends Vtiger_DetailRecordStructure_
 			'mailingstreet',
 			'mailingstate',
 			'mailingpobox',
+			'mailingrnvpeval',
+			'mailingrnvpcharade',
 			
 			'use_address2_for_revue',
 			'use_address2_for_recu_fiscal',
@@ -57,6 +59,8 @@ class Contacts_DetailRecordStructure_Model extends Vtiger_DetailRecordStructure_
 			'otherstreet',
 			'otherstate',
 			'otherpobox',
+			'otherrnvpeval',
+			'otherrnvpcharade',
 		);
 		$apos  = array_search($a, $orderedFieldNames);
 		if ($apos === false) return 0;
