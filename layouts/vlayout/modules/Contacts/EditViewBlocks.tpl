@@ -97,7 +97,7 @@
 							</div>
 						{/if}
 						{if $RECORD_MODEL->initRNVPLabel()}
-							<div style="display: inline-block; margin-left: 2em; opacity: 0.8;">
+							<div style="margin-left: 2em; opacity: 0.8;">
 								RNVP : {$RECORD_MODEL->get('mailingRNVPLabel')}
 							</div>
 						{/if}

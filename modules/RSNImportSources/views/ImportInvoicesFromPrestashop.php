@@ -1159,6 +1159,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$query = "ALTER TABLE `$tableName` ADD INDEX(`sourceid`)";
 		$db->pquery($query);
 		
+		/* création d'un index */
+		$query = "ALTER TABLE `$contactsTableName` ADD INDEX(`sourceid`)";
+		$db->pquery($query);
+		
 		/* Annule les factures déjà importées
 		*/
 		$query = "UPDATE $tableName
