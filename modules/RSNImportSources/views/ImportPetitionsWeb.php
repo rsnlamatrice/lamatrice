@@ -107,8 +107,8 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 			//pour la pré-validation des données des contacts, il faut que les noms des champs soient les mêmes
 			"firstname" => "firstname",
 			"lastname" => "lastname",
-			"mailingstreet3" => "mailingstreet3",
 			"mailingstreet" => "mailingstreet",
+			"mailingstreet3" => "mailingstreet3",
 			"mailingzip" => "mailingzip",
 			"mailingcity" => "mailingcity",
 			"mailingcountry" => "mailingcountry",
@@ -137,8 +137,9 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		$fields = $this->getContactsFieldsMapping();
 		
 		$fields = array_move_assoc('mailingstreet2', 'lastname', $fields);
-		$fields = array_move_assoc('mailingstreet3', 'mailingstreet', $fields);
-		$fields = array_move_assoc('mailingpobox', 'mailingstreet3', $fields);
+		$fields = array_move_assoc('mailingstreet3', 'mailingstreet2', $fields);
+		$fields = array_move_assoc('mailingstreet', 'mailingstreet3', $fields);
+		$fields = array_move_assoc('mailingpobox', 'mailingstreet', $fields);
 		$fields = array_move_assoc('rsnnpai', 'lastname', $fields);
 		
 		return $fields;

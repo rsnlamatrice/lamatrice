@@ -533,7 +533,7 @@ jQuery.Class("Vtiger_Popup_Js",{
 		}
 		var completeParams = this.getCompleteParams();
 		jQuery.extend(completeParams,sortingParams);
-		return this.getPageRecords(completeParams).then(
+		this.getPageRecords(completeParams).then(
 			function(data){
 				aDeferred.resolve(data);
 			},

@@ -303,7 +303,7 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 				FROM ' . $tableName . '
 			';
 			$nCondition = 0;
-			if($this->needValidatingStep()){
+			if($this->hasValidatingStep()){
 				$nCondition++;
 				$sql .= ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE;
 			}
