@@ -94,7 +94,7 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 	 * Changement du statut des factures Compta en status en cours 
 	 */
 	public function comptaStatusToEnCours(Vtiger_Request $request){
-		$this->changeInvoiceStatus($request, 'Compta', 'Created');
+		$this->changeInvoiceStatus($request, array('Compta', 'Validated'), 'Created');
 	}
 	/**
 	 * Changement du statut des factures 
@@ -116,14 +116,15 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 			$searchValue = array();
 			$operator = array();
 		}
-		$searchKey[] = 'invoicestatus';
-		$searchValue[] = $fromStatus;
-		$operator[] = 'e';
-		
+		if(!is_array($fromStatus)){
+			$searchKey[] = 'invoicestatus';
+			$searchValue[] = $fromStatus;
+			$operator[] = 'e';
+		}
 		$request->set('search_key', $searchKey);
 		$request->set('search_value', $searchValue);
 		$request->set('operator', $operator);
-		
+		//global $adb; $adb->setDebug(true);
 		$moduleName = $request->getModule();
 		$recordIds = $this->getRecordsListFromRequest($request);
 		$ids = array();
@@ -155,8 +156,7 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 			if($fromStatus === 'Compta')
 				$query .= ', sent2compta = NULL';
 			$query .= '
-				WHERE invoicestatus = ?
-				AND vtiger_crmentity.deleted = 0
+				WHERE vtiger_crmentity.deleted = 0
 				AND vtiger_crmentity.crmid IN ('.generateQuestionMarks($ids).')
 			';
 			$currentUser = Users_Record_Model::getCurrentUserModel();
@@ -164,9 +164,18 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 				array(
 					$toStatus,
 					$currentUser->getId(),
-					$fromStatus,
 				), $ids
 			);
+			
+			if(is_array($fromStatus)){
+				$query .= ' AND invoicestatus IN ('.generateQuestionMarks($fromStatus).')';
+				$params = array_merge($params, $fromStatus);
+			}
+			else{
+				$query .= ' AND invoicestatus = ?';
+				$params[] = $fromStatus;
+			}
+			
 			$result = $adb->pquery($query, $params);
 			if(!$result){
 				$response->setResult($adb->echoError('Erreur de modification des factures', true));
