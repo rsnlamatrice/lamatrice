@@ -30,8 +30,8 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 					'linkName'	=> $productsInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 							'&relatedModule='.$productsInstance->getName().'&mode=showRelatedRecords&page=1&limit=20',
-					'action'	=> array('Select'),
-					'actionlabel'	=> array('Sélectionner'),
+					'action'	=> array(),
+					'actionlabel'	=> array(),
 					'actionURL' =>	$productsInstance->getListViewUrl()
 			);
 		}
@@ -47,8 +47,8 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 					'linkName'	=> $servicesInstance->getName(),
 					'linkurl' => 'module='.$this->getModuleName().'&view=Detail&record='.$this->getRecord()->getId().
 							'&relatedModule='.$servicesInstance->getName().'&mode=showRelatedRecords&page=1&limit=10',
-					'action'	=> array('Select'),
-					'actionlabel'	=> array('Sélectionner'),
+					'action'	=> array(),
+					'actionlabel'	=> array(),
 					'actionURL' =>	$servicesInstance->getListViewUrl()
 			);
 		}

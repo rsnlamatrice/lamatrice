@@ -136,9 +136,33 @@ class Contacts_Popup_View extends Vtiger_Popup_View {
 			$viewer->assign('MULTI_SELECT', $multiSelectMode);
 			$viewer->assign('CURRENT_USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		} else {
+			
+			//Standard
+			
 			if(!$request->get('search_key'))
 				$request->set('search_key', 'lastname');
-			return parent::initializeListViewContents($request, $viewer);
+			parent::initializeListViewContents($request, $viewer);
+			//Compacte les colonnes
+			$headers = $viewer->getVariable('LISTVIEW_HEADERS')->value;
+			$models = $viewer->getVariable('LISTVIEW_ENTRIES')->value;
+			foreach ($models as $recordId => &$recordModel) {
+				$recordModel->set('mailingstreet',
+						  trim($recordModel->get('mailingstreet2')
+						  . ", " . $recordModel->get('mailingstreet3')
+						  . ", " . $recordModel->get('mailingstreet')
+						  , " ,")
+						);
+				$recordModel->set('mailingzip',
+						  trim($recordModel->get('mailingzip')
+						  . " " . $recordModel->get('mailingcity')
+						  )
+						);
+			}
+			unset($headers['mailingstreet2']);
+			unset($headers['mailingstreet3']);
+			unset($headers['mailingcity']);
+			$viewer->assign('LISTVIEW_HEADERS', $headers);
+			$viewer->assign('LISTVIEW_ENTRIES', $models);
 		}
 	}
 }
