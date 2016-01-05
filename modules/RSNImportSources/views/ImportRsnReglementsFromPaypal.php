@@ -214,8 +214,6 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			
 			'receivedmoderegl',
 			
-			'numpiece',
-			
 			//Massively updated
 			'_rsndonateurswebid',
 			'_contactid',
@@ -230,6 +228,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return array - the imported fields for the purchase order module.
 	 *
 	 * Factures de PayPal
+	 *
+	 * TODO
 	 */
 	function getPurchaseOrderFields() {
 		return array(
@@ -269,7 +269,6 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			//header
 			'numpiece',
 			'refdonateurweb',
-			'importsourceid',
 			'clicksource',
 			'dateregl',
 			'email',
@@ -501,7 +500,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		*/
 		$query = "UPDATE $contactsTableName
 		JOIN  $rsnreglementsTableName
-			ON ($rsnreglementsTableName.importsourceid = `$contactsTableName`.importsourceid
+			ON ($rsnreglementsTableName.numpiece = `$contactsTableName`.importsourceid
 				OR ( /* tous les importsourceid ne sont pas présents, si doublon */
 					$rsnreglementsTableName.email = `$contactsTableName`.email AND
 					NOT($rsnreglementsTableName.email IS NULL OR $rsnreglementsTableName.email = '')
@@ -527,7 +526,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		*/
 		$query = "UPDATE $invoiceTableName
 		JOIN  $rsnreglementsTableName
-			ON ($rsnreglementsTableName.importsourceid = `$invoiceTableName`.importsourceid
+			ON ($rsnreglementsTableName.numpiece = `$invoiceTableName`.importsourceid
 				OR ( /* tous les importsourceid ne sont pas présents, si doublon */
 					$rsnreglementsTableName.email = `$invoiceTableName`.email AND
 					NOT($rsnreglementsTableName.email IS NULL OR $rsnreglementsTableName.email = '')
@@ -943,7 +942,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					$invoiceNo = $record->getEntity()->setModuleSeqNumber("increment", $record->getModuleName());
 					$record->set('invoice_no',$invoiceNo);
 					
-					//set importsourceid
+					//set invoice_no, total, ...
 					$query = "UPDATE vtiger_invoice
 						JOIN vtiger_crmentity
 							ON vtiger_crmentity.crmid = vtiger_invoice.invoiceid
@@ -1102,7 +1101,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		else
 			$phone = $reglement['phone'];
 		$contactsHeader = array(
-			'importsourceid'		=> $invoice['importsourceid'],
+			'importsourceid'	=> $invoice['importsourceid'],
 			'lastname'		=> $invoice['lastname'],
 			'firstname'		=> $invoice['firstname'],
 			'email'			=> $invoice['email'],
@@ -1139,16 +1138,15 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		if($reglement['_invoiceid'])
 			return Vtiger_Record_Model::getInstanceById($reglement['_invoiceid'], 'Invoice');
 		$query = "SELECT crmid
-			FROM vtiger_invoicecf
+			FROM vtiger_invoice
 			JOIN vtiger_invoicecf
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 			JOIN vtiger_crmentity
 				ON vtiger_invoicecf.invoiceid = vtiger_crmentity.crmid
 			WHERE deleted = FALSE
-			AND (importsourceid = ?
-				OR (importsourceid = ? AND invoicedate = DATE(?)))
+			AND importsourceid = ?
 			LIMIT 1";
-		$queryParams = array($reglement['numpiece'], $reglement['importsourceid'], $reglement['dateregl']);
+		$queryParams = array($reglement['numpiece']);
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $queryParams);
 		if($db->num_rows($result)){
@@ -1177,9 +1175,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			break;
 		case 'DP':
 		case 'DR':
-			$query .= " AND (importsourceid = ?
-				OR (importsourceid = ? AND invoicedate = DATE(?)))";
-			$queryParams = array($invoiceData['numpiece'], $invoiceData['importsourceid'], $invoiceData['invoicedate']);
+			$query .= " AND importsourceid = ?";
+			$queryParams = array($invoiceData['importsourceid']);
 			break;
 		default:
 			var_dump('$reglement : ', $reglement);
@@ -1447,7 +1444,6 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 		JOIN $tableName
 			ON  vtiger_invoicecf.importsourceid = `$tableName`.numpiece
-			AND DATE(`$tableName`.dateregl) = vtiger_invoice.invoicedate /* [migration] via Cogilog */
 		JOIN vtiger_crmentity
 			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
 		";
@@ -1481,9 +1477,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		JOIN  vtiger_invoice
 			ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 		JOIN $tableName
-			ON  vtiger_invoicecf.importsourceid = `$tableName`.numpiece
-			OR (vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
-				AND `$tableName`.invoicedate = vtiger_invoice.invoicedate) /* [migration] via Cogilog */
+			ON  vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
 		JOIN vtiger_crmentity
 			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
 		";
@@ -1560,8 +1554,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			
 			$externalid = $reglement['refdonateurweb'] ? $reglement['refdonateurweb'] : $reglement['numpiece'];//transactionid
 			$clickSource = $reglement['clicksource'];
-			$numpiece = $reglement['numpiece'];
-			$importSourceId = $this->getImportationSourceId($reglement);
+			$importSourceId = $reglement['numpiece'];
 			if(!is_numeric($externalid))
 				$externalid = null;
 			switch($invoiceType){
@@ -1588,9 +1581,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			$typeDossier = $this->getInvoiceTypeDossier($invoiceType);
 			$invoiceValues = array(
 				'importsourceid'	=> $importSourceId,
-				'numpiece'		=> $numpiece,
 				'rsndonateurweb_externalid' => $externalid,
-				'importsourceid'	=> $importSourceId,
 				'invoicetype'		=> $invoiceType,
 				'subject'		=> $product['name'],
 				'invoicedate'		=> $date,
@@ -1623,11 +1614,6 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		return $invoiceValues;
 	}
 
-	function getImportationSourceId($reglement){
-		$sourceId = $reglement['refdonateurweb'] ? $reglement['refdonateurweb'] : $reglement['numpiece'];//transactionid
-		return $this->sourceid_prefix . $sourceId;
-	}
-
 	/**
 	 * Method that return the formated information of a purchase order found in the file.
 	 * @param $invoice : the purchase order data found in the file.
@@ -1641,7 +1627,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			$poType = 'invoice';
 			
 			$sourceId = $reglement['numpiece'];//transactionid
-			$importSourceId = $this->getImportationSourceId($reglement);
+			$importSourceId = $sourceId;
 				
 			$product = array(
 				'code' => 'DIVFOURN',
@@ -1713,8 +1699,6 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'contactname'		=> $reglement[3] . ' - ' . $reglement[10],
 			'clicksource'		=> $clickSource,
 		);
-		
-		$reglementValues['importsourceid'] = $this->getImportationSourceId($reglementValues);
 		
 		//Le nom est en un seul champ
 		if(strpos($reglementValues['lastname'], ' ') !== false){
