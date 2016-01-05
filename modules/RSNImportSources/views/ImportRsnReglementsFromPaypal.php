@@ -1148,7 +1148,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			AND (importsourceid = ?
 				OR (importsourceid = ? AND invoicedate = DATE(?)))
 			LIMIT 1";
-		$queryParams = array($reglement['importsourceid'], $reglement['numpiece'], $reglement['dateregl']);
+		$queryParams = array($reglement['numpiece'], $reglement['importsourceid'], $reglement['dateregl']);
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $queryParams);
 		if($db->num_rows($result)){
@@ -1179,7 +1179,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		case 'DR':
 			$query .= " AND (importsourceid = ?
 				OR (importsourceid = ? AND invoicedate = DATE(?)))";
-			$queryParams = array($invoiceData['importsourceid'], $invoiceData['numpiece'], $invoiceData['invoicedate']);
+			$queryParams = array($invoiceData['numpiece'], $invoiceData['importsourceid'], $invoiceData['invoicedate']);
 			break;
 		default:
 			var_dump('$reglement : ', $reglement);
@@ -1481,8 +1481,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		JOIN  vtiger_invoice
 			ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
 		JOIN $tableName
-			ON  vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
-			OR (vtiger_invoicecf.importsourceid = `$tableName`.numpiece
+			ON  vtiger_invoicecf.importsourceid = `$tableName`.numpiece
+			OR (vtiger_invoicecf.importsourceid = `$tableName`.importsourceid
 				AND `$tableName`.invoicedate = vtiger_invoice.invoicedate) /* [migration] via Cogilog */
 		JOIN vtiger_crmentity
 			ON vtiger_invoice.invoiceid = vtiger_crmentity.crmid
@@ -1587,7 +1587,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			$codeAffaire = $this->getFinalCodeAffaire($clickSource);
 			$typeDossier = $this->getInvoiceTypeDossier($invoiceType);
 			$invoiceValues = array(
-				'importsourceid'		=> $importSourceId,
+				'importsourceid'	=> $importSourceId,
 				'numpiece'		=> $numpiece,
 				'rsndonateurweb_externalid' => $externalid,
 				'importsourceid'	=> $importSourceId,

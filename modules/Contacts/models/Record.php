@@ -766,9 +766,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		
 		if(!$evalAdr && !$charade)
 			return '';
-		
-		var_dump($evalAdr, $charade);
-		
+				
 		$aRnvpQualite = '';
 		if($evalAdr == "1" || $evalAdr == "2" || $evalAdr == "0" || $evalAdr == "10"){
 			if($charade=="1" || $charade=="0" || $charade=="2" || !$charade)
