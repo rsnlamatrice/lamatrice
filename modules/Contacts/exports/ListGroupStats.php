@@ -24,7 +24,8 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 			"portable" => "mobile",
 			"email" => "email",
 			"région" => "mailingregion",
-			"département" => "mailingdepartment",//tmp dep number ??
+			"département" => "mailingdepartment",
+			"n° département" => function($row) { return substr($row["mailingzip"], 0, 2); },
 			"Dernière Adhésion" =>"max_adh",
 			"AutreAnnéeAdhésion" => function($row) { return Contacts_ListGroupStats_Export::getAutresAnneeAdhesion($row); },
 			"site web" => "websiteurl",
