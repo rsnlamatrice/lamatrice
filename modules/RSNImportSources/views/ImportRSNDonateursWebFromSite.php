@@ -150,8 +150,8 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		unset($fields['mobile']);
 		unset($fields['date']);
 		$fields = array_move_assoc('mailingstreet2', 'lastname', $fields);
-		$fields = array_move_assoc('mailingstreet3', 'mailingstreet', $fields);
-		$fields = array_move_assoc('mailingpobox', 'mailingstreet3', $fields);
+		$fields = array_move_assoc('mailingstreet3', 'mailingstreet2', $fields);
+		$fields = array_move_assoc('mailingpobox', 'mailingstreet', $fields);
 		$fields = array_move_assoc('rsnnpai', 'lastname', $fields);
 		$fields = array_move_assoc('isgroup', 'email', $fields);
 		
@@ -762,6 +762,22 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RSNDonateursWeb');
 		$contactTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`externalid`)";
+		$db->pquery($query);
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`email`)";
+		$db->pquery($query);
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$contactTableName` ADD INDEX(`externalid`)";
+		$db->pquery($query);
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$contactTableName` ADD INDEX(`email`)";
+		$db->pquery($query);
 		
 		/* Annule les donateursweb déjà importés
 		*/

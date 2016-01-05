@@ -146,7 +146,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 												<th class="enlarge-click-container">
 													<a href="{$CONTACTS_MODULE_MODEL->getDetailViewUrl($CONTACT_ID)}" target="_blank">
 														<span class="icon-rsn-small-isgroup{$CONTACT_ROW['isgroup']}"></span>
-														<label class="contact-no">{$CONTACT_ROW['contact_no']}</label>
+														<br/><label class="contact-no">{$CONTACT_ROW['contact_no']}</label>
 													</a>
 															
 												</th>
@@ -169,6 +169,11 @@ $IMPORT_RECORD_FAILED = 5;*}
 															{if $FIELD_NAME eq 'rsnnpai'}
 																<input type="hidden" value="{$CONTACT_ROW[$CONTACT_FIELD]}"/>
 																<span class="{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['icon']}"/></span>{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['label']}
+																{if $CONTACTS_MODULE_MODEL->getRNVPLabel($CONTACT_ROW)}
+																	<div>
+																		RNVP : {$CONTACTS_MODULE_MODEL->getRNVPLabel($CONTACT_ROW)}
+																	</div>
+																{/if}
 															{else}
 																{$CONTACT_ROW[$CONTACT_FIELD]}
 															{/if}

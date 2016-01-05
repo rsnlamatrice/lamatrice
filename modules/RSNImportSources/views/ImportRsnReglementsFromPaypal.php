@@ -1416,7 +1416,11 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	function postPreImportRsnReglementsData() {
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
-					
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`numpiece`)";
+		$db->pquery($query);
+		
 		/* Affecte l'id du règlement */
 		$query = "UPDATE $tableName
 		JOIN  vtiger_rsnreglements
@@ -1472,6 +1476,16 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`importsourceid`)";
+		$db->pquery($query);
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`rsndonateurweb_externalid`)";
+		$db->pquery($query);
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`_contactid`)";
+		$db->pquery($query);
+		
 		/* Affecte l'id de la facture */
 		$query = "UPDATE  vtiger_invoicecf
 		JOIN  vtiger_invoice
@@ -1518,6 +1532,10 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		
 		//Découvre les contacts d'après les factures
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$contactsTableName` ADD INDEX(`_contactid`)";
+		$db->pquery($query);
 		
 		$query = "UPDATE $contactsTableName
 		JOIN  $tableName

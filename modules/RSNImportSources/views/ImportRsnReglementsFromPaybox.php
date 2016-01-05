@@ -893,6 +893,18 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		
 		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('importsourceid', 'num_ligne'));
 		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`importsourceid`)";
+		$db->pquery($query);
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`refdonateursweb`)";
+		$db->pquery($query);
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$tableName` ADD INDEX(`invoicedate`)";
+		$db->pquery($query);
+		
 		/* Affecte l'id de la facture déjà connue
 		*/
 		$query = "UPDATE  vtiger_invoicecf
