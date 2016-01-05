@@ -33,9 +33,9 @@ class Contacts_ListGroupMailing_Export extends Contacts_ListGroupStats_Export {
 			"Descriptif" => "grpdescriptif",
 			"Remarques" => "description",
 			"StatutNPAI" => "rsnnpai",
-			"DateStatutNPAI" => function($row) { return ($row["rsnnpaidate"]) ? DateTime::createFromFormat('Y-m-d', $row["rsnnpaidate"])->format('d/m/y') : "00/00/00"; },
-			"DateModification" => function($row) { return DateTime::createFromFormat('Y-m-d H:i:s', $row["modifiedtime"])->format('d/m/y'); },
-			"DateModifAdresse" => function($row) { return DateTime::createFromFormat('Y-m-d', $row["mailingmodifiedtime"])->format('d/m/y'); },
+			"DateStatutNPAI" => function($row) { return ($row["rsnnpaidate"]) ? DateTime::createFromFormat('Y-m-d', $row["rsnnpaidate"])->format('d/m/y') : ""; },
+			"DateModification" => function($row) { return ($row["modifiedtime"]) ? DateTime::createFromFormat('Y-m-d H:i:s', $row["modifiedtime"])->format('d/m/y') : ""; },
+			"DateModifAdresse" => function($row) { return ($row["mailingmodifiedtime"]) ? DateTime::createFromFormat('Y-m-d', $row["mailingmodifiedtime"])->format('d/m/y') : ""; },
 		);
 	}
 	
