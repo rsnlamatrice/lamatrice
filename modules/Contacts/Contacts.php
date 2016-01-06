@@ -1088,7 +1088,7 @@ class Contacts extends CRMEntity {
 						SELECT vtiger_contactaddresses.contactaddressesid,
 							vtiger_contactaddresses.contactid,
 							vtiger_contactaddresses.addresstype, vtiger_contactaddresses.comments, vtiger_contactaddresses.addressformat,
-							`rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`,
+							`rsnnpai`, `rsnnpaicomment`, `city`, `street`, `street2`, `street3`, `country`, `state`, `pobox`, `zip`, mailingmodifiedtime,
 							0 AS is_current_address
 						FROM vtiger_contactaddresses
 						JOIN vtiger_contactdetails
@@ -1103,7 +1103,7 @@ class Contacts extends CRMEntity {
 							vtiger_contactaddress.contactaddressid,
 							'LBL_CURRENT_ADDRESS', NULL, NULL,
 							`rsnnpai`, `rsnnpaicomment`, `mailingcity`, `mailingstreet`, `mailingstreet2`, `mailingstreet3`
-							, `mailingcountry`, `mailingstate`, `mailingpobox`, `mailingzip`,
+							, `mailingcountry`, `mailingstate`, `mailingpobox`, `mailingzip`, mailingmodifiedtime,
 							1 AS is_current_address
 						FROM vtiger_contactaddress
 						WHERE vtiger_contactaddress.contactaddressid=".$id."

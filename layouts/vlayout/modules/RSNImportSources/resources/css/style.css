@@ -130,17 +130,17 @@ th.enlarge-click-container > * {
   width: initial;
 }
 
-a.address-sna-check {
+a.address-sna-check, a.address-pagesblanches {
   float: right;
   color: #8888CC;
   padding: 2px;
   border-radius: 3px;
 }
-a.address-sna-check:hover {
+a.address-sna-check:hover, a.address-pagesblanches:hover {
   border: 2px outset gray;
   color: #333333;
 }
-a.address-sna-check:active {
+a.address-sna-check:active, a.address-pagesblanches:active {
   border: 2px inset gray;
 }
 

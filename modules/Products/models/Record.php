@@ -362,7 +362,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 		if($module !== false) {
 			$query .= ' AND setype = ?';
 			if($module == 'Products'){
-				$query = 'SELECT label, crmid, setype, createdtime
+				$query = 'SELECT CONCAT(productcode, " - ", label) AS label, crmid, setype, createdtime
 							FROM vtiger_crmentity
 							INNER JOIN vtiger_products
 								ON vtiger_products.productid = vtiger_crmentity.crmid
@@ -371,7 +371,7 @@ class Products_Record_Model extends Vtiger_Record_Model {
 							AND vtiger_products.discontinued = 1 AND setype = ?';
 				$params[] = "%$searchKey%";
 			}else if($module == 'Services'){
-				$query = 'SELECT label, crmid, setype, createdtime
+				$query = 'SELECT CONCAT(productcode, " - ", label) AS label, crmid, setype, createdtime
 							FROM vtiger_crmentity
 							INNER JOIN vtiger_service
 								ON vtiger_service.serviceid = vtiger_crmentity.crmid

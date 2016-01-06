@@ -90,6 +90,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 											{if $ROW['_contactid_status'] !== null
 											&& (!$ROW['mailingcountry'] || $ROW['mailingcountry'] === 'France')}
 												<a href="#" class="address-sna-check">SNA</a>
+												<br><a href="#Pages blanches" class="address-pagesblanches">Pages bl.</a>
 											{/if}
 										</th>
 										{*foreach key=FIELD_NAME item=VALUE from=$ROW*}
@@ -160,7 +161,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 														{if $FIELD_NAME eq 'mailingstreet2'
 														|| $FIELD_NAME eq 'rsnnpai'
 														|| $FIELD_NAME eq 'mailingpobox'
-														|| straccentscmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
+														|| straddressfieldcmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
 															class="values-eq"
 														{else}
 															class="values-neq"
@@ -174,6 +175,8 @@ $IMPORT_RECORD_FAILED = 5;*}
 																		RNVP : {$CONTACTS_MODULE_MODEL->getRNVPLabel($CONTACT_ROW)}
 																	</div>
 																{/if}
+															{elseif $FIELD_NAME eq 'email' && !$CONTACT_ROW[$CONTACT_FIELD] && $ROW[$FIELD_NAME]}
+																(pas d'email)
 															{else}
 																{$CONTACT_ROW[$CONTACT_FIELD]}
 															{/if}

@@ -2031,8 +2031,25 @@ function clean_pickList_values_string($values){
  * Comparaison de chaines, sans la casse et sans les accents
  */
 function straccentscmp($str1, $str2){
+	if(!$str1 && !$str2) return true;
+	if($str1 && !$str2 || $str2 && !$str1) return false;
 	$str1 = remove_accent(html_entity_decode($str1, ENT_COMPAT | ENT_HTML401, 'UTF-8'));
 	$str2 = remove_accent(html_entity_decode($str2, ENT_COMPAT | ENT_HTML401, 'UTF-8'));
+	return strcasecmp($str1, $str2);
+}
+/* ED160106
+ * Comparaison de chaines pour la pré-validation des imports de contact
+ */
+function straddressfieldcmp($str1, $str2){
+	if(!$str1 && !$str2) return true;
+	if($str1 && !$str2 || $str2 && !$str1) return false;
+	$ignore = array('\'', '-', ' ', '&#039;');
+	$str1 = remove_accent(
+			str_replace($ignore, '', 
+				html_entity_decode($str1, ENT_COMPAT | ENT_HTML401, 'UTF-8')));
+	$str2 = remove_accent(
+			str_replace($ignore, '',
+				html_entity_decode($str2, ENT_COMPAT | ENT_HTML401, 'UTF-8')));
 	return strcasecmp($str1, $str2);
 }
 
