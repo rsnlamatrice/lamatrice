@@ -1,7 +1,7 @@
 <?php
 
 /* Phase de migration
- * Importation des prelevements Web depuis le fichier provenant de 4D
+ * Importation des prelevements Web depuis le fichier provenant du site web du rézo
  */
 class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFromFile_View {
         
