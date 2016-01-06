@@ -1245,7 +1245,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 */
 	function getRsnReglementsValues($reglement) {
 	//TODO end implementation of this method
-		$date = $this->getMySQLDate($reglement[9], $reglement[10]);
+		$date = $this->getMySQLDate($reglement[9]);//, $reglement[10]);
 		if($reglement[6])
 			$dateoperation = $this->getMySQLDate($reglement[6]);
 		else

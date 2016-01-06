@@ -720,14 +720,51 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	function validateSend2Compta(Vtiger_Request $request){
 		//d'abord les règlements, pour garder les factures dans le statut valable
 		$this->validateSend2ComptaReglements($request);
+		$this->validateSend2ComptaCheques($request);
 		$this->validateSend2ComptaInvoices($request);
+	}
+	
+	//Solde les factures réglées par chèque
+	function validateSend2ComptaCheques(Vtiger_Request $request){
+		
+		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');
+		$selectedIds = $request->get('selected_ids');
+		
+		$query = 'UPDATE vtiger_invoicecf
+			JOIN vtiger_invoice
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+			SET vtiger_invoice.received = vtiger_invoice.balance
+			, vtiger_invoice.balance = 0
+			, vtiger_invoicecf.receivedcomments = IF(IFNULL(vtiger_invoicecf.receivedcomments, "") = "", CONCAT("Validation du ", NOW()), vtiger_invoicecf.receivedcomments)
+			WHERE vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
+			AND vtiger_invoicecf.sent2compta IS NULL
+			AND vtiger_invoicecf.receivedmoderegl = "Chèque"
+			AND (vtiger_invoice.received IS NULL OR vtiger_invoice.received = 0)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
+		';
+		$params = array();
+		$params = array_merge($params, $selectedIds);
+		$params = array_merge($params, $excludeInvoicestatus);
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$response = new Vtiger_Response();
+			$response->setError('Erreur de requête de Solde');
+			$response->emit();
+			exit;
+		}
 	}
 	
 	//Marque les factures comme étant envoyées en compta (champ sent2compta)
 	function validateSend2ComptaInvoices(Vtiger_Request $request){
 		
-		$excludeInvoicestatus = array('Created', 'Cancelled');
+		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');
 		$selectedIds = $request->get('selected_ids');
+		//Changement du statut en Compta
 		$query = 'UPDATE vtiger_invoicecf
 			JOIN vtiger_invoice
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
@@ -751,15 +788,16 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			echo "<pre>$query</pre>";
 			var_dump($params);
 			$response = new Vtiger_Response();
-			$response->setError('Erreur de requête');
+			$response->setError('Erreur de requête de changement de statut. Attention les chèques sont validés.');
 			$response->emit();
+			exit;
 		}
 	}
 	
 	//Marque les règlements comme étant envoyées en compta (champ sent2compta)
 	function validateSend2ComptaReglements(Vtiger_Request $request){
 		
-		$excludeInvoicestatus = array('Created', 'Cancelled');
+		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');
 		$selectedIds = $request->get('selected_ids');
 		//
 		// Réglements (en tant que vtiger_rsnreglements) associés.
@@ -798,7 +836,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$response = new Vtiger_Response();
 			$response->setError('Erreur de requête');
 			$response->emit();
-			die();
+			exit;
 		}
 		//reconstitue le tableau des règlements à valider
 		$reglementIds = array();
@@ -823,7 +861,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				$response = new Vtiger_Response();
 				$response->setError('Erreur de requête');
 				$response->emit();
-				die();
+				exit;
 			}
 		}
 		
