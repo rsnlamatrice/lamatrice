@@ -147,10 +147,15 @@ class RSNStatistics extends Vtiger_CRMEntity {
 	}
 	
 	//new field stat
-	function add_statistic_table_field($fieldId) {
+	function add_statistic_table_field($fieldId, $dataType = 'DOUBLE') {
 		$tableName = RSNStatistics_Utils_Helper::getStatsTableNameFromId($this->id);
+		
+		if(strcasecmp($dataType, 'VARCHAR') === 0)
+			$dataType .= '(255) CHARACTER SET latin1 COLLATE latin1_general_ci';
 		//echo "Add a column in the stat field table!! " . $tableName . "<br/>";
-		$sql = "ALTER TABLE `" . $tableName . "` ADD `" . RSNStatistics_Utils_Helper::getFieldUniqueCodeFromId($fieldId) . "` DOUBLE";//tmp double -> use a specified data type !!
+		$sql = "ALTER TABLE `" . $tableName . "` ADD `" . RSNStatistics_Utils_Helper::getFieldUniqueCodeFromId($fieldId) . "` $dataType NULL";//tmp double -> use a specified data type !!
+		
+		
 		$db = PearDatabase::getInstance();
 		$db->pquery($sql);
 	}
@@ -160,7 +165,7 @@ class RSNStatistics extends Vtiger_CRMEntity {
 		$statFields = RSNStatistics_Utils_Helper::getRelatedStatsFieldsRecordModels($this->id);
 		//var_dump($statFields);
 		foreach($statFields as $statField){
-			$this->add_statistic_table_field($statField->getId());
+			$this->add_statistic_table_field($statField->getId(), $statField->get('fieldtype'));
 		}
 	}
 	
