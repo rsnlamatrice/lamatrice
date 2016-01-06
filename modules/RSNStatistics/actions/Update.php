@@ -303,8 +303,10 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 					$end_date = $statPeriod['end_date'];
 					$begin_date = $statPeriod['begin_date'];
 					
-					if(!array_key_exists($code, $cleanedPeriods))
+					if(!array_key_exists($code, $cleanedPeriods)){
 						$this->clearStatTableData($statTableName, $code, $isAllEntities ? false : $crmids);
+						$cleanedPeriods[$code] = true;
+					}
 					
 					$executionQuery = $sqlqueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date));
 					
