@@ -1,13 +1,8 @@
 <?php
 /*+***********************************************************************************
- * The contents of this file are subject to the vtiger CRM Public License Version 1.0
- * ("License"); You may not use this file except in compliance with the License
- * The Original Code is:  vtiger CRM Open Source
- * The Initial Developer of the Original Code is vtiger.
- * Portions created by vtiger are Copyright (C) vtiger.
- * All Rights Reserved.
+ * Exportation des factures vers la compta
  *************************************************************************************/
-if(1){
+if(1){ //0 pour Debug
 	define('ROWSEPAR', "\r\n");
 	define('COLSEPAR', "\t");
 } else {//debug
@@ -200,8 +195,24 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	 *
 	 *	downloadSend2Compta
 	 *
+	 *	les données doivent être exportées triées par journal, sinon COgilog refuse l'import
 	 ******************************************/
 	
+	var $exportBuffers = array();
+	function addExportRow($journal, $row){
+		if(!$this->exportBuffers)
+			$this->exportBuffers[$journal] = array();
+		$this->exportBuffers[$journal][] = $journal . COLSEPAR . $row;
+	}
+	function sanitizeExport($str){
+		return str_replace(array(',', ';', "\t", "\r", "\n",), '-', $str);
+	}
+	function echoExportBuffer(){
+		foreach($this->exportBuffers as $journal => $exportBuffer){
+			echo implode(ROWSEPAR, $exportBuffer);
+			echo ROWSEPAR;
+		}
+	}
 	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
@@ -333,7 +344,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				header("Cache-Control: post-check=0, pre-check=0", false );
 			}
 						
-			echo "**Compta\tEcritures";
+			$this->addExportRow( "**Compta\tEcritures", '' );
 			
 			
 			/* NOTE : les commentaires suivants ne sont pas forcément valables, ils datent du début du dév.
@@ -468,16 +479,16 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				else	$codeAnal = '';
 				//$productName = $invoice['productname'];
 				$productCode = $invoice['productcode'];
-				echo ROWSEPAR.$journalVente
-					.COLSEPAR.$date
-					.COLSEPAR.$piece
+				$this->addExportRow($journalVente,
+					$date
+					.COLSEPAR.$this->sanitizeExport($piece)
 					.COLSEPAR.$compteVente
 					.COLSEPAR.$codeAnal
-					.COLSEPAR.$basicSubject . ($productCode ? ' - ' . $productCode : '')
+					.COLSEPAR.$this->sanitizeExport($basicSubject . ($productCode ? ' - ' . $productCode : ''))
 					.COLSEPAR.''
 					.COLSEPAR.''
 					.COLSEPAR.self::formatAmountForCogilog($amountHT)
-				;
+				);
 				$invoiceTotal += $amountHT + $invoiceTotalTaxes;
 			}
 		
@@ -490,7 +501,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			/* En-tête de la dernière facture */
 			if($invoiceJournal && $invoiceReceived){
 				/* Ligne d'encaissement de la Facture */
-				self::exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
+				$this->exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
 			}
 			
 			/* Lignes des encaissements par jour */
@@ -506,19 +517,20 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				else	$codeAnal = '';
 				$amount= self::formatAmountForCogilog($total);
 				$piece = 'ENC-' . $key;
-				$descriptif = 'Paiements par ' . $modeRegl. ' du ' . $date;
-				echo ROWSEPAR.$journal
-					.COLSEPAR.$date
+				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $date;
+				$this->addExportRow($journal,
+					$date
 					.COLSEPAR.$piece
 					.COLSEPAR.$compteEnc
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$descriptif
 					.COLSEPAR.''
 					.COLSEPAR.$amount
-				;
+				);
 				
 			}
 		}
+		$this->echoExportBuffer();
 		if($isDebug)
 			echo '</table>';//debug
 		
@@ -527,30 +539,30 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
 		/* Ligne d'encaissement de la Facture */
-		echo ROWSEPAR.$invoiceJournal
-			.COLSEPAR.$date
-			.COLSEPAR.$piece
+		$this->addExportRow($invoiceJournal,
+			$date
+			.COLSEPAR.$this->sanitizeExport($piece)
 			.COLSEPAR.$compteVente
 			.COLSEPAR.$invoiceCodeAnal
-			.COLSEPAR.$invoiceSubject
+			.COLSEPAR.$this->sanitizeExport($invoiceSubject)
 			.COLSEPAR.''
 			.COLSEPAR.''
 			.COLSEPAR.$invoiceAmount
-		;
+		);
 	}
 	
 	private function exportInvoiceSolde($invoiceTTC, $journal, $date, $piece, $invoiceSubject, $invoiceData){
 		$amount= self::formatAmountForCogilog($invoiceTTC);
 		$account = self::getInvoiceCompteVenteSolde($invoiceData);
-		echo ROWSEPAR.$journal
-			.COLSEPAR.$date
-			.COLSEPAR.$piece
+		$this->addExportRow($journal,
+			$date
+			.COLSEPAR.$this->sanitizeExport($piece)
 			.COLSEPAR.$account
 			.COLSEPAR
-			.COLSEPAR.$invoiceSubject
+			.COLSEPAR.$this->sanitizeExport($invoiceSubject)
 			.COLSEPAR.''
 			.COLSEPAR.$amount
-		;
+		);
 	}
 	
 	private function exportInvoiceTaxes($invoiceTaxes, $journal, $date, $piece, $invoiceSubject){
@@ -558,16 +570,16 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$amount = self::formatAmountForCogilog($amount);
 			$tax = self::getTax($taxId);
 			$account = $tax['account'];
-			echo ROWSEPAR.$journal
-				.COLSEPAR.$date
-				.COLSEPAR.$piece
+			$this->addExportRow($journal,
+				$date
+				.COLSEPAR.$this->sanitizeExport($piece)
 				.COLSEPAR.$account
 				.COLSEPAR
-				.COLSEPAR.$invoiceSubject
+				.COLSEPAR.$this->sanitizeExport($invoiceSubject)
 				.COLSEPAR.''
 				.COLSEPAR.''
 				.COLSEPAR.$amount
-			;
+			);
 		}
 	}
 	
@@ -668,23 +680,28 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	private static function getCodeAffaireJournal($codeAffaire, $modeRegl = false){
-		switch(strtoupper($codeAffaire)){
-		case 'PAYBOX' :
-		case 'PAYBOXP' :
-			return 'BFC';
-		default :
-			if($modeRegl)
-				switch(strtoupper($modeRegl)){
-				case 'PAYBOX' :
-				case 'PAYBOXP' :
-					return 'BFC';
-				case 'ESPèCES' :
-				case 'ESPÈCES' :
-				case 'ESPECES' :
-					return 'CS';
-				}
-			return 'LBP';
-		}
+		return getModeReglementInfo($modeRegl, 'journalencaissement');
+		//
+		//switch(strtoupper($codeAffaire)){
+		//case 'PAYBOX BOU' :
+		//case 'PAYBOX DR' :
+		//case 'PAYBOX DP' :
+		//case 'PAYBOX' :
+		//case 'PAYBOXP' :
+		//	return 'BFC';
+		//default :
+		//	if($modeRegl)
+		//		switch(strtoupper($modeRegl)){
+		//		case 'PAYBOX' :
+		//		case 'PAYBOXP' :
+		//			return 'BFC';
+		//		case 'ESPèCES' :
+		//		case 'ESPÈCES' :
+		//		case 'ESPECES' :
+		//			return 'CS';
+		//		}
+		//	return 'LBP';
+		//}
 	}
 	
 	private static function formatDateForCogilog($myDate){
