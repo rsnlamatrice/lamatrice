@@ -274,6 +274,9 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		if($perf = !is_numeric($crmids))
 			$perf = new RSN_Performance_Helper();
 		
+		
+		$db = PearDatabase::getInstance();
+		
 		//$this->initStatsRows($relatedModuleName, $crmid, mktime(0, 0, 0, 1, 1, 2009));//TMP !!!
 		//var_dump($relatedModuleName, $statistics);
 		//exit();
@@ -285,6 +288,27 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			if($isAllEntities)
 				$this->cleanStatTable($statTableName);
 			
+			//Delete
+			$deleteParams = array();
+			$deleteQuery = "DELETE $statTableName
+				FROM $statTableName";
+			
+			if(!$isAllEntities)
+				$deleteQuery .= " WHERE crmid IN (" . $crmids . ")";
+				
+			$deleteParams = array();
+		
+			if($perf) $perf->tick();
+			$result = $db->pquery($deleteQuery, $deleteParams);
+			if(!$result){
+				$db->echoError();
+				echo "<pre>$deleteQuery</pre>";
+				var_dump($deleteParams);
+				die("ERREUR D'EXECUTION DE LA REQUETE DE PURGE DE STATISTIQUE");
+			}
+			if($perf) $perf->tick();
+			
+			//Insert
 			$statisticResults = array();
 			foreach ($statistic['queries'] as $statQuery){
 				$relatedStatisticsFields = $statQuery['fields'];
@@ -298,16 +322,6 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 					$begin_date = $statPeriod['begin_date'];
 						
 					$executionQuery = $sqlqueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date));
-					
-					//Delete
-					$deleteParams = array();
-					$deleteQuery = "DELETE $statTableName
-						FROM $statTableName
-						JOIN (" . $executionQuery['sql'] . ") source
-							ON $statTableName.crmid = source.crmid
-						WHERE `$statTableName`.code = ?";
-					$deleteParams[] = $code;
-					$deleteParams = array_merge($deleteParams, $executionQuery['params']);
 					
 					//Insert
 					$params = array();
@@ -348,15 +362,6 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 						$insertQuery .= ", `".$relatedStatisticsField['uniquecode']."` = source.`".$relatedStatisticsField['uniquecode']."`";
 					}
 					
-					$db = PearDatabase::getInstance();
-					if($perf) $perf->tick();
-					$result = $db->pquery($deleteQuery, $deleteParams);
-					if(!$result){
-						$db->echoError();
-						echo "<pre>$insertQuery</pre>";
-						var_dump($params);
-						die("ERREUR D'EXECUTION DE LA REQUETE DE PURGE DE STATISTIQUE");
-					}
 					if($perf) $perf->tick();
 					$result = $db->pquery($insertQuery, $params);
 					if($perf) $perf->tick();

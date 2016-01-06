@@ -35,9 +35,7 @@ class RSNSQLQueries_Record_Model extends Vtiger_Record_Model {
 	 *
 	 */
 	public function getQuery(){
-		return str_replace(array('&lt;', '&gt;','&#039;')
-				   , array('<', '>', "'")
-				   , $this->get('query'));
+		return decode_html($this->get('query'));
 	}
 	
 	public function updateQueryStringVariable($currentVariable, $newVariable) {

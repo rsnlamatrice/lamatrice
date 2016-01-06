@@ -422,7 +422,9 @@ ListView stylings **/
 /* detailView summary
 stats */
 #detailViewHeaderCenter {
-  float: left;
+  /*float: left;*/
+    overflow: hidden;
+    white-space: nowrap;
 }
 #statisticsSummary {
   max-height: 43px;
