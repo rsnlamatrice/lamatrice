@@ -38,8 +38,9 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 		$rows = $request->get('rows');
 		$moduleName = $request->get('for_module');
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($current_user, $moduleName);
-		
 		foreach($rows as $rowId => $rowData){
+			if($rowData['update']['email'] && preg_match('/^\(.*\)$/', $rowData['update']['email']))
+				$rowData['update']['email'] = '';
 			$params = array();
 			$query = 'UPDATE '.$tableName;
 			$nParam = 0;
@@ -70,7 +71,7 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 			$recordId = $rowData['update'.$moduleName]['id'];
 			
 			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
-			
+			$addressChanged = false;
 			//Archive l'ancienne adresse
 			switch($moduleName){
 			case 'Contacts' :
@@ -82,10 +83,13 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 				|| array_key_exists('mailingcity', $rowData['update'.$moduleName])
 				){
 					$recordModel->createContactAddressesRecord('mailing', true);
+					$addressChanged = true;
 				}
 				
 				//email
 				$fieldName = 'email';
+				if($rowData['update'.$moduleName][$fieldName] && preg_match('/^\(.*\)$/', $rowData['update'.$moduleName][$fieldName]))
+					$rowData['update'.$moduleName][$fieldName] = '';
 				if($rowData['update'.$moduleName][$fieldName]
 				&& $rowData['update'.$moduleName][$fieldName] != $recordModel->get($fieldName)){
 					$recordModel->createContactEmailsRecord(true);
@@ -99,6 +103,18 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 			foreach($rowData['update'.$moduleName] as $fieldName => $fieldValue){
 				if($fieldName != 'id')
 					$recordModel->set($fieldName, $fieldValue);
+			}
+			
+			if($addressChanged){
+				$recordModel->set('mailingmodifieddate', date('Y-m-d'));
+				if($recordModel->get('mailingzip') && $recordModel->get('mailingcity'))
+					$rsnnpai = 0;//Ok
+				else
+					$rsnnpai = 4;//Incomplète
+				if($rsnnpai != $recordModel->get('rsnnpai')){
+					$recordModel->set('rsnnpai', $rsnnpai);
+					$recordModel->set('rsnnpaidate', date('Y-m-d'));
+				}
 			}
 			$recordModel->save();
 		}

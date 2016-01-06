@@ -1618,6 +1618,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				$invoiceValues[$fieldName] = $reglement[$fieldName];
 		}
 		
+		//Ajout du code de pays en préfixe du code postal
+		$invoiceValues['zip'] = RSNImportSources_Utils_Helper::checkZipCodePrefix($invoiceValues['zip'], $invoiceValues['country']);
+		
 		if(isset($product) && $reglement)
 			$invoiceValues = array_merge($invoiceValues, array(
 				'productcode'	=> $product['code'],

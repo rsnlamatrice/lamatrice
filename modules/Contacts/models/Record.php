@@ -507,6 +507,13 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		
 		if($compareWithRequest && $hasChanges){
 			$compareWithRequest->set($fieldPrefix.'modifiedtime', date('Y-m-d'));
+			//Force le NPAI à Ok
+			$fieldName = 'rsnnpai';
+			if($this->get($fieldName) && $this->get($fieldName) != '0'){
+				$this->set($fieldName, 0);
+				$compareWithRequest->set($fieldName, 0);
+				$this->set('rsnnpaidate', date('Y-m-d'));
+			}
 		}
 		
 		if($hasChanges && $save){

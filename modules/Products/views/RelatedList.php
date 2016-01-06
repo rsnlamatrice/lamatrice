@@ -14,7 +14,8 @@ class Products_RelatedList_View extends Vtiger_RelatedList_View {
 				$request->set('orderby', 'sostatus'); //TODO Trier par IF(sostatus = 'Approved' OR sostatus = 'Created', 0, 1)
 				break;
 			case 'Invoice':
-				$request->set('orderby', 'invoicestatus'); 
+				$request->set('orderby', 'invoicedate'); 
+				$request->set('sortorder', 'desc'); 
 				break;
 			}
 		}

@@ -455,11 +455,12 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	 * @param Vtiger_Record_Model $recordModel
 	 */
 	public function saveRecord(Vtiger_Record_Model $recordModel) {
-		// ED141016 : majuscules obligatoires
 		$recordModel->set('firstname', ucfirst(trim(decode_html($recordModel->get('firstname')))));
-		$recordModel->set('lastname', trim(mb_strtoupper(decode_html($recordModel->get('lastname')))));
-		$recordModel->set('mailingcity', trim(mb_strtoupper(decode_html($recordModel->get('mailingcity')))));
-		$recordModel->set('othercity', trim(mb_strtoupper(decode_html($recordModel->get('othercity')))));
+		// ED141016 : majuscules obligatoires
+		$fieldNames = array('lastname', 'mailingcity', 'othercity', 'mailingstreet', 'mailingstreet2', 'mailingstreet3', 'otherstreet', 'otherstreet2', 'otherstreet3');
+		foreach($fieldNames as $fieldName)
+			if($recordModel->get($fieldName))
+				$recordModel->set($fieldName, trim(mb_strtoupper(decode_html($recordModel->get($fieldName)))));
 		
 		if($recordModel->get('rsnnpai') == null)
 			$recordModel->set('rsnnpai', 0);
