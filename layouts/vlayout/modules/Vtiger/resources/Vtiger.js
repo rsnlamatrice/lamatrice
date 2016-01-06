@@ -313,6 +313,7 @@ var Vtiger_Index_Js = {
 
 		function showTooltip(el, data) {
 			//ED151118 : modifications dans le css pour la largeur et sur le positionnement dans libraries\bootstrap\js\bootstrap-tooltip.js
+			//TODO anticiper le scroll horizontal si il existe
 			el.popover({
 				//title: '', - Is derived from the Anchor Element (el).
 				trigger: 'manual',
@@ -335,7 +336,7 @@ var Vtiger_Index_Js = {
 
 		references.each(function(index, el){
 			jQuery(el).hoverIntent({
-				interval: 100,
+				interval: 400, /* ED160106 : was 100, sensibilité */
 				sensitivity: 7,
 				timeout: 10,
 				over: prepareAndShowTooltipView,
