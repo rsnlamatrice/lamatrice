@@ -163,7 +163,7 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 
 		//ED150928
 		if($calculatedTotals !== false){
-			$queryGenerator->addField('total');
+			$queryGenerator->addField('hdnGrandTotal');
 		}
 		
 		$listQuery = $this->getQuery();

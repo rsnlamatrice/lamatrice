@@ -151,7 +151,14 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 	 */
 	public function getModulesInfoForDetailView() {
 		return array(
-			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel'),
+			'Critere4D' => array('fieldName' => 'critere4did', 'tableName' => 'vtiger_critere4dcontrel'
+					   , 'sourceFieldName' => 'vtiger_contactdetails.contactid' //WHERE %s IN
+					   , 'sourceFieldNameInRelation' => 'vtiger_critere4dcontrel.contactid' // WHERE sourceFieldName IN ( SELECT %s FROM relationTableName JOIN %sub
+					   , 'relationTableName' => 'vtiger_critere4dcontrel' // FROM %s JOIN %sub
+					   , 'relatedFieldName' => 'critere4did' //  JOIN %sub ON relationTableName.%s = %sub.relatedSourceFieldName
+					   , 'relatedSourceFieldName' => 'critere4did'
+					   , 'keyDateFieldName' => 'dateapplication'//clé primaire en 3 champs, incluant une date
+			),
 			
 			//Attention : manque la relation au compte du contact
 			'Documents' => array('fieldName' => 'notesid', 'tableName' => 'vtiger_senotesrel'
