@@ -284,29 +284,11 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 		foreach ($statistics as $statistic){
 			$relatedStatistic = $statistic['record'];
 			$statTableName = $statistic['table'];
+			
+			$cleanedPeriods = array();
 
 			if($isAllEntities)
 				$this->cleanStatTable($statTableName);
-			
-			//Delete
-			$deleteParams = array();
-			$deleteQuery = "DELETE $statTableName
-				FROM $statTableName";
-			
-			if(!$isAllEntities)
-				$deleteQuery .= " WHERE crmid IN (" . $crmids . ")";
-				
-			$deleteParams = array();
-		
-			if($perf) $perf->tick();
-			$result = $db->pquery($deleteQuery, $deleteParams);
-			if(!$result){
-				$db->echoError();
-				echo "<pre>$deleteQuery</pre>";
-				var_dump($deleteParams);
-				die("ERREUR D'EXECUTION DE LA REQUETE DE PURGE DE STATISTIQUE");
-			}
-			if($perf) $perf->tick();
 			
 			//Insert
 			$statisticResults = array();
@@ -320,7 +302,10 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 					$code = $statPeriod['code'];
 					$end_date = $statPeriod['end_date'];
 					$begin_date = $statPeriod['begin_date'];
-						
+					
+					if(!array_key_exists($code, $cleanedPeriods))
+						$this->clearStatTableData($statTableName, $code, $isAllEntities ? false : $crmids);
+					
 					$executionQuery = $sqlqueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date));
 					
 					//Insert
@@ -412,6 +397,30 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			$db->echoError();
 			echo "<pre>$deleteQuery</pre>";
 			die("ERREUR D'EXECUTION DE LA REQUETE DE NETTOYAGE DE STATISTIQUE");
+		}
+	}
+	
+	//Supprime les enregistrements de stats pour une période donnée
+	function clearStatTableData($statTableName, $periodCode, $crmids){
+		$db = PearDatabase::getInstance();
+		
+		//Delete
+		$deleteParams = array();
+		$deleteQuery = "DELETE $statTableName
+			FROM $statTableName
+			WHERE code = ?";
+		
+		if($crmids)
+			$deleteQuery .= " AND crmid IN (" . $crmids . ")";
+			
+		$deleteParams = array($periodCode);
+	
+		$result = $db->pquery($deleteQuery, $deleteParams);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$deleteQuery</pre>";
+			var_dump($deleteParams);
+			die("ERREUR D'EXECUTION DE LA REQUETE DE PURGE DE STATISTIQUE");
 		}
 	}
 }
