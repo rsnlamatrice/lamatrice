@@ -242,10 +242,10 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			)
 		;
 		
-		if(1){
+		if(0){
 			$list[] = array(
-					'sub' => 'TestsED',
-					'label' => 'Tests ED'
+					'sub' => 'freeDebug',
+					'label' => 'fonction de test (debug)'
 				)
 			;
 		}

@@ -4,9 +4,9 @@
  * La liste est affichée dans le bandeau vertical de gauche,
  * 	initialisée dans Module.php::getSideBarLinks()
  *************************************************************************************/
-require_once('modules/RSN/models/ImportCogilogFactures.php');
-require_once('modules/RSN/models/ImportCogilogAffaires.php');
-require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
+//require_once('modules/RSN/models/ImportCogilogFactures.php');
+//require_once('modules/RSN/models/ImportCogilogAffaires.php');
+//require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
 class RSN_Outils_View extends Vtiger_Index_View {
 	
 	public function preProcess(Vtiger_Request $request, $display = true) {
@@ -99,7 +99,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->resetPicklistValuesRights();
 			break;
 		
-		case 'TestsED' :
+		case 'freeDebug' :
 			$this->freeDebug();
 			exit;
 			break;
@@ -138,7 +138,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		$maxLoop = 100;
 		$testCounter = 0;
 		$updCounter = 0;
-		//Contacts venant de 4D avec leurs commentaires initiaux (il y en a de deux types : contact et groupe)
+		//Contacts venant de 4D avec leurs commentaires initiaux (attention, il y en a de deux types : contact et groupe)
 		$query = 'SELECT crmid, vtiger_modcomments.commentcontent
 			FROM vtiger_contactaddress
 			JOIN vtiger_crmentity
