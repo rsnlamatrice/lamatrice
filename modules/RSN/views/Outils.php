@@ -125,7 +125,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$this->createAboSurCritere();
+		
 	}
 	
 	
