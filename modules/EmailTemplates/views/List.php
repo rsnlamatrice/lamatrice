@@ -85,7 +85,7 @@ class EmailTemplates_List_View extends Vtiger_Index_View {
 
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
-		$searchInput = $this->get('search_input');
+		$searchInput = $request->get('search_input');
 		$operator = $request->get('operator');
 		if(!empty($operator)) {
 			$listViewModel->set('operator', $operator);
