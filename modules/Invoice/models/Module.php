@@ -45,6 +45,12 @@ class Invoice_Module_Model extends Inventory_Module_Model {
 			),
 			array(
 				'linktype' => 'SIDEBARLINK',
+				'linklabel' => 'Nombre de factures',
+				'linkurl' => 'index.php?module='.$this->get('name').'&view=GestionVSComptaNbFact',
+				'linkicon' => '',
+			),
+			array(
+				'linktype' => 'SIDEBARLINK',
 				'linklabel' => 'Contr&ocirc;le de gestion',
 				'linkurl' => 'index.php?module='.$this->get('name').'&view=ControleGestion',
 				'linkicon' => '',
