@@ -154,7 +154,7 @@ class Vtiger_WebUI extends Vtiger_EntryPoint {
 			}
 			$handlerClass = Vtiger_Loader::getComponentClassName($componentType, $componentName, $qualifiedModuleName);
 			$handler = new $handlerClass();
-
+			
 			if ($handler) {
 				vglobal('currentModule', $module);
 				if ($handler->loginRequired()) {
