@@ -56,11 +56,23 @@ class PurchaseOrder_Record_Model extends Inventory_Record_Model {
 			$this->set('postatus', 'Created');
 			break;
 		case 'receipt':
-			$this->set('postatus', 'Created');
+			$this->set('postatus', 'Received Shipment');
 			break;
 		default:
 			$this->set('postatus', 'Created');
 			break;
+		}
+	}
+	function get_potype_code(){
+		switch($this->get('potype')){
+		case 'order':
+			return 'CMF';
+		case 'invoice':
+			return 'FF';
+		case 'receipt':
+			return 'BR';
+		default:
+			return '';
 		}
 	}
 	
@@ -119,5 +131,11 @@ class PurchaseOrder_Record_Model extends Inventory_Record_Model {
 		$module = $this->getModule();
 		return 'index.php?module='.$this->getModuleName().'&view='.$module->getEditViewName().'&record='.$this->getId().'&isDuplicate=true&potype='.$new_potype;
 
+	}
+	
+	public function getVendorName(){
+		$html = $this->getDisplayValue('vendor_id');
+		if($html)
+			return trim(preg_replace('/^[\s\S]+\>(.*)\<.+$/', '$1', $html));
 	}
 }

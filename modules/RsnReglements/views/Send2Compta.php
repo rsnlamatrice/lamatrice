@@ -185,22 +185,27 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	 *
 	 *	downloadSend2Compta
 	 *
-	 *	les données doivent être exportées triées par journal, sinon COgilog refuse l'import
+	 *	les données doivent être exportées triées par journal et par mois, sinon Cogilog refuse l'import
 	 ******************************************/
 	
 	var $exportBuffers = array();
-	function addExportRow($journal, $row){
-		if(!$this->exportBuffers)
-			$this->exportBuffers[$journal] = array();
-		$this->exportBuffers[$journal][] = $journal . COLSEPAR . $row;
+	function addExportRow($journal, $date = '', $row = ''){
+		$dateYM = substr($date, 3);
+		if(!$this->exportBuffers[$dateYM])
+			$this->exportBuffers[$dateYM] = array();
+		if(!$this->exportBuffers[$dateYM][$journal])
+			$this->exportBuffers[$dateYM][$journal] = array();
+		$this->exportBuffers[$dateYM][$journal][] = $journal . COLSEPAR . $date . COLSEPAR . $row;
 	}
 	function sanitizeExport($str){
 		return str_replace(array(',', ';', "\t", "\r", "\n",), '-', $str);
 	}
 	function echoExportBuffer(){
-		foreach($this->exportBuffers as $journal => $exportBuffer){
-			echo implode(ROWSEPAR, $exportBuffer);
-			echo ROWSEPAR;
+		foreach($this->exportBuffers as $dateYM => $journaux){
+			foreach($journaux as $exportBuffer){
+				echo implode(ROWSEPAR, $exportBuffer);
+				echo ROWSEPAR;
+			}
 		}
 	}
 	
@@ -386,8 +391,8 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				$piece = 'ENC-' . $key;
 				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $date;
 				$this->addExportRow($journal,
-					$date
-					.COLSEPAR.$piece
+					$date,
+					$piece
 					.COLSEPAR.$compteEnc
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$descriptif
@@ -409,8 +414,8 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compte, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
 		/* Ligne d'encaissement du règlement */
 		$this->addExportRow($invoiceJournal,
-			$date
-			.COLSEPAR.$this->sanitizeExport($piece)
+			$date,
+			$this->sanitizeExport($piece)
 			.COLSEPAR.$compte
 			.COLSEPAR.$invoiceCodeAnal
 			.COLSEPAR.$this->sanitizeExport($invoiceSubject)

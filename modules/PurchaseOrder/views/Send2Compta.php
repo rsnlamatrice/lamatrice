@@ -92,6 +92,34 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 		}
 		$viewer->assign('SELECTED_IDS', $selectedIds);
 	}
+	
+	/******************************************
+	 *
+	 *	downloadSend2Compta
+	 *
+	 *	les données doivent être exportées triées par journal et par mois, sinon Cogilog refuse l'import
+	 ******************************************/
+	
+	var $exportBuffers = array();
+	function addExportRow($journal, $date = '', $row = ''){
+		$dateYM = substr($date, 3);
+		if(!$this->exportBuffers[$dateYM])
+			$this->exportBuffers[$dateYM] = array();
+		if(!$this->exportBuffers[$dateYM][$journal])
+			$this->exportBuffers[$dateYM][$journal] = array();
+		$this->exportBuffers[$dateYM][$journal][] = $journal . COLSEPAR . $date . COLSEPAR . $row;
+	}
+	function sanitizeExport($str){
+		return str_replace(array(',', ';', "\t", "\r", "\n",), '-', $str);
+	}
+	function echoExportBuffer(){
+		foreach($this->exportBuffers as $dateYM => $journaux){
+			foreach($journaux as $exportBuffer){
+				echo implode(ROWSEPAR, $exportBuffer);
+				echo ROWSEPAR;
+			}
+		}
+	}
 		
 	function downloadSend2Compta (Vtiger_Request $request){
 		$moduleName = $request->getModule();
@@ -216,7 +244,9 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			 * ******
 			 * ******
 			 * Seuls les comptes en 6 ou en 7 on une section analytique
-			 * 
+			 *
+			 *
+			 * ATTENTION tout ceci est une vieille copie de invoice::send2compta : A REFAIRE !
 			 */
 			
 			$journalVente = 'VT';//TODO Paramétrable
@@ -291,16 +321,16 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 				else	$codeAnal = '';
 				$amount = self::formatAmountForCogilog($invoice['quantity'] * $invoice['listprice']);//HT
 				//$productName = $invoice['productname'];
-				echo ROWSEPAR.$journalVente
-					.COLSEPAR.$date
-					.COLSEPAR.$piece
+				$this->addExportRow($journalVente,
+					$date,
+					$piece
 					.COLSEPAR.$compteVente
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$invoiceSubject
 					.COLSEPAR.''
 					.COLSEPAR.''
 					.COLSEPAR.$amount
-				;
+				);
 				$invoiceTotal += str_to_float($amount) + $invoiceTotalTaxes;
 			}
 			
@@ -328,15 +358,15 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 				$amount= self::formatAmountForCogilog($total);
 				$piece = $key;
 				$descriptif = 'Paiements du ' . $date;
-				echo ROWSEPAR.$journal
-					.COLSEPAR.$date
-					.COLSEPAR.$piece
+				$this->addExportRow($journal,
+					$date,
+					$piece
 					.COLSEPAR.$compteEnc
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$descriptif
 					.COLSEPAR.''
 					.COLSEPAR.$amount
-				;
+				);
 				
 			}
 		}
@@ -347,30 +377,30 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 	
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
 		/* Ligne d'encaissement de la Facture */
-		echo ROWSEPAR.$invoiceJournal
-			.COLSEPAR.$date
-			.COLSEPAR.$piece
+		$this->addExportRow($invoiceJournal,
+			$date,
+			$piece
 			.COLSEPAR.$compteVente
 			.COLSEPAR.$invoiceCodeAnal
 			.COLSEPAR.$invoiceSubject
 			.COLSEPAR.''
 			.COLSEPAR.''
 			.COLSEPAR.$invoiceAmount
-		;
+		);
 	}
 	
 	private function exportInvoiceClientAccount($invoiceTTC, $journal, $date, $piece, $invoiceSubject, $invoiceData){
 		$amount= self::formatAmountForCogilog($invoiceTTC);
 		$account = self::getInvoiceCompteVenteSolde($invoiceData);
-		echo ROWSEPAR.$journal
-			.COLSEPAR.$date
-			.COLSEPAR.$piece
+		$this->addExportRow($journal,
+			$date,
+			$piece
 			.COLSEPAR.$account
 			.COLSEPAR
 			.COLSEPAR.$invoiceSubject
 			.COLSEPAR.''
 			.COLSEPAR.$amount
-		;
+		);
 	}
 	
 	private function exportInvoiceTaxes($invoiceTaxes, $journal, $date, $piece, $invoiceSubject){
@@ -379,16 +409,16 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			$amount= self::formatAmountForCogilog($amount);
 			$tax = $taxes[$invoiceTaxe];
 			$account = $tax['account'];
-			echo ROWSEPAR.$journal
-				.COLSEPAR.$date
-				.COLSEPAR.$piece
+			$this->addExportRow($journal,
+				$date,
+				$piece
 				.COLSEPAR.$account
 				.COLSEPAR
 				.COLSEPAR.$invoiceSubject
 				.COLSEPAR.''
 				.COLSEPAR.''
 				.COLSEPAR.$amount
-			;
+			);
 		}
 	}
 	

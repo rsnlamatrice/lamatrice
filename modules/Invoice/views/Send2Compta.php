@@ -195,22 +195,27 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	 *
 	 *	downloadSend2Compta
 	 *
-	 *	les données doivent être exportées triées par journal, sinon COgilog refuse l'import
+	 *	les données doivent être exportées triées par journal et par mois, sinon COgilog refuse l'import
 	 ******************************************/
 	
 	var $exportBuffers = array();
-	function addExportRow($journal, $row){
-		if(!$this->exportBuffers)
-			$this->exportBuffers[$journal] = array();
-		$this->exportBuffers[$journal][] = $journal . COLSEPAR . $row;
+	function addExportRow($journal, $date = '', $row = ''){
+		$dateYM = substr($date, 3);
+		if(!$this->exportBuffers[$dateYM])
+			$this->exportBuffers[$dateYM] = array();
+		if(!$this->exportBuffers[$dateYM][$journal])
+			$this->exportBuffers[$dateYM][$journal] = array();
+		$this->exportBuffers[$dateYM][$journal][] = $journal . COLSEPAR . $date . COLSEPAR . $row;
 	}
 	function sanitizeExport($str){
 		return str_replace(array(',', ';', "\t", "\r", "\n",), '-', $str);
 	}
 	function echoExportBuffer(){
-		foreach($this->exportBuffers as $journal => $exportBuffer){
-			echo implode(ROWSEPAR, $exportBuffer);
-			echo ROWSEPAR;
+		foreach($this->exportBuffers as $dateYM => $journaux){
+			foreach($journaux as $exportBuffer){
+				echo implode(ROWSEPAR, $exportBuffer);
+				echo ROWSEPAR;
+			}
 		}
 	}
 	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
@@ -344,7 +349,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				header("Cache-Control: post-check=0, pre-check=0", false );
 			}
 						
-			$this->addExportRow( "**Compta\tEcritures", '' );
+			$this->addExportRow( "**Compta\tEcritures" );
 			
 			
 			/* NOTE : les commentaires suivants ne sont pas forcément valables, ils datent du début du dév.
@@ -432,7 +437,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						if(strpos($invoice['reglementstatus'], 'Compta') !== false)
 							$invoiceReceived = false;
 						//Si le montant des règlements associés n'est pas celui de la facture, on ne traite pas le règlement
-						if($invoice['reglementamount'] != $invoice['received'])
+						//TODO cf validateSend2ComptaReglements() si on prend bien en compte les écritures
+						if($invoice['reglementamount'] !== null && $invoice['reglementamount'] != $invoice['received'])
 							$invoiceReceived = false;
 					}
 					//Cumuls des règlements par mode de règlement
@@ -480,8 +486,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				//$productName = $invoice['productname'];
 				$productCode = $invoice['productcode'];
 				$this->addExportRow($journalVente,
-					$date
-					.COLSEPAR.$this->sanitizeExport($piece)
+					$date,
+					$this->sanitizeExport($piece)
 					.COLSEPAR.$compteVente
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$this->sanitizeExport($basicSubject . ($productCode ? ' - ' . $productCode : ''))
@@ -497,7 +503,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					
 			if($invoiceTotal)//précédente facture
 				$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $prevInvoice);
-				
+		
 			/* En-tête de la dernière facture */
 			if($invoiceJournal && $invoiceReceived){
 				/* Ligne d'encaissement de la Facture */
@@ -519,8 +525,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				$piece = 'ENC-' . $key;
 				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $date;
 				$this->addExportRow($journal,
-					$date
-					.COLSEPAR.$piece
+					$date,
+					$piece
 					.COLSEPAR.$compteEnc
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$descriptif
@@ -540,8 +546,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
 		/* Ligne d'encaissement de la Facture */
 		$this->addExportRow($invoiceJournal,
-			$date
-			.COLSEPAR.$this->sanitizeExport($piece)
+			$date,
+			$this->sanitizeExport($piece)
 			.COLSEPAR.$compteVente
 			.COLSEPAR.$invoiceCodeAnal
 			.COLSEPAR.$this->sanitizeExport($invoiceSubject)
@@ -555,8 +561,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$amount= self::formatAmountForCogilog($invoiceTTC);
 		$account = self::getInvoiceCompteVenteSolde($invoiceData);
 		$this->addExportRow($journal,
-			$date
-			.COLSEPAR.$this->sanitizeExport($piece)
+			$date,
+			$this->sanitizeExport($piece)
 			.COLSEPAR.$account
 			.COLSEPAR
 			.COLSEPAR.$this->sanitizeExport($invoiceSubject)
@@ -571,8 +577,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$tax = self::getTax($taxId);
 			$account = $tax['account'];
 			$this->addExportRow($journal,
-				$date
-				.COLSEPAR.$this->sanitizeExport($piece)
+				$date,
+				$this->sanitizeExport($piece)
 				.COLSEPAR.$account
 				.COLSEPAR
 				.COLSEPAR.$this->sanitizeExport($invoiceSubject)
@@ -795,6 +801,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	//Marque les règlements comme étant envoyées en compta (champ sent2compta)
+	//TODO A vérifier pour 2 règlements sur la même facture ou un règlement pour 2 factures. cf plus haut dans l'export où on annule l'export des écritures d'encaissement
 	function validateSend2ComptaReglements(Vtiger_Request $request){
 		
 		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');

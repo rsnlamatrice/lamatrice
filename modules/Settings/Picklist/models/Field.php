@@ -73,12 +73,31 @@ class Settings_Picklist_Field_Model extends Vtiger_Field_Model {
 	 * @param <type> $module - optional - module instance
 	 * @return <Vtiger_Field_Model>
 	 */
-	public static function  getInstance($value, $module = false) {
+	public static function getInstance($value, $module = false) {
 		$fieldObject = parent::getInstance($value, $module);
 		if($fieldObject) {
+			$alternatePicklistName = $fieldObject->getPickListName();
+			if($alternatePicklistName != $fieldObject->getName()){
+				$fieldObject = self::getFieldFromPicklistName($alternatePicklistName);
+			}
 			return self::getInstanceFromFieldObject($fieldObject);
 		}
 		return false;
+	}
+
+	/** ED160108
+	 * Function to get field object from picklistname
+	 * @param <String> $value - fieldname
+	 * @return <Int>
+	 */
+	public static function getFieldFromPicklistName($picklistName) {
+		global $adb;
+		$query = 'SELECT fieldid
+			FROM vtiger_field
+			WHERE fieldname = ?
+			LIMIT 1';
+		$result = $adb->pquery($query, array($picklistName));
+		return parent::getInstance($adb->query_result($result, 0, 0), $module);
 	}
 
     /**
@@ -122,7 +141,8 @@ class Settings_Picklist_Field_Model extends Vtiger_Field_Model {
         }
         $db = PearDatabase::getInstance();
 		
-        $query="SELECT $fieldName FROM vtiger_$fieldName WHERE presence=1 AND $fieldName <> '--None--'";
+        $query="SELECT $fieldName FROM vtiger_$fieldName WHERE presence=1 AND $fieldName <> '--None--'
+			ORDER BY $fieldName";
         $values = array();
         $result = $db->pquery($query, array());
         $num_rows = $db->num_rows($result);
