@@ -95,6 +95,7 @@ $languageStrings = array(
 	'LBL_USER'                     => 'Collaborateur'               , 
 	'LBL_GROUP'                    => 'Groupe'                      , 
 	'Last Modified By'             => 'Modifié par'            , 
+	'Created By'             	   => 'Créé par'            , 
 	'Created Time'                 => 'Date de création'           , 
 	'Modified Time'                => 'Date de modification'        , 
 	'Description'                  => 'Description'                 , 
