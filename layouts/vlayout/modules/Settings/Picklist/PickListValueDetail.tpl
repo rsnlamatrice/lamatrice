@@ -101,15 +101,18 @@
 					<input type="hidden" name="picklistname" value="{$SELECTED_PICKLIST_FIELDMODEL->getName()}"/>
 					<input type="hidden" name="picklistvalue" value=""/>
 					
-					<h3>Informations complémentaires à la valeur sélectionnée</h3>
+					<h3>Informations complémentaires de la valeur sélectionnée</h3>
 					<table border=0>
 						{foreach item=FIELD_MODEL from=$SETTING_TABLE_FIELDS_MODELS}
 							<tr><td class="span2"><label>{vtranslate($FIELD_MODEL->getName(), $SELECTED_MODULE_NAME)}</label>
 							<td>{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$QUALIFIED_MODULE) MODULE_NAME=$SELECTED_MODULE_NAME}</td>
 						{/foreach}
+						<tfoot>
+							<tr><td class="span2"></td>
+							<td><button class="btn btn-success marginLeftZero" disabled="" id="saveSettingTableFields">{vtranslate('LBL_SAVE',$QUALIFIED_MODULE)}</button><br><br>
+							</td>
+						</tfoot>
 					</table>
-					<span class="span2"><button class="btn btn-success span10 marginLeftZero" disabled="" id="saveSettingTableFields">{vtranslate('LBL_SAVE',$QUALIFIED_MODULE)}</button><br><br>
-					</span>
 				</fieldset></form>
 				</td></tr>
 			{/if}

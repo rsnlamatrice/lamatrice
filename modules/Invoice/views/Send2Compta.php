@@ -437,6 +437,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						if(strpos($invoice['reglementstatus'], 'Compta') !== false)
 							$invoiceReceived = false;
 						//Si le montant des règlements associés n'est pas celui de la facture, on ne traite pas le règlement
+						//TODO cf validateSend2ComptaReglements() si on prend bien en compte les écritures
 						if($invoice['reglementamount'] !== null && $invoice['reglementamount'] != $invoice['received'])
 							$invoiceReceived = false;
 					}
@@ -800,6 +801,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	//Marque les règlements comme étant envoyées en compta (champ sent2compta)
+	//TODO A vérifier pour 2 règlements sur la même facture ou un règlement pour 2 factures. cf plus haut dans l'export où on annule l'export des écritures d'encaissement
 	function validateSend2ComptaReglements(Vtiger_Request $request){
 		
 		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');
