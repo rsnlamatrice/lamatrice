@@ -22,7 +22,7 @@
 				<p>
 					<small>
 						<em>{vtranslate('LBL_CREATED_ON',$MODULE_NAME)} <b>{Vtiger_Util_Helper::formatDateTimeIntoDayString($RECORD->get('createdtime'))}</b>
-						{if $RECORD->get('createdby')}&nbsp;par {$RECORD->getDisplayValue('createdby')}{/if}</em>
+						{if $RECORD->get('createdby') && $RECORD->get('createdby') != 1}&nbsp;{vtranslate('LBL_BY')} {$RECORD->getDisplayValue('createdby')}{/if}</em>
 					</small>
 				</p>
 			</div>

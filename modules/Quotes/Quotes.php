@@ -159,6 +159,7 @@ class Quotes extends CRMEntity {
 			, vtiger_account.accountname,case when (vtiger_users.user_name not like '') then
 			$userNameSql else vtiger_groups.groupname end as user_name
 		from vtiger_salesorder
+		inner join vtiger_salesordercf on vtiger_salesordercf.salesorderid=vtiger_salesorder.salesorderid
 		inner join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_salesorder.salesorderid
 		left outer join vtiger_quotes on vtiger_quotes.quoteid=vtiger_salesorder.quoteid
 		left outer join vtiger_account on vtiger_account.accountid=vtiger_salesorder.accountid
