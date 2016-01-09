@@ -7,7 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  *************************************************************************************/
-if(false){
+if(1){
 	define('ROWSEPAR', "\r\n");
 	define('COLSEPAR', "\t");
 } else { //debug
@@ -36,6 +36,9 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
+		if(!$this->validateInvoicesData($request))
+			return false;
+
 		$this->initSend2ComptaForm ($request);
 
 		$viewer->assign('MODE', 'send2compta');
@@ -46,6 +49,72 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 		$viewer->assign('MODULE_MODEL', $moduleModel);
 	
 		echo $viewer->view('Send2ComptaForm.tpl','Invoice',true);
+	}
+	//Controle des données avant affichage
+	function validateInvoicesData(Vtiger_Request $request){
+		
+		$controller = new Vtiger_MassSave_Action();
+		$query = $controller->getRecordsQueryFromRequest($request);
+		//$query retourne autant de lignes que de lignes de factures
+		$query = 'SELECT DISTINCT purchaseorderid
+				FROM ('.$query.') _source_';
+		$query = 'SELECT DISTINCT vtiger_purchaseorder.subject,
+			IF(IFNULL(vtiger_productcf.compteachat, "") = "" AND IFNULL(vtiger_servicecf.compteachat, "") = ""
+				, CONCAT(IF(vtiger_products.productid IS NULL, "Service", "Produit"), " : ", IFNULL(vtiger_products.productcode, vtiger_service.productcode), " - ", IFNULL(productname, servicename)), "") AS "produit",
+			IF(IFNULL(vtiger_vendor.glacct, "") = "", vtiger_vendor.vendorname, "") AS "fournisseur"
+			FROM ('.$query.') _source_ids_
+			JOIN vtiger_purchaseorder
+				ON vtiger_purchaseorder.purchaseorderid = _source_ids_.purchaseorderid
+			JOIN vtiger_purchaseordercf
+				ON vtiger_purchaseordercf.purchaseorderid = vtiger_purchaseorder.purchaseorderid
+			LEFT JOIN vtiger_vendor /*fournisseur*/
+				ON vtiger_vendor.vendorid = vtiger_purchaseorder.vendorid
+			LEFT JOIN vtiger_inventoryproductrel
+				ON vtiger_inventoryproductrel.id = vtiger_purchaseorder.purchaseorderid
+			LEFT JOIN vtiger_products
+				ON vtiger_inventoryproductrel.productid = vtiger_products.productid
+			LEFT JOIN vtiger_productcf
+				ON vtiger_productcf.productid = vtiger_products.productid
+			LEFT JOIN vtiger_service
+				ON vtiger_service.serviceid = vtiger_inventoryproductrel.productid
+			LEFT JOIN vtiger_servicecf
+				ON vtiger_servicecf.serviceid = vtiger_inventoryproductrel.productid
+			WHERE vtiger_purchaseordercf.sent2compta IS NULL
+			AND vtiger_purchaseorder.total <> 0
+			AND vtiger_purchaseorder.postatus IN (?)
+			AND vtiger_purchaseorder.potype = \'invoice\'
+			AND ((vtiger_products.productid IS NOT NULL AND IFNULL(vtiger_productcf.compteachat, "") = "")
+					OR (vtiger_servicecf.serviceid IS NOT NULL AND IFNULL(vtiger_servicecf.compteachat, "") = "")
+				OR IFNULL(vtiger_vendor.glacct, "") = "")
+		';
+		$params = array('Approved');
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			return false;
+		}
+		elseif($db->getRowCount($result)) {
+			echo "<ul><h4 style=\"color: red;\">Produits ou fournisseurs sans compte !!!</h4>";
+			while($row = $db->fetch_row($result)){
+				//var_dump($row);
+				if($row['produit'])
+					echo "<li>".$row['produit']
+					." (dans la facture ".$row['subject'].")"
+					."</li>";
+				if($row['fournisseur'])
+					echo "<li>Fournisseur : ".$row['fournisseur']
+					." (dans la facture ".$row['subject'].")"
+					."</li>";
+				if(!$row['produit'] && !$row['fournisseur'])
+					echo "<li>Facture vide : ".$row['subject']."</li>";
+			}
+			echo "</ul>";
+			return false;
+		}
+		return true;
 	}
 	
 	function initSend2ComptaForm (Vtiger_Request $request){
@@ -65,11 +134,11 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 				ON vtiger_purchaseordercf.purchaseorderid = vtiger_purchaseorder.purchaseorderid
 			WHERE vtiger_purchaseordercf.sent2compta IS NULL
 			AND vtiger_purchaseorder.total <> 0
-			AND NOT vtiger_purchaseorder.postatus IN (?)
+			AND vtiger_purchaseorder.postatus IN (?)
 			AND vtiger_purchaseorder.potype = \'invoice\'
 			LIMIT 200 /*too long URL*/
 		';
-		$params = array('Cancelled');
+		$params = array('Approved');
 		
 		$selectedIds = array();
 		$total = 0;
@@ -99,7 +168,6 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 	 *
 	 *	les données doivent être exportées triées par journal et par mois, sinon Cogilog refuse l'import
 	 ******************************************/
-	
 	var $exportBuffers = array();
 	function addExportRow($journal, $date = '', $row = ''){
 		$dateYM = substr($date, 3);
@@ -120,7 +188,7 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			}
 		}
 	}
-		
+	
 	function downloadSend2Compta (Vtiger_Request $request){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
@@ -129,9 +197,13 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			
 		$selectedIds = $request->get('selected_ids');
 		$query = 'SELECT vtiger_purchaseorder.*
-			, vtiger_vendor.glacct
-			, vtiger_products.productname
-			, vtiger_products.productcode
+			, vtiger_vendor.glacct AS vendor_account
+			, vendorcode
+			, vendorname
+			, IFNULL(vtiger_products.productname, vtiger_service.servicename) AS productname
+			, IFNULL(vtiger_products.productcode, vtiger_service.productcode) AS productcode
+			, IFNULL(vtiger_productcf.compteachat, vtiger_servicecf.compteachat) AS compteachat
+			, IFNULL(vtiger_productcf.sectionanal, vtiger_servicecf.sectionanal) AS productsectionanal
 			, vtiger_inventoryproductrel.quantity
 			, vtiger_inventoryproductrel.listprice
 			, vtiger_inventoryproductrel.discount_percent
@@ -145,19 +217,30 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			FROM vtiger_purchaseorder
 			JOIN vtiger_purchaseordercf
 				ON vtiger_purchaseordercf.purchaseorderid = vtiger_purchaseorder.purchaseorderid
-			LEFT JOIN vtiger_vendor /*fournisseur*/
+			/*fournisseur*/
+			LEFT JOIN vtiger_vendor
 				ON vtiger_vendor.vendorid = vtiger_purchaseorder.vendorid
+			LEFT JOIN vtiger_vendorcf
+				ON vtiger_vendorcf.vendorid = vtiger_vendor.vendorid
+			
 			LEFT JOIN vtiger_inventoryproductrel
 				ON vtiger_inventoryproductrel.id = vtiger_purchaseorder.purchaseorderid
+				
 			LEFT JOIN vtiger_products
 				ON vtiger_inventoryproductrel.productid = vtiger_products.productid
 			LEFT JOIN vtiger_productcf
 				ON vtiger_productcf.productid = vtiger_products.productid
+				
+			LEFT JOIN vtiger_service
+				ON vtiger_service.serviceid = vtiger_inventoryproductrel.productid
+			LEFT JOIN vtiger_servicecf
+				ON vtiger_servicecf.serviceid = vtiger_inventoryproductrel.productid
+				
 			WHERE vtiger_purchaseorder.purchaseorderid IN ('. generateQuestionMarks( $selectedIds ) . ')
 			AND vtiger_purchaseordercf.sent2compta IS NULL
 			AND vtiger_purchaseorder.total <> 0
 			AND vtiger_inventoryproductrel.listprice <> 0
-			AND NOT vtiger_purchaseorder.postatus IN (?)
+			AND vtiger_purchaseorder.postatus IN (?)
 			AND vtiger_purchaseorder.potype = \'invoice\'
 		';
 		
@@ -178,7 +261,7 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			, vtiger_inventoryproductrel.sequence_no
 		';
 		$params = $selectedIds;
-		$params[] = 'Cancelled';
+		$params[] = 'Approved';
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
@@ -195,7 +278,7 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			$isDebug = COLSEPAR;
 			$isDebug = $isDebug[0] === '<';
 			
-			$fileName = 'LAM2Cogilog.FactFournisseurs.Compta.'.date('YmdHis');
+			$fileName = 'EcrituresCompta.FFournisseurs.Compta.'.date('Ymd_His').'.csv';
 			$exportType = 'text/csv';
 			if($isDebug)
 				echo '<table border="1"><tr><td>';//debug
@@ -207,12 +290,12 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 				header("Cache-Control: post-check=0, pre-check=0", false );
 			}
 						
-			echo "**Compta\tEcritures";
+			$this->addExportRow( "**Compta\tEcritures" );
 			
 			
 			/*
 			 * 1) Factures et le détail des lignes
-			 * Journal : "VT"
+			 * Journal : "AC"
 			 * 1 ligne par ligne d'article
 			 * 	Compte : issu du produit ou service
 			 * 	Section analytique : issu du code affaire de la facture (coupon ou campagne)
@@ -226,20 +309,7 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			 * 	Sinon, compte 411xxx (selon type de facture : dépôt-vente, boutique)
 			 * 
 			 * 2) Encaissements pour les factures payées
-			 * Journal : "BFC" (compte bancaire NEF)
-			 * 1 ligne par facture
-			 * 	Compte 511xxx : issu du code affaire de la facture (coupon ou campagne)
-			 * 	Section analytique : issu du code affaire de la facture (coupon ou campagne)
-			 * 	N° de pièce : n° de facture
-			 * 	Montant TTC en crédit
-			 * 	
-			 * 1 ligne par jour 
-			 * 	Compte 512107 : compte bancaire NEF
-			 * 	Section analytique : ?
-			 * 	Au débit
-			 * 
-			 * 
-			 * 3) Factures fournisseurs (commissions PayPal, ...)
+			 * non géré
 			 * 
 			 * ******
 			 * ******
@@ -249,155 +319,98 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			 * ATTENTION tout ceci est une vieille copie de invoice::send2compta : A REFAIRE !
 			 */
 			
-			$journalVente = 'VT';//TODO Paramétrable
+			$journalAchat = 'AC';//TODO Paramétrable
 			$prevpurchaseorderid = 0;
 			$prevDate = '';
-			$totalPerDate = array();
-			while($invoice = $db->fetch_row($result)){
+			while($invoice = $db->fetch_row($result, false)){
 				$isInvoiceHeader = $prevpurchaseorderid != $invoice['purchaseorderid'];
 				if($isInvoiceHeader){
 					/* En-tête de facture */
 					$prevpurchaseorderid = $invoice['purchaseorderid'];
 				
 					if($invoiceTaxes)//précédente facture
-						$this->exportInvoiceTaxes($invoiceTaxes, $journalVente, $date, $piece, $invoiceSubject);
+						$this->exportInvoiceTaxes($invoiceTaxes, $journalAchat, $date, $piece, $invoiceSubject);
 				
 					if($invoiceTotal)//précédente facture
-						$this->exportInvoiceClientAccount($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $invoice);
+						$this->exportInvoiceVendorAccount($invoiceTotal, $journalAchat, $date, $piece, $invoiceSubject, $vendorAccount);
 				
-					/* En-tête de la précédente facture */
-					if($invoiceJournal && $invoiceReceived){
-						/* Ligne d'encaissement de la Facture */
-						$this->exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
-					}
-						
 					$invoiceTaxes = array();
 					$invoiceTotal = 0;
 					
 					//ligne de facture de l'encaissement
-					$codeAffaire = $invoice['codeaffaire'];
-					$piece = $invoice['invoice_no'];
-					$invoiceCompteVente = self::getCodeAffaireCompteVente($codeAffaire);
-					if($invoiceCompteVente[0] === '7' || $invoiceCompteVente[0] === '6')
-						$invoiceCodeAnal = self::getCodeAffaireCodeAnal($codeAffaire);
-					else	$invoiceCodeAnal = '';
-					$invoiceJournal = self::getCodeAffaireJournal($codeAffaire);
+					$piece = $invoice['purchaseorder_no'];
 					$invoiceAmount = self::formatAmountForCogilog($invoice['total']);
-					$invoiceReceived = self::formatAmountForCogilog($invoice['received']);
-					$invoiceSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']) . ' - ' . $codeAffaire);
-					$date = self::formatDateForCogilog($invoice['invoicedate']);
-					$key = $date . '-' . $invoiceJournal . '-' . $invoiceCodeAnal;
-					if($invoiceReceived){
-						if(!$totalPerDate[$key])
-							$totalPerDate[$key] = array(
-										    'journal' => $invoiceJournal,
-										    'codeAnal' => $invoiceCodeAnal,
-										    'date' => $date,
-										    'total' => 0.0
-										);
-						$totalPerDate[$key]['total'] += str_to_float($invoiceReceived);
-					}
+					$vendorAccount = self::getVendorAccount($invoice);
+					$vendorCode = !$invoice['vendorcode'] || stricmp($invoice['vendorcode'], $invoice['vendor_account']) === 0 ? $invoice['vendorname'] : $invoice['vendorcode'];
+					$invoiceSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
+					if(stripos($invoiceSubject, $vendorCode) === false)
+						$invoiceSubject = $vendorCode . ' - ' . $invoiceSubject;
+					$date = self::formatDateForCogilog($invoice['duedate']);
 				}
 				
 				/* ligne de produit */
+				/* ligne de produit */
+				
+				$amountHT = round($invoice['quantity'] * $invoice['listprice'], 2);//HT
 				
 				//Taxe utilisée
 				$invoiceTotalTaxes = 0.0;
 				for($nTax = 0; $nTax < count($taxes); $nTax++){
 					$taxId = $taxes[$nTax]['taxid'];
 					if($invoice['tax'.$taxId]){
-						if(!array_key_exists($taxId, $invoiceTaxes))
-							$invoiceTaxes[$taxId] = 0.0;
-						$value = $invoice['tax'.$taxId] / 100 * $invoice['quantity'] * $invoice['listprice'];
+						if(!array_key_exists("$taxId", $invoiceTaxes))
+							$invoiceTaxes["$taxId"] = 0.0;
+						//Passage par le TTC, arrondi à 2 chiffres et retrait du HT pour éviter les écarts d'arrondis
+						$value = round((1 + $invoice['tax'.$taxId] / 100) * $invoice['quantity'] * $invoice['listprice'], 2) - $amountHT;
 						$invoiceTotalTaxes += $value;
-						$invoiceTaxes[$taxId] += $value;
+						$invoiceTaxes["$taxId"] += $value;
 						break;
 					}
 				}
 				
-				$compteVente = $invoice['productglacct'];
-				if($compteVente[0] === '7' || $compteVente[0] === '6')
+				$compteAchat = $invoice['compteachat'];
+				if($compteAchat[0] === '7' || $compteAchat[0] === '6')
 					$codeAnal = $invoiceCodeAnal ? $invoiceCodeAnal : $invoice['productsectionanal'];
 				else	$codeAnal = '';
-				$amount = self::formatAmountForCogilog($invoice['quantity'] * $invoice['listprice']);//HT
-				//$productName = $invoice['productname'];
-				$this->addExportRow($journalVente,
+					$amount = self::formatAmountForCogilog($invoice['quantity'] * $invoice['listprice']);//HT
+				$lineItem = $vendorCode
+					. " - " . (stripos($invoice['productname'], 'Frais de port') === false ? self::formatAmountForCogilog($invoice['quantity']) . " ex " : '')
+					. $invoice['productname'];
+				$this->addExportRow($journalAchat,
 					$date,
 					$piece
-					.COLSEPAR.$compteVente
+					.COLSEPAR.$compteAchat
 					.COLSEPAR.$codeAnal
-					.COLSEPAR.$invoiceSubject
+					.COLSEPAR.$this->sanitizeExport($lineItem)
 					.COLSEPAR.''
+					.COLSEPAR.self::formatAmountForCogilog($amountHT)
 					.COLSEPAR.''
-					.COLSEPAR.$amount
 				);
-				$invoiceTotal += str_to_float($amount) + $invoiceTotalTaxes;
+				$invoiceTotal += $amountHT + $invoiceTotalTaxes;
 			}
 			
 			if($invoiceTaxes)//dernière facture
-				$this->exportInvoiceTaxes($invoiceTaxes, $journalVente, $date, $piece, $invoiceSubject);
+				$this->exportInvoiceTaxes($invoiceTaxes, $journalAchat, $date, $piece, $invoiceSubject);
 				
 			if($invoiceTotal)//précédente facture
-				$this->exportInvoiceClientAccount($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $invoice);
-				
-			/* En-tête de la dernière facture */
-			if($invoiceJournal && $invoiceReceived){
-				/* Ligne d'encaissement de la Facture */
-				self::exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
-			}
+				$this->exportInvoiceVendorAccount($invoiceTotal, $journalAchat, $date, $piece, $invoiceSubject, $vendorAccount);
 			
-			/* Lignes des encaissements par jour */
-			$compteEnc = self::getCodeAffaireCompteEncaissement(''); 
-			foreach($totalPerDate as $key => $data){
-				$total = $data['total'];
-				$journal = $data['journal'];
-				$date = $data['date'];
-				if($compteEnc[0] === '7' || $compteEnc[0] === '6')
-					$codeAnal = $data['codeAnal'];
-				else	$codeAnal = '';
-				$amount= self::formatAmountForCogilog($total);
-				$piece = $key;
-				$descriptif = 'Paiements du ' . $date;
-				$this->addExportRow($journal,
-					$date,
-					$piece
-					.COLSEPAR.$compteEnc
-					.COLSEPAR.$codeAnal
-					.COLSEPAR.$descriptif
-					.COLSEPAR.''
-					.COLSEPAR.$amount
-				);
-				
-			}
 		}
+		$this->echoExportBuffer();
 		if($isDebug)
 			echo '</table>';//debug
 			
 	}
 	
-	private function exportEncaissement($invoiceJournal, $date, $piece, $compteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
-		/* Ligne d'encaissement de la Facture */
-		$this->addExportRow($invoiceJournal,
-			$date,
-			$piece
-			.COLSEPAR.$compteVente
-			.COLSEPAR.$invoiceCodeAnal
-			.COLSEPAR.$invoiceSubject
-			.COLSEPAR.''
-			.COLSEPAR.''
-			.COLSEPAR.$invoiceAmount
-		);
-	}
-	
-	private function exportInvoiceClientAccount($invoiceTTC, $journal, $date, $piece, $invoiceSubject, $invoiceData){
+	private function exportInvoiceVendorAccount($invoiceTTC, $journal, $date, $piece, $invoiceSubject, $vendorAccount){
 		$amount= self::formatAmountForCogilog($invoiceTTC);
-		$account = self::getInvoiceCompteVenteSolde($invoiceData);
 		$this->addExportRow($journal,
 			$date,
 			$piece
-			.COLSEPAR.$account
+			.COLSEPAR.$vendorAccount
 			.COLSEPAR
 			.COLSEPAR.$invoiceSubject
+			.COLSEPAR.''
 			.COLSEPAR.''
 			.COLSEPAR.$amount
 		);
@@ -408,7 +421,9 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 		foreach($invoiceTaxes as $invoiceTaxe => $amount){
 			$amount= self::formatAmountForCogilog($amount);
 			$tax = $taxes[$invoiceTaxe];
-			$account = $tax['account'];
+			
+			$account = '445641'; //TODO ajouter un compte TVA d'achat mais il faut peut être aussi ajouter la saisie d'une taxe d'achat différente de la vente. $tax['compteachat'];
+			
 			$this->addExportRow($journal,
 				$date,
 				$piece
@@ -416,8 +431,8 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 				.COLSEPAR
 				.COLSEPAR.$invoiceSubject
 				.COLSEPAR.''
-				.COLSEPAR.''
 				.COLSEPAR.$amount
+				.COLSEPAR.''
 			);
 		}
 	}
@@ -429,62 +444,10 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 		return self::$allTaxes;
 	}
 	
-	private static function getCodeAffaireCompteVente($codeAffaire){
-		switch(strtoupper($codeAffaire)){
-		case 'PAYBOX' :// (dons réguliers)  
-			return '511104';
-		case 'PAYBOXP' :
-			return '511400';// (dons ponctuels)  
-		case 'PAYPAL' :
-			return '511300';
-		case 'BOU' :
-		case 'BOUTIQUE' :
-			return '511101';
-		default:
-			return '511101';
-		}
-	}
-	
-	private static function getInvoiceCompteVenteSolde($invoiceData){
-		switch(strtoupper($invoiceData['status'])){
-		case 'PAID' :
-			return '511200';
-		default:
-			switch($invoiceData['typedossier']){
-			case 'Facture de dépôt-vente' :
-				return '411DEP';
-			case 'CREDIT INVOICE' ://Avoir
-			case 'Avoir' :
-			case 'Remboursement' :
-				return '511200';//TODO
-			default:
-				return '411000';
-			}
-		}
-	}
-	
-	private static function getCodeAffaireCompteEncaissement($codeAffaire){
-		switch(strtoupper($codeAffaire)){
-		default :
-			return '512107';
-		}
-	}
-	
-	private static function getCodeAffaireCodeAnal($codeAffaire){
-		switch(strtoupper($codeAffaire)){
-		default :
-			return strtoupper($codeAffaire);
-		}
-	}
-	
-	private static function getCodeAffaireJournal($codeAffaire){
-		switch(strtoupper($codeAffaire)){
-		case 'PAYBOX' :
-		case 'PAYBOXP' :
-			return 'LBP';
-		default :
-			return 'BFC';
-		}
+	private static function getVendorAccount($invoiceData){
+		if($invoiceData['vendor_account'])
+			return $invoiceData['vendor_account'];
+		return 411000;
 	}
 	
 	private static function formatDateForCogilog($myDate){
@@ -506,14 +469,15 @@ class PurchaseOrder_Send2Compta_View extends Invoice_Send2Compta_View {
 			JOIN vtiger_purchaseorder
 				ON vtiger_purchaseordercf.purchaseorderid = vtiger_purchaseorder.purchaseorderid
 			SET vtiger_purchaseordercf.sent2compta = NOW()
+			, vtiger_purchaseorder.postatus = "Compta"
 			WHERE vtiger_purchaseorder.purchaseorderid IN ('. generateQuestionMarks( $selectedIds ) . ')
 			AND vtiger_purchaseordercf.sent2compta IS NULL
 			AND vtiger_purchaseorder.total <> 0
-			AND NOT vtiger_purchaseorder.postatus IN (?)
+			AND vtiger_purchaseorder.postatus IN (?)
 			AND vtiger_purchaseorder.potype = \'invoice\'
 		';
 		$params = $selectedIds;
-		$params[] = 'Cancelled';
+		$params[] = 'Approved';
 		
 		$db = PearDatabase::getInstance();
 		$result = $db->pquery($query, $params);
