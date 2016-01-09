@@ -209,12 +209,12 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			if( $request->get('isDuplicate')){
 				if($request->get('potype') === 'receipt')
 					$recordModel->set('subject', str_replace('Cmde fourn.', 'Bon récept.',
-												 str_replace('CMF ', 'BR ', $recordModel->get('subject'))));
+												 preg_replace('/^CMF\s/', 'BR ', $recordModel->get('subject'))));
 				elseif($request->get('potype') === 'invoice')
 					$recordModel->set('subject', preg_replace('/^Bon r.*cept./', 'Fact. fourn.', 
-												 str_replace('BR ', 'FF ', $recordModel->get('subject'))));
+												 preg_replace('/^BR\s/', 'FF ', $recordModel->get('subject'))));
 			}
-			elseif(!$recordModel->get('subject')){
+			elseif(!$recordModel->get('subject') && $recordModel->get('vendor_id')){
 				$subject = $recordModel->get_potype_code() . ' ' . $recordModel->getVendorName();
 				$recordModel->set('subject', $subject);
 			}
