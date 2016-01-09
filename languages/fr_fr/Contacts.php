@@ -121,6 +121,8 @@ $languageStrings = array(
 	'LBL_TRANSFERER_REVUE'              => 'Transférer la revue vers', 
 	'LBL_TRANSFERER_DONS'              => 'Transférer les dons vers',
 	'LBL_RELATED_CONTACTS' => 'Contacts liés',
+	
+	'LBL_TAG_AS_DELETED' => 'Marquer comme supprimé(e)',
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 

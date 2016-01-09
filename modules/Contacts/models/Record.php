@@ -30,6 +30,14 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		return $calendarModuleModel->getCreateTaskRecordUrl().'&contact_id='.$this->getId();
 	}
 
+	/** ED160108
+	 * Function to get the url for changer la fiche pour indiquer comme [SUPPRIME(E)]
+	 * @return <String> - url
+	 */
+	public function getTagAsDeletedUrl() {
+		return $this->getDeleteUrl() . '&mode=tagAsDeleted';
+	}
+
 
 	/**
 	 * Function to get List of Fields which are related from Contacts to Inventory Record
