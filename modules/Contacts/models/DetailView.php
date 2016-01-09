@@ -11,12 +11,12 @@
 //Same as Accounts Detail View
 class Contacts_DetailView_Model extends Accounts_DetailView_Model {
 	
-	/**
-	 * Function to get the detail view widgets
-	 * @return <Array> - List of widgets , where each widget is an Vtiger_Link_Model
-	 */
-	public function getWidgets() {
-		$widgetLinks = array();
-		return $widgetLinks;
-	}
+	///**
+	// * Function to get the detail view widgets
+	// * @return <Array> - List of widgets , where each widget is an Vtiger_Link_Model
+	// */
+	//public function getWidgets() {
+	//	$widgetLinks = array();
+	//	return $widgetLinks;
+	//}
 }
