@@ -74,7 +74,6 @@ Class CustomView_EditAjax_View extends Vtiger_IndexAjax_View {
 		foreach($relationModels as $relationModel){
 			$relatedViews[$relationModel->getRelationModuleName()] = $relationModel->getRelationViews();
 		}
-
 		/* ED150507
 		 * RSNContactsPanels
 		 */

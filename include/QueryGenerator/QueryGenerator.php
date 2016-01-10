@@ -30,6 +30,8 @@ class QueryGenerator {
 	
 	private $statistictsRelations;
 	private $statisticsFields;
+
+	private $debug;
 	
 	/**
 	 *
@@ -243,6 +245,8 @@ class QueryGenerator {
 		/* ED150308*/
 		if($this->getAdvFilterListMore()){
 			//var_dump('OUIOUIOUIOUIOUIOUIOUI $this->getAdvFilterListMore()', $this->getAdvFilterListMore());
+			//$this->debug = true;
+			
 			if(!is_array($this->advFilterList)){
 				$this->advFilterList = array();
 				$key = "1";
@@ -433,7 +437,7 @@ class QueryGenerator {
 										$nextFilter = $filtercolumns[$iNext];
 										//same view, memorize and skip
 										if($nextFilter['isSubQuery'] && $nextFilter['relatedmodulename'] == $filter['relatedmodulename']){
-											//Il faut différencier les champs du module lié et les champs de la table de relation
+											//Il faut différencier les champs du module lié et les champs de la table de relation + champ vtiger_crmentity.label
 											//champ du module lié
 											if($nextFilter['subQueryColumn']){
 												$viewFilters[] = $nextFilter['subQueryColumn'];
@@ -517,7 +521,7 @@ class QueryGenerator {
 								//TODO $field =	var_dump($this->meta->getFieldByColumnName("contact_id"));
 								
 								//TODO bugg vu avec un filtre juste avant
-								
+								//var_dump('$filter', $filter, $filter['comparator'], $relatedSql);
 								$this->startGroup('', $filter['comparator'] . ' [' . $filter['viewname'] . ']');
 								$this->addCondition($sourceFieldName
 											, $relatedSql
@@ -632,7 +636,8 @@ class QueryGenerator {
 	* - Test sur un champ de la table de relation par la vue d'un autre module
 	*  [RelatedModule:ViewName:ViewId::relation table:relation column:relation field:label]
 	* - Test sur un champ d'un autre module via une vue de cet autre module
-	*  [RelatedModule:ViewName:ViewId]:field related table:column:field:label (TODO check column:field)
+	*  [RelatedModule:ViewName:ViewId]:field related table:column:field:label:datatype (TODO check column:field)
+	*  [RelatedModule::::]field table:column:field:label:datatype
 	* - Relation à un RSNContactsPanels (idem que les related module custom views)
 	* 	[RSNContactsPanels:PanelName:PanelId]
 	* - Test sur l'existence d'une stat pour une période donnée 
@@ -686,7 +691,7 @@ class QueryGenerator {
 					));
 					$this->initFilterConditionValue($filter['relationColumn'], $viewName[5], $customView, $dateSpecificConditions);
 				}
-
+				
 				$filter['relatedIsPanel'] = $filter['relatedmodulename'] === 'RSNContactsPanels';
 				
 				//Données après le ]
@@ -696,7 +701,6 @@ class QueryGenerator {
 					if($subQueryColumnName[0] === ':')
 						$subQueryColumnName = substr($subQueryColumnName,1);
 					$subQueryColumnInfos = explode(':', $subQueryColumnName);
-					
 					if($filter['relatedIsPanel']){
 						$filter['subQueryColumn'] = array_merge($filter, array(
 							'columnname' => $subQueryColumnName,
@@ -706,12 +710,14 @@ class QueryGenerator {
 							'isPanelVariable' => true,
 						));
 					} else {
+						//Par exemple : nom du critère d'une vue de critères lié aux contacts
 						$filter['subQueryColumn'] = array_merge($filter, array(
 							'columnname' => $subQueryColumnName,
 							'table' => $subQueryColumnInfos[0],
 							'column' => $subQueryColumnInfos[1],
 							'field' => $subQueryColumnInfos[2],
-							'dataType' => explode('~', $subQueryColumnInfos[3])[0],
+							'dataType' => explode('~', $subQueryColumnInfos[4])[0],
+							'isSubQuery' => false,
 						));
 					}
 					$this->initFilterConditionValue($filter['subQueryColumn'], $subQueryColumnInfos[1], $customView, $dateSpecificConditions);
@@ -886,8 +892,9 @@ class QueryGenerator {
 			$query .= $this->getWhereClause();
 			$this->query = $query;
 			
-//			print_r('<pre style="margin-top:4em;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
-			
+			if($this->debug)
+				print_r('<pre style="margin-top:4em;">'.__FILE__.'->getQuery $this->query = $query;<br>'.$query.'</pre>');
+//			die();
 			//echo_callstack();
 			
 			return $query;
@@ -1184,7 +1191,9 @@ class QueryGenerator {
 		$groupSql = $this->groupInfo;
 		$fieldSqlList = array();
 		foreach ($this->conditionals as $index=>$conditionInfo) {
-			//echo '<br><br><br><br><br>'; var_dump($index, $conditionInfo);
+			if(0 && $this->debug){
+				echo '<br><br><br><br><br>getWhereClause '; var_dump($index, $conditionInfo);
+			}
 			
 			$fieldName = $conditionInfo['name'];
 			$field = $moduleFieldList[$fieldName];
@@ -2124,6 +2133,8 @@ class QueryGenerator {
 	
 	//ED150308 : more advanced filters (given by code)
 	public function setAdvFilterListMore($list){
+		if($list)//Annule le dernier AND ou OR
+			$list[count($list)-1]['column_condition'] = '';
 		$this->advFilterListMore = $list;
 	}
 	public function getAdvFilterListMore(){
