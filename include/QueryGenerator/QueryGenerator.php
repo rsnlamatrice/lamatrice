@@ -453,7 +453,9 @@ class QueryGenerator {
 											
 										//TODO modifier le column_condition pour ne pas avoir un AND final
 									}
-									
+									//if($viewFilters){
+									//	var_dump('$viewFilters', $viewFilters);
+									//}
 									//sub view
 									$listView = Vtiger_ListView_Model::getInstance($filter['relatedmodulename'], $filter['viewid'], $viewFilters);
 									//get view query, adding filters
@@ -709,6 +711,7 @@ class QueryGenerator {
 							'dataType' => explode('~', $subQueryColumnInfos[3])[0],
 							'isPanelVariable' => true,
 						));
+						$conditionFieldName = $subQueryColumnInfos[1];
 					} else {
 						//Par exemple : nom du critère d'une vue de critères lié aux contacts
 						$filter['subQueryColumn'] = array_merge($filter, array(
@@ -719,8 +722,9 @@ class QueryGenerator {
 							'dataType' => explode('~', $subQueryColumnInfos[4])[0],
 							'isSubQuery' => false,
 						));
+						$conditionFieldName = $subQueryColumnInfos[2];
 					}
-					$this->initFilterConditionValue($filter['subQueryColumn'], $subQueryColumnInfos[1], $customView, $dateSpecificConditions);
+					$this->initFilterConditionValue($filter['subQueryColumn'], $conditionFieldName, $customView, $dateSpecificConditions);
 				}
 			}
 		}
@@ -1236,8 +1240,12 @@ class QueryGenerator {
 					$sqlOperator = " IN ";
 					$fieldSqlList[$index] = "$fieldGlue $fieldName $sqlOperator \n\t$valueSql\n";
 				}
+				else {
+					//var_dump('$conditionInfo Field introuvable', $conditionInfo, $moduleFieldList );
+				}
 				continue;
 			}
+			
 			$fieldSql = '(';
 			$fieldGlue = '';
 			$valueSqlList = $this->getConditionValue($conditionInfo['value'],
