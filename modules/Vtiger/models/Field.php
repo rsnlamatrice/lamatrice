@@ -1021,7 +1021,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 * @param <type> $module - optional - module instance
 	 * @return <Vtiger_Field_Model>
 	 */
-	public static function  getInstance($value, $module = false) {
+	public static function getInstance($value, $module = false) {
         $fieldObject = null;
         if($module){
             $fieldObject = Vtiger_Cache::get('field-'.$module->getId(), $value);
