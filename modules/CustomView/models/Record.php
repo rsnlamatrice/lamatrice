@@ -421,7 +421,12 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 							$fieldModel = $fieldModuleModel->getField($fieldName);
 						}
 						elseif($moduleRelationModel){
+							//Champ de relation 
 							$fieldModel = $moduleRelationModel->getRelationField($fieldName);
+							if(!$fieldModel){
+								//Ce n'est pas un champ de relation mais du module lié
+								$fieldModel = $relatedModule->getField($fieldName);
+							}
 						}
 						elseif($relatedModuleName === 'RSNContactsPanels'){
 							$variableId = $columnInfo[1];

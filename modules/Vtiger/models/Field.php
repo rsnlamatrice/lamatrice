@@ -398,10 +398,10 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	}
 
 	public function isQuickCreateEnabled() {
-		$moduleModel = $this->getModule();
 		$quickCreate = $this->get('quickcreate');
 		if(($quickCreate == self::QUICKCREATE_MANDATORY || $quickCreate == self::QUICKCREATE_ENABLED
 		|| $this->isMandatory()) && $this->get('uitype') != 69) {
+			$moduleModel = $this->getModule();
 		    //isQuickCreateSupported will not be there for settings
 			if(method_exists($moduleModel,'isQuickCreateSupported') && $moduleModel->isQuickCreateSupported()) {
 				return true;
@@ -1424,5 +1424,57 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	 */
 	public function canCreateReferenceRecord(){
 		return true;
+	}
+	
+	
+	
+
+	/** ED160110
+	 * Function to get the entity name field models
+	 * @return <Vtiger_Field_Model[]> 
+	 */
+	public static function getEntityNameFieldModels($moduleName) {
+		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+		$nameFieldObject = Vtiger_Cache::get('EntityField',$moduleName);
+		if(!$nameFieldObject) {
+			$nameFields = $moduleModel->getNameFields();
+			$nameFieldObject = Vtiger_Cache::get('EntityField',$moduleName);
+			if(!$nameFieldObject) {
+				$field = self::getModuleEntityLabelField($moduleModel);
+				return array($field->getName() => self::getModuleEntityLabelField($moduleModel));
+			}
+		}
+		$fieldModels = array();
+		foreach(explode(',', $nameFieldObject->fieldname) as $fieldname){
+			$field = $moduleModel->getField($fieldname);
+			if(!$field)
+				continue;
+			$field->set('label', vtranslate($field->get('label'), $moduleName) . ' ' . vtranslate('SINGLE_'.$moduleName, $moduleName));
+			$fieldModels[$field->getName()] = $field;
+		}
+		return $fieldModels;
+	}
+	/** ED160110
+	 * Function to get the entity label field
+	 * @return <Vtiger_Field_Model> 
+	 */
+	public static function getModuleEntityLabelField($moduleName) {
+		if(is_object($moduleName)){
+			$moduleModel = $moduleName;
+			$moduleName = $moduleModel->getName();
+		}
+		else
+			$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
+	    $fieldName = 'crmentitylabel';
+	    $field = new Vtiger_Field_Model();
+	    $field->setModule($moduledModel);
+	    $field->set('name', $fieldName);
+	    $field->set('column', 'label');
+	    $field->set('table', 'vtiger_crmentity');
+	    $field->set('label', vtranslate('LBL_ITEM_NAME') . ' ' . vtranslate('SINGLE_'.$moduleName, $moduleName));
+	    $field->set('typeofdata', 'V~0');
+	    $field->set('uitype', 1);
+	    
+		return $field;
 	}
 }
