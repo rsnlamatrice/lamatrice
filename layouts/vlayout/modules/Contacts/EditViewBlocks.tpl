@@ -219,7 +219,8 @@
 							</span>
 							<span class="subFieldLabel">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</span>
 							<span class="subFieldLabel" style="color: #88bbbb;">
-								<button class="address-sna-check ui-button" title="Contrôle externe de l'adresse">SNA</button>
+								<button class="address-pagesblanches ui-button" title="Pages blanches">Pages bl.</button>
+								<button class="address-sna-check ui-button" title="Contrôle par le Service National des Adresses">SNA</button>
 								&gt;&gt;
 							</span>
 						{elseif $FIELD_NAME eq 'rsnnpai'}
@@ -340,7 +341,7 @@
 							
 							{*isgroup : add duplicate mailingstreet2 *}
 							{if $FIELD_NAME eq 'isgroup'}
-								<div class="mailingstreet2-synchronize-holder {if $RECORD_MODEL->get('isgroup') eq '0'}hide{/if}"
+								<span class="mailingstreet2-synchronize-holder pull-right {if $RECORD_MODEL->get('isgroup') eq '0'}hide{/if}"
 								 title="Nom apparaissant en 2ème ligne d'adresse">
 									{* isgroup_mailingstreet2 *}
 									{assign var=TITLE value='Structure ou chez'}
@@ -353,7 +354,7 @@
 									{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 									{assign var=FIELD_MODEL value=$FIELD_MODELTMP}
 					       
-									<span class="subFieldLabel ui-buttonset-small marginRight10px" style="float: right;">
+									<span class="subFieldLabel ui-buttonset-small marginRight10px pull-right">
 										{* addressformat *}
 										{assign var=TITLE value='Format de l\'adresse'}
 										{assign var=FIELD_NAMETMP value=$FIELD_NAME}
@@ -365,7 +366,7 @@
 										{assign var=FIELD_NAME value=$FIELD_NAMETMP}
 										{assign var=FIELD_MODEL value=$FIELD_MODELTMP}	
 									</span>
-								</div>
+								</span>
 							{/if}
 						</div>
 						

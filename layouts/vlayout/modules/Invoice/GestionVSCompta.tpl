@@ -41,6 +41,15 @@
 		{/if}
 		{foreach item=COMPTES key=DATE from=$ENTRIES}
 			{assign var=POINTEE value=count($ALL_SOURCES) > 1 && abs($COMPTES['TOTAUX']['COG'] - $COMPTES['TOTAUX']['LAM']) < 0.01}
+			{* controle plus precis de chaque compte *}
+			{if $POINTEE}
+				{foreach item=SOURCES key=COMPTE from=$COMPTES}
+					{if ! (count($ALL_SOURCES) > 1 && count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) < 0.01)}
+						{assign var=POINTEE value=false}
+						{break}
+					{/if}
+				{/foreach}
+			{/if}
 			<tr {if $POINTEE}class="pointee"{/if}>
 				<td class="date"><b><a href="{$ROWS_URL}&date={$DATE}">{$DATE}</a></b></td>
 				<td><table class="compte">
@@ -49,14 +58,24 @@
 					<tr {if $POINTEE}class="pointee"{/if}>
 						<th colspan="2"><b><a href="{$ROWS_URL}&date={$DATE}&compte={$COMPTE}">
 						{if $COMPTE neq "TOTAUX"}compte {/if}{$COMPTE}
-						{if count($ALL_SOURCES) eq 2 && count($SOURCES) eq 2 && abs($SOURCES['COG'] - $SOURCES['LAM']) >= 0.01 }
-							&nbsp;: {money_format('%.2n', $SOURCES['COG'] - $SOURCES['LAM'])} &euro;
+						{if count($ALL_SOURCES) eq 2 && (count($SOURCES) eq 1 || abs($SOURCES['COG'] - $SOURCES['LAM']) >= 0.01) }
+							&nbsp;: {if strpos($COMPTE, 'Nombre') !== 0}
+									{money_format('%.2n', $SOURCES['COG'] - $SOURCES['LAM'])} &euro;
+								{else}
+									{$SOURCES['COG'] - $SOURCES['LAM']}
+								{/if}
 						{/if}
 						</a></b></th>
 					</tr>
 					<tr {if $POINTEE}class="pointee"{/if}>
 						{foreach item=SOURCE_NAME key=SOURCE_KEY from=$ALL_SOURCES}
-							<td>{if $SOURCES[$SOURCE_KEY]}{money_format('%.2n', $SOURCES[$SOURCE_KEY])} &euro;{/if}</td>
+							<td>{if $SOURCES[$SOURCE_KEY]}
+								{if strpos($COMPTE, 'Nombre') !== 0}
+									{money_format('%.2n', $SOURCES[$SOURCE_KEY])} &euro;
+								{else}
+									{$SOURCES[$SOURCE_KEY]}
+								{/if}
+							{/if}</td>
 						{/foreach}
 					</tr>
 				{/foreach}

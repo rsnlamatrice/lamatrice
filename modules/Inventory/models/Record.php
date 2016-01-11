@@ -72,7 +72,10 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		
 		$relatedProducts = getAssociatedProducts($this->getModuleName(), $this->getEntity());
 		$productsCount = count($relatedProducts);
-
+		if($productsCount === 1 && !$relatedProducts[1]['hdnProductId1']){
+			$productsCount = 0;
+		}
+		
 		//Updating Pre tax total
 		$preTaxTotal = (float)$relatedProducts[1]['final_details']['hdnSubTotal']
 						+ (float)$relatedProducts[1]['final_details']['shipping_handling_charge']
@@ -88,7 +91,6 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		
 		//Updating Tax details
 		$taxtype = $relatedProducts[1]['final_details']['taxtype'];
-
 		if($productsCount){
 			for ($i=1;$i<=$productsCount; $i++) {
 				$product = $relatedProducts[$i];

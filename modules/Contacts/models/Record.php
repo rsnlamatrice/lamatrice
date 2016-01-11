@@ -507,6 +507,13 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		
 		if($compareWithRequest && $hasChanges){
 			$compareWithRequest->set($fieldPrefix.'modifiedtime', date('Y-m-d'));
+			//Force le NPAI à Ok
+			$fieldName = 'rsnnpai';
+			if($this->get($fieldName) && $this->get($fieldName) != '0'){
+				$this->set($fieldName, 0);
+				$compareWithRequest->set($fieldName, 0);
+				$this->set('rsnnpaidate', date('Y-m-d'));
+			}
 		}
 		
 		if($hasChanges && $save){
@@ -761,55 +768,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	// Définit un champ 'mailingRNVPLabel' en fonction des champs 'mailingrnvpeval' et 'mailingrnvpcharade'
 	// d'après 4D
 	public function initRNVPLabel(){
-		$evalAdr = $this->get('mailingrnvpeval');
-		$charade = $this->get('mailingrnvpcharade');
-		
-		if(!$evalAdr && !$charade)
-			return '';
-				
-		$aRnvpQualite = '';
-		if($evalAdr == "1" || $evalAdr == "2" || $evalAdr == "0" || $evalAdr == "10"){
-			if($charade=="1" || $charade=="0" || $charade=="2" || !$charade)
-				$aRnvpQualite = "OK";
-			else
-				$aRnvpQualite = "";
-		}	
-		elseif($evalAdr=="5"){
-			$aRnvpQualite="??";
-		}
-		elseif($evalAdr=="6"){
-			$aRnvpQualite = "HS";
-		}
-		elseif($evalAdr=="E" || $evalAdr=="C" || $evalAdr=="9"){
-			$aRnvpQualite = "HS";
-		}
-		elseif($evalAdr=="13"){
-			$aRnvpQualite = "++";
-		}
-		elseif($evalAdr=="99"){
-			$aRnvpQualite = "--";
-		}
-		elseif(!$evalAdr){
-			$aRnvpQualite = ""; //  ` inconnue
-		}
-
-		$aRnvpStatut = '';
-		if($charade=="1" || $charade=="2"){
-			$aRnvpStatut ="Nouvelle";
-		}
-		elseif($charade=="5" || $charade=="8"){
-			$aRnvpStatut ="HS";
-		}
-		elseif($charade=="6"){
-			$aRnvpStatut ="Va déménager";
-		}
-		elseif($charade=="7"){
-			$aRnvpStatut ="HS : a déménagé";
-		}
-		elseif(!$charade){
-			$aRnvpStatut ="";//  ` inconnu
-		}
-		$label = trim($aRnvpQualite . ' ' . $aRnvpStatut);
+		$label = $this->getModule()->getRNVPLabel($this);
 		$this->set('mailingRNVPLabel', $label);
 		return $label;
 	}

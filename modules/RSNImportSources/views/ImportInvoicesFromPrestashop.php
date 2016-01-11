@@ -1112,6 +1112,9 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 			'subject'		=> $invoice['header'][11],
 			'invoicedate'		=> $date,
 		);
+		//Ajout du code de pays en préfixe du code postal
+		$invoiceHeader['zip'] = RSNImportSources_Utils_Helper::checkZipCodePrefix($invoiceHeader['zip'], $invoiceHeader['country']);
+		
 		foreach ($invoice['detail'] as $product) {
 			$isProduct = null;
 			$productCode = $product[1];
@@ -1157,6 +1160,10 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		
 		/* création d'un index */
 		$query = "ALTER TABLE `$tableName` ADD INDEX(`sourceid`)";
+		$db->pquery($query);
+		
+		/* création d'un index */
+		$query = "ALTER TABLE `$contactsTableName` ADD INDEX(`sourceid`)";
 		$db->pquery($query);
 		
 		/* Annule les factures déjà importées

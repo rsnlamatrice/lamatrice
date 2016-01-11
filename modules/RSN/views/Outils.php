@@ -4,9 +4,9 @@
  * La liste est affichée dans le bandeau vertical de gauche,
  * 	initialisée dans Module.php::getSideBarLinks()
  *************************************************************************************/
-require_once('modules/RSN/models/ImportCogilogFactures.php');
-require_once('modules/RSN/models/ImportCogilogAffaires.php');
-require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
+//require_once('modules/RSN/models/ImportCogilogFactures.php');
+//require_once('modules/RSN/models/ImportCogilogAffaires.php');
+//require_once('modules/RSN/models/ImportCogilogProduitsEtServices.php');
 class RSN_Outils_View extends Vtiger_Index_View {
 	
 	public function preProcess(Vtiger_Request $request, $display = true) {
@@ -99,7 +99,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 			$this->resetPicklistValuesRights();
 			break;
 		
-		case 'TestsED' :
+		case 'freeDebug' :
 			$this->freeDebug();
 			exit;
 			break;
@@ -128,6 +128,62 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		
 	}
 	
+	
+	//Post-Migration : Création d'un abonnement pour les contacts ayant le critère Prochaine_Revue_Offerte_?
+	function createAboSurCritere(){
+		global $adb;
+		
+		$query = "SELECT crmid, contact_no
+			FROM vtiger_contactdetails
+			JOIN vtiger_crmentity
+				ON vtiger_contactdetails.contactid = vtiger_crmentity.crmid
+			JOIN vtiger_critere4dcontrel
+				ON vtiger_contactdetails.contactid = vtiger_critere4dcontrel.contactid
+			JOIN vtiger_critere4d
+				ON vtiger_critere4dcontrel.critere4did = vtiger_critere4d.critere4did
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_critere4dcontrel.dateapplication > ?
+			AND vtiger_critere4d.nom = ?
+		";
+		$params = array('2015-10-29', 'prochaine_revue_offerte_?');
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			$adb->echoError();
+			return;
+		}
+		$aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
+		$models = array();
+		while($contact = $adb->getNextRow($result)){
+			$recordModel = Vtiger_Record_Model::getInstanceById($contact['crmid']);
+			$aboRevues = $recordModel->getRSNAboRevues();
+			$doNotAbo = false;
+			$aboRevue = false;
+			if($aboRevues)
+				foreach($aboRevues as $aboRevue){
+					if($aboRevue->isTypeNePasAbonner()){
+						$doNotAbo = true;
+						break;
+					}
+					if($aboRevue->isAbonne()){
+						$doNotAbo = true;
+						break;
+					}
+					break;
+				}
+			if(!$doNotAbo){
+				$models[$contact['crmid']] = $recordModel;
+				echo "<li>" . $contact['crmid'] . " " . $contact['contact_no'];
+				if($aboRevue)
+					echo " - dernier abo : " . $aboRevue->getName() . ', ' . $aboRevue->getTypeAbo() . ' du ' . $aboRevue->get('debutabo') . ' au ' . $aboRevue->get('finabo');
+				$aboRevue = $aboRevueModuleModel->ensureAboRevue($recordModel->getAccountRecordModel(), 3);
+					echo "<br> - nouvel abo : " . $aboRevue->getName() . ', ' . $aboRevue->getTypeAbo() . ' du ' . $aboRevue->get('debutabo') . ' au ' . $aboRevue->get('finabo');
+				//break;
+			}
+		}
+		echo "<BR>Total : " . count($models);
+	}
+	
 	//Post-Migration : met à jour des données dans la Matrice à partir des données présentes dans le commentaire initial des contacts importés
 	function updateContactsFromDonnes4D(){
 		global $adb;
@@ -138,7 +194,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		$maxLoop = 100;
 		$testCounter = 0;
 		$updCounter = 0;
-		//Contacts venant de 4D avec leurs commentaires initiaux (il y en a de deux types : contact et groupe)
+		//Contacts venant de 4D avec leurs commentaires initiaux (attention, il y en a de deux types : contact et groupe)
 		$query = 'SELECT crmid, vtiger_modcomments.commentcontent
 			FROM vtiger_contactaddress
 			JOIN vtiger_crmentity

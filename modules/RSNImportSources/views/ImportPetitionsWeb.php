@@ -1,7 +1,7 @@
 <?php
 
 /* Phase de migration
- * Importation des prelevements Web depuis le fichier provenant de 4D
+ * Importation des prelevements Web depuis le fichier provenant du site web du rézo
  */
 class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFromFile_View {
         
@@ -135,6 +135,11 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	}
 	function getContactsFieldsMappingForPreview(){
 		$fields = $this->getContactsFieldsMapping();
+		unset($fields['date']);
+		unset($fields['listesn']);
+		unset($fields['listesd']);
+		unset($fields['ip']);
+		unset($fields['x']);
 		
 		$fields = array_move_assoc('mailingstreet2', 'lastname', $fields);
 		$fields = array_move_assoc('mailingstreet3', 'mailingstreet2', $fields);

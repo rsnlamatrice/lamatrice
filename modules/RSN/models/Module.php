@@ -233,24 +233,6 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 		}
 		
 		$list[] = array(
-				'sub' => 'EditCustomView',
-				'label' => 'Edition de vue (debug)',
-				'params' => array(
-					'viewid' => 182,//exemple
-					'viewmodule' => 'Contacts'
-				)
-			)
-		;
-		
-		if(1){
-			$list[] = array(
-					'sub' => 'TestsED',
-					'label' => 'Tests ED'
-				)
-			;
-		}
-		
-		$list[] = array(
 				'sub' => 'DefineMissingLabels',
 				'label' => 'Affectation des labels manquants'
 			)
@@ -267,6 +249,25 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 				'label' => 'Transfert des listes de valeurs (banques)'
 			)
 		;
+		
+		// DEBUG
+		$list[] = array(
+				'sub' => 'EditCustomView',
+				'label' => 'Edition de vue (debug)',
+				'params' => array(
+					'viewid' => 182,//exemple
+					'viewmodule' => 'Contacts'
+				)
+			)
+		;
+		
+		if(0){
+			$list[] = array(
+					'sub' => 'freeDebug',
+					'label' => 'fonction de test (debug)'
+				)
+			;
+		}
 		
 		return $list;
 	}

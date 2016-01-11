@@ -217,12 +217,16 @@ class Vtiger_Util_Helper {
 		$dateTimeInUserFormat = Vtiger_Datetime_UIType::getDisplayDateTimeValue($dateTime);
 
 		list($dateInUserFormat, $timeInUserFormat) = explode(' ', $dateTimeInUserFormat);
-		list($hours, $minutes, $seconds) = explode(':', $timeInUserFormat);
-
-		$displayTime = $hours .':'. $minutes;
-		if ($currentUser->get('hour_format') === '12') {
-			$displayTime = Vtiger_Time_UIType::getTimeValueInAMorPM($displayTime);
+		if($timeInUserFormat){
+			list($hours, $minutes, $seconds) = explode(':', $timeInUserFormat);
+	
+			$displayTime = $hours .':'. $minutes;
+			if ($currentUser->get('hour_format') === '12') {
+				$displayTime = Vtiger_Time_UIType::getTimeValueInAMorPM($displayTime);
+			}
 		}
+		else
+			$displayTime = false;
 
 		/**
 		 * To support strtotime() for 'mm-dd-yyyy' format the seperator should be '/'
@@ -238,7 +242,8 @@ class Vtiger_Util_Helper {
 		/* ED141222 : format FR et minuscules */
 		$formatedDate = strtolower(vtranslate('LBL_'.date('D', $date))). ' ' .date('d', $date) . ' ' .strtolower(vtranslate('LBL_'.date('M', $date))). ' ' .date('Y', $date);
 		//Adding time details
-		$formatedDate .= ' ' .vtranslate('LBL_AT'). ' ' .$displayTime;
+		if($displayTime)
+			$formatedDate .= ' ' .vtranslate('LBL_AT'). ' ' .$displayTime;
 
 		return $formatedDate;
 	}

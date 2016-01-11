@@ -45,7 +45,7 @@
 	<tr>
 	    <td>
 		<div class="row-fluid">
-		    {$LINE_ITEM_DETAIL["hdnProductcode$INDEX"]} - {$LINE_ITEM_DETAIL["productName$INDEX"]}
+		    <a href="index.php?module={$LINE_ITEM_DETAIL["entityType$INDEX"]}&record={$LINE_ITEM_DETAIL["hdnProductId$INDEX"]}&view=Detail">{$LINE_ITEM_DETAIL["hdnProductcode$INDEX"]} - {$LINE_ITEM_DETAIL["productName$INDEX"]}</a>
 		</div>
 		{if $LINE_ITEM_DETAIL["productDeleted$INDEX"]}
 			<div class="row-fluid redColor deletedItem">

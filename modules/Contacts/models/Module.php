@@ -455,11 +455,12 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	 * @param Vtiger_Record_Model $recordModel
 	 */
 	public function saveRecord(Vtiger_Record_Model $recordModel) {
-		// ED141016 : majuscules obligatoires
 		$recordModel->set('firstname', ucfirst(trim(decode_html($recordModel->get('firstname')))));
-		$recordModel->set('lastname', trim(mb_strtoupper(decode_html($recordModel->get('lastname')))));
-		$recordModel->set('mailingcity', trim(mb_strtoupper(decode_html($recordModel->get('mailingcity')))));
-		$recordModel->set('othercity', trim(mb_strtoupper(decode_html($recordModel->get('othercity')))));
+		// ED141016 : majuscules obligatoires
+		$fieldNames = array('lastname', 'mailingcity', 'othercity', 'mailingstreet', 'mailingstreet2', 'mailingstreet3', 'otherstreet', 'otherstreet2', 'otherstreet3');
+		foreach($fieldNames as $fieldName)
+			if($recordModel->get($fieldName))
+				$recordModel->set($fieldName, trim(mb_strtoupper(decode_html($recordModel->get($fieldName)))));
 		
 		if($recordModel->get('rsnnpai') == null)
 			$recordModel->set('rsnnpai', 0);
@@ -542,5 +543,68 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	 */
 	public function getAlphabetSearchField(){
 		return 'isgroup,lastname';//contacttype trop d'éléments
+	}
+		
+	/**
+	 * Fonction des champs 'mailingrnvpeval' et 'mailingrnvpcharade'
+	 * d'après 4D
+	 * @param $record : Contacts_Record_Model ou array
+	 */
+	public function getRNVPLabel(&$record){
+		if(is_array($record)){
+			$evalAdr = $record['mailingrnvpeval'];
+			$charade = $record['mailingrnvpcharade'];
+		}
+		else{
+			$evalAdr = $record->get('mailingrnvpeval');
+			$charade = $record->get('mailingrnvpcharade');
+		}
+		
+		if(!$evalAdr && !$charade)
+			return '';
+				
+		$aRnvpQualite = '';
+		if($evalAdr == "1" || $evalAdr == "2" || $evalAdr == "0" || $evalAdr == "10"){
+			if($charade=="1" || $charade=="0" || $charade=="2" || !$charade)
+				$aRnvpQualite = "OK";
+			else
+				$aRnvpQualite = "";
+		}	
+		elseif($evalAdr=="5"){
+			$aRnvpQualite="??";
+		}
+		elseif($evalAdr=="6"){
+			$aRnvpQualite = "HS";
+		}
+		elseif($evalAdr=="E" || $evalAdr=="C" || $evalAdr=="9"){
+			$aRnvpQualite = "HS";
+		}
+		elseif($evalAdr=="13"){
+			$aRnvpQualite = "++";
+		}
+		elseif($evalAdr=="99"){
+			$aRnvpQualite = "--";
+		}
+		elseif(!$evalAdr){
+			$aRnvpQualite = ""; //  ` inconnue
+		}
+
+		$aRnvpStatut = '';
+		if($charade=="1" || $charade=="2"){
+			$aRnvpStatut ="Nouvelle";
+		}
+		elseif($charade=="5" || $charade=="8"){
+			$aRnvpStatut ="HS";
+		}
+		elseif($charade=="6"){
+			$aRnvpStatut ="Va déménager";
+		}
+		elseif($charade=="7"){
+			$aRnvpStatut ="HS : a déménagé";
+		}
+		elseif(!$charade){
+			$aRnvpStatut ="";//  ` inconnu
+		}
+		return trim($aRnvpQualite . ' ' . $aRnvpStatut);
 	}
 }

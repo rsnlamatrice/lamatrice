@@ -407,7 +407,7 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		});
 		//affiche/masque la saisie sous "isgroup"
 		jQuery('input[name="isgroup"]').on('change',function(e){
-			if(this.checked && this.value == 1)
+			if(this.checked && this.value != 0)
 				$('.mailingstreet2-synchronize-holder').show();
 			else
 				$('.mailingstreet2-synchronize-holder').hide();
@@ -495,6 +495,7 @@ Vtiger_Edit_Js("Contacts_Edit_Js",{},{
 		this.registerEventOnAccountReferenceStatusChanging(container);
 		this.registerEventForSynchronizeGroupNameMailingStreet2(container);
 		this.registerEventSNAButtonClickEvent(container);
+		this.registerPagesBlanchesButtonClickEvent(container);
 		this.registerBlockAnimationEvent(); /*ED150707*/
 		this.registerDONOTMassChangeEvent(); /*ED150912*/
 	}

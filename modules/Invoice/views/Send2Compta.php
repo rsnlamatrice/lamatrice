@@ -1,13 +1,8 @@
 <?php
 /*+***********************************************************************************
- * The contents of this file are subject to the vtiger CRM Public License Version 1.0
- * ("License"); You may not use this file except in compliance with the License
- * The Original Code is:  vtiger CRM Open Source
- * The Initial Developer of the Original Code is vtiger.
- * Portions created by vtiger are Copyright (C) vtiger.
- * All Rights Reserved.
+ * Exportation des factures vers la compta
  *************************************************************************************/
-if(1){
+if(1){ //0 pour Debug
 	define('ROWSEPAR', "\r\n");
 	define('COLSEPAR', "\t");
 } else {//debug
@@ -200,8 +195,29 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	 *
 	 *	downloadSend2Compta
 	 *
+	 *	les données doivent être exportées triées par journal et par mois, sinon COgilog refuse l'import
 	 ******************************************/
 	
+	var $exportBuffers = array();
+	function addExportRow($journal, $date = '', $row = ''){
+		$dateYM = substr($date, 3);
+		if(!$this->exportBuffers[$dateYM])
+			$this->exportBuffers[$dateYM] = array();
+		if(!$this->exportBuffers[$dateYM][$journal])
+			$this->exportBuffers[$dateYM][$journal] = array();
+		$this->exportBuffers[$dateYM][$journal][] = $journal . COLSEPAR . $date . COLSEPAR . $row;
+	}
+	function sanitizeExport($str){
+		return str_replace(array(',', ';', "\t", "\r", "\n",), '-', $str);
+	}
+	function echoExportBuffer(){
+		foreach($this->exportBuffers as $dateYM => $journaux){
+			foreach($journaux as $exportBuffer){
+				echo implode(ROWSEPAR, $exportBuffer);
+				echo ROWSEPAR;
+			}
+		}
+	}
 	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
@@ -333,7 +349,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				header("Cache-Control: post-check=0, pre-check=0", false );
 			}
 						
-			echo "**Compta\tEcritures";
+			$this->addExportRow( "**Compta\tEcritures" );
 			
 			
 			/* NOTE : les commentaires suivants ne sont pas forcément valables, ils datent du début du dév.
@@ -412,7 +428,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$invoiceJournal = self::getCodeAffaireJournal($codeAffaire, $invoiceModeRegl);
 					$invoiceAmount = self::formatAmountForCogilog($invoice['total']);
 					$invoiceReceived = self::formatAmountForCogilog($invoice['received']);
-					$basicSubject = $piece . ' ' . preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
+					$basicSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
 					$invoiceSubject = $basicSubject . ($codeAffaire ? ' - ' . $codeAffaire : '');
 					$date = self::formatDateForCogilog($invoice['invoicedate']);
 					//La facture est réglée
@@ -421,7 +437,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						if(strpos($invoice['reglementstatus'], 'Compta') !== false)
 							$invoiceReceived = false;
 						//Si le montant des règlements associés n'est pas celui de la facture, on ne traite pas le règlement
-						if($invoice['reglementamount'] != $invoice['received'])
+						//TODO cf validateSend2ComptaReglements() si on prend bien en compte les écritures
+						if($invoice['reglementamount'] !== null && $invoice['reglementamount'] != $invoice['received'])
 							$invoiceReceived = false;
 					}
 					//Cumuls des règlements par mode de règlement
@@ -468,16 +485,16 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				else	$codeAnal = '';
 				//$productName = $invoice['productname'];
 				$productCode = $invoice['productcode'];
-				echo ROWSEPAR.$journalVente
-					.COLSEPAR.$date
-					.COLSEPAR.$piece
+				$this->addExportRow($journalVente,
+					$date,
+					$this->sanitizeExport($piece)
 					.COLSEPAR.$compteVente
 					.COLSEPAR.$codeAnal
-					.COLSEPAR.$basicSubject . ($productCode ? ' - ' . $productCode : '')
+					.COLSEPAR.$this->sanitizeExport($basicSubject . ($productCode ? ' - ' . $productCode : ''))
 					.COLSEPAR.''
 					.COLSEPAR.''
 					.COLSEPAR.self::formatAmountForCogilog($amountHT)
-				;
+				);
 				$invoiceTotal += $amountHT + $invoiceTotalTaxes;
 			}
 		
@@ -486,11 +503,11 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					
 			if($invoiceTotal)//précédente facture
 				$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $prevInvoice);
-				
+		
 			/* En-tête de la dernière facture */
 			if($invoiceJournal && $invoiceReceived){
 				/* Ligne d'encaissement de la Facture */
-				self::exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
+				$this->exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
 			}
 			
 			/* Lignes des encaissements par jour */
@@ -506,19 +523,20 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				else	$codeAnal = '';
 				$amount= self::formatAmountForCogilog($total);
 				$piece = 'ENC-' . $key;
-				$descriptif = 'Paiements par ' . $modeRegl. ' du ' . $date;
-				echo ROWSEPAR.$journal
-					.COLSEPAR.$date
-					.COLSEPAR.$piece
+				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $date;
+				$this->addExportRow($journal,
+					$date,
+					$piece
 					.COLSEPAR.$compteEnc
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$descriptif
 					.COLSEPAR.''
 					.COLSEPAR.$amount
-				;
+				);
 				
 			}
 		}
+		$this->echoExportBuffer();
 		if($isDebug)
 			echo '</table>';//debug
 		
@@ -527,30 +545,30 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
 		/* Ligne d'encaissement de la Facture */
-		echo ROWSEPAR.$invoiceJournal
-			.COLSEPAR.$date
-			.COLSEPAR.$piece
+		$this->addExportRow($invoiceJournal,
+			$date,
+			$this->sanitizeExport($piece)
 			.COLSEPAR.$compteVente
 			.COLSEPAR.$invoiceCodeAnal
-			.COLSEPAR.$invoiceSubject
+			.COLSEPAR.$this->sanitizeExport($invoiceSubject)
 			.COLSEPAR.''
 			.COLSEPAR.''
 			.COLSEPAR.$invoiceAmount
-		;
+		);
 	}
 	
 	private function exportInvoiceSolde($invoiceTTC, $journal, $date, $piece, $invoiceSubject, $invoiceData){
 		$amount= self::formatAmountForCogilog($invoiceTTC);
 		$account = self::getInvoiceCompteVenteSolde($invoiceData);
-		echo ROWSEPAR.$journal
-			.COLSEPAR.$date
-			.COLSEPAR.$piece
+		$this->addExportRow($journal,
+			$date,
+			$this->sanitizeExport($piece)
 			.COLSEPAR.$account
 			.COLSEPAR
-			.COLSEPAR.$invoiceSubject
+			.COLSEPAR.$this->sanitizeExport($invoiceSubject)
 			.COLSEPAR.''
 			.COLSEPAR.$amount
-		;
+		);
 	}
 	
 	private function exportInvoiceTaxes($invoiceTaxes, $journal, $date, $piece, $invoiceSubject){
@@ -558,16 +576,16 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$amount = self::formatAmountForCogilog($amount);
 			$tax = self::getTax($taxId);
 			$account = $tax['account'];
-			echo ROWSEPAR.$journal
-				.COLSEPAR.$date
-				.COLSEPAR.$piece
+			$this->addExportRow($journal,
+				$date,
+				$this->sanitizeExport($piece)
 				.COLSEPAR.$account
 				.COLSEPAR
-				.COLSEPAR.$invoiceSubject
+				.COLSEPAR.$this->sanitizeExport($invoiceSubject)
 				.COLSEPAR.''
 				.COLSEPAR.''
 				.COLSEPAR.$amount
-			;
+			);
 		}
 	}
 	
@@ -668,23 +686,28 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	private static function getCodeAffaireJournal($codeAffaire, $modeRegl = false){
-		switch(strtoupper($codeAffaire)){
-		case 'PAYBOX' :
-		case 'PAYBOXP' :
-			return 'BFC';
-		default :
-			if($modeRegl)
-				switch(strtoupper($modeRegl)){
-				case 'PAYBOX' :
-				case 'PAYBOXP' :
-					return 'BFC';
-				case 'ESPèCES' :
-				case 'ESPÈCES' :
-				case 'ESPECES' :
-					return 'CS';
-				}
-			return 'LBP';
-		}
+		return getModeReglementInfo($modeRegl, 'journalencaissement');
+		//
+		//switch(strtoupper($codeAffaire)){
+		//case 'PAYBOX BOU' :
+		//case 'PAYBOX DR' :
+		//case 'PAYBOX DP' :
+		//case 'PAYBOX' :
+		//case 'PAYBOXP' :
+		//	return 'BFC';
+		//default :
+		//	if($modeRegl)
+		//		switch(strtoupper($modeRegl)){
+		//		case 'PAYBOX' :
+		//		case 'PAYBOXP' :
+		//			return 'BFC';
+		//		case 'ESPèCES' :
+		//		case 'ESPÈCES' :
+		//		case 'ESPECES' :
+		//			return 'CS';
+		//		}
+		//	return 'LBP';
+		//}
 	}
 	
 	private static function formatDateForCogilog($myDate){
@@ -703,14 +726,51 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	function validateSend2Compta(Vtiger_Request $request){
 		//d'abord les règlements, pour garder les factures dans le statut valable
 		$this->validateSend2ComptaReglements($request);
+		$this->validateSend2ComptaCheques($request);
 		$this->validateSend2ComptaInvoices($request);
+	}
+	
+	//Solde les factures réglées par chèque
+	function validateSend2ComptaCheques(Vtiger_Request $request){
+		
+		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');
+		$selectedIds = $request->get('selected_ids');
+		
+		$query = 'UPDATE vtiger_invoicecf
+			JOIN vtiger_invoice
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+			SET vtiger_invoice.received = vtiger_invoice.balance
+			, vtiger_invoice.balance = 0
+			, vtiger_invoicecf.receivedcomments = IF(IFNULL(vtiger_invoicecf.receivedcomments, "") = "", CONCAT("Validation du ", NOW()), vtiger_invoicecf.receivedcomments)
+			WHERE vtiger_invoice.invoiceid IN ('. generateQuestionMarks( $selectedIds ) . ')
+			AND vtiger_invoicecf.sent2compta IS NULL
+			AND vtiger_invoicecf.receivedmoderegl = "Chèque"
+			AND (vtiger_invoice.received IS NULL OR vtiger_invoice.received = 0)
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
+		';
+		$params = array();
+		$params = array_merge($params, $selectedIds);
+		$params = array_merge($params, $excludeInvoicestatus);
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $params);
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$response = new Vtiger_Response();
+			$response->setError('Erreur de requête de Solde');
+			$response->emit();
+			exit;
+		}
 	}
 	
 	//Marque les factures comme étant envoyées en compta (champ sent2compta)
 	function validateSend2ComptaInvoices(Vtiger_Request $request){
 		
-		$excludeInvoicestatus = array('Created', 'Cancelled');
+		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');
 		$selectedIds = $request->get('selected_ids');
+		//Changement du statut en Compta
 		$query = 'UPDATE vtiger_invoicecf
 			JOIN vtiger_invoice
 				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
@@ -734,15 +794,17 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			echo "<pre>$query</pre>";
 			var_dump($params);
 			$response = new Vtiger_Response();
-			$response->setError('Erreur de requête');
+			$response->setError('Erreur de requête de changement de statut. Attention les chèques sont validés.');
 			$response->emit();
+			exit;
 		}
 	}
 	
 	//Marque les règlements comme étant envoyées en compta (champ sent2compta)
+	//TODO A vérifier pour 2 règlements sur la même facture ou un règlement pour 2 factures. cf plus haut dans l'export où on annule l'export des écritures d'encaissement
 	function validateSend2ComptaReglements(Vtiger_Request $request){
 		
-		$excludeInvoicestatus = array('Created', 'Cancelled');
+		$excludeInvoicestatus = array('Created', 'Cancelled', 'Compta');
 		$selectedIds = $request->get('selected_ids');
 		//
 		// Réglements (en tant que vtiger_rsnreglements) associés.
@@ -781,7 +843,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$response = new Vtiger_Response();
 			$response->setError('Erreur de requête');
 			$response->emit();
-			die();
+			exit;
 		}
 		//reconstitue le tableau des règlements à valider
 		$reglementIds = array();
@@ -806,7 +868,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				$response = new Vtiger_Response();
 				$response->setError('Erreur de requête');
 				$response->emit();
-				die();
+				exit;
 			}
 		}
 		

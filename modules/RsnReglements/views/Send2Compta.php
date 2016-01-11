@@ -1,13 +1,8 @@
 <?php
 /*+***********************************************************************************
- * The contents of this file are subject to the vtiger CRM Public License Version 1.0
- * ("License"); You may not use this file except in compliance with the License
- * The Original Code is:  vtiger CRM Open Source
- * The Initial Developer of the Original Code is vtiger.
- * Portions created by vtiger are Copyright (C) vtiger.
- * All Rights Reserved.
+ * Exportation des règlements vers la compta
  *************************************************************************************/
-if(1){
+if(1){ //0 pour debug
 	define('ROWSEPAR', "\r\n");
 	define('COLSEPAR', "\t");
 } else {//debug
@@ -190,7 +185,29 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	 *
 	 *	downloadSend2Compta
 	 *
+	 *	les données doivent être exportées triées par journal et par mois, sinon Cogilog refuse l'import
 	 ******************************************/
+	
+	var $exportBuffers = array();
+	function addExportRow($journal, $date = '', $row = ''){
+		$dateYM = substr($date, 3);
+		if(!$this->exportBuffers[$dateYM])
+			$this->exportBuffers[$dateYM] = array();
+		if(!$this->exportBuffers[$dateYM][$journal])
+			$this->exportBuffers[$dateYM][$journal] = array();
+		$this->exportBuffers[$dateYM][$journal][] = $journal . COLSEPAR . $date . COLSEPAR . $row;
+	}
+	function sanitizeExport($str){
+		return str_replace(array(',', ';', "\t", "\r", "\n",), '-', $str);
+	}
+	function echoExportBuffer(){
+		foreach($this->exportBuffers as $dateYM => $journaux){
+			foreach($journaux as $exportBuffer){
+				echo implode(ROWSEPAR, $exportBuffer);
+				echo ROWSEPAR;
+			}
+		}
+	}
 	
 	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
 		$moduleName = $request->getModule();
@@ -292,7 +309,7 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				header("Cache-Control: post-check=0, pre-check=0", false );
 			}
 						
-			echo "**Compta\tEcritures";
+			$this->addExportRow( "**Compta\tEcritures", '');
 			
 			
 			/*
@@ -372,19 +389,22 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				else	$codeAnal = '';
 				$amount= self::formatAmountForCogilog($total);
 				$piece = 'ENC-' . $key;
-				$descriptif = 'Paiements par ' . $modeRegl. ' du ' . $date;
-				echo ROWSEPAR.$journal
-					.COLSEPAR.$date
-					.COLSEPAR.$piece
+				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $date;
+				$this->addExportRow($journal,
+					$date,
+					$piece
 					.COLSEPAR.$compteEnc
 					.COLSEPAR.$codeAnal
 					.COLSEPAR.$descriptif
 					.COLSEPAR.''
 					.COLSEPAR.$amount
-				;
+				);
 				
 			}
 		}
+		
+		$this->echoExportBuffer();
+		
 		if($isDebug)
 			echo '</table>';//debug
 		
@@ -393,16 +413,16 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compte, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
 		/* Ligne d'encaissement du règlement */
-		echo ROWSEPAR.$invoiceJournal
-			.COLSEPAR.$date
-			.COLSEPAR.$piece
+		$this->addExportRow($invoiceJournal,
+			$date,
+			$this->sanitizeExport($piece)
 			.COLSEPAR.$compte
 			.COLSEPAR.$invoiceCodeAnal
-			.COLSEPAR.$invoiceSubject
+			.COLSEPAR.$this->sanitizeExport($invoiceSubject)
 			.COLSEPAR.''
 			.COLSEPAR.''
 			.COLSEPAR.$invoiceAmount
-		;
+		);
 	}
 	
 	private static function getModeReglCompteEncaissement($modeRegl){
@@ -444,23 +464,24 @@ class RsnReglements_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	private static function getCodeAffaireJournal($codeAffaire, $modeRegl = false){
-		switch(strtoupper($codeAffaire)){
-		case 'PAYBOX' :
-		case 'PAYBOXP' :
-			return 'BFC';
-		default :
-			if($modeRegl)
-				switch(strtoupper($modeRegl)){
-				case 'PAYBOX' :
-				case 'PAYBOXP' :
-					return 'BFC';
-				case 'ESPèCES' :
-				case 'ESPÈCES' :
-				case 'ESPECES' :
-					return 'CS';
-				}
-			return 'LBP';
-		}
+		return getModeReglementInfo($modeRegl, 'journalencaissement');
+		//switch(strtoupper($codeAffaire)){
+		//case 'PAYBOX' :
+		//case 'PAYBOXP' :
+		//	return 'BFC';
+		//default :
+		//	if($modeRegl)
+		//		switch(strtoupper($modeRegl)){
+		//		case 'PAYBOX' :
+		//		case 'PAYBOXP' :
+		//			return 'BFC';
+		//		case 'ESPèCES' :
+		//		case 'ESPÈCES' :
+		//		case 'ESPECES' :
+		//			return 'CS';
+		//		}
+		//	return 'LBP';
+		//}
 	}
 	
 	private static function formatDateForCogilog($myDate){

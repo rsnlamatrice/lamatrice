@@ -46,7 +46,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 				if($moduleName === 'Invoice'){
 					$recordModel->set('invoicestatus', 'Created');
 					$recordModel->set('received', 0);
-				} else {
+				} elseif($moduleName === 'PurchaseOrder') {
 					$recordModel->set('postatus', null);
 					$recordModel->set('paid', 0);
 				}
@@ -201,15 +201,22 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			if($request->get('potype') && (empty($record) || $request->get('isDuplicate'))){
 				$recordModel->set('potype', $request->get('potype'));
 				$recordModel->setDefaultStatus();
+				$recordModel->set('duedate', date('Y-m-d'));
 			}
 			$fieldList['potype']->set('fieldvalue', $recordModel->get('potype'));
 			$fieldList['postatus']->set('fieldvalue', $recordModel->get('postatus'));
 			
 			if( $request->get('isDuplicate')){
 				if($request->get('potype') === 'receipt')
-					$recordModel->set('subject', str_replace('Cmde fourn.', 'Bon récept.', $recordModel->get('subject')));
+					$recordModel->set('subject', str_replace('Cmde fourn.', 'Bon récept.',
+												 str_replace('CMF ', 'BR ', $recordModel->get('subject'))));
 				elseif($request->get('potype') === 'invoice')
-					$recordModel->set('subject', preg_replace('/^Bon r.*cept./', 'Fact. fourn.', $recordModel->get('subject')));
+					$recordModel->set('subject', preg_replace('/^Bon r.*cept./', 'Fact. fourn.', 
+												 str_replace('BR ', 'FF ', $recordModel->get('subject'))));
+			}
+			elseif(!$recordModel->get('subject')){
+				$subject = $recordModel->get_potype_code() . ' ' . $recordModel->getVendorName();
+				$recordModel->set('subject', $subject);
 			}
 			$viewer->assign('POTYPE_FIELD_MODEL', $fieldList['potype']);
 			

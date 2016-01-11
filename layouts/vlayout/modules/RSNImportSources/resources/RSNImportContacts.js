@@ -97,8 +97,12 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		//Clic sur SNA
 		registerSNAButtonEvent: function() {
 			var thisInstance = this;
-			thisInstance.getContainer().on('click', '.address-sna-check', function(e){
+			thisInstance.getContainer().on('click', 'a.address-sna-check', function(e){
 				thisInstance.checkSNA(e);
+				return false;
+			});
+			thisInstance.getContainer().on('click', 'a.address-pagesblanches', function(e){
+				thisInstance.openPagesBlanches(e);
 				return false;
 			});
 		},
@@ -382,6 +386,28 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		},
 	
 		/* FIN du SNA */
+		
+		// Affiche l'adresse dans les pages blanches
+		openPagesBlanches: function(e){
+			var thisInstance = this;
+			var $tr = this.getCell(e).parent()
+			, importRowId = $tr.data('rowid')
+			, values = thisInstance.getAddressBlockValuesForAddressCheck($tr)
+			, lastname = values.address_lastname
+			, firstname = values.address_firstname
+			, zipcode = values.address_mailingzip
+			, city = values.address_mailingcity
+			;
+			
+			var url = "http://www.pagesjaunes.fr/pagesblanches/recherche"
+				+ "?quoiqui=" + (firstname.replace(' ', '+'))
+					+ "+" + (lastname.replace(' ', '+'))
+				+ "&ou=" + (city.replace(' ', '+'))
+					+ "+(" + (zipcode.replace(' ', '+')) + ")"
+			;
+			var win = window.open(url, '_blank');
+			win.focus();
+		},
 		
 		/* remplace l'affichage de valeur par un input */
 		editCellValue: function(e){

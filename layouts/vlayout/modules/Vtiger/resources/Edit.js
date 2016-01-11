@@ -441,6 +441,38 @@ jQuery.Class("Vtiger_Edit_Js",{
 			return false;
 		});
 	},
+	// Affiche l'adresse dans les pages blanches
+	registerPagesBlanchesButtonClickEvent : function(container){
+		var thisInstance = this;
+		container.find('button.address-pagesblanches').on('click',function(e){
+			thisInstance.openPagesBlanches(e);
+			return false;
+		});
+	},
+	
+	openPagesBlanches: function(e){
+		var thisInstance = this;
+		var $sourceBlock = jQuery(e.currentTarget).parents('.blockContainer:first')
+		, values = thisInstance.getAddressBlockValuesForAddressCheck($sourceBlock);
+		var zipcode = values.address_mailingzip
+		, city = values.address_mailingcity
+		;
+		$sourceBlock = jQuery(e.currentTarget).parents('form:first').find('.blockContainer:first');
+		values = thisInstance.getAddressBlockValuesForAddressCheck($sourceBlock);
+		var lastname = values.address_lastname
+		, firstname = values.address_firstname
+		;
+		
+		var url = "http://www.pagesjaunes.fr/pagesblanches/recherche"
+			+ "?quoiqui=" + (firstname ? firstname.replace(' ', '+') : firstname)
+				+ "+" + (lastname ? lastname.replace(' ', '+') : '')
+			+ "&ou=" + (city.replace(' ', '+'))
+				+ "+(" + (zipcode.replace(' ', '+')) + ")"
+		;
+		var win = window.open(url, '_blank');
+		win.focus();
+	},
+	
 	/** ED150713
 	 * Function to register the SNA button click event
 	 */
