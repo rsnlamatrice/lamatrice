@@ -45,8 +45,8 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 		$adh_size = sizeof($adhs);
 
 		if ($adh_size > 0 && $adhs[0] != "") {
-			sort($adhs);
-			$current_year = date("Y");//tmp dernière adhésion et non année en cours ?
+			rsort($adhs);
+			$current_year = date("Y");//tmp dernière adhésion et non année en cours ? -> utiliser la date de l'AG !! -> ne pas afficher les adhésion pour l'année après AG (pas afficher ADH16 avant ag 16)
 			$curent_adh = false;
 			$precedement_adhs = [];
 
