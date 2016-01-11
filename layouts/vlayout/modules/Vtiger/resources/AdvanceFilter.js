@@ -79,7 +79,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 			, $template = $conditionGroup.find('.conditionRow-template .conditionRow')
 			;
 			$conditionGroup.find('.conditionList .conditionRow.js-handled').each(function(){
-				thisInstance.addNewCondition($conditionGroup);
+				thisInstance.addNewCondition($conditionGroup, false);
 				var $newRow = $conditionGroup.find('.conditionList .conditionRow:last')
 				, $selectColumnName = $newRow.find('select.chzn-select[name="columnname"]')
 				, $selectComparator = $newRow.find('select.chzn-select[name="comparator"]')
@@ -250,7 +250,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 	 * @params : condtionGroupElement - group where condtion need to be added
 	 * @return : current instance
 	 */
-	addNewCondition : function(conditionGroupElement){
+	addNewCondition : function(conditionGroupElement, autoSelect){
 		var conditionList = jQuery('.conditionList', conditionGroupElement);
 		//ED151124 si le précédent est un panel, initialise avec la variable suivante
 		var previousRowCondition = jQuery('.conditionRow:last',conditionList);
@@ -263,7 +263,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		app.changeSelectElementView(newRowElement);
 		
 		//ED151124 si le précédent est un panel, initialise avec la variable suivante
-		if (previousRowCondition.length) {
+		if (autoSelect !== false && previousRowCondition.length) {
 			var fieldSelected = previousRowCondition.find('option:selected')
 			, fieldValue = fieldSelected.val();
 			if (fieldValue && fieldValue[0] === '[') {
@@ -272,14 +272,14 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 				//pour les modules liés, on cherche le champ de relation suivant 
 				if (/^\[(?!RSNStatisticsResults|RSNContactsPanels)/.test(fieldValue))//Au moins 4 champs entre [ ]) 
 				{	do {
-						if (/^\[(.+\:){4}.*\]/.test(nextFieldValue))
+						if (/^\[(.*\:){4}.*\]/.test(nextFieldValue))
 							break;
 						nextField = nextField.next();
 						nextFieldValue = nextField.val()
 					} while(nextField.is('option'));
 				}
 				if (nextFieldValue && nextFieldValue[0] === '['
-				&& (/^\[(.+\:){4}.*\]/.test(nextFieldValue)//Au moins 4 champs entre [ ]
+				&& (/^\[(.*\:){4}.*\]/.test(nextFieldValue)//Au moins 4 champs entre [ ]
 					|| /^\[RSNStatisticsResults\:(?!stats_periodicite)/.test(nextFieldValue)//Champ de statistique autre que la période
 					|| /^\[RSNContactsPanels\:.*\].+/.test(nextFieldValue)//Champ de statistique autre que la période
 				)) {
@@ -404,7 +404,7 @@ jQuery.Class("Vtiger_AdvanceFilter_Js",{
 		, fieldSelected = fieldSelect.find('option:selected')
 		, fieldValue = fieldSelected.val();
 		if (fieldValue[0] === '['
-		&& (	/^\[(?!RSNStatisticsResults|RSNContactsPanels)(.+\:){4}.*\]/.test(fieldValue)//Au moins 4 champs entre [ ]
+		&& (	/^\[(?!RSNStatisticsResults|RSNContactsPanels)(.*\:){4}.*\]/.test(fieldValue)//Au moins 4 champs entre [ ]
 			|| /^\[RSNStatisticsResults\:(?!stats_periodicite)/.test(fieldValue)//Champ de statistique autre que la période
 			|| /^\[RSNContactsPanels\:.*\].+/.test(fieldValue)//Champ de statistique autre que la période
 		)) {

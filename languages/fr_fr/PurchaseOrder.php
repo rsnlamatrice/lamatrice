@@ -42,6 +42,8 @@ $languageStrings = array(
 	'Tax' => 'Taxe',
 	'Contact Name' => 'Nom contact',
 	'Grand Total:' => 'Total :',
+	
+	'Created' => 'En cours',
         
         //ED150629
         'LBL_POTYPE' => 'Type de document',
@@ -55,7 +57,7 @@ $languageStrings = array(
         'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
 );
 $jsLanguageStrings = array(
-        'JS_SUBJECT_AUTO_POTYPE_order' => 'Cmde fourn.',
-        'JS_SUBJECT_AUTO_POTYPE_receipt' => 'Bon récept.',
-        'JS_SUBJECT_AUTO_POTYPE_invoice' => 'Fact. fourn.',
+        'JS_SUBJECT_AUTO_POTYPE_order' => 'CMF',
+        'JS_SUBJECT_AUTO_POTYPE_receipt' => 'BR',
+        'JS_SUBJECT_AUTO_POTYPE_invoice' => 'FF',
 );

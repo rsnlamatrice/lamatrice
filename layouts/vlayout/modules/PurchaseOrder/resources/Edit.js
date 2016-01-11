@@ -84,7 +84,7 @@ Inventory_Edit_Js("PurchaseOrder_Edit_Js",{},{
 		var thisInstance = this
 		, $subject = container.find('input[name="subject"]:first')
 		, poType = container.find('input[name="potype"]:first').val()
-		, subject = app.vtranslate('JS_SUBJECT_AUTO_POTYPE_' + poType) + ' - ' + data.selectedName;
+		, subject = app.vtranslate('JS_SUBJECT_AUTO_POTYPE_' + poType) + ' ' + data.selectedName;
 		if ($subject.val() && $subject.attr('data-isauto') === undefined) 
 			return;
 		$subject.val(subject).attr('data-isauto', 1);

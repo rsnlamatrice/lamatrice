@@ -301,11 +301,14 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			$numRecu = $matches['num'][0];
 		else
 			$numRecu = '';
-		return array(
+		
+		$infos = array(
 			'montant' => $montant,
 			'recu_fiscal_num' => $numRecu,
 			'date_edition' => $dateApplication,
 		);
+		
+		return $this->createRecuFiscalRelation($year, $documentRecordModel, $infos);
 	}
 	
 	/**
@@ -313,7 +316,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * @return true if needed (> 3€) and exists
 	 */
-	function createRecuFiscalRelation($year, $documentRecordModel){
+	function createRecuFiscalRelation($year, $documentRecordModel, $existingInfos = false){
 		
 		global $adb;
 		$query = "
@@ -373,9 +376,15 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		}
 		$montant = round($montant, 2);
 		
-		$numRecu = $documentRecordModel->getNexRelatedCounterValue();
+		//Une relation existe déjà
+		if($existingInfos && $existingInfos['recu_fiscal_num'] && $existingInfos['montant'] == $montant){
+			//même montant => même n° de reçu
+			$numRecu = $existingInfos['recu_fiscal_num'];
+		}
+		else
+			$numRecu = $documentRecordModel->getNexRelatedCounterValue();
 		
-		//create relation
+		//create relation or update if same date (current date)
 		
 		$data = "Montant : $montant €, Reçu n° : $numRecu";
 		

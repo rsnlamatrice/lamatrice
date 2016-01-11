@@ -93,6 +93,26 @@
 					>{$VIEW_LABEL}
 					</option>
 				{/foreach}
+		
+				{* add related module name fields *}
+				{foreach item=FIELD_MODEL key=FIELD_NAME from=Vtiger_Field_Model::getEntityNameFieldModels($RELATED_NAME)}
+					{assign var=CONDITION_NAME value="["|cat:$RELATED_NAME|cat:"::::]"|cat:$FIELD_MODEL->getCustomViewColumnName()}
+					{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfo()}
+					<option value="{$CONDITION_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$CONDITION_NAME}"
+						data-view="[{$RELATED_NAME}][]"
+						{if $CONDITION_NAME eq $CONDITION_INFO['columnname']}
+							{assign var=FIELD_TYPE value=$FIELD_MODEL->getFieldType()}
+							{assign var=SELECTED_FIELD_MODEL value=$FIELD_MODEL}
+							{if $FIELD_MODEL->getFieldDataType() == 'reference'}{$FIELD_TYPE='V'}{/if}
+							{$FIELD_INFO['value'] = decode_html($CONDITION_INFO['value'])}
+							selected="selected"
+						{/if}
+					
+						data-fieldinfo='{Vtiger_Util_Helper::toSafeHTML(ZEND_JSON::encode($FIELD_INFO))}'
+					>{vtranslate($FIELD_MODEL->get('label'), $RELATED_NAME)}
+					</option>
+				{/foreach}
+				
 				{* add relation fields *}
 				{foreach key=VIEW_IDX item=RELATED_VIEW from=$RELATED_VIEWS}
 					{if $RELATED_VIEW['id'] eq $RECORD_ID}{break}{/if}
@@ -100,7 +120,6 @@
 					{assign var=VIEW_ID value=$RELATED_VIEW['id']}
 					{assign var=VIEW_LABEL value=$RELATED_VIEW['name']}
 					{foreach key=FIELD_NAME item=FIELD_MODEL from=$RELATED_FIELDS}
-						{assign var=CONDITION_NAME value=$RELATED_NAME|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()}
 						{assign var=CONDITION_NAME value="["|cat:$RELATED_NAME|cat:":"|cat:$VIEW_LABEL|cat:":"|cat:$VIEW_ID|cat:":"|cat:$FIELD_MODEL->getCustomViewColumnName()|cat:"]"}
 						{assign var=FIELD_INFO value=$FIELD_MODEL->getFieldInfo()}
 						<option value="{$CONDITION_NAME}" data-fieldtype="{$FIELD_MODEL->getFieldType()}" data-field-name="{$CONDITION_NAME}"
