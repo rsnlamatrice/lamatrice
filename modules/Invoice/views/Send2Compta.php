@@ -461,8 +461,14 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				}
 				
 				/* ligne de produit */
-				
-				$amountHT = round($invoice['quantity'] * $invoice['listprice'], 2);//HT
+				$amountHT = $invoice['quantity'] * $invoice['listprice'];//HT
+				if($invoice['discount_amount']){
+					$amountHT -= $invoice['discount_amount'];
+				}
+				if($invoice['discount_percent']){
+					$amountHT *= (1 - $invoice['discount_percent']/100);
+				}
+				$amountHTRounded = round($amountHT, 2);//HT
 				
 				//Taxe utilisée
 				$invoiceTotalTaxes = 0.0;
@@ -472,7 +478,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						if(!array_key_exists("$taxId", $invoiceTaxes))
 							$invoiceTaxes["$taxId"] = 0.0;
 						//Passage par le TTC, arrondi à 2 chiffres et retrait du HT pour éviter les écarts d'arrondis
-						$value = round((1 + $invoice['tax'.$taxId] / 100) * $invoice['quantity'] * $invoice['listprice'], 2) - $amountHT;
+						$value = round((1 + $invoice['tax'.$taxId] / 100) * $amountHT, 2) - $amountHTRounded;
 						$invoiceTotalTaxes += $value;
 						$invoiceTaxes["$taxId"] += $value;
 						break;
@@ -493,9 +499,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					.COLSEPAR.$this->sanitizeExport($basicSubject . ($productCode ? ' - ' . $productCode : ''))
 					.COLSEPAR.''
 					.COLSEPAR.''
-					.COLSEPAR.self::formatAmountForCogilog($amountHT)
+					.COLSEPAR.self::formatAmountForCogilog($amountHTRounded)
 				);
-				$invoiceTotal += $amountHT + $invoiceTotalTaxes;
+				$invoiceTotal += $amountHTRounded + $invoiceTotalTaxes;
 			}
 		
 			if($invoiceTaxes)//dernière facture
