@@ -462,7 +462,11 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				
 				/* ligne de produit */
 				
+				$amountHT = $invoice['quantity'] * $invoice['listprice'];//HT
 				$amountHT = round($invoice['quantity'] * $invoice['listprice'], 2);//HT
+				//if($invoice['discount_percent']){
+				//	$amountHT = round($invoice['quantity'] * $invoice['listprice'] * (1 - $invoice['discount_percent']/100, 2);
+				//}
 				
 				//Taxe utilisée
 				$invoiceTotalTaxes = 0.0;
@@ -478,6 +482,11 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						break;
 					}
 				}
+				
+				//Remise (après TVA)
+				//if($invoice['discount_percent']){
+				//	$amountHT *= 1 - $invoice['discount_percent']/100;
+				//}
 				
 				$compteVente = $invoice['productglacct'];
 				if($compteVente[0] === '7' || $compteVente[0] === '6')
