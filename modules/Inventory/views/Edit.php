@@ -42,16 +42,14 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 				}
 					
 			}
-			else {
-				if($moduleName === 'Invoice'){
-					$recordModel->set('invoicestatus', 'Created');
-					$recordModel->set('received', 0);
-				} elseif($moduleName === 'PurchaseOrder') {
-					$recordModel->set('postatus', null);
-					$recordModel->set('paid', 0);
-				}
-				$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
+			if($moduleName === 'Invoice'){
+				$recordModel->set('invoicestatus', 'Created');
+				$recordModel->set('received', 0);
+			} elseif($moduleName === 'PurchaseOrder') {
+				$recordModel->set('postatus', null);
+				$recordModel->set('paid', 0);
 			}
+			$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
 		} elseif (!empty($record)) {
                
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
