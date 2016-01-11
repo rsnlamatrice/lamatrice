@@ -1416,6 +1416,20 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		});
 	},
 
+	//ED160109 : validation de la quantité par [Enter]
+	registerQuantityKeyPressEvent : function(container) {
+		var thisInstance = this;
+		container.on('keyup','input.qty',function(e){
+			if (e.keyCode === 13) {
+				var $this=$(this)
+				, $tr = $this.parents('tr:first')
+				, $input = $tr.find('input.listPrice:first');
+				$input.focus().select();	
+			}
+			return false;		
+		});
+	},
+
 	/* ED151229 sélection du mode HT ou TTC */
 	registerListPriceModeButtonsEvent: function(container) {
 		var thisInstance = this;
@@ -2719,6 +2733,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		this.registerQuantityButtonsEvent(container); /* ED150708 */
 		this.registerReceivedButtonsEvent(container); /* ED151014 */
 		this.registerListPriceModeButtonsEvent(container); /* ED151229 */
+		this.registerQuantityKeyPressEvent(container); /* ED160109 */
+		
 	},
 	
     registerEvents: function(){

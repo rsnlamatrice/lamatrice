@@ -92,6 +92,17 @@ class Vtiger_DetailView_Model extends Vtiger_Base_Model {
 					'linkicon' => ''
 			);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($deletelinkModel);
+			
+			if($moduleName === 'Contacts'){
+				$deletelinkModel = array(
+						'linktype' => 'DETAILVIEW',
+						'linklabel' => 'LBL_TAG_AS_DELETED',
+						'linkurl' => 'javascript:Vtiger_Detail_Js.deleteRecord("'.$recordModel->getTagAsDeletedUrl().'")',
+						'linkicon' => ''
+				);
+				$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($deletelinkModel);
+					
+			}
 		}
 
 		if($recordModel->isDuplicatable()) {//ED150521

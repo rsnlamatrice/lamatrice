@@ -207,5 +207,16 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	//}
 	
 	
+
+	/**
+	 * Function to get the field mode
+	 * @param <String> $fieldName - field name
+	 * @return <Vtiger_Field_Model>
+	 */
+	public function getField($fieldName){
+		if($fieldName === 'title')
+			$fieldName = 'notes_title';
+		return parent::getField($fieldName);
+	}
 }
 ?>

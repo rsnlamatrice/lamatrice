@@ -94,25 +94,25 @@ class PurchaseOrder_Record_Model extends Inventory_Record_Model {
 				case 'order':
 				case 'invoice':
 					return array(
-						'Created' => array( 'label' => 'Créée', 'icon' => 'ui-icon ui-icon-check' ),
+						'Created' => array( 'label' => 'Création en cours', 'icon' => 'ui-icon ui-icon-check' ),
 						'Approved' => array( 'label' => 'Validée', 'icon' => 'ui-icon ui-icon-check green' ),
-						'Compta' => array( 'label' => 'Comptabilisée', 'icon' => 'ui-icon ui-icon-check blue' ),
+						'Compta' => array( 'label' => 'Comptabilisée', 'icon' => 'ui-icon ui-icon-locked blue' ),
 						'Cancelled' => array( 'label' => 'Annulée', 'icon' => 'ui-icon ui-icon-close darkred' )
 					);
 					break;
 				case 'receipt':
 					return array(
-						'Created' => array( 'label' => 'Créé', 'icon' => 'ui-icon ui-icon-check' ),
+						'Created' => array( 'label' => 'Création en cours', 'icon' => 'ui-icon ui-icon-check' ),
 						'Received Shipment' => array( 'label' => 'Commande reçue', 'icon' => 'ui-icon ui-icon-locked darkgreen' ),
 						'Cancelled' => array( 'label' => 'Annulé', 'icon' => 'ui-icon ui-icon-close darkred' )
 					);
 					break;
 				default:
 					return array(
-						'Created' => array( 'label' => 'Créé-e', 'icon' => 'ui-icon ui-icon-check' ),
+						'Created' => array( 'label' => 'Création en cours', 'icon' => 'ui-icon ui-icon-check' ),
 						'Approved' => array( 'label' => 'Validé-e', 'icon' => 'ui-icon ui-icon-check green' ),
 						'Received Shipment' => array( 'label' => 'Commande reçue', 'icon' => 'ui-icon ui-icon-locked darkgreen' ),
-						'Compta' => array( 'label' => 'Comptabilisée', 'icon' => 'ui-icon ui-icon-check blue' ),
+						'Compta' => array( 'label' => 'Comptabilisée', 'icon' => 'ui-icon ui-icon-locked blue' ),
 						'Cancelled' => array( 'label' => 'Annulé-e', 'icon' => 'ui-icon ui-icon-close darkred' )
 					);
 					break;

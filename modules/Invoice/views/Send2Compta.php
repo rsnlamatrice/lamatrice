@@ -143,7 +143,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$viewer->assign('VALIDATABLE_DATEMAXI', $row['datemaxi']);
 		}
 	}
-		
+	
 	//Controle des données avant affichage
 	function validateInvoicesData(Vtiger_Request $request){
 		
