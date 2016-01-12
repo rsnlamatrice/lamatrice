@@ -33,9 +33,9 @@ class Accounts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		//liste des reçus fiscaux
 		$year = date('Y');
 		$listViewModel = Vtiger_ListView_Model::getInstance($relatedModuleName, 0);
-		$listViewModel->set('operator', array('e', array('c', 'OR', 'c', 'OR', 'c')));
-		$listViewModel->set('search_key', array('folderid', array('notes_title', null, 'notes_title', null, 'notes_title')));
-		$listViewModel->set('search_value', array('Reçus fiscaux', array($year, null, $year - 1, null, $year - 2)));
+		$listViewModel->set('operator', array('e', array('c', 'OR', 'c', 'OR', 'c', 'OR', 'c')));
+		$listViewModel->set('search_key', array('folderid', array('notes_title', null, 'notes_title', null, 'notes_title', null, 'notes_title')));
+		$listViewModel->set('search_value', array('Reçus fiscaux', array($year, null, $year - 1, null, $year - 2, null, $year - 3)));
 		
 		$listViewModel->set('orderby', 'title');
 		$listViewModel->set('sortorder','DESC');

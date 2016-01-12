@@ -125,7 +125,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		var_dump(Vtiger_Field_Model::getEntityNameFieldModels('Documents'));
+		$this->updateGroupesFromDonnes4D();
 	}
 	
 	
@@ -184,6 +184,98 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		echo "<BR>Total : " . count($models);
 	}
 	
+	//Post-Migration : met à jour des données dans la Matrice à partir des données présentes dans le commentaire initial des contacts importés
+	function updateGroupesFromDonnes4D(){
+		global $adb;
+		
+		$contactId = 0  ;
+		$limit = 1000;
+		$loop = 100;
+		$maxLoop = 1;
+		$testCounter = 0;
+		$updCounter = 0;
+		//Groupes venant de 4D avec leurs descriptifs initiaux (attention, il y en a de deux types : contact et groupe)
+		$query = 'SELECT crmid, vtiger_modcomments.commentcontent, vtiger_contactscf.grpdescriptif
+			FROM vtiger_contactscf
+			JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = vtiger_contactscf.contactid
+			JOIN vtiger_contactdetails
+				ON vtiger_contactdetails.contactid = vtiger_contactscf.contactid
+			JOIN vtiger_modcomments
+				ON vtiger_contactdetails.contactid = vtiger_modcomments.related_to
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_crmentity.crmid > ?
+			AND vtiger_contactdetails.ref4d IS NOT NULL
+			AND vtiger_modcomments.userid = 1
+			AND vtiger_modcomments.commentcontent LIKE "Donn%associationcourt%descriptifgroupe%"
+			AND vtiger_contactscf.grpdescriptif IS NOT NULL AND vtiger_contactscf.grpdescriptif <> ""
+			ORDER BY crmid
+			LIMIT '. $limit;
+		
+		$queryUpdate = 'UPDATE vtiger_contactscf
+			SET grpdescriptif = ?
+			WHERE contactid = ?';
+		do {
+			$result = $adb->pquery($query, array($contactId));
+			if(!$result){
+				$adb->echoError();
+				return;
+			}
+			$contactsCount = $adb->getRowCount($result);
+				echo "<br>Query : " . $contactsCount;
+			
+			while($row = $adb->getNextRow($result, false)){
+				$testCounter++;
+				$contactId = $row['crmid'];
+				$associationCourt = preg_replace('/^([\s\S]+associationcourt\s=\s)([^\n]*)(\n[\s\S]+)$/', '$2', $row['commentcontent']);
+				$descriptif = preg_replace('/^([\s\S]+descriptifgroupe\s=\s)([\s\S]*)$/', '$2', $row['commentcontent']);
+				if($associationCourt && !preg_match('/^Donn.*es 4D/', $associationCourt)){
+					$updateDescriptif = false;
+					$associationCourt = trim($associationCourt, " \t\n\r\0\x0B");
+					if(preg_match('/^Donn.*es 4D/', $descriptif))
+						$descriptif = '';
+					$descriptif = preg_split('/\n-\s\w+\s=\s/', $descriptif)[0];
+					$descriptif = trim($descriptif, " \t\n\r\0\x0B");
+					$grpdescriptif = trim($row['grpdescriptif'], " \t\n\r\0\x0B");
+					if($grpdescriptif == $associationCourt){
+						echo "<br><br>$contactId : \"$associationCourt\" <pre>$descriptif</pre>";
+						echo 'REPLACED !';
+						$grpdescriptif = '';
+						$updateDescriptif = true;
+						$updCounter++;
+					}
+					elseif(substr($grpdescriptif, 0, strlen($associationCourt)) == $associationCourt
+					&& substr($grpdescriptif, strlen($grpdescriptif) - strlen($descriptif)) == $descriptif){
+						echo "<br><br>$contactId : \"$associationCourt\" <pre>$descriptif</pre>";
+						echo 'CONCATENATED !';
+						$grpdescriptif = $descriptif;
+						$updateDescriptif = true;
+						$updCounter++;
+					}
+					if($updateDescriptif ){
+						$resultUpd = $adb->pquery($queryUpdate, array($grpdescriptif, $row['crmid']));
+						if(!$resultUpd){
+							$adb->echoError('UPDATE');
+							return;
+						}
+					}
+					//break;
+					
+				}
+			}
+			
+			if($contactsCount < $limit){
+				echo "<br>TERMINE $limit > " . $contactsCount;
+				break;
+			}
+			if(++$loop >= $maxLoop){
+				break;
+			}
+			
+		} while(true);
+		echo "<br>Fin au bout de $loop boucles / $limit contacts";
+		echo "<br>Tests : $testCounter, Mises à jour : $updCounter";
+	}
 	//Post-Migration : met à jour des données dans la Matrice à partir des données présentes dans le commentaire initial des contacts importés
 	function updateContactsFromDonnes4D(){
 		global $adb;
