@@ -261,7 +261,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 			)
 		;
 		
-		if(0){
+		if(1){
 			$list[] = array(
 					'sub' => 'freeDebug',
 					'label' => 'fonction de test (debug)'
