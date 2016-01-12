@@ -8,6 +8,7 @@ class Contacts_MassActionAjax_View extends Accounts_MassActionAjax_View {
 		parent::__construct();
 		$this->exposeMethod('assignRelatedEntities');
 		$this->exposeMethod('unassignRelatedEntities');
+		$this->exposeMethod('showRecordInfosForCopy');
 	}
 	
 	function assignRelatedEntities(Vtiger_Request $request){
@@ -123,5 +124,31 @@ class Contacts_MassActionAjax_View extends Accounts_MassActionAjax_View {
 		
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->view('UnassignRelatedEntities.tpl', $module);
+	}
+
+
+	/**
+	 * Function returns the email list view
+	 * @param Vtiger_Request $request
+	 *
+	 * ED150227 copy from showEmailList
+	 */
+	function showRecordInfosForCopy(Vtiger_Request $request) {
+		$moduleName = $request->getModule();
+		$records = $this->getRecordsListFromRequest( $request);
+		$recordModels = array();
+		foreach($records as $recordId){
+			$recordModels[$recordId] = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+			if(count($recordModels) >= 7)
+				break;
+		}
+		
+		$viewer = $this->getViewer($request);
+		$viewer->assign('MODULE', $moduleName);
+		$viewer->assign('RECORDS', $recordModels);
+		global $site_URL;
+        $viewer->assign('URL_ROOT', $site_URL);
+		echo $viewer->view('ShowInfosForCopy.tpl', $moduleName, true);
+		exit;
 	}
 }

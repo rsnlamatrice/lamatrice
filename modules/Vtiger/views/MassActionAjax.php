@@ -399,8 +399,8 @@ class Vtiger_MassActionAjax_View extends Vtiger_IndexAjax_View {
 		$viewer->assign('SKIP_MODULES', $skipModules);
 		$viewer->assign('USER_MODEL', Users_Record_Model::getCurrentUserModel());
 		$viewer->view('TransferRecordOwnership.tpl', $module);
-	}	
-
+	}
+	
 	/**
 	 * Function returns the email list view
 	 * @param Vtiger_Request $request

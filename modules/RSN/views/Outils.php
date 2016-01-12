@@ -125,7 +125,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$this->updateGroupesFromDonnes4D();
+		//$this->updateGroupesFromDonnes4D();
 	}
 	
 	
@@ -185,7 +185,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	}
 	
 	//Post-Migration : met à jour des données dans la Matrice à partir des données présentes dans le commentaire initial des contacts importés
-	function updateGroupesFromDonnes4D(){
+	function updateGroupeDescriptifFromDonnes4D(){
 		global $adb;
 		
 		$contactId = 0  ;

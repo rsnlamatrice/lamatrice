@@ -43,15 +43,25 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 		}
 		
 		$moduleModel = $this->getModule();
-		if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
-			$massActionLink = array(
-				'linktype' => 'LISTVIEWMASSACTION',
-				'linklabel' => 'LBL_TRANSFER_OWNERSHIP',
-				'linkurl' => 'javascript:Vtiger_List_Js.triggerTransferOwnership("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=transferOwnership")',
-				'linkicon' => ''
-			);
-			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
-		}
+		//if($currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'EditView')) {
+		//	$massActionLink = array(
+		//		'linktype' => 'LISTVIEWMASSACTION',
+		//		'linklabel' => 'LBL_TRANSFER_OWNERSHIP',
+		//		'linkurl' => 'javascript:Vtiger_List_Js.triggerTransferOwnership("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=transferOwnership")',
+		//		'linkicon' => ''
+		//	);
+		//	$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+		//}
+
+		//ED160112 copie des lignes sélectionnées
+		$massActionLink = array(
+			'linktype' => 'LISTVIEWMASSACTION',
+			'linklabel' => 'LBL_RECORD_INFOS_COPY',
+			'linkurl' => 'javascript:Vtiger_List_Js.triggerMassAction("index.php?module='.$moduleModel->getName().'&view=MassActionAjax&mode=showRecordInfosForCopy")',
+			'linkicon' => ''
+		);
+		$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
+
 		
 		////ED150628
 		//$moduleModel = $this->getModule();
@@ -112,7 +122,7 @@ class Contacts_ListView_Model extends Vtiger_ListView_Model {
 				$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
 			}
 		}
-
+		
 		return $massActionLinks;
 	}
 
