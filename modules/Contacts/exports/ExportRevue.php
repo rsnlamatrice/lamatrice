@@ -18,7 +18,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 			"adresse 3" => function ($row) { return Contacts_ExportRevue_Export::getPoBox($row); },
 			"Code Postal" => function ($row) { return Contacts_ExportRevue_Export::getZipCode($row); },
 			"Ville (ou Pays)" => function ($row) { return Contacts_ExportRevue_Export::getCityOrCountry($row); },
-			"Nb exemplaires" => "",//tmp
+			"Nb exemplaires" => function ($row) { return ($row["nbexemplaires"] == 0) ? 1 : $row["nbexemplaires"]; },//"nbexemplaires",//tmp
 			"Mode envoi" => "",//tmp to check ??
 			"info lib 1" => function ($row) { return Contacts_ExportRevue_Export::getMessage1($row); },
 			"info lib 2" => function ($row) { return Contacts_ExportRevue_Export::getMessage2($row); },
@@ -72,11 +72,11 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage1($row) {
-		return "Merci de vous réabonner (bulletin en p.9)";//tmp check witch message must be displayed ...
+		return "";//"Merci de vous réabonner (bulletin en p.9)";//tmp
 	}
 
 	function getMessage2($row) {
-		return "Bonjour " . $row["firstname"] . ",";//tmp check if structure or persone ...
+		return "";//"Bonjour " . $row["firstname"] . ",";//tmp
 	}
 
 	function getMessage3($row) {
@@ -85,5 +85,30 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 
 	function getMessage4($row) {
 		return "";
+	}
+
+	function getExportQuery($request) {//tmp ...
+		$parentQuery = parent::getExportQuery($request);
+
+		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
+		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
+		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnaborevues.nbexemplaires " .
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " JOIN (SELECT accountid, MAX(debutabo) as debutabo
+														    FROM vtiger_rsnaborevues
+														    JOIN vtiger_crmentity vtiger_rsnaborevues_crmentity ON vtiger_rsnaborevues_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
+														    WHERE vtiger_rsnaborevues_crmentity.deleted = 0
+														    GROUP BY accountid
+														) vtiger_rsnaborevues_max 
+														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
+														JOIN vtiger_rsnaborevues
+														    ON vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
+														    AND vtiger_rsnaborevues.debutabo =  vtiger_rsnaborevues_max.debutabo
+														JOIN vtiger_rsnabotype
+														    ON vtiger_rsnabotype.rsnabotype = vtiger_rsnaborevues.rsnabotype " .
+				 substr($parentQuery, $wherePos);
+
+//		echo '<br/><br/><br/>' . $query;
+
+		return $query;
 	}
 }
