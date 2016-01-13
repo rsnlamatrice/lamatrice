@@ -428,17 +428,21 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$invoiceJournal = self::getCodeAffaireJournal($codeAffaire, $invoiceModeRegl);
 					$invoiceAmount = self::formatAmountForCogilog($invoice['total']);
 					$invoiceReceived = self::formatAmountForCogilog($invoice['received']);
+					$encaissementJournal = self::getModeReglJournal($invoiceModeRegl); 
 					$basicSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
 					$invoiceSubject = $basicSubject . ($codeAffaire ? ' - ' . $codeAffaire : '');
 					$date = self::formatDateForCogilog($invoice['invoicedate']);
 					//La facture est réglée
 					if($invoiceReceived){
-						//Si un règlement est associé et qu'il est déjà en compta, on ne traite pas le règlement
-						if(strpos($invoice['reglementstatus'], 'Compta') !== false)
+						//Pas de compte de vente, pas d'encaissement (ce qui devrait être le cas de PayPal)
+						if(!$encaissementJournal)
+							$invoiceReceived = false;
+						//Si un règlement est associé et qu'il est déjà en compta, on ne traite pas le règlement (ce qui devrait être le cas de PayPal)
+						elseif(strpos($invoice['reglementstatus'], 'Compta') !== false)
 							$invoiceReceived = false;
 						//Si le montant des règlements associés n'est pas celui de la facture, on ne traite pas le règlement
 						//TODO cf validateSend2ComptaReglements() si on prend bien en compte les écritures
-						if($invoice['reglementamount'] !== null && $invoice['reglementamount'] != $invoice['received'])
+						elseif($invoice['reglementamount'] !== null && $invoice['reglementamount'] != $invoice['received'])
 							$invoiceReceived = false;
 					}
 					//Cumuls des règlements par mode de règlement
