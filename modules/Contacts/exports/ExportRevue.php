@@ -18,7 +18,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 			"adresse 3" => function ($row) { return Contacts_ExportRevue_Export::getPoBox($row); },
 			"Code Postal" => function ($row) { return Contacts_ExportRevue_Export::getZipCode($row); },
 			"Ville (ou Pays)" => function ($row) { return Contacts_ExportRevue_Export::getCityOrCountry($row); },
-			"Nb exemplaires" => function ($row) { return ($row["nbexemplaires"] == 0) ? 1 : $row["nbexemplaires"]; },//"nbexemplaires",//tmp
+			"Nb exemplaires" => function ($row) { return Contacts_ExportRevue_Export::getNbExemplaires($row); },
 			"Mode envoi" => "",//tmp to check ??
 			"info lib 1" => function ($row) { return Contacts_ExportRevue_Export::getMessage1($row); },
 			"info lib 2" => function ($row) { return Contacts_ExportRevue_Export::getMessage2($row); },
@@ -87,23 +87,29 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 		return "";
 	}
 
+	function getNbExemplaires($row) {
+		//tmp Attention -> checker si le dernier abonnement est encore en cours, sinon mettre 1 (exemple ancien abonné avec une revue de remerciement (ex: C286786)...)...
+		//tmp Attention, ne pas se fier au champs est abonné (pas necessairement à jour...)
+		return ($row["nbexemplaires"]) ? $row["nbexemplaires"] : 1;
+	}
+
 	function getExportQuery($request) {//tmp ...
 		$parentQuery = parent::getExportQuery($request);
 
 		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
 		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
 		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnaborevues.nbexemplaires " .
-				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " JOIN (SELECT accountid, MAX(debutabo) as debutabo
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN (SELECT accountid, MAX(debutabo) as debutabo
 														    FROM vtiger_rsnaborevues
 														    JOIN vtiger_crmentity vtiger_rsnaborevues_crmentity ON vtiger_rsnaborevues_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
 														    WHERE vtiger_rsnaborevues_crmentity.deleted = 0
 														    GROUP BY accountid
 														) vtiger_rsnaborevues_max 
 														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
-														JOIN vtiger_rsnaborevues
+														LEFT JOIN vtiger_rsnaborevues
 														    ON vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
 														    AND vtiger_rsnaborevues.debutabo =  vtiger_rsnaborevues_max.debutabo
-														JOIN vtiger_rsnabotype
+														LEFT JOIN vtiger_rsnabotype
 														    ON vtiger_rsnabotype.rsnabotype = vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $wherePos);
 
