@@ -5,11 +5,17 @@
 
 class Contacts_GetData_Action extends Vtiger_GetData_Action {
 
+	function __construct() {
+		parent::__construct();
+		$this->exposeMethod('assignRelatedEntities');
+		$this->exposeMethod('unassignRelatedEntities');
+		$this->exposeMethod('showModuleInfosForCopy');
+	}
+	
 	public function process(Vtiger_Request $request) {
 		$record = $request->get('record');
 		if(!is_numeric($record)){
 			global $adb;
-			//c'est la valeur du champ faq_no qui est fournie
 			$query = 'SELECT crmid
 				FROM vtiger_crmentity
 				JOIN vtiger_contactdetails
