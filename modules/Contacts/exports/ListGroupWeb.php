@@ -13,7 +13,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 		return array(
 			"ReffFiche" =>"contact_no",
 			"Association" => "grpnomllong",
-			"AssociationCourt" => "grpnomllong",//tmp nom court !!!!
+			"AssociationCourt" => "mailingstreet2",//tmp nom court ??
 			"Prenom" => "firstname",
 			"Nom" => "lastname",
 			"AdresseLigne2" => "mailingstreet2",
@@ -33,19 +33,25 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 			"Type" => "grptypes",
 			"NbAdherents" => "grpnbremembres",
 			"Descriptif" => "grpdescriptif",
-			"NomAssoEnLigne1" => "",//tmp => adresse format= CN1 => non groupe avant, sinon NC1
-			"CacherMail" => "",//tmp rsnwebhide
-			"CacherNomEtPrenom" => "",//tmp rsnwebhide
-			"CacherAdressePostale" => "",//tmp rsnwebhide
-			"CacherFax" => "",//tmp rsnwebhide
-			"CacherPortable" => "",//tmp rsnwebhide
-			"CacherTel" => "",//tmp rsnwebhide
-			"Email_priv" => "email",//tmp ???
+			"NomAssoEnLigne1" => function($row) { return ($row["mailingaddressformat"] == "CN1") ? 1 : 0; },
+			"CacherMail" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Email")) ? 1 : 0; },
+			"CacherNomEtPrenom" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Nom et prénom")) ? 1 : 0; },
+			"CacherAdressePostale" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Adresse postale")) ? 1 : 0; },
+			"CacherFax" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Fax")) ? 1 : 0; },
+			"CacherPortable" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Portable")) ? 1 : 0; },
+			"CacherTel" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Téléphone")) ? 1 : 0; },
+			"Email_priv" => "email",
 		);
 	}
 
+	function hideField($row, $field) {
+		$fieldsToHide = explode(" |##| ", html_entity_decode($row["webhide"]));//tmp cache??
+
+		return in_array($field, $fieldsToHide);
+	}
+
 	function displayHeaderLine() {
-		return true;
+		return false;
 	}
 
 	function getExportFileName($request) {

@@ -51,4 +51,8 @@ class Products_ProductsAll_Export extends Export_ExportData_Action {
 		$moduleName = $request->get('source_module');
 		return "export_produits";
 	}
+
+	function getCSVSeparator(){
+		return ";";	
+	}
 }
