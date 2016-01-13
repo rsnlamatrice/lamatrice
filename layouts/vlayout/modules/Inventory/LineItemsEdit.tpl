@@ -153,7 +153,7 @@
         </div>
     </div>
     <table class="table table-bordered blockContainer lineItemTable" id="lineItemResult">
-        <tr>
+        <tr class="hide{*ED160111*}">
             <td  width="83%">
                 <div class="pull-right"><strong>{vtranslate('LBL_ITEMS_TOTAL',$MODULE)}</strong></div>
             </td>
@@ -161,7 +161,7 @@
                 <div id="netTotal" class="pull-right netTotal">{if !empty($FINAL.hdnSubTotal)}{$FINAL.hdnSubTotal}{else}0.00{/if}</div>
             </td>
         </tr>
-        <tr>
+        <tr class="hide{*ED160111*}">
             <td width="83%">
                 <span class="pull-right">(-)&nbsp;<b><a href="javascript:void(0)" id="finalDiscount"
 		    {if $FINAL.discount_final_source}

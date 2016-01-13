@@ -19,7 +19,6 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 
 		if(!empty($record) && $request->get('isDuplicate') == true) {
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
-			
 			//ED150630
 			if($recordModel->get('sent2compta'))
 				$recordModel->set('sent2compta', null);
@@ -28,6 +27,7 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$taxes = $recordModel->getProductTaxes();
 			$shippingTaxes = $recordModel->getShippingTaxes();
 			$relatedProducts = $recordModel->getProducts();
+		
 			$viewer->assign('MODE', '');
 			$viewer->assign('IS_DUPLICATE_FROM', $record);
 			
@@ -38,20 +38,18 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 				$this->reverseAmountFields($relatedProducts, $recordModel);
 				if($relatedProducts[1]){
 					foreach(array('received', 'receivedcomments', 'receivedmoderegl') as $fieldName)
-						$relatedProducts[$index]['final_details'][$fieldName] = null;
+						$relatedProducts[1]['final_details'][$fieldName] = null;
 				}
 					
 			}
-			else {
-				if($moduleName === 'Invoice'){
-					$recordModel->set('invoicestatus', 'Created');
-					$recordModel->set('received', 0);
-				} elseif($moduleName === 'PurchaseOrder') {
-					$recordModel->set('postatus', null);
-					$recordModel->set('paid', 0);
-				}
-				$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
+			if($moduleName === 'Invoice'){
+				$recordModel->set('invoicestatus', 'Created');
+				$recordModel->set('received', 0);
+			} elseif($moduleName === 'PurchaseOrder') {
+				$recordModel->set('postatus', null);
+				$recordModel->set('paid', 0);
 			}
+			$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
 		} elseif (!empty($record)) {
                
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);
