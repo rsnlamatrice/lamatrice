@@ -55,6 +55,8 @@ $languageStrings = array(
         'LBL_DUPLICATE_AS_INVOICE' => 'Dupliquer en Facture fournisseur',
         
         'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
+        
+	'Due Date'                     => 'Date de la pièce', 
 );
 $jsLanguageStrings = array(
         'JS_SUBJECT_AUTO_POTYPE_order' => 'CMF',

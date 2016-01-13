@@ -663,7 +663,10 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					}
 					else
 						$record->set('error', 0);
-					$record->set('reglementstatus', $record->get('error') ? 'Cancelled' : 'Validated');
+					//Les règlements de Paypal ne sont pas transférables en compta
+					$record->set('reglementstatus', $record->get('error') ? 'Cancelled' : 'Compta');
+					if(!$record->get('error'))
+						$record->set('sent2compta', date('Y-m-d'));//TODO champ en lecture seule, non enregistré
 					
 					//$db->setDebug(true);
 					$record->save();

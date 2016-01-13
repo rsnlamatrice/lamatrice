@@ -153,8 +153,14 @@ class Invoice_MassSave_Action extends Inventory_MassSave_Action {
 				, modifiedtime = NOW()
 				, modifiedby = ?
 			';
-			if($fromStatus === 'Compta')
-				$query .= ', sent2compta = NULL';
+			if(!is_array($fromStatus) && $fromStatus === 'Compta'
+			 || is_array($fromStatus) && in_array('Compta', $fromStatus)){
+				$query .= ', sent2compta = NULL
+						   , received = IF(receivedmoderegl = "Chèque" AND receivedcomments LIKE "Validation%", 0, received)
+						   , balance = IF(receivedmoderegl = "Chèque" AND receivedcomments LIKE "Validation%", total, balance)
+						   , receivedcomments = IF(receivedmoderegl = "Chèque" AND receivedcomments LIKE "Validation%", "", receivedcomments)
+						   ';
+			}
 			$query .= '
 				WHERE vtiger_crmentity.deleted = 0
 				AND vtiger_crmentity.crmid IN ('.generateQuestionMarks($ids).')

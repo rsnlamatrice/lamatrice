@@ -41,4 +41,65 @@ class RsnReglements_ListView_Model extends Vtiger_ListView_Model {
 
 		return $links;
 	}
+
+
+	/**
+	 * Function to get the list view entries
+	 * @param Vtiger_Paging_Model $pagingModel
+	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
+	 */
+	public function getListViewCount(&$calculatedTotals = false) {
+		$db = PearDatabase::getInstance();
+
+		$queryGenerator = $this->get('query_generator');
+
+		$searchKey = $this->get('search_key');
+		$searchValue = $this->get('search_value');
+		$operator = $this->get('operator');
+		if(!empty($searchKey)) {
+			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
+		}
+
+		//ED150928
+		if($calculatedTotals !== false){
+			$queryGenerator->addField('amount');
+		}
+		
+		$listQuery = $this->getQuery();
+
+		$sourceModule = $this->get('src_module');
+		if(!empty($sourceModule)) {
+			$moduleModel = $this->getModule();
+			if(method_exists($moduleModel, 'getQueryByModuleField')) {
+				$overrideQuery = $moduleModel->getQueryByModuleField($sourceModule, $this->get('src_field'), $this->get('src_record'), $listQuery);
+				if(!empty($overrideQuery)) {
+					$listQuery = $overrideQuery;
+				}
+			}
+		}
+//echo "<pre>$listQuery</pre>";
+
+		//ED150507 : cou
+		$query = 'SELECT count(*) AS count';
+		
+		//ED150906
+		if($calculatedTotals !== false)
+			$query .= ', sum(amount) AS `total`';
+			
+		$query .= ' FROM (' . $listQuery . ') q';
+		
+		$listResult = $db->pquery($query, array());
+		if(!$listResult){
+			$db->echoError('Impossible de compter le nombre de lignes.');
+			echo '<pre>'; print_r($query); echo '</pre>'; 
+			return 0;
+		}
+		
+		if($calculatedTotals !== false)
+			$calculatedTotals = array(
+				'total' => $db->query_result($listResult, 0, 'total')
+			);
+		
+		return $db->query_result($listResult, 0, 'count');
+	}
 }

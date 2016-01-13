@@ -125,6 +125,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			/*ED140906 tests*/
 			$field->set('typeofdata', 'D~O');
 			$field->set('uitype', 6);
+			$field->set('isrelatedfield', true); //différencie les champs d'une table du module lié des champs de la table de relation
 			array_push($fields, $field);
 			    
 			//Added to support dateapplication
@@ -135,6 +136,7 @@ class Contacts_Relation_Model extends Vtiger_Relation_Model {
 			/*ED140906 tests*/
 			$field->set('typeofdata', 'V~O');
 			$field->set('uitype', 15);
+			$field->set('isrelatedfield', true); //différencie les champs d'une table du module lié des champs de la table de relation
 			array_push($fields, $field);
 			
 			break;

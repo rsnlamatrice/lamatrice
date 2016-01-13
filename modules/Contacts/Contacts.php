@@ -1811,6 +1811,9 @@ class Contacts extends CRMEntity {
 						}
 					}
 				}
+				if($rel_module === 'Contacts'){
+					//TODO Purge des contacts qui seraient devenus liés à eux même
+				}
 			}
 			//Potentials
 			if(is_array($countingOnly)){
