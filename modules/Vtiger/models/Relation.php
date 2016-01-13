@@ -320,6 +320,7 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 					//echo '<br>$referenceList '; var_dump($referenceList);
 					if(in_array($parentModule->getName(), $referenceList)) {
 						//echo '<br>OK $fieldModel '; var_dump($fieldModel->getName());
+						$fieldModel->set('isrelatedfield', true); //différencie les champs d'une table du module lié des champs de la table de relation
 						$this->set('relationField', $fieldModel);
 						$relationField = $fieldModel;
 						break;
@@ -368,7 +369,10 @@ class Vtiger_Relation_Model extends Vtiger_Base_Model{
 		$views = CustomView_Record_Model::getAll($this->getRelationModuleName());
 		$structures = array();
 		if($views){
-			$fields = $this->getRelationFields();
+			//Champs de nom du module
+			$fields = Vtiger_Field_Model::getEntityNameFieldModels($module->getName());
+			//Champs de relation ou du module lié (cf modules/Contacts/models/Relation.php)
+			$fields = array_merge($fields, $this->getRelationFields());
 			foreach($views as $viewName => $view){
 				$structures[$view->get('viewname')] = array(
 							'id' => $view->getId(),

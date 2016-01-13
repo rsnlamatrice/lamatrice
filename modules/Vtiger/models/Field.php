@@ -1450,6 +1450,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 			if(!$field)
 				continue;
 			$field->set('label', vtranslate($field->get('label'), $moduleName) . ' ' . vtranslate('SINGLE_'.$moduleName, $moduleName));
+			$field->set('isrelatedfield', true); //différencie les champs d'une table du module lié des champs de la table de relation
 			$fieldModels[$field->getName()] = $field;
 		}
 		return $fieldModels;
@@ -1474,6 +1475,7 @@ class Vtiger_Field_Model extends Vtiger_Field {
 	    $field->set('label', vtranslate('LBL_ITEM_NAME') . ' ' . vtranslate('SINGLE_'.$moduleName, $moduleName));
 	    $field->set('typeofdata', 'V~0');
 	    $field->set('uitype', 1);
+		$field->set('isrelatedfield', true); //différencie les champs d'une table du module lié des champs de la table de relation
 	    
 		return $field;
 	}
