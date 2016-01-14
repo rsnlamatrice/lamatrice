@@ -16,7 +16,7 @@ class ContactEmails_ListEmailsGroups_Export extends Export_ExportData_Action {
 	}
 	
 	function displayHeaderLine() {
-		return true;//tmp must be False
+		return false;
 	}
 
 	function getExportFileName($request) {
@@ -25,9 +25,9 @@ class ContactEmails_ListEmailsGroups_Export extends Export_ExportData_Action {
 	}
 
 	//tmp order by zip ??
-	// function getQueryOrderBy($moduleName) {
-	// 	return ' ORDER BY mailingcountry ASC, mailingzip ASC';
-	// }
+	function getQueryOrderBy($moduleName) {
+		return ' ORDER BY mailingzip ASC';
+	}
 
 	function getExportQuery($request) {//tmp ...
 		$parentQuery = parent::getExportQuery($request);
