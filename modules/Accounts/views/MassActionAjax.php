@@ -44,6 +44,12 @@ class Accounts_MassActionAjax_View extends Vtiger_MassActionAjax_View {
 		$pagingModel->set('page', 1);
 		$listViewEntries = $listViewModel->getListViewEntries($pagingModel);
 		
+		if(count($recordId) === 1){
+			//Add old reçus fiscaux
+			$recordModel = Vtiger_Record_Model::getInstanceById($recordId[0], $module);
+			$recordModel->getRelatedRecusFiscaux($module === 'Contacts' ? $recordModel : false, $listViewEntries);
+		}
+		
 		$viewer = $this->getViewer($request);
 		$viewer->assign('MODULE',$module);
 		$viewer->assign('RELATED_MODULE', $relatedModuleName);

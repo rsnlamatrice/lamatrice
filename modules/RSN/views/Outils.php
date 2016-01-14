@@ -125,7 +125,7 @@ class RSN_Outils_View extends Vtiger_Index_View {
 	 * 
 	 */
 	function freeDebug(){
-		$this->updateGroupeDescriptifFromDonnes4D();
+		//$this->updateGroupeDescriptifFromDonnes4D();
 	}
 	
 	
@@ -189,9 +189,9 @@ class RSN_Outils_View extends Vtiger_Index_View {
 		global $adb;
 		
 		$contactId = 0  ;
-		$limit = 10000;
+		$limit = 100;
 		$loop = 1;
-		$maxLoop = 100;
+		$maxLoop = 1;
 		$testCounter = 0;
 		$updCounter = 0;
 		//Groupes venant de 4D avec leurs descriptifs initiaux (attention, il y en a de deux types : contact et groupe)

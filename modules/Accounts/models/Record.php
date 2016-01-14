@@ -284,31 +284,38 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			return $this->createRecuFiscalRelation($year, $documentRecordModel);
 		}
 		$row = $adb->fetchByAssoc($result, 0, false);
-		$dateApplication = preg_replace('/^(\d+)\-(\d+)\-(\d+)(\s.*)?$/', '$3/$2/$1', $row['dateapplication']);
+		$dateApplication = $row['dateapplication'];
 		$data = $row['data'];
 		
-		//Montant : 
-		$matches = array();
-		if(! preg_match_all('/Montant\s*:\s*(?<montant>\d+([,\.]\d+)?)(\D|$)/i', $data, $matches)){
-			die('Erreur regex Montant');
+		$infos = $this->extractInfosRecuFiscal($dateApplication, $data);
+		
+		return $this->createRecuFiscalRelation($year, $documentRecordModel, $infos);
+	}
+	
+	function extractInfosRecuFiscal($dateApplication, $data){
+		$dateApplication = preg_replace('/^(\d+)\-(\d+)\-(\d+)(\s.*)?$/', '$3/$2/$1', $dateApplication);
+		
+		if($data){
+			//Montant : 
+			$matches = array();
+			if(! preg_match_all('/Montant\s*:\s*(?<montant>\d+([,\.]\d+)?)(\D|$)/i', $data, $matches)){
+				die('Erreur regex Montant dans ' . print_r($data, true));
+			}
+			$montant = $matches['montant'][0];
+			
+			//Reçu n° : n'existe pas sur les anciens
+			//je n'ai pas réussi à ne faire qu'un seul regex pour <montant> et <num>
+			$matches = array();
+			if(preg_match_all('/'.preg_quote('Reçu n° : ').'(?<num>\d+)/', $data, $matches))
+				$numRecu = $matches['num'][0];
+			else
+				$numRecu = '';
 		}
-		$montant = $matches['montant'][0];
-		
-		//Reçu n° : n'existe pas sur les anciens
-		//je n'ai pas réussi à ne faire qu'un seul regex pour <montant> et <num>
-		$matches = array();
-		if(preg_match_all('/'.preg_quote('Reçu n° : ').'(?<num>\d+)/', $data, $matches))
-			$numRecu = $matches['num'][0];
-		else
-			$numRecu = '';
-		
-		$infos = array(
+		return array(
 			'montant' => $montant,
 			'recu_fiscal_num' => $numRecu,
 			'date_edition' => $dateApplication,
 		);
-		
-		return $this->createRecuFiscalRelation($year, $documentRecordModel, $infos);
 	}
 	
 	/**
@@ -427,5 +434,48 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			default:
 				return parent::getPicklistValuesDetails($fieldname);
 		}
+	}
+	
+	
+	//Reçus existants
+	public function getRelatedRecusFiscaux($contact = false, &$recordModels = false){
+		if(!$contact){
+			$contact = $this->getRelatedMainContact();
+			$contactId = $contact->getId();
+		}
+		elseif(is_object($contact))
+			$contactId = $contact->getId();
+		else
+			$contactId = $contact;
+		global $adb;
+		$query = 'SELECT vtiger_notes.notesid, title, vtiger_senotesrel.dateapplication, vtiger_senotesrel.data AS recusfiscal_data
+			FROM vtiger_notes
+			JOIN vtiger_crmentity
+				ON vtiger_crmentity.crmid = vtiger_notes.notesid
+			JOIN vtiger_attachmentsfolder
+				ON vtiger_attachmentsfolder.folderid = vtiger_notes.folderid
+			JOIN vtiger_senotesrel
+				ON vtiger_crmentity.crmid = vtiger_senotesrel.notesid
+			WHERE vtiger_crmentity.deleted = 0
+			AND vtiger_senotesrel.crmid = ?
+			AND vtiger_attachmentsfolder.foldername = ?
+			AND title LIKE "R%20%"
+			ORDER BY title DESC
+		';
+		$params = array($contactId, 'Reçus fiscaux');
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			$adb->echoError('getRelatedRecusFiscaux');
+			exit();
+		}
+		if(!$recordModels)
+			$recordModels = array();
+		while($row = $adb->getNextRow($result)){
+			if(!$recordModels[$row['notesid']])
+				$recordModels[$row['notesid']] = Vtiger_Record_Model::getInstanceById($row['notesid'], 'Documents');
+			//var_dump($recordModels[$row['notesid']]->getName(), $this->extractInfosRecuFiscal($row['dateapplication'], $row['recusfiscal_data']), $row['dateapplication'], $row['recusfiscal_data']);
+			$recordModels[$row['notesid']]->set('recufiscal_infos', $this->extractInfosRecuFiscal($row['dateapplication'], $row['recusfiscal_data']));
+		}
+		return $recordModels;
 	}
 }
