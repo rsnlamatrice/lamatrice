@@ -74,11 +74,12 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 				, SUM( "quantite" ) AS "quantite"
 				, SUM( "ht2" ) AS "total_ligne_ht"
 				, AVG( "glbdco00002"."prix" ) AS "prix_unit_ht"
+				, "glbdco00002"."remise"
 				FROM "glbdco00002"
 				INNER JOIN "gprodu00002" ON "glbdco00002"."id_gprodu" = "gprodu00002"."id"
 			 LEFT JOIN "gtvacg00002" AS "codetauxtva"
 				ON "gprodu00002"."codetva" = "codetauxtva"."code"
-				GROUP BY "glbdco00002"."id_piece", "glbdco00002"."id_gprodu", "gprodu00002"."nom", "gprodu00002"."code", "codetauxtva"."taux"
+				GROUP BY "glbdco00002"."id_piece", "glbdco00002"."id_gprodu", "gprodu00002"."nom", "gprodu00002"."code", "codetauxtva"."taux", "glbdco00002"."remise"
 			) AS "ligne_bdc" 
 				ON "ligne_bdc"."id_piece" = "bdc"."id"
 			 INNER JOIN (
@@ -90,6 +91,9 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 				ON affaire.id=bdc.id_gaffai
 		';
 		if(FALSE)
+			$query .= ' WHERE bdc.annee = 2015
+			';
+		elseif(FALSE)
 			$query .= ' WHERE bdc.numero = 12923
 				AND bdc.annee = 2012
 			';
@@ -179,6 +183,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			'quantity',
 			'prix_unit_ht',
 			'taxrate',
+			'remise',
 			
 			
 			/* post pré-import */
@@ -246,33 +251,35 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 	function importSalesOrderLine($salesorder, $salesorderLine, $sequence, &$totalAmountHT, &$totalTax){
         
 		$qty = str_to_float($salesorderLine['quantity']);
-		$listprice = str_to_float($salesorderLine['prix_unit_ht']);
+		$prixUnitRemise = str_to_float($salesorderLine['prix_unit_ht']);
 		
 		//N'importe pas les lignes de frais de port à 0
-		if($listprice == 0
+		if($prixUnitRemise == 0
 		&& $salesorderLine['productcode'] == 'ZFPORT')
 			return;
 		
 		$discount_amount = 0;
+		$discount_percent = $salesorderLine['remise'];
+		$prixUnit = $prixUnitRemise / (1 - $discount_percent/100);
 		$tax = self::getTax($salesorderLine['taxrate']);
 		if($tax){
 			$taxName = $tax['taxname'];
 			$taxValue = $tax['percentage'];
-			$totalTax += $qty * $listprice * ($taxValue/100);
+			$totalTax += $qty * $prixUnitRemise * ($taxValue/100);
 			//var_dump('$totalTax', $totalTax, "$qty * $listprice * ($taxValue/100)");
 		}
 		else {
 			$taxName = 'tax1';
 			$taxValue = null;
 		}
-		$totalAmountHT += $qty * $listprice;
+		$totalAmountHT += $qty * $prixUnitRemise;
 		//var_dump('$totalAmountHT', $totalAmountHT, "$qty * $listprice", $salesorderLine['taxrate']);
 		
 		$incrementOnDel = $salesorderLine['isproduct'] ? 1 : 0;
 		
 		$db = PearDatabase::getInstance();
-		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel, $taxName) VALUES(?,?,?,?,?,?,?,?)";
-		$qparams = array($salesorder->getId(), $salesorderLine['productid'], $sequence, $qty, $listprice, $discount_amount, $incrementOnDel, $taxValue);
+		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_percent, discount_amount, incrementondel, $taxName) VALUES(?,?,?,?,?,?,?,?,?)";
+		$qparams = array($salesorder->getId(), $salesorderLine['productid'], $sequence, $qty, $prixUnit, $discount_percent, $discount_amount, $incrementOnDel, $taxValue);
 		//$db->setDebug(true);
 		$result = $db->pquery($query, $qparams);
 		if(!$result){
@@ -397,7 +404,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 						, modifiedtime = ?
 						WHERE salesorderid = ?
 					";
-					$total = $totalAmount + $totalTax;
+					$total = round($totalAmount + $totalTax, 2);
 					$result = $db->pquery($query, array($sourceId
 									    , $total
 									    , $total
@@ -728,6 +735,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 			'unit_price'	=> str_to_float($product[$this->columnName_indexes['prixvente_produit']]),//TTC, TODO HT
 			'qty_per_unit'	=> 1,
 			'taxrate'	=> str_to_float($product[$this->columnName_indexes['tva_produit']]),
+			'remise'	=> str_to_float($product[$this->columnName_indexes['remise']]),
 			'rsnsectionanal' => $product[$this->columnName_indexes['section_produit']],
 			'qtyinstock' => $product[$this->columnName_indexes['stock_produit']],
 			'glacct' => $product[$this->columnName_indexes['glacct']],
@@ -790,6 +798,7 @@ class RSNImportSources_ImportDepotsVenteFromCogilog_View extends RSNImportSource
 				'prix_unit_ht'	=> str_to_float($product[$this->columnName_indexes['total_ligne_ht']]) / $qty /* / (1 + $taxrate) */,
 				'isproduct'	=> $isProduct,
 				'taxrate'	=> str_to_float($product[$this->columnName_indexes['tva_produit']]),
+				'remise'	=> str_to_float($product[$this->columnName_indexes['remise']]),
             
 			)));
 		}
