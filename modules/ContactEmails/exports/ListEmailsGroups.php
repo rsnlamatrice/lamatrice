@@ -5,7 +5,7 @@
 
 class ContactEmails_ListEmailsGroups_Export extends Export_ExportData_Action {
 
-	//tmp mailing address ?? ...
+	//tmp mailing zip ?? ...
 	function getExportStructure() {
 		return array(
 			"email_groupes" => "email",
@@ -25,9 +25,9 @@ class ContactEmails_ListEmailsGroups_Export extends Export_ExportData_Action {
 	}
 
 	//tmp order by zip ??
-	function getQueryOrderBy($moduleName) {
-		return ' ORDER BY mailingzip ASC';
-	}
+	// function getQueryOrderBy($moduleName) {
+	// 	return ' ORDER BY mailingzip ASC';
+	// }
 
 	function getExportQuery($request) {//tmp ...
 		$parentQuery = parent::getExportQuery($request);
