@@ -17,6 +17,9 @@ class Settings_Profiles_Save_Action extends Vtiger_Action_Controller {
 		}
 	}
 
+	/* ED160114 : attention to php var in php.ini : max_input_vars = default is 1000, not enough */
+
+	
 	public function process(Vtiger_Request $request) {
 		$recordId = $request->get('record');
 
