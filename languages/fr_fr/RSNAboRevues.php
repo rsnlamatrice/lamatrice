@@ -22,6 +22,7 @@ $languageStrings = array(
 	'LBL_PARRAINE_PAR' => 'Parrainé(e) par',
 	
 	'isabonnable' => 'Ce type est abonnable',
+	'isfree' => 'Abonnement en cadeau',
 );
 
 ?>

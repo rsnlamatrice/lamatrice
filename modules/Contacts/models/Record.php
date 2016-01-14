@@ -780,4 +780,10 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		$this->set('mailingRNVPLabel', $label);
 		return $label;
 	}
+	public function getRelatedRecusFiscaux($contact = false, &$recordModels = false){
+		$account = $this->getAccountRecordModel(false);
+		if(!$account)
+			return $recordModels;
+		return $account->getRelatedRecusFiscaux($this, $recordModels);
+	}
 }

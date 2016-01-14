@@ -31,9 +31,16 @@
 			<div class="modal-body">
 				{foreach key=RELATED_KEY item=RELATED_RECORD from=$RELATED_ENTRIES name=relatedList}
 					<div class="row-fluid">
-						<label class="span6">
-							<input type="radio" name="related_ids[]" value="{$RELATED_RECORD->getId()}" {if $smarty.foreach.relatedList.index === 1}checked="checked"{/if}/>
+						<label class="span10">
+							&nbsp;<input type="radio" name="related_ids[]" value="{$RELATED_RECORD->getId()}" {if $smarty.foreach.relatedList.index === 1}checked="checked"{/if}/>
 								{$RELATED_RECORD->getName()}
+							{if $RELATED_RECORD->get('recufiscal_infos')}
+								{assign var=INFOS value=$RELATED_RECORD->get('recufiscal_infos')}
+								<i>&nbsp;(&eacute;dit&eacute; le {$INFOS['date_edition']}
+								{if $INFOS['montant']}, {$INFOS['montant']} &euro;{/if}
+								{if $INFOS['recu_fiscal_num']}, n¡ {$INFOS['recu_fiscal_num']}{/if}
+								)</i>
+							{/if}
 						</label>
 					</div>
 				{/foreach}

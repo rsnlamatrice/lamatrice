@@ -1791,7 +1791,7 @@ class Contacts extends CRMEntity {
 						$id_field = $entity_tbl_field_arr[$rel_table];
 					}
 					// IN clause to avoid duplicate entries
-					$sel_result =  $adb->pquery("select $id_field from $rel_table where $entity_id_field=? " .
+					$sel_result =  $adb->pquery("select DISTINCT $id_field from $rel_table where $entity_id_field=? " .
 							" and $id_field not in (select $id_field from $rel_table where $entity_id_field=?)",
 							array($transferId,$entityId));
 					$res_cnt = $adb->num_rows($sel_result);
@@ -1805,14 +1805,17 @@ class Contacts extends CRMEntity {
 						else {
 							for($i=0;$i<$res_cnt;$i++) {
 								$id_field_value = $adb->query_result($sel_result,$i,$id_field);
-								$adb->pquery("update $rel_table set $entity_id_field=? where $entity_id_field=? and $id_field=?",
-									array($entityId,$transferId,$id_field_value));
+								if($id_field_value == $entityId){
+									//ED160114 : éviter les relations de moi à moi
+									$adb->pquery("DELETE FROM $rel_table WHERE $entity_id_field=? and $id_field=?",
+										array($transferId,$id_field_value));
+								}
+								else
+									$adb->pquery("update $rel_table set $entity_id_field=? where $entity_id_field=? and $id_field=?",
+										array($entityId,$transferId,$id_field_value));
 							}
 						}
 					}
-				}
-				if($rel_module === 'Contacts'){
-					//TODO Purge des contacts qui seraient devenus liés à eux même
 				}
 			}
 			//Potentials
