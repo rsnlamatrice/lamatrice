@@ -135,7 +135,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 	}
 	function getContactsFieldsMappingForPreview(){
 		$fields = $this->getContactsFieldsMapping();
-		unset($fields['date']);
+		//unset($fields['date']);
 		unset($fields['listesn']);
 		unset($fields['listesd']);
 		unset($fields['ip']);
