@@ -31,25 +31,30 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$viewer->assign('MODE', '');
 			$viewer->assign('IS_DUPLICATE_FROM', $record);
 			
-			//ED151026
-			if($request->get('typedossier') === 'Avoir'
-			|| $request->get('typedossier') === 'Remboursement'){
-				//Inverse les quantités et montants
-				$this->reverseAmountFields($relatedProducts, $recordModel);
-				if($relatedProducts[1]){
-					foreach(array('received', 'receivedcomments', 'receivedmoderegl') as $fieldName)
-						$relatedProducts[1]['final_details'][$fieldName] = null;
-				}
-					
-			}
 			if($moduleName === 'Invoice'){
+				//ED151026
+				if($request->get('typedossier') === 'Avoir'
+				|| $request->get('typedossier') === 'Remboursement'){
+					//Inverse les quantités et montants
+					$this->reverseAmountFields($relatedProducts, $recordModel);
+					if($relatedProducts[1]){
+						foreach(array('received', 'receivedcomments', 'receivedmoderegl') as $fieldName)
+							$relatedProducts[1]['final_details'][$fieldName] = null;
+					}
+				}
 				$recordModel->set('invoicestatus', 'Created');
 				$recordModel->set('received', 0);
 			} elseif($moduleName === 'PurchaseOrder') {
 				$recordModel->set('postatus', null);
 				$recordModel->set('paid', 0);
+			} elseif($moduleName === 'SalesOrder') {
+				$recordModel->set('sostatus', 'Created');
+				$recordModel->set('duedate', date('d-m-Y'));
+				//Inverse les quantités et montants
+				$this->reverseAmountFields($relatedProducts, $recordModel);
 			}
 			$recordModel->set('balance', $recordModel->get('hdnGrandTotal'));
+			
 		} elseif (!empty($record)) {
                
 			$recordModel = Inventory_Record_Model::getInstanceById($record, $moduleName);

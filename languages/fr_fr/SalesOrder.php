@@ -62,4 +62,7 @@ $languageStrings = array(
 	'socomment' => 'Commentaire',
 	'LBL_RECEIVED' => 'Reçu',
 	'LBL_SEND2COMPTA' => 'Générer les écritures comptables',
+        'LBL_DUPLICATE_AS_INVOICE' => 'Créer la facture de Dépôt-vente',
+        
+        'Due Date' => 'Date',
 );

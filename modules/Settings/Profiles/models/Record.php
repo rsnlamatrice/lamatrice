@@ -477,7 +477,7 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 							}
 						}
 					}
-					var_dump($moduleModel->getId(), $permissions);
+					//var_dump($moduleModel->getId(), $permissions);
 					$this->saveModulePermissions($moduleModel, $permissions);
 				}
 			}
@@ -490,8 +490,25 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
         return $profileId;
 	}
 
+/*	nettoyage de la table des profils (des fields ne sont pas relatifs aux bonnes tables)
+SELECT `profileid`, `vtiger_profile2field`.tabid, tab_of_profil.name as profil_module_name, vtiger_field.tabid as field_tabid, tab_of_field.name as field_module_name, vtiger_field.tablename, `vtiger_profile2field`.`fieldid`, vtiger_field.fieldname, vtiger_field.columnname
+ FROM `vtiger_profile2field`
+JOIN vtiger_field
+ON `vtiger_profile2field`.fieldid = vtiger_field.fieldid
+AND `vtiger_profile2field`.tabid <> vtiger_field.tabid
+JOIN vtiger_tab tab_of_profil
+ON `vtiger_profile2field`.tabid = tab_of_profil.tabid
+JOIN vtiger_tab tab_of_field
+ON `vtiger_field`.tabid = tab_of_field.tabid;
+
+DELETE vtiger_profile2field FROM vtiger_profile2field
+JOIN vtiger_field
+ON vtiger_profile2field.fieldid = vtiger_field.fieldid
+AND vtiger_profile2field.tabid != vtiger_field.tabid;
+*/
 	protected function saveModulePermissions($moduleModel, $permissions) {
 		$db = PearDatabase::getInstance();
+		//$db->setDebug(true);
 		$profileId = $this->getId();
 		$tabId = $moduleModel->getId();
 		$profileActionPermissions = $this->getProfileActionPermissions();
@@ -598,9 +615,14 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 					}
 				}
 			} elseif ($this->isRestrictedModule($moduleModel->getName())) {
+			
+				var_dump('!$actionPermissions + isRestrictedModule : ' .  $moduleModel->getName());
 				//To check the module is restricted or not(Emails, Webmails)
 				$actionEnabled = true;
 			}
+			else
+			
+				var_dump('!$actionPermissions : ' .  $moduleModel->getName());
 		} else {
 			$actionEnabled = true;
 		}

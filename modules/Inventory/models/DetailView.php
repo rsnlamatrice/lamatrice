@@ -96,7 +96,19 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 				);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($duplicateLinkModel);
 		}
-
+		elseif($moduleName === 'SalesOrder'
+		&& $recordModel->isDuplicatable()
+		&& ($recordModel->get('typedossier') === 'Solde'
+		 || $recordModel->get('typedossier') === 'Inventaire')) {
+			//ED151026
+			$duplicateLinkModel = array(
+						'linktype' => 'DETAILVIEWBASIC',
+						'linklabel' => 'LBL_DUPLICATE_AS_INVOICE',
+						'linkurl' => $recordModel->getDuplicateRecordUrl() . '&typedossier=Facture',
+						'linkicon' => ''
+				);
+			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($duplicateLinkModel);
+		}
 		if(Users_Privileges_Model::isPermitted($moduleName, 'DetailView', $recordModel->getId())) {
 			$detailViewLinks = array(
 					'linklabel' => vtranslate('LBL_EXPORT_TO_PDF', $moduleName),
