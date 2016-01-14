@@ -62,4 +62,8 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 	function getCSVSeparator(){
 		return ";";	
 	}
+
+	function cleanData($value) {
+		return htmlspecialchars($value);
+	}
 }

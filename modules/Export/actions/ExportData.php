@@ -139,6 +139,8 @@ class Export_ExportData_Action extends Vtiger_ExportData_Action {
 				$value = str_replace('&nbsp;','',$value);
 				array_push($new_arr,$value);
 			}
+
+			$value = $this->cleanData($value);
 		}
 
 		return $arr;
@@ -167,5 +169,9 @@ class Export_ExportData_Action extends Vtiger_ExportData_Action {
 	function getExportStructure() {
 		return array(
 		);
+	}
+
+	function cleanData($value) {
+		return $value;
 	}
 }
