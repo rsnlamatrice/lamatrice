@@ -13,7 +13,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 		return array(
 			"ReffFiche" =>"contact_no",
 			"Association" => "grpnomllong",
-			"AssociationCourt" => "mailingstreet2",//tmp nom court ??
+			"AssociationCourt" => "grpnomcourt",//tmp nom court ??
 			"Prenom" => "firstname",
 			"Nom" => "lastname",
 			"AdresseLigne2" => "mailingstreet2",
