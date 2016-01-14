@@ -11,7 +11,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 	//tmp mailing address ??...
 	function getExportStructure() {
 		return array(
-			"ReffFiche" =>"contact_no",
+			"ReffFiche" => function($row) { return (substr($row["contact_no"], 0, 1) == "C") ? substr($row["contact_no"], 1) : $row["contact_no"]; },
 			"Association" => "grpnomllong",
 			"AssociationCourt" => "grpnomcourt",//tmp nom court ??
 			"Prenom" => "firstname",
@@ -57,5 +57,9 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 	function getExportFileName($request) {
 		$moduleName = $request->get('source_module');
 		return "liste_groupes_pour_web";
+	}
+
+	function getCSVSeparator(){
+		return ";";	
 	}
 }

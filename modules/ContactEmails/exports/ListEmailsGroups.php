@@ -10,7 +10,7 @@ class ContactEmails_ListEmailsGroups_Export extends Export_ExportData_Action {
 		return array(
 			"email_groupes" => "email",
 			"code_postal" => "mailingzip",
-			"RefFiche" => "contact_no",
+			"RefFiche" => function($row) { return (substr($row["contact_no"], 0, 1) == "C") ? substr($row["contact_no"], 1) : $row["contact_no"]; },
 			"DateExport" => function($row) { return date ("Y-m-d"); },
 		);
 	}
@@ -28,6 +28,10 @@ class ContactEmails_ListEmailsGroups_Export extends Export_ExportData_Action {
 	// function getQueryOrderBy($moduleName) {
 	// 	return ' ORDER BY mailingzip ASC';
 	// }
+
+	function getCSVSeparator(){
+		return ";";	
+	}
 
 	function getExportQuery($request) {//tmp ...
 		$parentQuery = parent::getExportQuery($request);
