@@ -177,7 +177,7 @@ class RSN_Module_Model extends Vtiger_Module_Model {
 	 * Liste des templates dans vlayout/modules/RSN/Outils/
 	 */
 	public function getOutilsList(){
-		if(true
+		if(false
 		&& (date('Y') == '2015' || (date('Y') == '2016' && date('n') == '1'))){
 			$list[] = array(
 				'sub' => 'ImportCogilog',

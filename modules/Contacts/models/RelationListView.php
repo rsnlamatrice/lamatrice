@@ -26,7 +26,7 @@ class Contacts_RelationListView_Model extends Vtiger_RelationListView_Model {
 				array(
 					'linktype' => 'LISTVIEWBASIC',
 					'linklabel' => 'Ajouter une commande',
-					'linkurl' => $this->getCreateViewUrl() . "&typedossier=Variation",
+					'linkurl' => $this->getCreateViewUrl() . "&typedossier=Commande",
 					'linkicon' => '',
 				),
 				array(

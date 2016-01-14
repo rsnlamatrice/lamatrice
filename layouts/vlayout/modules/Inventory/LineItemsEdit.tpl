@@ -114,9 +114,11 @@
             <tr id="row1" class="lineItemRow">
                 {include file="LineItemsContent.tpl"|@vtemplate_path:'Inventory' row_no=1 data=[]}
             </tr>
-            <tr id="row2" class="lineItemRow">
-                {include file="LineItemsContent.tpl"|@vtemplate_path:'Inventory' row_no=2 data=["entityType2"=>"Services"]}
-            </tr>
+	    {if $MODULE neq 'SalesOrder'}
+		<tr id="row2" class="lineItemRow">
+		    {include file="LineItemsContent.tpl"|@vtemplate_path:'Inventory' row_no=2 data=["entityType2"=>"Services"]}
+		</tr>
+	    {/if}
         {/if}
 
     </table>
