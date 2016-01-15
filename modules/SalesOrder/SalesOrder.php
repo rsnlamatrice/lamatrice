@@ -283,6 +283,7 @@ class SalesOrder extends CRMEntity {
 	// reset des lignes dans vtiger_inventoryproductrel
 	private function insertSaleOrderSoldeRows($soldeActifId, $soldeReferenceId, $variationIds){
 		global $adb;
+		$allTaxes = getAllTaxes();
 		//purge des produits du solde actif
 		$query = 'DELETE FROM vtiger_inventoryproductrel
 			WHERE id = ?';
@@ -301,20 +302,16 @@ class SalesOrder extends CRMEntity {
 			, IFNULL(vtiger_products.unit_price, vtiger_service.unit_price) AS `listprice`
 			, MAX(`vtiger_inventoryproductrel`.`sequence_no`) AS `sequence_no`
 			, SUM(`vtiger_inventoryproductrel`.`quantity`) AS `quantity`
-			, MAX(`vtiger_inventoryproductrel`.`discount_percent`)
-			, SUM(`vtiger_inventoryproductrel`.`discount_amount`)
+			, MAX(`vtiger_inventoryproductrel`.`discount_percent`) AS discount_percent
+			, SUM(`vtiger_inventoryproductrel`.`discount_amount`) AS discount_amount
 			, GROUP_CONCAT(DISTINCT `vtiger_inventoryproductrel`.`comment` SEPARATOR " - ") AS `comment`
 			, GROUP_CONCAT(DISTINCT `vtiger_inventoryproductrel`.`description` SEPARATOR " - ") AS `description`
 			, MAX(`vtiger_inventoryproductrel`.`incrementondel`) AS `incrementondel`
-			
-			/* pas sur que le nombre de taxes ne soit pas dynamique, mais a vrai dire, on s en fiche pour les salesorder */
-			, MIN(`vtiger_inventoryproductrel`.`tax1`) AS `tax1`
-			, MIN(`vtiger_inventoryproductrel`.`tax2`) AS `tax2`
-			, MIN(`vtiger_inventoryproductrel`.`tax3`) AS `tax3`
-			, MIN(`vtiger_inventoryproductrel`.`tax4`) AS `tax4`
-			, MIN(`vtiger_inventoryproductrel`.`tax5`) AS `tax5`
-			, MIN(`vtiger_inventoryproductrel`.`tax6`) AS `tax6`
-			
+		';
+		foreach($allTaxes as $taxInfos){
+			$query .= ', MIN(`vtiger_inventoryproductrel`.`tax'.$taxInfos['taxid'].'`) AS `tax'.$taxInfos['taxid'].'`';
+		}
+		$query .= '
 			FROM `vtiger_inventoryproductrel`
 			JOIN vtiger_crmentity
 				ON vtiger_crmentity.crmid = `vtiger_inventoryproductrel`.id
@@ -342,7 +339,10 @@ class SalesOrder extends CRMEntity {
 			die();
 		}
 		//insertion de chaque produit
-		$fieldNames = array('productid', 'quantity', 'listprice', 'discount_percent', 'discount_amount', 'comment', 'description', 'incrementondel', 'tax1', 'tax2', 'tax3', 'tax4', 'tax5', 'tax6');
+		$fieldNames = array('productid', 'quantity', 'listprice', 'discount_percent', 'discount_amount', 'comment', 'description', 'incrementondel');
+		foreach($allTaxes as $taxInfos){
+			$fieldNames[] = 'tax'.$taxInfos['taxid'];
+		}
 
 		$query = 'INSERT INTO vtiger_inventoryproductrel
 			(`id`, sequence_no, '.implode(',', $fieldNames) . ')
@@ -364,6 +364,7 @@ class SalesOrder extends CRMEntity {
 		}
 		if($params){
 			$result = $adb->pquery($query, $params);
+			
 			if(!$result){
 				echo "<pre>$query</pre>";
 				var_dump($params);
