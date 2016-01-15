@@ -377,9 +377,14 @@ class SalesOrder extends CRMEntity {
 	/* Recalcul du solde global */
 	private function setSaleOrderTotal($salesorderId){
 		global $adb;
+		$allTaxes = getAllTaxes();
+		$taxesQuery = '';
+		foreach($allTaxes as $taxInfos){
+			$taxesQuery .= ' * (1 + IFNULL(tax'.$taxInfos['taxid'].', 0)/100)';
+		}
 		$query = 'UPDATE vtiger_salesorder
 			SET total = ROUND((
-				SELECT SUM(quantity * (listprice * ( 1 - IFNULL(discount_percent, 0)/100) - IFNULL(discount_amount, 0))) AS total
+				SELECT SUM(quantity * (listprice * ( 1 - IFNULL(discount_percent, 0)/100) '.$taxesQuery.' - IFNULL(discount_amount, 0))) AS total
 				FROM vtiger_inventoryproductrel
 				WHERE vtiger_inventoryproductrel.id = ?)
 				 * ( 1 - IFNULL(discount_percent, 0)/100) - IFNULL(discount_amount, 0)
