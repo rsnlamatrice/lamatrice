@@ -599,7 +599,7 @@ if (typeof(RSNImportContactsJs) == 'undefined') {
 		toggleSelectedCellValue: function(e){
 			var thisInstance = this
 			, $td = this.getCell(e);
-			if ($td.is('.selected-value')) 
+			if ($td.is('.selected-value, .not-checkable')) 
 				thisInstance.unselectCellValue(e);
 			else{
 				thisInstance.selectCellValue(e);

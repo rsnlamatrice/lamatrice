@@ -6,6 +6,7 @@ $IMPORT_RECORD_SKIPPED = 2;
 $IMPORT_RECORD_UPDATED = 3;
 $IMPORT_RECORD_MERGED = 4;
 $IMPORT_RECORD_FAILED = 5;*}
+{assign var=SKIP_ROW_FIELDS value=array('id', 'status', 'isgroup', 'date')}
 <div class="marginLeftZero" style="overflow: scroll;width:95%;">
 	{if sizeof($PREVIEW_DATA) gt 0}
 		<param id="rsnnpai-picklistvalues" value="{htmlspecialchars (json_encode($RSNNPAI_VALUES))}"/>
@@ -61,7 +62,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 										</th>
 										{*foreach from=$MODULE_DATA[0] key=FIELD_NAME item=VALUE*}
 										{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
-											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status' || $FIELD_NAME === 'isgroup'}
+											{if $FIELD_NAME[0] === '_' || in_array($FIELD_NAME, $SKIP_ROW_FIELDS)}
 												{continue}
 											{/if}
 											<th>{$FIELD_NAME|@vtranslate:$MODULE_NAME}</th>
@@ -95,7 +96,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 										</th>
 										{*foreach key=FIELD_NAME item=VALUE from=$ROW*}
 										{foreach key=FIELD_NAME item=CONTACT_FIELD from=$CONTACTS_FIELDS_MAPPING}
-											{if $FIELD_NAME[0] === '_' || $FIELD_NAME === 'id' || $FIELD_NAME === 'status' || $FIELD_NAME === 'isgroup'}
+											{if $FIELD_NAME[0] === '_' ||  in_array($FIELD_NAME, $SKIP_ROW_FIELDS)}
 												{continue}
 											{/if}
 											<td data-fieldname="{$FIELD_NAME}"
@@ -104,7 +105,7 @@ $IMPORT_RECORD_FAILED = 5;*}
 													|| $FIELD_NAME eq 'listesd'
 													|| $FIELD_NAME eq 'ip'
 													|| $FIELD_NAME eq 'date'}
-													class="no-swap-value not-trashable"
+													class="no-swap-value not-trashable not-checkable"
 												{elseif $FIELD_NAME eq 'email'
 													|| $FIELD_NAME eq 'mailingcountry'}
 													class="no-swap-value"
@@ -117,11 +118,14 @@ $IMPORT_RECORD_FAILED = 5;*}
 												{/if}
 											>
 											{if $FIELD_NAME eq 'rsnnpai' && ($ROW[$FIELD_NAME] || $ROW[$FIELD_NAME] === '0')}
+												{* pas sûr que ça serve, et en plus ça ne serait plus clickable avec la classe not-checkable définie ci-dessus *}
 												<span class="value">
 													<input type="hidden" value="{$ROW[$FIELD_NAME]}"/>
 													<span class="{$RSNNPAI_VALUES[$ROW[$FIELD_NAME]]['icon']}"></span>
 													{$RSNNPAI_VALUES[$ROW[$FIELD_NAME]]['label']}
 												</span>
+											{elseif $FIELD_NAME eq 'rsnnpai' && $ROW['date']}
+												{DateTimeField::convertToUserFormat($ROW['date'])}
 											{else}
 												<span class="value">{$ROW[$FIELD_NAME]}</span>
 											{/if}
@@ -158,23 +162,36 @@ $IMPORT_RECORD_FAILED = 5;*}
 													{/if}
 													{if $CONTACT_FIELD && array_key_exists($CONTACT_FIELD, $CONTACT_ROW)}
 														<td data-fieldname="{$FIELD_NAME}"
-														{if $FIELD_NAME eq 'mailingstreet2'
-														|| $FIELD_NAME eq 'rsnnpai'
-														|| $FIELD_NAME eq 'mailingpobox'
-														|| straddressfieldcmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
-															class="values-eq"
-														{else}
-															class="values-neq"
-														{/if}>
+														class="
+															{if $FIELD_NAME eq 'mailingstreet2'
+															|| $FIELD_NAME eq 'rsnnpai'
+															|| $FIELD_NAME eq 'mailingpobox'
+															|| straddressfieldcmp($ROW[$FIELD_NAME], $CONTACT_ROW[$CONTACT_FIELD]) === 0}
+																values-eq
+															{else}
+																values-neq
+															{/if}
+															{if $FIELD_NAME eq 'rsnnpai'}
+																{' '}not-checkable
+															{/if}
+														">
 															<span class="value">
 															{if $FIELD_NAME eq 'rsnnpai'}
 																<input type="hidden" value="{$CONTACT_ROW[$CONTACT_FIELD]}"/>
-																<span class="{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['icon']}"/></span>{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['label']}
+																<span class="{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['icon']}"/></span>
+																{$RSNNPAI_VALUES[$CONTACT_ROW[$CONTACT_FIELD]]['label']}
+																{if $CONTACT_ROW['rsnnpaidate']} <span class="pull-right">{DateTimeField::convertToUserFormat($CONTACT_ROW['rsnnpaidate'])}</span>{/if}
 																{if $CONTACTS_MODULE_MODEL->getRNVPLabel($CONTACT_ROW)}
 																	<div>
 																		RNVP : {$CONTACTS_MODULE_MODEL->getRNVPLabel($CONTACT_ROW)}
 																	</div>
 																{/if}
+																{if $CONTACT_ROW['mailingmodifiedtime']}
+																	<div class="addressmodifiedtime {if $ROW['date'] && $ROW['date'] < $CONTACT_ROW['mailingmodifiedtime']} values-neq{/if}">
+																		Adr : {DateTimeField::convertToUserFormat($CONTACT_ROW['mailingmodifiedtime'])}
+																	</div>
+																{/if}
+																
 															{elseif $FIELD_NAME eq 'email' && !$CONTACT_ROW[$CONTACT_FIELD] && $ROW[$FIELD_NAME]}
 																(pas d'email)
 															{else}

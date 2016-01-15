@@ -189,3 +189,11 @@ a.address-sna-check:active, a.address-pagesblanches:active {
   font-size: 10px;
   display: inline-block;
 }
+
+tr.contact-row td[data-fieldname="rsnnpai"] {
+  min-width: 8em;
+  padding-right: 6px;
+}
+tr.contact-row td .addressmodifiedtime {
+  text-align: right;
+}

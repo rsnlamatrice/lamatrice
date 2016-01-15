@@ -148,7 +148,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		unset($fields['leadsource']);
 		unset($fields['phone']);
 		unset($fields['mobile']);
-		unset($fields['date']);
+		//unset($fields['date']);
 		$fields = array_move_assoc('mailingstreet2', 'lastname', $fields);
 		$fields = array_move_assoc('mailingstreet3', 'mailingstreet2', $fields);
 		$fields = array_move_assoc('mailingpobox', 'mailingstreet', $fields);

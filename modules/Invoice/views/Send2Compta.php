@@ -230,7 +230,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$query = 'SELECT vtiger_invoice.*
 			, vtiger_invoicecf.receivedmoderegl
 			, vtiger_invoicecf.receivedreference
-			, IF(vtiger_campaignscf.codeaffaire IS NULL OR vtiger_campaignscf.codeaffaire = "", vtiger_notescf.codeaffaire, vtiger_campaignscf.codeaffaire) AS codeaffaire
+			, vtiger_campaignscf.codeaffaire codeaffaire_campaign
+			, vtiger_notescf.codeaffaire AS codeaffaire_coupon
 			, IFNULL(vtiger_products.productname, vtiger_service.servicename) AS productname
 			, IFNULL(vtiger_products.productcode, vtiger_service.productcode) AS productcode
 			, IFNULL(vtiger_products.glacct, vtiger_servicecf.glacct) AS productglacct
@@ -420,7 +421,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$invoiceTotal = 0;
 					
 					//ligne de facture de l'encaissement
-					$codeAffaire = $invoice['codeaffaire'];
+					$codeAffaire = self::getInvoiceCodeAffaire($invoice['codeaffaire_campaign'], $invoice['codeaffaire_coupon']);
 					$piece = $invoice['invoice_no'];
 					$invoiceModeRegl = $invoice['receivedmoderegl'];
 					$invoiceCompteVente = self::getInvoiceCompteVenteSolde($invoice);
@@ -491,7 +492,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				
 				$compteVente = $invoice['productglacct'];
 				if($compteVente[0] === '7' || $compteVente[0] === '6')
-					$codeAnal = $invoiceCodeAnal ? $invoiceCodeAnal : $invoice['productsectionanal'];
+					$codeAnal = self::getCodeAffaireCodeAnal( $invoiceCodeAnal, $invoice['productsectionanal']);
 				else	$codeAnal = '';
 				//$productName = $invoice['productname'];
 				$productCode = $invoice['productcode'];
@@ -617,7 +618,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$accountType = $invoiceData['account_type'];
 		switch($accountType){
 		case 'Depot-vente' :
-		//case 'Dépôt-vente' :
+			//L'encaissement des adhésions
+			if($invoiceData['codeaffaire_coupon'] === 'ADH')
+				return '411000';
 			return '411DEP';
 		
 		default :
@@ -688,11 +691,22 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	//	}
 	//}
 	
-	private static function getCodeAffaireCodeAnal($codeAffaire){
-		switch(strtoupper($codeAffaire)){
-		default :
-			return strtoupper($codeAffaire);
+	private static function getCodeAffaireCodeAnal($codeAffaire, $codeAffaire2 = false){
+		if(!$codeAffaire)
+			return $codeAffaire2;
+		if($codeAffaire2
+		&& (substr($codeAffaire, 0, 3) === 'BOU'
+		 || substr($codeAffaire, 0, 6) === 'PAYBOX'
+		 || substr($codeAffaire, 0, 6) === 'PAYPAL'
+		 || substr($codeAffaire, 0, 3) === '***')
+		){
+			return $codeAffaire2;
 		}
+		return $codeAffaire;
+	}
+	
+	private static function getInvoiceCodeAffaire($codeaffaire_campaign, $codeaffaire_coupon){
+		return self::getCodeAffaireCodeAnal($codeaffaire_campaign, $codeaffaire_coupon);
 	}
 	
 	private static function getCodeAffaireJournal($codeAffaire, $modeRegl = false){
