@@ -60,17 +60,22 @@
 						{assign var=FIELD_MODEL value=$SUMMARY_RECORD_STRUCTURE['SUMMARY_FIELDS'][$FIELD_NAME]}
 						{if !$FIELD_MODEL}{$FIELD_NAME} n'existe pas !{/if}
 						<span class="pull-right" style="padding-right:4px;">
-							{if $RECORD->get('rsnnpai') neq '0'}
+							{if $RECORD->get('rsnnpai') neq '0' && !$RECORD->get('rsnnpaidate')}
 								<span style="margin-left:19px;">NPAI</span>
 							{/if}
 							{include file=$FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName()|@vtemplate_path FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$MODULE_NAME RECORD=$RECORD}
 						</span>
 						{assign var=FIELD_MODEL value=$FIELD_MODEL_TMP}
 						{assign var=FIELD_NAME value=$FIELD_NAME_TMP}	
+						{if $RECORD->get('rsnnpaidate')}
+							<div style="padding-left: 6px; white-space: nowrap;">
+								NPAI au {DateTimeField::convertToUserFormat($RECORD->get('rsnnpaidate'))}
+							</div>
+						{/if}
 					{/if}
 					{* RNVP *}
 					{if $RECORD->initRNVPLabel()}
-						<div style="padding-left:4px;">
+						<div style="padding-left: 6px;">
 							RNVP : {$RECORD->get('mailingRNVPLabel')}
 						</div>
 					{/if}
@@ -150,6 +155,12 @@
 								
 								{if $RECORD->get('mailingcountry')}
 									&nbsp;-&nbsp;{$RECORD->getDisplayValue('mailingcountry')}
+								{/if}
+								{if $RECORD->get('mailingmodifiedtime') != $RECORD->get('modifiedtime')
+								&& $RECORD->get('mailingmodifiedtime') != $RECORD->get('rsnnpaidate')}
+									<div>
+										Adr. au {DateTimeField::convertToUserFormat($RECORD->get('mailingmodifiedtime'))}
+									</div>
 								{/if}
 							{* concaténation de nom du compte + reference *}
 							{elseif $FIELD_NAME eq 'account_id'}
