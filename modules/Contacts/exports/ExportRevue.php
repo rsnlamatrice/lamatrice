@@ -86,7 +86,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function isAbo($row) {
 		$today = time() - 31 * 24 * 60 * 60;//aujourd'hui - 1 mois
 		$finabo = strtotime($row["finabo"]);
-		echo "today $today -> finabo : $finabo<br/>";
+		//echo "today $today -> finabo : $finabo<br/>";
 		return $finabo >= $today;//$finabo >= $today;
 	}
 
