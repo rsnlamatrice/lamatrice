@@ -73,7 +73,19 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage1($row) {
-		return "";//"Merci de vous réabonner (bulletin en p.9)";//tmp
+		if (strpos($row["rsnabotype"], "découverte") || strpos($row["rsnabotype"], "remerciement")) {
+			return "Numéro offert. Merci !";
+		} else if (!strpos($row["rsnabotype"], "Ne pas abonner" &&  !$row["rsnabotype"], "Non abonné") && !$this->isAbo()) {
+			return "Merci de vous réabonner."
+		}
+
+		return "";
+	}
+
+	function isAbo($row) {
+		$today = time() - 31 * 24 * 60 * 60;//aujourd'hui - 1 mois
+		$finabo = strtotime($row["finabo"]);
+		return $finabo >= $today;//$finabo >= $today;
 	}
 
 	function getMessage2($row) {
@@ -91,10 +103,8 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function getNbExemplaires($row) {
 		//tmp Attention -> checker si le dernier abonnement est encore en cours ou si la derniere revue à été recu, sinon mettre 1 (exemple ancien abonné avec une revue de remerciement (ex: C286786)...)...
 		//tmp Attention, ne pas se fier au champs "is_abo" (pas necessairement à jour...)
-		$today = time() - 31 * 24 * 60 * 60;//aujourd'hui - 1 mois
-		$finabo = strtotime($row["finabo"]);
-		$isAbo = true;//$finabo >= $today;
-		return ($row["nbexemplaires"] && $isAbo) ? $row["nbexemplaires"] : 1;
+		
+		return ($row["nbexemplaires"] /*&& $this->isAbo()*/) ? $row["nbexemplaires"] : 1;
 	}
 
 	function getExportQuery($request) {//tmp ...
@@ -102,7 +112,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 
 		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
 		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
-		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnaborevues.nbexemplaires, vtiger_rsnaborevues.debutabo, vtiger_rsnaborevues.finabo " .
+		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnaborevues.nbexemplaires, vtiger_rsnaborevues.debutabo, vtiger_rsnaborevues.finabo, vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN (SELECT accountid, MAX(debutabo) as debutabo
 														    FROM vtiger_rsnaborevues
 														    JOIN vtiger_crmentity vtiger_rsnaborevues_crmentity ON vtiger_rsnaborevues_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
