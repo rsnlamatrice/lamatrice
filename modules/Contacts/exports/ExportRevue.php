@@ -76,7 +76,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function getMessage1($row) {
 		if (strpos($row["rsnabotype"], "découverte") || strpos($row["rsnabotype"], "remerciement")) {
 			return "Numéro offert. Merci !";
-		} else if (!strpos($row["rsnabotype"], "Ne pas abonner" &&  !$row["rsnabotype"], "Non abonné") && !$this->isAbo()) {
+		} else if (!strpos($row["rsnabotype"], "Ne pas abonner") &&  !strpos($row["rsnabotype"], "Non abonné") && !$this->isAbo()) {
 			return "Merci de vous réabonner.";
 		}
 
