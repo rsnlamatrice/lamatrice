@@ -74,9 +74,9 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage1($row) {
-		if (strpos($row["rsnabotype"], "découverte") || strpos($row["rsnabotype"], "remerciement")) {
+		if (strpos($row["rsnabotype"], "couverte") || strpos($row["rsnabotype"], "remerciement")) {
 			return "Numéro offert. Merci !";
-		} else if (!strpos($row["rsnabotype"], "Ne pas abonner") &&  !strpos($row["rsnabotype"], "Non abonné") && !$this->isAbo()) {
+		} else if (!strpos($row["rsnabotype"], "Ne pas abonner") &&  !strpos($row["rsnabotype"], "Non abonné") && !$this->isAbo($row)) {
 			return "Merci de vous réabonner.";
 		}
 
@@ -86,6 +86,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function isAbo($row) {
 		$today = time() - 31 * 24 * 60 * 60;//aujourd'hui - 1 mois
 		$finabo = strtotime($row["finabo"]);
+		echo "today $today -> finabo : $finabo<br/>";
 		return $finabo >= $today;//$finabo >= $today;
 	}
 
