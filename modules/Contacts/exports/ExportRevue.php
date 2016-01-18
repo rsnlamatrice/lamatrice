@@ -25,6 +25,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 			"info lib 3" => function ($row) { return Contacts_ExportRevue_Export::getMessage3($row); },
 			"info lib 4" => function ($row) { return Contacts_ExportRevue_Export::getMessage4($row); },
 			"fin abo" => "finabo",
+			"abo type" => "rsnabotype",
 		);
 	}
 	
@@ -76,7 +77,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 		if (strpos($row["rsnabotype"], "découverte") || strpos($row["rsnabotype"], "remerciement")) {
 			return "Numéro offert. Merci !";
 		} else if (!strpos($row["rsnabotype"], "Ne pas abonner" &&  !$row["rsnabotype"], "Non abonné") && !$this->isAbo()) {
-			return "Merci de vous réabonner."
+			return "Merci de vous réabonner.";
 		}
 
 		return "";
