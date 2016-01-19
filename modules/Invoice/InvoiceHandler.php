@@ -290,7 +290,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 				//TODO vérifier si c'est un n° ou 1 an
 				$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
 				$dateDebut = $startDateOfNextAbo ? $startDateOfNextAbo : $invoiceDate;
-				$dateFin = self::getDateFinAbo($toDay, 3);
+				$dateFin = self::getDateFinAbo($toDay, 12);
 				//L'abonnement actuel finit dans plus de 3 mois
 				if($dateDebut > $dateFin){
 					$dateFin = false;
