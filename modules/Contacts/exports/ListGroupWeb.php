@@ -63,7 +63,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 		return ";";	
 	}
 
-	function cleanData($value) {
-		return htmlspecialchars($value);
-	}
+	// function cleanData($value) {
+	// 	return htmlspecialchars($value);
+	// }
 }
