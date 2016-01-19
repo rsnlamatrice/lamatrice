@@ -261,8 +261,10 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		$fileName = $this->getExportFileName($request);
 		$exportType = $this->getExportContentType($request);
 
-		//ED150922
+		//AV15
 		$csvseparator = $this->getCSVSeparator();
+		$csvDelimiter = $this->getCSVDelimiter();
+		$csvEscapeChar = $this->getCSVEscapeChar();
 		
 		header("Content-Disposition:attachment;filename=$fileName.csv");
 		header("Content-Type:$exportType;charset=UTF-8");
@@ -272,10 +274,10 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 
 		//AV151026
 		$out = fopen('php://output', 'w');
-		fputcsv($out, $headers, $csvseparator);
+		fputcsv($out, $headers, $csvseparator, $csvDelimiter, $csvEscapeChar);
 
 		foreach($entries as $row) {
-			fputcsv($out, $row, $csvseparator);
+			fputcsv($out, $row, $csvseparator, $csvDelimiter, $csvEscapeChar);
 		}
 
 		fclose($out);
@@ -306,10 +308,20 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		return "\t";	
 	}
 
+	//AV15
+	function getCSVDelimiter(){
+		return "\"";	
+	}
+
+	//AV15
+	function getCSVEscapeChar(){
+		return chr(92);	
+	}
+
 	//ED150922
 	function escapeForCSV($string){
-		if(strpos($string, "\t") !== FALSE)
-			$string = str_replace("\t", "\\t", $string);
+		// if(strpos($string, "\t") !== FALSE)
+		// 	$string = str_replace("\t", "\\t", $string);
 		if(strpos($string, '"') !== FALSE)
 			$string = str_replace('"', '\'\'', $string);
 		return $string;

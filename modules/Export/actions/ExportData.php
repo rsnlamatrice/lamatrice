@@ -172,6 +172,6 @@ class Export_ExportData_Action extends Vtiger_ExportData_Action {
 	}
 
 	function cleanData($value) {
-		return $value;
+		return $this->escapeForCSV($value);//tmp -> en attente de la mise à jour de mysql sur le serveur ...
 	}
 }
