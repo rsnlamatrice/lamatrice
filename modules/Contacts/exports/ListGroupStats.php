@@ -30,7 +30,7 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 			"AutreAnnéeAdhésion" => function($row) { return Contacts_ListGroupStats_Export::getAutresAnneeAdhesion($row); },
 			"site web" => "websiteurl",
 			"type de groupe" => "grptypes",
-			"Nb adhérents" => "grpnbremembres",
+			"Nb adhérents" => function($row) { return Contacts_ListGroupStats_Export::getNbAdhenrents($row); },
 			"Descriptif" => "grpdescriptif",
 			"Remarques" => "description",
 			"StatutNPAI" => "rsnnpai",
@@ -81,6 +81,14 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 	
 	function displayHeaderLine() {
 		return true;
+	}
+
+	function getNbAdhenrents($row) {
+		return ($row["grpnbremembres"] > 0) ? $row["grpnbremembres"] : "";
+	}
+
+	function getWebSite($row) {
+		return (strlen($row["websiteurl"]) < 3 || strrpos($row["websiteurl"], "http") === 0) ? $row["websiteurl"] : "http://" . $row["websiteurl"];
 	}
 
 	function getExportFileName($request) {

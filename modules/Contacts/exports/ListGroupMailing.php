@@ -29,7 +29,7 @@ class Contacts_ListGroupMailing_Export extends Contacts_ListGroupStats_Export {
 			"AutreAnnéeAdhésion" => function($row) { return Contacts_ListGroupStats_Export::getAutresAnneeAdhesion($row); },
 			"site web" => "websiteurl",
 			"type de groupe" => "grptypes",
-			"Nb adhérents" => "grpnbremembres",
+			"Nb adhérents" => function($row) { return Contacts_ListGroupStats_Export::getNbAdhenrents($row); },
 			"Descriptif" => "grpdescriptif",
 			"Remarques" => "description",
 			"StatutNPAI" => "rsnnpai",
