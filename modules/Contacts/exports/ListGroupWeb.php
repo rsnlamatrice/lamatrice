@@ -29,7 +29,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 			"Email" => function($row) { return Contacts_ListGroupStats_Export::getMainEmail($row); },
 			"Region" => function($row) { return ($row["mailingcountry"] == "" || strtoupper($row["mailingcountry"]) == "FRANCE") ? $row["mailingregion"] : "Etranger"; },
 			"Adhesion" => function($row) { return Contacts_ListGroupStats_Export::getAutresAnneeAdhesion($row); },
-			"SiteWeb"=> "websiteurl",
+			"SiteWeb"=> function($row) { return (strlen($row["websiteurl"]) < 3 || strrpos($row["websiteurl"], "http") === 0) ? $row["websiteurl"] : "http://" . $row["websiteurl"]; },//"websiteurl",
 			"Type" => "grptypes",
 			"NbAdherents" => "grpnbremembres",
 			"Descriptif" => "grpdescriptif",
