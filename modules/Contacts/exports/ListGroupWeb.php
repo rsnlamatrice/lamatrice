@@ -26,7 +26,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 			"Telephone" => "phone",
 			"Fax" => "fax",
 			"Portable" => "mobile",
-			"Email" => function($row) { return Contacts_ListGroupStats_Export::getEmail($row); },
+			"Email" => function($row) { return Contacts_ListGroupStats_Export::getMainEmail($row); },
 			"Region" => function($row) { return ($row["mailingcountry"] == "" || strtoupper($row["mailingcountry"]) == "FRANCE") ? $row["mailingregion"] : "Etranger"; },
 			"Adhesion" => function($row) { return Contacts_ListGroupStats_Export::getAutresAnneeAdhesion($row); },
 			"SiteWeb"=> "websiteurl",
@@ -40,7 +40,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 			"CacherFax" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Fax")) ? 1 : 0; },
 			"CacherPortable" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Portable")) ? 1 : 0; },
 			"CacherTel" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Téléphone")) ? 1 : 0; },
-			"Email_priv" => function($row) {  return "turlututu"; },//"email",
+			"Email_priv" => function($row) {  return Contacts_ListGroupStats_Export::getMainEmail($row); },
 		);
 	}
 

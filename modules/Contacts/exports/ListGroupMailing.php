@@ -22,7 +22,7 @@ class Contacts_ListGroupMailing_Export extends Contacts_ListGroupStats_Export {
 			"telephone" => "phone",
 			"fax" => "fax",
 			"portable" => "mobile",
-			"email" => "email",
+			"email" => function($row) { return Contacts_ListGroupStats_Export::getMainEmail($row); },
 			"région" => "mailingregion",
 			"département" => "mailingdepartment",//tmp dep number ??
 			"Dernière Adhésion" =>"max_adh",

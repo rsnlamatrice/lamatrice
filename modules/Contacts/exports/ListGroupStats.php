@@ -22,7 +22,7 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 			"telephone" => "phone",
 			"fax" => "fax",
 			"portable" => "mobile",
-			"email" => "email",
+			"email" => function($row) { return Contacts_ListGroupStats_Export::getMainEmail($row); },
 			"région" => "mailingregion",
 			"département" => "mailingdepartment",
 			"n° département" => function($row) { return substr($row["mailingzip"], 0, 2); },
@@ -93,7 +93,7 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 		return ' ORDER BY mailingcountry ASC, mailingzip ASC';
 	}
 
-	function getEmail($row) {
+	function getMainEmail($row) {
 		return ($row['emailoptout']) ? "" : $row['email'];
 	}
 
