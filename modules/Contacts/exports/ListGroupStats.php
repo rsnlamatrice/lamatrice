@@ -93,6 +93,10 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 		return ' ORDER BY mailingcountry ASC, mailingzip ASC';
 	}
 
+	function getEmail($row) {
+		return ($row['emailoptout']) ? "" : $row['email'];
+	}
+
 	function getExportQuery($request) {//tmp ...
 		$parentQuery = parent::getExportQuery($request);
 
