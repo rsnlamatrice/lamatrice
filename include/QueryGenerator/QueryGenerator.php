@@ -561,7 +561,7 @@ class QueryGenerator {
 							//Filtre sur un champ de relation
 							else {
 								
-								var_dump('subQueryColumn->columnname', $filter['subQueryColumn']['columnname']);
+								//var_dump('subQueryColumn->columnname', $filter['subQueryColumn']['columnname']);
 								
 							}
 							continue;
