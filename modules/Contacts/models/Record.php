@@ -351,19 +351,21 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 		if($this_id ==null)
 			$this_id = $this->id;
 		$contacts = array();
-		$query = 'SELECT contactid FROM vtiger_contactdetails
-				INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
-				WHERE vtiger_contactdetails.accountid = ?
-				AND vtiger_contactdetails.contactid <> ?
-				AND vtiger_contactdetails.reference = 1
-				AND vtiger_crmentity.deleted = 0';
-		$accountContacts = $adb->pquery($query, array($account_id, $this_id));
-		$numOfContacts = $adb->num_rows($accountContacts);
-		if($accountContacts && $numOfContacts > 0) {
-			for($i=0; $i < $numOfContacts; ++$i) {
-				//TODO : better then multi-query (in fact, may not have more then 1 contact)
-				$contact = Vtiger_Record_Model::getInstanceById($adb->query_result($accountContacts, $i, 'contactid'), 'Contacts');
-				array_push($contacts, $contact);
+		if ($account_id > 0) {
+			$query = 'SELECT contactid FROM vtiger_contactdetails
+					INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+					WHERE vtiger_contactdetails.accountid = ?
+					AND vtiger_contactdetails.contactid <> ?
+					AND vtiger_contactdetails.reference = 1
+					AND vtiger_crmentity.deleted = 0';
+			$accountContacts = $adb->pquery($query, array($account_id, $this_id));
+			$numOfContacts = $adb->num_rows($accountContacts);
+			if($accountContacts && $numOfContacts > 0) {
+				for($i=0; $i < $numOfContacts; ++$i) {
+					//TODO : better then multi-query (in fact, may not have more then 1 contact)
+					$contact = Vtiger_Record_Model::getInstanceById($adb->query_result($accountContacts, $i, 'contactid'), 'Contacts');
+					array_push($contacts, $contact);
+				}
 			}
 		}
 		return $contacts;
@@ -390,7 +392,7 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function updateAccountAddress($account = false, $save = true){
 		//echo '<pre>'; var_dump($this);echo '</pre>'; 
-		$account_id = $this->get('account_id');
+		/*$account_id = $this->get('account_id');
 		if(!$account
 		&& !($account_id == null || $account_id == '0') ){
 			$account = $this->getAccountRecordModel(false);
@@ -420,9 +422,9 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 			}
 			if($has_changed && $save)
 				$account->save();
-		}
+		}*/
 		
-		return $has_changed;
+		return false;//$has_changed;
 	}
 	
 	/**
