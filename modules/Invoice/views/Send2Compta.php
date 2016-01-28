@@ -249,7 +249,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		$query .= '
 			, reglements.rsnreglementsid
 			, reglements.reglementamount
-			, reglements.reglementstatus';
+			, reglements.reglementstatus
+			, reglements.dateoperation
+			, reglements.dateregl';
 		
 		$query .= '
 			FROM vtiger_invoice
@@ -280,6 +282,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				, GROUP_CONCAT(rsnreglementsid) AS rsnreglementsid
 				, GROUP_CONCAT(reglementstatus) AS reglementstatus
 				, SUM(vtiger_rsnreglements.amount) AS reglementamount
+				, vtiger_rsnreglements.dateoperation
+				, vtiger_rsnreglements.dateregl
 				FROM vtiger_rsnreglements
 				JOIN vtiger_crmentity
 					ON vtiger_crmentity.crmid = vtiger_rsnreglements.rsnreglementsid
@@ -414,7 +418,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					/* En-tête de la précédente facture */
 					if($invoiceJournal && $invoiceReceived){
 						/* Ligne d'encaissement de la Facture */
-						$this->exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
+						$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);//tmp ??
 					}
 						
 					$invoiceTaxes = array();
@@ -433,6 +437,14 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					$basicSubject = preg_replace('/[\r\n\t]/', ' ', html_entity_decode( $invoice['subject']));
 					$invoiceSubject = $basicSubject . ($codeAffaire ? ' - ' . $codeAffaire : '');
 					$date = self::formatDateForCogilog($invoice['invoicedate']);
+					if ($invoice['dateoperation']) {
+						$collectionDate = self::formatDateForCogilog($invoice['dateoperation']);
+						$EffectiveCollectionDateTime = new DateTime($invoice['dateoperation']);//DateTime::createFromFormat ( "Y-m-d" , $invoice['dateoperation']);
+						$EffectiveCollectionDateTime->add(new DateInterval('P1D'));
+						$EffectiveCollectionDate = $EffectiveCollectionDateTime->format("d-m-Y");
+					} else {
+						$collectionDate = $EffectiveCollectionDate = $date;
+					}
 					//La facture est réglée
 					if($invoiceReceived){
 						//Pas de compte de vente, pas d'encaissement (ce qui devrait être le cas de PayPal)
@@ -518,7 +530,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			/* En-tête de la dernière facture */
 			if($invoiceJournal && $invoiceReceived){
 				/* Ligne d'encaissement de la Facture */
-				$this->exportEncaissement($invoiceJournal, $date, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
+				$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
 			}
 			
 			/* Lignes des encaissements par jour */
@@ -534,9 +546,9 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				else	$codeAnal = '';
 				$amount= self::formatAmountForCogilog($total);
 				$piece = 'ENC-' . $key;
-				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $date;
+				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $collectionDate;
 				$this->addExportRow($journal,
-					$date,
+					$EffectiveCollectionDate,
 					$piece
 					.COLSEPAR.$compteEnc
 					.COLSEPAR.$codeAnal
