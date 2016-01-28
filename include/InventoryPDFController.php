@@ -434,7 +434,7 @@ class Vtiger_InventoryPDFController {
 		$contactName = $this->resolveReferenceLabel($this->focusColumnValue('contact_id'), 'Contacts');
 		$street2 = $this->focusColumnValues(array('bill_street2'));
 		$addressFormat = $this->focusColumnValues(array('bill_addressformat'));
-		$poBox	= $this->focusColumnValues(array('bill_pobox'));
+		$pobox	= $this->focusColumnValues(array('bill_pobox'));
 		$street = $this->focusColumnValues(array('bill_street'));
 		$street3 = $this->focusColumnValues(array('bill_street3'));
 		$zipCode =  $this->focusColumnValues(array('bill_code')); 
