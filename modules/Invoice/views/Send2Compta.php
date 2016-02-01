@@ -442,6 +442,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						$EffectiveCollectionDateTime = new DateTime($invoice['dateoperation']);//DateTime::createFromFormat ( "Y-m-d" , $invoice['dateoperation']);
 						$EffectiveCollectionDateTime->add(new DateInterval('P1D'));
 						$EffectiveCollectionDate = $EffectiveCollectionDateTime->format("d-m-Y");
+					} else if ($invoice['dateregl']) {
+						$EffectiveCollectionDate = $collectionDate = self::formatDateForCogilog($invoice['dateregl']);//tmp to check !!!
 					} else {
 						$collectionDate = $EffectiveCollectionDate = $date;
 					}
