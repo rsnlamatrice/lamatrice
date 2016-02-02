@@ -251,7 +251,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			, reglements.reglementamount
 			, reglements.reglementstatus
 			, reglements.dateoperation
-			, reglements.dateregl';
+			, reglements.dateregl
+			, reglements.typeregl';
 		
 		$query .= '
 			FROM vtiger_invoice
@@ -284,6 +285,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				, SUM(vtiger_rsnreglements.amount) AS reglementamount
 				, vtiger_rsnreglements.dateoperation
 				, vtiger_rsnreglements.dateregl
+				, vtiger_rsnreglements.typeregl
 				FROM vtiger_rsnreglements
 				JOIN vtiger_crmentity
 					ON vtiger_crmentity.crmid = vtiger_rsnreglements.rsnreglementsid
@@ -521,15 +523,18 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				if($factureEnded){
 					/* En-tête de facture */
 					
-					if($invoiceTaxes)
+					if($invoiceTaxes) {
 						$this->exportInvoiceTaxes($invoiceTaxes, $journalVente, $date, $piece, $invoiceSubject);
+					}
 				
-					if($invoiceTotal)
+					if($invoiceTotal){
 						$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $prevInvoice);
+					}
 
 					if($invoiceJournal && $invoiceReceived){
 						/* Ligne d'encaissement de la Facture */
-						$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);//tmp ??
+						$piece_for_encaissement = $this->getPieceLabel($invoice);
+						$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece_for_encaissement, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);//tmp ??
 					}
 				}
 			}
@@ -568,6 +573,17 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			echo '</table>';//debug
 		
 		return $fileName;
+	}
+
+	private function getPieceLabel($invoice) {
+		if ($invoice["receivedmoderegl"]) {
+			$data = explode(" ", $invoice["receivedmoderegl"]);
+			if ($data[1]) {
+				return $data[1] . "-" . self::formatDateForLabel($invoice['invoicedate']);
+			}
+		}
+
+		return $invoice['invoice_no'];
 	}
 	
 	private function exportEncaissement($invoiceJournal, $date, $piece, $compteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceAmount){
@@ -753,6 +769,11 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	private static function formatDateForCogilog($myDate){
 		$parts = explode('-', $myDate);
 		return $parts[2] . '/' . $parts[1] . '/' . $parts[0];
+	}
+
+	private static function formatDateForLabel($myDate){
+		$parts = explode('-', $myDate);
+		return $parts[0] . '-' . $parts[1] . '-' . $parts[2];
 	}
 	
 	private static function formatAmountForCogilog($amount){
