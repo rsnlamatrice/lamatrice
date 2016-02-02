@@ -404,23 +404,13 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$prevInvoiceId = 0;
 			$prevDate = '';
 			$totalPerDate = array();
-			while($invoice = $db->fetch_row($result, false)){
+			$num_rows = $db->num_rows($result);
+			for ($i=0; $i < $num_rows; ++$i) {
+			//while($invoice = $db->fetch_row($result, false)){
+				$invoice = $db->query_result_rowdata($result, $i);
 				$isInvoiceHeader = $prevInvoiceId != $invoice['invoiceid'];
 				if($isInvoiceHeader){
-					/* En-tête de facture */
-					
-					if($invoiceTaxes)//précédente facture
-						$this->exportInvoiceTaxes($invoiceTaxes, $journalVente, $date, $piece, $invoiceSubject);
-				
-					if($invoiceTotal)//précédente facture
-						$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $prevInvoice);
-				
-					/* En-tête de la précédente facture */
-					if($invoiceJournal && $invoiceReceived){
-						/* Ligne d'encaissement de la Facture */
-						$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);//tmp ??
-					}
-						
+					/* En-tête de facture */		
 					$invoiceTaxes = array();
 					$invoiceTotal = 0;
 					
@@ -441,7 +431,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						$collectionDate = self::formatDateForCogilog($invoice['dateoperation']);
 						$EffectiveCollectionDateTime = new DateTime($invoice['dateoperation']);//DateTime::createFromFormat ( "Y-m-d" , $invoice['dateoperation']);
 						$EffectiveCollectionDateTime->add(new DateInterval('P1D'));
-						$EffectiveCollectionDate = $EffectiveCollectionDateTime->format("d-m-Y");
+						$EffectiveCollectionDate = $EffectiveCollectionDateTime->format("d/m/Y");
 					} else if ($invoice['dateregl']) {
 						$EffectiveCollectionDate = $collectionDate = self::formatDateForCogilog($invoice['dateregl']);//tmp to check !!!
 					} else {
@@ -453,7 +443,10 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						if(!$encaissementJournal)
 							$invoiceReceived = false;
 						//Si un règlement est associé et qu'il est déjà en compta, on ne traite pas le règlement (ce qui devrait être le cas de PayPal)
-						elseif(strpos($invoice['reglementstatus'], 'Compta') !== false)
+						elseif(false)//(strpos($invoice['reglementstatus'], 'Compta') !== false)
+							//tmp check if it's OK -> si la facture est comptabilisé alors,  elle ne devrait pas être recomptabilisé,
+							//                       alors que lorsque que l'on repasse une facture en status en cours, on souheite regénérer les encaissement ??
+							//       OU alors repasser les règlement en en cours
 							$invoiceReceived = false;
 						//Si le montant des règlements associés n'est pas celui de la facture, on ne traite pas le règlement
 						//TODO cf validateSend2ComptaReglements() si on prend bien en compte les écritures
@@ -462,13 +455,15 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					}
 					//Cumuls des règlements par mode de règlement
 					if($invoiceReceived){
-						$key = $invoiceModeRegl . ($invoiceCodeAnal ? '-' . $invoiceCodeAnal : '') . '-' . $date;
+						$key = $invoiceModeRegl . '-' . $EffectiveCollectionDate;
 					
 						if(!$totalPerDate[$key])
 							$totalPerDate[$key] = array(
 										    'codeAnal' => $invoiceCodeAnal,
 										    'moderegl' => $invoiceModeRegl,
 										    'date' => $date,
+										    'EffectiveCollectionDate' => $EffectiveCollectionDate,
+										    'collectionDate'=> $collectionDate,
 										    'total' => 0.0
 										);
 						$totalPerDate[$key]['total'] += str_to_float($invoiceReceived);
@@ -521,33 +516,40 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					.COLSEPAR.self::formatAmountForCogilog($amountHTRounded)
 				);
 				$invoiceTotal += $amountHTRounded + $invoiceTotalTaxes;
-			}
-		
-			if($invoiceTaxes)//dernière facture
-				$this->exportInvoiceTaxes($invoiceTaxes, $journalVente, $date, $piece, $invoiceSubject);
+
+				$factureEnded = (($i + 1 >= $num_rows) || ($db->query_result_rowdata($result, $i+1)['invoiceid'] != $invoice['invoiceid']));
+				if($factureEnded){
+					/* En-tête de facture */
 					
-			if($invoiceTotal)//précédente facture
-				$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $prevInvoice);
-		
-			/* En-tête de la dernière facture */
-			if($invoiceJournal && $invoiceReceived){
-				/* Ligne d'encaissement de la Facture */
-				$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);
+					if($invoiceTaxes)
+						$this->exportInvoiceTaxes($invoiceTaxes, $journalVente, $date, $piece, $invoiceSubject);
+				
+					if($invoiceTotal)
+						$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $prevInvoice);
+
+					if($invoiceJournal && $invoiceReceived){
+						/* Ligne d'encaissement de la Facture */
+						$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);//tmp ??
+					}
+				}
 			}
 			
 			/* Lignes des encaissements par jour */
 			foreach($totalPerDate as $key => $data){
 				$total = $data['total'];
 				$date = $data['date'];
+				$collectionDate = $data['collectionDate'];
+				$EffectiveCollectionDate = $data['EffectiveCollectionDate'];
 				$modeRegl = $data['moderegl'];
 				$compteEnc = self::getModeReglCompteEncaissement($modeRegl); 
 				$journal = self::getModeReglJournal($modeRegl); 
 				//$journal = self::getCompteEncaissementJournal($compteEnc);
 				if($compteEnc[0] === '7' || $compteEnc[0] === '6')
 					$codeAnal = $data['codeAnal'];
-				else	$codeAnal = '';
+				else
+					$codeAnal = '';
 				$amount= self::formatAmountForCogilog($total);
-				$piece = 'ENC-' . $key;
+				$piece = 'ENC-' . $modeRegl . /*($codeAnal ? '-' . $codeAnal : '') .*/ '-' . $date;//tmp code anal ???
 				$descriptif = 'Paiements par ' . $this->sanitizeExport($modeRegl). ' du ' . $collectionDate;
 				$this->addExportRow($journal,
 					$EffectiveCollectionDate,
