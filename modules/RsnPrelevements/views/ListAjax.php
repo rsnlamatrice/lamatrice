@@ -3,13 +3,13 @@
  * ED150906
  ************************************************************************************/
 
-class Invoice_ListAjax_View extends Vtiger_ListAjax_View {
+class RsnPrelevements_ListAjax_View extends Vtiger_ListAjax_View {
+
 	/**
 	 * Function returns the number of records for the current filter
 	 * @param Vtiger_Request $request
 	 */
 	function getRecordsCount(Vtiger_Request $request) {
-		
 		$moduleName = $request->getModule();
 		$cvId = $request->get('viewname');
 		$calculatedTotals = array();
