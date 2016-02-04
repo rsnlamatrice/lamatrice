@@ -344,7 +344,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$isDebug = COLSEPAR;
 			$isDebug = $isDebug[0] === '<';
 			
-			$fileName = 'EcrituresCompta.Factures.Compta.'.date('Ymd_His').'.csv';
+			$fileName = 'EC_'.date('Y-m-d').'.csv';
 			$exportType = 'text/csv';
 			if($isDebug)
 				echo '<table border="1"><tr><td>';//debug
@@ -409,7 +409,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			$num_rows = $db->num_rows($result);
 			for ($i=0; $i < $num_rows; ++$i) {
 			//while($invoice = $db->fetch_row($result, false)){
-				$invoice = $db->query_result_rowdata($result, $i);
+				$invoice = $db->query_result_rowdata($result, $i, false);
 				$isInvoiceHeader = $prevInvoiceId != $invoice['invoiceid'];
 				if($isInvoiceHeader){
 					/* En-tête de facture */		
@@ -528,7 +528,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 					}
 				
 					if($invoiceTotal){
-						$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $prevInvoice);
+						$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $invoice);
 					}
 
 					if($invoiceJournal && $invoiceReceived){
@@ -646,7 +646,6 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	}
 	
 	private static function getInvoiceCompteVenteSolde($invoiceData){
-		
 		$accountType = $invoiceData['account_type'];
 		switch($accountType){
 		case 'Depot-vente' :
