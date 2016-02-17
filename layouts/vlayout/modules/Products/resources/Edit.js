@@ -66,15 +66,33 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 		var thisInstance = this;
 		var formElem = this.getForm();
 		//checkboxes
+		if (jQuery('.taxes[checked]').length > 1) {
+			jQuery('#switcc-TTC-HT').prop( "disabled", true );
+			jQuery('#switcc-TTC-HT').attr('checked', false);
+		}
+
 		jQuery('.taxes').on('change',function(e){
 			var elem = thisInstance.getCurrentElem(e);
 			var taxBox  = elem.data('taxName');
+
+			if (thisInstance.getUseMultipleTaxes()) {
+				if (jQuery('.taxes:checked').length > 1) {
+					jQuery('#switcc-TTC-HT').prop( "disabled", true );
+					jQuery('#switcc-TTC-HT').attr('checked', false);
+					$("#temporary_unit_price").val(thisInstance.getUnitPrice().val());
+				} else {
+					jQuery('#switcc-TTC-HT').prop( "disabled", false );
+				}
+			}
+
 			if(elem.is(':checked')) {
 				//ED150521 : rule "Only one tax allowed"
 				if (!thisInstance.getUseMultipleTaxes()) {
 					jQuery('.taxes:not([data-tax-name="'+taxBox+'"]').removeAttr('checked');
 					elem.parents('table:first').find('input[type="text"][name^="tax"]:not([name="'+taxBox+'"]').addClass('hide');
 				}
+
+				thisInstance.setUnitPrice()
 				
 				jQuery('input[name='+taxBox+']',formElem).removeClass('hide').show();
 			}else{
@@ -120,7 +138,7 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 					.insertAfter($input);
 			else
 				$label.show();
-			$label.html((unitPrice * ( 1 + taxRate / 100)).toFixed(2) + '&nbsp;&euro;');
+			$label.html(parseFloat(unitPrice).toFixed(2) + '&nbsp;&euro; / ' + (unitPrice * ( 1 + taxRate / 100)).toFixed(2) + '&nbsp;&euro;');
 			
 		});
 	},
@@ -470,6 +488,73 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 			}
 		});
 	},
+
+	getHTFromeTTC: function() {//tmp
+		var thisInstance = this
+		, formElem = thisInstance.getForm()
+		, temporaryPriceInput = $("#temporary_unit_price")
+		, TTC_price = parseFloat(temporaryPriceInput.val().replace(',','.'))
+		, taxeQuantity = 0
+		, HT_Price = 0
+		;
+
+		formElem.find('.taxes').each(function(){
+			var isChecked = this.checked
+			, $tdInput = $(this).parents('td:first').next()
+			, $label = $tdInput.find('.taxedPrice');
+			if (isChecked) {
+				++taxeQuantity;
+				if (taxeQuantity > 1) {
+					//tmp uncheck TTC !! //TMP called update price on taxes checked !!
+					HT_Price = TTC_price;
+					return false;
+				}
+
+				var $input = $tdInput.find('input.detailedViewTextBox')
+				, taxRate = parseFloat($input.val().replace(',','.'));
+
+				HT_Price = TTC_price / ( 1 + taxRate / 100);
+			}
+			
+		});
+
+		return HT_Price;// TMP !!!!
+	},
+
+ 	setUnitPrice: function(){
+ 		var isTTC = jQuery('#switcc-TTC-HT').is(":checked");
+ 		var priceInput = this.getUnitPrice();
+ 		var temporaryPriceInput = $("#temporary_unit_price");
+
+ 		if (isTTC) {
+ 			var HT_Price = this.getHTFromeTTC();
+ 			priceInput.val(HT_Price);
+ 		} else {
+			priceInput.val(temporaryPriceInput.val());
+		}
+
+		this.triggerForBaseCurrencyCalc();
+	},
+
+	registerSwitchTTC_HC: function(){
+		var thisInstance = this;
+		var priceInput = this.getUnitPrice();
+		var temporaryPriceInput = priceInput.clone().attr('id', 'temporary_unit_price').insertAfter(priceInput);
+		priceInput.css('display', 'none');
+		$('<span class="span"><label style="float:left;" for="switcc-TTC-HT">TTC</label> <input type="checkbox" id="switcc-TTC-HT"></span>')
+					.css('margin-left', '1em')
+					.css('margin-right', '1em')
+					.insertAfter(temporaryPriceInput);
+		var switchTTC_HT = jQuery('#switcc-TTC-HT');
+
+		switchTTC_HT.on('change', function(){
+			thisInstance.setUnitPrice();
+		});
+
+		temporaryPriceInput.on('change',function(){
+			thisInstance.setUnitPrice();
+		});
+	},
 	
 	registerEvents : function(){
 		this._super();
@@ -477,5 +562,6 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 		this.registerEventForTaxes();
 		this.registerEventForUnitPrice();
 		this.registerRecordPreSaveEvent();
+		this.registerSwitchTTC_HC();
 	}
 })
