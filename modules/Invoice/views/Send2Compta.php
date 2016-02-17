@@ -456,7 +456,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 							$invoiceReceived = false;
 					}
 					//Cumuls des règlements par mode de règlement
-					if($invoiceReceived){
+					if($invoiceReceived && !$invoice['iscredit']){
 						$key = $invoiceModeRegl . '-' . $EffectiveCollectionDate;
 					
 						if(!$totalPerDate[$key])
@@ -531,7 +531,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						$this->exportInvoiceSolde($invoiceTotal, $journalVente, $date, $piece, $invoiceSubject, $invoice);
 					}
 
-					if($invoiceJournal && $invoiceReceived){
+					if($invoiceJournal && $invoiceReceived && !$invoice['iscredit']){
 						/* Ligne d'encaissement de la Facture */
 						$piece_for_encaissement = $this->getPieceLabel($invoice);
 						$this->exportEncaissement($invoiceJournal, $EffectiveCollectionDate, $piece_for_encaissement, $invoiceCompteVente, $invoiceCodeAnal, $invoiceSubject, $invoiceReceived);//tmp ??
