@@ -33,6 +33,10 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			
 			if($moduleName === 'Invoice'){
 				//ED151026
+				if($request->get('typedossier') === 'Avoir') {
+					$recordModel->set('iscredit', true);
+				}
+
 				if($request->get('typedossier') === 'Avoir'
 				|| $request->get('typedossier') === 'Remboursement'){
 					//Inverse les quantités et montants
