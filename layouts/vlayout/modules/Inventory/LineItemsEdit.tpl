@@ -370,7 +370,7 @@
 				{if $BLOCK_LABEL eq 'LBL_RSNREGLEMENTS'}
 				    <table>
 					{foreach key=FIELD_NAME item=FIELD_MODEL from=$BLOCK_FIELDS name=blockfields}
-					<tr>
+					<tr id="{$FIELD_MODEL->get('name')}">
 					    <td class="fieldLabel">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}</td>
 					    <td>
 						{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) BLOCK_FIELDS=$BLOCK_FIELDS}

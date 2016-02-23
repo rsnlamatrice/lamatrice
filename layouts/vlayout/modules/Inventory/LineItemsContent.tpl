@@ -101,7 +101,7 @@
 		{/if}
 	</td>
 	<td>
-		<div>
+		<div class="switch-TTC-HT">
 			<input id="{$listPrice}" name="{$listPrice}" value="{if !empty($data.$listPrice)}{$data.$listPrice}{else}0{/if}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]"
 			class="listPrice tinyInputBox" onfocus="$(this).select()"/>
 			<div id="mode-{$listPrice}" {if $row_no > 0}class="buttonset"{/if} style="display: inline-block; margin-right: 0; margin-left: 3px;">
@@ -117,7 +117,7 @@
 				<img src="{vimage_path('PriceBooks.png')}" class="cursorPointer alignMiddle priceBookPopup" data-popup="Popup" data-module-name="PriceBooks" title="{vtranslate('PriceBooks',$MODULE)}"/>
 			{/if*}
 		</div>
-		<div>
+		<div class="discount">
 			<span>
 				(-)&nbsp; <b><a href="javascript:void(0)" class="individualDiscount">{vtranslate('LBL_DISCOUNT',$MODULE)}</a> : </b>
 			</span>

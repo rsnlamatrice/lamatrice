@@ -10,6 +10,25 @@
  ********************************************************************************/
 -->*}
 
+<style type="text/css"> {* <!-- tmp move css ... --> *}
+#LBL_DESCRIPTION_INFORMATION {
+    display: none;
+}
+
+#LBL_CUSTOM_INFORMATION {
+    display: none;
+}
+
+.blockContainer {
+	margin-bottom: 20px;
+}
+
+#lineItemTab .lineItemCommentBox, #lineItemTab .productTotal, #lineItemTab .discountTotal, #lineItemTab .switch-TTC-HT, #lineItemTab .discount, #receivedreference {
+    display: none;
+}
+
+</style>
+
 {strip}
 <div class='editViewContainer container-fluid'>
 	{assign var=FORMID value='EditView'}
@@ -97,7 +116,7 @@
 				{continue}
 			{/if}
 			{assign var=IS_HIDDEN value=($BLOCK_LABEL eq 'LBL_ADDRESS_INFORMATION' || $BLOCK_LABEL eq 'LBL_DESCRIPTION_INFORMATION' || $BLOCK_LABEL eq 'LBL_CUSTOM_INFORMATION')}
-			<table class="table table-bordered blockContainer showInlineTable">
+			<table class="table table-bordered blockContainer showInlineTable" id="{$BLOCK_LABEL}">
 			<thead><tr>
 				<th class="blockHeader" colspan="4">
 					{if $IS_HIDDEN}
@@ -251,6 +270,5 @@
 			</tr>
 			</tbody>
 			</table>
-			<br>
 		{/foreach}
 {/strip}
