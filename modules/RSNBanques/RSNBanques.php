@@ -234,7 +234,6 @@ class RSNBanques extends Vtiger_CRMEntity {
 		
 		while($row = $adb->fetchByAssoc($result))
 			return $row['name'];
-		break;
 	}
 	
 }
