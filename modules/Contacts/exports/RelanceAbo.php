@@ -24,4 +24,9 @@ class Contacts_RelanceAbo_Export extends Contacts_ExportRevue_Export { // TMP Fi
 	function displayHeaderLine() {
 		return true;
 	}
+
+	function getExportFileName($request) {
+		$moduleName = $request->get('source_module');
+		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Relance_Abo";
+	}
 }
