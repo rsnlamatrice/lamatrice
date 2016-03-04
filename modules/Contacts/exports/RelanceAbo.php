@@ -3,7 +3,7 @@
 	AV1511
  *************************************************************************************/
 
-class Contacts_RelanceAbo_Export extends Export_ExportData_Action { // TMP Fields !!!!!
+class Contacts_RelanceAbo_Export extends Contacts_ExportRevue_Export { // TMP Fields !!!!!
 
 	//tmp check mailing ou other address !!!!!!!
 	function getExportStructure() {
