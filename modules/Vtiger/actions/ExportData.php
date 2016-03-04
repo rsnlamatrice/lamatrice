@@ -295,8 +295,7 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		foreach ($headers as &$header) {
 			$header = mb_convert_encoding($header, $encoding);
 		}
-		$headers[0] = mb_detect_encoding($headers[0]);
-		$headers[1] = $encoding;
+
 		fputcsv($out, $headers, $csvseparator, $csvDelimiter, $csvEscapeChar);
 
 		foreach($entries as $row) {
