@@ -241,6 +241,21 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		if(empty($type)) {
 			return 'text/csv';
 		}
+		return $type;
+	}
+
+	/**
+	 * Function returns the export encoding - This can be extended to support different file exports
+	 * @param Vtiger_Request $request
+	 * @return <String>
+	 */
+	function getExportEncoding(Vtiger_Request $request) {
+		$encoding = $request->get('export_encoding');
+		if(empty($encoding)) {
+			return 'UTF-8';
+		}
+
+		return $encoding;
 	}
 
 	/**
@@ -260,6 +275,7 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 	function output($request, $headers, $entries) {
 		$fileName = $this->getExportFileName($request);
 		$exportType = $this->getExportContentType($request);
+		$encoding = $this->getExportEncoding($request);
 
 		//AV15
 		$csvseparator = $this->getCSVSeparator();
@@ -267,16 +283,25 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		$csvEscapeChar = $this->getCSVEscapeChar();
 		
 		header("Content-Disposition:attachment;filename=$fileName.csv");
-		header("Content-Type:$exportType;charset=UTF-8");
+		header("Content-Type:$exportType");
+		header("Content-Transfer-Encoding: $encoding");
+
 		header("Expires: Mon, 31 Dec 2000 00:00:00 GMT" );
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
 		header("Cache-Control: post-check=0, pre-check=0", false );
 
 		//AV151026
 		$out = fopen('php://output', 'w');
+		foreach ($headers as &$header) {
+			$header = mb_convert_encoding($header, $encoding);
+		}
+		//$headers[0] = mb_detect_encoding($headers[0]);
 		fputcsv($out, $headers, $csvseparator, $csvDelimiter, $csvEscapeChar);
 
 		foreach($entries as $row) {
+			foreach ($row as &$value) {
+				$value = mb_convert_encoding($value, $encoding);
+			}
 			fputcsv($out, $row, $csvseparator, $csvDelimiter, $csvEscapeChar);
 		}
 

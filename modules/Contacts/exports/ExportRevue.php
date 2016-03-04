@@ -33,6 +33,10 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 		return true;
 	}
 
+	function getExportEncoding(Vtiger_Request $request) {
+		return 'ISO-8859-1';
+	}
+
 	function getExportFileName($request) {
 		$moduleName = $request->get('source_module');
 		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Export_Revue";
@@ -76,7 +80,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function getMessage1($row) {
 		if (strpos($row["rsnabotype"], "couverte") || strpos($row["rsnabotype"], "remerciement")) {
 			return "Numéro offert. Merci !";
-		} else if (!strpos($row["rsnabotype"], "Ne pas abonner") &&  !strpos($row["rsnabotype"], "Non abonné") && !$this->isAbo($row)) {
+		} else if (!$this->isAbo($row)) {
 			return "Merci de vous réabonner.";
 		}
 
@@ -87,7 +91,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 		$today = time() - 31 * 24 * 60 * 60;//aujourd'hui - 1 mois
 		$finabo = strtotime($row["finabo"]);
 		//echo "today $today -> finabo : $finabo<br/>";
-		return ($finabo >= $today) || !$finabo;//$finabo >= $today;
+		return (!strpos($row["rsnabotype"], "Ne pas abonner") &&  !strpos($row["rsnabotype"], "Non abon")) && (($finabo >= $today) || !$finabo);//$finabo >= $today;
 	}
 
 	function getMessage2($row) {
