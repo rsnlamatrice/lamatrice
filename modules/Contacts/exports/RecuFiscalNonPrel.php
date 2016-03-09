@@ -37,7 +37,7 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 
 	function getExportFileName($request) {
 		$moduleName = $request->get('source_module');
-		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Relance_Abo";
+		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Recu_fiscaux_sans_prel";
 	}
 
 	function getAddressToUse($row) {
