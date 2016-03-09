@@ -20,11 +20,9 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 			"Pays" => function ($row) { return Contacts_RecuFiscalPrel_Export::getAddressField($row, "country"); },
 			"Salutations" => function ($row) { return Contacts_RecuFiscalPrel_Export::getSalutation($row); },
 			"Dons" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDons($row) /*. " €"*/; },
-			"Dons sans prel" => function ($row) { return Contacts_RecuFiscalPrel_Export::getDons($row) /*. " €"*/; },//tmp
-			"Dons prel" => function ($row) { return Contacts_RecuFiscalPrel_Export::getPrel($row) /*. " €"*/; },//tmp
 			"Dons en lettres" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDonsLetter($row). " euros"; },
-			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRealDons($row) /*. " €"*/; },
-			"pvt_actuel" => function ($row) { return Contacts_RecuFiscalPrel_Export::getPrelevementSetence($row) /*. " €"*/; },//je suis actuellement en prélèvements de 10 €  par mois,
+			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRealDons($row) . " euros" /*. " €"*/; },
+			"pvt_actuel" => function ($row) { return Contacts_RecuFiscalPrel_Export::getPrelevementSetence($row) . " euros" /*. " €"*/; },//je suis actuellement en prélèvements de 10 €  par mois,
 			"oui augmentation" => function ($row) { return "Je souhaite augmenter mon prélèvement de:"; },// 
 			"suggestion augmentation" => function ($row) { return Contacts_RecuFiscalPrel_Export::getSuggestionSentence($row); },// TMP check value ... // O 1 €    O 2 €    O 3 €    O Autres:    .... € 
 		);
@@ -54,7 +52,7 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 		$value1 = (int) $row["prel_amount"] * 0.1;//tmp ammount ...
 		$value2 = (int) $row["prel_amount"] * 0.2;//tmp amount ...
 		$value3 = (int) $row["prel_amount"] * 0.3;//tmp amount ...
-		return "O $value1 €    O $value2 €    O $value3 €    O Autres:    .... € ";
+		return "O $value1 euros    O $value2 euros    O $value3 euros    O Autres:    .... euros ";
 	}
 	
 	function displayHeaderLine() {
