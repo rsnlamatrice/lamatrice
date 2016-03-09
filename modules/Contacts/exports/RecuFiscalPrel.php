@@ -19,8 +19,8 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 													Contacts_RecuFiscalPrel_Export::getAddressField($row, "city"); },
 			"Pays" => function ($row) { return Contacts_RecuFiscalPrel_Export::getAddressField($row, "country"); },
 			"Salutations" => function ($row) { return Contacts_RecuFiscalPrel_Export::getSalutation($row); },
-			"Dons" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDons($row) /*. " €"*/; },
-			"Dons en lettres" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDonsLetter($row). " euros"; },
+			"Dons" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDons($row) . " euros" /*. " €"*/; },
+			"Dons en lettres" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDonsLetter($row) . " euros"; },
 			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRealDons($row) . " euros" /*. " €"*/; },
 			"pvt_actuel" => function ($row) { return Contacts_RecuFiscalPrel_Export::getPrelevementSetence($row) . " euros" /*. " €"*/; },//je suis actuellement en prélèvements de 10 €  par mois,
 			"oui augmentation" => function ($row) { return "Je souhaite augmenter mon prélèvement de:"; },// 

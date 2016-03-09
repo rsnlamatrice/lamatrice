@@ -21,9 +21,9 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 													Contacts_RecuFiscalNonPrel_Export::getAddressField($row, "city"); },
 			"Pays" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getAddressField($row, "country"); },
 			"Salutations" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getSalutation($row); },
-			"Dons" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getTotalDons($row) /*. " €"*/; },
+			"Dons" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getTotalDons($row) . " euros" /*. " €"*/; },
 			"Dons en lettres" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getTotalDonsLetter($row). " euros"; },
-			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getRealDons($row) /*. " €"*/; },
+			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getRealDons($row) . " euros" /*. " €"*/; },
 		);
 	}
 	
