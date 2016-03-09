@@ -87,8 +87,8 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 		$orderbyPos = strrpos($parentQuery, 'ORDER BY');//tmp attention si il y a plusieurs clauses ORDER BY
 
 		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnprelevements.montant AS prel_amount, vtiger_rsnprelevements.periodicite AS prel_periode " .
-				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " INNER JOIN vtiger_rsnprelevements ON vtiger_contactdetails.accountid = vtiger_rsnprelevements.accountid
-														INNER JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid AND vtiger_rsnprelevements.etat = 0 " .
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN vtiger_rsnprelevements ON vtiger_contactdetails.accountid = vtiger_rsnprelevements.accountid
+														LEFT JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid AND vtiger_rsnprelevements.etat = 0 " .
 				 substr($parentQuery, $wherePos, ($orderbyPos - $wherePos)) . " AND vtiger_rsnprelevements_crmentity.deleted = 0 " .
 														" GROUP BY vtiger_crmentity.crmid " .
 				 substr($parentQuery, $orderbyPos);
