@@ -18,7 +18,7 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 			"CP-Ville" => function ($row) { return Contacts_RecuFiscalPrel_Export::getAddressField($row, "zip") . " " .
 													Contacts_RecuFiscalPrel_Export::getAddressField($row, "city"); },
 			"Pays" => function ($row) { return Contacts_RecuFiscalPrel_Export::getAddressField($row, "country"); },
-			"Salutations" => function ($row) { return Contacts_RecuFiscalPrel_Export::getSalutation($row); },
+			"Salutations" => function ($row) { return "Bonjour " . Contacts_RecuFiscalPrel_Export::getSalutation($row); },
 			"Dons" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDons($row) .  " " . utf8_encode(chr(128)); },
 			"Dons en lettres" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDonsLetter($row) . " euros"; },
 			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRealDons($row) . " " . utf8_encode(chr(128)); },
