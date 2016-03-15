@@ -127,18 +127,14 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 	function getTotalDons($row) {
 		$total_dons = $this->getDons($row) + $this->getPrel($row);
 
-		return round($total_dons, 2);
+		return round($total_dons, 0);
 	}
 
 	function getTotalDonsLetter($row) {
 		$total_dons = $this->getTotalDons($row);
-		
- 
-		// créer l'objet
+
 		$nw = new Numbers_Words();
 		 
-		// convertir en chaîne
-		//echo "600 en lettres donne " . $nw->toWords(600);
 		return $nw->toWords($total_dons, 'fr');
 	}
 
@@ -146,7 +142,7 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 		$rate = 0.34;
 		$total_dons = $this->getDons($row) + $this->getPrel($row);
 
-		return round(($total_dons * $rate), 2);
+		return round(($total_dons * $rate), 0);
 	}
 
 	function getRecuFiscalDocumentRecordModel($current_year) {
