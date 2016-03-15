@@ -7,7 +7,7 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 	//tmp check mailing ou other address !!!!!!!
 	function getExportStructure() {
 		return array(
-			"Numero Ordre" => "", //Reçu n° 2014 / 010375
+			"Numero Ordre" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRecuFiscalDisplayNumber($row); }, //Reçu n° 2014 / 010375
 			"Ref" => "contact_no",
 			"Ligne2" => "grpnomllong",
 			"Prenom-Nom" => function ($row) { return $row["firstname"] . " " . $row["lastname"]; },
@@ -19,10 +19,10 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 													Contacts_RecuFiscalPrel_Export::getAddressField($row, "city"); },
 			"Pays" => function ($row) { return Contacts_RecuFiscalPrel_Export::getAddressField($row, "country"); },
 			"Salutations" => function ($row) { return Contacts_RecuFiscalPrel_Export::getSalutation($row); },
-			"Dons" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDons($row) . " euros" /*. " €"*/; },
+			"Dons" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDons($row) .  " " . utf8_encode(chr(128)); },
 			"Dons en lettres" => function ($row) { return Contacts_RecuFiscalPrel_Export::getTotalDonsLetter($row) . " euros"; },
-			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRealDons($row) . " euros" /*. " €"*/; },
-			"pvt_actuel" => function ($row) { return Contacts_RecuFiscalPrel_Export::getPrelevementSetence($row) . " euros" /*. " €"*/; },//je suis actuellement en prélèvements de 10 €  par mois,
+			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRealDons($row) . " " . utf8_encode(chr(128)); },
+			"pvt_actuel" => function ($row) { return Contacts_RecuFiscalPrel_Export::getPrelevementSetence($row); },//je suis actuellement en prélèvements de 10 €  par mois,
 			"oui augmentation" => function ($row) { return "Je souhaite augmenter mon prélèvement de:"; },// 
 			"suggestion augmentation" => function ($row) { return Contacts_RecuFiscalPrel_Export::getSuggestionSentence($row); },// TMP check value ... // O 1 €    O 2 €    O 3 €    O Autres:    .... € 
 		);
@@ -45,14 +45,18 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 			$periodicite = " ? ";
 		}
 
-		return "Je suis actuellement en prélèvements de " . $row["prel_amount"] . " euros  par " . $periodicite; // tmp périodicity ...
+		return "Je suis actuellement en prélèvements de " . $row["prel_amount"] . " " .utf8_encode(chr(128)) . "  par " . $periodicite; // tmp périodicity ...
 	}
 
 	function getSuggestionSentence($row) {
-		$value1 = (int) $row["prel_amount"] * 0.1;//tmp ammount ...
-		$value2 = (int) $row["prel_amount"] * 0.2;//tmp amount ...
-		$value3 = (int) $row["prel_amount"] * 0.3;//tmp amount ...
-		return "O $value1 euros    O $value2 euros    O $value3 euros    O Autres:    .... euros ";
+		$value1 = (int) ($row["prel_amount"] * 0.1);
+		$value1 = ($value1 > 0) ? $value1 : 1;
+		$value2 = (int) ($row["prel_amount"] * 0.2);
+		$value2 = ($value2 > $value1) ? $value2 : $value1 + 1;
+		$value3 = (int) ($row["prel_amount"] * 0.3);
+		$value3 = ($value3 > $value2) ? $value3 : $value2 + 1;
+
+		return "O $value1 " . utf8_encode(chr(128)) . "    O $value2 " . utf8_encode(chr(128)) . "    O $value3 " . utf8_encode(chr(128)) . "    O Autres:    .... " . utf8_encode(chr(128));
 	}
 	
 	function displayHeaderLine() {
@@ -78,7 +82,7 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 
 	function getExportQuery($request) {//tmp ...
 		$query = $parentQuery = parent::getExportQuery($request);
-		$current_year = date("Y") - 1;
+		$current_year = date("Y") - 1;//TMP Date
 		$date_debut = $current_year . "-01-01";
 		$date_fin = $current_year . "-12-31";
 		// echo $query;
@@ -87,9 +91,9 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 		$orderbyPos = strrpos($parentQuery, 'ORDER BY');//tmp attention si il y a plusieurs clauses ORDER BY
 
 		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnprelevements.montant AS prel_amount, vtiger_rsnprelevements.periodicite AS prel_periode " .
-				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN vtiger_rsnprelevements ON vtiger_contactdetails.accountid = vtiger_rsnprelevements.accountid
-														LEFT JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid AND vtiger_rsnprelevements.etat = 0 " .
-				 substr($parentQuery, $wherePos, ($orderbyPos - $wherePos)) . " AND vtiger_rsnprelevements_crmentity.deleted = 0 " .
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN vtiger_rsnprelevements ON vtiger_contactdetails.accountid = vtiger_rsnprelevements.accountid AND vtiger_rsnprelevements.etat = 0
+														LEFT JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid AND vtiger_rsnprelevements_crmentity.deleted != 0 " .
+				 substr($parentQuery, $wherePos, ($orderbyPos - $wherePos)) . " /*AND vtiger_rsnprelevements_crmentity.deleted != 0*/ " .//tmp ??? 
 														" GROUP BY vtiger_crmentity.crmid " .
 				 substr($parentQuery, $orderbyPos);
 

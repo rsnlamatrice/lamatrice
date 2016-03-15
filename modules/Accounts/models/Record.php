@@ -327,48 +327,25 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		
 		global $adb;
 		$query = "
-		SELECT SUM(montant) AS montant
-		FROM (
-			SELECT SUM(vtiger_inventoryproductrel.quantity * vtiger_inventoryproductrel.listprice) AS montant
-				FROM vtiger_inventoryproductrel
-				JOIN vtiger_invoice
-					ON vtiger_invoice.invoiceid = vtiger_inventoryproductrel.id
-				JOIN vtiger_crmentity as vtiger_crmentity_invoice
-					ON vtiger_invoice.invoiceid = vtiger_crmentity_invoice.crmid
-				JOIN vtiger_service
-					ON vtiger_service.serviceid = vtiger_inventoryproductrel.productid
-				JOIN vtiger_crmentity as vtiger_crmentity_service
-					ON vtiger_service.serviceid = vtiger_crmentity_service.crmid
-				WHERE vtiger_crmentity_invoice.deleted = false
-				AND vtiger_crmentity_service.deleted = false
-				AND vtiger_service.servicecategory = 'Dons'
-				AND vtiger_invoice.accountid = ?
-				AND vtiger_invoice.invoicedate BETWEEN ? AND ?
-				AND vtiger_invoice.invoicestatus != 'Cancelled'
-			UNION
-				SELECT SUM(vtiger_rsnprelvirement.montant)
-				FROM vtiger_rsnprelvirement
-				JOIN vtiger_crmentity as vtiger_crmentity_prelvir
-					ON vtiger_rsnprelvirement.rsnprelvirementid = vtiger_crmentity_prelvir.crmid
-				JOIN vtiger_rsnprelevements
-					ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_rsnprelevements.rsnprelevementsid
-				JOIN vtiger_crmentity as vtiger_crmentity_prelevements
-					ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_crmentity_prelevements.crmid
-				WHERE vtiger_crmentity_prelvir.deleted = false
-				AND vtiger_crmentity_prelevements.deleted = false
-				AND vtiger_rsnprelvirement.rsnprelvirstatus = 'Ok'
-				AND vtiger_rsnprelevements.prelvtype = 'Prélèvement périodique'
-				AND vtiger_rsnprelevements.accountid = ?
-				AND vtiger_rsnprelvirement.dateexport BETWEEN ? AND ?
-		) _source
+		SELECT SUM(vtiger_inventoryproductrel.listprice * vtiger_inventoryproductrel.quantity) montant
+			FROM vtiger_inventoryproductrel
+			JOIN vtiger_invoice ON vtiger_inventoryproductrel.id = vtiger_invoice.invoiceid 
+			JOIN vtiger_service ON vtiger_inventoryproductrel.productid = vtiger_service.serviceid
+			JOIN vtiger_crmentity vtiger_service_crmentity ON vtiger_service_crmentity.crmid = vtiger_service.serviceid
+            JOIN vtiger_crmentity vtiger_invoice_crmentity ON vtiger_invoice_crmentity.crmid = vtiger_invoice.invoiceid
+			WHERE vtiger_invoice_crmentity.deleted = false
+			AND vtiger_service_crmentity.deleted = false
+			AND vtiger_inventoryproductrel.quantity != 0 
+			AND vtiger_inventoryproductrel.listprice != 0
+			AND vtiger_invoice.accountid = ?
+			AND vtiger_invoice.invoicedate BETWEEN ? AND ?
+			AND vtiger_service.servicecategory = 'Dons'
+			AND vtiger_invoice.invoicestatus != 'Cancelled'
 		";
 		$params = array(
 				$this->getId(),
 				"$year-01-01",
-				"$year-12-31 23:59:59",
-				$this->getId(),
-				"$year-01-01",
-				"$year-12-31 23:59:59",
+				"$year-12-31 23:59:59"
 		);
 		$result = $adb->pquery($query, $params);
 		if(!$result){
@@ -377,7 +354,35 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			$adb->echoError();
 			return false;
 		}
-		$montant = $adb->query_result($result, 0, 0);
+		$montant_dons = $adb->query_result($result, 0, 0);
+
+		$query = "
+		SELECT SUM(vtiger_rsnprelvirement.montant)
+			FROM vtiger_rsnprelvirement
+			JOIN vtiger_crmentity as vtiger_crmentity_prelvir
+				ON vtiger_rsnprelvirement.rsnprelvirementid = vtiger_crmentity_prelvir.crmid
+			JOIN vtiger_rsnprelevements
+				ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_rsnprelevements.rsnprelevementsid
+			JOIN vtiger_crmentity as vtiger_crmentity_prelevements
+				ON vtiger_rsnprelevements.rsnprelevementsid = vtiger_crmentity_prelevements.crmid
+			WHERE vtiger_crmentity_prelvir.deleted = false
+			AND vtiger_crmentity_prelevements.deleted = false
+			AND vtiger_rsnprelvirement.rsnprelvirstatus = 'Ok'
+			AND vtiger_rsnprelevements.prelvtype = 'Prélèvement périodique'
+			AND vtiger_rsnprelevements.accountid = ?
+			AND vtiger_rsnprelvirement.dateexport BETWEEN ? AND ?
+		";
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError();
+			return false;
+		}
+		$montant_prel = $adb->query_result($result, 0, 0);
+		
+		$montant = $montant_dons + $montant_prel;
+
 		if(!$montant){ // || $montant < 3 on génère quand même le reçu, on ne l'envoie pas 
 			return false;
 		}

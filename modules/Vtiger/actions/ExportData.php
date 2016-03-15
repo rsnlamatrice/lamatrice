@@ -312,6 +312,15 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		// echo 'display preview';
 		// var_dump($headers);
 		// var_dump($entries);
+		foreach ($headers as &$header) {
+			$header = htmlentities($header);
+		}
+
+		foreach($entries as $row) {
+			foreach ($row as &$value) {
+				$value = htmlentities($value);
+			}
+		} 
 
 		$module = $request->get('module');
 

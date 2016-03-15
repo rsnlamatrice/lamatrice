@@ -10,13 +10,13 @@ class Contacts_RelanceAbo_Export extends Contacts_ExportRevue_Export { // TMP Fi
 		return array(
 			"Ref" => function ($row) { return "Ref : " . $row["contact_no"]; },
 			"Ligne1" => function ($row) { return $row["firstname"] . " " . $row["lastname"]; },
-			"Ligne2" => function ($row) { return Contacts_ExportRevue_Export::getAddressField($row, "street2"); },
-			"Complément" => function ($row) { return Contacts_ExportRevue_Export::getAddressField($row, "street3"); },
-			"Adresse4" => function ($row) { return Contacts_ExportRevue_Export::getAddressField($row, "street"); },
-			"Adresse5" => function ($row) { return Contacts_ExportRevue_Export::getAddressField($row, "pobox"); },
-			"CodePostal" => function ($row) { return Contacts_ExportRevue_Export::getAddressField($row, "zip"); },
-			"Ville" => function ($row) { return Contacts_ExportRevue_Export::getAddressField($row, "city"); },
-			"Pays" => function ($row) { return Contacts_ExportRevue_Export::getAddressField($row, "country"); },
+			"Ligne2" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "street2"); },
+			"Complément" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "street3"); },
+			"Adresse4" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "street"); },
+			"Adresse5" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "pobox"); },
+			"CodePostal" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "zip"); },
+			"Ville" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "city"); },
+			"Pays" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "country"); },
 			"" => function ($row) { return $row["firstname"]; },
 		);
 	}
