@@ -711,6 +711,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 
 	registerAddingNewProductsAndServices: function(){
 		var thisInstance = this;
+		this.loadRowSequenceNumber();
 		var lineItemTable = this.getLineItemContentsContainer();
 		jQuery('#addProduct').on('click',function(e){
 			thisInstance.addProductButtonClickHandler(e, lineItemTable, 'Products');
@@ -924,6 +925,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var message = "Une autre ligne contient le même article \"" + productName + "\".<br>Voulez-vous reprendre cette ligne ?";
 			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
 				function(e) {
+					console.log("uibbhrueibhfvuei");
 					var parentRows = $existing.parents('tr.'+ thisInstance.rowClass)
 					, qty = 0.0
 					, amount = 0.0
@@ -2023,7 +2025,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	saveProductCount : function () {
-		jQuery('#totalProductCount').val(jQuery('tr.'+this.rowClass, this.getLineItemContentsContainer()).length);
+		jQuery('#totalProductCount').val(jQuery('tr.'+this.rowClass, this.getLineItemContentsContainer()).length);//.val(this.rowSequenceHolder);
 	},
 
 	saveSubTotalValue : function() {
@@ -2693,6 +2695,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerSaveEvent : function(container){
 		var thisInstance = this;
 		jQuery('button.btn-success[type="submit"]', container).on('click', function(e, data){
+				e.preventDefault();
 				var oneDeleted = false;
 				thisInstance.getLineItemContentsContainer().find('tr.'+thisInstance.rowClass).each(function(){
 						// isProductSelected() semble retourner l'inverse de ce qu'elle dit...
@@ -2708,11 +2711,21 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 							oneDeleted = true;
 							return;
 						}
+
+						var listPriceMode = thisInstance.getListPriceMode(this);
+						if (listPriceMode === 'TTC') {
+							var price = thisInstance.getListPriceValue(this, listPriceMode);
+							$(this).find(".listPrice").val(price);
+							$(this).find(".listPrice-mode[data-mode='HT']").prop('checked', true);
+							$(this).find(".listPrice-mode[data-mode='TTC']").prop('checked', false);
+						}
 				});
 				if (oneDeleted) {
 						thisInstance.checkLineItemRow();
 						thisInstance.lineItemDeleteActions();
 				}
+
+				return false;
 		});
 	},
 
