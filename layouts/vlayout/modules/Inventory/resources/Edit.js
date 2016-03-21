@@ -1957,7 +1957,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 							   'comment','qty','listPrice','discount_type','discount_percentage',
 							   'discount_amount','lineItemType','searchIcon','netPrice','subprod_names',
 								'productTotal','discountTotal','totalAfterDiscount','taxTotal'
-								,'mode-listPrice','mode-ht-listPrice','mode-ttc-listPrice');
+								,'mode-listPrice','mode-ht-listPrice','mode-ttc-listPrice','popup_tax_row'
+								,'tax0_percentage','tax1_percentage','tax2_percentage','tax3_percentage','tax4_percentage','tax5_percentage');
 		
 		var nameFields = new Array('discount');
 		var classFields = new Array('taxPercentage');
