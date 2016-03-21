@@ -2695,7 +2695,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	registerSaveEvent : function(container){
 		var thisInstance = this;
 		jQuery('button.btn-success[type="submit"]', container).on('click', function(e, data){
-				e.preventDefault();
 				var oneDeleted = false;
 				thisInstance.getLineItemContentsContainer().find('tr.'+thisInstance.rowClass).each(function(){
 						// isProductSelected() semble retourner l'inverse de ce qu'elle dit...
@@ -2724,8 +2723,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 						thisInstance.checkLineItemRow();
 						thisInstance.lineItemDeleteActions();
 				}
-
-				return false;
 		});
 	},
 
