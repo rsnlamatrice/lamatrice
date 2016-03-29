@@ -56,6 +56,7 @@ $languageStrings = array(
 	'Tax' => 'Taxe',
 	'Contact Name' => 'Nom contact',
 	'Grand Total:' => 'Total :',
+	'Total' => 'Total TTC',
         
         /* 140926 */
         'LBL_PRODUCT_NAME' => 'Nom du produit',
