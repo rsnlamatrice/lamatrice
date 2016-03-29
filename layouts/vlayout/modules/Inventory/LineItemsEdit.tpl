@@ -327,15 +327,15 @@
             <td width="83%" >
                 <div class="pull-right"><b>{vtranslate('LBL_ADJUSTMENT',$MODULE)}&nbsp;&nbsp;</b>
                     <div class="radio pull-right">
-                        <input type="radio" name="adjustmentType" option value="-" {if $FINAL.adjustment lt 0}checked{/if}>{vtranslate('LBL_DEDUCT',$MODULE)}
+                        <input type="radio" name="adjustmentType" option value="-" {if $FINAL.adjustment lt 0}checked{/if} disabled="disabled">{vtranslate('LBL_DEDUCT',$MODULE)}
                     </div>
                     <div class="radio pull-right">
-                        <input type="radio" name="adjustmentType" option value="+" {if $FINAL.adjustment gte 0}checked{/if}>{vtranslate('LBL_ADD',$MODULE)}&nbsp;&nbsp;
+                        <input type="radio" name="adjustmentType" option value="+" {if $FINAL.adjustment gte 0}checked{/if} disabled="disabled">{vtranslate('LBL_ADD',$MODULE)}&nbsp;&nbsp;
                     </div>
                 </div>
             </td>
             <td>
-                <span class="pull-right"><input id="adjustment" name="adjustment" type="text" data-validation-engine="validate[funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]" class="lineItemInputBox" value="{if $FINAL.adjustment lt 0}{abs($FINAL.adjustment)}{elseif $FINAL.adjustment}{$FINAL.adjustment}{else}0.00{/if}"></span>
+                <span class="pull-right"><input id="adjustment" name="adjustment" type="text" data-validation-engine="validate[funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]" class="lineItemInputBox" value="{if $FINAL.adjustment lt 0}{abs($FINAL.adjustment)}{elseif $FINAL.adjustment}{$FINAL.adjustment}{else}0.00{/if}" disabled="disabled"></span>
             </td>
         </tr>
         <tr valign="top">
