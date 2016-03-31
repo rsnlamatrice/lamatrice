@@ -734,10 +734,10 @@ class Contacts_Record_Model extends Vtiger_Record_Model {
 				FROM vtiger_senotesrel
 				JOIN vtiger_crmentity
 					ON vtiger_senotesrel.notesid = vtiger_crmentity.crmid
-				WHERE vtiger_senotesrel.crmid = ?
+				WHERE (vtiger_senotesrel.crmid = ? OR vtiger_senotesrel.crmid = ?)
 				AND notesid = ?
 				GROUP BY vtiger_crmentity.crmid, vtiger_crmentity.label';
-			$params = array($this->getId(), $notesId);
+			$params = array($this->getId(), $this->get('account_id'), $notesId);
 			$result = $adb->pquery($query, $params);
 			if(!$result){
 				$adb->echoError();
