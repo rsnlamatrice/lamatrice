@@ -173,9 +173,13 @@ class Documents_RelationListView_Model extends Vtiger_RelationListView_Model {
 					FROM $tableName
 					WHERE $fieldName IN (". generateQuestionMarks($relatedRecordIdsList).")
 					AND notesid = ?
-					ORDER BY dateapplication desc";
+					ORDER BY rel_data asc, dateapplication desc";
 				$params = array_keys($relatedRecordIdsList);
 				array_push($params, $notesId);
+
+				// echo $query . "<br/>";
+				// var_dump($params);
+				// exit();
 			}
 			$fieldRels = self::get_related_fields();
 			

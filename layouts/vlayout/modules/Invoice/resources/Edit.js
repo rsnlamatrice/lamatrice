@@ -111,9 +111,16 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 		if (!products || products.length === 0) return;
 		var thisInstance = this
 		, $items = this.getLineItemContentsContainer();
+		sorted_products = [];
+
 		for(var id in products) {
-			var product = products[id];
-			if ($items.find('.selectedModuleId[value="' + id + '"]').length) 
+			sorted_products.push(products[id]);
+		}
+
+		sorted_products.sort(function(a, b){return parseInt(a['rel_data'][0]) - parseInt(b['rel_data'][0])});
+		for(var i = 0; i < sorted_products.length; ++i) {
+			var product = sorted_products[i];
+			if ($items.find('.selectedModuleId[value="' + product["id"] + '"]').length) 
 				continue;
 			var productName = product['productname']
 			,   productcode = product['productcode'];
@@ -131,10 +138,11 @@ Inventory_Edit_Js("Invoice_Edit_Js",{},{
 			, $inputId = $row.find('#hdnProductId' + sequenceNumber);
 			
 			$input.val(thisInstance.htmlDecode(productName));
-			$inputId.val(id);
-			thisInstance.autoCompleteSelected($input, {type: true, id: id});
+			$inputId.val(product["id"]);
+			thisInstance.autoCompleteSelected($input, {type: true, id: product["id"]});
 			thisInstance.setQuantityValue($row, 0);
 		}
+
 		//remove empty product row
 		$input = $items.find('.selectedModuleId').filter(function() { return !this.value; });
 		if ($input.length) 
