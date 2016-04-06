@@ -327,7 +327,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : current instance;
 	 */
 	setLineItemTotal : function(lineItemRow, lineItemTotalValue) {
-		var strValue = parseFloat(lineItemTotalValue).toFixed(2);
+		var strValue = parseFloat(lineItemTotalValue);//.toFixed(2);
 		jQuery('.productTotal', lineItemRow).text(strValue);
 		return this;
 	},
@@ -457,7 +457,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @return : current instance;
 	 */
 	setDiscountTotal : function(lineItemRow, discountValue) {
-		var strValue = parseFloat(discountValue).toFixed(2);
+		var strValue = parseFloat(discountValue);//.toFixed(2);
 		jQuery('.discountTotal',lineItemRow).text(strValue);
 		return this;
 	},
@@ -1082,19 +1082,31 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				rowAmountField.removeClass('hide').focus();
 		}
 		this.setDiscountTotal(lineItemRow,discountValue)
-			.calculateTotalAfterDiscount(lineItemRow);
+			.updateTotalAfterDiscount(lineItemRow);
 	},
 
 	/**
 	 * Function which will calculate line item total after discount
 	 * @params : lineItemRow - element which will represent lineItemRow
 	 */
-	calculateTotalAfterDiscount: function(lineItemRow) {
+	calculateTotalAfterDiscount: function(lineItemRow, round) {
+		round = (typeof round != "number") ? 0 : parseInt(round);
+		console.log(round);
 		var productTotal = this.getLineItemTotal(lineItemRow);
 		var discountTotal = this.getDiscountTotal(lineItemRow);
 		var totalAfterDiscount = productTotal - discountTotal;
-		totalAfterDiscount = totalAfterDiscount.toFixed(2);
-		this.setTotalAfterDiscount(lineItemRow,totalAfterDiscount);
+		if (round) {
+			totalAfterDiscount = totalAfterDiscount.toFixed(round);
+		}
+		return totalAfterDiscount;
+	},
+
+	/**
+	 * Function which will update line item total after discount
+	 * @params : lineItemRow - element which will represent lineItemRow
+	 */
+	updateTotalAfterDiscount: function(lineItemRow) {
+		this.setTotalAfterDiscount(lineItemRow, this.calculateTotalAfterDiscount(lineItemRow, 2));
 	},
 
 	/**
@@ -1102,7 +1114,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 */
 	calculateTaxForLineItem : function(lineItemRow) {
 		var thisInstance = this;
-		var totalAfterDiscount = this.getTotalAfterDiscount(lineItemRow);
+		var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow);
 		var quantity = this.getQuantityValue(lineItemRow);
 		var taxPercentages = jQuery('.taxPercentage',lineItemRow);
 		//intially make the tax as zero
@@ -1132,10 +1144,12 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * Function which will calculate net price for the line item
 	 */
 	calculateLineItemNetPrice : function(lineItemRow) {
-		var totalAfterDiscount = this.getTotalAfterDiscount(lineItemRow);
-		var netPrice = parseFloat(totalAfterDiscount);
+		var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow);//this.getTotalAfterDiscount(lineItemRow);
+		var netPrice = parseFloat(totalAfterDiscount); 
 		if(this.isIndividualTaxMode()) {
+			console.log("AAA");
 			var productTaxTotal = this.getLineItemTaxTotal(lineItemRow);
+			console.log("BBBB");
 			netPrice +=  parseFloat(productTaxTotal)
 		}
 		netPrice = netPrice.toFixed(2);
