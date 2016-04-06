@@ -47,6 +47,7 @@
 			</div>
 		</div>
 		<div class="modal-footer">
+			<input type="checkbox" id="toto" name="toto" value=/><label style="display:inline;" for="toto">G&eacute;n&eacute;rer un re&ccedil;u fiscal modificatif</label><br/>
 			<div class=" pull-right cancelLinkContainer">
 				<a class="cancelLink" type="reset" data-dismiss="modal">{vtranslate('LBL_CLOSE', $MODULE)}</a>
 			</div>
