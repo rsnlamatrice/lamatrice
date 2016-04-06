@@ -1147,9 +1147,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow);//this.getTotalAfterDiscount(lineItemRow);
 		var netPrice = parseFloat(totalAfterDiscount); 
 		if(this.isIndividualTaxMode()) {
-			console.log("AAA");
 			var productTaxTotal = this.getLineItemTaxTotal(lineItemRow);
-			console.log("BBBB");
 			netPrice +=  parseFloat(productTaxTotal)
 		}
 		netPrice = netPrice.toFixed(2);
