@@ -125,6 +125,7 @@ $languageStrings = array(
 	'LBL_TAG_AS_DELETED' => 'Marquer comme supprimé(e)',
 	
 	'LBL_RECORD_INFOS_COPY' => 'Copier les infos',
+	'LBL_REGENERATE_RECU_FISCAL' => 'Générer un reçu fiscal modificatif',
 );
 $jsLanguageStrings = array(
 	'LBL_SYNC_BUTTON'              => 'Synchroniser maintenant '             , 
