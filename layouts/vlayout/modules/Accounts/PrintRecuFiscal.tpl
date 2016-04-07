@@ -47,7 +47,7 @@
 			</div>
 		</div>
 		<div class="modal-footer">
-			<input type="checkbox" id="regenerated" name="regenerated" value=/><label style="display:inline;" for="regenerated">{vtranslate('LBL_REGENERATE_RECU_FISCAL', $MODULE)}</label><br/>
+			<input type="checkbox" id="regenerated" name="regenerated" /><label style="display:inline;" for="regenerated">{vtranslate('LBL_REGENERATE_RECU_FISCAL', $MODULE)}</label><br/>
 			<div class=" pull-right cancelLinkContainer">
 				<a class="cancelLink" type="reset" data-dismiss="modal">{vtranslate('LBL_CLOSE', $MODULE)}</a>
 			</div>
