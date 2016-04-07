@@ -229,13 +229,13 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	}
 	
 	//Génération du PDF du reçu fiscal
-	public function getRecuFiscalPDF($filePath, $documentRecordModel, $contactRecordModel = false){
+	public function getRecuFiscalPDF($filePath, $documentRecordModel, $contactRecordModel = false, $regenerated = false){
 		$year = preg_replace('/^.*(20\d+).*$/', '$1', $documentRecordModel->get('notes_title'));
 		
 		if(!$contactRecordModel)
 			$contactRecordModel = $this->getRelatedMainContact();
 		
-		$infos = $this->getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel);
+		$infos = $this->getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel, $regenerated);
 		if(!$infos)
 			return $infos;
 		
@@ -268,7 +268,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		return $fileName;
 	}
 	
-	function getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel){
+	function getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel, $regenerated){
 		
 		global $adb;
 		$query = "SELECT dateapplication, data
@@ -280,7 +280,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			LIMIT 1";
 		$params = array($documentRecordModel->getId(), $this->getId(), $contactRecordModel->getId());
 		$result = $adb->pquery($query, $params);
-		if($adb->num_rows($result) === 0){
+		if($adb->num_rows($result) === 0 || $regenerated){
 			return $this->createRecuFiscalRelation($year, $documentRecordModel);
 		}
 		$row = $adb->fetchByAssoc($result, 0, false);
@@ -289,7 +289,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		
 		$infos = $this->extractInfosRecuFiscal($dateApplication, $data);
 		
-		return $this->createRecuFiscalRelation($year, $documentRecordModel, $infos);
+		return $this->addRecuFiscalRelation($year, $documentRecordModel, $infos);
 	}
 	
 	function extractInfosRecuFiscal($dateApplication, $data){
@@ -315,6 +315,43 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			'montant' => $montant,
 			'recu_fiscal_num' => $numRecu,
 			'date_edition' => $dateApplication,
+		);
+	}
+
+	/**
+	 * Calcul du reçu fiscal et création de la relation
+	 *
+	 * @return true if needed (> 3€) and exists
+	 */
+	function addRecuFiscalRelation($year, $documentRecordModel, $existingInfos){
+		global $adb;
+		$numRecu = $existingInfos['recu_fiscal_num'];
+		$montant = $existingInfos['montant'];
+		
+		//create relation or update if same date (current date)
+		
+		$data = "Montant : $montant €, Reçu n° : $numRecu";
+		
+		$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
+			VALUES(?, ?, CURRENT_DATE, ?)
+			ON DUPLICATE KEY UPDATE data = ?";
+		$params = array(
+			$documentRecordModel->getId(),
+			$this->getId(),
+			$data,
+			$data,
+		);
+		$result = $adb->pquery($query, $params);
+		if(!$result){
+			echo "<pre>$query</pre>";
+			var_dump($params);
+			$adb->echoError();
+			return false;
+		}
+		return array(
+			'montant' => $montant,
+			'recu_fiscal_num' => $numRecu,
+			'date_edition' => date('d-m-Y'),
 		);
 	}
 	
@@ -481,6 +518,6 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			//var_dump($recordModels[$row['notesid']]->getName(), $this->extractInfosRecuFiscal($row['dateapplication'], $row['recusfiscal_data']), $row['dateapplication'], $row['recusfiscal_data']);
 			$recordModels[$row['notesid']]->set('recufiscal_infos', $this->extractInfosRecuFiscal($row['dateapplication'], $row['recusfiscal_data']));
 		}
-		return $recordModels;
+		return array();//$recordModels;
 	}
 }

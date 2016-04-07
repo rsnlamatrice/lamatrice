@@ -36,7 +36,9 @@ class Accounts_PrintRecuFiscal_Action extends Vtiger_Mass_Action {
 		
 		$files = array();
 		$filesPath = sys_get_temp_dir();
-			
+
+		$regenerated = ($request->get('regenerated')) ? true : false;
+
 		while($row = $adb->fetch_row($result)){
 			$recordId = $row[0];
 			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
@@ -49,7 +51,7 @@ class Accounts_PrintRecuFiscal_Action extends Vtiger_Mass_Action {
 				if($files[$recordId])
 					continue;
 			}
-			$fileName = $recordModel->getRecuFiscalPDF($filesPath, $documentRecordModel, $contactRecordModel);
+			$fileName = $recordModel->getRecuFiscalPDF($filesPath, $documentRecordModel, $contactRecordModel, $regenerated);
 			if($fileName)
 				$files[$recordId] = $fileName;
 		}
