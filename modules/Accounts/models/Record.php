@@ -253,6 +253,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		
 		$controller->setColumnValue('montant', $infos['montant']);
 		$controller->setColumnValue('recu_fiscal_num', $infos['recu_fiscal_num']);
+		$controller->setColumnValue('cancel_and_replace', $infos['cancel_and_replace']);
 		$controller->setColumnValue('recu_fiscal_date', $infos['date_edition']);
 		
 		$fileName = preg_replace('/\W/', '_', remove_accent($this->getName()));
@@ -276,19 +277,36 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			WHERE notesid = ?
 			AND crmid IN ( ?, ?)
 			AND IFNULL(data, '') LIKE '%Montant : %'
-			ORDER BY dateapplication DESC
-			LIMIT 1";
+			ORDER BY dateapplication DESC";
+			//LIMIT 1";
+
 		$params = array($documentRecordModel->getId(), $this->getId(), $contactRecordModel->getId());
 		$result = $adb->pquery($query, $params);
-		if($adb->num_rows($result) === 0 || $regenerated){
+		if($adb->num_rows($result) === 0){
 			return $this->createRecuFiscalRelation($year, $documentRecordModel);
 		}
+
+		if ($regenerated) {
+			$this->createRecuFiscalRelation($year, $documentRecordModel);
+			return $this->getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel, false);
+		}
+		
 		$row = $adb->fetchByAssoc($result, 0, false);
 		$dateApplication = $row['dateapplication'];
 		$data = $row['data'];
 		
 		$infos = $this->extractInfosRecuFiscal($dateApplication, $data);
-		
+
+		$length =  $adb->num_rows($result);
+
+		for ($i=1; $i < $length; ++$i) {
+			$row = $adb->fetchByAssoc($result, $i, false);
+			$previous_infos = $this->extractInfosRecuFiscal($row['dateapplication'], $row['data']);
+			if ($previous_infos['recu_fiscal_num'] != $infos['recu_fiscal_num']) {
+				$infos["cancel_and_replace"] = $previous_infos['recu_fiscal_num'];
+				break;
+			}
+		}
 		return $this->addRecuFiscalRelation($year, $documentRecordModel, $infos);
 	}
 	
@@ -327,6 +345,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		global $adb;
 		$numRecu = $existingInfos['recu_fiscal_num'];
 		$montant = $existingInfos['montant'];
+		$cancel_and_replace = $existingInfos['cancel_and_replace'];
 		
 		//create relation or update if same date (current date)
 		
@@ -352,6 +371,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			'montant' => $montant,
 			'recu_fiscal_num' => $numRecu,
 			'date_edition' => date('d-m-Y'),
+			'cancel_and_replace' => $cancel_and_replace,
 		);
 	}
 	
@@ -518,6 +538,6 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			//var_dump($recordModels[$row['notesid']]->getName(), $this->extractInfosRecuFiscal($row['dateapplication'], $row['recusfiscal_data']), $row['dateapplication'], $row['recusfiscal_data']);
 			$recordModels[$row['notesid']]->set('recufiscal_infos', $this->extractInfosRecuFiscal($row['dateapplication'], $row['recusfiscal_data']));
 		}
-		return array();//$recordModels;
+		return $recordModels;
 	}
 }

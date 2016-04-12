@@ -115,6 +115,8 @@ class Vtiger_RecuFiscal_PDFController extends Vtiger_LetterToAccount_PDFControll
 	function getContentRecuFiscal(){
 		//Attention, HTML strict : fermer les balises proprement
 		//✁ ne s'imprime pas
+		$cancel_and_replace = $this->focusColumnValue('cancel_and_replace');
+
 		$text = "<hr/>
 <table style=\"width: 100%\" border=1><tr><td>
 	<table><tr>
@@ -122,8 +124,13 @@ class Vtiger_RecuFiscal_PDFController extends Vtiger_LetterToAccount_PDFControll
 		<td style=\"width: 35mm; font-size: 9;\">Selon modèle Cerfa
 			<br/>n° 11580-03
 		</td>
-		<td style=\"width: 105mm; text-align: center; font-size: 11;\"><b>Reçu pour déductibilité fiscale des dons</b>
-			<div style=\"font-size: 9\">Articles 200-5, 238 bis et 885-0 V bis A du code Général des Impôts</div>
+		<td style=\"width: 105mm; text-align: center; font-size: 11;\"><b>Reçu pour déductibilité fiscale des dons</b>";
+
+		if ($cancel_and_replace) {
+			$text .= "<br/><b style=\"font-size: 9\">Annule et remplace le recu fiscal [[année]]/[[cancel_and_replace]].</b>";
+		}
+
+		$text .= "<div style=\"font-size: 9\">Articles 200-5, 238 bis et 885-0 V bis A du code Général des Impôts</div>
 		</td>
 		<td style=\"text-align: right; width: 40mm;\">Reçu [[année]]/[[n° reçu]] 
 		</td>
@@ -191,6 +198,7 @@ l'année [[année]], <b>pour la somme totale de</b> :
 			'date' => $date,
 			'article CGI' => $articleCGI,
 			'image signature' => $imageSignature,
+			'cancel_and_replace' => $cancel_and_replace,
 		);
 	
 		foreach($mapping as $field => $value)
