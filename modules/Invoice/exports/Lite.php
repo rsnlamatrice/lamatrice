@@ -4,6 +4,7 @@
  *************************************************************************************/
 
 class Invoice_Lite_Export extends Export_ExportData_Action {
+	//tmp plusieur ligne par facture (une par produit...)
 
 	// function getExportQuery(Vtiger_Request $request) {//depand of the export type...
 
