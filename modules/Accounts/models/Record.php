@@ -276,26 +276,70 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		//Contrôle du champ "use_address2_for_recu_fiscal" disponible dans le contact
 		if($contactRecordModel->get('use_address2_for_recu_fiscal')){
 			$addressData['street2'] = $contactRecordModel->get('otherstreet2');
-			$addressData['$addressFormat'] = $contactRecordModel->get('otheraddressformat');
-			$addressData['$poBox']	= $contactRecordModel->get('otherpobox');
-			$addressData['$street'] = $contactRecordModel->get('otherstreet');
-			$addressData['$street3'] = $contactRecordModel->get('otherstreet3');
-			$addressData['$zipCode'] =  $contactRecordModel->get('otherzip'); 
-			$addressData['$city']	= $contactRecordModel->get('othercity');
-			$addressData['$state']	= $contactRecordModel->get('otherstate');
-			$addressData['$country'] = $contactRecordModel->get('othercountry');
+			$addressData['addressFormat'] = $contactRecordModel->get('otheraddressformat');
+			$addressData['poBox']	= $contactRecordModel->get('otherpobox');
+			$addressData['street'] = $contactRecordModel->get('otherstreet');
+			$addressData['street3'] = $contactRecordModel->get('otherstreet3');
+			$addressData['zipCode'] =  $contactRecordModel->get('otherzip'); 
+			$addressData['city']	= $contactRecordModel->get('othercity');
+			$addressData['state']	= $contactRecordModel->get('otherstate');
+			$addressData['country'] = $contactRecordModel->get('othercountry');
 		}
 		else {	//adresse principale synchronisée dans le compte
-			$addressData['$street2'] = $contactRecordModel->get('mailingstreet2');
-			$addressData['$addressFormat'] = $contactRecordModel->get('mailingaddressformat');
-			$addressData['$poBox']	= $contactRecordModel->get('mailingpobox');
-			$addressData['$street'] = $contactRecordModel->get('mailingstreet');
-			$addressData['$street3'] = $contactRecordModel->get('mailingstreet3');
-			$addressData['$zipCode'] =  $contactRecordModel->get('mailingzip'); 
-			$addressData['$city']	= $contactRecordModel->get('mailingcity');
-			$addressData['$state']	= $contactRecordModel->get('mailingstate');
-			$addressData['$country'] = $contactRecordModel->get('mailingcountry');
+			$addressData['street2'] = $contactRecordModel->get('mailingstreet2');
+			$addressData['addressFormat'] = $contactRecordModel->get('mailingaddressformat');
+			$addressData['poBox']	= $contactRecordModel->get('mailingpobox');
+			$addressData['street'] = $contactRecordModel->get('mailingstreet');
+			$addressData['street3'] = $contactRecordModel->get('mailingstreet3');
+			$addressData['zipCode'] =  $contactRecordModel->get('mailingzip'); 
+			$addressData['city']	= $contactRecordModel->get('mailingcity');
+			$addressData['state']	= $contactRecordModel->get('mailingstate');
+			$addressData['country'] = $contactRecordModel->get('mailingcountry');
 		}
+		return $addressData;
+	}
+
+	function buildAddressString($addressData) {
+		$address = $addressData['name'] . "<br/>";
+
+		//if ($addressData['street2']) {
+			$address .= $addressData['street2'] . "<br/>";
+		//}
+
+		//if ($addressData['poBox']) {
+			$address .= $addressData['poBox'] . "<br/>";
+		//}
+
+		$address .= $addressData['street'] . "<br/>";
+
+		//if ($addressData['street3']) {
+			$address .= $addressData['street3'] . "<br/>";
+		//}
+
+		$address .= $addressData['zipCode'] . ", " . $addressData['city'];
+
+		//if ($addressData['country'] && strtoupper($addressData['country']) != "FRANCE" ) {
+			$address .= "<br/>" . $addressData['country'];
+		//}
+		
+		return $address;
+	}
+
+	function getAdressDataFromString($address) {
+		$data = explode('<br/>', $address);
+		$addressData = [];
+		$addressData['name'] = $data[0];
+		$addressData['street2'] = $data[1];
+		$addressData['poBox']	= $data[2];
+		$addressData['street'] = $data[3];
+		$addressData['street3'] = $data[4];
+		$zip_city = explode(", ", $data[5]);
+		$addressData['zipCode'] = $zip_city[0];
+		$addressData['city']	= $zip_city[1];
+		$addressData['country'] = $data[6];
+
+		$addressData['addressFormat'] = 1;//tmp ??
+		
 		return $addressData;
 	}
 	
@@ -313,11 +357,11 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		$params = array($documentRecordModel->getId(), $this->getId(), $contactRecordModel->getId());
 		$result = $adb->pquery($query, $params);
 		if($adb->num_rows($result) === 0){
-			return $this->createRecuFiscalRelation($year, $documentRecordModel);
+			return $this->createRecuFiscalRelation($year, $documentRecordModel, $contactRecordModel);
 		}
 
 		if ($regenerated) {
-			$this->createRecuFiscalRelation($year, $documentRecordModel);
+			$this->createRecuFiscalRelation($year, $documentRecordModel, $contactRecordModel);
 			return $this->getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel, false);
 		}
 		
@@ -359,11 +403,19 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 				$numRecu = $matches['num'][0];
 			else
 				$numRecu = '';
+
+			$matches = array();
+			if(preg_match_all('/Adresse\s*:\s*(?<add>.+)$/', $data, $matches))
+				$address = $matches['add'][0];
+			else
+				$address = "";
+
 		}
 		return array(
 			'montant' => $montant,
 			'recu_fiscal_num' => $numRecu,
 			'date_edition' => $dateApplication,
+			'address' => $address,
 		);
 	}
 
@@ -377,10 +429,12 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		$numRecu = $existingInfos['recu_fiscal_num'];
 		$montant = $existingInfos['montant'];
 		$cancel_and_replace = $existingInfos['cancel_and_replace'];
+		$address = $existingInfos['address'];
+		$addressData = $this->getAdressDataFromString($address);
 		
 		//create relation or update if same date (current date)
 		
-		$data = "Montant : $montant €, Reçu n° : $numRecu";
+		$data = "Montant : $montant €, Reçu n° : $numRecu, Adresse : $address";
 		
 		$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
 			VALUES(?, ?, CURRENT_DATE, ?)
@@ -398,11 +452,13 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			$adb->echoError();
 			return false;
 		}
+
 		return array(
 			'montant' => $montant,
 			'recu_fiscal_num' => $numRecu,
 			'date_edition' => date('d-m-Y'),
 			'cancel_and_replace' => $cancel_and_replace,
+			'addressData' => $addressData,
 		);
 	}
 	
@@ -411,7 +467,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * @return true if needed (> 3€) and exists
 	 */
-	function createRecuFiscalRelation($year, $documentRecordModel, $existingInfos = false){
+	function createRecuFiscalRelation($year, $documentRecordModel, $contactRecordModel, $existingInfos = false){
 		
 		global $adb;
 		$query = "
@@ -485,8 +541,11 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			$numRecu = $documentRecordModel->getNexRelatedCounterValue();
 		
 		//create relation or update if same date (current date)
+
+		$addressData = $this->getHeaderAddressData($contactRecordModel);
+		$address = $this->buildAddressString($addressData);
 		
-		$data = "Montant : $montant €, Reçu n° : $numRecu";
+		$data = "Montant : $montant €, Reçu n° : $numRecu, Adresse : $address";
 		
 		$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
 			VALUES(?, ?, CURRENT_DATE, ?)
@@ -508,6 +567,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			'montant' => $montant,
 			'recu_fiscal_num' => $numRecu,
 			'date_edition' => date('d-m-Y'),
+			'addressData' => $addressData,
 		);
 	}
 	
