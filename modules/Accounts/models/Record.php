@@ -268,6 +268,36 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		}
 		return $fileName;
 	}
+
+	function getHeaderAddressData($contactRecordModel) {
+		$addressData = [];
+		$addressData['name'] = $contactRecordModel->get('lastname') . " " . $contactRecordModel->get('firstname');
+		
+		//Contrôle du champ "use_address2_for_recu_fiscal" disponible dans le contact
+		if($contactRecordModel->get('use_address2_for_recu_fiscal')){
+			$addressData['street2'] = $contactRecordModel->get('otherstreet2');
+			$addressData['$addressFormat'] = $contactRecordModel->get('otheraddressformat');
+			$addressData['$poBox']	= $contactRecordModel->get('otherpobox');
+			$addressData['$street'] = $contactRecordModel->get('otherstreet');
+			$addressData['$street3'] = $contactRecordModel->get('otherstreet3');
+			$addressData['$zipCode'] =  $contactRecordModel->get('otherzip'); 
+			$addressData['$city']	= $contactRecordModel->get('othercity');
+			$addressData['$state']	= $contactRecordModel->get('otherstate');
+			$addressData['$country'] = $contactRecordModel->get('othercountry');
+		}
+		else {	//adresse principale synchronisée dans le compte
+			$addressData['$street2'] = $contactRecordModel->get('mailingstreet2');
+			$addressData['$addressFormat'] = $contactRecordModel->get('mailingaddressformat');
+			$addressData['$poBox']	= $contactRecordModel->get('mailingpobox');
+			$addressData['$street'] = $contactRecordModel->get('mailingstreet');
+			$addressData['$street3'] = $contactRecordModel->get('mailingstreet3');
+			$addressData['$zipCode'] =  $contactRecordModel->get('mailingzip'); 
+			$addressData['$city']	= $contactRecordModel->get('mailingcity');
+			$addressData['$state']	= $contactRecordModel->get('mailingstate');
+			$addressData['$country'] = $contactRecordModel->get('mailingcountry');
+		}
+		return $addressData;
+	}
 	
 	function getInfosRecuFiscal($year, $documentRecordModel, $contactRecordModel, $regenerated){
 		
@@ -307,6 +337,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 				break;
 			}
 		}
+
 		return $this->addRecuFiscalRelation($year, $documentRecordModel, $infos);
 	}
 	
