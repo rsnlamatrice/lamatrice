@@ -47,34 +47,48 @@ class Vtiger_RecuFiscal_PDFController extends Vtiger_LetterToAccount_PDFControll
 		return $contentModels;
 	}
 	
+	// function buildHeaderBillingAddress() {
+		
+	// 	$contactName = $this->resolveReferenceLabel($this->focusColumnValue('accountid'), 'Accounts');
+		
+	// 	//Contrôle du champ "use_address2_for_recu_fiscal" disponible dans le contact
+	// 	if($this->focusColumnValue('use_address2_for_recu_fiscal')){
+	// 		$street2 = $this->focusColumnValue('otherstreet2');
+	// 		$addressFormat = $this->focusColumnValue('otheraddressformat');
+	// 		$poBox	= $this->focusColumnValue('otherpobox');
+	// 		$street = $this->focusColumnValue('otherstreet');
+	// 		$street3 = $this->focusColumnValue('otherstreet3');
+	// 		$zipCode =  $this->focusColumnValue('otherzip'); 
+	// 		$city	= $this->focusColumnValue('othercity');
+	// 		$state	= $this->focusColumnValue('otherstate');
+	// 		$country = $this->focusColumnValue('othercountry');
+	// 	}
+	// 	else {	//adresse principale synchronisée dans le compte
+	// 		$street2 = $this->focusColumnValue('bill_street2');
+	// 		$addressFormat = $this->focusColumnValue('bill_addressformat');
+	// 		$poBox	= $this->focusColumnValue('bill_pobox');
+	// 		$street = $this->focusColumnValue('bill_street');
+	// 		$street3 = $this->focusColumnValue('bill_street3');
+	// 		$zipCode =  $this->focusColumnValue('bill_code'); 
+	// 		$city	= $this->focusColumnValue('bill_city');
+	// 		$state	= $this->focusColumnValue('bill_state');
+	// 		$country = $this->focusColumnValue('bill_country');
+	// 	}
+	// 	return $this->buildAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress);
+	// }
+
 	function buildHeaderBillingAddress() {
-		
-		$contactName = $this->resolveReferenceLabel($this->focusColumnValue('accountid'), 'Accounts');
-		
-		//Contrôle du champ "use_address2_for_recu_fiscal" disponible dans le contact
-		if($this->focusColumnValue('use_address2_for_recu_fiscal')){
-			$street2 = $this->focusColumnValue('otherstreet2');
-			$addressFormat = $this->focusColumnValue('otheraddressformat');
-			$poBox	= $this->focusColumnValue('otherpobox');
-			$street = $this->focusColumnValue('otherstreet');
-			$street3 = $this->focusColumnValue('otherstreet3');
-			$zipCode =  $this->focusColumnValue('otherzip'); 
-			$city	= $this->focusColumnValue('othercity');
-			$state	= $this->focusColumnValue('otherstate');
-			$country = $this->focusColumnValue('othercountry');
-		}
-		else {	//adresse principale synchronisée dans le compte
-			$street2 = $this->focusColumnValue('bill_street2');
-			$addressFormat = $this->focusColumnValue('bill_addressformat');
-			$poBox	= $this->focusColumnValue('bill_pobox');
-			$street = $this->focusColumnValue('bill_street');
-			$street3 = $this->focusColumnValue('bill_street3');
-			$zipCode =  $this->focusColumnValue('bill_code'); 
-			$city	= $this->focusColumnValue('bill_city');
-			$state	= $this->focusColumnValue('bill_state');
-			$country = $this->focusColumnValue('bill_country');
-		}
-		return $this->buildAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress);
+		$contactName = $this->focusColumnValue('rf_name');
+		$street2 = $this->focusColumnValue('rf_street2');
+		$addressFormat = $this->focusColumnValue('rf_addressformat');
+		$poBox	= $this->focusColumnValue('rf_pobox');
+		$street = $this->focusColumnValue('rf_street');
+		$street3 = $this->focusColumnValue('rf_street3');
+		$zipCode =  $this->focusColumnValue('rf_code'); 
+		$city	= $this->focusColumnValue('rf_city');
+		$state	= $this->focusColumnValue('rf_state');
+		$country = $this->focusColumnValue('rf_country');
+		return $this->buildAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $addressFormat);
 	}
 	
 	function getContentText(){
@@ -179,7 +193,7 @@ l'année [[année]], <b>pour la somme totale de</b> :
 		$contact_no = $this->focusColumnValue('contact_no');
 		$contact_nom = $this->resolveReferenceLabel($this->focusColumnValue('accountid'), 'Accounts');
 		$contact_address = $this->buildContactAddress();
-		$recufiscal_num = $this->focusColumnValue('recu_fiscal_num');; //TODO
+		$recufiscal_num = $this->focusColumnValue('recu_fiscal_num'); //TODO
 		
 		if($this->focusColumnValue('isgroup') > 0)
 			$articleCGI = '238 bis du CGI (entreprises & asociations)';
@@ -243,18 +257,32 @@ l'année [[année]], <b>pour la somme totale de</b> :
 	
 	
 	
-	function buildContactAddress() {
-		$contactName = '';//$this->resolveReferenceLabel($this->focusColumnValue('accountid'), 'Accounts');
-		$street2 = $this->focusColumnValue('bill_street2');
-		$addressFormat = $this->focusColumnValue('bill_addressformat');
-		$poBox	= $this->focusColumnValue('bill_pobox');
-		$street = $this->focusColumnValue('bill_street');
-		$street3 = $this->focusColumnValue('bill_street3');
-		$zipCode =  $this->focusColumnValue('bill_code'); 
-		$city	= $this->focusColumnValue('bill_city');
-		$state	= $this->focusColumnValue('bill_state');
-		$country = $this->focusColumnValue('bill_country');   
+	// function buildContactAddress() {
+	// 	$contactName = '';//$this->resolveReferenceLabel($this->focusColumnValue('accountid'), 'Accounts');
+	// 	$street2 = $this->focusColumnValue('bill_street2');
+	// 	$addressFormat = $this->focusColumnValue('bill_addressformat');
+	// 	$poBox	= $this->focusColumnValue('bill_pobox');
+	// 	$street = $this->focusColumnValue('bill_street');
+	// 	$street3 = $this->focusColumnValue('bill_street3');
+	// 	$zipCode =  $this->focusColumnValue('bill_code'); 
+	// 	$city	= $this->focusColumnValue('bill_city');
+	// 	$state	= $this->focusColumnValue('bill_state');
+	// 	$country = $this->focusColumnValue('bill_country');   
 		
+	// 	return $this->buildOneLineAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress);
+	// }
+
+	function buildContactAddress() {
+		$contactName = $this->focusColumnValue('rf_name');
+		$street2 = $this->focusColumnValue('rf_street2');
+		$addressFormat = $this->focusColumnValue('rf_addressformat');
+		$poBox	= $this->focusColumnValue('rf_pobox');
+		$street = $this->focusColumnValue('rf_street');
+		$street3 = $this->focusColumnValue('rf_street3');
+		$zipCode =  $this->focusColumnValue('rf_code'); 
+		$city	= $this->focusColumnValue('rf_city');
+		$state	= $this->focusColumnValue('rf_state');
+		$country = $this->focusColumnValue('rf_country');
 		return $this->buildOneLineAddress($contactName, $street2, $street, $street3, $pobox, $zipCode, $city, $state, $country, $formatAddress);
 	}
 

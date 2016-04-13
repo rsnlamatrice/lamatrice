@@ -255,7 +255,18 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		$controller->setColumnValue('recu_fiscal_num', $infos['recu_fiscal_num']);
 		$controller->setColumnValue('cancel_and_replace', $infos['cancel_and_replace']);
 		$controller->setColumnValue('recu_fiscal_date', $infos['date_edition']);
-		
+
+		$controller->setColumnValue('rf_name', $infos['addressData']['name']);
+		$controller->setColumnValue('rf_street2', $infos['addressData']['street2']);
+		$controller->setColumnValue('rf_addressformat', $infos['addressData']['addressFormat']);
+		$controller->setColumnValue('rf_pobox', $infos['addressData']['poBox']);
+		$controller->setColumnValue('rf_street', $infos['addressData']['street']);
+		$controller->setColumnValue('rf_street3', $infos['addressData']['street3']);
+		$controller->setColumnValue('rf_code', $infos['addressData']['zipCode']);
+		$controller->setColumnValue('rf_city', $infos['addressData']['city']);
+		$controller->setColumnValue('rf_state', $infos['addressData']['state']);
+		$controller->setColumnValue('rf_country', $infos['addressData']['country']);
+
 		$fileName = preg_replace('/\W/', '_', remove_accent($this->getName()));
 		$fileName = 'RecuFiscal_'.$year.'_'.$fileName.'_'.$contactRecordModel->get('contact_no') . '.pdf';
 		if($filePath){
