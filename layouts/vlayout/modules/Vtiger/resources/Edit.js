@@ -572,6 +572,15 @@ jQuery.Class("Vtiger_Edit_Js",{
 
 	},
 
+	registerCheckClose : function() {
+		var checkClose = function() {
+			return confirm('warning');
+		};
+
+	    window.onbeforeunload = checkClose;//TMP Why it does not work each time ?
+		//window.onunload = checkClose2;
+	},
+
 	/**
 	 * Function which will register basic events which will be used in quick create as well
 	 *
@@ -589,6 +598,7 @@ jQuery.Class("Vtiger_Edit_Js",{
 
 		//ED151029
 		this.setBrowserTitle();
+		//this.registerCheckClose();
 	},
 
 	/**
