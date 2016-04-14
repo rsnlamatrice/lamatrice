@@ -453,12 +453,9 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 		
 		$data = "Montant : $montant €, Reçu n° : $numRecu, Adresse : $address";
 		
-		// $query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
-		// 	VALUES(?, ?, CURRENT_DATE, ?)
-		// 	ON DUPLICATE KEY UPDATE data = ?";
 		$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
-			VALUES(?, ?, DATE('2016-03-17'), ?)
-			ON DUPLICATE KEY UPDATE data = ?";//tmp !!
+			VALUES(?, ?, CURRENT_DATE, ?)
+			ON DUPLICATE KEY UPDATE data = ?";
 		$params = array(
 			$documentRecordModel->getId(),
 			$this->getId(),
