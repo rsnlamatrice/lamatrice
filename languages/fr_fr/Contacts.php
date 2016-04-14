@@ -85,6 +85,7 @@ $languageStrings = array(
         
     'USE ADDRESS2 FOR REVUE'        => 'Spécifiquement pour la Revue',
     'USE ADDRESS2 FOR RECU FISCAL'  => 'Spécifiquement pour le Reçu fiscal',
+    'ASK_REGENERATE_RECU_FISCAL'    => 'Attention, vous êtes sur le point de générer un nouveau recu fiscal. Êtes vous sûr de vouloir continuer ?',
         
     'use_address2_for_revue'        => 'spécifiquement pour la Revue',
     'use_address2_for_recu_fiscal'  => 'spécifiquement pour le Reçu fiscal',

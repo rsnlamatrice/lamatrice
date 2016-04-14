@@ -16,7 +16,7 @@
 		<h3 id="massEditHeader">{vtranslate('LBL_PRINT_RECU_FISCAL', $MODULE)}
 			&nbsp;{vtranslate('LBL_FOR', $MODULE)} {$ASSIGNABLE_COUNTER} {if $ASSIGNABLE_COUNTER > 1}{vtranslate($MODULE, $MODULE)}{else}{vtranslate('SINGLE_'|cat:$MODULE, $MODULE)}{/if}</h3>
 	</div>
-	<form class="form-horizontal" id="massEdit" name="MassEdit" method="post" action="index.php">
+	<form class="form-horizontal" id="massEdit" name="MassEdit" method="post" action="index.php" onsubmit="if (document.getElementById('regenerated').checked == true) return confirm('{vtranslate('ASK_REGENERATE_RECU_FISCAL', $MODULE)}'); return true; ">
 		<input type="hidden" name="module" value="{$MODULE}" />
 		<input type="hidden" name="relatedmodule" value="{$RELATED_MODULE}" />
 		<input type="hidden" name="action" value="PrintRecuFiscal" />
