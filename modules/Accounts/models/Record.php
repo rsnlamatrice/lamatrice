@@ -393,7 +393,7 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 			}
 		}
 
-		return $this->addRecuFiscalRelation($year, $documentRecordModel, $infos);
+		return $this->addRecuFiscalRelation($year, $documentRecordModel, $contactRecordModel, $infos);
 	}
 	
 	function extractInfosRecuFiscal($dateApplication, $data){
@@ -435,21 +435,30 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
 	 *
 	 * @return true if needed (> 3€) and exists
 	 */
-	function addRecuFiscalRelation($year, $documentRecordModel, $existingInfos){
+	function addRecuFiscalRelation($year, $documentRecordModel, $contactRecordModel, $existingInfos){
 		global $adb;
 		$numRecu = $existingInfos['recu_fiscal_num'];
 		$montant = $existingInfos['montant'];
 		$cancel_and_replace = $existingInfos['cancel_and_replace'];
 		$address = $existingInfos['address'];
-		$addressData = $this->getAdressDataFromString($address);
+
+		if (trim($address)) {
+			$addressData = $this->getAdressDataFromString($address);
+		} else {
+			$addressData = $this->getHeaderAddressData($contactRecordModel);
+			$address = $this->buildAddressString($addressData);
+		}
 		
 		//create relation or update if same date (current date)
 		
 		$data = "Montant : $montant €, Reçu n° : $numRecu, Adresse : $address";
 		
+		// $query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
+		// 	VALUES(?, ?, CURRENT_DATE, ?)
+		// 	ON DUPLICATE KEY UPDATE data = ?";
 		$query = "INSERT INTO vtiger_senotesrel (notesid, crmid, dateapplication, data)
-			VALUES(?, ?, CURRENT_DATE, ?)
-			ON DUPLICATE KEY UPDATE data = ?";
+			VALUES(?, ?, DATE('2016-03-17'), ?)
+			ON DUPLICATE KEY UPDATE data = ?";//tmp !!
 		$params = array(
 			$documentRecordModel->getId(),
 			$this->getId(),
