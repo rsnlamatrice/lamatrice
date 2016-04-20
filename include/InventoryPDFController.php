@@ -206,7 +206,7 @@ class Vtiger_InventoryPDFController {
 		}
 		$netTotal = round($netTotal, 2); //ED151019 round 2
 		$netTotal = number_format(($netTotal + $this->totaltaxes), $no_of_decimal_places,'.', '');
-		// if($netTotal != $grandTotal)
+		// if($netTotal != $grandTotal) // TMP ??
 		// 	$summaryModel->set(getTranslatedString("Net Total", $this->moduleName), $this->formatPrice($netTotal));
 
 		$discount_amount = $final_details["discount_amount_final"];
@@ -265,6 +265,7 @@ class Vtiger_InventoryPDFController {
 			$summaryModel->set(getTranslatedString("Shipping & Handling Tax:", $this->moduleName)." ($sh_tax_percent%)", $this->formatPrice($final_details['shtax_totalamount']));
 		if((float)$final_details['adjustment'])
 			$summaryModel->set(getTranslatedString("Adjustment", $this->moduleName), $this->formatPrice($final_details['adjustment']));
+		$summaryModel->set(getTranslatedString("Total TVA", $this->moduleName), $this->formatPrice($this->totaltaxes)); // TODO add currency string
 		$summaryModel->set(getTranslatedString("Total", $this->moduleName), $this->formatPrice($grandTotal)); // TODO add currency string
 
 		if ($this->moduleName == 'Invoice') {
