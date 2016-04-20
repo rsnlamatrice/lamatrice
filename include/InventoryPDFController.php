@@ -202,7 +202,7 @@ class Vtiger_InventoryPDFController {
 		$sh_tax_percent = 0;
 		foreach($associated_products as $productLineItem) {
 			++$productLineItemIndex;
-			$netTotal += $productLineItem["netPrice{$productLineItemIndex}"]
+			$netTotal += $productLineItem["netPrice{$productLineItemIndex}"];
 		}
 		$netTotal = round($netTotal, 2); //ED151019 round 2
 		$netTotal = number_format(($netTotal + $this->totaltaxes), $no_of_decimal_places,'.', '');
