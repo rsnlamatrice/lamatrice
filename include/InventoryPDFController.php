@@ -117,8 +117,8 @@ class Vtiger_InventoryPDFController {
 			$discount	= $productLineItem["discountTotal{$productLineItemIndex}"];
 			$taxed_discount = $discount;
 			$taxable_total = $quantity * $listPrice - $discount;
-			$taxable_total = number_format(round($taxable_total, $no_of_decimal_places), $no_of_decimal_places,'.','');
-			$producttotal = $taxable_total;
+			// $taxable_total = number_format(round($taxable_total, $no_of_decimal_places), $no_of_decimal_places,'.','');
+			// $producttotal = $taxable_total;
 			if($this->focus->column_fields["hdnTaxType"] == "individual") {
 				for($tax_count=0;$tax_count<count($productLineItem['taxes']);$tax_count++) {
 					$tax_percent = $productLineItem['taxes'][$tax_count]['percentage'];
@@ -136,7 +136,7 @@ class Vtiger_InventoryPDFController {
 				}
 			}
 
-			$producttotal_taxes = number_format(round(round($producttotal_taxes, $no_of_decimal_places), $no_of_decimal_places), $no_of_decimal_places,'.','');
+			//$producttotal_taxes = number_format(round($producttotal_taxes, $no_of_decimal_places)), $no_of_decimal_places,'.','');
 			$producttotal = $taxable_total+$producttotal_taxes;
 			$unitTaxedPrice = $quantity ? (($producttotal + $taxed_discount) / $quantity) : ($listPrice);
 			$producttotal = number_format(round($producttotal, $no_of_decimal_places), $no_of_decimal_places,'.','');
