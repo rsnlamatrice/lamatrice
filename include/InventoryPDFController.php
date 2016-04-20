@@ -142,7 +142,7 @@ class Vtiger_InventoryPDFController {
 			$producttotal = number_format(round($producttotal, $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$tax = $producttotal_taxes;
 			$totaltaxes += $tax;
-			$totaltaxes = number_format(round($totaltaxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
+			
 			$discountPercentage = $productLineItem["discount_percent{$productLineItemIndex}"];
 			$productName = decode_html($productLineItem["productName{$productLineItemIndex}"]);
 			//get the sub product
@@ -169,6 +169,7 @@ class Vtiger_InventoryPDFController {
 
 			$contentModels[] = $contentModel;
 		}
+		$totaltaxes = number_format(round($totaltaxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
 		$this->totaltaxes = $totaltaxes; //will be used to add it to the net total
 		$this->totalPerTax = $totalPerTax;
 		return $contentModels;
