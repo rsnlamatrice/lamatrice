@@ -117,7 +117,7 @@ class Vtiger_InventoryPDFController {
 			$discount	= $productLineItem["discountTotal{$productLineItemIndex}"];
 			$taxed_discount = $discount;
 			$taxable_total = $quantity * $listPrice - $discount;
-			$taxable_total = number_format($taxable_total, $no_of_decimal_places,'.','');
+			$taxable_total = number_format(round($taxable_total, $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$producttotal = $taxable_total;
 			if($this->focus->column_fields["hdnTaxType"] == "individual") {
 				for($tax_count=0;$tax_count<count($productLineItem['taxes']);$tax_count++) {
@@ -136,13 +136,13 @@ class Vtiger_InventoryPDFController {
 				}
 			}
 
-			$producttotal_taxes = number_format($producttotal_taxes, $no_of_decimal_places,'.','');
+			$producttotal_taxes = number_format(round(round($producttotal_taxes, $no_of_decimal_places), $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$producttotal = $taxable_total+$producttotal_taxes;
 			$unitTaxedPrice = $quantity ? (($producttotal + $taxed_discount) / $quantity) : ($listPrice);
-			$producttotal = number_format($producttotal, $no_of_decimal_places,'.','');
+			$producttotal = number_format(round($producttotal, $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$tax = $producttotal_taxes;
 			$totaltaxes += $tax;
-			$totaltaxes = number_format($totaltaxes, $no_of_decimal_places,'.','');
+			$totaltaxes = number_format(round($totaltaxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$discountPercentage = $productLineItem["discount_percent{$productLineItemIndex}"];
 			$productName = decode_html($productLineItem["productName{$productLineItemIndex}"]);
 			//get the sub product
@@ -204,8 +204,8 @@ class Vtiger_InventoryPDFController {
 			++$productLineItemIndex;
 			$netTotal += $productLineItem["netPrice{$productLineItemIndex}"];
 		}
-		$netTotal = round($netTotal, 2); //ED151019 round 2
-		$netTotal = number_format(($netTotal + $this->totaltaxes), $no_of_decimal_places,'.', '');
+		//$netTotal = round($netTotal, 2); //ED151019 round 2
+		$netTotal = number_format(round($netTotal + $this->totaltaxes, 2), $no_of_decimal_places,'.', '');
 		// if($netTotal != $grandTotal) // TMP ??
 		// 	$summaryModel->set(getTranslatedString("Net Total", $this->moduleName), $this->formatPrice($netTotal));
 
@@ -244,7 +244,7 @@ class Vtiger_InventoryPDFController {
 				$tax_name = $group_tax_details[$i]['taxname'];
 				if($this->totalPerTax[$tax_name]){
 					$taxNames[] = decode_html($group_tax_details[$i]['taxlabel']) . ' ' . (float)$group_tax_details[$i]['percentage'] . ' %';
-					$taxValues[] = $this->formatPrice(number_format($this->totalPerTax[$tax_name], $no_of_decimal_places,'.', ''));
+					$taxValues[] = $this->formatPrice(number_format(round($this->totalPerTax[$tax_name], $no_of_decimal_places), $no_of_decimal_places,'.', ''));
 				}
 			}
 			//var_dump($group_tax_details, $this->totalPerTax, implode("\r\n", $taxNames), implode("\r\n", $taxValues));
@@ -583,7 +583,7 @@ class Vtiger_InventoryPDFController {
 
 	function formatPrice($value, $decimal=2) {
 		global $current_user;
-		return number_format((float)$value, $decimal, $current_user->currency_decimal_separator, ' ') . ' ' . $this->buildCurrencySymbol();
+		return number_format(round((float)$value, $decimal), $decimal, $current_user->currency_decimal_separator, ' ') . ' ' . $this->buildCurrencySymbol();
 		/*ED151019
 		$currencyField = new CurrencyField($value);
 		return $currencyField->getDisplayValue(null, true);*/
