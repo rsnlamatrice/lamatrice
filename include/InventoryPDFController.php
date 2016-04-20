@@ -206,8 +206,8 @@ class Vtiger_InventoryPDFController {
 		}
 		$netTotal = round($netTotal, 2); //ED151019 round 2
 		$netTotal = number_format(($netTotal + $this->totaltaxes), $no_of_decimal_places,'.', '');
-		if($netTotal != $grandTotal)
-			$summaryModel->set(getTranslatedString("Net Total", $this->moduleName), $this->formatPrice($netTotal));
+		// if($netTotal != $grandTotal)
+		// 	$summaryModel->set(getTranslatedString("Net Total", $this->moduleName), $this->formatPrice($netTotal));
 
 		$discount_amount = $final_details["discount_amount_final"];
 		$discount_percent = $final_details["discount_percentage_final"];
