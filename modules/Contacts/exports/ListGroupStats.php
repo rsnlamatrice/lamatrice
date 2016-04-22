@@ -110,7 +110,7 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 
 		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
 		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
-		$query = substr($parentQuery, 0, $fromPos) . ", mc.department mailingdepartment, mc.region mailingregion, oc.department otherdepartment, oc.region otherregion, adh.adh_list, adh.max_adh " .
+		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_contactdetails.contactid, mc.department mailingdepartment, mc.region mailingregion, oc.department otherdepartment, oc.region otherregion, adh.adh_list, adh.max_adh " .
 				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN (SELECT department, region, rsnzipcode FROM vtiger_rsncity GROUP BY rsnzipcode) AS mc ON vtiger_contactaddress.mailingzip = mc.rsnzipcode LEFT JOIN (SELECT department, region, rsnzipcode FROM vtiger_rsncity GROUP BY rsnzipcode) AS oc ON vtiger_contactaddress.otherzip = oc.rsnzipcode " .
 				 	"LEFT JOIN (SELECT vtiger_invoice.accountid, GROUP_CONCAT(vtiger_service.productcode SEPARATOR ';') AS adh_list, MAX(vtiger_service.productcode) AS max_adh FROM  vtiger_invoice
 						LEFT JOIN vtiger_inventoryproductrel ON vtiger_invoice.invoiceid = vtiger_inventoryproductrel.id
