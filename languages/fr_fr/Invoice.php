@@ -11,10 +11,12 @@
  * December 2013   
  ************************************************************************************/
 $languageStrings = array(
-	'LBL_INVOICE'                   => 'Facture'             , 
-	'Invoice'                       => 'Factures'                     , 
+	'LBL_INVOICE'                  => 'Facture'             , 
+	'Invoice'                      => 'Factures'                     , 
 	'SINGLE_Invoice'               => 'Facture'                     , 
-	'LBL_EXPORT_TO_PDF'            => 'Imprimer en PDF'                  , 
+	'LBL_EXPORT_TO_PDF'            => 'Imprimer en PDF'                  ,
+	'LBL_EXPORT_TO_PDF_ADH'        => 'Imprimer en PDF (Reçu d\'adhésion)'                  ,
+	'LBL_EXPORT_TO_PDF_DV'         => 'Imprimer en PDF (Dépôt-vente)'                  ,
 	'LBL_SEND_MAIL_PDF'            => 'Envoi du PDF par Email'         , 
 	'LBL_ADD_RECORD'               => 'Ajouter une facture'         , 
 	'LBL_RECORDS_LIST'             => 'Liste des factures'              , 
@@ -33,7 +35,7 @@ $languageStrings = array(
 	'Credit Invoice'               => 'Avoir'                     , 
 	'Paid'                         => 'Soldée'                      , 
 	'AutoCreated'                  => 'Créée automatiquement'      , 
-	'Created'                  	=> 'Création en cours'      , 
+	'Created'                  	   => 'Création en cours'      , 
 	'Cancel'                       => 'Annuler'                     , 
 	'LBL_COPY_SHIPPING_ADDRESS'    => 'Copier l\'adresse de livraison'       , 
 	'LBL_COPY_BILLING_ADDRESS'     => 'Copier l\'adresse de facturation'        , 

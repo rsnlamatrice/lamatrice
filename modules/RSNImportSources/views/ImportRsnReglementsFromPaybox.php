@@ -524,7 +524,11 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		else {
 			$record = Vtiger_Record_Model::getCleanInstance('RsnReglements');
 			$record->set('mode', 'create');
-			$record->set('numpiece', $reglement['numpiece']);
+			//if ($reglement['transactionid']) {
+				$record->set('numpiece', $reglement['numpiece'] . "|" . $reglement['transactionid']);
+			//} else {
+			//	$record->set('numpiece', $reglement['numpiece']);
+			//}
 			$record->set('rsnmoderegl', $reglement['rsnmoderegl']);
 			$record->set('dateregl', $reglement['dateregl']);
 			$record->set('rsnbanque', $reglement['rsnbanque']);
@@ -711,7 +715,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 
 				}
 
-				$fileReader->close(); 
+				$fileReader->close();
 				return !isset($error);
 			} else {
 				//TODO: manage error
@@ -801,12 +805,19 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
 
-		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('numpiece', 'autorisation'));
+		RSNImportSources_Utils_Helper::clearDuplicatesInTable($tableName, array('numpiece', 'autorisation', 'transactionid'));
 		
-		/* Affecte l'id du règlement déjà connu */
+		/* Affecte l'id du règlement déjà connu */ /* TMP ERROR CHECK EXICTING REGLEMENT ...*/
 		$query = "UPDATE $tableName
 		JOIN  vtiger_rsnreglements
-			ON  vtiger_rsnreglements.numpiece = `$tableName`.numpiece
+			ON (
+				vtiger_rsnreglements.numpiece = CONCAT(`$tableName`.numpiece, '|', `$tableName`.transactionid)
+				OR (
+					vtiger_rsnreglements.numpiece NOT LIKE '%|%'
+					AND vtiger_rsnreglements.numpiece = `$tableName`.numpiece
+					AND vtiger_rsnreglements.dateregl = `$tableName`.dateregl
+					AND vtiger_rsnreglements.dateoperation = `$tableName`.dateoperation )
+			)
 			AND (vtiger_rsnreglements.error = 0 AND `$tableName`.autorisation = 'Autorisation'
 				OR vtiger_rsnreglements.error > 0 AND `$tableName`.autorisation != 'Autorisation'
 			)
