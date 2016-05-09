@@ -11,10 +11,12 @@
  * December 2013   
  ************************************************************************************/
 $languageStrings = array(
-	'LBL_INVOICE'                  => 'Facture'             , 
+	'LBL_INVOICE'                  => 'Facture'             ,
+	'LBL_INVOICE_ADH'              => 'Reçu d\'Adhésion'             ,
+	'LBL_INVOICE_DV'               => 'Facture dépôt-vente'             ,
 	'Invoice'                      => 'Factures'                     , 
 	'SINGLE_Invoice'               => 'Facture'                     , 
-	'LBL_EXPORT_TO_PDF'            => 'Imprimer en PDF'                  ,
+	'LBL_EXPORT_TO_PDF'            => 'Imprimer en PDF (Facture)'                  ,
 	'LBL_EXPORT_TO_PDF_ADH'        => 'Imprimer en PDF (Reçu d\'adhésion)'                  ,
 	'LBL_EXPORT_TO_PDF_DV'         => 'Imprimer en PDF (Dépôt-vente)'                  ,
 	'LBL_SEND_MAIL_PDF'            => 'Envoi du PDF par Email'         , 

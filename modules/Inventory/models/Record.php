@@ -261,8 +261,8 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	 * Function to get URL for Export the record as PDF
 	 * @return <type>
 	 */
-	public function getExportPDFUrl() {
-		return "index.php?module=".$this->getModuleName()."&action=ExportPDF&record=".$this->getId();
+	public function getExportPDFUrl($type="Default") {
+		return "index.php?module=".$this->getModuleName()."&action=ExportPDF&record=".$this->getId()."&type=".$type;
 	}
 
 	/**
@@ -276,7 +276,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	/**
 	 * Function to get this record and details as PDF
 	 */
-	public function getPDF() {
+	public function getPDF($type="Default") {
 		$recordId = $this->getId();
 		$moduleName = $this->getModuleName();
 
@@ -286,6 +286,7 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		$controller->loadRecord($recordId);
 
 		$fileName = vtranslate('SINGLE_'.$moduleName, $moduleName).'_'.getModuleSequenceNumber($moduleName, $recordId);
+		$controller->setType($type);
 		$controller->Output($fileName.'.pdf', 'D');
 	}
 
@@ -363,8 +364,6 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	 */
 	public function updateReceivedFromRelated(){		
 	}
-	
-	
 	
 	//Change la valeur du prix unitaire pour afficher le prix TTC vendu
 	function setSoldPrice_to_UnitPrice(&$records, &$headers){

@@ -12,15 +12,27 @@ include_once 'include/InventoryPDFController.php';
 
 class Vtiger_InvoicePDFController extends Vtiger_InventoryPDFController{
 	function buildHeaderModelTitle() {
+		$translatedTypeLabel = "";
+		switch ($this->type) {
+		case "ADH":
+			$translatedTypeLabel = getTranslatedString("LBL_INVOICE_ADH", $this->moduleName) . "\n";
+			break;
+		case "DV":
+			$translatedTypeLabel = getTranslatedString("LBL_INVOICE_DV", $this->moduleName) . "\n";
+			break;
+		}
+
 		$singularModuleNameKey = 'SINGLE_'.$this->moduleName;
 		$translatedSingularModuleLabel = getTranslatedString($singularModuleNameKey, $this->moduleName);
 		if($translatedSingularModuleLabel == $singularModuleNameKey) {
 			$translatedSingularModuleLabel = getTranslatedString($this->moduleName, $this->moduleName);
 		}
+
 		$singularContactsNameKey = 'SINGLE_Contacts';
 		$translatedSingularContactsLabel = getTranslatedString($singularContactsNameKey, 'Contacts');
 		$contactNo = $this->resolveReferenceFieldValue($this->focusColumnValue('contact_id'), 'Contacts', 'contact_no');
-		return sprintf("%s : %s\n%s : %s"
+		return sprintf("%s%s : %s\n%s : %s"
+				   , $translatedTypeLabel
 			       , $translatedSingularModuleLabel, $this->focusColumnValue('invoice_no')
 			       , $translatedSingularContactsLabel, $contactNo
 			       );

@@ -117,6 +117,20 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 			);
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($detailViewLinks);
 
+			$detailViewLinks = array(
+					'linklabel' => vtranslate('LBL_EXPORT_TO_PDF_ADH', $moduleName),
+					'linkurl' => $recordModel->getExportPDFURL("ADH"),
+					'linkicon' => ''
+			);
+			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($detailViewLinks);
+
+			$detailViewLinks = array(
+					'linklabel' => vtranslate('LBL_EXPORT_TO_PDF_DV', $moduleName),
+					'linkurl' => $recordModel->getExportPDFURL("DV"),
+					'linkicon' => ''
+			);
+			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($detailViewLinks);
+
 			$sendEmailLink = array(
 			    'linklabel' => vtranslate('LBL_SEND_MAIL_PDF', $moduleName),
 			    'linkurl' => 'javascript:Inventory_Detail_Js.sendEmailPDFClickHandler(\''.$recordModel->getSendEmailPDFUrl().'\')',

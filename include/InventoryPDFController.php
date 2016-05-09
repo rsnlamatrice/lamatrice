@@ -322,7 +322,11 @@ class Vtiger_InventoryPDFController {
 			//if(!empty($resultrow['country'])) $addressValues[]= "\n".$resultrow['country'];
 
 
-			if(!empty($resultrow['inventory_header_text']))		$additionalCompanyInfo[]= "\n\n".$resultrow['inventory_header_text'];
+			if(strtoupper($this->type) == "ADH" && !empty($resultrow['adh_header_text'])) {
+				$additionalCompanyInfo[]= "\n\n".$resultrow['adh_header_text'];
+			} else if(!empty($resultrow['inventory_header_text'])) {
+				$additionalCompanyInfo[]= "\n\n".$resultrow['inventory_header_text'];
+			}
 			
 			if(!empty($resultrow['phone']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Phone: ", $this->moduleName). $resultrow['phone'];
 			if(!empty($resultrow['fax']))		$additionalCompanyInfo[]= "\n".getTranslatedString("Fax: ", $this->moduleName). $resultrow['fax'];
@@ -592,6 +596,10 @@ class Vtiger_InventoryPDFController {
 
 	function formatDate($value) {
 		return DateTimeField::convertToUserFormat($value);
+	}
+
+	public function setType($type) {
+		$this->type = $type;
 	}
 
 }

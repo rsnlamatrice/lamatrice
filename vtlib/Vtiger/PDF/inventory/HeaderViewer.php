@@ -94,11 +94,15 @@ class Vtiger_PDF_InventoryHeaderViewer extends Vtiger_PDF_HeaderViewer {
 			$title = $this->model->get('title');
 			$titleRows = explode("\n", $title);
 			$contentWidth = $pdf->GetStringWidth($titleRows[0]);
+			for ($i = 1; $i < sizeof($titleRows); ++$i) {
+				$line_width = $pdf->GetStringWidth($titleRows[$i]);
+				$contentWidth = ($contentWidth < $line_width) ? $line_width : $contentWidth;
+			}
 			$contentHeight = $pdf->GetStringHeight($titleRows[0], $contentWidth) * count($titleRows);
 			
-			$roundedRectX = $headerFrame->w+$headerFrame->x-$contentWidth*2.0;
-			$roundedRectW = $contentWidth*2.0;
-			$roundedRectH = 10 + (6 * (count($titleRows) -1));
+			$roundedRectW = $contentWidth + 2*15;
+			$roundedRectX = $headerFrame->w+$headerFrame->x-$roundedRectW;
+			$roundedRectH = 10 + (5 * (count($titleRows) -1));
 			$pdf->RoundedRect($roundedRectX, 10, $roundedRectW, $roundedRectH, 3, '1111', 'DF', array(), array(205,201,201));
 			
 			$contentX = $roundedRectX + (($roundedRectW - $contentWidth)/2.0);
