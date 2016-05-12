@@ -86,9 +86,9 @@ class RSNInvoiceHandler extends VTEventHandler {
 		//Autres, après les abonnements
 		foreach($categories as $productCategory => $categoryItems)
 			switch($productCategory){
-			case 'Adhésion' :
-				$this->handleAfterSaveInvoiceAdhesionEvent($invoice, $categoryItems, $account);
-				break;
+			// case 'Adhésion' : // plus d'abonnement automatique en cas d'adhésion ...
+			// 	$this->handleAfterSaveInvoiceAdhesionEvent($invoice, $categoryItems, $account);
+			// 	break;
 			default:
 				break;
 			}
