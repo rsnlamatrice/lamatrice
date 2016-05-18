@@ -87,7 +87,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 		return "";
 	}
 
-	function ifFree($row) {
+	function isFree($row) {
 		$max_fin_abo = time() - 365 * 24 * 60 * 60;//aujourd'hui - 1 an
 		$finabo = strtotime($row["finabo"]);
 		//echo "today $today -> finabo : $finabo<br/>";
