@@ -25,7 +25,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 			"info lib 3" => function ($row) { return Contacts_ExportRevue_Export::getMessage3($row); },
 			"info lib 4" => function ($row) { return Contacts_ExportRevue_Export::getMessage4($row); },
 			"fin abo" => "finabo",
-			"abo type" => "rsnabotype",
+			"abo type" => function ($row) { return Contacts_ExportRevue_Export::getAboType($row); },
 		);
 	}
 	
@@ -35,7 +35,6 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 
 	function getExportEncoding(Vtiger_Request $request) {
 		return 'ISO-8859-1';
-		//return 'ASCII';
 	}
 
 	function getExportFileName($request) {
@@ -93,6 +92,14 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 		$finabo = strtotime($row["finabo"]);
 		//echo "today $today -> finabo : $finabo<br/>";
 		return (!strpos($row["rsnabotype"], "Ne pas abonner") &&  !strpos($row["rsnabotype"], "Non abon")) && (($finabo >= $today) || !$finabo);//$finabo >= $today;
+	}
+
+	function getAboType($row) {
+		if ($row["rsnabotype"]) {
+			return $row["rsnabotype"];
+		} else {
+			return "Un n° découverte";
+		}
 	}
 
 	function getMessage2($row) {
