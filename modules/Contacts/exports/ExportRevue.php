@@ -78,13 +78,20 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage1($row) {
-		if (strpos($row["rsnabotype"], "couverte") || strpos($row["rsnabotype"], "remerciement")) {
+		if ($this->isFree($row)) {
 			return "Numéro offert. Merci !";
 		} else if (!$this->isAbo($row)) {
 			return "Merci de vous réabonner.";
 		}
 
 		return "";
+	}
+
+	function ifFree($row) {
+		$max_fin_abo = time() - 365 * 24 * 60 * 60;//aujourd'hui - 1 an
+		$finabo = strtotime($row["finabo"]);
+		//echo "today $today -> finabo : $finabo<br/>";
+		return (strpos($row["rsnabotype"], "couverte") || strpos($row["rsnabotype"], "remerciement") || !$row["rsnabotype"] || ($finabo < $max_fin_abo));
 	}
 
 	function isAbo($row) {
