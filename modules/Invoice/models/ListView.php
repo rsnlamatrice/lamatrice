@@ -18,6 +18,7 @@ class Invoice_ListView_Model extends Inventory_ListView_Model {
 	public function getListViewMassActions($linkParams) {
 		$moduleModel = $this->getModule();
 		$currentUser = Users_Record_Model::getCurrentUserModel();
+		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 
 		$links = parent::getListViewMassActions($linkParams);
 		
@@ -28,7 +29,7 @@ class Invoice_ListView_Model extends Inventory_ListView_Model {
 				break;
 			}
 		}
-		if($currentUser->isAdminUser()){
+		if($currentUser->isAdminUser() || $currentUserModel->hasModuleActionPermission($moduleModel->getId(), 'UnaccountingInvoice')){
 			//Ajout du menu Rétablir en cours les Compta
 			$massActionLink = array(
 					'linktype' => 'LISTVIEWMASSACTION',
