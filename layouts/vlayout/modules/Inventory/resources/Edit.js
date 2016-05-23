@@ -925,7 +925,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var message = "Une autre ligne contient le même article \"" + productName + "\".<br>Voulez-vous reprendre cette ligne ?";
 			Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(
 				function(e) {
-					console.log("uibbhrueibhfvuei");
 					var parentRows = $existing.parents('tr.'+ thisInstance.rowClass)
 					, qty = 0.0
 					, amount = 0.0
@@ -1091,7 +1090,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 */
 	calculateTotalAfterDiscount: function(lineItemRow, round) {
 		round = (typeof round != "number") ? 0 : parseInt(round);
-		console.log(round);
 		var productTotal = this.getLineItemTotal(lineItemRow);
 		var discountTotal = this.getDiscountTotal(lineItemRow);
 		var totalAfterDiscount = productTotal - discountTotal;
