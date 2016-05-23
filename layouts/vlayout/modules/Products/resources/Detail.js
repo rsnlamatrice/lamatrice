@@ -39,6 +39,8 @@ Vtiger_Detail_Js("Products_Detail_Js",{},{
 			var selectedTabElement = thisInstance.getSelectedTab();
 			var relatedController = new Products_RelatedList_Js(thisInstance.getRecordId(), app.getModuleName(), selectedTabElement, relatedModuleName);
 			relatedController.registerEventForPriceBooks();
+		} else if (relatedModuleName === 'Products') {
+			this._super();
 		}
 	},
 	

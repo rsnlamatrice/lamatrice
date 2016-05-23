@@ -27,6 +27,11 @@ class Products_Relation_Model extends Vtiger_Relation_Model {
 		} else {
 			parent::deleteRelation($sourceRecordId, $relatedRecordId);
 		}
+
+		if ($sourceModuleName == "Products" && $relatedModuleName == "Products") {
+			//TMP Udate stock !!
+			autoUpdateLotQtyInStock($sourceRecordId);
+		}
 	}
     
     /**
@@ -67,6 +72,17 @@ class Products_Relation_Model extends Vtiger_Relation_Model {
 			if($db->num_rows($result) > 0){
 				return true;
 			}
+		}
+	}
+
+	public function addRelation($sourcerecordId, $destinationRecordId) {
+		parent::addRelation($sourcerecordId, $destinationRecordId);
+		$sourceModule = $this->getParentModuleModel();
+		$sourceModuleName = $sourceModule->get('name');
+		$sourceModuleFocus = CRMEntity::getInstance($sourceModuleName);
+		$destinationModuleName = $this->getRelationModuleModel()->get('name');
+		if ($sourceModuleName == "Products" && $destinationModuleName == "Products") {
+			autoUpdateLotQtyInStock($sourcerecordId);
 		}
 	}
 

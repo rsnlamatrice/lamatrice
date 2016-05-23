@@ -687,13 +687,20 @@ function insert_def_org_field()
   * @param $upd_qty -- quantity :: Type integer
   */
 
-function updateProductQty($product_id, $upd_qty)
+function updateProductQty($product_id, $upd_qty) // TMP -> update parent product stock!!
 {
 	global $log;
 	$log->debug("Entering updateProductQty(".$product_id.",". $upd_qty.") method ...");
 	global $adb;
 	$query= "update vtiger_products set qtyinstock=? where productid=?";
     $adb->pquery($query, array($upd_qty, $product_id));
+
+	$product = Vtiger_Record_Model::getInstanceById($product_id, "Products");
+	$parentProducts = $product->getParentProducts();
+	foreach($parentProducts as $parentProduct) {
+		autoUpdateLotQtyInStock($parentProduct->getId());
+	}
+
 	$log->debug("Exiting updateProductQty method ...");
 
 }
@@ -707,11 +714,9 @@ function addToProductStock($productId,$qty)
 {
 	global $log;
 	$log->debug("Entering addToProductStock(".$productId.",".$qty.") method ...");
-	global $adb;
 	$qtyInStck=getProductQtyInStock($productId);
 	$updQty=$qtyInStck + $qty;
-	$sql = "UPDATE vtiger_products set qtyinstock=? where productid=?";
-	$adb->pquery($sql, array($updQty, $productId));
+	updateProductQty($productId, $updQty);
 	$log->debug("Exiting addToProductStock method ...");
 
 }
@@ -741,11 +746,9 @@ function deductFromProductStock($productId,$qty)
 {
 	global $log;
 	$log->debug("Entering deductFromProductStock(".$productId.",".$qty.") method ...");
-	global $adb;
 	$qtyInStck=getProductQtyInStock($productId);
 	$updQty=$qtyInStck - $qty;
-	$sql = "UPDATE vtiger_products set qtyinstock=? where productid=?";
-	$adb->pquery($sql, array($updQty, $productId));
+	updateProductQty($productId, $updQty);
 	$log->debug("Exiting deductFromProductStock method ...");
 
 }
@@ -774,16 +777,50 @@ function deductFromProductDemand($productId,$qty)
   */
 function getProductQtyInStock($product_id)
 {
+	//tmp if product is lot -> then auto uptade stock !!
 	global $log;
 	$log->debug("Entering getProductQtyInStock(".$product_id.") method ...");
         global $adb;
-        $query1 = "select qtyinstock from vtiger_products where productid=?";
+        $query1 = "select qtyinstock, usageunit from vtiger_products where productid=?";
         $result=$adb->pquery($query1, array($product_id));
+        $usageunit= $adb->query_result($result,0,"usageunit");
         $qtyinstck= $adb->query_result($result,0,"qtyinstock");
+        if ($usageunit == "Pack") {
+        	$qtyinstck = autoUpdateLotQtyInStock($product_id);
+        }
 	$log->debug("Exiting getProductQtyInStock method ...");
         return $qtyinstck;
 
 
+}
+
+/** Function to auto update lot quantity
+  * @param $product_id -- product id :: Type integer
+  * @param $upd_qty -- quantity :: Type integer
+  */
+function autoUpdateLotQtyInStock($lot_id)
+{
+	$sourceModuleRecordModel = Vtiger_Record_Model::getInstanceById($lot_id, "Products");
+	if ($sourceModuleRecordModel->get('usageunit') == "Pack") {
+		$subProducts = $sourceModuleRecordModel->getSubProducts();
+		$stockQty = -1;
+		foreach($subProducts as $subProduct) {
+			$subProductStock = getProductQtyInStock($subProduct->getId());
+			$subProductQty = 1;//tmp !!!
+			$subProductStock = $subProductStock / $subProductQty;
+			if ($stockQty == -1 || $subProductStock < $stockQty) {
+				$stockQty = $subProductStock;
+			} 
+		}
+		
+		$stockQty = ($stockQty == -1) ? 0 : $stockQty;
+
+		updateProductQty($lot_id, $stockQty);
+
+		return $stockQty;
+	}
+
+	return $sourceModuleRecordModel->get('qtyinstock');
 }
 
 /**	This Function returns the current product quantity in demand.

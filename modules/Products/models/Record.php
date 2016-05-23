@@ -76,6 +76,30 @@ class Products_Record_Model extends Vtiger_Record_Model {
 	}
 
 	/**
+	 * Function to get parentproduct for this record
+	 * @return <Array> of parentproducts
+	 */
+	function getParentProducts() {
+		$db = PearDatabase::getInstance();
+
+		$result = $db->pquery("SELECT vtiger_products.productid FROM vtiger_products
+			INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_products.productid
+			LEFT JOIN vtiger_seproductsrel ON vtiger_seproductsrel.productid = vtiger_products.productid AND vtiger_seproductsrel.setype='Products'
+			LEFT JOIN vtiger_users ON vtiger_users.id=vtiger_crmentity.smownerid
+			LEFT JOIN vtiger_groups ON vtiger_groups.groupid = vtiger_crmentity.smownerid
+			WHERE vtiger_crmentity.deleted = 0 AND vtiger_seproductsrel.crmid = ? ", array($this->getId()));
+
+		$parentProductList = array();
+		for($i=0; $i<$db->num_rows($result); $i++) {
+			$parentProductId = $db->query_result($result, $i, 'productid');
+			$parentProductList[] = Vtiger_Record_Model::getInstanceById($parentProductId, 'Products');
+		}
+
+		return $parentProductList;
+	}
+
+
+	/**
 	 * Function to get Url to Create a new Quote from this record
 	 * @return <String> Url to Create new Quote
 	 */
