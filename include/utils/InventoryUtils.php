@@ -469,7 +469,7 @@ function updateInventoryProductRel($entity) {
 				foreach($product_info as $key=>$prevQty) {
 					$updqtyinstk = getPrdQtyInStck($key);
 					$upd_qty = $updqtyinstk + $prevQty;
-					updateProductQty($key, $upd_qty);
+					updateProductQty($key, $upd_qty); // TMP sub product ????
 				}
 			}
 		}
@@ -542,17 +542,7 @@ function updateInventoryProductRel($entity) {
 				$qty = $adb->query_result($product_info,$index,'quantity');
 				$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
 				$qtyinstk= getPrdQtyInStck($productid);
-				$upd_qty = $qtyinstk-$qty;
-				updateProductQty($productid, $upd_qty);
-				$sub_prod_query = $adb->pquery("SELECT productid from vtiger_inventorysubproductrel WHERE id=? AND sequence_no=?",array($entity_id,$sequence_no));
-				if($adb->num_rows($sub_prod_query)>0) {
-					for($j=0;$j<$adb->num_rows($sub_prod_query);$j++) {
-						$sub_prod_id = $adb->query_result($sub_prod_query,$j,"productid");
-						$sqtyinstk= getPrdQtyInStck($sub_prod_id);
-						$supd_qty = $sqtyinstk-$qty;
-						updateProductQty($sub_prod_id, $supd_qty);
-					}
-				}
+				deductFromProductStock($productid, $qty, true);
 			}
 		}
 	}
@@ -1186,17 +1176,7 @@ function deductProductsFromStock($recordId) {
 		$qty = $adb->query_result($product_info,$index,'quantity');
 		$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
 		$qtyinstk= getPrdQtyInStck($productid);
-		$upd_qty = $qtyinstk-$qty;
-		updateProductQty($productid, $upd_qty);
-		$sub_prod_query = $adb->pquery("SELECT productid from vtiger_inventorysubproductrel WHERE id=? AND sequence_no=?",array($recordId,$sequence_no));
-		if($adb->num_rows($sub_prod_query)>0) {
-			for($j=0;$j<$adb->num_rows($sub_prod_query);$j++) {
-				$sub_prod_id = $adb->query_result($sub_prod_query,$j,"productid");
-				$sqtyinstk= getPrdQtyInStck($sub_prod_id);
-				$supd_qty = $sqtyinstk-$qty;
-				updateProductQty($sub_prod_id, $supd_qty);
-			}
-		}
+		deductFromProductStock($productid, $qty, true);
 	}
 }
 
@@ -1211,17 +1191,7 @@ function addProductsToStock($recordId) {
 		$qty = $adb->query_result($product_info,$index,'quantity');
 		$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
 		$qtyinstk= getPrdQtyInStck($productid);
-		$upd_qty = $qtyinstk+$qty;
-		updateProductQty($productid, $upd_qty);
-		$sub_prod_query = $adb->pquery("SELECT productid from vtiger_inventorysubproductrel WHERE id=? AND sequence_no=?",array($recordId,$sequence_no));
-		if($adb->num_rows($sub_prod_query)>0) {
-			for($j=0;$j<$adb->num_rows($sub_prod_query);$j++) {
-				$sub_prod_id = $adb->query_result($sub_prod_query,$j,"productid");
-				$sqtyinstk= getPrdQtyInStck($sub_prod_id);
-				$supd_qty = $sqtyinstk+$qty;
-				updateProductQty($sub_prod_id, $supd_qty);
-			}
-		}
+		addToProductStock($productid, $qty, true);
 	}
 }
 

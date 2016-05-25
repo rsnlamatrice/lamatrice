@@ -687,7 +687,7 @@ function insert_def_org_field()
   * @param $upd_qty -- quantity :: Type integer
   */
 
-function updateProductQty($product_id, $upd_qty) // TMP -> update parent product stock!!
+function updateProductQty($product_id, $upd_qty)
 {
 	global $log;
 	$log->debug("Entering updateProductQty(".$product_id.",". $upd_qty.") method ...");
@@ -710,15 +710,36 @@ function updateProductQty($product_id, $upd_qty) // TMP -> update parent product
   *  $productId --> ProductId, Type:Integer
   *  $qty --> Quantity to be added, Type:Integer
   */
-function addToProductStock($productId,$qty)
+function addToProductStock($productId,$qty, $updateChilds)
 {
 	global $log;
 	$log->debug("Entering addToProductStock(".$productId.",".$qty.") method ...");
 	$qtyInStck=getProductQtyInStock($productId);
 	$updQty=$qtyInStck + $qty;
 	updateProductQty($productId, $updQty);
+
+	if ($updateChilds) {
+		addToChildProductStock($productId,$qty);
+	}
 	$log->debug("Exiting addToProductStock method ...");
 
+}
+
+/**	This Function add the specified child product quantity to the Product Quantity in Stock in the Warehouse
+  *	@param int $productId - ProductId
+  *	@param int $qty - Quantity to be subtracted
+  */
+function addToChildProductStock($productId,$qty)
+{
+	global $log;
+	$log->debug("Entering addToChildProductStock(".$productId.",".$qty.") method ...");
+
+	$product = Vtiger_Record_Model::getInstanceById($productId, "Products");
+	$childProducts = $product->getSubProducts();
+	foreach($childProducts as $childProduct) {
+		addToProductStock($childProduct->getId(), $qty, true);
+	}
+	$log->debug("Exiting addToChildProductStock method ...");
 }
 
 /**	This Function adds the specified product quantity to the Product Quantity in Demand in the Warehouse
@@ -742,15 +763,35 @@ function addToProductDemand($productId,$qty)
   *	@param int $productId - ProductId
   *	@param int $qty - Quantity to be subtracted
   */
-function deductFromProductStock($productId,$qty)
+function deductFromProductStock($productId,$qty, $updateChilds)
 {
 	global $log;
 	$log->debug("Entering deductFromProductStock(".$productId.",".$qty.") method ...");
 	$qtyInStck=getProductQtyInStock($productId);
 	$updQty=$qtyInStck - $qty;
 	updateProductQty($productId, $updQty);
+
+	if ($updateChilds) {
+		deductFromChildProductStock($productId,$qty);
+	}
 	$log->debug("Exiting deductFromProductStock method ...");
 
+}
+
+/**	This Function subtract the specified child product quantity to the Product Quantity in Stock in the Warehouse
+  *	@param int $productId - ProductId
+  *	@param int $qty - Quantity to be subtracted
+  */
+function deductFromChildProductStock($productId,$qty)
+{
+	global $log;
+	$log->debug("Entering deductFromChildProductStock(".$productId.",".$qty.") method ...");
+	$product = Vtiger_Record_Model::getInstanceById($productId, "Products");
+	$childProducts = $product->getSubProducts();
+	foreach($childProducts as $childProduct) {
+		deductFromProductStock($childProduct->getId(), $qty, true);
+	}
+	$log->debug("Exiting deductFromChildProductStock method ...");
 }
 
 /**	This Function subtract the specified product quantity to the Product Quantity in Demand in the Warehouse

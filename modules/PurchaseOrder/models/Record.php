@@ -30,6 +30,12 @@ class PurchaseOrder_Record_Model extends Inventory_Record_Model {
 				$qty = $db->query_result($result,0,"qtyinstock");
 				$stock = $qty + $relatedProduct['qty'.$key];
 				$db->pquery("UPDATE vtiger_products SET qtyinstock=? WHERE productid=?", array($stock, $productId));
+
+				$product = Vtiger_Record_Model::getInstanceById($productId, "Products");
+				$parentProducts = $product->getParentProducts();
+				foreach($parentProducts as $parentProduct) {
+					autoUpdateLotQtyInStock($parentProduct->getId());
+				}
 			}
 		}
 	}
