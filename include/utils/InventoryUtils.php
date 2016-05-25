@@ -467,9 +467,7 @@ function updateInventoryProductRel($entity) {
 		foreach($update_product_array as $id=>$seq) {
 			foreach($seq as $seq=>$product_info) {
 				foreach($product_info as $key=>$prevQty) {
-					$updqtyinstk = getPrdQtyInStck($key);
-					$upd_qty = $updqtyinstk + $prevQty;
-					updateProductQty($key, $upd_qty); // TMP sub product ????
+					addToProductStock($key, $prevQty, true);
 				}
 			}
 		}
@@ -541,7 +539,6 @@ function updateInventoryProductRel($entity) {
 				$productid = $adb->query_result($product_info,$index,'productid');
 				$qty = $adb->query_result($product_info,$index,'quantity');
 				$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
-				$qtyinstk= getPrdQtyInStck($productid);
 				deductFromProductStock($productid, $qty, true);
 			}
 		}
@@ -1169,13 +1166,11 @@ function deductProductsFromStock($recordId) {
 	global $adb;
 	$adb->pquery("UPDATE vtiger_inventoryproductrel SET incrementondel=1 WHERE id=?",array($recordId));
 
-	$product_info = $adb->pquery("SELECT productid,sequence_no, quantity from vtiger_inventoryproductrel WHERE id=?",array($recordId));
+	$product_info = $adb->pquery("SELECT productid, quantity from vtiger_inventoryproductrel WHERE id=?",array($recordId));
 	$numrows = $adb->num_rows($product_info);
 	for($index = 0;$index <$numrows;$index++) {
 		$productid = $adb->query_result($product_info,$index,'productid');
 		$qty = $adb->query_result($product_info,$index,'quantity');
-		$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
-		$qtyinstk= getPrdQtyInStck($productid);
 		deductFromProductStock($productid, $qty, true);
 	}
 }
@@ -1184,13 +1179,11 @@ function deductProductsFromStock($recordId) {
 function addProductsToStock($recordId) {
 	global $adb;
 
-	$product_info = $adb->pquery("SELECT productid,sequence_no, quantity from vtiger_inventoryproductrel WHERE id=?",array($recordId));
+	$product_info = $adb->pquery("SELECT productid, quantity from vtiger_inventoryproductrel WHERE id=?",array($recordId));
 	$numrows = $adb->num_rows($product_info);
 	for($index = 0;$index <$numrows;$index++) {
 		$productid = $adb->query_result($product_info,$index,'productid');
 		$qty = $adb->query_result($product_info,$index,'quantity');
-		$sequence_no = $adb->query_result($product_info,$index,'sequence_no');
-		$qtyinstk= getPrdQtyInStck($productid);
 		addToProductStock($productid, $qty, true);
 	}
 }
