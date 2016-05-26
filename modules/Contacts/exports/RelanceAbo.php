@@ -17,7 +17,7 @@ class Contacts_RelanceAbo_Export extends Contacts_ExportRevue_Export { // TMP Fi
 			"CodePostal" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "zip"); },
 			"Ville" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "city"); },
 			"Pays" => function ($row) { return Contacts_RelanceAbo_Export::getAddressField($row, "country"); },
-			"" => function ($row) { return $row["firstname"]; },
+			"" => function ($row) { return "Bonjour " . $row["firstname"]; },
 		);
 	}
 	
