@@ -65,59 +65,61 @@ class RSNImportSources_PreImport_Action extends Vtiger_SaveAjax_Action {
 					break;
 				}	
 			}
-		}
-		//Mise à jour de l'enregistrement final associé
-		if($rowData['update'.$moduleName]){
-			$recordId = $rowData['update'.$moduleName]['id'];
-			
-			$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
-			$addressChanged = false;
-			//Archive l'ancienne adresse
-			switch($moduleName){
-			case 'Contacts' :
-				if(array_key_exists('mailingstreet', $rowData['update'.$moduleName])
-				|| array_key_exists('mailingstreet2', $rowData['update'.$moduleName])
-				|| array_key_exists('mailingstreet3', $rowData['update'.$moduleName])
-				|| array_key_exists('mailingpobox', $rowData['update'.$moduleName])
-				|| array_key_exists('mailingzip', $rowData['update'.$moduleName])
-				|| array_key_exists('mailingcity', $rowData['update'.$moduleName])
-				){
-					$recordModel->createContactAddressesRecord('mailing', true);
-					$addressChanged = true;
+
+			//Mise à jour de l'enregistrement final associé
+			if($rowData['update'.$moduleName]){
+				$recordId = $rowData['update'.$moduleName]['id'];
+				
+				$recordModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+				$addressChanged = false;
+				//Archive l'ancienne adresse
+				switch($moduleName){
+				case 'Contacts' :
+					if(array_key_exists('mailingstreet', $rowData['update'.$moduleName])
+					|| array_key_exists('mailingstreet2', $rowData['update'.$moduleName])
+					|| array_key_exists('mailingstreet3', $rowData['update'.$moduleName])
+					|| array_key_exists('mailingpobox', $rowData['update'.$moduleName])
+					|| array_key_exists('mailingzip', $rowData['update'.$moduleName])
+					|| array_key_exists('mailingcity', $rowData['update'.$moduleName])
+					){
+						$recordModel->createContactAddressesRecord('mailing', true);
+						$addressChanged = true;
+					}
+					
+					//email
+					$fieldName = 'email';
+					if($rowData['update'.$moduleName][$fieldName] && preg_match('/^\(.*\)$/', $rowData['update'.$moduleName][$fieldName]))
+						$rowData['update'.$moduleName][$fieldName] = '';
+					if($rowData['update'.$moduleName][$fieldName]
+					&& $rowData['update'.$moduleName][$fieldName] != $recordModel->get($fieldName)){
+						$recordModel->createContactEmailsRecord(true);
+					}
+					break;
+				default:
+					break;
+				}//switch($moduleName)
+				
+				$recordModel->set('mode', 'edit');
+				foreach($rowData['update'.$moduleName] as $fieldName => $fieldValue){
+					if($fieldName != 'id')
+						$recordModel->set($fieldName, $fieldValue);
 				}
 				
-				//email
-				$fieldName = 'email';
-				if($rowData['update'.$moduleName][$fieldName] && preg_match('/^\(.*\)$/', $rowData['update'.$moduleName][$fieldName]))
-					$rowData['update'.$moduleName][$fieldName] = '';
-				if($rowData['update'.$moduleName][$fieldName]
-				&& $rowData['update'.$moduleName][$fieldName] != $recordModel->get($fieldName)){
-					$recordModel->createContactEmailsRecord(true);
+				if($addressChanged){
+					$recordModel->set('mailingmodifieddate', date('Y-m-d'));
+					if($recordModel->get('mailingzip') && $recordModel->get('mailingcity'))
+						$rsnnpai = 0;//Ok
+					else
+						$rsnnpai = 4;//Incomplète
+					if($rsnnpai != $recordModel->get('rsnnpai')){
+						$recordModel->set('rsnnpai', $rsnnpai);
+						$recordModel->set('rsnnpaidate', date('Y-m-d'));
+					}
 				}
-				break;
-			default:
-				break;
-			}//switch($moduleName)
-			
-			$recordModel->set('mode', 'edit');
-			foreach($rowData['update'.$moduleName] as $fieldName => $fieldValue){
-				if($fieldName != 'id')
-					$recordModel->set($fieldName, $fieldValue);
+				$recordModel->save();
 			}
-			
-			if($addressChanged){
-				$recordModel->set('mailingmodifieddate', date('Y-m-d'));
-				if($recordModel->get('mailingzip') && $recordModel->get('mailingcity'))
-					$rsnnpai = 0;//Ok
-				else
-					$rsnnpai = 4;//Incomplète
-				if($rsnnpai != $recordModel->get('rsnnpai')){
-					$recordModel->set('rsnnpai', $rsnnpai);
-					$recordModel->set('rsnnpaidate', date('Y-m-d'));
-				}
-			}
-			$recordModel->save();
 		}
+		
 
 		$response = new Vtiger_Response();
 		$response->setResult(true);
