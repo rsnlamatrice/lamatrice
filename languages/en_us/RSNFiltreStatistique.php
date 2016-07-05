@@ -16,7 +16,7 @@ $languageStrings = array(
 	'LBL_NAME' => 'name',
 	'LBL_FILTERVALUEQUERY' => 'Filter Value Query',
 	'LBL_FILTERNAMEFIELDNAME' => 'Name of the filter name field',
-	'STATISTIQUE' => 'statistic',
+	'LBL_STATISTIQUE' => 'Statistic',
 
 );
 
