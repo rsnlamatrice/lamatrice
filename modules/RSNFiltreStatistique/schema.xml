@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_rsnfiltrestatistique</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnfiltrestatistique` (
+  `rsnfiltrestatistiqueid` int(11) NOT NULL DEFAULT '0',
+    `name` VARCHAR(128) DEFAULT NULL,
+    `filtervaluequery` INT(19) DEFAULT NULL,
+    `filternamefieldname` VARCHAR(128) DEFAULT NULL,
+    PRIMARY KEY (`rsnfiltrestatistiqueid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_rsnfiltrestatistiquecf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_rsnfiltrestatistiquecf` (
+  `rsnfiltrestatistiqueid` int(11) NOT NULL,
+  PRIMARY KEY (`rsnfiltrestatistiqueid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
