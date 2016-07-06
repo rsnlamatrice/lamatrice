@@ -14,8 +14,7 @@ $languageStrings = array(
 	'LBL_BLOCK_GENERAL_INFORMATION' => '',
 	'LBL_BLOCK_SYSTEM_INFORMATION' => '',
 	'LBL_NAME' => 'nom',
-	'LBL_FILTERVALUEQUERY' => 'Ruequête des valeurs du filtre',
-	'LBL_FILTERNAMEFIELDNAME' => 'Nom du champos nom du filtre',
+	'LBL_FILTERVALUEQUERY' => 'Requête des valeurs du filtre',
 	'LBL_STATISTIQUE' => 'Statistique',
 
 );
