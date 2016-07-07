@@ -126,6 +126,10 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			//var_dump($relatedStatistic->getId(), $relatedStatistic->get('rsnstatisticsid'), $relatedStatistic, $statTableName);
 			$periodicities = explode(' |##| ', $relatedStatistic->get('stats_periodicite'));//Annuelle | Mensuelle | Exercice // tmp hardcode !!
 
+			$statisticFilters = RSNStatistics_Utils_Helper::getStatisticFilters($relatedStatistic->getId());
+			$statisticFilters[] = null;
+			//$statisticFilters->append(null);
+
 			$periods = array();
 			foreach ($periodicities as $periodicity) {
 				switch ($periodicity) {
@@ -194,7 +198,8 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 				$statistics[] = array(
 					'record' => $relatedStatistic,
 					'table' => $statTableName,
-					'queries' => $queries
+					'queries' => $queries,
+					'filters' =>$statisticFilters,
 				);
 			}
 		}
@@ -243,7 +248,6 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			$beginDate = mktime(0, 0, 0, 1, 1, $this->getDefaultBeginYear()); 
 			break;
 		}
-		
 		$statistics = $this->getStatsQueriesPeriods($relatedModuleName, $beginDate);
 		$isAllEntities = $crmids === '*';
 		if($isAllEntities){
@@ -270,7 +274,7 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 			}
 			//var_dump($statistics, $relatedModuleName, $crmids);
 		}
-		
+
 		if($perf = !is_numeric($crmids))
 			$perf = new RSN_Performance_Helper();
 		
@@ -289,86 +293,108 @@ class RSNStatistics_Update_Action extends Vtiger_Action_Controller {
 
 			if($isAllEntities)
 				$this->cleanStatTable($statTableName);
-			
-			//Insert
-			$statisticResults = array();
-			foreach ($statistic['queries'] as $statQuery){
-				$relatedStatisticsFields = $statQuery['fields'];
-				$sqlqueryRecord = $statQuery['record'];
-						
-				//Chaque période
-				foreach ($statQuery['periods'] as $statPeriod){
-					$name = $statPeriod['name'];
-					$code = $statPeriod['code'];
-					$end_date = $statPeriod['end_date'];
-					$begin_date = $statPeriod['begin_date'];
-					
-					if(!array_key_exists($code, $cleanedPeriods)){
-						$this->clearStatTableData($statTableName, $code, $isAllEntities ? false : $crmids);
-						$cleanedPeriods[$code] = true;
-					}
-					
-					$executionQuery = $sqlqueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date));
-					
+
+			foreach ($statistic["filters"] as $filter) {
+				if ($filter) {
+					$filters_available = RSNStatistics_Utils_Helper::getFiltersAvailable($filter["filtervaluequery"], $crmids, $isAllEntities);
+				} else {
+					$filters_available = array();
+					$filters_available[] = null;
+				}
+
+				foreach ($filters_available as $filter_value) {
 					//Insert
-					$params = array();
-					$insertQuery = "INSERT INTO $statTableName ( crmid, name, code, begin_date, end_date, last_update";
-					
-					//Stat Fields
-					//Chaque Champ de stat
-					foreach ($relatedStatisticsFields as $relatedStatisticsField) {
-						$insertQuery .= ", `".$relatedStatisticsField['uniquecode']."`";
-					}
-					
-					//Select Données source
-					$insertQuery .= ")
-					/* ".$relatedStatistic->getName()." -> $name */
-					SELECT source.crmid, ?, ?, ?, ?, NOW()";
-					$params[] = $name;
-					$params[] = $code;
-					$params[] = $begin_date;
-					$params[] = $end_date;
-					
-					//Stat Fields
-					//Chaque Champ de stat
-					foreach ($relatedStatisticsFields as $relatedStatisticsField) {
-						$insertQuery .= ", source.`".$relatedStatisticsField['uniquecode']."`";
-					}
-					
-					//From source
-					$insertQuery .= "
-						FROM (" . $executionQuery['sql'] . ") source";
-					$params = array_merge($params, $executionQuery['params']);
-					
-					//ON DUPLICATE (rappel : index unique sur crmid, code)
-					$insertQuery .= "
-					ON DUPLICATE KEY UPDATE last_update = NOW()";
-					//Stat Fields
-					//Chaque Champ de stat
-					foreach ($relatedStatisticsFields as $relatedStatisticsField) {
-						$insertQuery .= ", `".$relatedStatisticsField['uniquecode']."` = source.`".$relatedStatisticsField['uniquecode']."`";
-					}
-					
-					if($perf) $perf->tick();
-					$result = $db->pquery($insertQuery, $params);
-					if($perf) $perf->tick();
-					if(!$result){
-						$db->echoError();
-						echo "<pre>$insertQuery</pre>";
-						var_dump($params);
-						die("ERREUR D'EXECUTION DE LA REQUETE DE STATISTIQUE");
-					}
-					else{
-						echo "<pre>$insertQuery</pre>";
-						var_dump($params);
-						$affectedRows = $db->getAffectedRowCount($result);
-						var_dump("OK : ".$relatedStatistic->get('name')." -> $name : $affectedRows modification(s).");
+					$statisticResults = array();
+					foreach ($statistic['queries'] as $statQuery){
+						$relatedStatisticsFields = $statQuery['fields'];
+						$sqlqueryRecord = $statQuery['record'];
+								
+						//Chaque période
+						foreach ($statQuery['periods'] as $statPeriod){//tmp check filters !!! ($filter and $filter_value)
+							$name = $statPeriod['name'];
+							$code = $statPeriod['code'];
+							$end_date = $statPeriod['end_date'];
+							$begin_date = $statPeriod['begin_date'];
+							
+							if(!array_key_exists($code, $cleanedPeriods)){
+								$this->clearStatTableData($statTableName, $code, $isAllEntities ? false : $crmids);
+								$cleanedPeriods[$code] = true;
+							}
+
+							if ($filter && $filter_value) {
+								$executionQuery = $sqlqueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date, $filter["fieldname"].'_filter_id'=>$filter_value["id"], $filter["fieldname"].'_filter_enabled'=>"1"));
+							} else {
+								$executionQuery = $sqlqueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'begin_date'=>$begin_date, 'end_date'=>$end_date));
+							}
+
+							//Insert
+							$params = array();
+							$insertQuery = "INSERT INTO $statTableName ( crmid, name, code, begin_date, end_date, rsnfiltrestatistiqueid, filterid, last_update";
+							
+							//Stat Fields
+							//Chaque Champ de stat
+							foreach ($relatedStatisticsFields as $relatedStatisticsField) {
+								$insertQuery .= ", `".$relatedStatisticsField['uniquecode']."`";
+							}
+							
+							//Select Données source
+							$insertQuery .= ")
+							/* ".$relatedStatistic->getName()." -> $name */";
+							if ($filter && $filter_value) {
+								$insertQuery .= "SELECT source.crmid, ?, ?, ?, ?, ?, ?, NOW()";
+							} else {
+								$insertQuery .= "SELECT source.crmid, ?, ?, ?, ?, NULL, NULL, NOW()";
+							}
+							$params[] = $name;
+							$params[] = $code;
+							$params[] = $begin_date;
+							$params[] = $end_date;
+							if ($filter && $filter_value) {
+								$params[] = $filter['id'];
+								$params[] = $filter_value["id"];
+							}
+							
+							//Stat Fields
+							//Chaque Champ de stat
+							foreach ($relatedStatisticsFields as $relatedStatisticsField) {
+								$insertQuery .= ", source.`".$relatedStatisticsField['uniquecode']."`";
+							}
+							
+							//From source
+							$insertQuery .= "
+								FROM (" . $executionQuery['sql'] . ") source";
+							$params = array_merge($params, $executionQuery['params']);
+							
+							//ON DUPLICATE (rappel : index unique sur crmid, code)
+							$insertQuery .= "
+							ON DUPLICATE KEY UPDATE last_update = NOW()";//tmp check what is key !!!
+							//Stat Fields
+							//Chaque Champ de stat
+							foreach ($relatedStatisticsFields as $relatedStatisticsField) {
+								$insertQuery .= ", `".$relatedStatisticsField['uniquecode']."` = source.`".$relatedStatisticsField['uniquecode']."`";
+							}
+							
+							if($perf) $perf->tick();
+							$result = $db->pquery($insertQuery, $params);
+							if($perf) $perf->tick();
+							if(!$result){
+								$db->echoError();
+								echo "<pre>$insertQuery</pre>";
+								var_dump($params);
+								die("ERREUR D'EXECUTION DE LA REQUETE DE STATISTIQUE");
+							}
+							else{
+								echo "<pre>$insertQuery</pre>";
+								var_dump($params);
+								$affectedRows = $db->getAffectedRowCount($result);
+								var_dump("OK : ".$relatedStatistic->get('name')." -> $name : $affectedRows modification(s).");
+							}
+						}
 					}
 				}
 			}
 		}
 		if($perf) $perf->terminate();
-		//exit;
 	}
 
 	function updateAll(Vtiger_Request $request) {

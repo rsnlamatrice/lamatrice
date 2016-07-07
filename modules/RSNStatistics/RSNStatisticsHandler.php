@@ -53,6 +53,8 @@ class RSNStatisticsHandler extends VTEventHandler {
 				  `code` varchar(30) NOT NULL,
 				  `begin_date` TIMESTAMP NULL DEFAULT NULL,
 				  `end_date` TIMESTAMP NULL DEFAULT NULL,
+				  `rsnfiltrestatistiqueid` INT(11) NULL,
+				  `filterid` INT(19) NULL,
 				  `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 				  PRIMARY KEY (`id`),
 				  UNIQUE( `crmid`, `code`)

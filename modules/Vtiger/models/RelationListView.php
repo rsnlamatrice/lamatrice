@@ -477,7 +477,7 @@ class Vtiger_RelationListView_Model extends Vtiger_Base_Model {
 			    if(array_key_exists($col,$relatedColumnFields)){
 					$newRow[$relatedColumnFields[$col]] = $val;
 			    }
-				elseif($col === 'rsnstatisticsid'){
+				elseif($col === 'rsnstatisticsid' || $col === 'rsnfiltrestatistiqueid' || $col === 'filterid'){
 					$newRow[$col] = $val;
 				}
 			}

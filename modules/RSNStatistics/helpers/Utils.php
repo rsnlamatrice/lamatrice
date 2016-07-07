@@ -128,6 +128,81 @@ class RSNStatistics_Utils_Helper {
 		}
 		return $relatedStatFields;
 	}
+
+	/**
+	 * Function to get sfilters of a statistic
+	 * @param $statisticIds : id or array of ids
+	 * @return array of array of statistic fields properties
+	 */
+	public static function getStatisticFilters($statisticIds, $moduleNames = false, $context = false) {//statistics 306963 tmp
+		if($statisticIds && !is_array($statisticIds))
+			$statisticIds = array($statisticIds);
+		$params = array();
+		//Pas sûr que le `vtiger_rsnstatistics`.`rsnstatisticsid` ne fasse pas foirer le DISTINCT dans le cas où un champ apparait dans plusieurs stats lié au même module
+		$sql = "SELECT DISTINCT `vtiger_rsnfiltrestatistique`.*, `vtiger_crmentity`.*, `vtiger_rsnstatistics`.`rsnstatisticsid`
+				FROM `vtiger_rsnfiltrestatistique`
+				INNER JOIN `vtiger_crmentity`
+					ON `vtiger_crmentity`.`crmid` = `vtiger_rsnfiltrestatistique`.`rsnfiltrestatistiqueid`
+				INNER JOIN `vtiger_crmentityrel`
+					ON `vtiger_crmentityrel`.`relcrmid` = `vtiger_crmentity`.`crmid`
+				INNER JOIN `vtiger_rsnstatistics`
+					ON `vtiger_crmentityrel`.`crmid` = `vtiger_rsnstatistics`.`rsnstatisticsid`
+				INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_stats`
+					ON `vtiger_rsnstatistics`.`rsnstatisticsid` = `vtiger_crmentity_stats`.`crmid`
+				WHERE `vtiger_crmentity`.`deleted` = 0
+				AND `vtiger_crmentity_stats`.`deleted` = 0";
+		if($statisticIds){
+			$sql .= "
+				AND `vtiger_crmentityrel`.`crmid` IN (".generateQuestionMarks($statisticIds).")";
+			$params = array_merge($params, $statisticIds);
+		}
+		else{
+			$sql .= "
+				AND `vtiger_rsnstatistics`.`disabled` = 0";
+			if($moduleNames){
+				if(!is_array($moduleNames))
+					$moduleNames = array($moduleNames);
+				$sql .= "
+					AND `vtiger_rsnstatistics`.`relmodule` IN (".generateQuestionMarks($moduleNames).")";
+				$params = array_merge($params, $moduleNames);
+			}
+		}
+
+		$sql .= " ORDER BY `vtiger_rsnfiltrestatistique`.name";
+
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($sql, $params);
+		if(!$result)
+			$db->echoError();
+		$numberOfRecords = $db->num_rows($result);
+		
+		$statisticFilters = array();
+		for ($i = 0; $i < $numberOfRecords; ++$i) {
+			$row = $db->raw_query_result_rowdata($result, $i);
+			$row['id'] = $row['crmid'];
+			$statisticFilters[] = $row;
+		}
+		return $statisticFilters;
+	}
+
+	public function getFiltersAvailable($filtervaluequeryid, $crmids, $isAllEntities) {//tmp to check !!
+		$db = PearDatabase::getInstance();
+		$filterValuesQueryRecord = Vtiger_Record_Model::getInstanceById($filtervaluequeryid);
+					$filtersQuery = $filterValuesQueryRecord->getExecutionQuery(array('crmid'=>$crmids, 'all_filters'=>$isAllEntities));
+		$result = $db->pquery($filtersQuery["sql"], $filtersQuery["params"]);
+
+		if(!$result)
+			$db->echoError();
+		$numberOfRecords = $db->num_rows($result);
+		
+		$filters_available = array();
+		for ($i = 0; $i < $numberOfRecords; ++$i) {
+			$row = $db->raw_query_result_rowdata($result, $i);
+			$filters_available[] = $row;
+		}
+
+		return $filters_available;
+	}
 	
 	public static function getRelatedStatsFieldsRecordModels($statisticIds, $moduleName = false) {
 		$relatedStatFields = self::getRelatedStatsFields($statisticIds, $moduleName);
@@ -331,7 +406,7 @@ class RSNStatistics_Utils_Helper {
 		}
 		if($mainTable){
 			$query .= "SELECT " .
-					"`" . $mainTable . "`.id, `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, " . $rows;
+					"`" . $mainTable . "`.id, `" . $mainTable . "`.name, `" . $mainTable . "`.begin_date, `" . $mainTable . "`.end_date, `" . $mainTable . "`.rsnfiltrestatistiqueid, `" . $mainTable . "`.filterid, ". $rows;
 					//" FROM `" . $mainTable . "`";
 			//Se base sur les entités parentes car $mainTable ne fait pas forcément référence à toutes les entités
 			// ce qui n'est pas nécessaire si !$aggregate ou si $crmid TODO

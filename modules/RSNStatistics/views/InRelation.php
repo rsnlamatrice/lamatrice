@@ -53,6 +53,7 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$relationModel = $relationListView->getRelationModel();
 		$relatedModuleModel = $relationModel->getRelationModuleModel();
 		$relationField = $relationModel->getRelationField();
+		$isAllEntities = 0;
 
 		$viewer = $this->getViewer($request);
 		$viewer->assign('CRMID' , $parentId);
@@ -62,18 +63,35 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('RELATED_HEADERS', $relatedHeaders);
 		
 		//$viewer->assign('RELATED_GROUPED_HEADERS', $this->groupFieldsByStatistic($relatedHeaders, 'rsnstatisticsid'));
-		
 		$viewer->assign('RELATED_MODULE', $relatedModuleModel);
 		$viewer->assign('RELATED_ENTIRES_COUNT', $noOfEntries);
 		$viewer->assign('RELATION_FIELD', $relationField);
-		$viewer->assign('UPDATE_STATS_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : ''));
-		$viewer->assign('UPDATE_STATS_THIS_YEAR_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : '', 'this_year'));
+		$viewer->assign('UPDATE_STATS_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName === 'RSNStatistics' ? $parentRecordModel->get("relmodule") : $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : ''));
+		$viewer->assign('UPDATE_STATS_THIS_YEAR_URL', $relatedModuleModel->getUpdateValuesUrl($moduleName === 'RSNStatistics' ? '*' : $parentId, $moduleName === 'RSNStatistics' ? $parentRecordModel->get("relmodule") : $moduleName, $moduleName === 'RSNStatistics' ? $parentRecordModel->getId() : '', 'this_year'));
 		
-		if($moduleName === 'RSNStatistics' //TODO un des deux
-		|| $moduleName === 'RSNStatisticsResults')
-			$viewer->assign('RELATED_STATISTICS', array($parentRecordModel->getId() => $parentRecordModel));
-		else
-			$viewer->assign('RELATED_STATISTICS', RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName));
+		if($moduleName === 'RSNStatistics' || $moduleName === 'RSNStatisticsResults') {//TODO un des deux
+			$relatedStatistics = array($parentRecordModel->getId() => $parentRecordModel);
+			$isAllEntities = 1;
+		} else {
+			$relatedStatistics = RSNStatistics_Utils_Helper::getRelatedStatisticsRecordModels($moduleName);
+		}
+
+		$viewer->assign('RELATED_STATISTICS', $relatedStatistics);
+		$allStatsFilters = [];
+		//$allStatsFilters["0"] = null;//tmp ?? (check what is needed !!)
+		foreach ($relatedStatistics as $relatedStatistic) {
+			$statisticFilters = RSNStatistics_Utils_Helper::getStatisticFilters($relatedStatistic->getId());
+			foreach ($statisticFilters as $statisticFilter) {
+				$filter_data = array(
+					"id" =>$statisticFilter['rsnfiltrestatistiqueid'],
+					"name"=>$statisticFilter['name'],
+					"filtersavailable"=>RSNStatistics_Utils_Helper::getFiltersAvailable($statisticFilter["filtervaluequery"], $parentId, $isAllEntities),
+
+				);
+				$allStatsFilters[] = $filter_data;//tmp do not add 2 time the same filter (if there is many  statitisque group ...)
+			}
+		}
+		$viewer->assign('STATISTICS_FILTERS', $allStatsFilters);
 		
 		//if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			$totalCount = $relationListView->getRelatedEntriesCount();

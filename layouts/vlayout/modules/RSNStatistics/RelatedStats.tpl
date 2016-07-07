@@ -10,29 +10,29 @@
     <div class="relatedHeader ">
         <div class="btn-toolbar row-fluid">
             <div class="span6">
-				{if $RELATED_MODULE->get('name') === $MODULE}
-					<span class="btn-toolbar span4">
-						{include file='ListViewHeaderViewSelector.tpl'|@vtemplate_path NOT_EDITABLE_CUSTOMVIEWS=1}
-					</span>
-				{else}
-					&nbsp;
-				{/if}
+                {if $RELATED_MODULE->get('name') === $MODULE}
+                    <span class="btn-toolbar span4">
+                        {include file='ListViewHeaderViewSelector.tpl'|@vtemplate_path NOT_EDITABLE_CUSTOMVIEWS=1}
+                    </span>
+                {else}
+                    &nbsp;
+                {/if}
             </div>
             <div class="span6">
                 <span class="row-fluid">
                     <span class="span7 pushDown">
                         <a class="btn" id="UpdateStatistics" type="button" href="{$UPDATE_STATS_URL}">{vtranslate('LBL_UPDATE_STATS', $RELATED_MODULE->get('name'))}</a>
                         &nbsp;
-						<a class="btn" id="UpdateStatistics" type="button" href="{$UPDATE_STATS_THIS_YEAR_URL}">{vtranslate('LBL_THIS_YEAR', $RELATED_MODULE->get('name'))}</a>
+                        <a class="btn" id="UpdateStatistics" type="button" href="{$UPDATE_STATS_THIS_YEAR_URL}">{vtranslate('LBL_THIS_YEAR', $RELATED_MODULE->get('name'))}</a>
                         <span class="pull-right pageNumbers alignTop" data-placement="bottom" data-original-title="" style="margin-top: -5px">
                         {*ED140907 if !empty($RELATED_RECORDS)} {$PAGING->getRecordStartRange()} {vtranslate('LBL_to', $RELATED_MODULE->get('name'))} {$PAGING->getRecordEndRange()}{/if*}
-						{if !empty($RELATED_RECORDS)}
-							{assign var=START_RANGE value=$PAGING->getRecordStartRange()}
-							{if $START_RANGE gt 1}
-								{$START_RANGE}&nbsp;{vtranslate('LBL_to', $RELATED_MODULE->get('name'))}&nbsp;
-							{/if}
-							{$PAGING->getRecordEndRange()}
-						{/if}
+                        {if !empty($RELATED_RECORDS)}
+                            {assign var=START_RANGE value=$PAGING->getRecordStartRange()}
+                            {if $START_RANGE gt 1}
+                                {$START_RANGE}&nbsp;{vtranslate('LBL_to', $RELATED_MODULE->get('name'))}&nbsp;
+                            {/if}
+                            {$PAGING->getRecordEndRange()}
+                        {/if}
                     </span>
                 </span>
                 <span class="span5 pull-right">
@@ -69,8 +69,9 @@
     </div>
     <div class="relatedContents contents-bottomscroll">
         <div class="bottomscroll-div">
-	    {assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
-	    <table class="table table-bordered listViewEntriesTable">
+        {assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
+
+        <table class="table table-bordered listViewEntriesTable">
             {foreach item=RELATED_STATISTIC from=$RELATED_STATISTICS}
                 <thead>
                     <tr class="listViewHeaders">
@@ -78,31 +79,90 @@
                             {vtranslate($RELATED_STATISTIC->getName(), $RELATED_MODULE->get('name'))}
                         </th>
                         {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
-                            <th nowrap class="{$WIDTHTYPE}">
-                                {$RELATED_RECORD->getDisplayValue('name', false, $UNKNOWN_FIELD_RETURNS_VALUE)} 
-                                {*({$RELATED_RECORD->getDisplayValue('begin_date', false, $UNKNOWN_FIELD_RETURNS_VALUE)} / {$RELATED_RECORD->getDisplayValue('end_date', false, $UNKNOWN_FIELD_RETURNS_VALUE)})*}
-                            </th>
+                            {if ! $RELATED_RECORD->get('rsnfiltrestatistiqueid')}
+                                <th nowrap class="{$WIDTHTYPE}">
+                                    {$RELATED_RECORD->getDisplayValue('name', false, $UNKNOWN_FIELD_RETURNS_VALUE)} 
+                                    {*({$RELATED_RECORD->getDisplayValue('begin_date', false, $UNKNOWN_FIELD_RETURNS_VALUE)} / {$RELATED_RECORD->getDisplayValue('end_date', false, $UNKNOWN_FIELD_RETURNS_VALUE)})*}
+                                </th>
+                            {/if}
                         {/foreach}
                     </tr>
                 </thead>
                 {foreach item=HEADER_FIELD from=$RELATED_HEADERS}
                     {assign var=HEADERNAME value=$HEADER_FIELD->get('name')}
-					{if $HEADER_FIELD->get('rsnstatisticsid') && ($RELATED_STATISTIC->getId() eq $HEADER_FIELD->get('rsnstatisticsid'))}
+                    {if $HEADER_FIELD->get('rsnstatisticsid') && ($RELATED_STATISTIC->getId() eq $HEADER_FIELD->get('rsnstatisticsid'))}
                     {*if $HEADERNAME neq 'name' and $HEADERNAME neq 'begin_date' and $HEADERNAME neq 'end_date'*}
                         <tr class="listViewEntries" data-id='{$HEADER_FIELD->getId()}' data-recordUrl='{RSNStatistics_Record_Model::getStatFieldDetailViewUrl($HEADER_FIELD->get("name"))}'>
                             <td class="{$WIDTHTYPE}" data-field-type="{$HEADER_FIELD->getFieldDataType()}" nowrap>
                                 {vtranslate($HEADER_FIELD->get('label'), $RELATED_MODULE->get('name'))}
                             </td>
                             {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
-                                <td class="{$WIDTHTYPE}" data-field-type="{$HEADER_FIELD->getFieldDataType()}" nowrap>
-                                    {$RELATED_RECORD->getDisplayValue($HEADERNAME, false, $UNKNOWN_FIELD_RETURNS_VALUE)}
-                                </td>
+                                {if ! $RELATED_RECORD->get('rsnfiltrestatistiqueid')}
+                                    <td class="{$WIDTHTYPE}" data-field-type="{$HEADER_FIELD->getFieldDataType()}" nowrap>
+                                        {$RELATED_RECORD->getDisplayValue($HEADERNAME, false, $UNKNOWN_FIELD_RETURNS_VALUE)}
+                                    </td>
+                                {/if}
                             {/foreach}
                         </tr>
                     {/if}
                 {/foreach}
             {/foreach}
-	    </table>
+
+
+        {foreach item=STATISTICS_FILTER from=$STATISTICS_FILTERS}
+                {foreach item=RELATED_STATISTIC from=$RELATED_STATISTICS}
+                    <thead>
+                        <tr class="listViewHeaders">
+                            <th nowrap class="{$WIDTHTYPE}">
+                                {vtranslate($RELATED_STATISTIC->getName(), $RELATED_MODULE->get('name'))} (par {$STATISTICS_FILTER["name"]})
+                            </th>
+                            {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
+                                {if ! $RELATED_RECORD->get('rsnfiltrestatistiqueid')}
+                                    <th nowrap class="{$WIDTHTYPE}">
+                                    </th>
+                                {/if}
+                            {/foreach}
+                        </tr>
+                    </thead>
+                    {foreach item=FILTER_AVALAIBLE from=$STATISTICS_FILTER["filtersavailable"]}
+                         <tr class="listViewHeaders">
+                            <th nowrap class="{$WIDTHTYPE}">
+                                {$FILTER_AVALAIBLE['name']}
+                            </th>
+                            {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
+                                {if ! $RELATED_RECORD->get('rsnfiltrestatistiqueid')}
+                                    <th nowrap class="{$WIDTHTYPE}">
+                                        {$RELATED_RECORD->getDisplayValue('name', false, $UNKNOWN_FIELD_RETURNS_VALUE)} 
+                                    </th>
+                                {/if}
+                            {/foreach}
+                        </tr>
+                        {foreach item=HEADER_FIELD from=$RELATED_HEADERS}
+                                {assign var=HEADERNAME value=$HEADER_FIELD->get('name')}
+                                {if $HEADER_FIELD->get('rsnstatisticsid') && ($RELATED_STATISTIC->getId() eq $HEADER_FIELD->get('rsnstatisticsid'))}
+                                {*if $HEADERNAME neq 'name' and $HEADERNAME neq 'begin_date' and $HEADERNAME neq 'end_date'*}
+                                    <tr class="listViewEntries" data-id='{$HEADER_FIELD->getId()}' data-recordUrl='{RSNStatistics_Record_Model::getStatFieldDetailViewUrl($HEADER_FIELD->get("name"))}'>
+                                        <td class="{$WIDTHTYPE}" data-field-type="{$HEADER_FIELD->getFieldDataType()}" nowrap>
+                                            {vtranslate($HEADER_FIELD->get('label'), $RELATED_MODULE->get('name'))}
+                                        </td>
+                                        {foreach item=RELATED_RECORD from=$RELATED_RECORDS}
+                                        {if ! $RELATED_RECORD->get('rsnfiltrestatistiqueid')}
+                                            <td class="{$WIDTHTYPE}" data-field-type="{$HEADER_FIELD->getFieldDataType()}" nowrap>
+                                            {foreach item=RELATED_RECORD_V from=$RELATED_RECORDS}
+                                                {if $RELATED_RECORD_V->get('rsnfiltrestatistiqueid') == $STATISTICS_FILTER['id'] && $RELATED_RECORD_V->get('filterid') == $FILTER_AVALAIBLE['id'] && $RELATED_RECORD->get('name') == $RELATED_RECORD_V->get('name')}<!-- TMP get filters avalable in aramater --> 
+                                                        {$RELATED_RECORD_V->getDisplayValue($HEADERNAME, false, $UNKNOWN_FIELD_RETURNS_VALUE)}
+                                                {/if}
+                                            {/foreach}
+                                            </td>
+                                        {/if}
+                                        {/foreach}
+                                    </tr>
+                                {/if}
+                        {/foreach}
+                    {/foreach}
+                {/foreach}
+            </table>
+        {/foreach}
         </div>
     </div>
 </div>

@@ -61,7 +61,7 @@ class RSNStatistics_Record_Model extends Vtiger_Record_Model {
 		$statTableName = RSNStatistics_Utils_Helper::getStatsTableName($this->getId(), $this);
 		
 		$fields = array();
-		$excludeFields = array('id', 'crmid', 'name', 'code', 'begin_date', 'end_date', 'last_update');
+		$excludeFields = array('id', 'crmid', 'name', 'code', 'begin_date', 'end_date', 'rsnfiltrestatistiqueid', 'filterid', 'last_update');
 		$params = array();
 		$sql = "SELECT * FROM $statTableName LIMIT 0";
 		$db = PearDatabase::getInstance();

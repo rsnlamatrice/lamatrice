@@ -803,7 +803,7 @@ $languageStrings = array(
 	'AllMenuEditor' => 'Editeur du menu \'Tout\'',
 	
 	'LBL_INSCRIPTIONS' => 'Inscriptions',
-    'LBL_STATISTIQUE' => 'Statistique',
+    'LBL_STATISTIQUE' => 'Filtre Statistique',
 	'RSNSysControls' => 'Contrôles d\'intégrité du système',
 	
 );
