@@ -163,8 +163,8 @@
                         {/foreach}
                     {/foreach}
                 {/foreach}
-            </table>
         {/foreach}
+        </table>
         </div>
     </div>
 </div>
