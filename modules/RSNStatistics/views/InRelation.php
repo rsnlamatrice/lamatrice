@@ -61,6 +61,11 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		$viewer->assign('PARENT_RECORD', $parentRecordModel);
 		$viewer->assign('RELATED_LIST_LINKS', $links);
 		$viewer->assign('RELATED_HEADERS', $relatedHeaders);
+		$last_update = RSNStatistics_Utils_Helper::getLastUpdate($moduleName, $parentId);
+		$last_update_hour = explode(":", explode(" ", $last_update)[1]);
+		$last_update_hour = $last_update_hour[0] . "h" . $last_update_hour[1];
+		$last_update =  Vtiger_Util_Helper::formatDateIntoStrings($last_update);
+		$viewer->assign('LAST_UPDATE', $last_update . " " . $last_update_hour);// TMP all stat ????!!!!!
 		
 		//$viewer->assign('RELATED_GROUPED_HEADERS', $this->groupFieldsByStatistic($relatedHeaders, 'rsnstatisticsid'));
 		$viewer->assign('RELATED_MODULE', $relatedModuleModel);

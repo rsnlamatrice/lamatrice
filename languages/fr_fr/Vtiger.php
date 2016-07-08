@@ -115,6 +115,7 @@ $languageStrings = array(
 	'LBL_SEARCH_FOR'               => 'Rechercher'                  , 
 	'LBL_IN'                       => ' dans '                        , 
 	'LBL_TYPE_SEARCH'              => 'Saisir la recherche'              , 
+	'LBL_LAST_UPDATE'              => 'Dernière mise à jour'         ,
 	'LBL_SEARCH_BUTTON'            => 'Bouton recherche'               , 
 	'LBL_ADVANCE_SEARCH'           => 'Avancée'                    , 
 	'LBL_LOADING_PLEASE_WAIT'      => 'Chargement, Veuillez patienter.'       , 

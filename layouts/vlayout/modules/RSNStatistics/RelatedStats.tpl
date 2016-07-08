@@ -21,9 +21,11 @@
             <div class="span6">
                 <span class="row-fluid">
                     <span class="span7 pushDown">
+                        <p>({vtranslate('LBL_LAST_UPDATE', $RELATED_MODULE->get('name'))}: {$LAST_UPDATE})</p>
                         <a class="btn" id="UpdateStatistics" type="button" href="{$UPDATE_STATS_URL}">{vtranslate('LBL_UPDATE_STATS', $RELATED_MODULE->get('name'))}</a>
                         &nbsp;
                         <a class="btn" id="UpdateStatistics" type="button" href="{$UPDATE_STATS_THIS_YEAR_URL}">{vtranslate('LBL_THIS_YEAR', $RELATED_MODULE->get('name'))}</a>
+
                         <span class="pull-right pageNumbers alignTop" data-placement="bottom" data-original-title="" style="margin-top: -5px">
                         {*ED140907 if !empty($RELATED_RECORDS)} {$PAGING->getRecordStartRange()} {vtranslate('LBL_to', $RELATED_MODULE->get('name'))} {$PAGING->getRecordEndRange()}{/if*}
                         {if !empty($RELATED_RECORDS)}

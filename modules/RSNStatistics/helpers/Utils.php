@@ -367,6 +367,40 @@ class RSNStatistics_Utils_Helper {
 		return $row['rsnstatisticsfieldsid'];
 	}
 
+	public static function getLastUpdate($parentModuleName, $crmid = false) {
+		$db = PearDatabase::getInstance();
+		$relatedStatsTablesNames = self::getRelatedStatsTablesNames($parentModuleName, true);
+		$last_update = false;
+
+		foreach($relatedStatsTablesNames as $mainTable) {
+			$params = [];
+			$sql = "SELECT MIN(`" . $mainTable . "`.`last_update`) last_update FROM `" . $mainTable . "`
+			   WHERE ";
+
+			if ($crmid) {
+				$sql .= "`" . $mainTable . "`.`crmid` = ?";
+				$params[] = $crmid;
+			}
+
+			$sql .= " LIMIT 1";
+
+			$result = $db->pquery($sql, $params);
+			$numberOfRecords = $db->num_rows($result);
+			if ($numberOfRecords <= 0) {
+				//tmp error !
+				return false;
+			}
+
+			$update_date = $db->raw_query_result_rowdata($result, 0)["last_update"];
+
+			if (!$last_update || $update_date < $last_update) {
+				$last_update = $update_date;
+			}
+		}
+
+		return $last_update;
+	}
+
 	public static function getRelationQuery($parentModuleName, $crmid, $statisticId = false) {
 		$aggregate = !$crmid || !is_numeric($crmid);
 		$rows = "";
