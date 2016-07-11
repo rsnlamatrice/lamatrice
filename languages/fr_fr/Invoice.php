@@ -89,6 +89,7 @@ $languageStrings = array(
 	'LBL_DUPLICATE_AS_CREDIT_INVOICE' => 'Générer un avoir',
 	'LBL_DUPLICATE_AS_REFUND' => 'Générer un remboursement',
 	'LBL_REFUND' => 'Remboursement',
+	'LBL_DELETE' => 'Annuler',
 	
 	'comptevente' => 'Compte de vente',
 	'compteencaissement' => 'Compte d\'encaissement',
@@ -97,4 +98,7 @@ $languageStrings = array(
 
 $jsLanguageStrings = array(
 	'JS_PLEASE_REMOVE_LINE_ITEM_THAT_IS_DELETED' => 'Veuillez retirer cette ligne dont le produit a été supprimé.',
+	'JS_LBL_ARE_YOU_SURE_YOU_WANT_TO_DELETE' => 'Êtes-vous certain d\'annuler la facture ?', 
+	'LBL_DELETE_CONFIRMATION'      => 'Êtes-vous certain d\'annuler la facture ?', 
+	'LBL_MASS_DELETE_CONFIRMATION' => 'Êtes-vous certain d\'annuler les factures sélectionnées ?', 
 );

@@ -23,11 +23,12 @@ class RecycleBin_Module_Model extends Vtiger_Module_Model {
 	 * Function to get the list of listview links for the module
 	 * @return <Array> - Associate array of Link Type to List of Vtiger_Link_Model instances
 	 */
-	public function getListViewLinks() {
+	public function getListViewLinks($sourceModule) {
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		$privileges = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$basicLinks = array();
-		if($currentUserModel->isAdminUser()) {
+
+		if($currentUserModel->isAdminUser()/* && $sourceModule != 'Invoice'*/) {
 			$basicLinks = array(
 					array(
 						'linktype' => 'LISTVIEWBASIC',
@@ -50,11 +51,11 @@ class RecycleBin_Module_Model extends Vtiger_Module_Model {
 	 * @param <Array> $linkParams
 	 * @return <Array> - Associative array of Link type to List of  Vtiger_Link_Model instances for Mass Actions
 	 */
-	public function getListViewMassActions() {
+	public function getListViewMassActions($linkParams, $sourceModule) {
 		$currentUserModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 
 		$massActionLinks = array();
-		if($currentUserModel->isAdminUser()) {
+		if($currentUserModel->isAdminUser()/* && $sourceModule != "Invoice"*/) {
 			$massActionLinks[] = array(
 					'linktype' => 'LISTVIEWMASSACTION',
 					'linklabel' => 'LBL_DELETE',
@@ -122,7 +123,7 @@ class RecycleBin_Module_Model extends Vtiger_Module_Model {
 	public function emptyRecycleBin(){
 		$db = PearDatabase::getInstance();
 
-		$db->query('DELETE FROM vtiger_crmentity WHERE deleted = 1');
+		$db->query('DELETE FROM vtiger_crmentity WHERE deleted = 1 and setype not like"Invoice"');//Do not remove invoice  !!!!
 		$db->query('DELETE FROM vtiger_relatedlists_rb');
 		
 		return true;

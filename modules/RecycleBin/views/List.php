@@ -83,7 +83,7 @@ class RecycleBin_List_View extends Vtiger_Index_View {
 		$moduleModel = RecycleBin_Module_Model::getInstance($moduleName);
 		
 		$linkParams = array('MODULE'=>$moduleName, 'ACTION'=>$request->get('view'));
-		$linkModels = $moduleModel->getListViewMassActions($linkParams);
+		$linkModels = $moduleModel->getListViewMassActions($linkParams, $sourceModule);
 
 		$pagingModel = new Vtiger_Paging_Model();
 		$pagingModel->set('page', $pageNumber);
@@ -103,7 +103,7 @@ class RecycleBin_List_View extends Vtiger_Index_View {
 
 		$viewer->assign('MODULE', $moduleName);
 		
-		$viewer->assign('LISTVIEW_LINKS', $moduleModel->getListViewLinks());
+		$viewer->assign('LISTVIEW_LINKS', $moduleModel->getListViewLinks($sourceModule));
 		$viewer->assign('LISTVIEW_MASSACTIONS', $linkModels);
 
 		$viewer->assign('PAGING_MODEL', $pagingModel);

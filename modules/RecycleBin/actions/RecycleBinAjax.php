@@ -90,13 +90,19 @@ class RecycleBin_RecycleBinAjax_Action extends Vtiger_Mass_Action {
 	public function deleteRecords(Vtiger_Request $request){
 		$recordIds = $this->getRecordsListFromRequest($request);
 		$recycleBinModule = new RecycleBin_Module_Model();
+		$sourceModule = $request->get('sourceModule');
  
 		$response = new Vtiger_Response();	
-		if ($recordIds) {
-			$recycleBinModule->deleteRecords($recordIds);
-			$response->setResult(array(true));
+		if ($sourceModule == "Invoice") {
+			$response->setResult(array(false));
 			$response->emit();
-		} 
+		} else {
+			if ($recordIds) {
+				$recycleBinModule->deleteRecords($recordIds);
+				$response->setResult(array(true));
+				$response->emit();
+			}
+		}
 	}
 	
 }
