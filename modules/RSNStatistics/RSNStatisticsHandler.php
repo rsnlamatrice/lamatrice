@@ -57,7 +57,7 @@ class RSNStatisticsHandler extends VTEventHandler {
 				  `filterid` INT(19) NULL,
 				  `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 				  PRIMARY KEY (`id`),
-				  UNIQUE( `crmid`, `code`)
+				  UNIQUE( `crmid`, `code`, `rsnfiltrestatistiqueid`, `filterid`)
 				) DEFAULT CHARSET=utf8";
 
 			$db = PearDatabase::getInstance();
