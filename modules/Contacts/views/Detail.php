@@ -69,6 +69,8 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 			FROM " . $relatedStatsTablesNames[0] . "
 			WHERE crmid = ?
 			AND code IN (".generateQuestionMarks($yearCodes).")
+			AND rsnfiltrestatistiqueid = 0
+			AND filterid = 0
 			ORDER BY code DESC
 			LIMIT ".count($yearCodes)."
 		";
