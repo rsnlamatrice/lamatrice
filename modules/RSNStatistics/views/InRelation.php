@@ -21,7 +21,7 @@ class RSNStatistics_InRelation_View extends Vtiger_RelatedList_View {
 		//CustomView filtrant les records liés
 		$relatedViewName = $request->get('related_viewname');
 
-		$pagingModel = new Vtiger_Paging_Model();
+		$pagingModel = new Vtiger_Paging_Model();//tmp.....
 		$pagingModel->set('page',$requestedPage);
 		//ED $pagingModel->set('limit', 10);//AUR_TMP : not good -> le nombre de page n'est pas correctement calculé si je ne commente pas la cond performancePref...
 

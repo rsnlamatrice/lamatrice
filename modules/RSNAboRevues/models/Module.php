@@ -34,16 +34,25 @@ class RSNAboRevues_Module_Model extends Vtiger_Module_Model {
 	/**
 	 * Parcourt l'historique pour clôturer les en-cours périmés
 	 */
-	public function check_IsAbonne_vs_DateFin(&$rsnAboRevues){
+	public function check_IsAbonne_vs_DateFin(&$rsnAboRevues, $closeAllFree){
 		global $log;
 		$toDay = new DateTime();
 		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
-			if( $rsnAboRevue->isAbonne()
-			&& $rsnAboRevue->getFinAbo()
-			&& $rsnAboRevue->getFinAbo() < $toDay){
+			if( $rsnAboRevue->isAbonne() && (
+				($rsnAboRevue->getFinAbo() && $rsnAboRevue->getFinAbo() <= $toDay)
+				|| ($rsnAboRevue->isTypeMerciSoutien() || $rsnAboRevue->isTypeDecouverte()) )
+				) {
 				$log->debug("RSNAboRevues_Module_Model::check_IsAbonne_vs_DateFin abonnement périmé");
 				$rsnAboRevue->setAbonne(false);
 				$rsnAboRevue->set('mode', 'edit');
+
+				$toDay = new DateTime();
+				$dateFin = $rsnAboRevue->getFinAbo();
+
+				if ($dateFin > $toDay) {
+					$rsnAboRevue->setFinAbo($toDay);
+				}
+
 				$rsnAboRevue->save();
 			}
 		}

@@ -190,7 +190,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 		if($rsnAboRevues){
 			
 			//Parcourt l'historique pour clôturer les en-cours périmés
-			self::check_IsAbonne_vs_DateFin($rsnAboRevues);
+			self::check_IsAbonne_vs_DateFin($rsnAboRevues, true);
 			
 			//Parcourt l'historique par date décroissante
 			foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
@@ -226,13 +226,17 @@ class RSNInvoiceHandler extends VTEventHandler {
 		}
 		
 		$log->debug("handleAfterSaveInvoiceAbonnementsEvent rsnAboRevueCourant = " .($rsnAboRevueCourant ? 'oui' : 'non'));
-		foreach($categoryItems as $nLine => $lineItem){
+		foreach($categoryItems as $nLine => $lineItem){//tmp mettre fin aux numero découverte / offert en cas d'abo payant !!!
 			$productCode = $lineItem['hdnProductcode'.$nLine];
 			$addMonths = 0;
 			$addMaxDate = false;
 			$aboType = $productCode;
 			$nbExemplaires = 1;
 			switch($productCode){
+			case 'RABOGROU': //Abonnement d'un an à la revue a 10 euro pour les groupes // check if it is a group
+				if (! $account->getRelatedMainContact()->get('isgroup') ) {
+					break;
+				}
 			case 'RABO': //Abonnement d'un an à la revue
 			case 'RABOS': //Abonnement de soutien d'un an à la revue
 				if($nbExemplairesGroupes){
@@ -282,13 +286,12 @@ class RSNInvoiceHandler extends VTEventHandler {
 			case 'RSGR': //Abonnements groupés
 				//compté au préalable
 				continue;
-			case 'RABOG': //Abonnement gratuit d'un n° à la revue
+			case 'RABOG': //Abonnement gratuit d'un an à la revue
 				if($abonneAVie){
 					$dateFin = false;
 					continue;//! ne sort pas du foreach
 				}
-				//TODO vérifier si c'est un n° ou 1 an
-				$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
+				$aboType = RSNABOREVUES_TYPE_ABONNE;
 				$dateDebut = $startDateOfNextAbo ? $startDateOfNextAbo : $invoiceDate;
 				$dateFin = self::getDateFinAbo($toDay, 12);
 				//L'abonnement actuel finit dans plus de 3 mois
@@ -392,9 +395,9 @@ class RSNInvoiceHandler extends VTEventHandler {
 	}
 	
 	//Parcourt l'historique pour clôturer les en-cours périmés
-	public static function check_IsAbonne_vs_DateFin($rsnAboRevues){
+	public static function check_IsAbonne_vs_DateFin($rsnAboRevues, $closeAllFree){
 		$aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
-		$aboRevueModuleModel->check_IsAbonne_vs_DateFin($rsnAboRevues);
+		$aboRevueModuleModel->check_IsAbonne_vs_DateFin($rsnAboRevues, $closeAllFree);
 	}
 	
 	public static function getDateFinAbo($dateDebut, $nbMonths){
@@ -413,6 +416,16 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$log->debug("IN handleAfterSaveInvoiceTotalEvent");
 		
 		$grandTotal = (float)$lineItems[1]['final_details']['grandTotal'];
+		$totalAdh = 0;
+		foreach($lineItems as $nLine => $lineItem){//remove ADH from total!!!
+			$productCode = html_entity_decode($lineItem['hdnProductcode'.$nLine]);
+
+			if (strstr($productCode, "ADH") !== false) {
+				$totalAdh += ($lineItem['netPrice'.$nLine]);
+			}
+		}
+
+		$grandTotal -= $totalAdh;
 		
 		$toDay = new DateTime();
 		
@@ -431,8 +444,12 @@ class RSNInvoiceHandler extends VTEventHandler {
 		
 		$nbTrimestresGratos = false; //càd, nbre de revues
 		$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
+
+		$amount_to_check = ($totalDons > 0) ? $totalDons : $grandTotal;
 		
 		//TODO : prélèvement == 1 an
+
+		//TMP -> cumuler grandTotal et totalDons ?????
 		
 		// Les étrangers, pour moins de 20€ n'ont le droit à rien
 		if($grandTotal < 20 && $foreigner){
@@ -443,35 +460,33 @@ class RSNInvoiceHandler extends VTEventHandler {
 			//walou
 		}
 		// Pour plus de 48 € de dons, un an
-		elseif($totalDons >= 48){
+		elseif($amount_to_check >= 48){
 			$nbTrimestresGratos = 4;
 			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
 		}
 		// Pour plus de 36 € de dons, 3 trimestres
-		elseif($totalDons >= 36){
+		elseif($amount_to_check >= 36){
 			$nbTrimestresGratos = 3;
 			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
 		}
 		// Pour plus de 24 € de dons, 2 trimestres
-		elseif($totalDons >= 24){
+		elseif($amount_to_check >= 24){
 			$nbTrimestresGratos = 2;
 			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
 		}
 		// Pour plus de 12 € de dons, 1 trimestre
-		elseif($totalDons >= 12){
+		elseif($amount_to_check >= 12){
 			$nbTrimestresGratos = 1;
 			$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
 		}
-		// Pour plus de 48 € de commande hors dons, un n° découverte
-		elseif(($grandTotal - $totalDons) >= 48){
-			$nbTrimestresGratos = 1;
-			$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
-		}
+
+		$IsNonGivedAbo = false;
 		
 		if($nbTrimestresGratos){
 			//Parcourt l'historique par date décroissante
 			foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
 				if($rsnAboRevue->isAbonne()){
+					$IsNonGivedAbo = ! ($rsnAboRevue->isTypeMerciSoutien() || $rsnAboRevue->isTypeDecouverte());
 					if($rsnAboRevue->isTypeAbonneAVie()){
 						$rsnAboRevueCourant = $rsnAboRevue;
 						$abonneAVie = true;
@@ -496,7 +511,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 			}
 		}
 		
-		if($nbTrimestresGratos && !$abonneAVie){
+		if($nbTrimestresGratos && !$abonneAVie && !$IsNonGivedAbo) {
 			$invoiceDate = new DateTime($invoice->get('invoicedate'));
 			$dateFin = self::getDateFinAbo($invoiceDate, $nbTrimestresGratos * 3 + 1);
 			if($rsnAboRevueCourant){
