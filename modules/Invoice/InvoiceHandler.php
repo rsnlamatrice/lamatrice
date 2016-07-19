@@ -443,7 +443,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 		$foreigner = $country && strcasecmp($country, 'France') !== 0;
 		
 		$nbTrimestresGratos = false; //càd, nbre de revues
-		$aboType = RSNABOREVUES_TYPE_NUM_DECOUVERTE;
+		$aboType = RSNABOREVUES_TYPE_NUM_MERCI;
 
 		$amount_to_check = ($totalDons > 0) ? $totalDons : $grandTotal;
 		
