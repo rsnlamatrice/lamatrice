@@ -293,14 +293,22 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		//AV151026
 		$out = fopen('php://output', 'w');
 		foreach ($headers as &$header) {
-			$header = mb_convert_encoding($header, $encoding);
+			if ($encoding == 'macintosh') {
+				$header = iconv('UTF-8', 'macintosh', $header);
+			} else {
+				$header = mb_convert_encoding($header, $encoding);
+			}
 		}
 
 		fputcsv($out, $headers, $csvseparator, $csvDelimiter, $csvEscapeChar);
 
 		foreach($entries as $row) {
 			foreach ($row as &$value) {
-				$value = mb_convert_encoding($value, $encoding);
+				if ($encoding == 'macintosh') {
+					$value = iconv('UTF-8', 'macintosh', $value);
+				} else {
+					$value = mb_convert_encoding($value, $encoding);
+				}
 			}
 			fputcsv($out, $row, $csvseparator, $csvDelimiter, $csvEscapeChar);
 		}
