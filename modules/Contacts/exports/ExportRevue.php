@@ -34,7 +34,8 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getExportEncoding(Vtiger_Request $request) {
-		return 'ISO-8859-1';
+		//return 'ISO-8859-1';
+		return 'macintosh';
 	}
 
 	function getExportFileName($request) {
