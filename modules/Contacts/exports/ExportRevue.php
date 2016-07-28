@@ -140,6 +140,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														    FROM vtiger_rsnaborevues
 														    JOIN vtiger_crmentity vtiger_rsnaborevues_crmentity ON vtiger_rsnaborevues_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
 														    WHERE vtiger_rsnaborevues_crmentity.deleted = 0
+														    AND vtiger_rsnaborevues.debutabo <= CURRENT_DATE
 														    GROUP BY accountid
 														) vtiger_rsnaborevues_max 
 														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
