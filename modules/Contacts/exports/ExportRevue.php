@@ -30,7 +30,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 	
 	function displayHeaderLine() {
-		return true;
+		return false;
 	}
 
 	function getExportEncoding(Vtiger_Request $request) {
