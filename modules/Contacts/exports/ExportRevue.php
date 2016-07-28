@@ -78,7 +78,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage1($row) {
-		if (strpos($row["rsnabotype"], "remerciement")) {
+		if (strpos($row["rsnabotype"], "remerciement") && $this->isAbo($row)) {
 			"Numéro(s) offert(s), merci!";
 		} else if ($this->isFree($row)) {
 			return "Un numéro découverte.";
@@ -104,7 +104,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getAboType($row) {
-		if ($row["rsnabotype"]) {
+		if ($row["rsnabotype"] && !(strpos($row["rsnabotype"], "remerciement") && !$this->isAbo($row)) ) {
 			return $row["rsnabotype"];
 		} else {
 			return "Un n° découverte";
