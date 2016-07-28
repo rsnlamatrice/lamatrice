@@ -143,10 +143,10 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														    AND vtiger_rsnaborevues.debutabo <= CURRENT_DATE
 														    AND debutabo = (
 																SELECT MAX( vtiger_rsnaborevues.debutabo )
-																FROM vtiger_rsnaborevues
-																JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
-														    	WHERE vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
-														    	AND vtiger_crmentity.deleted = 0)
+																FROM vtiger_rsnaborevues max_abo
+																JOIN vtiger_crmentity cmrentity_max_abo ON cmrentity_max_abo.crmid = max_abo.rsnaborevuesid
+														    	WHERE max_abo.accountid = vtiger_contactdetails.accountid
+														    	AND cmrentity_max_abo.deleted = 0)
 														    GROUP BY accountid
 														) vtiger_rsnaborevues_max 
 														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
