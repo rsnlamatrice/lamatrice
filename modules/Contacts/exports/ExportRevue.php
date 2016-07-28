@@ -78,7 +78,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage1($row) {
-		if (strpos($row["rsnabotype"], "remerciement") && $this->isAbo($row)) {
+		if (strpos($row["rsnabotype"], "remerciement")) {
 			"Numéro(s) offert(s), merci!";
 		} else if ($this->isFree($row)) {
 			return "Un numéro découverte.";
@@ -136,23 +136,17 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
 		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
 		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnaborevues.nbexemplaires, vtiger_rsnaborevues.debutabo, vtiger_rsnaborevues.finabo, vtiger_rsnaborevues.rsnabotype " .
-				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN (SELECT accountid, rsnaborevuesid
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN (SELECT accountid, MAX(debutabo) as debutabo
 														    FROM vtiger_rsnaborevues
 														    JOIN vtiger_crmentity vtiger_rsnaborevues_crmentity ON vtiger_rsnaborevues_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
 														    WHERE vtiger_rsnaborevues_crmentity.deleted = 0
 														    AND vtiger_rsnaborevues.debutabo <= CURRENT_DATE
-														    AND debutabo = (
-																SELECT MAX( vtiger_rsnaborevues.debutabo )
-																FROM vtiger_rsnaborevues max_abo
-																JOIN vtiger_crmentity cmrentity_max_abo ON cmrentity_max_abo.crmid = max_abo.rsnaborevuesid
-														    	WHERE max_abo.accountid = vtiger_contactdetails.accountid
-														    	AND cmrentity_max_abo.deleted = 0)
 														    GROUP BY accountid
 														) vtiger_rsnaborevues_max 
 														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
 														LEFT JOIN vtiger_rsnaborevues
 														    ON vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
-														    AND vtiger_rsnaborevues.rsnaborevuesid =  vtiger_rsnaborevues_max.rsnaborevuesid
+														    AND vtiger_rsnaborevues.debutabo =  vtiger_rsnaborevues_max.debutabo
 														LEFT JOIN vtiger_rsnabotype
 														    ON vtiger_rsnabotype.rsnabotype = vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $wherePos);
