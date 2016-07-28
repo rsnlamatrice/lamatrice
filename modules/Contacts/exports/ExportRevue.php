@@ -97,7 +97,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function isAbo($row) {
-		$today = time() - 31 * 24 * 60 * 60;//aujourd'hui - 1 mois
+		$today = time();//aujourd'hui - 1 mois
 		$finabo = strtotime($row["finabo"]);
 		//echo "today $today -> finabo : $finabo<br/>";
 		return (!strpos($row["rsnabotype"], "Ne pas abonner") &&  !strpos($row["rsnabotype"], "Non abon")) && (($finabo >= $today) || !$finabo);//$finabo >= $today;
