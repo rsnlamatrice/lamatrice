@@ -144,9 +144,9 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														    AND debutabo = (
 																SELECT MAX( vtiger_rsnaborevues.debutabo )
 																FROM vtiger_rsnaborevues
-																JOIN vtiger_crmentity ON vtiger_rsnaborevues_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
+																JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
 														    	WHERE vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
-														    	AND vtiger_rsnaborevues_crmentity.deleted = 0)
+														    	AND vtiger_crmentity.deleted = 0)
 														    GROUP BY accountid
 														) vtiger_rsnaborevues_max 
 														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
