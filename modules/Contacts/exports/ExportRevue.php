@@ -78,8 +78,10 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage1($row) {
-		if ($this->isFree($row)) {
-			return "Numéro offert. Merci !";
+		if (strpos($row["rsnabotype"], "remerciement")) {
+			"Numéro(s) offert(s), merci!";
+		} else if ($this->isFree($row)) {
+			return "Un numéro découverte.";
 		} else if (!$this->isAbo($row)) {
 			return "Merci de vous réabonner.";
 		}
