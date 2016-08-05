@@ -460,7 +460,7 @@ function updateInventoryProductRel($entity) {
 	$entity_id = vtws_getIdComponents($entity->getId());
 	$entity_id = $entity_id[1];
 	$log->debug("Entering into function updateInventoryProductRel(".$entity_id.").");
-	/* TMP Usefull for what ????
+
 	$update_product_array = $updateInventoryProductRel_update_product_array;
 
 	//Affectation des stocks après suppression des anciennes lignes
@@ -468,13 +468,11 @@ function updateInventoryProductRel($entity) {
 		foreach($update_product_array as $id=>$seq) {
 			foreach($seq as $seq=>$product_info) {
 				foreach($product_info as $key=>$prevQty) {
-					echo $prevQty;
-					exit();
 					addToProductStock($key, $prevQty, true);
 				}
 			}
 		}
-	}*/
+	}
 
 	//TODO c'est la chiotte ce bordel
 	//erreur pour un purchaseorder si on passe du status 'Received Shipment' à 'Cancelled' tout en changeant de produit.
