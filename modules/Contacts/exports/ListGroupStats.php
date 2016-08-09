@@ -115,7 +115,9 @@ class Contacts_ListGroupStats_Export extends Export_ExportData_Action {
 				 	"LEFT JOIN (SELECT vtiger_invoice.accountid, GROUP_CONCAT(vtiger_service.productcode SEPARATOR ';') AS adh_list, MAX(vtiger_service.productcode) AS max_adh FROM  vtiger_invoice
 						LEFT JOIN vtiger_inventoryproductrel ON vtiger_invoice.invoiceid = vtiger_inventoryproductrel.id
 						LEFT JOIN vtiger_service ON vtiger_service.serviceid = vtiger_inventoryproductrel.productid
+						LEFT JOIN vtiger_crmentity AS invoice_crmentity ON vtiger_invoice.invoiceid = invoice_crmentity.crmid
 						WHERE productcode IS NOT NULL
+						AND invoice_crmentity.deleted = 0
 						AND vtiger_service.servicecategory = 'Adhésion'
 						GROUP BY vtiger_invoice.accountid) AS adh ON adh.accountid = vtiger_contactdetails.accountid " .
 				 substr($parentQuery, $wherePos);
