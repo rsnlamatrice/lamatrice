@@ -41,8 +41,8 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 			"CacherPortable" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Portable")) ? 1 : 0; },
 			"CacherTel" => function($row) {return (Contacts_ListGroupWeb_Export::hideField($row, "Téléphone")) ? 1 : 0; },
 			"Email_priv" => function($row) {  return Contacts_ListGroupStats_Export::getMainEmail($row); },
-			"latitude" => function($row) {return floatval($row["latitude"]); },
-			"longitude" => function($row) {return floatval($row["longitude"]); },
+			"latitude" => "latitude",
+			"longitude" => "longitude",
 		);
 	}
 
