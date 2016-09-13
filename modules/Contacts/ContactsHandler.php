@@ -16,12 +16,14 @@ class ContactsHandler extends VTEventHandler {
 		if($eventName == 'vtiger.entity.beforesave') {
 			$moduleName = $entityData->getModuleName();
 			if ($moduleName == 'Contacts') {
-				$address = Contacts_Utils_Helper::getFormatedAddress($entityData);
-				$GPSCoordinate = Contacts_Utils_Helper::getGPSCoordinate($address);
-				
-				if ($GPSCoordinate['status'] && ( !$GPSCoordinate["partial_match"] || !$entityData->get("latitude") || !$entityData->get("longitude"))) {
-					$entityData->set("latitude", $GPSCoordinate["latitude"]);
-					$entityData->set("longitude", $GPSCoordinate["longitude"]);
+				if (!$entityData->get("manualgpscoordinates")) {
+					$address = Contacts_Utils_Helper::getFormatedAddress($entityData);
+					$GPSCoordinate = Contacts_Utils_Helper::getGPSCoordinate($address);
+					
+					if ($GPSCoordinate['status'] && ( !$GPSCoordinate["partial_match"] || !$entityData->get("latitude") || !$entityData->get("longitude"))) {
+						$entityData->set("latitude", $GPSCoordinate["latitude"]);
+						$entityData->set("longitude", $GPSCoordinate["longitude"]);
+					}
 				}
 			}
 		}
