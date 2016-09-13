@@ -139,6 +139,8 @@ class Contacts_Detail_View extends Accounts_Detail_View {
 			'mailingstreet2',
 			'mailingcity',
 			'mailingcountry',
+			'longitude',
+			'latitude',
 		);
 		$apos  = array_search($a, $orderedFieldNames);
 		$bpos  = array_search($b, $orderedFieldNames);
