@@ -177,7 +177,7 @@ class Invoice_GestionVSCompta_View extends Vtiger_Index_View {
 		global $adb;
 		$query = "SELECT `vtiger_invoice`.`invoicedate` AS `Date`
 		, IFNULL( `vtiger_products`.`glacct`, `vtiger_servicecf`.`glacct` ) AS `Compte`
-		, SUM( ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - `vtiger_inventoryproductrel`.`discount_percent` / 100 ) - `vtiger_inventoryproductrel`.`discount_amount`, 2 ) ) AS `Montant`
+		, SUM( ROUND( `vtiger_inventoryproductrel`.`quantity` * `vtiger_inventoryproductrel`.`listprice` * ( 1 - IFNULL(`vtiger_inventoryproductrel`.`discount_percent`, 0) / 100 ) - IFNULL(`vtiger_inventoryproductrel`.`discount_amount`, 0), 2 ) ) AS `Montant`
 		FROM `vtiger_invoice`
 		INNER JOIN `vtiger_crmentity` AS `vtiger_crmentity_invoice`
 			ON `vtiger_invoice`.`invoiceid` = `vtiger_crmentity_invoice`.`crmid`
