@@ -136,7 +136,7 @@ class Vtiger_InventoryPDFController {
 				}
 			}
 
-			//$producttotal_taxes = number_format(round($producttotal_taxes, $no_of_decimal_places)), $no_of_decimal_places,'.','');
+			$producttotal_taxes = number_format(round($producttotal_taxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$producttotal = $taxable_total+$producttotal_taxes;
 			$unitTaxedPrice = $quantity ? (($producttotal + $taxed_discount) / $quantity) : ($listPrice);
 			$producttotal = number_format(round($producttotal, $no_of_decimal_places), $no_of_decimal_places,'.','');
@@ -169,7 +169,7 @@ class Vtiger_InventoryPDFController {
 
 			$contentModels[] = $contentModel;
 		}
-		$totaltaxes = number_format(round($totaltaxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
+		//$totaltaxes = number_format(round($totaltaxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
 		$this->totaltaxes = $totaltaxes; //will be used to add it to the net total
 		$this->totalPerTax = $totalPerTax;
 		return $contentModels;

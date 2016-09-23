@@ -221,6 +221,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 	function downloadSend2Compta (Vtiger_Request $request, $setHeaders = true){
 		$moduleName = $request->getModule();
 		$viewer = $this->getViewer($request);
+		$no_of_decimal_places = getCurrencyDecimalPlacesForOutput();
 			
 		$taxes = self::getAllTaxes();
 			
@@ -494,7 +495,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 						if(!array_key_exists("$taxId", $invoiceTaxes))
 							$invoiceTaxes["$taxId"] = 0.0;
 						//Passage par le TTC, arrondi à 2 chiffres et retrait du HT pour éviter les écarts d'arrondis
-						$value = round((1 + $invoice['tax'.$taxId] / 100) * $amountHT, 2) - $amountHTRounded;
+						$value = round(($invoice['tax'.$taxId] / 100) * $amountHT, 2);
 						$invoiceTotalTaxes += $value;
 						$invoiceTaxes["$taxId"] += $value;
 						break;

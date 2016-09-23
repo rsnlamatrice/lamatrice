@@ -105,10 +105,10 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 					for($j=0; $j<$taxCount; $j++) {
 						$taxValue = $product['taxes'][$j]['percentage'];
 	
-						$taxAmount = $totalAfterDiscount * $taxValue / 100;
+						$taxAmount = number_format($totalAfterDiscount * $taxValue / 100, $no_of_decimal_places,'.','');
 						$taxTotal = $taxTotal + $taxAmount;
 	
-						$relatedProducts[$i]['taxes'][$j]['amount'] = number_format($taxAmount, $no_of_decimal_places,'.','');
+						$relatedProducts[$i]['taxes'][$j]['amount'] = $taxAmount;
 						$relatedProducts[$i]['taxTotal'.$i] = number_format($taxTotal, $no_of_decimal_places,'.','');
 					}
 					$netPrice = $totalAfterDiscount + $taxTotal;
