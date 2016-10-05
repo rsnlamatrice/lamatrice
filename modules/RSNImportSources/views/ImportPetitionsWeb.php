@@ -172,7 +172,7 @@ class RSNImportSources_ImportPetitionsWeb_View extends RSNImportSources_ImportFr
 		}
 		
 		$config = new RSNImportSources_Config_Model();
-		
+		$this->ignoreCancelledContactsOnImport();
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$sql = 'SELECT * FROM ' . $tableName . '

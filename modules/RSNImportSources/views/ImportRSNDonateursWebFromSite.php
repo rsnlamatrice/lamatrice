@@ -222,7 +222,7 @@ class RSNImportSources_ImportRSNDonateursWebFromSite_View extends RSNImportSourc
 		}
 		
 		$config = new RSNImportSources_Config_Model();
-		
+		$this->ignoreCancelledContactsOnImport();
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$sql = 'SELECT * FROM ' . $tableName . '

@@ -203,6 +203,16 @@ class RSNImportSources_Import_View extends Vtiger_View_Controller{
 		return false;
 	}
 
+	function ignoreCancelledContactsOnImport() {
+		$adb = PearDatabase::getInstance();
+		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
+
+		$sql = 'UPDATE ' . $tableName . ' SET status = ' . RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED
+				. " WHERE _contactid_status = " . RSNImportSources_Import_View::$RECORDID_STATUS_SKIP;
+
+		$adb->query($sql);
+	}
+
 	/**
 	 * Initialise les données de validation des Contacts
 	 */
