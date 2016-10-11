@@ -1858,13 +1858,14 @@ function getEmailRelatedModules() {
 
 //Get the User selected NumberOfCurrencyDecimals
 function getCurrencyDecimalPlaces() {
-	global $current_user;
-	$currency_decimal_places = $current_user->no_of_currency_decimals;
-	if(isset($currency_decimal_places)) {
-		return $currency_decimal_places;
-	} else {
-		return 2;
-	}
+	// global $current_user;
+	// $currency_decimal_places = $current_user->no_of_currency_decimals;
+	// if(isset($currency_decimal_places)) {
+	// 	return $currency_decimal_places;
+	// } else {
+	// 	return 2;
+	// }
+	return 8;
 }
 
 // ED151019 in case of PDF or screen destination

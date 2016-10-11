@@ -101,17 +101,25 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 					$taxDetails = getTaxDetailsForProduct($productId, 'all');
 					$taxCount = count($taxDetails);
 					$taxTotal = '0.00';
+					if($taxCount == 1) {
+						$taxValue = $product['taxes'][0]['percentage'];
+						$netPrice = $totalAfterDiscount * (1 + $taxValue/100);
+						$taxAmount = number_format(round($netPrice, 2) - round($totalAfterDiscount, 2), $no_of_decimal_places,'.','');
+						$relatedProducts[$i]['taxes'][0]['amount'] = $taxAmount;
+						$relatedProducts[$i]['taxTotal'.$i] = $taxAmount;
+					} else {
 	
-					for($j=0; $j<$taxCount; $j++) {
-						$taxValue = $product['taxes'][$j]['percentage'];
-	
-						$taxAmount = number_format($totalAfterDiscount * $taxValue / 100, $no_of_decimal_places,'.','');
-						$taxTotal = $taxTotal + $taxAmount;
-	
-						$relatedProducts[$i]['taxes'][$j]['amount'] = $taxAmount;
-						$relatedProducts[$i]['taxTotal'.$i] = number_format($taxTotal, $no_of_decimal_places,'.','');
+						for($j=0; $j<$taxCount; $j++) {
+							$taxValue = $product['taxes'][$j]['percentage'];
+		
+							$taxAmount = number_format($totalAfterDiscount * $taxValue / 100, $no_of_decimal_places,'.','');
+							$taxTotal = $taxTotal + $taxAmount;
+		
+							$relatedProducts[$i]['taxes'][$j]['amount'] = $taxAmount;
+							$relatedProducts[$i]['taxTotal'.$i] = number_format($taxTotal, $no_of_decimal_places,'.','');
+						}
+						$netPrice = $totalAfterDiscount + $taxTotal;
 					}
-					$netPrice = $totalAfterDiscount + $taxTotal;
 					$relatedProducts[$i]['netPrice'.$i] = number_format($netPrice, $no_of_decimal_places,'.','');
 				}
 				

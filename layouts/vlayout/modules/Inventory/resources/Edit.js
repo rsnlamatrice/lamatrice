@@ -305,17 +305,17 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 
 	setListPriceValue : function(lineItemRow, listPriceValue, decimals) {
 		if (typeof decimals !== 'number') {
-			decimals = 2;
+			decimals = 8;
 		}
 		var listPrice = parseFloat(listPriceValue);
 		var listPriceMode = this.getListPriceMode(lineItemRow);
 		if (listPriceMode === 'TTC') {
 			var taxRate = this.getLineItemTaxRate(lineItemRow);
 			listPrice *= 1 + taxRate / 100;
-			listPrice = listPrice.toFixed(4);
+			//listPrice = listPrice.toFixed(8);
 		}
 		else
-			listPrice = listPrice.toFixed(decimals);
+			//listPrice = listPrice.toFixed(decimals);
 		lineItemRow.find('.listPrice').val(listPrice)
 		return this;
 	},
@@ -1051,10 +1051,15 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	},
 
 	/**
-	 * Function which will calculate discount for the line item
+	 * Function which will calculate line item total after discount
 	 * @params : lineItemRow - element which will represent lineItemRow
 	 */
-	calculateDiscountForLineItem : function(lineItemRow) {
+	calculateTotalAfterDiscount: function(lineItemRow, rounded) {
+		// var unitPriceAfterDiscount = this.getUnitPriceAfterDiscount(lineItemRow, true);
+		
+		// var totalAfterDiscount = (unitPriceAfterDiscount * quantity).toFixed(2);
+		// return totalAfterDiscount;
+
 		var discountContianer = lineItemRow.find('div.discountUI');
 		var element = discountContianer.find('input.discounts').filter(':checked');
 		var discountType = element.data('discountType');
@@ -1068,35 +1073,34 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		rowPercentageField.addClass('hide');
 		rowAmountField.addClass('hide');
 
+		var totalBeforeDiscount = this.getLineItemTotal(lineItemRow);
 		var discountValue = this.parseFloat(discountRow.find('.discountVal').val());
-		if(discountValue == ""){
-			discountValue = 0;
-		}
+		var priceAfterDiscount = totalBeforeDiscount;
+
+		// if(discountValue == ""){
+		// 	return listprice;
+		// }
 		if(discountType == Inventory_Edit_Js.percentageDiscountType){
-				rowPercentageField.removeClass('hide').focus();
-				//since it is percentage
-				var productTotal = this.getLineItemTotal(lineItemRow);
-				discountValue = (productTotal * discountValue)/100;
+			priceAfterDiscount = totalBeforeDiscount - (totalBeforeDiscount * discountValue/100);
 		}else if(discountType == Inventory_Edit_Js.directAmountDiscountType){
-				rowAmountField.removeClass('hide').focus();
+			//rowAmountField.removeClass('hide').focus(); //tmp usefull for what ??
+//			priceAfterDiscount = discountValue; // TMP to check if it's usefull !!!!!
 		}
-		this.setDiscountTotal(lineItemRow,discountValue)
-			.updateTotalAfterDiscount(lineItemRow);
+
+		return rounded ? priceAfterDiscount.toFixed(2) : priceAfterDiscount;
 	},
 
 	/**
-	 * Function which will calculate line item total after discount
+	 * Function which will calculate discount for the line item
 	 * @params : lineItemRow - element which will represent lineItemRow
 	 */
-	calculateTotalAfterDiscount: function(lineItemRow, round) {
-		round = (typeof round != "number") ? 0 : parseInt(round);
-		var productTotal = this.getLineItemTotal(lineItemRow);
-		var discountTotal = this.getDiscountTotal(lineItemRow);
-		var totalAfterDiscount = productTotal - discountTotal;
-		if (round) {
-			totalAfterDiscount = totalAfterDiscount.toFixed(round);
-		}
-		return totalAfterDiscount;
+	calculateDiscountForLineItem : function(lineItemRow) {
+		this.updateTotalAfterDiscount(lineItemRow);
+		var totalBeforeDiscount = this.getLineItemTotal(lineItemRow).toFixed(2);
+		var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow, true);
+		var discountValue =  (totalBeforeDiscount - totalAfterDiscount).toFixed(2);
+
+		this.setDiscountTotal(lineItemRow,discountValue);
 	},
 
 	/**
@@ -1104,50 +1108,58 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	 * @params : lineItemRow - element which will represent lineItemRow
 	 */
 	updateTotalAfterDiscount: function(lineItemRow) {
-		this.setTotalAfterDiscount(lineItemRow, this.calculateTotalAfterDiscount(lineItemRow, 2));
+		this.setTotalAfterDiscount(lineItemRow, this.calculateTotalAfterDiscount(lineItemRow, true));
 	},
 
 	/**
 	 * Function which will calculate tax for the line item total after discount
 	 */
 	calculateTaxForLineItem : function(lineItemRow) {
-		var thisInstance = this;
-		var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow);
-		var quantity = this.getQuantityValue(lineItemRow);
-		var taxPercentages = jQuery('.taxPercentage',lineItemRow);
-		//intially make the tax as zero
-		var taxTotal = 0;
-		jQuery.each(taxPercentages,function(index,domElement){
-			var taxPercentage = jQuery(domElement);
-			var individualTaxRow = taxPercentage.closest('tr');
-			var individualTaxPercentage = thisInstance.parseFloat(taxPercentage.val());
-			if(individualTaxPercentage == ""){
-				individualTaxPercentage = "0.00";
-			}
-			individualTaxPercentage = parseFloat(individualTaxPercentage);
-			var individualTaxTotal = (individualTaxPercentage * totalAfterDiscount)/100;
-			//if (quantity <= 1)
-				individualTaxTotal = individualTaxTotal.toFixed(2);
-			//ED151016 pas nécessaire si le paramétrage Utilisateur est sur 4 chiffres
-			//else //ED151014 : arrondit le tarif unitaire puis le multiplie par la quantité 
-			//	individualTaxTotal = (Math.round(individualTaxTotal/quantity * 100) * quantity / 100).toFixed(2);
-			jQuery('.taxTotal',individualTaxRow).val(individualTaxTotal);
-			taxTotal += parseFloat(individualTaxTotal);
-		});
-		taxTotal = parseFloat(taxTotal.toFixed(2));
+		// var thisInstance = this;
+		// var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow);
+		// var quantity = this.getQuantityValue(lineItemRow);
+		// var taxPercentages = jQuery('.taxPercentage',lineItemRow);
+		// //intially make the tax as zero
+		// var taxTotal = 0;
+		// jQuery.each(taxPercentages,function(index,domElement){
+		// 	var taxPercentage = jQuery(domElement);
+		// 	var individualTaxRow = taxPercentage.closest('tr');
+		// 	var individualTaxPercentage = thisInstance.parseFloat(taxPercentage.val());
+		// 	if(individualTaxPercentage == ""){
+		// 		individualTaxPercentage = "0.00";
+		// 	}
+		// 	individualTaxPercentage = parseFloat(individualTaxPercentage);
+		// 	var individualTaxTotal = (individualTaxPercentage * totalAfterDiscount)/100;
+		// 	//if (quantity <= 1)
+		// 		individualTaxTotal = individualTaxTotal.toFixed(2);
+		// 	//ED151016 pas nécessaire si le paramétrage Utilisateur est sur 4 chiffres
+		// 	//else //ED151014 : arrondit le tarif unitaire puis le multiplie par la quantité 
+		// 	//	individualTaxTotal = (Math.round(individualTaxTotal/quantity * 100) * quantity / 100).toFixed(2);
+		// 	jQuery('.taxTotal',individualTaxRow).val(individualTaxTotal);
+		// 	taxTotal += parseFloat(individualTaxTotal);
+		// });
+		// taxTotal = parseFloat(taxTotal.toFixed(2));
+		// this.setLineItemTaxTotal(lineItemRow, taxTotal);
+		var totalAfterDiscount = this.getTotalAfterDiscount(lineItemRow).toFixed(2);
+		var lineItemNetPrice = this.getLineItemNetPrice(lineItemRow).toFixed(2);
+		var taxTotal = parseFloat((lineItemNetPrice - totalAfterDiscount).toFixed(2));
 		this.setLineItemTaxTotal(lineItemRow, taxTotal);
+		console.log ("TotalAfterDiscount " + this.getTotalAfterDiscount(lineItemRow) + " " + totalAfterDiscount);
+		console.log ("lineItemNetPrice " + this.getLineItemNetPrice(lineItemRow) + " " + lineItemNetPrice);
+		console.log ("taxTotal " + taxTotal);
 	},
 
 	/**
 	 * Function which will calculate net price for the line item
 	 */
 	calculateLineItemNetPrice : function(lineItemRow) {
-		var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow);//this.getTotalAfterDiscount(lineItemRow);
-		var netPrice = parseFloat(totalAfterDiscount); 
-		if(this.isIndividualTaxMode()) {
-			var productTaxTotal = this.getLineItemTaxTotal(lineItemRow);
-			netPrice +=  parseFloat(productTaxTotal)
-		}
+		var totalAfterDiscount = this.calculateTotalAfterDiscount(lineItemRow);
+		var taxeRate = this.getLineItemTaxRate(lineItemRow);
+		var netPrice = totalAfterDiscount * (1 + taxeRate/100);
+		// if(this.isIndividualTaxMode()) { //?
+		// 	var productTaxTotal = this.getLineItemTaxTotal(lineItemRow);
+		// 	netPrice +=  parseFloat(productTaxTotal)
+		// }
 		netPrice = netPrice.toFixed(2);
 		this.setLineItemNetPrice(lineItemRow,netPrice);
 	},
@@ -1450,7 +1462,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 			var selectedListPriceMode = thisInstance.getListPriceMode(lineItemRow)
 			, asListPriceMode = selectedListPriceMode === 'TTC' ? 'HT' : 'TTC';
 			var price = thisInstance.getListPriceValue(lineItemRow, asListPriceMode);
-			thisInstance.setListPriceValue(lineItemRow, price, 4);
+			thisInstance.setListPriceValue(lineItemRow, price);
 			thisInstance.lineItemRowCalculations(lineItemRow);
 			return;		
 		});
@@ -1487,8 +1499,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 	lineItemRowCalculations : function(lineItemRow) {
 		this.calculateLineItemTotal(lineItemRow);
 		this.calculateDiscountForLineItem(lineItemRow);
-		this.calculateTaxForLineItem(lineItemRow);
 		this.calculateLineItemNetPrice(lineItemRow);
+		this.calculateTaxForLineItem(lineItemRow);
 	},
 
 	lineItemToTalResultCalculations : function(){
@@ -1562,7 +1574,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 				break;
 			}
 			thisInstance.setLineItemDiscount(lineItemRow, discountpc, Inventory_Edit_Js.percentageDiscountType, false);
-			thisInstance.setListPriceValue(lineItemRow, price, 4);
+			thisInstance.setListPriceValue(lineItemRow, price);
 		}
 	},
 	
@@ -1633,8 +1645,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 
 	lineItemDiscountChangeActions : function(lineItemRow){
 		this.calculateDiscountForLineItem(lineItemRow);
-		this.calculateTaxForLineItem(lineItemRow);
 		this.calculateLineItemNetPrice(lineItemRow);
+		this.calculateTaxForLineItem(lineItemRow);
+		
 
 		this.lineItemToTalResultCalculations();
 	},
@@ -1647,6 +1660,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 
 	taxPercentageChangeActions : function(lineItemRow){
 		this.calculateLineItemNetPrice(lineItemRow);
+		this.calculateTaxForLineItem(lineItemRow);
 		this.calculateNetTotal();
 		this.calculateFinalDiscount();
 		if(this.isGroupTaxMode()){
@@ -1815,6 +1829,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 		lineItemTable.on('focusout','.taxPercentage',function(e){
 			var element = jQuery(e.currentTarget);
 			var lineItemRow = thisInstance.getClosestLineItemRow(element);
+			thisInstance.calculateLineItemNetPrice(lineItemRow);
 			thisInstance.calculateTaxForLineItem(lineItemRow);
 		});
 		
@@ -1882,6 +1897,7 @@ Vtiger_Edit_Js("Inventory_Edit_Js",{
 					var lineItemRow = jQuery(domElement);
 					lineItemRow.find('.individualTaxContainer,.productTaxTotal').addClass('hide');
 					thisInstance.calculateLineItemNetPrice(lineItemRow);
+					thisInstance.calculateTaxForLineItem(lineItemRow);
 				});
 			}
 			thisInstance.lineItemToTalResultCalculations();

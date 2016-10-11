@@ -69,6 +69,27 @@
             &nbsp;
         </div>
     </div>
+    <div id='stats_filters'>
+        <p>Filtres statistiques :</p>
+        <select>
+            <option>aucun</option>
+            {foreach item=STATISTICS_FILTER from=$STATISTICS_FILTERS}
+                <option>{$STATISTICS_FILTER["name"]}</option>
+            {/foreach}      
+        </select>
+    </div>
+
+    {foreach item=STATISTICS_FILTER from=$STATISTICS_FILTERS}
+        <div id='stat_filter_{$STATISTICS_FILTER["name"]}' style="display:none;">
+            <p>{$STATISTICS_FILTER["name"]}</p>
+            <select>
+                {foreach item=FILTER_AVALAIBLE from=$STATISTICS_FILTER["filtersavailable"]}
+                    <option>{$FILTER_AVALAIBLE["name"]}</option>
+                {/foreach}
+            </select>
+        </div>
+    {/foreach}
+
     <div class="relatedContents contents-bottomscroll">
         <div class="bottomscroll-div">
         {assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
@@ -169,3 +190,7 @@
     </div>
 </div>
 {/strip}
+
+<script type="text/javascript">
+    console.log("tutu");
+</script>

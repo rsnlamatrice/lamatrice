@@ -102,7 +102,7 @@
 	</td>
 	<td>
 		<div class="edit-Price">
-			<input id="{$listPrice}" name="{$listPrice}" value="{if !empty($data.$listPrice)}{$data.$listPrice}{else}0{/if}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]"
+			<input id="{$listPrice}" name="{$listPrice}" value="{if !empty($data.$listPrice)}{(float)$data.$listPrice}{else}0{/if}" type="text" data-validation-engine="validate[required,funcCall[Vtiger_PositiveNumber_Validator_Js.invokeValidation]]"
 			class="listPrice tinyInputBox" onfocus="$(this).select()"/>
 			<div id="mode-{$listPrice}" {if $row_no > 0}class="buttonset"{/if} style="display: inline-block; margin-right: 0; margin-left: 3px;">
 				<input type="radio" id="mode-ht-{$listPrice}" name="mode-{$listPrice}" checked="checked" class="listPrice-mode" data-mode="HT"/>

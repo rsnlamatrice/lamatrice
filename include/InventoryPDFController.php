@@ -112,38 +112,57 @@ class Vtiger_InventoryPDFController {
 			$tax_amount = ''; $producttotal = '';
 
 
-			$quantity	= $productLineItem["qty{$productLineItemIndex}"];
-			$listPrice	= $productLineItem["listPrice{$productLineItemIndex}"];
-			$discount	= $productLineItem["discountTotal{$productLineItemIndex}"];
-			$taxed_discount = $discount;
-			$taxable_total = $quantity * $listPrice - $discount;
-			// $taxable_total = number_format(round($taxable_total, $no_of_decimal_places), $no_of_decimal_places,'.','');
-			// $producttotal = $taxable_total;
+			$quantity			= $productLineItem["qty{$productLineItemIndex}"];
+			$listPrice			= $productLineItem["listPrice{$productLineItemIndex}"];
+			$discount			= $productLineItem["discountTotal{$productLineItemIndex}"];
+			$discountPercentage = $productLineItem["discount_percent{$productLineItemIndex}"];
+			$taxed_discount 	= $discount;
+			$taxable_total 		= ($quantity * $listPrice) * (1 - $discountPercentage/100);
+			$producttotal 		= $taxable_total;
+
 			if($this->focus->column_fields["hdnTaxType"] == "individual") {
-				for($tax_count=0;$tax_count<count($productLineItem['taxes']);$tax_count++) {
-					$tax_percent = $productLineItem['taxes'][$tax_count]['percentage'];
-					$total_tax_percent += $tax_percent;
-					$tax_amount = (($taxable_total*$tax_percent)/100);
+				$taxQuantity = count($productLineItem['taxes']);
+				if ($taxQuantity == 1) {
+					$total_tax_percent += $tax_percent = $productLineItem['taxes'][0]['percentage'];
+					$producttotal = $taxable_total * (1 + $tax_percent/100);
 					$taxed_discount *= (1 + $tax_percent/100);
-					$producttotal_taxes += $tax_amount;
+					$producttotal_taxes += $tax_amount = round($producttotal, 2) - round($taxable_total, 2);
+
 					//ED151019
 					if($tax_amount){
-						$tax_name = $productLineItem['taxes'][$tax_count]['taxname'];
+						$tax_name = $productLineItem['taxes'][0]['taxname'];
 						if(!$totalPerTax[$tax_name])
 							$totalPerTax[$tax_name] = 0.0;
 						$totalPerTax[$tax_name] += $tax_amount;
 					}
+
+				} else {
+					for($tax_count=0;$tax_count<$taxQuantity;$tax_count++) {
+						$tax_percent = $productLineItem['taxes'][$tax_count]['percentage'];
+						$total_tax_percent += $tax_percent;
+						$tax_amount = (($taxable_total*$tax_percent)/100);
+						$taxed_discount *= (1 + $tax_percent/100);
+						$producttotal_taxes += $tax_amount;
+						//ED151019
+						if($tax_amount){
+							$tax_name = $productLineItem['taxes'][$tax_count]['taxname'];
+							if(!$totalPerTax[$tax_name])
+								$totalPerTax[$tax_name] = 0.0;
+							$totalPerTax[$tax_name] += $tax_amount;
+						}
+					}
+					$producttotal = $taxable_total+$producttotal_taxes;
 				}
 			}
 
 			$producttotal_taxes = number_format(round($producttotal_taxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
-			$producttotal = $taxable_total+$producttotal_taxes;
 			$unitTaxedPrice = $quantity ? (($producttotal + $taxed_discount) / $quantity) : ($listPrice);
+			$taxable_total = number_format(round($taxable_total, $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$producttotal = number_format(round($producttotal, $no_of_decimal_places), $no_of_decimal_places,'.','');
 			$tax = $producttotal_taxes;
 			$totaltaxes += $tax;
 			
-			$discountPercentage = $productLineItem["discount_percent{$productLineItemIndex}"];
+			//$discountPercentage = $productLineItem["discount_percent{$productLineItemIndex}"];
 			$productName = decode_html($productLineItem["productName{$productLineItemIndex}"]);
 			//get the sub product
 			$subProducts = $productLineItem["subProductArray{$productLineItemIndex}"];
@@ -169,7 +188,7 @@ class Vtiger_InventoryPDFController {
 
 			$contentModels[] = $contentModel;
 		}
-		//$totaltaxes = number_format(round($totaltaxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
+		$totaltaxes = number_format(round($totaltaxes, $no_of_decimal_places), $no_of_decimal_places,'.','');
 		$this->totaltaxes = $totaltaxes; //will be used to add it to the net total
 		$this->totalPerTax = $totalPerTax;
 		return $contentModels;

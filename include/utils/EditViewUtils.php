@@ -280,6 +280,7 @@ function getAssociatedProducts($module,$focus,$seid='')
 		//To avoid NaN javascript error, here we assign 0 initially to' %of price' and 'Direct Price reduction'(for Each Product)
 		$product_Detail[$i]['discount_percent'.$i] = 0;
 		$product_Detail[$i]['discount_amount'.$i] = 0;
+		$totalAfterDiscount = $productTotal;
 
 		if($discount_percent != 'NULL' && $discount_percent != '')
 		{
@@ -288,7 +289,8 @@ function getAssociatedProducts($module,$focus,$seid='')
 			$product_Detail[$i]['checked_discount_percent'.$i] = ' checked';
 			$product_Detail[$i]['style_discount_percent'.$i] = ' style="visibility:visible"';
 			$product_Detail[$i]['style_discount_amount'.$i] = ' style="visibility:hidden"';
-			$discountTotal = $productTotal*$discount_percent/100;
+			$totalAfterDiscount = $productTotal-($productTotal*$discount_percent/100);
+			$discountTotal = round($productTotal, 2)-round($totalAfterDiscount, 2);
 		}
 		elseif($discount_amount != 'NULL' && $discount_amount != '')
 		{
@@ -298,12 +300,12 @@ function getAssociatedProducts($module,$focus,$seid='')
 			$product_Detail[$i]['style_discount_amount'.$i] = ' style="visibility:visible"';
 			$product_Detail[$i]['style_discount_percent'.$i] = ' style="visibility:hidden"';
 			$discountTotal = $discount_amount;
+			$totalAfterDiscount = $productTotal-$discountTotal;
 		}
 		else
 		{
 			$product_Detail[$i]['checked_discount_zero'.$i] = ' checked';
 		}
-		$totalAfterDiscount = $productTotal-$discountTotal;
 		$totalAfterDiscount = number_format(round($totalAfterDiscount, $no_of_decimal_places), $no_of_decimal_places,'.','');
 		$discountTotal = number_format(round($discountTotal, $no_of_decimal_places), $no_of_decimal_places,'.','');
 		$product_Detail[$i]['discountTotal'.$i] = $discountTotal;

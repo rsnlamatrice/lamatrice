@@ -489,15 +489,19 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				
 				//Taxe utilisée
 				$invoiceTotalTaxes = 0.0;
+				$amountTTC = $amountHTRounded;
 				for($nTax = 0; $nTax < count($taxes); $nTax++){
 					$taxId = $taxes[$nTax]['taxid'];
 					if($invoice['tax'.$taxId]){
 						if(!array_key_exists("$taxId", $invoiceTaxes))
 							$invoiceTaxes["$taxId"] = 0.0;
+
+						$amountTTC = $amountHT * (1 + $invoice['tax'.$taxId] / 100);
 						//Passage par le TTC, arrondi à 2 chiffres et retrait du HT pour éviter les écarts d'arrondis
-						$value = round(($invoice['tax'.$taxId] / 100) * $amountHT, 2);
+						$value = round($amountTTC, 2) - $amountHTRounded;
 						$invoiceTotalTaxes += $value;
 						$invoiceTaxes["$taxId"] += $value;
+						$amountTTC = round($amountTTC, 2);
 						break;
 					}
 				}
