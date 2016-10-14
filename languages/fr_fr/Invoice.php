@@ -20,6 +20,7 @@ $languageStrings = array(
 	'LBL_EXPORT_TO_PDF_ADH'        => 'Imprimer en PDF (Reçu d\'adhésion)'                  ,
 	'LBL_EXPORT_TO_PDF_DV'         => 'Imprimer en PDF (Dépôt-vente)'                  ,
 	'LBL_SEND_MAIL_PDF'            => 'Envoi du PDF par Email'         , 
+	'LBL_MARK_AS_SETTLED'            => 'Marquer comme payée'         , 
 	'LBL_ADD_RECORD'               => 'Ajouter une facture'         , 
 	'LBL_RECORDS_LIST'             => 'Liste des factures'              , 
 	'LBL_INVOICE_INFORMATION'      => 'Détail de la facture'             , 

@@ -282,6 +282,14 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 	}
 
 	/**
+	 * Function to get URL for Mark as settled
+	 * @return <type>
+	 */
+	public function getMarkAsSettledUrl() {
+		return "index.php?module=".$this->getModuleName()."&action=MarkAsSettled&record=".$this->getId();
+	}
+
+	/**
 	 * Function to get this record and details as PDF
 	 */
 	public function getPDF($type="Default") {
@@ -296,6 +304,27 @@ class Inventory_Record_Model extends Vtiger_Record_Model {
 		$fileName = vtranslate('SINGLE_'.$moduleName, $moduleName).'_'.getModuleSequenceNumber($moduleName, $recordId);
 		$controller->setType($type);
 		$controller->Output($fileName.'.pdf', 'D');
+	}
+
+	/**
+	 * Function to get this record and details as PDF
+	 */
+	public function markAsSettled() {
+		global $adb;
+		
+		$query = 'UPDATE vtiger_invoice
+			SET balance = 0, received = ?
+			WHERE invoiceid = ?';
+		
+		$params = array(
+			$this->get("hdnGrandTotal"),
+			$this->getId()
+		);
+
+		$res = $adb->pquery($query, $params);
+
+		$redirectUrl = $this->getDetailViewUrl();
+		header("Location: $redirectUrl");
 	}
 
     /**

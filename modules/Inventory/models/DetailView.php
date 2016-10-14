@@ -138,6 +138,15 @@ class Inventory_DetailView_Model extends Vtiger_DetailView_Model {
 			);
 	    
 			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($sendEmailLink);
+
+	    	if($recordModel->get('balance') > 0) {
+				$markAsSettledLink = array(
+				    'linklabel' => vtranslate('LBL_MARK_AS_SETTLED', $moduleName),
+				    'linkurl' => $recordModel->getMarkAsSettledUrl(),
+				    'linkicon' => ''
+				);
+				$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($markAsSettledLink);
+	    	}
 		}
 
 		//ED150603 : remove "delete" menu if sent2compta
