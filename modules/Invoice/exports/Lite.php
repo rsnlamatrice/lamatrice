@@ -26,4 +26,13 @@ class Invoice_Lite_Export extends Export_ExportData_Action {
 		$moduleName = $request->get('source_module');
 		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Export_Test";
 	}
+
+	function getExportQuery($request) {
+		$parentQuery = parent::getExportQuery($request);
+		$orderByPos = strpos($parentQuery, 'ORDER BY');
+		$query = substr($parentQuery, 0, $orderByPos) . " GROUP BY invoice_no " .
+				 substr($parentQuery, $orderByPos);
+
+		return $query;
+	}
 }
