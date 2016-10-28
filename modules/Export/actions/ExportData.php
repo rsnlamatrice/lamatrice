@@ -9,6 +9,7 @@ class Export_ExportData_Action extends Vtiger_ExportData_Action {
 	 * @param Vtiger_Request $request
 	 */
 	function process(Vtiger_Request $request) {
+		set_time_limit(600);
 		$exportClassName = $request->get('ExportClassName');
 		$sourceModule = $request->get('source_module');
 		$exporter = Export_Utils_Helper::getExportClassFromName($exportClassName, $sourceModule);

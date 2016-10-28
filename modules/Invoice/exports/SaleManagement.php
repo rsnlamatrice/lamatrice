@@ -21,13 +21,13 @@ class Invoice_SaleManagement_Export extends Export_ExportData_Action {
 		return array(
 			"Facture" => "invoice_no",//tmp enlever COG\Y\Y0 ou FAC\Y\Y0 !! ????
 			"Date" => "invoicedate",
-			"TVA 20,00 %" => function ($row) { return Invoice_SaleManagement_Export::get_tax_20($row); },
-			"TVA 7,00 %" => function ($row) { return Invoice_SaleManagement_Export::get_tax_7($row); },
-			"TVA 5,50 %" => function ($row) { return Invoice_SaleManagement_Export::get_tax_5_5($row); },
-			"TVA 2,10 %" => function ($row) { return Invoice_SaleManagement_Export::get_tax_2_1($row); },
-			"Total TVA" => function ($row) { return Invoice_SaleManagement_Export::get_tax_total($row); },
-			"Total HT" => function ($row) { return Invoice_SaleManagement_Export::get_total($row); },
-			"Total TTC" => function ($row) { return Invoice_SaleManagement_Export::get_net_total($row); },
+			"TVA 20,00 %" => function ($row) { return Invoice_SaleManagement_Export::formatFloatVal(Invoice_SaleManagement_Export::get_tax_20($row)); },
+			"TVA 7,00 %" => function ($row) { return Invoice_SaleManagement_Export::formatFloatVal(Invoice_SaleManagement_Export::get_tax_7($row)); },
+			"TVA 5,50 %" => function ($row) { return Invoice_SaleManagement_Export::formatFloatVal(Invoice_SaleManagement_Export::get_tax_5_5($row)); },
+			"TVA 2,10 %" => function ($row) { return Invoice_SaleManagement_Export::formatFloatVal(Invoice_SaleManagement_Export::get_tax_2_1($row)); },
+			"Total TVA" => function ($row) { return Invoice_SaleManagement_Export::formatFloatVal(Invoice_SaleManagement_Export::get_tax_total($row)); },
+			"Total HT" => function ($row) { return Invoice_SaleManagement_Export::formatFloatVal(Invoice_SaleManagement_Export::get_total($row)); },
+			"Total TTC" => function ($row) { return Invoice_SaleManagement_Export::formatFloatVal(Invoice_SaleManagement_Export::get_net_total($row)); },
 		);
 	}
 
@@ -165,5 +165,9 @@ class Invoice_SaleManagement_Export extends Export_ExportData_Action {
 				 substr($parentQuery, $orderByPos);
 		//echo $query;exit();
 		return $query;
+	}
+
+	function formatFloatVal($val) {
+		return str_replace(".", ",", strval(floatval($val)));
 	}
 }
