@@ -28,7 +28,6 @@ class Invoice_SaleManagement_Export extends Export_ExportData_Action {
 			"Total TVA" => function ($row) { return Invoice_SaleManagement_Export::get_tax_total($row); },
 			"Total HT" => function ($row) { return Invoice_SaleManagement_Export::get_total($row); },
 			"Total TTC" => function ($row) { return Invoice_SaleManagement_Export::get_net_total($row); },
-			"Total TTC 2" => "total",
 		);
 	}
 
