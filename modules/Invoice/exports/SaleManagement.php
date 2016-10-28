@@ -147,6 +147,10 @@ class Invoice_SaleManagement_Export extends Export_ExportData_Action {
 		return $this->net_total;
 	}
 
+	function getQueryOrderBy($moduleName) {
+		return ' ORDER BY invoicedate ASC';
+	}
+
 	function displayHeaderLine() {
 		return true;
 	}
