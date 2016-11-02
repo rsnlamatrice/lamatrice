@@ -149,6 +149,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														    ON vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
 														    AND vtiger_rsnaborevues.debutabo =  vtiger_rsnaborevues_max.debutabo
 														    AND (vtiger_rsnaborevues.debutabo != vtiger_rsnaborevues.finabo OR vtiger_rsnaborevues.finabo IS NULL)
+														    AND NOT (vtiger_rsnaborevues.rsnabotype LIKE '%remerciement%' AND vtiger_rsnaborevues.isabonne = 0)
 														LEFT JOIN vtiger_rsnabotype
 														    ON vtiger_rsnabotype.rsnabotype = vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $wherePos);
