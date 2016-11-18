@@ -142,12 +142,15 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														    JOIN vtiger_crmentity vtiger_rsnaborevues_crmentity ON vtiger_rsnaborevues_crmentity.crmid = vtiger_rsnaborevues.rsnaborevuesid
 														    WHERE vtiger_rsnaborevues_crmentity.deleted = 0
 														    AND vtiger_rsnaborevues.debutabo <= CURRENT_DATE
+														    AND NOT (vtiger_rsnaborevues.rsnabotype LIKE '%remerciement%' AND vtiger_rsnaborevues.isabonne = 0)
 														    GROUP BY accountid
 														) vtiger_rsnaborevues_max 
 														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
 														LEFT JOIN vtiger_rsnaborevues
 														    ON vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
 														    AND vtiger_rsnaborevues.debutabo =  vtiger_rsnaborevues_max.debutabo
+														    AND (vtiger_rsnaborevues.debutabo != vtiger_rsnaborevues.finabo OR vtiger_rsnaborevues.finabo IS NULL)
+														    AND NOT (vtiger_rsnaborevues.rsnabotype LIKE '%remerciement%' AND vtiger_rsnaborevues.isabonne = 0)
 														LEFT JOIN vtiger_rsnabotype
 														    ON vtiger_rsnabotype.rsnabotype = vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $wherePos);
