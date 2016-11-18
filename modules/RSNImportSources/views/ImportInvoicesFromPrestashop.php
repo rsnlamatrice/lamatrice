@@ -1233,6 +1233,7 @@ class RSNImportSources_ImportInvoicesFromPrestashop_View extends RSNImportSource
 		$query = "UPDATE $tableName
 		JOIN  vtiger_rsnreglements
 			ON  vtiger_rsnreglements.numpiece LIKE CONCAT(`$tableName`.numcart, ';%')
+				OR vtiger_rsnreglements.numpiece LIKE CONCAT(`$tableName`.numcart, ' - %')
 		JOIN vtiger_crmentity
 			ON vtiger_rsnreglements.rsnreglementsid = vtiger_crmentity.crmid
 		";

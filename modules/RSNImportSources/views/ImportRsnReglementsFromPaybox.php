@@ -1274,6 +1274,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 		if($numpiece){
 			if(strpos($numpiece, ';') !== FALSE)
 				$referenceParts = explode( ';', $numpiece);
+			else if(strpos($numpiece, ' - ') !== FALSE)
+				$referenceParts = explode( ' - ', $numpiece);
 			else
 				$referenceParts = explode( '_', $numpiece);
 			$numcart = $referenceParts[0];
