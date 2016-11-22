@@ -17,9 +17,7 @@ class Contacts_MontantDonTmp_Export extends Contacts_RecuFiscalNonPrel_Export { 
 			"CP-Ville" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "zip") . " " .
 													Contacts_MontantDonTmp_Export::getAddressField($row, "city"); },
 			"Pays" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "country"); },
-			"Dons" => function ($row) { return Contacts_MontantDonTmp_Export::getTotalDons($row) .  " " . utf8_encode(chr(128)); },
-			"Dons en lettres" => function ($row) { return Contacts_MontantDonTmp_Export::getTotalDonsLetter($row) . " euros"; },
-			"Dons après déduction" => function ($row) { return Contacts_MontantDonTmp_Export::getRealDons($row) . " " . utf8_encode(chr(128)); },
+			"Dons" => function ($row) { return Contacts_MontantDonTmp_Export::getTotalDons($row)); },
 		);
 	}
 
