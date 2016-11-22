@@ -26,8 +26,8 @@ class Contacts_MontantDonTmp_Export extends Contacts_RecuFiscalNonPrel_Export { 
 	function getDons($row) {//tmp requete executé pour chaque contact ...
 		$db = PearDatabase::getInstance();
 		$current_year = date("Y") - 1;
-		$date_debut = "2013-09-01";
-		$date_fin = "2014-08-31";
+		$date_debut = "2014-09-01";
+		$date_fin = "2015-08-31";
 		$query = "SELECT SUM(vtiger_inventoryproductrel.listprice * vtiger_inventoryproductrel.quantity) total_dons
 					FROM vtiger_inventoryproductrel
 	                
@@ -55,8 +55,8 @@ class Contacts_MontantDonTmp_Export extends Contacts_RecuFiscalNonPrel_Export { 
 	function getPrel($row) {//tmp requete executé pour chaque contact ...
 		$db = PearDatabase::getInstance();
 		$current_year = date("Y") - 1;//TMP Year !
-		$date_debut = "2013-09-01";
-		$date_fin = "2014-08-31";
+		$date_debut = "2014-09-01";
+		$date_fin = "2015-08-31";
 		$query = "SELECT DISTINCT SUM(vtiger_rsnprelvirement.montant) total_prelevements 
 				FROM vtiger_rsnprelevements 
 				JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid 
