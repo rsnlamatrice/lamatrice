@@ -7,7 +7,6 @@ class Contacts_MontantDonTmp_Export extends Contacts_RecuFiscalNonPrel_Export { 
 	//tmp check mailing ou other address !!!!!!!
 	function getExportStructure() {
 		return array(
-			"Numero Ordre" => function ($row) { return Contacts_RecuFiscalPrel_Export::getRecuFiscalDisplayNumber($row); }, //Reçu n° 2014 / 010375
 			"Ref" => "contact_no",
 			"Ligne2" => "grpnomllong",
 			"Prenom-Nom" => function ($row) { return $row["firstname"] . " " . $row["lastname"]; },
