@@ -66,7 +66,7 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 
 	function getExportFileName($request) {
 		$moduleName = $request->get('source_module');
-		return "liste_groupes_pour_stats";
+		return "export_emails";
 	}
 
 	//tmp order by zip ??
