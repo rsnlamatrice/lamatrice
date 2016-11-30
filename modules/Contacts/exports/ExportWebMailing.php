@@ -114,8 +114,7 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 					    ON vtiger_crmentity_contacts.crmid = vtiger_contactdetails.contactid
 					JOIN vtiger_crmentity vtiger_crmentity_emails
 					    ON vtiger_crmentity_emails.crmid = vtiger_contactemails.`contactemailsid`
-					WHERE (`vtiger_contactemails`.`emailaddressorigin` != 'Principale'
-							OR `vtiger_contactemails`.`emailaddressorigin` IS NULL)
+					WHERE `vtiger_contactemails`.`emailaddressorigin` != 'Principale'
 					AND vtiger_crmentity_contacts.deleted = 0
 					AND vtiger_crmentity_emails.deleted = 0
 					/*AND `vtiger_contactemails`.emailoptout = 0
