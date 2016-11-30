@@ -120,7 +120,7 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 					AND `vtiger_contactemails`.emailoptout = 0
 					AND `vtiger_contactdetails`.emailoptout = 0
 
-					)) AS all_emails /*GROUP BY contactid*/) AS export_emails ON export_emails.contactid = vtiger_contactdetails.contactid
+					) AS all_emails /*GROUP BY contactid*/) AS export_emails ON export_emails.contactid = vtiger_contactdetails.contactid
 					" .
 				 substr($parentQuery, $wherePos);
 
