@@ -87,8 +87,7 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . 
 					 "JOIN ( SELECT contactid, email FROM 
 					 (
-					/* adresse email principale dans rézo-info
-					13 039 */
+					/* adresse email principale */
 					SELECT `vtiger_contactemails`.contactid, `vtiger_contactemails`.email
 					FROM `vtiger_contactemails`
 					JOIN `vtiger_contactdetails`
@@ -101,14 +100,12 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 					AND vtiger_crmentity_emails.deleted = 0
 					AND `vtiger_contactemails`.emailoptout = 0
 					AND `vtiger_contactdetails`.emailoptout = 0
-					AND `vtiger_contactemails`.`rsnmediadocuments` LIKE '%rezo-info%'
 					AND `vtiger_contactemails`.`emailaddressorigin` = 'Principale'
 
 
 					UNION
 
-					/* adresse email secondaire dans rézo-info
-					2 440 */
+					/* adresse email secondaire */
 					SELECT  `vtiger_contactemails`.contactid, `vtiger_contactemails`.email
 					FROM `vtiger_contactemails`
 					JOIN `vtiger_contactdetails`
@@ -122,45 +119,6 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 					AND vtiger_crmentity_emails.deleted = 0
 					AND `vtiger_contactemails`.emailoptout = 0
 					AND `vtiger_contactdetails`.emailoptout = 0
-					AND `vtiger_contactemails`.`rsnmediadocuments` LIKE '%rezo-info%'
-
-
-
-					UNION
-
-					/* adresse email principale de ceux qui ne n'ont pas d'adresse secondaire dans rézo-info
-					85  666 */
-					SELECT  `vtiger_contactemails`.contactid, `vtiger_contactemails`.email
-					FROM `vtiger_contactemails`
-					JOIN `vtiger_contactdetails`
-					    ON `vtiger_contactemails`.contactid = `vtiger_contactdetails`.contactid
-					JOIN vtiger_crmentity vtiger_crmentity_contacts
-					    ON vtiger_crmentity_contacts.crmid = vtiger_contactdetails.contactid
-					JOIN vtiger_crmentity vtiger_crmentity_emails
-					    ON vtiger_crmentity_emails.crmid = vtiger_contactemails.`contactemailsid`
-					 WHERE `vtiger_contactemails`.`emailaddressorigin` = 'Principale'
-					AND vtiger_crmentity_contacts.deleted = 0
-					AND vtiger_crmentity_emails.deleted = 0
-					AND `vtiger_contactemails`.emailoptout = 0
-					AND `vtiger_contactdetails`.emailoptout = 0
-					AND (NOT `vtiger_contactemails`.`rsnmediadocuments` LIKE '%rezo-info%')
-					AND  `vtiger_contactemails`.contactid NOT IN (
-
-					    /* adresse email secondaire dans rézo-info */
-					    SELECT  `vtiger_contactemails`.contactid
-					    FROM `vtiger_contactemails`
-					    JOIN `vtiger_contactdetails`
-					        ON `vtiger_contactemails`.contactid = `vtiger_contactdetails`.contactid
-					    JOIN vtiger_crmentity vtiger_crmentity_contacts
-					        ON vtiger_crmentity_contacts.crmid = vtiger_contactdetails.contactid
-					    JOIN vtiger_crmentity vtiger_crmentity_emails
-					        ON vtiger_crmentity_emails.crmid = vtiger_contactemails.`contactemailsid`
-					    WHERE `vtiger_contactemails`.`emailaddressorigin` != 'Principale'
-					    AND vtiger_crmentity_contacts.deleted = 0
-					    AND vtiger_crmentity_emails.deleted = 0
-						AND `vtiger_contactemails`.emailoptout = 0
-						AND `vtiger_contactdetails`.emailoptout = 0
-					    AND `vtiger_contactemails`.`rsnmediadocuments` LIKE '%rezo-info%'
 
 					)) AS all_emails /*GROUP BY contactid*/) AS export_emails ON export_emails.contactid = vtiger_contactdetails.contactid
 					" .
