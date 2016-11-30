@@ -85,7 +85,7 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
 		$query = substr($parentQuery, 0, $fromPos) . ", export_emails.email as export_email " .
 				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . 
-					 "JOIN ( SELECT contactid, email FROM 
+					 "JOIN ( SELECT contactid, DISTINCT(email) FROM 
 					 (
 					/* adresse email principale */
 					SELECT `vtiger_contactemails`.contactid, `vtiger_contactemails`.email
@@ -120,7 +120,7 @@ class Contacts_ExportWebMailing_Export extends Export_ExportData_Action {
 					/*AND `vtiger_contactemails`.emailoptout = 0
 					AND `vtiger_contactdetails`.emailoptout = 0*/
 
-					) AS all_emails GROUP BY email) AS export_emails ON export_emails.contactid = vtiger_contactdetails.contactid
+					) AS all_emails) AS export_emails ON export_emails.contactid = vtiger_contactdetails.contactid
 					" .
 				 substr($parentQuery, $wherePos);
 
