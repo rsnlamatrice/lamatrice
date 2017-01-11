@@ -34,6 +34,7 @@ class RSNInvoiceHandler extends VTEventHandler {
                 break;
             }
             break;
+        }
     }
       
     /* ED150507 Règles de gestion lors de la validation d'une facture
