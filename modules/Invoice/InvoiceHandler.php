@@ -34,57 +34,8 @@ class RSNInvoiceHandler extends VTEventHandler {
                 break;
             }
             break;
-        case 'vtiger.entity.beforesave':
-            $moduleName = $entity->getModuleName();
-            switch ($moduleName){
-            case 'Invoice' :
-                $this->handleBeforeSaveInvoiceEvent($entity, $moduleName);
-                break;
-            }
-            break;
-        }
     }
-
-    public function handleBeforeSaveInvoiceEvent($entity, $moduleName) {
-        // global $log;
-        // $log->debug("IN handleBeforeSaveInvoiceEvent");
-        // $invoiceId = $entity->getId();
-        // $data = $entity->getData();
-        // //$invoice = Vtiger_Record_Model::getInstanceById($invoiceId, $moduleName);
-   
-        // var_dump($entity);
-        // exit();
-        // $lineItems = $entity->getProducts();
-        // $totalDons = 0;
-        // $totalProduit = 0;
-        // $totalService = 0;
-        // $totalFDP = 0;
-        // foreach($lineItems as $nLine => $lineItem){;
-        //     $productCategory = html_entity_decode($lineItem['hdnProductCategory'.$nLine]);
-               
-        //     if($productCategory == 'Dons'){
-        //         $totalDons += (float)$lineItem[ 'netPrice'.$nLine ];
-        //     }
-
-        //     $is_product = (html_entity_decode($lineItem['entityType'.$nLine]) == "Products");
-        //     if ($is_product) {
-        //         $totalProduit += (float)$lineItem[ 'netPrice'.$nLine ];
-        //     } else {
-        //         $totalService += (float)$lineItem[ 'netPrice'.$nLine ];
-
-        //         $is_fdp = strstr(html_entity_decode($lineItem['hdnProductcode'.$nLine]), 'ZFPORT') !== false;
-        //         if ($is_fdp) {
-        //             $totalFDP += (float)$lineItem[ 'netPrice'.$nLine ];
-        //         }
-        //     }
-        // }
-
-        // $entity->set('total_don', $totalDons);
-        // $entity->set('total_product', $totalProduit);
-        // $entity->set('total_service', $totalService);
-        // $entity->set('total_fdp', $totalFDP);
-    }
-       
+      
     /* ED150507 Règles de gestion lors de la validation d'une facture
     */
     public function handleAfterSaveInvoiceEvent($entity, $moduleName){
