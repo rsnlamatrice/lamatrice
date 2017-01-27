@@ -557,9 +557,12 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				}
 				
 				$compteVente = $invoice['productglacct'];
-				if($compteVente[0] === '7' || $compteVente[0] === '6')
-					$codeAnal = self::getCodeAffaireCodeAnal( $invoiceCodeAnal, $invoice['productsectionanal']);
-				else	$codeAnal = '';
+				if($compteVente[0] === '7' || $compteVente[0] === '6') {
+					$codeAnal = self::getCodeAffaireCodeAnal($invoice['codeaffaire_campaign'], $invoice['productsectionanal']);
+					$codeAnal = ($codeAnal == $invoice['codeaffaire_campaign']) ? self::getCodeAffaireCodeAnal( $invoiceCodeAnal, $invoice['codeaffaire_coupon']) : $codeAnal;
+				} else {
+					$codeAnal = '';
+				}
 				//$productName = $invoice['productname'];
 				$productCode = $invoice['productcode'];
 				$this->addExportRow($journalVente,
