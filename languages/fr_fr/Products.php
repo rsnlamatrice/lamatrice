@@ -75,6 +75,9 @@ $languageStrings = array(
 	'Spiral Binder'                => 'Cahier à spiral'            , 
 	'Sq Ft'                        => 'm²'                         , 
 	'LBL_CONVERSION_RATE'          => 'Taux de conversion'          , // TODO: Review
-	'Compte Achat'                   => 'Compte d\'achat'           ,
-        'Purchase price'               => 'Prix d\'achat (HT)'          ,
+	'Compte Achat'                 => 'Compte d\'achat'           ,
+    'Purchase price'               => 'Prix d\'achat (HT)'          ,
+    'Purchase price TTC'               => 'Prix d\'achat (TTC)'          ,
+    'Sell price TTC'               => 'Prix de vente (TTC)'         ,
+    'Sell price'                   => 'Prix de vente (HT)'         ,
 );
