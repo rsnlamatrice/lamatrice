@@ -51,6 +51,56 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		
 		$this->initSend2ComptaFormExportableInvoices ($request);
 		$this->initSend2ComptaFormValidatableInvoices ($request);
+		$this->initSend2ComptaInvoicesWithoutRegulation($request);
+	}
+
+	function initSend2ComptaInvoicesWithoutRegulation (Vtiger_Request $request){
+		$moduleName = $request->getModule();
+		$viewer = $this->getViewer($request);
+		
+		$controller = new Vtiger_MassSave_Action();
+		
+		$query = $controller->getRecordsQueryFromRequest($request);
+		
+		$onlyInvoicestatus = array('Created');
+		
+		//$query retourne autant de lignes que de lignes de factures
+		$query = 'SELECT DISTINCT invoiceid
+				FROM ('.$query.') _source_';
+		$query = 'SELECT vtiger_invoice.invoice_no, vtiger_invoice.balance
+			FROM ('.$query.') _source_ids_
+			JOIN vtiger_invoice
+				ON vtiger_invoice.invoiceid = _source_ids_.invoiceid
+			JOIN vtiger_invoicecf
+				ON vtiger_invoicecf.invoiceid = vtiger_invoice.invoiceid
+			WHERE vtiger_invoicecf.sent2compta IS NULL
+			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
+			AND vtiger_invoice.balance > 0
+			LIMIT 200 /*too long URL*/
+		';
+		
+		$total = 0;
+		$invoices = [];
+		
+		$db = PearDatabase::getInstance();
+		$result = $db->pquery($query, $onlyInvoicestatus);
+
+		if(!$result){
+			$db->echoError();
+			echo "<pre>$query</pre>";
+			var_dump($params);
+		}
+		else {
+			while($invoice = $db->fetch_row($result)){
+				$invoices[] = array(
+					invoice_no => $invoice['invoice_no'],
+					balance => round($invoice['balance'], 2)
+				);
+			}
+		}
+
+		$viewer->assign('INVOICE_WITHOUT_REGULATION_LIST', $invoices);
+		$viewer->assign('INVOICE_WITHOUT_REGULATION', (count($invoices) > 0));
 	}
 	
 	function initSend2ComptaFormExportableInvoices(Vtiger_Request $request){
@@ -507,9 +557,12 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 				}
 				
 				$compteVente = $invoice['productglacct'];
-				if($compteVente[0] === '7' || $compteVente[0] === '6')
-					$codeAnal = self::getCodeAffaireCodeAnal( $invoiceCodeAnal, $invoice['productsectionanal']);
-				else	$codeAnal = '';
+				if($compteVente[0] === '7' || $compteVente[0] === '6') {
+					$codeAnal = self::getCodeAffaireCodeAnal($invoice['codeaffaire_campaign'], $invoice['productsectionanal']);
+					$codeAnal = ($codeAnal == $invoice['codeaffaire_campaign']) ? self::getCodeAffaireCodeAnal( $invoiceCodeAnal, $invoice['codeaffaire_coupon']) : $codeAnal;
+				} else {
+					$codeAnal = '';
+				}
 				//$productName = $invoice['productname'];
 				$productCode = $invoice['productcode'];
 				$this->addExportRow($journalVente,

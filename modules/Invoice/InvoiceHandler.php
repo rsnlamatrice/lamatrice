@@ -266,6 +266,26 @@ class RSNInvoiceHandler extends VTEventHandler {
 
                 WHERE vtiger_invoice.invoiceid=$invoiceId;";
         $result = $adb->query($sql);
+
+        $sql = "UPDATE vtiger_invoice
+
+				SET vtiger_invoice.isgroup = (
+				    
+				SELECT
+				CASE vtiger_contactdetails.isgroup
+				       WHEN 0 THEN 0
+				       ELSE 1
+				END
+				FROM vtiger_contactdetails
+
+				JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+
+				WHERE vtiger_contactdetails.contactid = vtiger_invoice.contactid
+				AND vtiger_crmentity.deleted = 0
+				)
+
+				WHERE vtiger_invoice.invoiceid=$invoiceId;";
+        $result = $adb->query($sql);
     }
    
     /**
