@@ -27,7 +27,8 @@ class Products_ProductsAll_Export extends Export_ExportData_Action {
 			"Product Sheet" => "productsheet",
 			"Product No" => "product_no",
 			"Handler" => "smownerid",//mettre un id à la place du nom?
-			"Unit Price" => function($row) { return Products_ProductsAll_Export::formatFloatVal($row["unit_price"]); },
+			"Unit Price" => function($row) { return Products_ProductsAll_Export::formatFloatVal( round($row["unit_price"], 2) ); },
+			"Unit Price TTC" => function($row) { return Products_ProductsAll_Export::formatFloatVal( round($row["unit_price"] * (1 + $row["taxpercentage"]/100), 2) ); },
 			"Tax Class" => "taxclass",
 			"Purchase price" => function($row) { return Products_ProductsAll_Export::formatFloatVal($row["purchaseprice"]); },
 			"Usage Unit" => "usageunit",
@@ -54,5 +55,19 @@ class Products_ProductsAll_Export extends Export_ExportData_Action {
 
 	function getCSVSeparator(){
 		return ";";	
+	}
+
+	function getExportQuery($request) {//tmp ...
+		$parentQuery = parent::getExportQuery($request);
+
+		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
+		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
+		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_producttaxrel.taxpercentage AS taxpercentage " .
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . 
+					 "JOIN vtiger_producttaxrel ON vtiger_producttaxrel.productid = vtiger_products.productid 
+					" .
+				 substr($parentQuery, $wherePos);
+
+		return $query;
 	}
 }
