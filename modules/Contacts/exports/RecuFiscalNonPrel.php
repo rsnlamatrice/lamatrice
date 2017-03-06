@@ -149,8 +149,10 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 		global $adb;
 		$query = "SELECT notesid
 			FROM vtiger_notes
-			WHERE folderid = 17
-			AND title LIKE '%" . $current_year . "'
+			JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_notes.notesid
+			WHERE vtiger_crmentity.deleted = 0
+			AND folderid = 17
+			AND title LIKE '%2016'
 			LIMIT 1";
 
 		$result = $adb->pquery($query, $params);
