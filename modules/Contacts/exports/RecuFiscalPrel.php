@@ -65,7 +65,7 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 
 	function getExportFileName($request) {
 		$moduleName = $request->get('source_module');
-		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Recu_fiscaux_avec_prel";
+		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Recu_fiscaux_prelevements";
 	}
 
 	function getExportQuery($request) {//tmp ...

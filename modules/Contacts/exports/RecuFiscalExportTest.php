@@ -24,4 +24,9 @@ class Contacts_RecuFiscalExportTest_Export extends Contacts_RecuFiscalNonPrel_Ex
 			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getRealDons($row) . " " . utf8_encode(chr(128)); },
 		);
 	}
+
+	function getExportFileName($request) {
+		$moduleName = $request->get('source_module');
+		return str_replace(' ','_',vtranslate($moduleName, $moduleName)) . "_Recu_fiscaux_pour verification";
+	}
 }
