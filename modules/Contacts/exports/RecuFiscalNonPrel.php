@@ -54,10 +54,11 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 	}
 
 	function getSalutation($row) {
-		$return_value = "Bonjour";
+		$return_value = "";//"Bonjour";
 
 		if ($row["firstname"] != "") {
-			$return_value .= " " . $row["firstname"];
+			//$return_value .= " " . $row["firstname"];
+			$return_value = $row["firstname"];
 		}
 
 		$return_value .= ",";
