@@ -28,11 +28,11 @@
 						<span class="span2">{$INVOICES_COUNT}</span>
 						{if $INVOICES_COUNT == 200}<span class="span5"><i>{$INVOICES_COUNT} est le nombre maximum de factures traitées en une seule fois. Bref, il vous faut recommencer plusieurs fois l'opération.</i></span>{/if}
 						{if $INVOICE_WITHOUT_REGULATION}
-							<span class="span5" style="color:#ff0000;font-weight:bold;"><i>
+							<span class="span5" style="color:#000000;font-weight:bold;"><i>
 								Attention : Il y a plusieurs factures sans réglements ou avec un reglement inférieur au montant de la facture dans la selection :
-								<ul>
+								<ul style="color:#ff0000;font-weight:bold;">
 									{foreach item=INVOICE key=ENTRY_KEY from=$INVOICE_WITHOUT_REGULATION_LIST}
-										<li>{$INVOICE['invoice_no']} : +{$INVOICE['balance']} €</li>
+										<li>{$INVOICE['invoice_no']} : +{$INVOICE['balance']} € (règlement : {$INVOICE['receivedmoderegl']})</li>
 									{/foreach}
 								</ul>
 							</i></span>
