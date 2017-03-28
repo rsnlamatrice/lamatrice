@@ -184,7 +184,8 @@ class Vtiger_InventoryPDFController {
 			//$contentModel->set('Tax',       $this->formatPrice($tax)."\n ($total_tax_percent%)");
 			
 			$contentModel->set('Total',     $this->formatPrice($producttotal));
-			$contentModel->set('Comment',   decode_html($productLineItem["comment{$productLineItemIndex}"]));
+			// Do not display comment on invoices anymore
+			//$contentModel->set('Comment',   decode_html($productLineItem["comment{$productLineItemIndex}"]));
 
 			$contentModels[] = $contentModel;
 		}
