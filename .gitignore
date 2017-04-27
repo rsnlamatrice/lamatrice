@@ -4,6 +4,8 @@
 /licence
 /logs
 /storage
+/user_privileges/sharing_*
+/user_privileges/user_*
 
 *.sh
 .DS_Store
