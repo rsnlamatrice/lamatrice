@@ -39,9 +39,9 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 		 $offsetStr = ($offset >= 0) ? " OFFSET ".((integer)$offset) : '';
 		 $limitStr  = ($nrows >= 0)  ? " LIMIT ".((integer)$nrows) : '';
 		 if ($secs2cache)
-		  	$rs =& $this->CacheExecute($secs2cache,$sql."$limitStr$offsetStr",$inputarr);
+		  	$rs =  $this->CacheExecute($secs2cache,$sql."$limitStr$offsetStr",$inputarr);
 		 else
-		  	$rs =& $this->Execute($sql."$limitStr$offsetStr",$inputarr);
+		  	$rs =  $this->Execute($sql."$limitStr$offsetStr",$inputarr);
 		
 		return $rs;
 	 }
@@ -72,10 +72,10 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 		ORDER BY
 			t.tgrelid';
 		
-		$rs =& $this->Execute($sql);
+		$rs =  $this->Execute($sql);
 		
 		if ($rs && !$rs->EOF) {
-			$arr =& $rs->GetArray();
+			$arr =  $rs->GetArray();
 			$a = array();
 			foreach($arr as $v)
 			{

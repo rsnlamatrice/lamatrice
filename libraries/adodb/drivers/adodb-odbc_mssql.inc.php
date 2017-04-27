@@ -93,7 +93,7 @@ from sysforeignkeys
 where upper(object_name(fkeyid)) = $table
 order by constraint_name, referenced_table_name, keyno";
 		
-		$constraints =& $this->GetArray($sql);
+		$constraints =  $this->GetArray($sql);
 		
 		$ADODB_FETCH_MODE = $save;
 		
@@ -122,7 +122,7 @@ order by constraint_name, referenced_table_name, keyno";
 			$mask = $this->qstr($mask);
 			$this->metaTablesSQL .= " AND name like $mask";
 		}
-		$ret =& ADOConnection::MetaTables($ttype,$showSchema);
+		$ret =  ADOConnection::MetaTables($ttype,$showSchema);
 		
 		if ($mask) {
 			$this->metaTablesSQL = $save;
@@ -184,9 +184,9 @@ order by constraint_name, referenced_table_name, keyno";
 		if ($nrows > 0 && $offset <= 0) {
 			$sql = preg_replace(
 				'/(^\s*select\s+(distinctrow|distinct)?)/i','\\1 '.$this->hasTop." $nrows ",$sql);
-			$rs =& $this->Execute($sql,$inputarr);
+			$rs =  $this->Execute($sql,$inputarr);
 		} else
-			$rs =& ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
+			$rs =  ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
 			
 		return $rs;
 	}

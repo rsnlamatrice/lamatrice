@@ -39,7 +39,7 @@ class ADODB_sybase_ase extends ADODB_sybase {
 			if ($rs === false || !method_exists($rs, 'GetArray')){
 					return $false;
 			}
-			$arr =& $rs->GetArray();
+			$arr =  $rs->GetArray();
 
 			$arr2 = array();
 			foreach($arr as $key=>$value){
@@ -77,7 +77,7 @@ class ADODB_sybase_ase extends ADODB_sybase {
 
 			$retarr = array();
 			while (!$rs->EOF) {
-				$fld =& new ADOFieldObject();
+				$fld =  new ADOFieldObject();
 				$fld->name = $rs->Fields('field_name');
 				$fld->type = $rs->Fields('type');
 				$fld->max_length = $rs->Fields('width');

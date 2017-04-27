@@ -277,7 +277,7 @@ class ADODB_odbtp extends ADOConnection{
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		if ($this->fetchMode !== false) $savefm = $this->SetFetchMode(false);
 		
-		$arr =& $this->GetArray("||SQLTables||||$ttype");
+		$arr =  $this->GetArray("||SQLTables||||$ttype");
 		
 		if (isset($savefm)) $this->SetFetchMode($savefm);
 		$ADODB_FETCH_MODE = $savem;
@@ -342,7 +342,7 @@ class ADODB_odbtp extends ADOConnection{
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$arr =& $this->GetArray("||SQLPrimaryKeys||$owner|$table");
+		$arr =  $this->GetArray("||SQLPrimaryKeys||$owner|$table");
 		$ADODB_FETCH_MODE = $savem;
 
 		//print_r($arr);
@@ -359,7 +359,7 @@ class ADODB_odbtp extends ADOConnection{
 
 		$savem = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$constraints =& $this->GetArray("||SQLForeignKeys|||||$owner|$table");
+		$constraints =  $this->GetArray("||SQLForeignKeys|||||$owner|$table");
 		$ADODB_FETCH_MODE = $savem;
 
 		$arr = false;
@@ -425,7 +425,7 @@ class ADODB_odbtp extends ADOConnection{
 		if( $this->odbc_driver == ODB_DRIVER_FOXPRO ) {
 			if (!preg_match('/ORDER[ \t\r\n]+BY/is',$sql)) $sql .= ' ORDER BY 1';
 		}
-		$ret =& ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
+		$ret =  ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
 		return $ret;
 	}
 

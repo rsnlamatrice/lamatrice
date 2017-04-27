@@ -69,7 +69,7 @@ class ADODB_mysql extends ADOConnection {
 			$mask = $this->qstr($mask);
 			$this->metaTablesSQL .= " like $mask";
 		}
-		$ret =& ADOConnection::MetaTables($ttype,$showSchema);
+		$ret =  ADOConnection::MetaTables($ttype,$showSchema);
 		
 		$this->metaTablesSQL = $save;
 		return $ret;
@@ -158,7 +158,7 @@ class ADODB_mysql extends ADOConnection {
 	function GetOne($sql,$inputarr=false)
 	{
 		if ($this->compat323 == false && strncasecmp($sql,'sele',4) == 0) {
-			$rs =& $this->SelectLimit($sql,1,-1,$inputarr);
+			$rs =  $this->SelectLimit($sql,1,-1,$inputarr);
 			if ($rs) {
 				$rs->Close();
 				if ($rs->EOF) return false;
@@ -482,9 +482,9 @@ class ADODB_mysql extends ADOConnection {
 		if ($nrows < 0) $nrows = '18446744073709551615'; 
 		
 		if ($secs)
-			$rs =& $this->CacheExecute($secs,$sql." LIMIT $offsetStr".((integer)$nrows),$inputarr);
+			$rs =  $this->CacheExecute($secs,$sql." LIMIT $offsetStr".((integer)$nrows),$inputarr);
 		else
-			$rs =& $this->Execute($sql." LIMIT $offsetStr".((integer)$nrows),$inputarr);
+			$rs =  $this->Execute($sql." LIMIT $offsetStr".((integer)$nrows),$inputarr);
 		return $rs;
 	}
 	
@@ -641,7 +641,7 @@ class ADORecordSet_mysql extends ADORecordSet{
 	function &GetRowAssoc($upper=true)
 	{
 		if ($this->fetchMode == MYSQL_ASSOC && !$upper) $row = $this->fields;
-		else $row =& ADORecordSet::GetRowAssoc($upper);
+		else $row =  ADORecordSet::GetRowAssoc($upper);
 		return $row;
 	}
 	

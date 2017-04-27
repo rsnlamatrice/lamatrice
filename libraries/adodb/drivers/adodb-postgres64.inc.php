@@ -236,7 +236,7 @@ select tablename,'T' from pg_tables where tablename like $mask
  union 
 select viewname,'V' from pg_views where viewname like $mask";
 		}
-		$ret =& ADOConnection::MetaTables($ttype,$showSchema);
+		$ret =  ADOConnection::MetaTables($ttype,$showSchema);
 		
 		if ($mask) {
 			$this->metaTablesSQL = $save;
@@ -486,8 +486,8 @@ select viewname,'V' from pg_views where viewname like $mask";
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
 		
-		if ($schema) $rs =& $this->Execute(sprintf($this->metaColumnsSQL1,$table,$table,$schema));
-		else $rs =& $this->Execute(sprintf($this->metaColumnsSQL,$table,$table));
+		if ($schema) $rs =  $this->Execute(sprintf($this->metaColumnsSQL1,$table,$table,$schema));
+		else $rs =  $this->Execute(sprintf($this->metaColumnsSQL,$table,$table));
 		if (isset($savem)) $this->SetFetchMode($savem);
 		$ADODB_FETCH_MODE = $save;
 		
@@ -504,7 +504,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 			
 			$rskey = $this->Execute(sprintf($this->metaKeySQL,($table)));
 			// fetch all result in once for performance.
-			$keys =& $rskey->GetArray();
+			$keys =  $rskey->GetArray();
 			if (isset($savem)) $this->SetFetchMode($savem);
 			$ADODB_FETCH_MODE = $save;
 			
@@ -891,7 +891,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 	function &GetRowAssoc($upper=true)
 	{
 		if ($this->fetchMode == PGSQL_ASSOC && !$upper) return $this->fields;
-		$row =& ADORecordSet::GetRowAssoc($upper);
+		$row =  ADORecordSet::GetRowAssoc($upper);
 		return $row;
 	}
 

@@ -252,7 +252,7 @@ class ADODB_odbc extends ADOConnection {
 		if (!$rs) return false;
 		$rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;
 		
-		$arr =& $rs->GetArray();
+		$arr =  $rs->GetArray();
 		$rs->Close();
 		//print_r($arr);
 		$arr2 = array();
@@ -281,7 +281,7 @@ class ADODB_odbc extends ADOConnection {
 		}
 		$rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;
 		
-		$arr =& $rs->GetArray();
+		$arr =  $rs->GetArray();
 		//print_r($arr);
 		
 		$rs->Close();
@@ -422,7 +422,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/od
 		}
 		if (empty($qid)) return $false;
 		
-		$rs =& new ADORecordSet_odbc($qid);
+		$rs =  new ADORecordSet_odbc($qid);
 		$ADODB_FETCH_MODE = $savem;
 		
 		if (!$rs) return $false;
@@ -664,7 +664,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 	function &GetArrayLimit($nrows,$offset=-1) 
 	{
 		if ($offset <= 0) {
-			$rs =& $this->GetArray($nrows);
+			$rs =  $this->GetArray($nrows);
 			return $rs;
 		}
 		$savem = $this->fetchMode;
@@ -673,7 +673,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 		$this->fetchMode = $savem;
 		
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-			$this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE);
+			$this->fields =  $this->GetRowAssoc(ADODB_ASSOC_CASE);
 		}
 		
 		$results = array();
@@ -700,7 +700,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 			}
 			if ($rez) {
 				if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-					$this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE);
+					$this->fields =  $this->GetRowAssoc(ADODB_ASSOC_CASE);
 				}
 				return true;
 			}
@@ -721,7 +721,7 @@ class ADORecordSet_odbc extends ADORecordSet {
 		}
 		if ($rez) {
 			if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-				$this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE);
+				$this->fields =  $this->GetRowAssoc(ADODB_ASSOC_CASE);
 			}
 			return true;
 		}
