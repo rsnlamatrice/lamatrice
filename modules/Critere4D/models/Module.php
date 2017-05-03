@@ -18,7 +18,7 @@ class Critere4D_Module_Model extends Vtiger_Module_Model {
 		return 'index.php?module='.$this->getName().'&action=ToDocumentAjax&mode=tranformAsNewDocument';
 
 	}
-	
+
 	/**
 	 * Function to get list view query for popup window
 	 * @param <String> $sourceModule Parent module
@@ -44,7 +44,7 @@ class Critere4D_Module_Model extends Vtiger_Module_Model {
 				$pos = stripos($listQuery, ' FROM ');
 	//var_dump($listQuery);
 				if ($pos) {//TODO substr($pos)
-					$split = spliti(' FROM ', $listQuery);
+					$split = preg_split('/ FROM /i', $listQuery);
 					$overRideQuery = $split[0] //TODO jointure
 						. ', (SELECT COUNT(*)'
 							.' FROM ' . $tableName
@@ -63,7 +63,7 @@ class Critere4D_Module_Model extends Vtiger_Module_Model {
 
 			$position = stripos($overRideQuery, ' WHERE ');
 			if($position) {
-				$split = spliti(' WHERE ', $overRideQuery);
+				$split = preg_split('/ WHERE /i', $overRideQuery);
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $overRideQuery. ' WHERE ' . $condition;
@@ -71,14 +71,14 @@ class Critere4D_Module_Model extends Vtiger_Module_Model {
 			return $overRideQuery;
 		}
 	}
-	
+
 	/**
-	 * Function to get Alphabet Search Field 
+	 * Function to get Alphabet Search Field
 	 */
 	public function getAlphabetSearchField(){
 		return 'categorie,nom';
 	}
-	
+
 	/**
 	 * Function to get Alphabet Search Field for popup
 	 */
