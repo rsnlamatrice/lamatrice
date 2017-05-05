@@ -115,9 +115,9 @@
 												</div>
 												<div class="control-group signin-button">
 													<div class="controls" id="forgotPassword">
-														<button type="submit" class="btn btn-primary sbutton">Au boulot !</button>
+                                                                                                            <button type="submit" class="btn btn-primary sbutton">S&rsquo;identifier</button>
 														&nbsp;&nbsp;&nbsp;
-														<br/><br/><small><a>j'ai encore oubli&eacute; mon mot de passe...</a></small>
+														<br/><br/><small><a>Retrouver mon mot de passe</a></small>
 													</div>
 												</div>
 												{* Retain this tracker to help us get usage details *}
