@@ -9,7 +9,7 @@
  *************************************************************************************/
 
 class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
-	
+
 	/**
 	 * Static Function to get the Instance of Vtiger ListView model for a given module and custom view
 	 * @param <String> $moduleName - Module Name
@@ -22,16 +22,16 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'ListView', $moduleName);
 		$instance = new $modelClassName();
-		
+
 		$sourceModuleModel = Vtiger_Module_Model::getInstance($sourceModule);
 		$queryGenerator = new QueryGenerator($sourceModuleModel->get('name'), $currentUser);
 		$queryGenerator->initForDefaultCustomView();
-		
+
 		$controller = new ListViewController($db, $currentUser, $queryGenerator);
 
 		return $instance->set('module', $sourceModuleModel)->set('query_generator', $queryGenerator)->set('listview_controller', $controller);
 	}
-	
+
 	/**
 	 * Function to get the list view entries
 	 * @param Vtiger_Paging_Model $pagingModel
@@ -45,7 +45,7 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 
 		$queryGenerator = $this->get('query_generator');
 		$listViewContoller = $this->get('listview_controller');
-        
+
         $orderBy = $this->getForSql('orderby');
 		$sortOrder = $this->getForSql('sortorder');
 
@@ -59,7 +59,7 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
                 $queryGenerator->addWhereField($orderByFieldName);
             }
         }
-        
+
 		$listQuery = $this->getQuery();
 		$listQuery = preg_replace("/vtiger_crmentity.deleted\s*=\s*0/i", 'vtiger_crmentity.deleted = 1', $listQuery);
 
@@ -73,7 +73,7 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
                 foreach($referenceModules as $referenceModuleName) {
                     $referenceModuleModel = Vtiger_Module_Model::getInstance($referenceModuleName);
                     $referenceNameFields = $referenceModuleModel->getNameFields();
-                    
+
                     $columnList = array();
                     foreach($referenceNameFields as $nameField) {
                         $fieldModel = $referenceModuleModel->getField($nameField);
@@ -112,7 +112,7 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 		}
 		return $listViewRecordModels;
 	}
-	
+
 	/**
 	 * Function to get the list view entries
 	 * @param Vtiger_Paging_Model $pagingModel
@@ -128,7 +128,7 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 
 		$position = stripos($listQuery, ' from ');
 		if ($position) {
-			$split = spliti(' from ', $listQuery);
+			$split = preg_split('/ from /i', $listQuery);
 			$splitCount = count($split);
 			$listQuery = 'SELECT count(*) AS count ';
 			for ($i=1; $i<$splitCount; $i++) {
@@ -144,5 +144,5 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 		$listViewCount = $db->query_result($listResult, 0, 'count');
 		return $listViewCount;
 	}
-	
+
 }

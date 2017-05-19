@@ -59,7 +59,7 @@ function adodb_unserialize( $serialized_string )
 */
 function adodb_session_regenerate_id() 
 {
-	$conn =& ADODB_Session::_conn();
+	$conn =  ADODB_Session::_conn();
 	if (!$conn) return false;
 
 	$old_id = session_id();
@@ -72,7 +72,7 @@ function adodb_session_regenerate_id()
 		//@session_start();
 	}
 	$new_id = session_id();
-	$ok =& $conn->Execute('UPDATE '. ADODB_Session::table(). ' SET sesskey='. $conn->qstr($new_id). ' WHERE sesskey='.$conn->qstr($old_id));
+	$ok =  $conn->Execute('UPDATE '. ADODB_Session::table(). ' SET sesskey='. $conn->qstr($new_id). ' WHERE sesskey='.$conn->qstr($old_id));
 	
 	/* it is possible that the update statement fails due to a collision */
 	if (!$ok) {
@@ -95,7 +95,7 @@ function adodb_session_create_table($schemaFile=null,$conn = null)
 {
     // set default values
     if ($schemaFile===null) $schemaFile = ADODB_SESSION . '/session_schema.xml';
-    if ($conn===null) $conn =& ADODB_Session::_conn();
+    if ($conn===null) $conn =  ADODB_Session::_conn();
 
 	if (!$conn) return 0;
 
@@ -463,7 +463,7 @@ class ADODB_Session {
 	/*!
 	*/
 	function _dumprs($rs) {
-		$conn	=& ADODB_Session::_conn();
+		$conn	=  ADODB_Session::_conn();
 		$debug	= ADODB_Session::debug();
 
 		if (!$conn) {
@@ -512,7 +512,7 @@ class ADODB_Session {
 		If $conn already exists, reuse that connection
 	*/
 	function open($save_path, $session_name, $persist = null) {
-		$conn =& ADODB_Session::_conn();
+		$conn =  ADODB_Session::_conn();
 
 		if ($conn) {
 			return true;
@@ -536,7 +536,7 @@ class ADODB_Session {
 #		assert('$driver');
 #		assert('$host');
 
-		$conn =& ADONewConnection($driver);
+		$conn =  ADONewConnection($driver);
 
 		if ($debug) {
 			$conn->debug = true;
@@ -554,7 +554,7 @@ class ADODB_Session {
 			$ok = $conn->Connect($host, $user, $password, $database);
 		}
 
-		if ($ok) $GLOBALS['ADODB_SESS_CONN'] =& $conn;
+		if ($ok) $GLOBALS['ADODB_SESS_CONN'] =  $conn;
 		else
 			ADOConnection::outp('<p>Session: connection failed</p>', false);
 		
@@ -567,7 +567,7 @@ class ADODB_Session {
 	*/
 	function close() {
 /*
-		$conn =& ADODB_Session::_conn();
+		$conn =  ADODB_Session::_conn();
 		if ($conn) $conn->Close();
 */
 		return true;
@@ -577,7 +577,7 @@ class ADODB_Session {
 		Slurp in the session variables and return the serialized string
 	*/
 	function read($key) {
-		$conn	=& ADODB_Session::_conn();
+		$conn	=  ADODB_Session::_conn();
 		$data	= ADODB_Session::dataFieldName();
 		$filter	= ADODB_Session::filter();
 		$table	= ADODB_Session::table();
@@ -596,10 +596,10 @@ class ADODB_Session {
 		  developer has commited elsewhere... :(
 		 */
 		#if (ADODB_Session::Lock())
-		#	$rs =& $conn->RowLock($table, "$binary sesskey = $qkey AND expiry >= " . time(), $data);
+		#	$rs =  $conn->RowLock($table, "$binary sesskey = $qkey AND expiry >= " . time(), $data);
 		#else
 		
-			$rs =& $conn->Execute($sql);
+			$rs =  $conn->Execute($sql);
 		//ADODB_Session::_dumprs($rs);
 		if ($rs) {
 			if ($rs->EOF) {
@@ -635,7 +635,7 @@ class ADODB_Session {
 		if (!empty($ADODB_SESSION_READONLY)) return;
 		
 		$clob			= ADODB_Session::clob();
-		$conn			=& ADODB_Session::_conn();
+		$conn			=  ADODB_Session::_conn();
 		$crc			= ADODB_Session::_crc();
 		$data			= ADODB_Session::dataFieldName();
 		$debug			= ADODB_Session::debug();
@@ -674,7 +674,7 @@ class ADODB_Session {
 			
 			
 			$sql = "UPDATE $table SET expiry = ".$conn->Param('0').",expireref=".$conn->Param('1')." WHERE $binary sesskey = ".$conn->Param('2')." AND expiry >= ".$conn->Param('3');
-			$rs =& $conn->Execute($sql,array($expiry,$expirevar,$key,time()));
+			$rs =  $conn->Execute($sql,array($expiry,$expirevar,$key,time()));
 			return true;
 		}
 		$val = rawurlencode($val);
@@ -716,7 +716,7 @@ class ADODB_Session {
 			
 			$expiryref = $conn->qstr($arr['expireref']);
 			// do we insert or update? => as for sesskey
-			$rs =& $conn->Execute("SELECT COUNT(*) AS cnt FROM $table WHERE $binary sesskey = $qkey");
+			$rs =  $conn->Execute("SELECT COUNT(*) AS cnt FROM $table WHERE $binary sesskey = $qkey");
 			if ($rs && reset($rs->fields) > 0) {
 				$sql = "UPDATE $table SET expiry = $expiry, $data = $lob_value, expireref=$expiryref WHERE  sesskey = $qkey";
 			} else {
@@ -727,11 +727,11 @@ class ADODB_Session {
 			}
 
 			$err = '';
-			$rs1 =& $conn->Execute($sql);
+			$rs1 =  $conn->Execute($sql);
 			if (!$rs1) {
 				$err = $conn->ErrorMsg()."\n";
 			}
-			$rs2 =& $conn->UpdateBlob($table, $data, $val, " sesskey=$qkey", strtoupper($clob));
+			$rs2 =  $conn->UpdateBlob($table, $data, $val, " sesskey=$qkey", strtoupper($clob));
 			
 			if (!$rs2) {
 				$err .= $conn->ErrorMsg()."\n";
@@ -753,7 +753,7 @@ class ADODB_Session {
 			// properly unless select statement executed in Win2000
 			if ($conn->databaseType == 'access') {
 				$sql = "SELECT sesskey FROM $table WHERE $binary sesskey = $qkey";
-				$rs =& $conn->Execute($sql);
+				$rs =  $conn->Execute($sql);
 				ADODB_Session::_dumprs($rs);
 				if ($rs) {
 					$rs->Close();
@@ -769,7 +769,7 @@ class ADODB_Session {
 	/*!
 	*/
 	function destroy($key) {
-		$conn			=& ADODB_Session::_conn();
+		$conn			=  ADODB_Session::_conn();
 		$table			= ADODB_Session::table();
 		$expire_notify	= ADODB_Session::expireNotify();
 
@@ -787,7 +787,7 @@ class ADODB_Session {
 			$fn = next($expire_notify);
 			$savem = $conn->SetFetchMode(ADODB_FETCH_NUM);
 			$sql = "SELECT expireref, sesskey FROM $table WHERE $binary sesskey = $qkey";
-			$rs =& $conn->Execute($sql);
+			$rs =  $conn->Execute($sql);
 			ADODB_Session::_dumprs($rs);
 			$conn->SetFetchMode($savem);
 			if (!$rs) {
@@ -804,7 +804,7 @@ class ADODB_Session {
 		}
 
 		$sql = "DELETE FROM $table WHERE $binary sesskey = $qkey";
-		$rs =& $conn->Execute($sql);
+		$rs =  $conn->Execute($sql);
 		ADODB_Session::_dumprs($rs);
 		if ($rs) {
 			$rs->Close();
@@ -816,7 +816,7 @@ class ADODB_Session {
 	/*!
 	*/
 	function gc($maxlifetime) {
-		$conn			=& ADODB_Session::_conn();
+		$conn			=  ADODB_Session::_conn();
 		$debug			= ADODB_Session::debug();
 		$expire_notify	= ADODB_Session::expireNotify();
 		$optimize		= ADODB_Session::optimize();
@@ -838,7 +838,7 @@ class ADODB_Session {
 			$fn = next($expire_notify);
 			$savem = $conn->SetFetchMode(ADODB_FETCH_NUM);
 			$sql = "SELECT expireref, sesskey FROM $table WHERE expiry < $time";
-			$rs =& $conn->Execute($sql);
+			$rs =  $conn->Execute($sql);
 			ADODB_Session::_dumprs($rs);
 			$conn->SetFetchMode($savem);
 			if ($rs) {
@@ -859,14 +859,14 @@ class ADODB_Session {
 		
 			if (1) {
 				$sql = "SELECT sesskey FROM $table WHERE expiry < $time";
-				$arr =& $conn->GetAll($sql);
+				$arr =  $conn->GetAll($sql);
 				foreach ($arr as $row) {
 					$sql2 = "DELETE FROM $table WHERE sesskey='$row[0]'";
 					$conn->Execute($sql2);
 				}
 			} else {
 				$sql = "DELETE FROM $table WHERE expiry < $time";
-				$rs =& $conn->Execute($sql);
+				$rs =  $conn->Execute($sql);
 				ADODB_Session::_dumprs($rs);
 				if ($rs) $rs->Close();
 			}
@@ -899,7 +899,7 @@ class ADODB_Session {
 			}
 			$sql .= " FROM $table";
 
-			$rs =& $conn->SelectLimit($sql, 1);
+			$rs =  $conn->SelectLimit($sql, 1);
 			if ($rs && !$rs->EOF) {
 				$dbts = reset($rs->fields);
 				$rs->Close();

@@ -166,10 +166,10 @@ class ADODB_ibase extends ADOConnection {
 		if ($this->_logsql) {
 			$savecrecs = $ADODB_COUNTRECS;
 			$ADODB_COUNTRECS = true; // force countrecs
-			$ret =& ADOConnection::_Execute($sql,$inputarr);
+			$ret =  ADOConnection::_Execute($sql,$inputarr);
 			$ADODB_COUNTRECS = $savecrecs;
 		} else {
-			$ret =& ADOConnection::_Execute($sql,$inputarr);
+			$ret =  ADOConnection::_Execute($sql,$inputarr);
 		}
 		return $ret;
 	}
@@ -326,7 +326,7 @@ class ADODB_ibase extends ADOConnection {
 			if (is_array($iarr)) {
 				if  (ADODB_PHPVER >= 0x4050) { // actually 4.0.4
 					if ( !isset($iarr[0]) ) $iarr[0] = ''; // PHP5 compat hack
-					$fnarr =& array_merge( array($sql) , $iarr);
+					$fnarr =  array_merge( array($sql) , $iarr);
 					$ret = call_user_func_array($fn,$fnarr);
 				} else {
 					switch(sizeof($iarr)) {
@@ -348,7 +348,7 @@ class ADODB_ibase extends ADOConnection {
 			if (is_array($iarr)) {	
 				if (ADODB_PHPVER >= 0x4050) { // actually 4.0.4
 					if (sizeof($iarr) == 0) $iarr[0] = ''; // PHP5 compat hack
-					$fnarr =& array_merge( array($conn,$sql) , $iarr);
+					$fnarr =  array_merge( array($conn,$sql) , $iarr);
 					$ret = call_user_func_array($fn,$fnarr);
 				} else {
 					switch(sizeof($iarr)) {
@@ -798,7 +798,7 @@ class ADORecordset_ibase extends ADORecordSet
 		if ($this->fetchMode == ADODB_FETCH_ASSOC) {
 			$this->fields = &$this->GetRowAssoc(ADODB_ASSOC_CASE);
 		} else if ($this->fetchMode == ADODB_FETCH_BOTH) {
-			$this->fields =& array_merge($this->fields,$this->GetRowAssoc(ADODB_ASSOC_CASE));
+			$this->fields =  array_merge($this->fields,$this->GetRowAssoc(ADODB_ASSOC_CASE));
 		}
 		return true;
 	}

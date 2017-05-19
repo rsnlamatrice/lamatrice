@@ -67,7 +67,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 		//$query retourne autant de lignes que de lignes de factures
 		$query = 'SELECT DISTINCT invoiceid
 				FROM ('.$query.') _source_';
-		$query = 'SELECT vtiger_invoice.invoice_no, vtiger_invoice.balance
+		$query = 'SELECT vtiger_invoice.invoice_no, vtiger_invoice.balance, vtiger_invoicecf.receivedmoderegl
 			FROM ('.$query.') _source_ids_
 			JOIN vtiger_invoice
 				ON vtiger_invoice.invoiceid = _source_ids_.invoiceid
@@ -76,6 +76,7 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			WHERE vtiger_invoicecf.sent2compta IS NULL
 			AND NOT vtiger_invoice.invoicestatus IN ('.generateQuestionMarks($excludeInvoicestatus).')
 			AND vtiger_invoice.balance > 0
+			AND vtiger_invoicecf.receivedmoderegl != "chèque"
 			LIMIT 200 /*too long URL*/
 		';
 		
@@ -94,7 +95,8 @@ class Invoice_Send2Compta_View extends Vtiger_MassActionAjax_View {
 			while($invoice = $db->fetch_row($result)){
 				$invoices[] = array(
 					invoice_no => $invoice['invoice_no'],
-					balance => round($invoice['balance'], 2)
+					balance => round($invoice['balance'], 2),
+					receivedmoderegl => $invoice['receivedmoderegl'],
 				);
 			}
 		}

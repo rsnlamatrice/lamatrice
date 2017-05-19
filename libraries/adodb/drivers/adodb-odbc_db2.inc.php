@@ -157,7 +157,7 @@ class ADODB_ODBC_DB2 extends ADODB_odbc {
 		}
 		$rs->_has_stupid_odbc_fetch_api_change = $this->_has_stupid_odbc_fetch_api_change;
 		
-		$arr =& $rs->GetArray();
+		$arr =  $rs->GetArray();
 		//print_r($arr);
 		
 		$rs->Close();
@@ -284,14 +284,14 @@ class ADODB_ODBC_DB2 extends ADODB_odbc {
 		if ($offset <= 0) {
 		// could also use " OPTIMIZE FOR $nrows ROWS "
 			if ($nrows >= 0) $sql .=  " FETCH FIRST $nrows ROWS ONLY ";
-			$rs =& $this->Execute($sql,$inputArr);
+			$rs =  $this->Execute($sql,$inputArr);
 		} else {
 			if ($offset > 0 && $nrows < 0);
 			else {
 				$nrows += $offset;
 				$sql .=  " FETCH FIRST $nrows ROWS ONLY ";
 			}
-			$rs =& ADOConnection::SelectLimit($sql,-1,$offset,$inputArr);
+			$rs =  ADOConnection::SelectLimit($sql,-1,$offset,$inputArr);
 		}
 		
 		return $rs;

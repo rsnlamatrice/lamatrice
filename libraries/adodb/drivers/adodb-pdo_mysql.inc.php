@@ -44,7 +44,7 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 			$mask = $this->qstr($mask);
 			$this->metaTablesSQL .= " like $mask";
 		}
-		$ret =& ADOConnection::MetaTables($ttype,$showSchema);
+		$ret =  ADOConnection::MetaTables($ttype,$showSchema);
 		
 		$this->metaTablesSQL = $save;
 		return $ret;
@@ -148,9 +148,9 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		if ($nrows < 0) $nrows = '18446744073709551615'; 
 		
 		if ($secs)
-			$rs =& $this->CacheExecute($secs,$sql." LIMIT $offsetStr$nrows",$inputarr);
+			$rs =  $this->CacheExecute($secs,$sql." LIMIT $offsetStr$nrows",$inputarr);
 		else
-			$rs =& $this->Execute($sql." LIMIT $offsetStr$nrows",$inputarr);
+			$rs =  $this->Execute($sql." LIMIT $offsetStr$nrows",$inputarr);
 		return $rs;
 	}
 }

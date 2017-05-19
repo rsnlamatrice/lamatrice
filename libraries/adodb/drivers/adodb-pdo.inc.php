@@ -142,7 +142,7 @@ class ADODB_pdo extends ADOConnection {
 		if (!empty($this->_driver->_hasdual)) $sql = "select $this->sysTimeStamp from dual";
 		else $sql = "select $this->sysTimeStamp";
 		
-		$rs =& $this->_Execute($sql);
+		$rs =  $this->_Execute($sql);
 		if ($rs && !$rs->EOF) return $this->UnixTimeStamp(reset($rs->fields));
 		
 		return false;

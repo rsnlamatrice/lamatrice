@@ -80,7 +80,7 @@ class ADODB_mysqlt extends ADODB_mysql {
 	{
 		if ($this->transCnt==0) $this->BeginTrans();
 		if ($where) $where = ' where '.$where;
-		$rs =& $this->Execute("select $flds from $tables $where for update");
+		$rs =  $this->Execute("select $flds from $tables $where for update");
 		return !empty($rs); 
 	}
 	

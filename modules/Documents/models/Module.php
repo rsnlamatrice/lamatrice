@@ -25,7 +25,7 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	public function isSummaryViewSupported() {
 		return true;
 	}
-	
+
 	/**
 	 * Function returns the url which gives Documents that have Internal file upload
 	 * @return string
@@ -40,7 +40,7 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	 */
 	public static function getAllFolders($folderName = false) {
 		$db = PearDatabase::getInstance();
-		
+
 		$params = array();
 		$query = 'SELECT *
 				FROM vtiger_attachmentsfolder';
@@ -74,7 +74,7 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		}
 		$pos = stripos($listQuery, 'where');
 		if($pos) {
-			$split = spliti('where', $listQuery);
+			$split = preg_split('/where/i', $listQuery);
 			$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 		} else {
 			$overRideQuery = $listQuery. ' WHERE ' . $condition;
@@ -82,7 +82,7 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		return $overRideQuery;
 	}
 
-	
+
 	//ED151105 comments
 //	/**
 //	 * Funtion that returns fields that will be showed in the record selection popup
@@ -118,14 +118,14 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	public function getAddFolderUrl() {
 		return 'index.php?module='.$this->getName().'&view=AddFolder';
 	}
-	
+
 	/**
-	 * Function to get Alphabet Search Field 
+	 * Function to get Alphabet Search Field
 	 */
 	public function getAlphabetSearchField(){
 		return 'folderid,notes_title';
 	}
-	
+
 	/**
      * Function that returns related list header fields that will be showed in the Related List View
      * @return <Array> returns related fields list.
@@ -135,14 +135,14 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		//Adding filestatus, filelocationtype in the related list to be used for file download
 		$relatedListFields['filestatus'] = 'filestatus';
 		$relatedListFields['filelocationtype'] = 'filelocationtype';
-		
+
 		return $relatedListFields;
 	}
-    
+
 	public function getSettingLinks() {
 		vimport('~~modules/com_vtiger_workflow/VTWorkflowUtils.php');
-        
-        
+
+
 		$layoutEditorImagePath = Vtiger_Theme::getImagePath('LayoutEditor.gif');
 		$settingsLinks = array();
 
@@ -152,14 +152,14 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 			'linkurl' => 'index.php?parent=Settings&module=LayoutEditor&sourceModule='.$this->getName(),
 			'linkicon' => $layoutEditorImagePath
 		);
-		
+
 		$settingsLinks[] = array(
 			'linktype' => 'LISTVIEWSETTING',
 			'linklabel' => 'LBL_EDIT_PICKLIST_VALUES',
 			'linkurl' => 'index.php?parent=Settings&module=Picklist&source_module='.$this->getName(),
 			'linkicon' => ''
 		);
-        
+
 		if($this->hasSequenceNumberField()) {
 			$settingsLinks[] = array(
 				'linktype' => 'LISTVIEWSETTING',
@@ -168,10 +168,10 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 				'linkicon' => ''
 			);
 		}
-	
+
 		return $settingsLinks;
     }
-    
+
 	/* ED141018*/
 	public function getConfigureRelatedListFields(){
 		$ListFields = parent::getConfigureRelatedListFields();
@@ -180,14 +180,14 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		$ListFields['data'] = 'data';
 		return $ListFields;
 	}
-    
+
 	/* ED141223
 	 * fields de la table senotesrel
 	*/
 	public function getRelationHeaders(){
 		return Documents_RelationListView_Model::get_related_fields();
 	}
-	
+
 	//Useless because date and data may be multiple and are initialized in RelationListView->getEntries
 	///**
 	// * Function to get relation query for particular module with function name
@@ -202,11 +202,11 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 	//	if(strpos($query, 'vtiger_senotesrel') !== FALSE)
 	//		$query = preg_replace('/^\s*SELECT\s/', 'SELECT vtiger_senotesrel.dateapplication, vtiger_senotesrel.data, ', $query);
 	//	//echo('<pre>APRES '.$query . '</pre>');
-	//	
+	//
 	//	return $query;
 	//}
-	
-	
+
+
 
 	/**
 	 * Function to get the field mode

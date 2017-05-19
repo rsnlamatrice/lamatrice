@@ -45,7 +45,7 @@ class Contacts_RecuFiscalPrel_Export extends Contacts_RecuFiscalNonPrel_Export {
 			$periodicite = " ? ";
 		}
 
-		return "Je suis actuellement en prélèvements de " . $row["prel_amount"] . " " .utf8_encode(chr(128)) . "  par " . $periodicite; // tmp périodicity ...
+		return "Je suis actuellement en prélèvement de " . $row["prel_amount"] . " " .utf8_encode(chr(128)) . "  par " . $periodicite; // tmp périodicity ...
 	}
 
 	function getSuggestionSentence($row) {

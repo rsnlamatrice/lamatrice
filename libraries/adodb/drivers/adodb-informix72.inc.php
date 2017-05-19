@@ -219,7 +219,7 @@ class ADODB_informix72 extends ADOConnection {
 
 		$rs = $this->Execute($sql);
 		if (!$rs || $rs->EOF)  return false;
-		$arr =& $rs->GetArray();
+		$arr =  $rs->GetArray();
 		$a = array();
 		foreach($arr as $v) {
 			$coldest=$this->metaColumnNames($v["tabname"]);

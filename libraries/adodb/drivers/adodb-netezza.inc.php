@@ -67,7 +67,7 @@ class ADODB_netezza extends ADODB_postgres64 {
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		if ($this->fetchMode !== false) $savem = $this->SetFetchMode(false);
 		
-		$rs =& $this->Execute(sprintf($this->metaColumnsSQL,$table,$table));
+		$rs =  $this->Execute(sprintf($this->metaColumnsSQL,$table,$table));
 		if (isset($savem)) $this->SetFetchMode($savem);
 		$ADODB_FETCH_MODE = $save;
 		

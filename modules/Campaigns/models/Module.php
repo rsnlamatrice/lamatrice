@@ -22,7 +22,7 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 		}
 		return parent::getSpecificRelationQuery($relatedModule);
  	}
-	
+
 	/**
 	 * Function to check whether the module is summary view supported
 	 * @return <Boolean> - true/false
@@ -30,11 +30,11 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 	public function isSummaryViewSupported() {
 		return false;
 	}
-    
+
     public function getSettingLinks() {
         vimport('~~modules/com_vtiger_workflow/VTWorkflowUtils.php');
-        
-        
+
+
 		$layoutEditorImagePath = Vtiger_Theme::getImagePath('LayoutEditor.gif');
 		$editWorkflowsImagePath = Vtiger_Theme::getImagePath('EditWorkflows.png');
 		$settingsLinks = array();
@@ -54,14 +54,14 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 					'linkicon' => $editWorkflowsImagePath
 			);
 		}
-		
+
 		$settingsLinks[] = array(
 					'linktype' => 'LISTVIEWSETTING',
 					'linklabel' => 'LBL_EDIT_PICKLIST_VALUES',
 				'linkurl' => 'index.php?parent=Settings&module=Picklist&source_module='.$this->getName(),
 				'linkicon' => ''
 		);
-        
+
          if($this->hasSequenceNumberField()) {
 		$settingsLinks[] = array(
 				'linktype' => 'LISTVIEWSETTING',
@@ -94,7 +94,7 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 			$pos = stripos($listQuery, 'where');
 
 			if ($pos) {
-				$split = spliti('where', $listQuery);
+				$split = preg_split('/where/i', $listQuery);
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $listQuery. ' WHERE ' . $condition;
@@ -102,8 +102,8 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 			return $overRideQuery;
 		}
 	}
-	
-	
+
+
 	/* ED150323
 	 * Provides the ability for Document / Related contacts / Campaigns to show dateapplication data
 	 * see /modules/Vtiger/models/RelationListView.php, function getEntries($pagingModel)
@@ -115,7 +115,7 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 		$ListFields['data'] = 'data';
 		return $ListFields;
 	}
-    
+
 	/* ED141223
 	 * fields de la table vtiger_campaigncontrel
 	*/
@@ -128,22 +128,22 @@ class Campaigns_Module_Model extends Vtiger_Module_Model {
 		$field->set('label', 'Date d\'application');
 		$field->set('typeofdata', 'DATETIME');
 		$field->set('uitype', 6);
-		
+
 		$headerFields[$field->get('name')] = $field;
 		return $headerFields;
 	}
-	
+
 	/**
-	 * Function to get Alphabet Search Field 
+	 * Function to get Alphabet Search Field
 	 */
 	public function getAlphabetSearchField(){
-		return 'campaigntype,campaignname'; 
+		return 'campaigntype,campaignname';
 	}
 	/** ED151105
 	 * Function returns the default column for Alphabetic search for popup
 	 * @return <String> columnname
 	 */
 	public function getAlphabetSearchFieldForPopup(){
-		return 'campaigntype'; 
+		return 'campaigntype';
 	}
 }

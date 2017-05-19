@@ -24,7 +24,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 			'linkurl' => $this->getDashBoardUrl(),
 			'linkicon' => '',
 		);
-		
+
 		//Check profile permissions for Dashboards
 		$moduleModel = Vtiger_Module_Model::getInstance('Dashboard');
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
@@ -32,7 +32,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 		if($permission) {
 			$parentQuickLinks['SIDEBARLINK'][] = Vtiger_Link_Model::getInstanceFromValues($quickLink);
 		}
-		
+
 		return $parentQuickLinks;
 	}
 
@@ -66,7 +66,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 						INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid
 						AND deleted = 0 '.Users_Privileges_Model::getNonAdminAccessControlQuery($this->getName()). $ownerSql . $dateFilterSql . ' AND sales_stage NOT IN ("Closed Won", "Closed Lost")
 							GROUP BY sales_stage ORDER BY count desc', $params);
-		
+
 		$response = array();
 		for($i=0; $i<$db->num_rows($result); $i++) {
 			$saleStage = $db->query_result($result, $i, 'sales_stage');
@@ -90,7 +90,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 						INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid
 						INNER JOIN vtiger_users ON vtiger_users.id=vtiger_crmentity.smownerid AND vtiger_users.status="ACTIVE"
 						AND vtiger_crmentity.deleted = 0'.Users_Privileges_Model::getNonAdminAccessControlQuery($this->getName()).'
-						INNER JOIN vtiger_sales_stage ON vtiger_potential.sales_stage =  vtiger_sales_stage.sales_stage 
+						INNER JOIN vtiger_sales_stage ON vtiger_potential.sales_stage =  vtiger_sales_stage.sales_stage
 						GROUP BY smownerid, sales_stage ORDER BY vtiger_sales_stage.sortorderid', $params);
 
 		$response = array();
@@ -116,7 +116,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 						INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid
 						INNER JOIN vtiger_users ON vtiger_users.id=vtiger_crmentity.smownerid AND vtiger_users.status="ACTIVE"
 						AND vtiger_crmentity.deleted = 0 '.Users_Privileges_Model::getNonAdminAccessControlQuery($this->getName()).
-						'INNER JOIN vtiger_sales_stage ON vtiger_potential.sales_stage =  vtiger_sales_stage.sales_stage 
+						'INNER JOIN vtiger_sales_stage ON vtiger_potential.sales_stage =  vtiger_sales_stage.sales_stage
 						WHERE vtiger_potential.sales_stage NOT IN ("Closed Won", "Closed Lost")
 						GROUP BY smownerid, sales_stage ORDER BY vtiger_sales_stage.sortorderid', $params);
 		for($i=0; $i<$db->num_rows($result); $i++) {
@@ -141,7 +141,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 			$params[] = $dateFilter['start']. ' 00:00:00';
 			$params[] = $dateFilter['end']. ' 23:59:59';
 		}
-		
+
 		$result = $db->pquery('SELECT sum(amount) amount, last_name,vtiger_users.id as id,DATE_FORMAT(closingdate, "%d-%m-%Y") AS closingdate  FROM vtiger_potential
 						INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid
 						INNER JOIN vtiger_users ON vtiger_users.id=vtiger_crmentity.smownerid AND vtiger_users.status="ACTIVE"
@@ -195,14 +195,14 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 			$params[] = $closingdateFilter['start'];
 			$params[] = $closingdateFilter['end'];
 		}
-		
+
 		if(!empty($dateFilter)) {
 			$dateFilterSql = ' AND createdtime BETWEEN ? AND ? ';
 			//client is not giving time frame so we are appending it
 			$params[] = $dateFilter['start']. ' 00:00:00';
 			$params[] = $dateFilter['end']. ' 23:59:59';
 		}
-		
+
 		$result = $db->pquery('SELECT forecast_amount, DATE_FORMAT(closingdate, "%m-%d-%Y") AS closingdate FROM vtiger_potential
 					INNER JOIN vtiger_crmentity ON vtiger_potential.potentialid = vtiger_crmentity.crmid
 					AND deleted = 0 AND smownerid = ? WHERE closingdate >= CURDATE() AND sales_stage NOT IN ("Closed Won", "Closed Lost")'.
@@ -254,7 +254,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 
 		return $query;
 	}
-	
+
 	/**
 	 * Function returns Potentials Amount for each Sales Stage
 	 * @return <Array>
@@ -278,7 +278,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 					$values[1] = vtranslate($picklistValue, $this->getName());
 					$data[] = $values;
 				}
-				
+
 			}
 		}
 		return $data;
@@ -302,7 +302,7 @@ class Potentials_Module_Model extends Vtiger_Module_Model {
 
 			$pos = stripos($listQuery, 'where');
 			if ($pos) {
-				$split = spliti('where', $listQuery);
+				$split = preg_split('/where/i', $listQuery);
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $listQuery . ' WHERE ' . $condition;
