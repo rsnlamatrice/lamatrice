@@ -9,7 +9,7 @@
  *************************************************************************************/
 
 class PriceBooks_Module_Model extends Vtiger_Module_Model {
-    
+
 	/**
 	 * Function to check whether the entity has an quick create menu
 	 * @return <Boolean> true/false
@@ -18,7 +18,7 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 	public function isQuickCreateMenuVisible() {
 		return false ;
 	}
-	
+
 	/**
 	 * Function to check whether the module is summary view supported
 	 * @return <Boolean> - true/false
@@ -86,7 +86,7 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 				$condition = " vtiger_pricebook.pricebookid IN (SELECT pricebookid FROM vtiger_pricebookproductrel WHERE productid = $record)
 								AND vtiger_pricebook.currency_id = $currencyId AND vtiger_pricebook.active = 1";
 				if ($pos) {
-					$split = spliti(' where ', $listQuery);
+					$split = preg_split('/ where /i', $listQuery);
 					$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 				} else {
 					$overRideQuery = $listQuery . ' WHERE ' . $condition;
@@ -95,7 +95,7 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 			return $overRideQuery;
 		}
 	}
-	
+
 	//Il est important que tous les champs soient transmis à l'éditeur de tarifs (Product->relatedPriceBooks)
 	public function getConfigureRelatedListFields(){
 		$fieldNames = array_keys($this->getFields());
@@ -117,7 +117,7 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 	 */
 	function getPriceBookRecordId($discountType, $quantity, $createIfNone = true){
 		global $adb;
-		
+
 		//Clear DB data
 		$query = "SELECT vtiger_crmentity.crmid
 			FROM vtiger_pricebook
@@ -129,7 +129,7 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 			AND IFNULL(minimalqty, 0) = ?
 			AND IFNULL(modeapplication, '') = ?
 			LIMIT 1";
-		
+
 		if($discountType || $discountType === 0 || $discountType === "0"){
 			if($quantity)
 				$modeapplication = 'qty,discounttype';
@@ -150,10 +150,10 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 		if($adb->getRowCount($result)){
 			return $adb->query_result($result, 0, 'crmid');
 		}
-		
+
 		if(!$createIfNone)
 			return false;
-		
+
 		//Création d'un nouveau record
 		$recordModel = Vtiger_Record_Model::getCleanInstance('PriceBooks');
 		$discountTypes = $recordModel->getPicklistValuesDetails('discounttype');
@@ -179,7 +179,7 @@ class PriceBooks_Module_Model extends Vtiger_Module_Model {
 		$recordModel->set('minimalqty', $quantity);
 		$recordModel->set('discounttype', $discountType);
 		$recordModel->save();
-		
+
 		return $recordModel->getId();
 	}
 }

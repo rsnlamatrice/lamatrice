@@ -54,9 +54,9 @@ class ADODB_firebird extends ADODB_ibase {
 		
 		$sql = preg_replace('/^[ \t]*select/i',$str,$sql); 
 		if ($secs)
-			$rs =& $this->CacheExecute($secs,$sql,$inputarr);
+			$rs =  $this->CacheExecute($secs,$sql,$inputarr);
 		else
-			$rs =& $this->Execute($sql,$inputarr);
+			$rs =  $this->Execute($sql,$inputarr);
 			
 		return $rs;
 	}

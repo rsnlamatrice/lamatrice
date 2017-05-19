@@ -4,26 +4,26 @@
  *************************************************************************************/
 
 class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Model {
-	
+
 	public function getEntries($pagingModel) {
 		$db = PearDatabase::getInstance();
 		//echo __FILE__; $db->setDebug(true);
-		
+
 		$parentModule = $this->getParentRecordModel()->getModule();
 		$relationModel = $this->getRelationModel();
 		if($relationModel)
 			return parent::getEntries($pagingModel);
-		
+
 		//Relation model inconnu === spécificité de ce module
-		
+
 		$relationModule = $this->getRelatedModuleModel();
 		$relatedColumnFields = $relationModule->getConfigureRelatedListFields();
 		if(count($relatedColumnFields) <= 0){
 			$relatedColumnFields = $relationModule->getRelatedListFields();
 		}
-		
+
 		$query = $this->getRelationQuery();
-		
+
 		//ED150704
 		$searchKey = $this->get('search_key');
 		if(!empty($searchKey)) {
@@ -34,8 +34,8 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 		if ($this->get('whereCondition')) {
 			$query = $this->updateQueryWithWhereCondition($query);
 		}
-		
-		
+
+
 		$startIndex = $pagingModel->getStartIndex();
 		$pageLimit = $pagingModel->getPageLimit();
 
@@ -46,7 +46,7 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 			$orderByFieldModuleModel = $relationModule->getFieldByColumn($orderBy);
 			if($orderByFieldModuleModel && $orderByFieldModuleModel->isReferenceField()) {
 			    //If reference field then we need to perform a join with crmentity with the related to field
-			    $queryComponents = $split = spliti(' where ', $query);
+			    $queryComponents = $split = preg_split('/ where /i', $query);
 			    $selectAndFromClause = $queryComponents[0];
 			    $whereCondition = $queryComponents[1];
 			    $qualifiedOrderBy = 'vtiger_crmentity'.$orderByFieldModuleModel->get('column');
@@ -79,9 +79,9 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 			return array();
 		}
 		$relatedRecordList = array();
-		
+
 		$max_rows = min($db->num_rows($result), $pageLimit);/* ED140907 + 1 instead of two db query */
-		
+
 		for($i=0; $i < $max_rows; $i++ ) {
 			$row = $db->fetch_row($result,$i);
 			$newRow = array();
@@ -90,7 +90,7 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 				$newRow[$relatedColumnFields[$col]] = $val;
 			    }
 			}
-		
+
 			//To show the value of "Assigned to"
 			$newRow['assigned_user_id'] = $row['smownerid'];
 			$record = Vtiger_Record_Model::getCleanInstance($relationModule->get('name'));
@@ -108,7 +108,7 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 		echo ' -- ';
 		echo count($relatedRecordList);
 		*/
-		
+
 		$pagingModel->calculatePageRange($relatedRecordList);
 
 		/* ED140907 + 1 instead of two db query */
@@ -121,7 +121,7 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 		}else{
 			$pagingModel->set('nextPageExists', false);
 		}*/
-		
+
 		return $relatedRecordList;
 	}
 
@@ -134,14 +134,14 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 		$relationModel = $this->getRelationModel();
 		if($relationModel)
 			return parent::getRelationQuery();
-		
+
 		$parentModuleModel = $recordModel->getModule();
 		$relatedModuleModel = $this->getRelatedModuleModel();
 		$relatedModuleName = $relatedModuleModel->getName();
 		$ctrlQuery = $recordModel->getQueryFieldValue();
-		
+
 		$nonAdminQuery = $parentModuleModel->getNonAdminAccessControlQueryForRelation($relatedModuleName);
-		
+
 		//modify query if any module has summary fields, those fields we are displayed in related list of that module
 		$relatedListFields = $relatedModuleModel->getConfigureRelatedListFields();
 		if(count($relatedListFields) === 0) {
@@ -152,17 +152,17 @@ class RSNSysControls_RelationListView_Model extends Vtiger_RelationListView_Mode
 		$queryGenerator = new QueryGenerator($relatedModuleName, $currentUser);
 		$queryGenerator->setFields($relatedListFields);
 		$query = $queryGenerator->getQuery();
-		
+
 		$query = 'SELECT vtiger_crmentity.crmid, ' . substr($query, stripos($query, 'SELECT ') + 6);
-		
+
 		$query .= ' AND vtiger_crmentity.crmid IN (SELECT crmid FROM (
 			/*SysControl*/'.$ctrlQuery.'/*/SysControl*/
 		) _syscontrolquery)';
-		
+
 		if ($nonAdminQuery) {
 			$query = appendFromClauseToQuery($query, $nonAdminQuery);
 		}
-		
+
 		//print_r("<pre>$query</pre>");
 		return $query;
 	}

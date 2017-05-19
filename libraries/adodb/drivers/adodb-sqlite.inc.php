@@ -195,9 +195,9 @@ class ADODB_sqlite extends ADOConnection {
 		$offsetStr = ($offset >= 0) ? " OFFSET $offset" : '';
 		$limitStr  = ($nrows >= 0)  ? " LIMIT $nrows" : ($offset >= 0 ? ' LIMIT 999999999' : '');
 	  	if ($secs2cache)
-	   		$rs =& $this->CacheExecute($secs2cache,$sql."$limitStr$offsetStr",$inputarr);
+	   		$rs =  $this->CacheExecute($secs2cache,$sql."$limitStr$offsetStr",$inputarr);
 	  	else
-	   		$rs =& $this->Execute($sql."$limitStr$offsetStr",$inputarr);
+	   		$rs =  $this->Execute($sql."$limitStr$offsetStr",$inputarr);
 			
 		return $rs;
 	}

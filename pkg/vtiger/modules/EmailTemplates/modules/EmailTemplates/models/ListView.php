@@ -9,8 +9,8 @@
  *************************************************************************************/
 
 class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
-	
-	
+
+
 	/**
 	 * Function to get the list of Mass actions for the module
 	 * @param <Array> $linkParams
@@ -34,7 +34,7 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 
 		return $links;
 	}
-	
+
 	/**
 	 * Static Function to get the Instance of Vtiger ListView model for a given module and custom view
 	 * @param <String> $moduleName - Module Name
@@ -45,11 +45,11 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 		$db = PearDatabase::getInstance();
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'ListView', $moduleName);
 		$instance = new $modelClassName();
-		
+
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 		return $instance->set('module', $moduleModel);
 	}
-	
+
 	/**
 	 * Function to get the list view header
 	 * @return <Array> - List of Vtiger_Field_Model instances
@@ -66,13 +66,13 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 		}
 		return $fieldObjects;
 	}
-	
+
 	/**
 	 * Function to get the list view entries
 	 * @param Vtiger_Paging_Model $pagingModel
 	 * @return <Array> - Associative array of record id mapped to Vtiger_Record_Model instance.
 	 */
-	
+
 	public function getListViewEntries($pagingModel) {
 		$db = PearDatabase::getInstance();
 		$startIndex = $pagingModel->getStartIndex();
@@ -83,11 +83,11 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 		$listQuery = $this->getQuery();
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
-		
+
 		if(!empty($searchKey) && !empty($searchValue)) {
 			$listQuery .= " WHERE $searchKey LIKE '$searchValue%'";
 		}
-				
+
 		if ($orderBy) {
 			$listQuery .= " ORDER BY $orderBy $sortOrder";
 		}
@@ -95,7 +95,7 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 
 		$result = $db->pquery($listQuery, array());
 		$num_rows = $db->num_rows($result);
-		
+
 		$listViewRecordModels = array();
 		for ($i = 0; $i < $num_rows; $i++) {
 			$recordModel = new EmailTemplates_Record_Model();
@@ -103,7 +103,7 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 			$row = $db->query_result_rowdata($result, $i);
 			$listViewRecordModels[$row['templateid']] = $recordModel->setData($row);
 		}
-		
+
 		$pagingModel->calculatePageRange($listViewRecordModels);
 
 		if($num_rows > $pageLimit){
@@ -112,10 +112,10 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 		}else{
 			$pagingModel->set('nextPageExists', false);
 		}
-		
+
         return $listViewRecordModels;
 	}
-	
+
 	/**
 	 * Function to get the list of listview links for the module
 	 * @param <Array> $linkParams
@@ -141,12 +141,12 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 
 		return $links;
 	}
-	
+
 	function getQuery() {
 		$listQuery = 'SELECT templateid, templatename, foldername, subject FROM vtiger_emailtemplates';
 		return $listQuery;
 	}
-	
+
 	/**
 	 * Function to get the list view entries
 	 * @param Vtiger_Paging_Model $pagingModel
@@ -156,10 +156,10 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 		$db = PearDatabase::getInstance();
 
 		$listQuery = $this->getQuery();
-		
+
 		$position = stripos($listQuery, 'from');
 		if ($position) {
-			$split = spliti('from', $listQuery);
+			$split = preg_split('/from/i', $listQuery);
 			$splitCount = count($split);
 			$listQuery = 'SELECT count(*) AS count ';
 			for ($i=1; $i<$splitCount; $i++) {
@@ -168,7 +168,7 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 		}
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
-		
+
 		if(!empty($searchKey) && !empty($searchValue)) {
 			$listQuery .= " WHERE $searchKey LIKE '$searchValue%'";
 		}
@@ -176,5 +176,5 @@ class EmailTemplates_ListView_Model extends Vtiger_ListView_Model {
 		$listResult = $db->pquery($listQuery, array());
 		return $db->query_result($listResult, 0, 'count');
 	}
-	
-} 
+
+}

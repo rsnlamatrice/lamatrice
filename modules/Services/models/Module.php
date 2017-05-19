@@ -9,7 +9,7 @@
  *************************************************************************************/
 
 class Services_Module_Model extends Products_Module_Model {
-	
+
 	/**
 	 * Function to get list view query for popup window
 	 * @param <String> $sourceModule Parent module
@@ -34,7 +34,7 @@ class Services_Module_Model extends Products_Module_Model {
 
 			$pos = stripos($listQuery, 'where');
 			if ($pos) {
-				$split = spliti('where', $listQuery);
+				$split = preg_split('/where/i', $listQuery);
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $listQuery . ' WHERE ' . $condition;
@@ -42,14 +42,14 @@ class Services_Module_Model extends Products_Module_Model {
 			return $overRideQuery;
 		}
 	}
-	
+
 	/**
-	 * Function to get Alphabet Search Field 
+	 * Function to get Alphabet Search Field
 	 */
 	public function getAlphabetSearchField(){
-		return 'servicecategory,servicename'; 
+		return 'servicecategory,servicename';
 	}
-	
+
 	/**
 	 * Function to get Alphabet Search Field for popup
 	 */

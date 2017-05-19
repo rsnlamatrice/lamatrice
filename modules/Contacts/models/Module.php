@@ -18,9 +18,9 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		//gestion spécifique
 		unset($fields['account_id']);
 		unset($fields['reference']);
-		
-		$fields = 
-			array_move_assoc('mailingcity', 'mailingzip',  
+
+		$fields =
+			array_move_assoc('mailingcity', 'mailingzip',
 			array_move_assoc('mailingzip', 'mailingpobox',
 			array_move_assoc('mailingpobox', 'mailingstreet3',
 			array_move_assoc('mailingstreet3', 'mailingstreet',
@@ -29,9 +29,9 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			array_move_assoc('mailingaddressformat', 'rsnnpaicomment',
 					 $fields
 		)))))));
-		
-		$fields = 
-			array_move_assoc('othercity', 'otherzip',  
+
+		$fields =
+			array_move_assoc('othercity', 'otherzip',
 			array_move_assoc('otherzip', 'otherpobox',
 			array_move_assoc('otherpobox', 'otherstreet3',
 			array_move_assoc('otherstreet3', 'otherstreet',
@@ -39,10 +39,10 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			array_move_assoc('otherstreet2', 'otheraddressformat',
 					 $fields
 		))))));
-		
+
 		return $fields;
 	}
-	
+
 	/**
 	 * Function to get the Quick Links for the module
 	 * @param <Array> $linkParams
@@ -205,7 +205,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	 * @return <String>
 	 */
 	public function getRelationQuery($recordId, $functionName, $relatedModule) {
-		
+
 		switch ($functionName){
 		case 'get_activities' :
 			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
@@ -230,9 +230,9 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			if ($nonAdminQuery) {
 				$query = appendFromClauseToQuery($query, $nonAdminQuery);
 			}
-			
+
 			break;
-			
+
 		case 'get_rsndons':
 			$servicecategory = 'Dons';
 			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
@@ -242,9 +242,9 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		case 'get_rsnabonnements':
 			$servicecategory = 'Abonnement';
 			return $this->getRelationQuery_RsnServices($recordId, $functionName, $relatedModule, $servicecategory);
-		
+
 		case 'get_rsnprelevements':
-			
+
 			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 			$query = 'SELECT CASE WHEN (vtiger_users.user_name not like "") THEN '.$userNameSql.' ELSE vtiger_groups.groupname END AS user_name
 				, vtiger_crmentity.*, p.*
@@ -260,7 +260,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 					ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 				WHERE vtiger_crmentity.deleted = 0
 				AND cd.contactid = '.$recordId;
-				
+
 			$relatedModuleName = $relatedModule->getName();
 			$query .= $this->getSpecificRelationQuery($relatedModuleName);
 			$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
@@ -269,10 +269,10 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			}
 			//echo('<pre>'.$query . '</pre>');
 			break;
-		
-				
+
+
 		case 'get_invoices':
-			
+
 			$userNameSql = getSqlForNameInDisplayFormat(array('first_name' => 'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
 			$query = 'SELECT vtiger_crmentity.crmid,vtiger_invoice.subject, vtiger_invoice.invoice_no, vtiger_invoicecf.typedossier
 			, vtiger_invoice.invoicestatus, vtiger_invoice.invoicedate, vtiger_invoicecf.campaign_no, vtiger_invoicecf.notesid, vtiger_invoice.total, vtiger_invoice.balance
@@ -313,13 +313,13 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			//echo('<pre>'.__FILE__.' '.$functionName . '</pre>');
 			$query = parent::getRelationQuery($recordId, $functionName, $relatedModule);
 			//echo('<pre>'.$query . '</pre>');
-			
+
 			break;
 		}
 
 		return $query;
 	}
-	
+
 	/** ED150619
 	 * Function to get relation query for particular module with function name
 	 * Similar to getRelationQuery but overridable.
@@ -329,7 +329,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	 * @return <String>
 	 */
 	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
-				
+
 		switch($relatedModule->getName()){
 		 case 'ContactAddresses' :
 			//don't show if not > 1
@@ -345,8 +345,8 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			return parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
 		}
 	}
-	
-	/* 
+
+	/*
 	 * Cas particuliers de la fonction ci-dessus pour les modules affichant une seule catégorie de service
 	 * ED150203
 	 * AV150619
@@ -391,7 +391,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 				ON vtiger_groups.groupid = vtiger_crmentity.smownerid
 			WHERE vtiger_crmentity.deleted = 0
 			AND cd.contactid = '.$recordId;
-			
+
 		$relatedModuleName = $relatedModule->getName();
 		$query .= $this->getSpecificRelationQuery($relatedModuleName);
 		$nonAdminQuery = $this->getNonAdminAccessControlQueryForRelation($relatedModuleName);
@@ -401,7 +401,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		//echo('<pre>'.$query . '</pre>');
 		return $query;
 	}
-	
+
 	/**
 	 * Function to get list view query for popup window
 	 * @param <String> $sourceModule Parent module
@@ -429,19 +429,19 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			} elseif ($sourceModule === 'Contacts' && $field === 'contact_id') {
 				$condition = " vtiger_contactdetails.contactid != '$record'";
 			} elseif ($sourceModule === 'Critere4D') { /* ED140907 les contacts peuvent avoir plusieurs fois le même critère */
-				$condition = false; 
+				$condition = false;
 			} elseif ($sourceModule === 'Campaigns') { /* ED150331 les contacts peuvent avoir plusieurs fois la mêmes campagnes */
-				$condition = false; 
+				$condition = false;
 			} else {
 				$condition = " vtiger_contactdetails.contactid NOT IN (SELECT $fieldName FROM $tableName WHERE $relatedFieldName = '$record')";
 			}
-			
+
 			if(!$condition)
 				return $listQuery;
 
 			$position = stripos($listQuery, 'where');
 			if($position) {
-				$split = spliti('where', $listQuery);
+				$split = preg_split('/where/i', $listQuery);
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $listQuery. ' WHERE ' . $condition;
@@ -449,7 +449,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			return $overRideQuery;
 		}
 	}
-	
+
 	/**
 	 * Function to save a given record model of the current module
 	 * @param Vtiger_Record_Model $recordModel
@@ -461,23 +461,23 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		foreach($fieldNames as $fieldName)
 			if($recordModel->get($fieldName))
 				$recordModel->set($fieldName, trim(mb_strtoupper(decode_html($recordModel->get($fieldName)))));
-		
+
 		if($recordModel->get('rsnnpai') == null)
 			$recordModel->set('rsnnpai', 0);
-		
+
 		$return = parent::saveRecord($recordModel);
-		
+
 		// ED150205 : synchronisation de l'adresse vers le compte et les autres contacts en compte commun
 		$recordModel->synchronizeAddressToOthers();
-		
+
 		// ED15015 : un seul contact peut être référent du compte
 		$recordModel->ensureAccountHasOnlyOneMainContact();
-		
+
 		//via SaveAjax, modification du mail : archive du précédent
 		if($recordModel->get('email_add_history')){
 			$recordModel->createContactEmailsRecord(true, $recordModel->get('email_add_history'), 'Ancienne adresse');
 		}
-		
+
 		//mise à jour (TODO) du mail : définition en Principale
 		if($recordModel->get('email')){
 			//TODO un seul en Principale
@@ -487,12 +487,12 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 				$emailRecordModel->set('emailoptout', $recordModel->get('emailoptout'));
 				$emailRecordModel->save();
 			}
-			
+
 		}
 		return $return;
 	}
-	
-	
+
+
 	/* ED150323
 	 * Provides the ability for Document / Related contacts / Campaigns to show dateapplication data
 	 * see /modules/Vtiger/models/RelationListView.php, function getEntries($pagingModel)
@@ -504,7 +504,7 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 		$ListFields['data'] = 'data';
 		return $ListFields;
 	}
-	
+
 	/**
 	 * Function to get list of field for summary view
 	 * @return <Array> list of field models <Vtiger_Field_Model>
@@ -536,14 +536,14 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 	public function getInputNPAICriteresUrl() {
 		return 'index.php?module='.$this->get('name').'&view=InputNPAICriteres';
 	}
-	
+
 	/**
-	 * Function to get Alphabet Search Field 
+	 * Function to get Alphabet Search Field
 	 */
 	public function getAlphabetSearchField(){
 		return 'isgroup,lastname';//contacttype trop d'éléments
 	}
-		
+
 	/**
 	 * Fonction des champs 'mailingrnvpeval' et 'mailingrnvpcharade'
 	 * d'après 4D
@@ -558,17 +558,17 @@ class Contacts_Module_Model extends Vtiger_Module_Model {
 			$evalAdr = $record->get('mailingrnvpeval');
 			$charade = $record->get('mailingrnvpcharade');
 		}
-		
+
 		if(!$evalAdr && !$charade)
 			return '';
-				
+
 		$aRnvpQualite = '';
 		if($evalAdr == "1" || $evalAdr == "2" || $evalAdr == "0" || $evalAdr == "10"){
 			if($charade=="1" || $charade=="0" || $charade=="2" || !$charade)
 				$aRnvpQualite = "OK";
 			else
 				$aRnvpQualite = "";
-		}	
+		}
 		elseif($evalAdr=="5"){
 			$aRnvpQualite="??";
 		}
