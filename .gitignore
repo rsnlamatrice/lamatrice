@@ -6,6 +6,7 @@
 /storage
 /user_privileges/sharing_*
 /user_privileges/user_*
+/nbproject
 
 *.sh
 .DS_Store
