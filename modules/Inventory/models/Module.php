@@ -20,7 +20,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 		//SalesOrder module is not enabled for quick create
 		return false;
 	}
-	
+
 	/**
 	 * Function to check whether the module is summary view supported
 	 * @return <Boolean> - true/false
@@ -77,7 +77,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 
 		return $query;
 	}
-	
+
 	/** ED150619
 	 * Function to get relation query for particular module with function name
 	 * Similar to getRelationQuery but overridable.
@@ -87,7 +87,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	 * @return <String>
 	 */
 	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
-				
+
 		switch($relatedModule->getName()){
 		// case 'RsnReglements' :
 		 case 'Contacts' :
@@ -99,7 +99,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 			return parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
 		}
 	}
-	
+
 	/**
 	 * Function returns export query
 	 * @param <String> $where
@@ -107,7 +107,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 	 */
 	public function getExportQuery($focus, $query) {
 		$baseTableName = $focus->table_name;
-		$splitQuery = spliti(' FROM ', $query);
+		$splitQuery = preg_split('/ FROM /i', $query);
 		$columnFields = explode(',', $splitQuery[0]);
 		foreach ($columnFields as $key => &$value) {
 			if($value == ' vtiger_inventoryproductrel.discount_amount'){
@@ -118,16 +118,16 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 				$value = ' vtiger_currency_info.currency_name AS currency_id';
 			}
 		}
-		$joinSplit = spliti(' WHERE ',$splitQuery[1]);
+		$joinSplit = preg_split('/ WHERE /i',$splitQuery[1]);
 		$joinSplit[0] .= " LEFT JOIN vtiger_currency_info ON vtiger_currency_info.id = $baseTableName.currency_id";
 		$splitQuery[1] = $joinSplit[0] . ' WHERE ' .$joinSplit[1];
 
 		$query = implode(',', $columnFields).' FROM ' . $splitQuery[1];
-		
+
 		return $query;
 	}
-	
-	
+
+
 
 	/**
 	 * Function to save a given record model of the current module
@@ -141,7 +141,7 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 			$accountRecordModel = $contactRecordModel->getAccountRecordModel();
 			$recordModel->set('account_id', $accountRecordModel->getId());
 		}
-		
+
 		switch($this->getName()){
 		case 'Invoice':
 			$statusFieldName = 'invoicestatus';
@@ -156,10 +156,10 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 			$previousStatus = Vtiger_Functions::getSalesOrderStatus($recordModel->getId());
 			break;
 		}
-		
+
 		$_REQUEST['previous_status'] = $previousStatus;
 		$_REQUEST['new_status'] = $_REQUEST[$statusFieldName];
-		
+
 		//Annulation de la facture
 		if($previousStatus === 'Cancelled'
 		&& $_REQUEST[$statusFieldName] !== 'Cancelled'){
@@ -193,9 +193,9 @@ class Inventory_Module_Model extends Vtiger_Module_Model {
 		}
 		return parent::saveRecord($recordModel);
 	}
-	
+
 	/**
-	 * Function to get Alphabet Search Field 
+	 * Function to get Alphabet Search Field
 	 */
 	public function getAlphabetSearchField(){
 		return 'account_id'; //TODO invoicestatus ne fonctionne pas

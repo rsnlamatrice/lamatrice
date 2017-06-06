@@ -23,7 +23,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 			'linkurl' => $this->getDashBoardUrl(),
 			'linkicon' => '',
 		);
-		
+
 		//Check profile permissions for Dashboards
 		$moduleModel = Vtiger_Module_Model::getInstance('Dashboard');
 		$userPrivilegesModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
@@ -31,7 +31,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 		if($permission) {
 			$links['SIDEBARLINK'][] = Vtiger_Link_Model::getInstanceFromValues($quickLink);
 		}
-		
+
 		return $links;
 	}
 
@@ -42,7 +42,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 	public function getSettingLinks() {
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		$settingLinks = parent::getSettingLinks();
-		
+
 		if($currentUserModel->isAdminUser()) {
 			$settingLinks[] = array(
 					'linktype' => 'LISTVIEWSETTING',
@@ -104,7 +104,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 		if(!empty($ownerSql)) {
 			$ownerSql = ' AND '.$ownerSql;
 		}
-		
+
 		$params = array();
 		if(!empty($dateFilter)) {
 			$dateFilterSql = ' AND createdtime BETWEEN ? AND ? ';
@@ -139,7 +139,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 		if(!empty($ownerSql)) {
 			$ownerSql = ' AND '.$ownerSql;
 		}
-		
+
 		$params = array();
 		if(!empty($dateFilter)) {
 			$dateFilterSql = ' AND createdtime BETWEEN ? AND ? ';
@@ -148,15 +148,15 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 			$params[] = $dateFilter['end']. ' 23:59:59';
 		}
 
-		$result = $db->pquery('SELECT COUNT(*) as count, CASE WHEN vtiger_leadstatus.leadstatus IS NULL OR vtiger_leadstatus.leadstatus = "" THEN "" ELSE 
-						vtiger_leadstatus.leadstatus END AS leadstatusvalue FROM vtiger_leaddetails 
+		$result = $db->pquery('SELECT COUNT(*) as count, CASE WHEN vtiger_leadstatus.leadstatus IS NULL OR vtiger_leadstatus.leadstatus = "" THEN "" ELSE
+						vtiger_leadstatus.leadstatus END AS leadstatusvalue FROM vtiger_leaddetails
 						INNER JOIN vtiger_crmentity ON vtiger_leaddetails.leadid = vtiger_crmentity.crmid
 						AND deleted=0 AND converted = 0 '.Users_Privileges_Model::getNonAdminAccessControlQuery($this->getName()). $ownerSql .' '.$dateFilterSql.
-						'INNER JOIN vtiger_leadstatus ON vtiger_leaddetails.leadstatus = vtiger_leadstatus.leadstatus 
+						'INNER JOIN vtiger_leadstatus ON vtiger_leaddetails.leadstatus = vtiger_leadstatus.leadstatus
 						GROUP BY leadstatusvalue ORDER BY vtiger_leadstatus.sortorderid', $params);
 
 		$response = array();
-		
+
 		for($i=0; $i<$db->num_rows($result); $i++) {
 			$row = $db->query_result_rowdata($result, $i);
 			$response[$i][0] = $row['count'];
@@ -182,7 +182,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 		if(!empty($ownerSql)) {
 			$ownerSql = ' AND '.$ownerSql;
 		}
-		
+
 		$params = array();
 		if(!empty($dateFilter)) {
 			$dateFilterSql = ' AND createdtime BETWEEN ? AND ? ';
@@ -190,14 +190,14 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 			$params[] = $dateFilter['start']. ' 00:00:00';
 			$params[] = $dateFilter['end']. ' 23:59:59';
 		}
-		
-		$result = $db->pquery('SELECT COUNT(*) as count, CASE WHEN vtiger_leaddetails.leadsource IS NULL OR vtiger_leaddetails.leadsource = "" THEN "" 
-						ELSE vtiger_leaddetails.leadsource END AS leadsourcevalue FROM vtiger_leaddetails 
+
+		$result = $db->pquery('SELECT COUNT(*) as count, CASE WHEN vtiger_leaddetails.leadsource IS NULL OR vtiger_leaddetails.leadsource = "" THEN ""
+						ELSE vtiger_leaddetails.leadsource END AS leadsourcevalue FROM vtiger_leaddetails
 						INNER JOIN vtiger_crmentity ON vtiger_leaddetails.leadid = vtiger_crmentity.crmid
 						AND deleted=0 AND converted = 0 '.Users_Privileges_Model::getNonAdminAccessControlQuery($this->getName()). $ownerSql .' '.$dateFilterSql.
-						'INNER JOIN vtiger_leadsource ON vtiger_leaddetails.leadsource = vtiger_leadsource.leadsource 
+						'INNER JOIN vtiger_leadsource ON vtiger_leaddetails.leadsource = vtiger_leadsource.leadsource
 						GROUP BY leadsourcevalue ORDER BY vtiger_leadsource.sortorderid', $params);
-		
+
 		$response = array();
 		for($i=0; $i<$db->num_rows($result); $i++) {
 			$row = $db->query_result_rowdata($result, $i);
@@ -224,7 +224,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 		if(!empty($ownerSql)) {
 			$ownerSql = ' AND '.$ownerSql;
 		}
-		
+
 		$params = array();
 		if(!empty($dateFilter)) {
 			$dateFilterSql = ' AND createdtime BETWEEN ? AND ? ';
@@ -232,14 +232,14 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 			$params[] = $dateFilter['start']. ' 00:00:00';
 			$params[] = $dateFilter['end']. ' 23:59:59';
 		}
-		
-		$result = $db->pquery('SELECT COUNT(*) as count, CASE WHEN vtiger_leaddetails.industry IS NULL OR vtiger_leaddetails.industry = "" THEN "" 
-						ELSE vtiger_leaddetails.industry END AS industryvalue FROM vtiger_leaddetails 
+
+		$result = $db->pquery('SELECT COUNT(*) as count, CASE WHEN vtiger_leaddetails.industry IS NULL OR vtiger_leaddetails.industry = "" THEN ""
+						ELSE vtiger_leaddetails.industry END AS industryvalue FROM vtiger_leaddetails
 						INNER JOIN vtiger_crmentity ON vtiger_leaddetails.leadid = vtiger_crmentity.crmid
 						AND deleted=0 AND converted = 0 '.Users_Privileges_Model::getNonAdminAccessControlQuery($this->getName()). $ownerSql .' '.$dateFilterSql.'
-						INNER JOIN vtiger_industry ON vtiger_leaddetails.industry = vtiger_industry.industry 
+						INNER JOIN vtiger_industry ON vtiger_leaddetails.industry = vtiger_industry.industry
 						GROUP BY industryvalue ORDER BY vtiger_industry.sortorderid', $params);
-		
+
 		$response = array();
 		for($i=0; $i<$db->num_rows($result); $i++) {
 			$row = $db->query_result_rowdata($result, $i);
@@ -335,7 +335,7 @@ class Leads_Module_Model extends Vtiger_Module_Model {
 
 			$position = stripos($listQuery, 'where');
 			if($position) {
-				$split = spliti('where', $listQuery);
+				$split = preg_split('/where/i', $listQuery);
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $listQuery. ' WHERE ' . $condition;

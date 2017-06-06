@@ -55,12 +55,12 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 		//ED150910
 		$source_query = $this->get('source_query');//selected ids
 		$among_query = $this->get('among_query');//among selected ids
-		
-		
+
+
 		//ED151220 : possibilité de ne choisir que 2 enregistrements à fusionner, sans recherche de doublon
 		$focus = CRMEntity::getInstance($module);
 		$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
-			
+
 		$query .= " LIMIT $startIndex, ". ($pageLimit+1);
 		$result = $db->pquery($query, array());
 		if(!$result){
@@ -68,7 +68,7 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			die();
 		}
 		//echo "<br><br><br><br><br><pre>$query</pre>";
-		
+
         $rows = $db->num_rows($result);
 		$this->result = $result;
 
@@ -153,12 +153,12 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			//ED150910
 			$source_query = $this->get('source_query');//selected ids
 			$among_query = $this->get('among_query');//among selected ids
-			
+
 			$query = $focus->getQueryForDuplicates($module, $tableColumns, '', $ignoreEmpty, $source_query, $among_query);
-				
+
 			$position = stripos($query, 'from');
 			if ($position) {
-				$split = spliti('from ', $query);
+				$split = preg_split('/from /i', $query);
 				$splitCount = count($split);
 				$query = 'SELECT count(*) AS count ';
 				for ($i=1; $i<$splitCount; $i++) {
@@ -178,7 +178,7 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 		//TODO $modules = Vtiger_Module_Model::getAll();
 		return array('Contacts');
 	}
-	
+
 	/* Inject duplicated records in vtiger_duplicateentities table
 	 * http://localhost/lamatrice/index.php?module=Contacts&action=FindDuplicate&mode=runScheduledSearch
 	 */
@@ -187,18 +187,18 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 		$moduleName = $moduleModel->getName();
 		$duplicateTableName = $this->getDuplicateEntitiesTable();
 		$tableColumns = $this->getFindDuplicateFields();
-		
+
 		if(!$tableColumns)
 			return;
-		
+
 		if(!is_array($tableColumns[0]))
 			$tableColumns = array($tableColumns);
-			
+
 		for($nTableColumns = 0; $nTableColumns < count($tableColumns); $nTableColumns++){
 			$moduleQuery = $this->getScheduledSearchBasicQuery($moduleName, $tableColumns[$nTableColumns]);
-			
+
 			//echo "<pre>getScheduledSearchBasicQuery.moduleQuery : $moduleQuery</pre>";
-			
+
 			$focus = CRMEntity::getInstance($moduleName);
 			$fields = $moduleModel->getFields();
 			/*foreach($tableColumns[$nTableColumns] as $n => $tableColumn)
@@ -206,9 +206,9 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			var_dump($tableColumns[$nTableColumns]);*/
 			//$query = $focus->getQueryForDuplicates($moduleName, $tableColumns[$nTableColumns], '', false, $moduleQuery, $moduleQuery);
 			//echo "<pre>getQueryForDuplicates.Query : $query</pre>";
-			
+
 			//$moduleQuery .= ' LIMIT 1000';
-			
+
 			$query = 'SELECT crm1.'.$focus->table_index . ', crm2.'.$focus->table_index . '
 				, 0 AS duplicatestatus
 				, \''.implode(',',$tableColumns[$nTableColumns]).'\' AS  duplicatefields
@@ -221,17 +221,17 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			foreach($tableColumns[$nTableColumns] as $n => $tableColumn){
 				$query .= " AND crm1.$tableColumn = crm2.$tableColumn";
 			}
-			
+
 			$queryJoin = $this->getScheduledSearchJoinQuery($moduleName, $tableColumns[$nTableColumns]);
 			if($queryJoin)
 				$query .= '
 					'.$queryJoin;
-			
+
 			$queryWhere = $this->getScheduledSearchWhereQuery($moduleName, $tableColumns[$nTableColumns]);
 			if($queryWhere)
 				$query .= '
 					WHERE ' . $queryWhere;
-				
+
 			//echo "<pre>$query</pre>";
 			//die();
 			$query = 'INSERT INTO ' . $duplicateTableName . '
@@ -239,33 +239,33 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 				' . $query . '
 				ON DUPLICATE KEY UPDATE mergeaction = mergeaction
 			';
-			
+
 			//echo "<pre>$query</pre>";
 			//continue;
-			
+
 			$db = PearDatabase::getInstance();
 			$result = $db->query($query);
 			if(!$result){
 				$db->echoError();
 			}
-			
+
 			$this->runCleanDuplicateTable();
 		}
 	}
-	
+
 	/**
 	 * Retourne un filtre sur la requête de recherche de doublon.
 	 * Cette requête est utilisée pour effectuer la recherche de doublons.
 	 */
 	function getScheduledSearchWhereQuery($moduleName, $tableColumns){
 	}
-	
+
 	/**
 	 * Retourne une simple requête sur tous les enregistrements de la table.
 	 * Cette requête est utilisée pour effectuer la recherche de doublons.
 	 */
 	function getScheduledSearchBasicQuery($moduleName, $tableColumns){
-		
+
 		if(is_array($tableColumns[0])){
 			//recherches multiples
 			$query = '';
@@ -276,23 +276,23 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			}
 			return $query;
 		}
-		
+
 		$moduleModel = $this->getModule();
 		$moduleName = $moduleModel->getName();
 		$focus = CRMEntity::getInstance($moduleName);
 		$currentUser = Users_Record_Model::getCurrentUserModel();
-		
+
 		$queryGenerator = new QueryGenerator($moduleName, $currentUser);
 		$queryGenerator->initForAllCustomView();
-		
+
 		$moduleFields = $moduleModel->getFields();
-		
+
 		$fields = $tableColumns;
 		$fields[] = 'id';
 		$queryGenerator->setFields($fields);
-		
+
 		$query = $queryGenerator->getQuery();
-		
+
 		//Pas tous vide
 		$query .= " AND NOT (";
 		foreach($tableColumns as $n => $tableColumn){
@@ -301,10 +301,10 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 			$query .= "IFNULL($columnTable.$tableColumn,'') = ''";
 		}
 		$query .= ")";
-		
+
 		return $query;
 	}
-	
+
 	/* Fields to find duplicates
 	 * @returns $tableColumns
 	 * 	May be an array of column names or,  for multiple search, an array of array of column names
@@ -312,7 +312,7 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 	public function getFindDuplicateFields(){
 		return $this->getModule()->getNameFields();
 	}
-	
+
 	/* Inject duplicated records in vtiger_duplicateentities table
 	 */
 	public function getDuplicateEntitiesTable(){
@@ -320,10 +320,10 @@ class Vtiger_FindDuplicate_Model extends Vtiger_Base_Model {
 		$focus = CRMEntity::getInstance($moduleName);
 		return $focus->duplicate_entities_table;
 	}
-	
+
 	/* nettoie la table des duplicates
 	 */
 	public function runCleanDuplicateTable(){
-		
+
 	}
 }

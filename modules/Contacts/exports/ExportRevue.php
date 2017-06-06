@@ -28,7 +28,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 			"abo type" => function ($row) { return Contacts_ExportRevue_Export::getAboType($row); },
 		);
 	}
-	
+
 	function displayHeaderLine() {
 		return false;
 	}
@@ -127,14 +127,14 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function getNbExemplaires($row) {
 		//tmp Attention -> checker si le dernier abonnement est encore en cours ou si la derniere revue à été recu, sinon mettre 1 (exemple ancien abonné avec une revue de remerciement (ex: C286786)...)...
 		//tmp Attention, ne pas se fier au champs "is_abo" (pas necessairement à jour...)
-		
+
 		return ($row["nbexemplaires"] /*&& $this->isAbo()*/) ? $row["nbexemplaires"] : 1;
 	}
 
 	function getExportQuery($request) {//tmp ...
 		$parentQuery = parent::getExportQuery($request);
 
-		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
+                $fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
 		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
 		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_rsnaborevues.nbexemplaires, vtiger_rsnaborevues.debutabo, vtiger_rsnaborevues.finabo, vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . " LEFT JOIN (SELECT accountid, MAX(debutabo) as debutabo
@@ -144,7 +144,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														    AND vtiger_rsnaborevues.debutabo <= CURRENT_DATE
 														    AND NOT (vtiger_rsnaborevues.rsnabotype LIKE '%remerciement%' AND vtiger_rsnaborevues.isabonne = 0)
 														    GROUP BY accountid
-														) vtiger_rsnaborevues_max 
+														) vtiger_rsnaborevues_max
 														    ON vtiger_rsnaborevues_max.accountid = vtiger_contactdetails.accountid
 														LEFT JOIN vtiger_rsnaborevues
 														    ON vtiger_rsnaborevues.accountid = vtiger_contactdetails.accountid
@@ -154,7 +154,8 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														LEFT JOIN vtiger_rsnabotype
 														    ON vtiger_rsnabotype.rsnabotype = vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $wherePos);
-
+                $query = 'SELECT DISTINCT(vtiger_contactdetails.contactid),'.substr($query, 6);
+                
 //		echo '<br/><br/><br/>' . $query;
 
 		return $query;

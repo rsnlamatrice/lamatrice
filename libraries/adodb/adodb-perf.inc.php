@@ -68,7 +68,7 @@ function& adodb_log_sql(&$conn,$sql,$inputarr)
     $perf_table = adodb_perf::table();
 	$conn->fnExecute = false;
 	$t0 = microtime();
-	$rs =& $conn->Execute($sql,$inputarr);
+	$rs =  $conn->Execute($sql,$inputarr);
 	$t1 = microtime();
 
 	if (!empty($conn->_logsql)) {
@@ -160,7 +160,7 @@ function& adodb_log_sql(&$conn,$sql,$inputarr)
 		} else {
 			$err2 = $conn->ErrorMsg();
 			$conn->_logsql = true; // enable logsql error simulation
-			$perf =& NewPerfMonitor($conn);
+			$perf =  NewPerfMonitor($conn);
 			if ($perf) {
 				if ($perf->CreateLogTable()) $ok = $conn->Execute($isql,$arr);
 			} else {
@@ -395,7 +395,7 @@ Committed_AS:   348732 kB
 		$saveE = $this->conn->fnExecute;
 		$this->conn->fnExecute = false;
         $perf_table = adodb_perf::table();
-		$rs =& $this->conn->SelectLimit("select distinct count(*),sql1,tracer as error_msg from $perf_table where tracer like 'ERROR:%' group by sql1,tracer order by 1 desc",$numsql);//,$numsql);
+		$rs =  $this->conn->SelectLimit("select distinct count(*),sql1,tracer as error_msg from $perf_table where tracer like 'ERROR:%' group by sql1,tracer order by 1 desc",$numsql);//,$numsql);
 		$this->conn->fnExecute = $saveE;
 		if ($rs) {
 			$s .= rs2html($rs,false,false,false,false);
@@ -429,7 +429,7 @@ Committed_AS:   348732 kB
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 			if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
 			//$this->conn->debug=1;
-			$rs =& $this->conn->SelectLimit(
+			$rs =  $this->conn->SelectLimit(
 			"select avg(timer) as avg_timer,$sql1,count(*),max(timer) as max_timer,min(timer) as min_timer
 				from $perf_table
 				where {$this->conn->upperCase}({$this->conn->substr}(sql0,1,5)) not in ('DROP ','INSER','COMMI','CREAT')
@@ -508,7 +508,7 @@ Committed_AS:   348732 kB
 			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 			if ($this->conn->fetchMode !== false) $savem = $this->conn->SetFetchMode(false);
 			
-			$rs =& $this->conn->SelectLimit(
+			$rs =  $this->conn->SelectLimit(
 			"select sum(timer) as total,$sql1,count(*),max(timer) as max_timer,min(timer) as min_timer
 				from $perf_table
 				where {$this->conn->upperCase}({$this->conn->substr}(sql0,1,5))  not in ('DROP ','INSER','COMMI','CREAT')
@@ -730,13 +730,13 @@ Committed_AS:   348732 kB
 		//$this->conn->debug=1;
 		if ($secs <= 1) $secs = 1;
 		echo "Accumulating statistics, every $secs seconds...\n";flush();
-		$arro =& $this->PollParameters();
+		$arro =  $this->PollParameters();
 		$cnt = 0;
 		set_time_limit(0);
 		sleep($secs);
 		while (1) {
 
-			$arr =& $this->PollParameters();
+			$arr =  $this->PollParameters();
 			
 			$hits   = sprintf('%2.2f',$arr[0]);
 			$reads  = sprintf('%12.4f',($arr[1]-$arro[1])/$secs);

@@ -334,7 +334,7 @@ class ADODB_db2 extends ADOConnection {
 		
 		if (!$rs) return false;
 		
-		$arr =& $rs->GetArray();
+		$arr =  $rs->GetArray();
 		$rs->Close();
 		$arr2 = array();
 		for ($i=0; $i < sizeof($arr); $i++) {
@@ -361,7 +361,7 @@ class ADODB_db2 extends ADOConnection {
 			return $false;
 		}
 		
-		$arr =& $rs->GetArray();
+		$arr =  $rs->GetArray();
 		
 		$rs->Close();
 		$arr2 = array();
@@ -465,7 +465,7 @@ See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/db2/htm/db2
 	        $qid = db2_columns($this->_connectionID, "", $schema, $table, $colname);
 		if (empty($qid)) return $false;
 		
-		$rs =& new ADORecordSet_db2($qid);
+		$rs =  new ADORecordSet_db2($qid);
 		$ADODB_FETCH_MODE = $savem;
 		
 		if (!$rs) return $false;
@@ -688,7 +688,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 	function &GetArrayLimit($nrows,$offset=-1) 
 	{
 		if ($offset <= 0) {
-			$rs =& $this->GetArray($nrows);
+			$rs =  $this->GetArray($nrows);
 			return $rs;
 		}
 		$savem = $this->fetchMode;
@@ -697,7 +697,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 		$this->fetchMode = $savem;
 		
 		if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-			$this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE);
+			$this->fields =  $this->GetRowAssoc(ADODB_ASSOC_CASE);
 		}
 		
 		$results = array();
@@ -719,7 +719,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 			$this->fields = @db2_fetch_array($this->_queryID);
 			if ($this->fields) {
 				if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-					$this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE);
+					$this->fields =  $this->GetRowAssoc(ADODB_ASSOC_CASE);
 				}
 				return true;
 			}
@@ -735,7 +735,7 @@ class ADORecordSet_db2 extends ADORecordSet {
 		$this->fields = db2_fetch_array($this->_queryID);
 		if ($this->fields) {
 			if ($this->fetchMode & ADODB_FETCH_ASSOC) {
-				$this->fields =& $this->GetRowAssoc(ADODB_ASSOC_CASE);
+				$this->fields =  $this->GetRowAssoc(ADODB_ASSOC_CASE);
 			}
 			return true;
 		}

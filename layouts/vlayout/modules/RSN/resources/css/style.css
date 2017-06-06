@@ -7,6 +7,18 @@ label {
   color: #444444;
 }
 
+/* Global a11y */
+.listViewEntriesTable tbody tr:nth-child(odd){
+    background: #efefef;
+}
+/*  Define the background color for all the EVEN background rows  */
+.listViewEntriesTable tbody tr:nth-child(even){
+    background: #ffffff;
+}
+.listViewEntriesTable td + td{
+    padding: 5px;
+}
+
 /* bootstrap */
 .table-bordered thead:first-child tr:first-child > * th, .table-bordered tbody:first-child tr:first-child > * th, .table-bordered tbody:first-child tr:first-child > * td {
     border-top: 1px solid #ddd;

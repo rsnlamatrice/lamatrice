@@ -154,7 +154,7 @@ class ADODB_sybase extends ADOConnection {
 	function &SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0) 
 	{
 		if ($secs2cache > 0) {// we do not cache rowcount, so we have to load entire recordset
-			$rs =& ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
+			$rs =  ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,$secs2cache);
 			return $rs;
 		}
 		
@@ -165,7 +165,7 @@ class ADODB_sybase extends ADOConnection {
 		if ($offset > 0 && $cnt) $cnt += $offset;
 		
 		$this->Execute("set rowcount $cnt"); 
-		$rs =& ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,0);
+		$rs =  ADOConnection::SelectLimit($sql,$nrows,$offset,$inputarr,0);
 		$this->Execute("set rowcount 0");
 		
 		return $rs;

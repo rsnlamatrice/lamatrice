@@ -15,7 +15,7 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 	 */
 	public function getAdvancedLinks(){
 		$advancedLinks = parent::getAdvancedLinks();
-		
+
 		//ED150928 Recalcule des quantités en commande pour tous les produits
 		$moduleModel = $this->getModule();
 		$createPermission = Users_Privileges_Model::isPermitted($moduleModel->getName(), 'EditView');
@@ -28,7 +28,7 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 				'linkicon' => ''
 			);
 			$advancedLinks[] = $advancedLink;
-		
+
 			$advancedLink = array(
 				'linktype' => 'LISTVIEW',
 				'linklabel' => 'Recalcul du dépôt-vente',
@@ -36,12 +36,12 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 				'linkicon' => ''
 			);
 			$advancedLinks[] = $advancedLink;
-		
+
 		}
 
 		return $advancedLinks;
 	}
-	
+
 	/**
 	 * Function to get the list view entries
 	 * @param Vtiger_Paging_Model $pagingModel
@@ -55,12 +55,12 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 
 		$queryGenerator = $this->get('query_generator');
-		
+
 		$this->setListViewSearchConditions($pagingModel);
-	
+
 		$listViewContoller = $this->get('listview_controller');
 
-		
+
 		$orderBy = $this->getForSql('orderby');
 		$sortOrder = $this->getForSql('sortorder');
 
@@ -158,14 +158,14 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		}
 		return $listViewRecordModels;
 	}
-	
-	/** 
+
+	/**
 	 * Function to set the list view search conditions.
 	 * @param Vtiger_Paging_Model $pagingModel
 	 */
 	protected function setListViewSearchConditions($pagingModel = false) {
 		$queryGenerator = $this->get('query_generator');
-		
+
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
@@ -190,7 +190,7 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 			$this->set('search_value', $searchValue);
 			$this->set('operator', $operator);
 		}
-		
+
 		return parent::setListViewSearchConditions($pagingModel);
 	}
 
@@ -224,13 +224,13 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		$tableName = $moduleName == 'Services' ? 'vtiger_service' : 'vtiger_products';
 		$query = ' LEFT JOIN vtiger_producttaxrel ON vtiger_crmentity.crmid = vtiger_producttaxrel.productid';
 		$listQuery = preg_replace('/\sWHERE\s/i', $query . ' WHERE ', $listQuery, 1);
-		
+
 		$query = $tableName . '.unit_price * (1 + IFNULL(vtiger_producttaxrel.taxpercentage, 0)/100)';
 		//occurence du SELECT
 		$listQuery = preg_replace('/' . $tableName . '\.unit_price/', $query . ' as unit_price', $listQuery, 1);
 		//occurences suivantes (WHERE ...)
 		$listQuery = preg_replace('/(^.*' . $tableName . '\.unit_price.*)' . $tableName . '\.unit_price/', '$1'. $query, $listQuery);
-		
+
 		return $listQuery;
 	}
 
@@ -269,7 +269,7 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		}
 		$position = stripos($listQuery, ' from ');
 		if ($position) {
-			$split = spliti(' from ', $listQuery);
+			$split = preg_split('/ from /i', $listQuery);
 			$splitCount = count($split);
 			$listQuery = 'SELECT count(*) AS count ';
 			for ($i=1; $i<$splitCount; $i++) {

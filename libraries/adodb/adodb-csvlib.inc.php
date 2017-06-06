@@ -54,7 +54,7 @@ $ADODB_INCLUDED_CSV = 1;
 		$line = "====1,$tt,$sql\n";
 		
 		if ($rs->databaseType == 'array') {
-			$rows =& $rs->_array;
+			$rows =  $rs->_array;
 		} else {
 			$rows = array();
 			while (!$rs->EOF) {	
@@ -64,7 +64,7 @@ $ADODB_INCLUDED_CSV = 1;
 		}
 		
 		for($i=0; $i < $max; $i++) {
-			$o =& $rs->FetchField($i);
+			$o =  $rs->FetchField($i);
 			$flds[] = $o;
 		}
 	

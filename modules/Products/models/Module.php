@@ -17,7 +17,7 @@ class Products_Module_Model extends Vtiger_Module_Model {
 	public function getRefreshQtyInDemandUrl() {
 		return 'index.php?module=Products&view=List&mode=refreshQtyInDemand';
 	}
-	
+
 	/**
 	 * Function to get list view query for popup window
 	 * @param <String> $sourceModule Parent module
@@ -45,7 +45,7 @@ class Products_Module_Model extends Vtiger_Module_Model {
 
 			$pos = stripos($listQuery, 'where');
 			if ($pos) {
-				$split = spliti('where', $listQuery);
+				$split = preg_split('/where/i', $listQuery);
 				$overRideQuery = $split[0] . ' WHERE ' . $split[1] . ' AND ' . $condition;
 			} else {
 				$overRideQuery = $listQuery. ' WHERE ' . $condition;
@@ -76,7 +76,7 @@ class Products_Module_Model extends Vtiger_Module_Model {
 	public function getPricesForProducts($currencyId, $productIdsList) {
 		return getPricesForProducts($currencyId, $productIdsList, $this->getName());
 	}
-	
+
 	/**
 	 * Function to check whether the module is summary view supported
 	 * @return <Boolean> - true/false
@@ -84,7 +84,7 @@ class Products_Module_Model extends Vtiger_Module_Model {
 	public function isSummaryViewSupported() {
 		return false;
 	}
-	
+
 	/**
 	 * Function searches the records in the module, if parentId & parentModule
 	 * is given then searches only those records related to them.
@@ -102,13 +102,13 @@ class Products_Module_Model extends Vtiger_Module_Model {
 
 		return $matchingRecords;
 	}
-	
+
 	/** ED150507
 	 * Function searches the record of the next Revue SdN that will be sent
 	 * vtiger_products.sales_start_date defines the next product
 	 */
 	public function getProchaineRevue(){
-		
+
 		$db = PearDatabase::getInstance();
 
 		$query = 'SELECT crmid, vtiger_products.sales_start_date
@@ -121,13 +121,13 @@ class Products_Module_Model extends Vtiger_Module_Model {
 		ORDER BY vtiger_products.sales_start_date
 		LIMIT 1
 		';
-		
+
 		$dbResult = $db->pquery($query);
 		$crmId = $db->query_result($dbResult, 0, 'crmid');
-		
+
 		if(!$crmId){
 			//La prochaine revue n'a pas été crée, on prend la dernière
-			
+
 			$query = 'SELECT crmid, vtiger_products.sales_start_date
 			FROM vtiger_products
 			INNER JOIN vtiger_crmentity
@@ -137,14 +137,14 @@ class Products_Module_Model extends Vtiger_Module_Model {
 			ORDER BY vtiger_products.sales_start_date DESC
 			LIMIT 1
 			';
-			
+
 			$dbResult = $db->pquery($query);
 			$crmId = $db->query_result($dbResult, 0, 'crmid');
 		}
 		return Vtiger_Record_Model::getInstanceById($crmId, 'Products');
 	}
-	
-	
+
+
 
 	/**
 	 * Function to get the module is permitted to specific action
@@ -159,27 +159,27 @@ class Products_Module_Model extends Vtiger_Module_Model {
 		}
 		return parent::isPermitted($actionName);
 	}
-	
+
 	/**
-	 * Function to get Alphabet Search Field 
+	 * Function to get Alphabet Search Field
 	 */
 	public function getAlphabetSearchField(){
 		return 'productcategory,productname'; //TODO invoicestatus ne fonctionne pas
 	}
-	
+
 	/**
 	 * Function to get Alphabet Search Field for popup
 	 */
 	public function getAlphabetSearchFieldForPopup(){
 		return 'productcategory';
 	}
-	
+
 	/** ED151226
 	 * Function to get relation query for particular module with function name
 	 */
 	public function getRelationQuery($recordId, $functionName, $relatedModule) {
-		
-		
+
+
 		switch($relatedModule->getName()){
 		 case 'PriceBooks':
 			$relationQuery = parent::getRelationQuery($recordId, $functionName, $relatedModule);
@@ -190,7 +190,7 @@ class Products_Module_Model extends Vtiger_Module_Model {
 			return parent::getRelationQuery($recordId, $functionName, $relatedModule);
 		}
 	}
-	
+
 	/** ED150619
 	 * Function to get relation query for particular module with function name
 	 * Similar to getRelationQuery but overridable.
@@ -200,8 +200,8 @@ class Products_Module_Model extends Vtiger_Module_Model {
 	 * @return <String>
 	 */
 	public function getRelationCounterQuery($recordId, $functionName, $relatedModule) {
-		
-		
+
+
 		switch($relatedModule->getName()){
 		 case 'SalesOrder':
 			$relationQuery = $this->getRelationQuery($recordId, $functionName, $relatedModule);
@@ -212,16 +212,16 @@ class Products_Module_Model extends Vtiger_Module_Model {
 		 default:
 			return parent::getRelationCounterQuery($recordId, $functionName, $relatedModule);
 		}
-		
+
 		return 'SELECT COUNT(*) quantity'
 			. ', \'' . $relatedModule->getName() . '\' module'
 			. ', \'' . $functionName . '\' functionName'
-			. ' FROM (' . 
+			. ' FROM (' .
 					$relationQuery .
 			') `' . $relatedModule->getName() . '_' . $functionName . '_query`';
 	}
-	
-	
+
+
 	/** ED150000
 	 * Change la valeur du prix unitaire pour afficher le prix TTC
 	 */
@@ -234,7 +234,7 @@ class Products_Module_Model extends Vtiger_Module_Model {
 				return;
 		global $adb;
 		$productIds = array_keys($records);
-		
+
 		$query = 'SELECT vtiger_producttaxrel.productid, MAX(vtiger_producttaxrel.taxpercentage) AS percentage
 			FROM vtiger_inventorytaxinfo
 			LEFT JOIN vtiger_producttaxrel
@@ -242,7 +242,7 @@ class Products_Module_Model extends Vtiger_Module_Model {
 			WHERE vtiger_producttaxrel.productid IN (' . generateQuestionMarks($productIds) . ')
 			AND vtiger_inventorytaxinfo.deleted=0
 			GROUP BY vtiger_producttaxrel.productid';
-		
+
 		$params = $productIds;
 		$res = $adb->pquery($query, $params);
 		if(!$res)
