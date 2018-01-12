@@ -9,6 +9,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function getExportStructure() {
 		return array(
 			"Code client" => "contact_no",
+			"Salutation" => function ($row) { return Contacts_ExportRevue_Export::getGreetings($row); },
 			"Civilité" => "",//tmp ??
 			"Nom" => "lastname",
 			"Prenom" => "firstname",
@@ -45,6 +46,10 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 
 	function getQueryOrderBy($moduleName) {
 		return ' ORDER BY mailingcountry ASC, mailingzip ASC';
+	}
+
+	function getGreetings($row){
+		return 'Bonjour'.(!empty($row['firstname']) ? ' '.$row['firstname'] : '').(!empty($row['lastname']) ? ' '.$row['lastname'] : '').',';
 	}
 
 	function getAddressToUse($row) {
@@ -155,7 +160,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 														    ON vtiger_rsnabotype.rsnabotype = vtiger_rsnaborevues.rsnabotype " .
 				 substr($parentQuery, $wherePos);
                 $query = 'SELECT DISTINCT(vtiger_contactdetails.contactid),'.substr($query, 6);
-                
+
 //		echo '<br/><br/><br/>' . $query;
 
 		return $query;
