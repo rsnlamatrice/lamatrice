@@ -49,7 +49,7 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getGreetings($row){
-		return 'Bonjour'.(!empty($row['firstname']) ? ' '.$row['firstname'] : '').(!empty($row['lastname']) ? ' '.$row['lastname'] : '').',';
+		return 'Bonjour'.(!empty($row['firstname']) ? ' '.$row['firstname'] : '').',';
 	}
 
 	function getAddressToUse($row) {
