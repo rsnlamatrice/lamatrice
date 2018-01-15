@@ -9,7 +9,6 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	function getExportStructure() {
 		return array(
 			"Code client" => "contact_no",
-			"Salutation" => function ($row) { return Contacts_ExportRevue_Export::getGreetings($row); },
 			"Civilité" => "",//tmp ??
 			"Nom" => "lastname",
 			"Prenom" => "firstname",
@@ -118,7 +117,8 @@ class Contacts_ExportRevue_Export extends Export_ExportData_Action {
 	}
 
 	function getMessage2($row) {
-		return "";//"Bonjour " . $row["firstname"] . ",";//tmp
+		return Contacts_ExportRevue_Export::getGreetings($row);
+		//return "";//"Bonjour " . $row["firstname"] . ",";//tmp
 	}
 
 	function getMessage3($row) {
