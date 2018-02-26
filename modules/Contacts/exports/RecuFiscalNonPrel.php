@@ -2,9 +2,7 @@
 /*+***********************************************************************************
 	AV1511
  *************************************************************************************/
-
 include("Numbers/Words.php");
-
 class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TMP € -> check encodage ....
 	//tmp check mailing ou other address !!!!!!!
 	function getExportStructure() {
@@ -26,7 +24,7 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 			"Dons après déduction" => function ($row) { return Contacts_RecuFiscalNonPrel_Export::getRealDons($row) . " " . utf8_encode(chr(128)); },
 		);
 	}
-	
+
 	function displayHeaderLine() {
 		return true;
 	}
@@ -79,16 +77,16 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 		$date_fin = $current_year . "-12-31";
 		$query = "SELECT SUM(vtiger_inventoryproductrel.listprice * vtiger_inventoryproductrel.quantity) total_dons
 					FROM vtiger_inventoryproductrel
-	                
-					 
-					JOIN vtiger_invoice ON vtiger_inventoryproductrel.id = vtiger_invoice.invoiceid 
+
+
+					JOIN vtiger_invoice ON vtiger_inventoryproductrel.id = vtiger_invoice.invoiceid
 					JOIN vtiger_service ON vtiger_inventoryproductrel.productid = vtiger_service.serviceid
 					JOIN vtiger_crmentity vtiger_service_crmentity ON vtiger_service_crmentity.crmid = vtiger_service.serviceid
 	                JOIN vtiger_crmentity vtiger_invoice_crmentity ON vtiger_invoice_crmentity.crmid = vtiger_invoice.invoiceid
-	                
+
 					WHERE vtiger_invoice_crmentity.deleted = false
 					AND vtiger_service_crmentity.deleted = false
-					AND vtiger_inventoryproductrel.quantity != 0 
+					AND vtiger_inventoryproductrel.quantity != 0
 					AND vtiger_inventoryproductrel.listprice != 0
 					AND vtiger_invoice.invoicedate BETWEEN ? AND ?
 					AND vtiger_service.servicecategory = 'Dons'
@@ -106,11 +104,11 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 		$current_year = date("Y") - 1;//TMP Year !
 		$date_debut = $current_year . "-01-01";
 		$date_fin = $current_year . "-12-31";
-		$query = "SELECT DISTINCT SUM(vtiger_rsnprelvirement.montant) total_prelevements 
-				FROM vtiger_rsnprelevements 
-				JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid 
+		$query = "SELECT DISTINCT SUM(vtiger_rsnprelvirement.montant) total_prelevements
+				FROM vtiger_rsnprelevements
+				JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
 				JOIN vtiger_rsnprelvirement ON vtiger_rsnprelvirement.rsnprelevementsid = vtiger_rsnprelevements.rsnprelevementsid
-				JOIN vtiger_crmentity vtiger_rsnprelvirement_crmentity ON vtiger_rsnprelvirement_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid 
+				JOIN vtiger_crmentity vtiger_rsnprelvirement_crmentity ON vtiger_rsnprelvirement_crmentity.crmid = vtiger_rsnprelvirement.rsnprelvirementid
 				WHERE vtiger_rsnprelevements_crmentity.deleted = 0
 				AND vtiger_rsnprelvirement_crmentity.deleted = 0
 				AND vtiger_rsnprelvirement.rsnprelvirstatus = 'Ok'
@@ -134,7 +132,7 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 		$total_dons = $this->getTotalDons($row);
 
 		$nw = new Numbers_Words();
-		 
+
 		return $nw->toWords($total_dons, 'fr');
 	}
 
@@ -152,7 +150,7 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 			JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_notes.notesid
 			WHERE vtiger_crmentity.deleted = 0
 			AND folderid = 17
-			AND title LIKE '%2016'
+			AND title LIKE '%2017'
 			LIMIT 1";
 
 		$result = $adb->pquery($query, $params);
@@ -172,8 +170,8 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 		$orderbyPos = strrpos($parentQuery, 'ORDER BY');//tmp attention si il y a plusieurs clauses ORDER BY
 
 		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_contactdetails.contactid " .
-				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . 
-				 substr($parentQuery, $wherePos, ($orderbyPos - $wherePos)) . 
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) .
+				 substr($parentQuery, $wherePos, ($orderbyPos - $wherePos)) .
 				 substr($parentQuery, $orderbyPos);
 
 		// echo '<br/><br/><br/>' . $query;
