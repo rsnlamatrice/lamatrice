@@ -41,7 +41,7 @@ class Contacts_ListGroupMailingAG_Export extends Contacts_ListGroupStats_Export 
 		}
 
 		if ($last_adh_year >= $curent_year-1) {
-			return "ADHÉSION À JOUR - Nous avons déjà reçu votre cotisation $curent_year. Merci !";
+			return "ADHÉSION À JOUR - Nous avons déjà reçu votre cotisation $last_adh_year. Merci !";
 		}
 
 		return "DERNIÈRE ADHÉSION EN $last_adh_year - Merci de faire le nécessaire.";
