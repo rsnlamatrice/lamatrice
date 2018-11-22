@@ -51,7 +51,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return array - an array of string containing the supported file extentions.
 	 */
 	public function getSupportedFileExtentions() {
-		return array('csv');
+		return array('txt');
 	}
 
 	/**
@@ -67,7 +67,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return string - the default file encoding.
 	 */
 	public function getDefaultFileEncoding() {
-		return 'ISO-8859-1';
+		return 'UTF-8';
 	}
 
 	/**
