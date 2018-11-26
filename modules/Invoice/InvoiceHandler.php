@@ -124,7 +124,7 @@ class RSNInvoiceHandler extends VTEventHandler {
         }
 
         //Parcourt l'historique pour clôturer les en-cours périmés
-        self::check_IsAbonne_vs_DateFin($rsnAboRevues);
+        self::check_IsAbonne_vs_DateFin($rsnAboRevues, false);
 
         //Parcourt l'historique par date décroissante
         foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
@@ -573,7 +573,7 @@ class RSNInvoiceHandler extends VTEventHandler {
             return;
         }
         //Parcourt l'historique pour clôturer les en-cours périmés
-        self::check_IsAbonne_vs_DateFin($rsnAboRevues);
+        self::check_IsAbonne_vs_DateFin($rsnAboRevues, false);
 
         $country = $account->get('billcountry');
         $foreigner = $country && strcasecmp($country, 'France') !== 0;
