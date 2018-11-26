@@ -3,7 +3,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 	 * Namespaced javascript class for RSNImport
 	 */
     RSNImportSourcesJs = {
-		
+
 		/* constantes */
 		RECORDID_STATUS_NONE : 0,
 		RECORDID_STATUS_SELECT : 1,
@@ -28,13 +28,13 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			var thisInstance = this;
 			jQuery('body').on('click', '.getMorePreviewData', function(e){
 				e.preventDefault();
-				
+
 				thisInstance.getMorePreviewData(e);
-				
+
 				return false;
 			});
 		},
-		
+
 		/**
 		 * TODO pas sûr que ça fonctionne avec plusieurs modules simultannéement
 		 */
@@ -47,14 +47,14 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			, $destHeaderFilters = $destTableData.find('.header-filters > th:first')
 			, url = $destTableData.find('param[name="PREVIEW_DATA_URL"]').attr('value')
 			, params = $.param(this.getPreviewDataRequestParams(e));
-			
+
 			var progressIndicatorElement = jQuery.progressIndicator({
 				'position' : 'html',
 				'blockInfo' : {
 					'enabled' : true
 				}
 			});
-			
+
 			AppConnector.request(url + '&' + params).then(
 				function(data){
 					var $data = $(data)
@@ -65,8 +65,8 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 					$destTableData.children('tbody').html($trs);//replace rows
 					$destToolboxRows.replaceWith($toolboxRows);//replace table row for next link
 					if ($headerFilters.length)
-						$destHeaderFilters.replaceWith($headerFilters);//replace 
-					
+						$destHeaderFilters.replaceWith($headerFilters);//replace
+
 					progressIndicatorElement.progressIndicator({
 						'mode' : 'hide'
 					});
@@ -78,8 +78,8 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 				}
 			);
 		},
-		
-		// Ajoute des lignes en fin de tableau 
+
+		// Ajoute des lignes en fin de tableau
 		getMorePreviewData : function(e){
 			var url = e.target.href
 			, $thisElement = $(e.target)
@@ -89,14 +89,14 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			, $destToolboxRows = $destTablePage.find('tr.importContents-toolbox[data-module="'+$moduleName+'"]')
 			, $destHeaderFilters = $destTableData.find('.header-filters > th:first')
 			, params = $.param(this.getPreviewDataRequestParams(e));
-		
+
 			var progressIndicatorElement = jQuery.progressIndicator({
 				'position' : 'html',
 				'blockInfo' : {
 					'enabled' : true
 				}
 			});
-			
+
 			AppConnector.request(url + '&' + params).then(
 				function(data){
 					var $data = $(data)
@@ -107,8 +107,8 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 					$destTableData.children('tbody').append($trs);//append rows
 					$destToolboxRows.replaceWith($toolboxRows);//replace table row for next link
 					if ($headerFilters.length)
-						$destHeaderFilters.replaceWith($headerFilters);//replace 
-					
+						$destHeaderFilters.replaceWith($headerFilters);//replace
+
 					progressIndicatorElement.progressIndicator({
 						'mode' : 'hide'
 					});
@@ -120,7 +120,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 				}
 			);
 		},
-		
+
 		// Paramètres pour la requête de chargement de données */
 		getPreviewDataRequestParams : function(e){
 			var $thisElement = e.jquery ? e : $(e.target)
@@ -131,7 +131,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			$filters.each(function(){
 				//champ comme tableau
 				if (/\[\]$/.test(this.name)){
-					if (!params[this.name]) 
+					if (!params[this.name])
 						params[this.name] = [];
 					params[this.name].push( this.value );
 				}
@@ -198,7 +198,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 				RSNImportSourcesJs.handleNeededFileDelimiterChange(e);
 			});
 		},
-		
+
 		//Les sources disposent d'une description dans leur balise option
 		showSelectedSourceDescription: function(view){
 			var $select = $('#SelectSourceDropdown')
@@ -274,7 +274,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 		validateFile: function(e) {
 			return RSNImportSourcesJs.validateFilePath();
 		},
-		
+
 		/* ED150829
 		 * Mode de définition du fichier à traiter : upload ou localpath (chemin sur le serveur)
 		 */
@@ -309,7 +309,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 		validateFileType: function(elementId, curentFileTypeId, fileTypeId) {
 			var obj = jQuery('#'+elementId);
 			if(obj) {
-				var fileType = jQuery('#'+ curentFileTypeId).val();
+				var fileType = jQuery('#'+ curentFileTypeId).val().toLowerCase();
 				var neededFileType = jQuery('#' + fileTypeId).val();
 				if(fileType != neededFileType) {
 					var errorMessage = app.vtranslate('JS_SELECT_FILE_EXTENSION')+'\n' + neededFileType;
@@ -341,7 +341,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 						break;
 					case 'MB':
 						unit = 'GB';
-						break;	
+						break;
 					}
 				}
 
@@ -391,7 +391,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			var fileDelimiterName = jQuery('.delimiter_plural[value="' + fileDelimiter + '"]').html();
 			jQuery('#needed_file_delimiter').html(fileDelimiterName);
 		},
-    
+
 		/* ED150913
 		 * Validation de la bonne sélection d'un élément lié
 		*/
@@ -406,15 +406,15 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			}
 		return true;
 		},
-		
+
 		/* ED150913
 		 * Initialisation de l'étape de sélection d'une entité liée (Document pétition, Critere4D, ...)
 		*/
 		registerRelatedRecordSelectionEvent: function() {
-			
+
 			this.referenceModulePopupRegisterEvent($('#sourceconfiguration'));
 		},
-		
+
 		/* Copie depuis Edit.js */
 		/* Initialise le sélecteur d'entité */
 		referenceModulePopupRegisterEvent : function(container){
@@ -429,14 +429,14 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 				var referenceModuleElement = jQuery('input[name="popupReferenceModule"]', closestTD);
 				var prevSelectedReferenceModule = referenceModuleElement.val();
 				referenceModuleElement.val(popupReferenceModule);
-	
+
 				//If Reference module is changed then we should clear the previous value
 				if(prevSelectedReferenceModule != popupReferenceModule) {
 					closestTD.find('.clearReferenceSelection').trigger('click');
 				}
 			});
 		},
-		
+
 		getPopUpParams : function(container) {
 			var params = {};
 			var sourceModule = app.getModuleName();
@@ -448,19 +448,19 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			if(sourceRecordElement.length > 0) {
 			sourceRecordId = sourceRecordElement.val();
 			}
-		
+
 			var isMultiple = false;
 			if(sourceFieldElement.data('multiple') == true){
 			isMultiple = true;
 			}
-		
+
 			var params = {
 				'module' : popupReferenceModule,
 				'src_module' : sourceModule,
 				'src_field' : sourceField,
 				/*ED150913 'src_record' : sourceRecordId*/
 			}
-			
+
 			/*ED150913
 			//ED150625
 			var fieldInfo = sourceFieldElement.data('fieldinfo');
@@ -471,7 +471,7 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 			//ED150913
 			params.search_key = jQuery('input[name="related_search_key"]',container).val();
 			params.search_value = jQuery('input[name="related_search_value"]',container).val();
-			
+
 			if(isMultiple) {
 				params.multi_select = true ;
 			}
@@ -482,23 +482,23 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 		openPopUp : function(e){
 			var thisInstance = this;
 			var parentElem = jQuery(e.target).closest('td');
-	
+
 			var params = this.getPopUpParams(parentElem);
-		
+
 			var isMultiple = false;
 			if(params.multi_select) {
 				isMultiple = true;
 			}
-		
+
 			var sourceFieldElement = jQuery('input[class="sourceField"]',parentElem);
-		
+
 			var prePopupOpenEvent = jQuery.Event(Vtiger_Edit_Js.preReferencePopUpOpenEvent);
 			sourceFieldElement.trigger(prePopupOpenEvent);
-		
+
 			if(prePopupOpenEvent.isDefaultPrevented()) {
 				return ;
 			}
-		
+
 			var popupInstance =Vtiger_Popup_Js.getInstance();
 			popupInstance.show(params,function(responseData){
 				responseData = JSON.parse(responseData);
@@ -513,27 +513,27 @@ if (typeof(RSNImportSourcesJs) == 'undefined') {
 						thisInstance.setReferenceFieldValue(parentElem, data);
 					}
 				}
-			
+
 				if(isMultiple) { //ED150913 TODO non testé et je doute que ça fonctionne
 					sourceFieldElement.trigger(Vtiger_Edit_Js.refrenceMultiSelectionEvent,{'data':dataList});
 				}
 			});
 		},
-	
+
 		setReferenceFieldValue : function(container, params) {
 			var sourceField = container.find('input[class="sourceField"]').attr('name');
 			var fieldElement = container.find('input[name="'+sourceField+'"]');
 			var sourceFieldDisplay = sourceField+"_display";
 			var fieldDisplayElement = container.find('input[name="'+sourceFieldDisplay+'"]');
 			var popupReferenceModule = container.find('input[name="popupReferenceModule"]').val();
-	
+
 			var selectedName = params.name;
 			var id = params.id;
-	
+
 			fieldElement.val(id)
 			fieldDisplayElement.val(selectedName).attr('readonly',true);
 			fieldElement.trigger(Vtiger_Edit_Js.referenceSelectionEvent, {'source_module' : popupReferenceModule, 'record' : id, 'selectedName' : selectedName});
-	
+
 			fieldDisplayElement.validationEngine('closePrompt',fieldDisplayElement);
 		},
 		/* fin de la copie depuis Edit.js */
