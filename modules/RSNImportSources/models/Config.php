@@ -5,6 +5,7 @@ class RSNImportSources_Config_Model extends Vtiger_Base_Model {
 	function __construct() {
 		$ImportConfig = array(
 			'importTypes' => array(
+				'txt' => array('reader' => 'RSNImportSources_CSVFileReader_Reader', 'classpath' => 'modules/RSNImportSources/readers/CSVFileReader.php'),
 				'csv' => array('reader' => 'RSNImportSources_CSVFileReader_Reader', 'classpath' => 'modules/RSNImportSources/readers/CSVFileReader.php'),
 				'default' => array('reader' => 'RSNImportSources_FileReader_Reader', 'classpath' => 'modules/RSNImportSources/readers/FileReader.php')
 			),
