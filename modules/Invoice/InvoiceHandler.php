@@ -22,7 +22,7 @@ require_once 'modules/RSNAboRevues/models/Record.php';
 class RSNInvoiceHandler extends VTEventHandler {
 
     function handleEvent($eventName, $entity) {
-       
+
         global $log, $adb;
 
         switch($eventName){
@@ -36,7 +36,7 @@ class RSNInvoiceHandler extends VTEventHandler {
             break;
         }
     }
-      
+
     /* ED150507 Règles de gestion lors de la validation d'une facture
     */
     public function handleAfterSaveInvoiceEvent($entity, $moduleName){
@@ -45,7 +45,7 @@ class RSNInvoiceHandler extends VTEventHandler {
         $invoiceId = $entity->getId();
         $data = $entity->getData();
         $invoice = Vtiger_Record_Model::getInstanceById($invoiceId, $moduleName);
-       
+
         $account = Vtiger_Record_Model::getInstanceById($invoice->get('account_id'), 'Accounts');
         if(!$account){
             $log->debug("handleAfterSaveInvoiceEvent, pas de compte défini");
@@ -54,7 +54,7 @@ class RSNInvoiceHandler extends VTEventHandler {
         }
 
         $this->updateAllTotal($invoice->getId());
-       
+
         $lineItems = $invoice->getProducts();
         $log->debug("handleAfterSaveInvoiceEvent lineItems " . print_r($lineItems, true));
         $categories = array(); //items by category
@@ -70,14 +70,14 @@ class RSNInvoiceHandler extends VTEventHandler {
             if(!array_key_exists($productCategory, $categories))
                 $categories[$productCategory] = array();
             $categories[$productCategory][$nLine] = $lineItem;
-               
+
             if($productCategory == 'Dons'){
                 $totalDons += (float)$lineItem[ 'netPrice'.$nLine ];
             }
         }
 
         $log->debug("handleAfterSaveInvoiceEvent Categories " . print_r(array_keys($categories), true));
-       
+
         //Traitement par catégorie de produits
         //Abonnements
         foreach($categories as $productCategory => $categoryItems)
@@ -105,27 +105,27 @@ class RSNInvoiceHandler extends VTEventHandler {
         }
         $log->debug("OUT handleAfterSaveInvoiceEvent");
     }
-   
+
     /* ED150507 Règles de gestion lors de la validation d'une facture, article d'adhésion
      * Abonnement d'un an
      */
     public function handleAfterSaveInvoiceAdhesionEvent($invoice, $categoryItems, $account){
         global $log;
         $log->debug("IN handleAfterSaveInvoiceAdhesionEvent");
-       
+
         $toDay = new DateTime();
         $invoiceDate = new DateTime($invoice->get('invoicedate'));
         $rsnAboRevues = $account->getRSNAboRevues();
-       
+
         //Contrôle si cette facture a déjà généré un abonnement
         if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoice->getId())){
             $log->debug("handleAfterSaveInvoiceAdhesionEvent, cette facture a déjà généré un abonnement");
             return;
         }
-       
+
         //Parcourt l'historique pour clôturer les en-cours périmés
-        self::check_IsAbonne_vs_DateFin($rsnAboRevues);
-       
+        self::check_IsAbonne_vs_DateFin($rsnAboRevues, false);
+
         //Parcourt l'historique par date décroissante
         foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
             if($rsnAboRevue->isAbonne()){
@@ -150,7 +150,7 @@ class RSNInvoiceHandler extends VTEventHandler {
             $dateDebut = $invoiceDate;
         }
         $dateFin = self::getDateFinAbo($dateDebut, 12);
-       
+
         if($dateFin && $dateFin > $toDay){
             $aboRevue = $this->createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, RSNABOREVUES_TYPE_ABO_ADHERENT);
         }
@@ -162,7 +162,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 
         $sql = "UPDATE vtiger_invoice
                 SET vtiger_invoice.total_don = (
-                   
+
                 SELECT
                 ROUND(SUM( (vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice-ROUND(vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice*(IFNULL(vtiger_inventoryproductrel.discount_percent, 0)/100), 2) ) * (IFNULL ( tax1 , IFNULL ( tax2 , IFNULL ( tax3 , IFNULL ( tax4 , IFNULL ( tax5 , IFNULL ( tax6 , IFNULL ( tax7 , 0 ) ) ) ) ) ) ) / 100 + 1)), 2) AS prix_ttc
                 FROM vtiger_inventoryproductrel
@@ -190,7 +190,7 @@ class RSNInvoiceHandler extends VTEventHandler {
         $sql = "UPDATE vtiger_invoice
 
                 SET vtiger_invoice.total_service = (
-                   
+
                 SELECT
                 ROUND(SUM( (vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice-ROUND(vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice*(IFNULL(vtiger_inventoryproductrel.discount_percent, 0)/100), 2) ) * (IFNULL ( tax1 , IFNULL ( tax2 , IFNULL ( tax3 , IFNULL ( tax4 , IFNULL ( tax5 , IFNULL ( tax6 , IFNULL ( tax7 , 0 ) ) ) ) ) ) ) / 100 + 1)), 2) AS prix_ttc
                 FROM vtiger_inventoryproductrel
@@ -216,13 +216,13 @@ class RSNInvoiceHandler extends VTEventHandler {
         $sql = "UPDATE vtiger_invoice
 
                 SET vtiger_invoice.total_product = (
-                   
+
                 SELECT
                 ROUND(SUM( (vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice-ROUND(vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice*(IFNULL(vtiger_inventoryproductrel.discount_percent, 0)/100), 2) ) * (IFNULL ( tax1 , IFNULL ( tax2 , IFNULL ( tax3 , IFNULL ( tax4 , IFNULL ( tax5 , IFNULL ( tax6 , IFNULL ( tax7 , 0 ) ) ) ) ) ) ) / 100 + 1)), 2) AS prix_ttc
                 FROM vtiger_inventoryproductrel
 
                 JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_inventoryproductrel.id
-                   
+
                 JOIN vtiger_products ON vtiger_inventoryproductrel.productid = vtiger_products.productid
                 JOIN vtiger_crmentity vtiger_product_crmentity ON vtiger_product_crmentity.crmid = vtiger_products.productid
 
@@ -242,7 +242,7 @@ class RSNInvoiceHandler extends VTEventHandler {
         $sql = "UPDATE vtiger_invoice
 
                 SET vtiger_invoice.total_fdp = (
-                   
+
                 SELECT
                 ROUND(SUM( (vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice-ROUND(vtiger_inventoryproductrel.quantity*vtiger_inventoryproductrel.listprice*(IFNULL(vtiger_inventoryproductrel.discount_percent, 0)/100), 2) ) * (IFNULL ( tax1 , IFNULL ( tax2 , IFNULL ( tax3 , IFNULL ( tax4 , IFNULL ( tax5 , IFNULL ( tax6 , IFNULL ( tax7 , 0 ) ) ) ) ) ) ) / 100 + 1)), 2) AS prix_ttc
                 FROM vtiger_inventoryproductrel
@@ -258,7 +258,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 
                 AND vtiger_inventoryproductrel.quantity != 0
                 AND vtiger_inventoryproductrel.listprice != 0
-                   
+
                 AND vtiger_service.productcode LIKE '%ZFPORT%'
 
                 GROUP BY vtiger_crmentity.crmid
@@ -270,7 +270,7 @@ class RSNInvoiceHandler extends VTEventHandler {
         $sql = "UPDATE vtiger_invoice
 
 				SET vtiger_invoice.isgroup = (
-				    
+
 				SELECT
 				CASE vtiger_contactdetails.isgroup
 				       WHEN 0 THEN 0
@@ -287,7 +287,7 @@ class RSNInvoiceHandler extends VTEventHandler {
 				WHERE vtiger_invoice.invoiceid=$invoiceId;";
         $result = $adb->query($sql);
     }
-   
+
     /**
      * Création d'un abonnement
      */
@@ -295,13 +295,13 @@ class RSNInvoiceHandler extends VTEventHandler {
         $aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
         return $aboRevueModuleModel->createAboRevue($invoice, $account, $dateDebut, $dateFin, $nbExemplaires, $aboType);
     }
-   
+
     /* ED150507 Règles de gestion lors de la validation d'une facture, article d'abonnement
     */
     public function handleAfterSaveInvoiceAbonnementsEvent($invoice, $categoryItems, $account){
         global $log;
         $log->debug("IN handleAfterSaveInvoiceAbonnementsEvent");
-       
+
         $invoiceId = $invoice->getId();
         $rsnAboRevues = $account->getRSNAboRevues();
         if($rsnAboRevues){
@@ -324,10 +324,10 @@ class RSNInvoiceHandler extends VTEventHandler {
         $startDateOfNextAbo = false;
         $rsnAboRevueCourant = false;
         if($rsnAboRevues){
-           
+
             //Parcourt l'historique pour clôturer les en-cours périmés
             self::check_IsAbonne_vs_DateFin($rsnAboRevues, true);
-           
+
             //Parcourt l'historique par date décroissante
             foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
                 if($rsnAboRevue->isAbonne()){
@@ -350,7 +350,7 @@ class RSNInvoiceHandler extends VTEventHandler {
                 }
             }
         }
-       
+
         //Décompte des abonnements groupés
         $nbExemplairesGroupes = 0;
         foreach($categoryItems as $nLine => $lineItem){
@@ -360,7 +360,7 @@ class RSNInvoiceHandler extends VTEventHandler {
             }
             //$log->debug("handleAfterSaveInvoiceAbonnementsEvent productCode = $productCode : nbExemplairesGroupes = $nbExemplairesGroupes");
         }
-       
+
         $log->debug("handleAfterSaveInvoiceAbonnementsEvent rsnAboRevueCourant = " .($rsnAboRevueCourant ? 'oui' : 'non'));
         foreach($categoryItems as $nLine => $lineItem){//tmp mettre fin aux numero découverte / offert en cas d'abo payant !!!
             $productCode = $lineItem['hdnProductcode'.$nLine];
@@ -385,11 +385,11 @@ class RSNInvoiceHandler extends VTEventHandler {
                 //TODO $dateFin dépend de l'historique actuel
                 $dateDebut = $startDateOfNextAbo && $startDateOfNextAbo > $invoiceDate ? $startDateOfNextAbo : $invoiceDate;
                 $dateFin = self::getDateFinAbo($dateDebut, 12);
-               
+
                 $log->debug("handleAfterSaveInvoiceAbonnementsEvent startDateOfNextAbo = " . ($startDateOfNextAbo ? $startDateOfNextAbo->format('d/m/Y') : 'false')
                         . ", dateDebut = " . $dateDebut->format('d/m/Y') . ' (' . ($dateDebut === $dateFin ? "===" : "!!!") . ')'
                         . ", dateFin = " . $dateFin->format('d/m/Y') . ' (' . get_class($dateFin) . ')');
-               
+
                 if($abonneAVie){
                     //Puisque le contact paye un abonnement, on arrête son abonnement à vie
                     $rsnAboRevueCourant->set('mode', 'edit');
@@ -414,7 +414,7 @@ class RSNInvoiceHandler extends VTEventHandler {
                                 . ", date : " . $rsnAboRevueCourant->getFinAbo()->format('d/m/Y'));
                         $rsnAboRevueCourant->set('comment', $rsnAboRevueCourant->get('comment') . '- Suite à facture ' . $invoice->get('invoice_no'));
                         $rsnAboRevueCourant->save();
-                       
+
                         $dateDebut = $invoiceDate;
                         $dateFin = self::getDateFinAbo($dateDebut, 12);
                     }
@@ -453,15 +453,15 @@ class RSNInvoiceHandler extends VTEventHandler {
                 break;
             }
         }
-       
+
         //Il est important d'avoir un abonnement pour chaque facture (via le champ sourceid)
         // pour que le prochain enregistrement de la facture ne recrée pas une modif cumulative
         if($nbExemplairesGroupes){
             //TODO
             $log->debug("handleAfterSaveInvoiceAbonnementsEvent : Attention, abonnements supplémentaires sans abonnement principal");
-           
+
             $aboType = RSNABOREVUES_TYPE_ABO_GROUPE;
-                   
+
             //Parcourt l'historique par date décroissante pour trouver un abonnement groupé
             $rsnAboRevueCourant = false;
             $dateDebut = false;
@@ -486,7 +486,7 @@ class RSNInvoiceHandler extends VTEventHandler {
                                 $rsnAboRevue->setNbExemplaires($nbExemplairesGroupes);
                             $rsnAboRevue->setFinAbo($invoiceDate);
                             $rsnAboRevue->save();
-                           
+
                             $rsnAboRevueCourant = $rsnAboRevue;
                         }
                         else {//sinon , on crée un abonnement parallèle
@@ -516,12 +516,12 @@ class RSNInvoiceHandler extends VTEventHandler {
             }
             $this->addRelatedTask($invoice, "Veuillez contrôler l'abonnement groupé du contact.");
         }
-       
-       
+
+
         $log->debug("OUT handleAfterSaveInvoiceAbonnementsEvent");
         return $aboRevue;
     }
-   
+
     /**
      * Déjà traité
      */
@@ -529,28 +529,28 @@ class RSNInvoiceHandler extends VTEventHandler {
         $aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
         return $aboRevueModuleModel->isRecordAlreadyRelatedWithAboRevue($rsnAboRevues, $invoiceId);
     }
-   
+
     //Parcourt l'historique pour clôturer les en-cours périmés
     public static function check_IsAbonne_vs_DateFin($rsnAboRevues, $closeAllFree){
         $aboRevueModuleModel = Vtiger_Module_Model::getInstance('RSNAboRevues');
         $aboRevueModuleModel->check_IsAbonne_vs_DateFin($rsnAboRevues, $closeAllFree);
     }
-   
+
     public static function getDateFinAbo($dateDebut, $nbMonths){
         $dateFin = clone $dateDebut;
         $dateFin->modify('first day of this month')->modify( '+' . ($nbMonths) . ' month' );
         return $dateFin;
     }
-   
+
     /* ED150507 Règles de gestion lors de la validation d'une facture, d'après le montant total
      *
      * Rien de gratuit si un abonnement est en cours pendant encore 3 mois
-     *            
+     *
      */
     public function handleAfterSaveInvoiceTotalEvent($invoice, $invoiceData, $lineItems, $account, $totalDons){
         global $log;
         $log->debug("IN handleAfterSaveInvoiceTotalEvent");
-       
+
         $grandTotal = (float)$lineItems[1]['final_details']['grandTotal'];
         $totalAdh = 0;
         foreach($lineItems as $nLine => $lineItem){//remove ADH from total!!!
@@ -562,31 +562,31 @@ class RSNInvoiceHandler extends VTEventHandler {
         }
 
         $grandTotal -= $totalAdh;
-       
+
         $toDay = new DateTime();
-       
+
         $rsnAboRevues = $account->getRSNAboRevues();
-       
+
         //Contrôle si cette facture a déjà généré un abonnement
         if(self::isInvoiceAlreadyRelatedWithAboRevue($rsnAboRevues, $invoice->getId())){
             $log->debug("handleAfterSaveInvoiceTotalEvent, cette facture a déjà généré un abonnement");
             return;
         }
         //Parcourt l'historique pour clôturer les en-cours périmés
-        self::check_IsAbonne_vs_DateFin($rsnAboRevues);
-       
+        self::check_IsAbonne_vs_DateFin($rsnAboRevues, false);
+
         $country = $account->get('billcountry');
         $foreigner = $country && strcasecmp($country, 'France') !== 0;
-       
+
         $nbTrimestresGratos = false; //càd, nbre de revues
         $aboType = RSNABOREVUES_TYPE_NUM_MERCI;
 
         $amount_to_check = ($totalDons > 0) ? $totalDons : $grandTotal;
-       
+
         //TODO : prélèvement == 1 an
 
         //TMP -> cumuler grandTotal et totalDons ?????
-       
+
         // Les étrangers, pour moins de 20€ n'ont le droit à rien
         if($grandTotal < 20 && $foreigner){
             //walou
@@ -617,7 +617,7 @@ class RSNInvoiceHandler extends VTEventHandler {
         }
 
         $IsNonGivedAbo = false;
-       
+
         if($nbTrimestresGratos){
             //Parcourt l'historique par date décroissante
             foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
@@ -646,7 +646,7 @@ class RSNInvoiceHandler extends VTEventHandler {
                 }
             }
         }
-       
+
         if($nbTrimestresGratos && !$abonneAVie && !$IsNonGivedAbo) {
             $invoiceDate = new DateTime($invoice->get('invoicedate'));
             $dateFin = self::getDateFinAbo($invoiceDate, $nbTrimestresGratos * 3 + 1);
@@ -659,18 +659,18 @@ class RSNInvoiceHandler extends VTEventHandler {
             if($dateFin > $dateDebut && $dateFin > $toDay)
                 $aboRevue = $this->createAboRevue($invoice, $account, $dateDebut, $dateFin, 1, $aboType);
         }
-       
+
         $log->debug("OUT handleAfterSaveInvoiceTotalEvent");
     }
-   
+
     //Ajoute une tâche d'alerte pour prévenir l'utilisateur
     public function addRelatedTask($invoice, $message){
         global $log;
-       
+
         $log->debug("handleAfterSaveInvoice addRelatedTask IN");
-       
+
         $task = Vtiger_Record_Model::getCleanInstance('Calendar');
-       
+
         $task->set('mode', 'create');
         $task->set('date_start', date('Y-m-d'));
         $task->set('contact_id', $invoice->get('contact_id'));
@@ -681,12 +681,12 @@ class RSNInvoiceHandler extends VTEventHandler {
         $task->set('activitytype', 'Contrôle des données');
         if(strlen($message) > 255)
             $task->set('description', $message);
-       
+
         $task->save();
         $task->set('mode', '');
         $log->debug("handleAfterSaveInvoice addRelatedTask OUT");
-       
+
         return $task;
     }
-   
+
 }

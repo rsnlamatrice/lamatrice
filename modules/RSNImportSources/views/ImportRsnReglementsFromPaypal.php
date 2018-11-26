@@ -11,7 +11,7 @@
 class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSources_ImportFromFile_View {
 
 	private $reglementOrigine = 'PayPal';
-	
+
 	public $sourceid_prefix = 'PPAL';
 
 	/**
@@ -51,7 +51,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return array - an array of string containing the supported file extentions.
 	 */
 	public function getSupportedFileExtentions() {
-		return array('csv');
+		return array('txt');
 	}
 
 	/**
@@ -67,16 +67,16 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return string - the default file encoding.
 	 */
 	public function getDefaultFileEncoding() {
-		return 'ISO-8859-1';
+		return 'UTF-8';
 	}
-	
+
 	/**
 	 * Function that returns if the import controller has a validating step of pre-import data
 	 */
 	public function hasValidatingStep(){
 		return in_array('Contacts', $this->getImportModules());//héritage From4D
 	}
-	
+
 	/**
 	 * After preImport validation, and before real import, the controller needs a validation step of pre-imported data
 	 */
@@ -104,7 +104,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	function getImportPreviewTemplateName($moduleName){
 		if($this->request->get('mode') === 'validatePreImportData'
 		|| $this->request->get('mode') === 'getPreviewData'
-		|| $this->needValidatingStep())//$moduleName === 'Contacts' && 
+		|| $this->needValidatingStep())//$moduleName === 'Contacts' &&
 			return 'ImportPreviewContacts.tpl';
 		return parent::getImportPreviewTemplateName($moduleName);
 	}
@@ -119,7 +119,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	public function getContactsFieldsMapping() {
 		return array(
 			'importsourceid' => '',
-			
+
 			"firstname" => "firstname",
 			"lastname" => "lastname",
 			"mailingstreet3" => "mailingstreet3",
@@ -133,14 +133,14 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'contacttype' => 'contacttype',
 			'leadsource' => 'leadsource',
 			'isgroup' => 'isgroup',
-			
+
 			"date" => "",//format MySQL
-			
+
 			//champ supplémentaire
 			"mailingstreet2" => "mailingstreet2",
 			"mailingpobox" => "mailingpobox",
 			"rsnnpai" => "rsnnpai",
-			
+
 			'_contactid' => '',
 			'_contactid_status' => '', //Type de reconnaissance automatique. Massively updated after preImport
 			'_contactid_source' => '', //Source de la reconnaissance automatique. Massively updated after preImport
@@ -163,10 +163,10 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$fields = array_move_assoc('mailingpobox', 'mailingstreet3', $fields);
 		$fields = array_move_assoc('rsnnpai', 'lastname', $fields);
 		$fields = array_move_assoc('isgroup', 'email', $fields);
-		
+
 		return $fields;
 	}
-	
+
 	/**
 	 * Method to get the imported fields for the contacts module.
 	 * @return array - the imported fields for the contacts module.
@@ -175,7 +175,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		//laisser exactement les colonnes du fichier
 		return array_keys($this->getContactsFieldsMapping());
 	}
-	
+
 
 	/**
 	 * Method to get the imported fields for the invoice module.
@@ -211,9 +211,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'taxrate',
 			'rsndonateurweb_externalid',
 			'affaire_code',
-			
+
 			'receivedmoderegl',
-			
+
 			//Massively updated
 			'_rsndonateurswebid',
 			'_contactid',
@@ -221,7 +221,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		);
 	}
 
-	
+
 
 	/**
 	 * Method to get the imported fields for the purchase order module.
@@ -259,7 +259,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		);
 	}
 
-	
+
 	/**
 	 * Method to get the imported fields for the invoice module.
 	 * @return array - the imported fields for the invoice module.
@@ -288,7 +288,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'city',
 			'state',
 			'country',
-			
+
 			'_contactid',
 			'_invoiceid',
 		);
@@ -306,11 +306,11 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			$this->keepScheduledImport = true;
 			return;
 		}
-		
+
 		$config = new RSNImportSources_Config_Model();
 
 		$this->ignoreCancelledContactsOnImport();
-		
+
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$sql = 'SELECT * FROM ' . $tableName . '
@@ -341,12 +341,12 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			}
 		}
 		$perf->terminate();
-		
+
 		if(isset($keepScheduledImport))
 			$this->keepScheduledImport = $keepScheduledImport;
 		elseif($numberOfRecords == $config->get('importBatchLimit'))
 			$this->keepScheduledImport = $this->getNumberOfRecords() > 0;
-		
+
 		if($this->keepScheduledImport)
 			$this->skipNextScheduledImports = true;
 	}
@@ -357,9 +357,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOneContacts($contactsData, $importDataController) {
-					
+
 		global $log;
-		
+
 		$entryId = $contactsData[0]['_contactid']; // initialisé dans le postPreImportData
 		if($entryId){
 			//clean up concatened ids
@@ -371,14 +371,14 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		if(is_numeric($entryId)){
 			$record = Vtiger_Record_Model::getInstanceById($entryId, 'Contacts');
-			
+
 			//already imported !!
 			foreach ($contactsData as $contactsLine) {
 				$entityInfo = array(
 					'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_UPDATED,
 					'id'		=> $entryId
 				);
-				
+
 				//TODO update all with array
 				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
 			}
@@ -386,13 +386,13 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		else {
 			$record = Vtiger_Record_Model::getCleanInstance('Contacts');
 			$record->set('mode', 'create');
-			
+
 			$this->updateContactRecordModelFromData($record, $contactsData);
-			
+
 			//$db->setDebug(true);
 			$record->save();
 			$contactId = $record->getId();
-			
+
 			if(!$contactId){
 				//TODO: manage error
 				echo "<pre><code>Impossible d'enregistrer le contact</code></pre>";
@@ -400,14 +400,14 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					$entityInfo = array(
 						'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
 					);
-					
+
 					//TODO update all with array
 					$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
 				}
 
 				return false;
 			}
-			
+
 			$entryId = $this->getEntryId("Contacts", $contactId);
 			foreach ($contactsData as $contactsLine) {
 				$entityInfo = array(
@@ -416,7 +416,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				);
 				$importDataController->updateImportStatus($contactsLine[id], $entityInfo);
 			}
-			
+
 			$record->set('mode','edit');
 			$db = PearDatabase::getInstance();
 			$query = "UPDATE vtiger_crmentity
@@ -427,7 +427,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			$result = $db->pquery($query, array(ASSIGNEDTO_ALL
 								, $contactsData[0]['date']
 								, $contactId));
-			
+
 			$log->debug("" . basename(__FILE__) . " update imported contacts (id=" . $record->getId() . ", date=" . $contactsData[0]['date']
 					. ", result=" . ($result ? " true" : "false"). " )");
 			if( ! $result){
@@ -438,8 +438,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * Method called before the data are really imported.
 	 *  This method must be overload in the child class.
@@ -452,7 +452,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$db = PearDatabase::getInstance();
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$invoiceTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
-							
+
 		/* Affecte l'id du contact trouvé dans l'import Factures ou Contacts à l'autre table
 		*/
 		$query = "UPDATE $contactsTableName
@@ -469,7 +469,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		, `$invoiceTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$invoiceTableName`.status)";
 		$query .= "
 			WHERE `$invoiceTableName`._contactid IS NULL
-			AND `$invoiceTableName`.status = ? 
+			AND `$invoiceTableName`.status = ?
 		";
 		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
 		if(!$result){
@@ -478,11 +478,11 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * Method called before the data are really imported.
 	 *  This method must be overload in the child class.
@@ -490,14 +490,14 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * Note : pas de postPreImportData() à cause de la validation du pre-import
 	 */
 	function beforeImportRsnReglements() {
-		
+
 		if(!$this->hasValidatingStep())
 			return;
 		$db = PearDatabase::getInstance();
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
 		$invoiceTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		$rsnreglementsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
-		
+
 		/* Affecte l'id du contact trouvé dans l'import Contacts à l'autre table
 		*/
 		$query = "UPDATE $contactsTableName
@@ -514,7 +514,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		, `$rsnreglementsTableName`.status = IF(`$contactsTableName`.recordid IS NULL, ?, `$rsnreglementsTableName`.status)";
 		$query .= "
 			WHERE `$rsnreglementsTableName`._contactid IS NULL
-			AND `$rsnreglementsTableName`.status = ? 
+			AND `$rsnreglementsTableName`.status = ?
 		";
 		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
 		if(!$result){
@@ -523,7 +523,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		/* Affecte l'id du contact trouvé dans l'import Factures à l'autre table
 		*/
 		$query = "UPDATE $invoiceTableName
@@ -540,7 +540,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		, `$rsnreglementsTableName`.status = IF(`$invoiceTableName`.recordid IS NULL, ?, `$rsnreglementsTableName`.status)";
 		$query .= "
 			WHERE `$rsnreglementsTableName`._contactid IS NULL
-			AND `$rsnreglementsTableName`.status = ? 
+			AND `$rsnreglementsTableName`.status = ?
 		";
 		$result = $db->pquery($query, array(RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED, RSNImportSources_Data_Action::$IMPORT_RECORD_NONE));
 		if(!$result){
@@ -549,10 +549,10 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		return true;
 	}
-	
+
 
 	/**
 	 * Method to process to the import of the RSNReglements module.
@@ -567,7 +567,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 
 		$this->beforeImportRsnReglements();
-		
+
 		$adb = PearDatabase::getInstance();
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
@@ -599,27 +599,27 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$this->importOneRsnReglements($reglementData, $importDataController);
 	}
 
-	
+
 	/**
 	 * Method to process to the import of a one invoice.
 	 * @param $reglementData : the data of the invoice to import
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOneRsnReglements($reglementData, $importDataController) {
-					
+
 		global $log;
 		$reglement = $reglementData[0];
 		//TODO check sizeof $reglementata
 		$invoice = $this->getInvoice($reglement);
-		
+
 		//var_dump('importOneRsnReglements', $reglement, $invoice);
-		
+
 		if ($invoice != null) {
 			$accountId = $invoice->get('account_id');
 
 			if ($accountId != null) {
 				$numpiece = $reglement['numpiece'];
-		
+
 				$query = "SELECT crmid, rsnreglementsid
 					FROM vtiger_rsnreglements
 					JOIN vtiger_crmentity
@@ -632,14 +632,14 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				$result = $db->pquery($query, array($numpiece));
 				if($db->num_rows($result)){
 					//already imported !!
-					$row = $db->fetch_row($result, 0); 
+					$row = $db->fetch_row($result, 0);
 					$entryId = $this->getEntryId("RsnReglements", $row['crmid']);
 					foreach ($reglementData as $reglementLine) {
 						$entityInfo = array(
 							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED,
 							'id'		=> $entryId
 						);
-						
+
 						//TODO update all with array
 						$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
 					}
@@ -669,7 +669,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					$record->set('reglementstatus', $record->get('error') ? 'Cancelled' : 'Compta');
 					if(!$record->get('error'))
 						$record->set('sent2compta', date('Y-m-d'));//TODO champ en lecture seule, non enregistré
-					
+
 					//$db->setDebug(true);
 					$record->save();
 					$reglementId = $record->getId();
@@ -681,31 +681,31 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 							$entityInfo = array(
 								'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
 							);
-							
+
 							//TODO update all with array
 							$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
 						}
 
 						return false;
 					}
-					
+
 					$record->set('mode','edit');
-					
+
 					//Relation Facture/Réglement
 					RSNImportSources_Utils_Helper::addInvoiceReglementRelation($invoice, $record, 'Import PayPal');
-					
+
 					$entryId = $this->getEntryId("RsnReglements", $reglementId);
 					foreach ($reglementData as $reglementLine) {
 						$entityInfo = array(
 							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_CREATED,
 							'id'		=> $entryId
 						);
-						
+
 						//TODO update all with array
 						$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
 					}
-					
-					return $record;//tmp 
+
+					return $record;//tmp
 				}
 			} else {
 				//TODO: manage error
@@ -719,7 +719,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				$entityInfo = array(
 					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
 				);
-				
+
 				$importDataController->updateImportStatus($reglementLine[id], $entityInfo);
 			}
 
@@ -728,7 +728,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 		return true;
 	}
-	
+
 	/**
 	 * Method to process to the import of the invoice module.
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
@@ -742,7 +742,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 
 		$this->beforeImportInvoice();
-		
+
 		global $adb;
 		$tableName = Import_Utils_Helper::getDbTableName($this->user, 'Invoice');
 		$sql = 'SELECT * FROM ' . $tableName . ' WHERE status = '. RSNImportSources_Data_Action::$IMPORT_RECORD_NONE . ' ORDER BY id';
@@ -781,15 +781,15 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @param int $sequence : the line number of this invoice.
 	 */
 	function importInvoiceLine($invoice, $invoiceLine, $sequence, &$totalAmountHT, &$totalTax){
-        
+
 		$qty = $invoiceLine['quantity'];
 		$listprice = $invoiceLine['prix_unit_ht'];
-		
+
 		//N'importe pas les lignes de frais de port à 0
 		if($listprice == 0
 		&& $invoiceLine['productcode'] == 'ZFPORT')
 			return;
-		
+
 		$discount_amount = 0;
 		$tax = self::getTax($invoiceLine['taxrate']);
 		if($tax){
@@ -804,9 +804,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		$totalAmountHT += $qty * $listprice;
 		//var_dump('$totalAmountHT', $totalAmountHT, "$qty * $listprice", $invoiceLine['taxrate']);
-		
+
 		$incrementOnDel = $invoiceLine['isproduct'] ? 1 : 0;
-		
+
 		$db = PearDatabase::getInstance();
 		$query ="INSERT INTO vtiger_inventoryproductrel (id, productid, sequence_no, quantity, listprice, discount_amount, incrementondel, $taxName) VALUES(?,?,?,?,?,?,?,?)";
 		$qparams = array($invoice->getId(), $invoiceLine['productid'], $sequence, $qty, $listprice, $discount_amount, $incrementOnDel, $taxValue);
@@ -820,9 +820,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @param RSNImportSources_Data_Action $importDataController : an instance of the import data controller.
 	 */
 	function importOneInvoice($invoiceData, $importDataController) {
-	
+
 		global $log;
-		
+
 		//TODO check sizeof $invoiceata
 		$contactId = $invoiceData[0]['_contactid'];
 		if(!$contactId)
@@ -835,7 +835,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 			if ($account != null) {
 				$sourceId = $invoiceData[0]['importsourceid'];
-		
+
 				//test sur importsourceid == $sourceId
 				$query = "SELECT crmid, invoiceid
 					FROM vtiger_invoicecf
@@ -848,14 +848,14 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				$result = $db->pquery($query, array($sourceId));//$invoiceData[0]['subject']
 				if($db->num_rows($result)){
 					//already imported !!
-					$row = $db->fetch_row($result, 0); 
+					$row = $db->fetch_row($result, 0);
 					$entryId = $this->getEntryId("Invoice", $row['crmid']);
 					foreach ($invoiceData as $invoiceLine) {
 						$entityInfo = array(
 							'status'	=> RSNImportSources_Data_Action::$IMPORT_RECORD_SKIPPED,
 							'id'		=> $entryId
 						);
-						
+
 						//TODO update all with array
 						$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
 					}
@@ -890,12 +890,12 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 					$record->set('conversion_rate', CONVERSION_RATE);
 					$record->set('hdnTaxType', 'individual');
 					$record->set('importsourceid', $invoiceData[0]['importsourceid']);
-		                    
-				    
+
+
 					/*$coupon = $this->getCoupon($invoiceData[0]);
 					if($coupon != null)
 						$record->set('notesid', $coupon->getId());*/
-					
+
 					//Coupon et campagne
 					$coupon = $this->getCoupon($invoiceData[0]['affaire_code']);
 					if($coupon){
@@ -903,9 +903,9 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 						$campagne = $this->getCampaign($invoiceData[0]['affaire_code'], $coupon);
 						if($campagne)
 							$record->set('campaign_no', $campagne->getId());
-						
+
 					}
-					
+
 					//$db->setDebug(true);
 					$log->debug('ImportRsnReglementsFromPaypal.php importOneInvoice $record->save();');
 					$record->saveInBulkMode();
@@ -918,15 +918,15 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 							$entityInfo = array(
 								'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
 							);
-							
+
 							//TODO update all with array
 							$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
 						}
 
 						return false;
 					}
-					
-					
+
+
 					$entryId = $this->getEntryId("Invoice", $invoiceId);
 					$sequence = 0;
 					$totalAmount = 0.0;
@@ -940,13 +940,13 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 						//TODO update all with array
 						$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
 					}
-					
+
 					$record->set('mode','edit');
 					//This field is not manage by save()
-					
+
 					$invoiceNo = $record->getEntity()->setModuleSeqNumber("increment", $record->getModuleName());
 					$record->set('invoice_no',$invoiceNo);
-					
+
 					//set invoice_no, total, ...
 					$query = "UPDATE vtiger_invoice
 						JOIN vtiger_crmentity
@@ -968,21 +968,21 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 									    //, $invoiceData[0]['invoicedate']
 									    //, $invoiceData[0]['invoicedate']
 									    , $invoiceId));
-					
+
 					$log->debug("" . basename(__FILE__) . " update imported invoice (id=" . $record->getId() . ", importsourceid=$sourceId , total=$total, date=" . $invoiceData[0]['invoicedate']
 						    . ", result=" . ($result ? " true" : "false"). " )");
 					if( ! $result)
 						$db->echoError();
-						
-						
+
+
 					//raise trigger instead of ->save() whose need invoice rows
-					
+
 					$log->debug("BEFORE " . basename(__FILE__) . " raise event handler(" . $record->getId() . ", " . $record->get('mode') . " )");
 					//raise event handler
 					$record->triggerEvent('vtiger.entity.aftersave');
 					$log->debug("AFTER " . basename(__FILE__) . " raise event handler");
-					
-					return $record;//tmp 
+
+					return $record;//tmp
 				}
 			} else {
 				//TODO: manage error
@@ -993,7 +993,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				$entityInfo = array(
 					'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
 				);
-				
+
 				$importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
 			}
 
@@ -1002,7 +1002,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 		return true;
 	}
-	
+
 	/**
 	 * Method that pre import an invoice.
 	 *  It adone row in the temporary pre-import table by invoice line.
@@ -1048,16 +1048,16 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 */
 	function checkContact($invoice, $reglement) {
 		$contactData = $this->getContactValues($invoice, $reglement);
-		
+
 		if($this->checkPreImportInCache('Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']))
 			return true;
-		
+
 		/* recherche massive
 		$id = $this->getContactId($contactData['firstname'], $contactData['lastname'], $contactData['email']);*/
 		$id = false;
-		
+
 		$this->setPreImportInCache($id, 'Contacts', $contactData['firstname'], $contactData['lastname'], $contactData['email']);
-		
+
 		if(!$id){
 			$this->preImportContact($contactData);
 		}
@@ -1067,7 +1067,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 	//Mise à jour des données du record model nouvellement créé à partir des données d'importation
 	private function updateContactRecordModelFromData($record, $contactsData){
-		
+
 		$fieldsMapping = $this->getContactsFieldsMapping();
 		foreach($contactsData[0] as $fieldName => $value)
 			if(!is_numeric($fieldName) && $fieldName != 'id'){
@@ -1075,23 +1075,23 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				if($vField)
 					$record->set($vField, $value);
 			}
-					
+
 		//cast des DateTime
 		foreach($this->getContactsDateFields() as $fieldName){
 			$value = $record->get($fieldName);
 			if( is_object($value) )
 				$record->set($fieldsMapping[$fieldName], $value->format('Y-m-d'));
 		}
-		
+
 		$fieldName = 'isgroup';
 		$record->set($fieldName, 0);
 		$record->set('leadsource', 'PETITION');//TODO
-		
+
 		if(!$record->get('mailingzip') || !$record->get('mailingcity')
 		|| (!$record->get('mailingstreet') && !$record->get('mailingstreet3') && !$record->get('mailingstreet2') && !$record->get('mailingpobox')))
 			$record->set('rsnnpai', 4);//incomplète
-		
-		
+
+
 	}
 	/**
 	 * Method that return the formated information of a contact found in the file.
@@ -1122,11 +1122,11 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'leadsource'		=> 'PAYPAL',
 			'date'		=> $invoice['invoicedate'],
 		);
-		
+
 		//TODO 'France' en constante de config
 		if(strcasecmp($contactsHeader['mailingcountry'], 'France') === 0)
 			$contactsHeader['mailingcountry'] = '';
-			
+
 		//Ajout du code de pays en préfixe du code postal
 		$contactsHeader['mailingzip'] = RSNImportSources_Utils_Helper::checkZipCodePrefix($contactsHeader['mailingzip'], $contactsHeader['mailingcountry']);
 
@@ -1159,7 +1159,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			return Vtiger_Record_Model::getInstanceById($row['crmid'], 'Invoice');
 		}
 	}
-	
+
 	/**
 	 * Method that pre-import an invoice if it does not exist in database.
 	 * @param $reglement : the rsnreglements data.
@@ -1195,7 +1195,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$result = $db->pquery($query, $queryParams);
 		if(!$db->num_rows($result)){
 			$donateurWeb = $this->getDonateurWeb($reglement);
-			
+
 			if(!$donateurWeb){
 				$this->checkContact($invoiceData, $reglement);
 			}
@@ -1203,7 +1203,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			return true;
 		}
 		$row = $db->fetch_row($result, 0);
-			
+
 		return $row['crmid'];
 	}
 
@@ -1225,7 +1225,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 						$currency = $this->getCurrency($reglement);
 						if (!$this->getCurrencyId($currency)) {
 							array_push($newCurrencies, $currency);
-						} 
+						}
 					}
 				} while ($reglement != null);
 			}
@@ -1278,7 +1278,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 
 				}
 
-				$fileReader->close(); 
+				$fileReader->close();
 				return !isset($error);
 			} else {
 				//TODO: manage error
@@ -1306,15 +1306,15 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return the coupon.
 	 */
 	protected function getCoupon($codeAffaire){
-		
+
 		$coupon = parent::getCoupon($codeAffaire);
 		if($coupon)
 			return $coupon;
-		
+
 		$codeAffaire='PAYPAL';
 		return parent::getCoupon($codeAffaire);
 	}
-	
+
 	/**
 	 * Method that check if a string is a formatted date (DD/MM/YYYY).
 	 * @param string $string : the string to check.
@@ -1331,7 +1331,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	 * @return string - formated date.
 	 */
 	function getMySQLDate($string, $hour = FALSE) {
-		
+
 		$dateArray = preg_split('/[-\/]/', $string);
 		return $dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0]
 			. ($hour ? ' ' . $hour : '');
@@ -1421,11 +1421,11 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	function postPreImportRsnReglementsData() {
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
-		
+
 		/* création d'un index */
 		$query = "ALTER TABLE `$tableName` ADD INDEX(`numpiece`)";
 		$db->pquery($query);
-		
+
 		/* Affecte l'id du règlement */
 		$query = "UPDATE $tableName
 		JOIN  vtiger_rsnreglements
@@ -1446,7 +1446,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		/* Affecte l'id de la facture */
 		$query = "UPDATE  vtiger_invoicecf
 		JOIN  vtiger_invoice
@@ -1469,7 +1469,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		return true;
 	}
 
@@ -1480,7 +1480,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 	function postPreImportInvoiceData() {
 		$db = PearDatabase::getInstance();
 		$tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Invoice');
-		
+
 		/* création d'un index */
 		$query = "ALTER TABLE `$tableName` ADD INDEX(`importsourceid`)";
 		$db->pquery($query);
@@ -1490,7 +1490,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		/* création d'un index */
 		$query = "ALTER TABLE `$tableName` ADD INDEX(`_contactid`)";
 		$db->pquery($query);
-		
+
 		/* Affecte l'id de la facture */
 		$query = "UPDATE  vtiger_invoicecf
 		JOIN  vtiger_invoice
@@ -1514,7 +1514,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		/* Affecte l'id du donateur web */
 		$query = "UPDATE $tableName
 		JOIN  vtiger_rsndonateursweb
@@ -1534,14 +1534,14 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		//Découvre les contacts d'après les factures
 		$contactsTableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'Contacts');
-		
+
 		/* création d'un index */
 		$query = "ALTER TABLE `$contactsTableName` ADD INDEX(`_contactid`)";
 		$db->pquery($query);
-		
+
 		$query = "UPDATE $contactsTableName
 		JOIN  $tableName
 			ON $contactsTableName.importsourceid = `$tableName`.importsourceid
@@ -1560,10 +1560,10 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			echo("<pre>$query</pre>");
 			die();
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Method that return the formated information of an invoice found in the file.
 	 * @param $invoice : the invoice data found in the file.
@@ -1574,7 +1574,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		if(!$invoiceValues){
 			$date = RSNImportSources_Utils_Helper::getDateWithoutTime($reglement['dateregl']);
 			$invoiceType = $this->getInvoiceType($reglement['typeregl']);
-			
+
 			$externalid = $reglement['refdonateurweb'] ? $reglement['refdonateurweb'] : $reglement['numpiece'];//transactionid
 			$clickSource = $reglement['clicksource'];
 			$importSourceId = $reglement['numpiece'];
@@ -1598,7 +1598,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				);
 				break;
 			}
-			
+
 			$modeRegl = $reglement['rsnmoderegl'];
 			$codeAffaire = $this->getFinalCodeAffaire($clickSource);
 			$typeDossier = $this->getInvoiceTypeDossier($invoiceType);
@@ -1613,7 +1613,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 				'receivedmoderegl' => $modeRegl,
 			);
 		}
-		
+
 		if($donateurWeb){
 			foreach(array('lastname', 'firstname', 'email', 'street', 'street2', 'street3', 'zip', 'city', 'state', 'country') as $fieldName)
 				$invoiceValues[$fieldName] = decode_html($donateurWeb->get($fieldName));
@@ -1622,10 +1622,10 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			foreach(array('lastname', 'firstname', 'email', 'street', 'street3', 'zip', 'city', 'state', 'country') as $fieldName)
 				$invoiceValues[$fieldName] = $reglement[$fieldName];
 		}
-		
+
 		//Ajout du code de pays en préfixe du code postal
 		$invoiceValues['zip'] = RSNImportSources_Utils_Helper::checkZipCodePrefix($invoiceValues['zip'], $invoiceValues['country']);
-		
+
 		if(isset($product) && $reglement)
 			$invoiceValues = array_merge($invoiceValues, array(
 				'productcode'	=> $product['code'],
@@ -1651,16 +1651,16 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		if(!$invoiceValues){
 			$date = $reglement['dateregl'];
 			$poType = 'invoice';
-			
+
 			$sourceId = $reglement['numpiece'];//transactionid
 			$importSourceId = $sourceId;
-				
+
 			$product = array(
 				'code' => 'DIVFOURN',
 				'name' => 'Service fournisseur',
 			);
 			$isProduct = false;
-	
+
 			$purchaseOrderValues = array(
 				'sourceid'		=> $sourceId,
 				'importsourceid'	=> $importSourceId,
@@ -1708,24 +1708,24 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			'refdonateurweb'	=> $refdonateurweb,
 			'dateregl'		=> $date,
 			'email'			=> mb_strtolower($reglement[10]),
-			'phone'			=> $reglement[39],
+			'phone'			=> $reglement[38],
 			'amount'		=> str_to_float($reglement[7]),
 			'commission'		=> str_to_float($reglement[8]),
 			'currency_id'		=> $currencyId,
 			'typeregl'		=> $typeregl,
 			'rsnmoderegl'		=> 'PayPal',
 			'lastname'		=> trim($reglement[3]),
-			'street'		=> $reglement[33],
-			'street3'		=> $reglement[34],
-			'zip'			=> $reglement[37],
-			'city'			=> $reglement[35],
-			'state'			=> $reglement[36],
-			'country'		=> $reglement[38],
+			'street'		=> $reglement[30],
+			'street3'		=> $reglement[32],
+			'zip'			=> $reglement[34],
+			'city'			=> $reglement[32],
+			'state'			=> $reglement[33],
+			'country'		=> $reglement[35],
 			'errorcode'		=> $reglement[5] === "Terminé" ? null : $reglement[5],
 			'contactname'		=> $reglement[3] . ' - ' . $reglement[10],
 			'clicksource'		=> $clickSource,
 		);
-		
+
 		//Le nom est en un seul champ
 		if(strpos($reglementValues['lastname'], ' ') !== false){
 			$reglementValues['firstname'] = explode(' ', $reglementValues['lastname'])[0];
@@ -1733,8 +1733,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		return $reglementValues;
 	}
-	
-	
+
+
 	/**
 	 * Method that pre import a contact.
 	 * @param $contactValues : the values of the contact to import.
@@ -1743,7 +1743,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$contact = new RSNImportSources_Preimport_Model($contactValues, $this->user, 'Contacts');
 		$contact->save();
 	}
-	
+
 	/**
 	 * Retourne le type de facture associée : Boutique, Don Régulier, Don Ponctuel
 	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
@@ -1752,6 +1752,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		switch($type){
 		 case 'Don reçu':
 			return 'Don ponctuel';
+		 case 'Paiement de don':
+			return 'Don ponctuel';
 		 case 'Paiement d\'abonnement envoyé':
 			return 'Facture fournisseur'; //DotSpirit
 		 case 'Paiement récurrent reçu':
@@ -1759,8 +1761,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		return FALSE;
 	}
-	
-	
+
+
 	/**
 	 * Retourne le type de facture associée : BOU, DR, DP
 	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
@@ -1779,7 +1781,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		return FALSE;
 	}
-	
+
 	/**
 	 * Retourne le type de facture associée : BOU, DR, DP
 	 * Différencie les paiements DR et DP des autres factures boutiques (qui peuvent commencer par 'dr' (minuscules))
@@ -1795,7 +1797,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			return 'Boutique';
 		}
 	}
-	
+
 	/**
 	 *
 	 *
@@ -1808,7 +1810,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		}
 		return $currencyCode;
 	}
-	
+
 	/**
 	 *
 	 *
@@ -1821,7 +1823,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		//TODO
 		return 0;
 	}
-	
+
 	/**
 	 * Returns DonateursWeb record if 'numpiece' is not empty
 	 *
@@ -1830,7 +1832,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$refdonateurweb = $reglement['refdonateurweb'];//4297
 		if(!$refdonateurweb)
 			return false;
-		
+
 		$query = "SELECT crmid
 			FROM vtiger_rsndonateursweb
 			JOIN vtiger_crmentity
@@ -1849,8 +1851,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$row = $db->fetch_row($result, 0);
 		return Vtiger_Record_Model::getInstanceById( $row['crmid'], 'RSNDonateursWeb');
 	}
-	
-	
+
+
 	/**
 	 * Initialise les données de validation des Contacts
 	 */
@@ -1858,7 +1860,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$this->initDisplayPreviewContactsData();
 		return parent::initDisplayPreviewData();
 	}
-	
+
 	/**
 	 * Method to get the pre Imported data in order to preview them.
 	 *  By default, it return the values in the pre-imported table.
@@ -1874,7 +1876,7 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		$data = parent::getPreviewData($request, $offset, $limit, $importModules);
 		return RSNImportSources_Utils_Helper::getPreviewDataWithMultipleContacts($data);
 	}
-	
+
 }
 
 ?>
