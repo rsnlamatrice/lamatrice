@@ -1758,6 +1758,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 			return 'Facture fournisseur'; //DotSpirit
 		 case 'Paiement récurrent reçu':
 			return 'Don régulier';
+		 case 'Paiement d\'abonnement':
+			return 'Don régulier';
 		}
 		return FALSE;
 	}
