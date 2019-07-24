@@ -180,7 +180,7 @@ l'année [[année]], <b>pour la somme totale de</b> :
 <br/>
 <table style=\"width: 100%\"><tr>
 	<td>Lyon, le [[date]]</td>
-	<td style=\"text-align: center\">Le trésorier, <img src=\"[[image signature]]\" height=\"20mm\"/></td>
+	<td style=\"text-align: center\">la Trésorière : Brigitte Alban, <img src=\"[[image signature]]\" height=\"20mm\"/></td>
 </tr></table>";
 
 		$annee = $this->focusColumnValue('year');
