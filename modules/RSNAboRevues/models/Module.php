@@ -34,7 +34,7 @@ class RSNAboRevues_Module_Model extends Vtiger_Module_Model {
 	/**
 	 * Parcourt l'historique pour clôturer les en-cours périmés
 	 */
-	public function check_IsAbonne_vs_DateFin(&$rsnAboRevues, $closeAllFree){
+	public function check_IsAbonne_vs_DateFin(&$rsnAboRevues, $closeAllFree=null){
 		global $log;
 		$toDay = new DateTime();
 		foreach($rsnAboRevues as $rsnaborevuesId=>$rsnAboRevue){
