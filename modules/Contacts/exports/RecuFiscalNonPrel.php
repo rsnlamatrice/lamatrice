@@ -150,7 +150,7 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 			JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_notes.notesid
 			WHERE vtiger_crmentity.deleted = 0
 			AND folderid = 17
-			AND title LIKE '%2018'
+			AND title LIKE '%2019'
 			LIMIT 1";
 
 		$result = $adb->pquery($query, $params);
