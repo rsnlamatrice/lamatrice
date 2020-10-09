@@ -30,6 +30,8 @@ class Products_ProductsAll_Export extends Export_ExportData_Action {
 			"Unit Price" => function($row) { return Products_ProductsAll_Export::formatFloatVal( round($row["unit_price"], 2) ); },
 			"Unit Price TTC" => function($row) { return Products_ProductsAll_Export::formatFloatVal( round($row["unit_price"] * (1 + $row["taxpercentage"]/100), 2) ); },
 			"Tax Class" => "taxclass",
+			"Taux Class" => "taxpercentage",
+			"Tax ID" => "taxid",
 			"Purchase price" => function($row) { return Products_ProductsAll_Export::formatFloatVal($row["purchaseprice"]); },
 			"Usage Unit" => "usageunit",
 			"Qty/Unit" => function($row) { return intval($row["qty_per_unit"]); },
@@ -43,7 +45,7 @@ class Products_ProductsAll_Export extends Export_ExportData_Action {
 	function formatFloatVal($val) {
 		return str_replace(".", ",", strval(floatval($val)));
 	}
-	
+
 	function displayHeaderLine() {
 		return true;
 	}
@@ -54,7 +56,7 @@ class Products_ProductsAll_Export extends Export_ExportData_Action {
 	}
 
 	function getCSVSeparator(){
-		return ";";	
+		return ";";
 	}
 
 	function getExportQuery($request) {//tmp ...
@@ -62,9 +64,9 @@ class Products_ProductsAll_Export extends Export_ExportData_Action {
 
 		$fromPos = strpos($parentQuery, 'FROM');//tmp attention si il y a plusieurs clauses FROM
 		$wherePos = strpos($parentQuery, 'WHERE');//tmp attention si il y a plusieurs clauses WHERE
-		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_producttaxrel.taxpercentage AS taxpercentage " .
-				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) . 
-					 "JOIN vtiger_producttaxrel ON vtiger_producttaxrel.productid = vtiger_products.productid 
+		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_producttaxrel.taxpercentage AS taxpercentage, vtiger_producttaxrel.taxid AS taxid " .
+				 substr($parentQuery, $fromPos, ($wherePos - $fromPos)) .
+					 "JOIN vtiger_producttaxrel ON vtiger_producttaxrel.productid = vtiger_products.productid
 					" .
 				 substr($parentQuery, $wherePos);
 
