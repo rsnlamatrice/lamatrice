@@ -8,26 +8,19 @@ class Contacts_MontantDonTmp_Export extends Contacts_RecuFiscalNonPrel_Export { 
 	function getExportStructure() {
 		return array(
 			"Ref" => "contact_no",
-			"Ligne2" => "grpnomllong",
 			"Prenom-Nom" => function ($row) { return $row["firstname"] . " " . $row["lastname"]; },
-			"Ligne3" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "street2"); },
-			"Ligne4" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "street3"); },
-			"Ligne5" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "street"); },
-			"BP" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "pobox"); },
-			"CP-Ville" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "zip") . " " .
-													Contacts_MontantDonTmp_Export::getAddressField($row, "city"); },
+			"CP" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "zip"); },
+			"Ville" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "city"); },										
 			"Pays" => function ($row) { return Contacts_MontantDonTmp_Export::getAddressField($row, "country"); },
 			"Dons" => function ($row) { return Contacts_MontantDonTmp_Export::getTotalDons($row); },
-			"Dons en lettres" => function ($row) { return Contacts_MontantDonTmp_Export::getTotalDonsLetter($row) . " euros"; },
-			"Dons après déduction" => function ($row) { return Contacts_MontantDonTmp_Export::getRealDons($row); },
 		);
 	}
 
 	function getDons($row) {//tmp requete executé pour chaque contact ...
 		$db = PearDatabase::getInstance();
-		$current_year = date("Y") - 1;
-		$date_debut = "2015-09-01";
-		$date_fin = "2016-08-31";
+		$previous_year = date("Y") - 1;//TMP Year !
+		$date_debut = $previous_year . "-01-01";
+		$date_fin = $previous_year . "-12-31";
 		$query = "SELECT SUM(vtiger_inventoryproductrel.listprice * vtiger_inventoryproductrel.quantity) total_dons
 					FROM vtiger_inventoryproductrel
 	                
@@ -54,9 +47,9 @@ class Contacts_MontantDonTmp_Export extends Contacts_RecuFiscalNonPrel_Export { 
 
 	function getPrel($row) {//tmp requete executé pour chaque contact ...
 		$db = PearDatabase::getInstance();
-		$current_year = date("Y") - 1;//TMP Year !
-		$date_debut = "2015-09-01";
-		$date_fin = "2016-08-31";
+		$previous_year = date("Y") - 1;//TMP Year !
+		$date_debut = $previous_year . "-01-01";
+		$date_fin = $previous_year . "-12-31";
 		$query = "SELECT DISTINCT SUM(vtiger_rsnprelvirement.montant) total_prelevements 
 				FROM vtiger_rsnprelevements 
 				JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid 
@@ -75,6 +68,12 @@ class Contacts_MontantDonTmp_Export extends Contacts_RecuFiscalNonPrel_Export { 
 		return $db->fetchByAssoc($result, 0)["total_prelevements"];
 	}
 	
+	function getTotalDons($row) {
+		$total_dons = $this->getDons($row);
+
+		return $total_dons;
+	}
+
 	function displayHeaderLine() {
 		return true;
 	}
