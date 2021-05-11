@@ -1087,32 +1087,18 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	}
 	/**
 	 * Method that returns a formatted date for mysql (Y-m-d).
+	 * La date d'entrée est de type "2021-04-01 22:30:50" pour paybox.
 	 * @param string $string : the string to format.
 	 * @param string $hour : hours and minutes.
 	 * @return string - formated date.
 	 */
-	function getMySQLDate($string, $hour = FALSE) {
+	function getMySQLDate($string) {
 		
-		if($hour){
-			switch(strlen($hour)){
-			case 1:
-			case 2:
-				$hour = '00:' . $hour;
-				break;
-			case 3:
-				$hour = '0' . $hour[0] . ':' . substr($hour,1);
-				break;
-			case 4:
-				$hour = substr($hour,0,2) . ':' . substr($hour,2);
-				break;
-			default:
-				$hour = '';
-				break;
-			}
-		}
-		$dateArray = preg_split('/[-\/]/', $string);
-		return $dateArray[2] . '-' . $dateArray[1] . '-' . $dateArray[0]
-			. ($hour ? ' ' . $hour : '');
+		// 2021-04-01 22:30:50"
+		// $dateArray[0] : yyyy-mm-dd
+		// $dateArray[1] : hh:mm:ss
+		$dateArray = preg_split('/ /', $string, 2);
+		return $dateArray[0];
 	}
 
 	/**
@@ -1122,11 +1108,9 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 * @return boolean - true if the line is a validated receipt.
 	 */
 	function isValidInformationLine($line) {
-		$emailTests = array('sabine@pustule.org');
-		if (sizeof($line) > 0 && is_numeric($line[2])
-		    && $this->isDate($line[9]) //date
-		    && $line[3] == 1 //Rank
-		    && !in_array($line[13], $emailTests)
+		if (sizeof($line) > 0 && is_numeric($line[18])
+		    //&& $this->isDate($line[2]) //date
+		    && $line[19] == 1 //Rank
 		) {
 			return true;
 		}
@@ -1256,19 +1240,19 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 */
 	function getRsnReglementsValues($reglement) {
 	//TODO end implementation of this method
-		$date = $this->getMySQLDate($reglement[9]);//, $reglement[10]);
-		if($reglement[6])
-			$dateoperation = $this->getMySQLDate($reglement[6]);
+		$date = $this->getMySQLDate($reglement[2]);//, $reglement[10]);
+		if($reglement[22])
+			$dateoperation = $this->getMySQLDate($reglement[22]);
 		else
 			$dateoperation = $date;
 		$currency = $this->getCurrency($reglement);
 		$currencyId = $this->getCurrencyId($currency);
-		$reference = $reglement[12];
+		$reference = $reglement[3];
 		$typeregl = $this->getTypeRegl($reference);
 		$modeRegl = $this->getModeRegl($reference);
 		$numpiece = $reference;
-		$rank = (int)$reglement[3];
-		$transactionId = $reglement[7];
+		$rank = (int)$reglement[19];
+		$transactionId = $reglement[0];
 		$importSourceId = $this->getImportationSourceId($reglement);
 		
 		if($numpiece){
@@ -1280,7 +1264,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 				$referenceParts = explode( '_', $numpiece);
 			$numcart = $referenceParts[0];
 		}
-		
+		// Pour assurer le changement de formalisme
+		$authorize_payement = ($reglement[7]==='Acceptée') ? 'Autorisation' : 'Refused';
 		
 		$reglementValues = array(
 			'transactionid' => $transactionId,
@@ -1290,15 +1275,15 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 			'rank'			=> $rank,
 			'dateregl'		=> $date,
 			'dateoperation'		=> $dateoperation,
-			'email'			=> $reglement[13],
-			'autorisation'		=> $reglement[14],
-			'amount'		=> str_to_float($reglement[17]) / 100,
+			'email'			=> $reglement[12],
+			'autorisation'		=> $authorize_payement, 
+			'amount'		=> str_to_float($reglement[4]),
 			'currency_id'		=> $currencyId,
-			'payment'		=> $reglement[23],
-			'paymentstatus'		=> $reglement[28],
-			'ip'			=> $reglement[30],
-			'errorcode'		=> $reglement[31],
-			'bank'			=> $reglement[1],
+			'payment'		=> $reglement[9],// changement de formalisme
+			'paymentstatus'		=> $reglement[7], // regarder le traitement.
+			'ip'			=> 'xxx.xxx.xxx.xxx',
+			'errorcode'		=> $reglement[17],
+			'bank'			=> 'xxxx',
 			'typeregl'		=> $typeregl,
 			'rsnmoderegl'		=> $modeRegl,
 		);
@@ -1309,7 +1294,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	function getImportationSourceId($reglement){
 		$sourceId = $reglement['transactionid'];
 		if(!$sourceId)
-			$sourceId = $reglement[7];
+			$sourceId = $reglement[0];
 		return $this->sourceid_prefix . $sourceId;
 	}
 	
@@ -1361,9 +1346,9 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
 	 *
 	 */
 	function getCurrency($reglement){
-		$currencyCode = $reglement[18];
+		$currencyCode = $reglement[5];
 		switch ($currencyCode){
-		case '978':
+		case 'EUR':
 			return 'Euro';
 		}
 		return $currencyCode;
