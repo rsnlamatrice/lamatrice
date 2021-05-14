@@ -1752,6 +1752,8 @@ class RSNImportSources_ImportRsnReglementsFromPaypal_View extends RSNImportSourc
 		switch($type){
 		 case 'Don reçu':
 			return 'Don ponctuel';
+		 case 'Paiement standard':
+                        return 'Don ponctuel';
 		 case 'Paiement de don':
 			return 'Don ponctuel';
 		 case 'Paiement d\'abonnement envoyé':
