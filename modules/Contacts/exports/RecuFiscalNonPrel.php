@@ -101,9 +101,9 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 
 	function getPrel($row) {//tmp requete executé pour chaque contact ...
 		$db = PearDatabase::getInstance();
-		$current_year = date("Y") - 1;//TMP Year !
-		$date_debut = $current_year . "-01-01";
-		$date_fin = $current_year . "-12-31";
+		$previous_year = date("Y") - 1;//TMP Year !
+		$date_debut = $previous_year . "-01-01";
+		$date_fin = $previous_year . "-12-31";
 		$query = "SELECT DISTINCT SUM(vtiger_rsnprelvirement.montant) total_prelevements
 				FROM vtiger_rsnprelevements
 				JOIN vtiger_crmentity vtiger_rsnprelevements_crmentity ON vtiger_rsnprelevements_crmentity.crmid = vtiger_rsnprelevements.rsnprelevementsid
@@ -143,16 +143,19 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 		return round(($total_dons * $rate), 0);
 	}
 
-	function getRecuFiscalDocumentRecordModel($current_year) {
+	function getRecuFiscalDocumentRecordModel($year) {
 		global $adb;
 		$query = "SELECT notesid
 			FROM vtiger_notes
 			JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_notes.notesid
 			WHERE vtiger_crmentity.deleted = 0
 			AND folderid = 17
-			AND title LIKE '%2019'
+			AND title LIKE ?
 			LIMIT 1";
-
+		
+		$param_year = "'%". $year . "'";
+		$params = array($param_year);
+		
 		$result = $adb->pquery($query, $params);
 		if($adb->num_rows($result) === 0){
 			// Error !!!
