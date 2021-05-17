@@ -41,7 +41,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
      */
     public function getSource() {
         return 'LBL_PAYBOX';
-
+    }
         
     /**
      * Method to get the source type label to display.
@@ -291,7 +291,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
                         );
                         
                         //TODO update all with array
-                        $importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
+                        $importDataController->updateImportStatus($invoiceLine['id'], $entityInfo);
                     }
                 }
                 else {
@@ -347,7 +347,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
                             );
                             
                             //TODO update all with array
-                            $importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
+                            $importDataController->updateImportStatus($invoiceLine['id'], $entityInfo);
                         }
 
                         return false;
@@ -363,7 +363,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
                             'id'		=> $entryId
                         );
                         //TODO update all with array
-                        $importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
+                        $importDataController->updateImportStatus($invoiceLine['id'], $entityInfo);
                     }
                     $record->set('mode','edit');
                     
@@ -424,7 +424,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
                     'status'	=>	RSNImportSources_Data_Action::$IMPORT_RECORD_FAILED,
                 );
                 
-                $importDataController->updateImportStatus($invoiceLine[id], $entityInfo);
+                $importDataController->updateImportStatus($invoiceLine['id'], $entityInfo);
             }
 
             return false;
@@ -493,6 +493,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
         }
         $numpiece = $reglement['numpiece'];
 
+        $db = PearDatabase::getInstance();
+        $tableName = RSNImportSources_Utils_Helper::getDbTableName($this->user, 'RsnReglements');
         //Déjà importée (au pré-import on a mis à jour massivement ceux connus, il s'agit donc ici d'un test en trop, sauf à considérer un import entre temps)
         $query = "SELECT crmid, rsnreglementsid
             FROM vtiger_rsnreglements
@@ -505,7 +507,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
             AND deleted = FALSE
             LIMIT 1
         ";
-        $db = PearDatabase::getInstance();
+
         $result = $db->pquery($query, array($numpiece));
         if($db->num_rows($result)){
             //already imported !!
@@ -518,7 +520,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
                 );
                 
                 //TODO update all with array
-                $importDataController->updateImportStatus($reglementLine[id], $entityInfo);
+                $importDataController->updateImportStatus($reglementLine['id'], $entityInfo);
             }
         }
         else {
@@ -566,7 +568,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
                     );
                     
                     //TODO update all with array
-                    $importDataController->updateImportStatus($reglementLine[id], $entityInfo);
+                    $importDataController->updateImportStatus($reglementLine['id'], $entityInfo);
                 }
 
                 return false;
@@ -586,7 +588,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
                 );
                 
                 //TODO update all with array
-                $importDataController->updateImportStatus($reglementLine[id], $entityInfo);
+                $importDataController->updateImportStatus($reglementLine['id'], $entityInfo);
             }
             
             return $record;//tmp 
@@ -661,18 +663,6 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
             }
 
             $fileReader->close();
-
-            if (sizeof($newProducts) > 0) {
-                global $HELPDESK_SUPPORT_NAME;
-                $viewer = new Vtiger_Viewer();
-                $viewer->assign('FOR_MODULE', 'Invoice');
-                $viewer->assign('MODULE', 'RSNImportSources');
-                $viewer->assign('NEW_CURRENCIES', $newCurrencies);
-                $viewer->assign('HELPDESK_SUPPORT_NAME', $HELPDESK_SUPPORT_NAME);
-                $viewer->view('NewCurrenciesFound.tpl', 'RSNImportSources');
-
-                exit;//TODO: Be carefull: in this case, JS is not loaded !!!
-            }
         } else {
             //TODO: manage error
             echo "<code>le fichier n'a pas pu être ouvert...</code>";
@@ -1082,8 +1072,11 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
      * @return boolean - true if the string is a date.
      */
     function isDate($string) {
-    //TODO do not put this function here ?
-        return preg_match("/^[0-3][0-9][-\/][0-1][0-9][-\/][0-9]{2,4}$/", $string);//only true for french format
+        // Date au format jj/mm/yyyy
+        //$pattern_simpledate = "/^[0-3][0-9][-\/][0-1][0-9][-\/][0-9]{2,4}$/" ;
+        // Date au format yyyy-mm-jj hh:mm:ss
+        $pattern_completedate = "/^[0-9]{2,4}[-\/][0-1][0-9][-\/][0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/" ;
+        return preg_match($pattern_completedate, $string);
     }
     /**
      * Method that returns a formatted date for mysql (Y-m-d).
@@ -1108,8 +1101,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
      * @return boolean - true if the line is a validated receipt.
      */
     function isValidInformationLine($line) {
-        if (sizeof($line) > 0 && is_numeric($line[18])
-            //&& $this->isDate($line[2]) //date
+        if (sizeof($line) > 0 && is_numeric($line[33])
+            && $this->isDate($line[2]) //date
             && $line[19] == 1 //Rank
         ) {
             return true;
@@ -1122,7 +1115,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
      * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
      * @return boolean - false if error or if no invoice found.
      */
-    function moveCursorToNextRsnReglement(RSNImportSources_FileReader_Reader $fileReader) {
+    function moveCursorToNextRsnReglement(RSNImportSources_CSVFileReader_Reader $fileReader) {
         do {
             $cursorPosition = $fileReader->getCurentCursorPosition();
             $nextLine = $fileReader->readNextDataLine($fileReader);
@@ -1142,7 +1135,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
      * @param RSNImportSources_FileReader_Reader $filereader : the reader of the uploaded file.
      * @return the reglement information | null if no reglement found.
      */
-    function getNextRsnReglement(RSNImportSources_FileReader_Reader $fileReader) {
+    function getNextRsnReglement(RSNImportSources_CSVFileReader_Reader $fileReader) {
         $nextLine = $fileReader->readNextDataLine($fileReader);
         if ($nextLine != false) {
             $reglement = $nextLine;
@@ -1240,7 +1233,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
      */
     function getRsnReglementsValues($reglement) {
     //TODO end implementation of this method
-        $date = $this->getMySQLDate($reglement[2]);//, $reglement[10]);
+        $date = $this->getMySQLDate($reglement[2]);
         if($reglement[22])
             $dateoperation = $this->getMySQLDate($reglement[22]);
         else
@@ -1265,7 +1258,10 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
             $numcart = $referenceParts[0];
         }
         // Pour assurer le changement de formalisme
-        $authorize_payement = ($reglement[7]==='Acceptée') ? 'Autorisation' : 'Refused';
+        $authorize_payement = $reglement[7];
+        if ($reglement[7]==='Acceptée'){
+            $authorize_payement = 'Autorisation' ;
+        }
         
         $reglementValues = array(
             'transactionid' => $transactionId,
