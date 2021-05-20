@@ -1101,7 +1101,7 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
      * @return boolean - true if the line is a validated receipt.
      */
     function isValidInformationLine($line) {
-        if (sizeof($line) > 0 && is_numeric($line[33])
+        if (sizeof($line) > 0 && is_numeric($line[1])
             && $this->isDate($line[2]) //date
             && $line[19] == 1 //Rank
         ) {
@@ -1275,8 +1275,8 @@ class RSNImportSources_ImportRsnReglementsFromPaybox_View extends RSNImportSourc
             'autorisation'		=> $authorize_payement, 
             'amount'		=> str_to_float($reglement[4]),
             'currency_id'		=> $currencyId,
-            'payment'		=> $reglement[9],// changement de formalisme
-            'paymentstatus'		=> $reglement[7], // regarder le traitement.
+            'payment'		=> $reglement[9],
+            'paymentstatus'		=> $reglement[7],
             'ip'			=> 'xxx.xxx.xxx.xxx',
             'errorcode'		=> $reglement[17],
             'bank'			=> 'xxxx',
