@@ -7,6 +7,18 @@
 
 class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 
+	var $TABLE_TYPE_GROUPE = array (
+		'Groupe spécifiquement antinucléaire' => 1,
+		'Energies renouvelables et alternatives' => 2,
+		'Désarmement nucléaire, paix, ou non violence' => 3,
+		'Protection de l\'environnement' => 4,
+		'Santé/nutrition' => 5,
+		'Arts et spectacles' => 6,
+		'Produits bios/écologiques' => 7,
+		'Syndicats' => 8,
+		'Parti politique ou apparentés' => 9,
+		'Autre' => 10
+	);
 	
 	//tmp mailing address ??...
 	function getExportStructure() {
@@ -31,6 +43,7 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 			"Adhesion" => function($row) { return Contacts_ListGroupStats_Export::getAutresAnneeAdhesion($row); },
 			"SiteWeb"=> function($row) { return Contacts_ListGroupStats_Export::getWebSite($row); },
 			"Type" => "grptypes",
+			"id_type" => function($row) {return (Contacts_ListGroupWeb_Export::getIdTypeGroupe($row)); },
 			"NbAdherents" => function($row) { return Contacts_ListGroupStats_Export::getNbAdhenrents($row); },
 			"Descriptif" => "grpdescriptif",
 			"NomAssoEnLigne1" => function($row) { return ($row["mailingaddressformat"] == "CN1") ? 1 : 0; },
@@ -44,6 +57,13 @@ class Contacts_ListGroupWeb_Export extends Contacts_ListGroupStats_Export {
 			"latitude" => "latitude",
 			"longitude" => "longitude",
 		);
+	}
+
+
+	function getIdTypeGroupe ($row) {
+		$type_name = html_entity_decode($row["grptypes"], ENT_QUOTES, 'UTF-8');
+		$type_id = $this->TABLE_TYPE_GROUPE[$type_name];
+		return $type_id;
 	}
 
 	function hideField($row, $field) {
