@@ -153,7 +153,7 @@ class Contacts_RecuFiscalNonPrel_Export extends Export_ExportData_Action { // TM
 			AND title LIKE ?
 			LIMIT 1";
 		
-		$param_year = "'%". $year . "'";
+		$param_year = "%". $year;
 		$params = array($param_year);
 		
 		$result = $adb->pquery($query, $params);
