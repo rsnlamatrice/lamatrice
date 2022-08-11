@@ -70,10 +70,10 @@ class Invoice_SaleManagement_Export extends Export_ExportData_Action {
 			$this->total 		= 0;
 			$this->net_total 	= 0;
 
-			$no_of_decimal_places = getCurrencyDecimalPlacesForOutput();
-
+			$productLineItemIndex = 0;
 			foreach($associated_products as $productLineItem) {
-				++$productLineItemIndex;
+
+				$productLineItemIndex++;
 
 				$discountPercentage  = 0.00;
 				$quantity 		= 0;
@@ -96,21 +96,16 @@ class Invoice_SaleManagement_Export extends Export_ExportData_Action {
 						$tax = &$this->get_tax($tax_percent);
 						$tax += $tax_amount;
 						$this->tax_total += $tax_amount;
-					} else if ($taxQuantity > 0) { 
-						// tmp should not appends
-					}
-
+					} 
 					$this->total += round($taxable_total, 2);
 					$this->net_total += round($producttotal, 2);
 				}
 			}
-
 			$this->curent_invoice_id = $invoice_id;
 		}
 	}
 
 	function get_tax_20($row) {
-		//return $row["invoice_no"] !== $this->curent_invoice_id;
 		$this->update_data($row);
 
 		return $this->tax_20;
@@ -167,7 +162,6 @@ class Invoice_SaleManagement_Export extends Export_ExportData_Action {
 		$query = substr($parentQuery, 0, $fromPos) . ", vtiger_invoice.invoiceid " .
 				substr($parentQuery, $fromPos, ($orderByPos - $fromPos)) . " GROUP BY vtiger_invoice.invoiceid " .
 				 substr($parentQuery, $orderByPos);
-		//echo $query;exit();
 		return $query;
 	}
 
