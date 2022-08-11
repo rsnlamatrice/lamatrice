@@ -164,6 +164,9 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 		//ED150928
 		if($calculatedTotals !== false){
 			$queryGenerator->addField('hdnGrandTotal');
+			$queryGenerator->addField('total_product'); 
+			$queryGenerator->addField('total_don'); 
+			$queryGenerator->addField('total_service'); 
 		}
 		
 		$listQuery = $this->getQuery();
@@ -186,6 +189,9 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 		//ED150906
 		if($calculatedTotals !== false)
 			$query .= ', sum(total) AS `total`';
+			$query .= ', sum(total_product) AS `total_product`';
+			$query .= ', sum(total_don) AS `total_don`';
+			$query .= ', sum(total_service) AS `total_service`';
 			
 		$query .= ' FROM (' . $listQuery . ') q';
 		
@@ -198,7 +204,10 @@ class Inventory_ListView_Model extends Vtiger_ListView_Model {
 		
 		if($calculatedTotals !== false)
 			$calculatedTotals = array(
-				'total' => $db->query_result($listResult, 0, 'total')
+				'total' => $db->query_result($listResult, 0, 'total'),
+				'total_product' => $db->query_result($listResult, 0, 'total_product'),
+				'total_don' => $db->query_result($listResult, 0, 'total_don'),
+				'total_service' => $db->query_result($listResult, 0, 'total_service')
 			);
 		
 		return $db->query_result($listResult, 0, 'count');
