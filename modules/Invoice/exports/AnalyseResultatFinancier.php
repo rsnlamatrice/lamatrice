@@ -10,7 +10,6 @@ class Invoice_AnalyseResultatFinancier_Export extends Invoice_SaleManagement_Exp
 			"Total Produit" => function ($row) { return Invoice_AnalyseResultatFinancier_Export::formatFloatVal(Invoice_AnalyseResultatFinancier_Export::get_total_produit($row)); },
 			"Total Service" => function ($row) { return Invoice_AnalyseResultatFinancier_Export::formatFloatVal(Invoice_AnalyseResultatFinancier_Export::get_total_service($row)); },
 			"Total Don" => function ($row) { return Invoice_AnalyseResultatFinancier_Export::formatFloatVal(Invoice_AnalyseResultatFinancier_Export::get_total_don($row)); },
-			"Écart" => function ($row) { return Invoice_AnalyseResultatFinancier_Export::formatFloatVal(Invoice_AnalyseResultatFinancier_Export::get_ecart($row)); },
 		);
 	}
 
@@ -40,13 +39,6 @@ class Invoice_AnalyseResultatFinancier_Export extends Invoice_SaleManagement_Exp
 	*/
 	function get_total_service($row){
 		return $row['total_service'];
-	}
-	/*
-	* Ecart entre le TTC et la somme des produits et des service. En principe doit être à 0
-	*/
-	function get_ecart($row){
-		$ecart = $row['total'] - ($row['total_service'] + $row['total_product']);
-		return $ecart;
 	}
 
 	function displayHeaderLine() {
