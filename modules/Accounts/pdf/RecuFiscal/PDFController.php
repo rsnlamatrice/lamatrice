@@ -155,7 +155,7 @@ class Vtiger_RecuFiscal_PDFController extends Vtiger_LetterToAccount_PDFControll
 <h4>Bénéficiaire du don :</h4>
 <table style=\"width: 100%\"><tr>
 	<td style=\"width: 5mm\"> </td>
-	<td style=\"width: 170mm\"><b>Réseau <i>\"Sortir du nucléaire\"</i></b>, Parc Benoît - Bâtiment B, 65/69 rue Gorge de Loup, 69009 Lyon - <i>Siret n° 418 092 094 00014</i></td>
+	<td style=\"width: 170mm\"><b>Réseau <i>\"Sortir du nucléaire\"</i></b>, Parc Benoît - Bâtiment B, 65/69 rue Gorge de Loup, CS 70457, 69336 Lyon CEDEX 09 - <i>Siret n° 418 092 094 00014</i></td>
 </tr></table>
 
 <table style=\"width: 100%\"><tr>

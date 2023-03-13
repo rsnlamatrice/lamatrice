@@ -100,7 +100,7 @@ class Vtiger_RejetPrelvnt_PDFController extends Vtiger_LetterToAccount_PDFContro
 		$text = "<hr/>
 		<h3 style=\"text-align: center;\">Souhaitez-vous poursuivre vos dons par prélèvement automatique ?</h3>
 <p style=\"font-style: italic;\">Coupon-réponse à renvoyer
-<br/>- dans l'enveloppe T jointe, à Réseau \"Sortir du nucléaire\", Parc Benoît - Bâtiment B, 65/69 rue Gorge de Loup 69009 Lyon,
+<br/>- dans l'enveloppe T jointe, à Réseau \"Sortir du nucléaire\", Parc Benoît - Bâtiment B, 65/69 rue Gorge de Loup, CS 70457 69336 Lyon CEDEX 09,
 <br/>- ou par mail à annie.orenga@sortirdunucleaire.fr
 </p>
 <table style=\"width: 100%\">
