@@ -618,21 +618,32 @@ class Accounts_Record_Model extends Vtiger_Record_Model {
         else
             $contactId = $contact;
         global $adb;
-        $query = 'SELECT vtiger_notes.notesid, title, vtiger_senotesrel.dateapplication, vtiger_senotesrel.data AS recusfiscal_data
-            FROM vtiger_notes
-            JOIN vtiger_crmentity
-                ON vtiger_crmentity.crmid = vtiger_notes.notesid
-            JOIN vtiger_attachmentsfolder
-                ON vtiger_attachmentsfolder.folderid = vtiger_notes.folderid
-            JOIN vtiger_senotesrel
-                ON vtiger_crmentity.crmid = vtiger_senotesrel.notesid
+        $query = 'SELECT DISTINCT _rf_.notesid, _rf_.title, _rf_.dateapplication, _rf_.recusfiscal_data FROM (
+            SELECT DISTINCT vtiger_notes.notesid, vtiger_notes.title, vtiger_senotesrel.dateapplication, vtiger_senotesrel.data AS recusfiscal_data
+            FROM vtiger_crmentity
+            JOIN vtiger_contactdetails ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+            JOIN vtiger_senotesrel ON vtiger_senotesrel.crmid = vtiger_contactdetails.contactid
+            JOIN vtiger_notes ON vtiger_senotesrel.notesid = vtiger_notes.notesid
+            JOIN vtiger_attachmentsfolder folder ON folder.folderid = vtiger_notes.folderid
+            WHERE vtiger_crmentity.deleted =0
+            AND vtiger_crmentity.crmid = ?
+            AND folder.foldername = ?
+            UNION
+            SELECT DISTINCT vtiger_notes.notesid, vtiger_notes.title, vtiger_senotesrel.dateapplication, vtiger_senotesrel.data AS recusfiscal_data
+            FROM vtiger_crmentity 
+            JOIN vtiger_contactdetails ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid
+            JOIN vtiger_account ON vtiger_account.accountid = vtiger_contactdetails.accountid
+            JOIN vtiger_senotesrel ON vtiger_senotesrel.crmid = vtiger_account.accountid
+            JOIN vtiger_notes ON vtiger_senotesrel.notesid = vtiger_notes.notesid
+            JOIN vtiger_attachmentsfolder folder ON folder.folderid = vtiger_notes.folderid
             WHERE vtiger_crmentity.deleted = 0
-            AND vtiger_senotesrel.crmid = ?
-            AND vtiger_attachmentsfolder.foldername = ?
-            AND title LIKE "R%20%"
-            ORDER BY title DESC
-        ';
-        $params = array($contactId, 'Reçus fiscaux');
+            AND vtiger_crmentity.crmid = ? 
+            AND folder.foldername = ? )_rf_
+            GROUP BY _rf_.title 
+            ORDER BY _rf_.title DESC';
+
+
+        $params = array($contactId, 'Reçus fiscaux', $contactId, 'Reçus fiscaux');
         $result = $adb->pquery($query, $params);
         if(!$result){
             $adb->echoError('getRelatedRecusFiscaux');
